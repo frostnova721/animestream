@@ -1,5 +1,6 @@
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
+import 'package:animestream/ui/pages/Discover.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -60,21 +61,23 @@ class _HomeState extends State<Home> {
       if (currentlyAiringResponse.length == 0) return;
 
       currentlyAiring = [];
-      currentlyAiringResponse.sublist(0, 20).forEach((e) {
+      currentlyAiringResponse.forEach((e) {
         final title = e['title']['english'] ?? e['title']['romaji'];
         final image = e['coverImage']['large'] ?? e['coverImage']['extraLarge'];
         // final id = e['id'];
         currentlyAiring
             .add(ListElement(widget: animeCard(title, image), info: e));
       });
-      setState(() {
-        dataLoaded = true;
-      });
+      if (mounted)
+        setState(() {
+          dataLoaded = true;
+        });
     } catch (err) {
       print(err);
-      setState(() {
-        error = true;
-      });
+      if (mounted)
+        setState(() {
+          error = true;
+        });
     }
   }
 
@@ -83,7 +86,7 @@ class _HomeState extends State<Home> {
       case 0:
         return _homePage(context);
       case 1:
-        return _discoverPage();
+        return Discover(currentSeason: currentlyAiring,);
       default:
         return _homePage(context);
     }
@@ -136,39 +139,6 @@ class _HomeState extends State<Home> {
             ),
           ),
         ));
-  }
-
-  Column _discoverPage() {
-    return Column(
-      children: [
-        Container(
-          height: 50,
-        ),
-        Container(
-          child: InkWell(
-            onTap: () {
-              showDialog(context: context, builder: (context) => AlertDialog(content: Text("NO CALWNDAR FOR YOU :("),),);
-            },
-            child: Container(
-              height: 50,
-              width: 150,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                color: themeColor
-              ),
-              child: Center(
-                child: Text(
-                  "Calendar",
-                  style: TextStyle(
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
   }
 
   Column _homePage(BuildContext context) {
@@ -243,7 +213,7 @@ class _HomeState extends State<Home> {
             error
                 ? _errorText()
                 : dataLoaded
-                    ? _cardListMaker(currentlyAiring)
+                    ? _cardListMaker(currentlyAiring.sublist(0, 20))
                     : Container(
                         height: 280,
                         child: Center(
@@ -292,7 +262,7 @@ class _HomeState extends State<Home> {
         widgetList.length > 0
             ? Container(
                 padding: const EdgeInsets.only(left: 15, right: 15, top: 15),
-                height: 280,
+                height: 255,
                 child: ListView.builder(
                   itemCount: widgetList.length,
                   scrollDirection: Axis.horizontal,

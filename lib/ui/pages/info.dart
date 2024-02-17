@@ -45,7 +45,8 @@ class _InfoState extends State<Info> {
     if (item != null) {
       watched = item['watched'];
     }
-    setState(() {});
+    if (mounted)
+     setState(() {});
   }
 
   //incase the results need to be stored!

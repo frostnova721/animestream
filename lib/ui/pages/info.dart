@@ -37,6 +37,7 @@ class _InfoState extends State<Info> {
   List<String> epLinks = [];
   List streamSources = [];
   int watched = 1;
+  bool started = false;
 
   Future<void> getWatched() async {
     final box = await Hive.openBox('animestream');
@@ -44,6 +45,7 @@ class _InfoState extends State<Info> {
     final item = watching.where((item) => item['id'] == widget.id).firstOrNull;
     if (item != null) {
       watched = item['watched'];
+      started = true;
     }
     if (mounted)
      setState(() {});
@@ -331,7 +333,7 @@ class _InfoState extends State<Info> {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  '${watched > 1 ? 'Continue' : 'Start'} from:',
+                  '${started ? 'Continue' : 'Start'} from:',
                   style: TextStyle(
                     color: themeColor,
                     fontFamily: "Rubik",

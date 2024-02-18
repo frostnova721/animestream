@@ -13,7 +13,7 @@ Future<void> storeWatching(
     watchingList.removeWhere((item) => item['id'] == id);
   }
   watchingList.add(
-      {'title': title, 'imageUrl': imageUrl, 'id': id, 'watched': watched});
+      {'title': title, 'imageUrl': imageUrl, 'id': id, 'watched': watched,});
   box.put('watching', watchingList);
   box.close();
 }

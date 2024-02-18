@@ -1,5 +1,6 @@
 import 'package:animestream/core/news/animenews.dart';
 import 'package:animestream/ui/models/cards.dart';
+import 'package:animestream/ui/pages/newsDetail.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -59,19 +60,29 @@ class _NewsState extends State<News> {
                     shrinkWrap: true,
                     itemCount: newses.length,
                     physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) => Container(
-                      decoration: BoxDecoration(color: Colors.black),
-                      padding: EdgeInsets.only(top: 5, left: 10, right: 10),
-                      child: NewsCard(
-                          newses[index]['title'],
-                          newses[index]['image'],
-                          newses[index]['date'],
-                          newses[index]['time']),
+                    itemBuilder: (context, index) => GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => NewsDetails(url: newses[index]['url'],)));
+                      },
+                      child: Container(
+                        decoration: BoxDecoration(color: Colors.black),
+                        padding: EdgeInsets.only(top: 5, left: 10, right: 10),
+                        child: NewsCard(
+                            newses[index]['title'],
+                            newses[index]['image'],
+                            newses[index]['date'],
+                            newses[index]['time']),
+                      ),
                     ),
                   )
                 ],
               ),
             ),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

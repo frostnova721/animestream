@@ -1,9 +1,7 @@
-import 'package:animestream/ui/models/cards.dart';
+import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-
-import '../../core/database/anilist/anilist.dart';
 
 class Discover extends StatefulWidget {
   final List currentSeason;
@@ -53,9 +51,10 @@ class _DiscoverState extends State<Discover> {
               height: 50,
               width: 150,
               decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  color: Colors.black,
-                  border: Border.all(color: themeColor)),
+                borderRadius: BorderRadius.circular(20),
+                color: Colors.black,
+                border: Border.all(color: themeColor),
+              ),
               child: Center(
                 child: Text(
                   "News",
@@ -84,9 +83,21 @@ class _DiscoverState extends State<Discover> {
           child: ListView.builder(
             itemCount: thisSeason.length,
             scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) => Container(
-              width: 125,
-              child: thisSeason[index].widget,
+            itemBuilder: (context, index) => GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => Info(
+                      id: thisSeason[index].info['id'],
+                    ),
+                  ),
+                );
+              },
+              child: Container(
+                width: 125,
+                child: thisSeason[index].widget,
+              ),
             ),
           ),
         )
@@ -100,5 +111,10 @@ class _DiscoverState extends State<Discover> {
       fontFamily: family ?? 'NotoSans',
       fontSize: size ?? 15,
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

@@ -50,7 +50,7 @@ class AnimeNews {
       newses.add({
         'image': image,
         'title': title,
-        'link': ref,
+        'url': ref,
         'date': date,
         'time': time,
         'category': topic,

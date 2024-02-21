@@ -51,7 +51,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     currentEpIndex = info['episodeNumber'] - 1;
     epLinks = widget.episodes;
 
-    getQualities();
+    getQualities().then((val) => changeQuality(qualities[0]['link'], _controller.videoPlayerController!.value.position.inSeconds));
 
     final config = BetterPlayerConfiguration(
       aspectRatio: 16 / 9,
@@ -79,11 +79,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Future<void> refreshPage(int episodeIndex, dynamic streamInfo) async {
     info['streamInfo'] = streamInfo;
     qualities = [];
+    await getQualities();
     setState(() {
       info['episodeNumber'] = episodeIndex + 1;
       currentEpIndex = episodeIndex;
     });
-    getQualities();
     await updateWatching(info['animeTitle'], episodeIndex + 1);
   }
 

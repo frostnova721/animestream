@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -38,6 +39,7 @@ class _InfoState extends State<Info> {
   List streamSources = [];
   int watched = 1;
   bool started = false;
+  List qualities = [];
 
   Future<void> getWatched() async {
     final box = await Hive.openBox('animestream');
@@ -47,8 +49,7 @@ class _InfoState extends State<Info> {
       watched = item['watched'];
       started = true;
     }
-    if (mounted)
-     setState(() {});
+    if (mounted) setState(() {});
   }
 
   //incase the results need to be stored!
@@ -70,6 +71,23 @@ class _InfoState extends State<Info> {
         data = info;
       });
     }
+  }
+
+  Future<void> getQualities() async {
+    List<dynamic> mainList = [];
+    for (int i = 0; i < streamSources.length; i++) {
+      final List<dynamic> list =
+          await generateQualitiesForMultiQuality(streamSources[i].link);
+      list.forEach((element) {
+        element['server'] =
+            "${streamSources[i].server} ${streamSources[i].backup ? "• backup" : ""}";
+        mainList.add(element);
+      });
+    }
+    if (mounted)
+      setState(() {
+        qualities = mainList;
+      });
   }
 
   Future getEpisodeSources(String epLink) async {
@@ -422,7 +440,7 @@ class _InfoState extends State<Info> {
             child: Stack(
               children: [
                 Container(
-                  height: 120,
+                  height: 110,
                   margin: EdgeInsets.only(top: 10, left: 10, right: 10),
                   padding: EdgeInsets.only(left: 10, right: 10),
                   decoration: BoxDecoration(
@@ -430,6 +448,7 @@ class _InfoState extends State<Info> {
                     color: Colors.black,
                   ),
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15),
@@ -437,24 +456,153 @@ class _InfoState extends State<Info> {
                           opacity: index + 2 > watched ? 1.0 : 0.6,
                           child: Image.network(
                             data.cover,
-                            width: 150,
-                            height: 100,
+                            width: 140,
+                            height: 90,
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.only(
-                          left: 15,
+                      // Padding(
+                      // padding: const EdgeInsets.only(
+                      //   left: 15,
+                      // ),
+                      // child:
+                      Text(
+                        "Episode ${index + 1}",
+                        style: TextStyle(
+                          color: index + 2 > watched
+                              ? Colors.white
+                              : Color.fromARGB(155, 255, 255, 255),
+                          fontFamily: "Poppins",
+                          fontSize: 18,
                         ),
-                        child: Text(
-                          "Episode ${index + 1}",
-                          style: TextStyle(
-                            color: index + 2 > watched
-                                ? Colors.white
-                                : Color.fromARGB(155, 255, 255, 255),
-                            fontFamily: "Poppins",
-                            fontSize: 18,
+                      ),
+                      // ),
+                      Container(
+                        child: IconButton(
+                          onPressed: () async {
+                            showModalBottomSheet(
+                              showDragHandle: true,
+                              backgroundColor: Color(0xff121212),
+                              context: context,
+                              builder: (BuildContext context) {
+                                return Container(
+                                  height: 150,
+                                  child: Container(
+                                    height: 100,
+                                    child: Center(
+                                      child: CircularProgressIndicator(
+                                        color: themeColor,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            );
+                            try {
+                              await getEpisodeSources(epLinks[index]);
+                              await getQualities();
+                              Navigator.of(context).pop();
+                              showModalBottomSheet(
+                                showDragHandle: true,
+                                backgroundColor:
+                                    Color.fromARGB(255, 19, 19, 19),
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    padding: EdgeInsets.only(
+                                        left: 20, right: 20, bottom: 20),
+                                    child: ListView.builder(
+                                      itemCount: qualities.length,
+                                      shrinkWrap: true,
+                                      itemBuilder:
+                                          (BuildContext context, ind) =>
+                                              Container(
+                                        margin: EdgeInsets.only(top: 15),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              Color.fromARGB(97, 190, 175, 255),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                        ),
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            print(index + 1);
+                                            Downloader().download(qualities[ind]['link'], "${data.title['enlish'] ?? data.title['romaji']}_Ep_${index + 1}");
+                                            floatingSnackBar(context, "Downloading the episode to your downloads folder");
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor: Color.fromARGB(
+                                                68, 190, 175, 255),
+                                            padding: EdgeInsets.only(
+                                                top: 10,
+                                                bottom: 10,
+                                                left: 20,
+                                                right: 20),
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(20),
+                                            ),
+                                          ),
+                                          child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.start,
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.center,
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.only(
+                                                          top: 5),
+                                                      child: Text(
+                                                        "${qualities[ind]['server']} • ${qualities[ind]['quality']}",
+                                                        style: TextStyle(
+                                                          color: themeColor,
+                                                          fontSize: 18,
+                                                          fontFamily: "Rubik",
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ]),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            } catch (err) {
+                              print(err);
+                              Navigator.of(context).pop();
+                              showModalBottomSheet(
+                                showDragHandle: true,
+                                backgroundColor:
+                                    Color.fromARGB(255, 19, 19, 19),
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return Container(
+                                    height: 120,
+                                    child: Center(
+                                      child: Text(
+                                        "OOPS! SOME ERROR",
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                              );
+                            }
+                          },
+                          icon: Icon(
+                            Icons.download_rounded,
+                            color: Colors.white,
                           ),
                         ),
                       ),

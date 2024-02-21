@@ -1,6 +1,6 @@
 import "dart:io";
 import "package:http/http.dart";
-
+import "package:path_provider/path_provider.dart";
 import "../../commons/utils.dart";
 
 class Downloader {
@@ -11,7 +11,23 @@ class Downloader {
   }
 
   Future<void> download(String streamLink, String fileName) async {
-    final output = File(fileName);
+    final downPath = await Directory('/storage/emulated/0/Download');
+    String finalPath;
+    if (downPath.existsSync()) {
+      final directory = Directory("${downPath.path}/animestream/");
+      if (!(await directory.exists())) {
+        await directory.create(recursive: true);
+      }
+      finalPath = '/storage/emulated/0/Download/animestream/${fileName}.mp4';
+    } else {
+      final externalStorage = await getExternalStorageDirectory();
+      final directory = Directory("${externalStorage?.path}/animestream/");
+      if (!(await directory.exists())) {
+        await directory.create(recursive: true);
+      }
+      finalPath = "${externalStorage?.path}/animestream/${fileName}.mp4";
+    }
+    final output = File(finalPath);
     var out = output.openWrite();
     final streamBaseLink = _makeBaseLink(streamLink);
     try {
@@ -20,7 +36,7 @@ class Downloader {
         if (segment.length != 0) {
           final uri =
               segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
-          print("fetching $segment");
+          print("fetching $segment  [$segment/${segments.length}]");
           final res = await get(Uri.parse(uri));
           if (res.statusCode == 200) {
             out.add(res.bodyBytes);

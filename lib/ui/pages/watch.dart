@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/sources.dart';
@@ -10,7 +11,7 @@ import 'package:flutter/services.dart';
 
 class Watch extends StatefulWidget {
   final String selectedSource;
-  final Map<String, dynamic> info;
+  final WatchPageInfo info;
   final List<String> episodes;
   const Watch({
     super.key,
@@ -32,7 +33,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Timer? _controlsTimer;
   String currentQualityLink = '';
   List<String> epLinks = [];
-  late Map<String, dynamic> info;
+  late WatchPageInfo info;
   int currentEpIndex = 0;
 
   List qualities = [];
@@ -48,7 +49,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     ]);
 
     info = widget.info;
-    currentEpIndex = info['episodeNumber'] - 1;
+    currentEpIndex = info.episodeNumber - 1;
     epLinks = widget.episodes;
 
     getQualities().then((val) => changeQuality(qualities[0]['link'], _controller.videoPlayerController!.value.position.inSeconds));
@@ -64,7 +65,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     _controller = BetterPlayerController(config);
     _ds = BetterPlayerDataSource(
       BetterPlayerDataSourceType.network,
-      info['streamInfo'].link,
+      info.streamInfo.link,
     );
 
     _controller.setupDataSource(_ds);
@@ -77,24 +78,29 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> refreshPage(int episodeIndex, dynamic streamInfo) async {
-    info['streamInfo'] = streamInfo;
+    info.streamInfo = streamInfo;
     qualities = [];
     await getQualities();
     setState(() {
-      info['episodeNumber'] = episodeIndex + 1;
+      info.episodeNumber = episodeIndex + 1;
       currentEpIndex = episodeIndex;
     });
-    await updateWatching(info['animeTitle'], episodeIndex + 1);
+    await updateWatching(info.animeTitle, episodeIndex + 1);
   }
 
   Future getEpisodeSources(String epLink) async {
-    final epSrcs = await getStreams(widget.selectedSource, epLink);
-    return epSrcs;
+    final List<dynamic> srcs = [];
+    await getStreams(widget.selectedSource, epLink, (list, finished) {
+      setState(() {
+        srcs.add(list);
+      });
+    });
+    return srcs;
   }
 
   Future<void> getQualities() async {
     final List list =
-        await generateQualitiesForMultiQuality(info['streamInfo'].link);
+        await generateQualitiesForMultiQuality(info.streamInfo.link);
     if (mounted)
       setState(() {
         qualities = list;
@@ -215,7 +221,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     Container(
                       padding: const EdgeInsets.only(left: 20, top: 5),
                       alignment: Alignment.topLeft,
-                      child: Text("Episode ${info['episodeNumber']}",
+                      child: Text("Episode ${info.episodeNumber}",
                           style: TextStyle(
                             color: Colors.white,
                             fontFamily: 'NotoSans',
@@ -227,7 +233,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                       padding: const EdgeInsets.only(left: 20),
                       alignment: Alignment.topLeft,
                       child: Text(
-                        "${info['animeTitle']}",
+                        "${info.animeTitle}",
                         style: TextStyle(
                             color: Color.fromARGB(255, 190, 190, 190),
                             fontFamily: 'NotoSans',
@@ -253,7 +259,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                           style: TextStyle(color: themeColor)),
                       content: Text(
                         //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
-                        "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info['streamInfo'].server} ${info['streamInfo'].backup ? "\(backup\)" : ''}",
+                        "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info.streamInfo.server} ${info.streamInfo.backup ? "\(backup\)" : ''}",
                       ),
                     ),
                   );

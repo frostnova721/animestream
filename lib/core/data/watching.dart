@@ -6,7 +6,6 @@ Future<void> storeWatching(
   if (!box.isOpen) {
     box = await Hive.openBox('animestream');
   }
-  print("storing");
   final List watchingList = box.get('watching') ?? [];
   final currList = watchingList.where((item) => item['id'] == id).toList();
   if (currList.length != 0 && currList[0]['watched'] <= watched) {
@@ -23,7 +22,6 @@ Future<void> updateWatching(String title, int watched) async {
   if (!box.isOpen) {
     box = await Hive.openBox('animestream');
   }
-  print("updating");
   final List watchingList = box.get('watching') ?? [];
   final index = watchingList.indexWhere((item) => item['title'] == title);
   if (index != -1) {

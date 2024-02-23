@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/extractors/streamwish.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import '../extractors/vidstream.dart';
@@ -60,9 +61,31 @@ class GogoAnime {
     return searchResults;
   }
 
-  getStreams(String episodeId) async {
-    final sources = await Vidstream().extractGogo(episodeId);
-    return sources;
+  String _getServerLink(String serverName, List<Map<String, String>> servers) {
+    final src = servers.where((element) => element['server'] == serverName).toList()[0]['src'];
+    return src ?? '';
+  }
+
+  Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {
+    final servers = await getAllServerLinks(episodeId);
+    final vsLink = _getServerLink("vidstreaming", servers);
+    final swLink = _getServerLink("streamwish", servers);
+    // final sources = [];
+    int returns = 0;
+    int totalStreams = 2;
+    final vidstream = Vidstream().extractGogo(vsLink);
+    final streamwish = StreamWish().extract(swLink);
+
+    vidstream.then((res) {
+      returns++;
+      update(res, returns == totalStreams);
+    });
+    streamwish.then((res) {
+      returns++;
+      update(res, returns == totalStreams);
+    });
+    // sources.addAll([vidstream, streamwish]);
+    // return sources.expand((element) => element).toList();
   }
 
    getAnimeEpisodeLink(String aliasId) async {
@@ -96,10 +119,10 @@ class GogoAnime {
     };
   }
 
-  getAllServerLinks(String epUrl) async {
+  Future<List<Map<String, String>>> getAllServerLinks(String epUrl) async {
         final res = await get(epUrl);
         final $ = html.parse(res.body);
-        List serverArray = [];
+        List<Map<String, String>> serverArray = [];
         $.querySelectorAll('div.anime_muti_link > ul > li').forEach((e) {
             final serverName = e.attributes['class'] ?? '';
             final srcChildren = e.children;

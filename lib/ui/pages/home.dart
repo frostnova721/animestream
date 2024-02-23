@@ -115,7 +115,7 @@ class _HomeState extends State<Home> {
                 selectedItemColor: themeColor,
                 unselectedItemColor: Colors.white,
                 currentIndex: activeIndex,
-                backgroundColor: Color.fromARGB(22, 255, 255, 255),
+                backgroundColor: Color.fromARGB(255, 24, 24, 24),
                 elevation: 0,
                 onTap: (val) => setState(() {
                   activeIndex = val;
@@ -131,7 +131,7 @@ class _HomeState extends State<Home> {
                       icon: Image.asset(
                         'lib/assets/images/shines.png',
                         color: activeIndex == 1 ? themeColor : Colors.white,
-                        scale: 25,
+                        scale: 22,
                       ),
                       tooltip: "discover"),
                 ],

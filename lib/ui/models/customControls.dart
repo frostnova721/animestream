@@ -30,6 +30,8 @@ class _ControlsState extends State<Controls> {
   BetterPlayerController? _betterPlayerController;
   VideoPlayerController? _controller;
 
+  bool startedLoadingNext = false;
+
   int currentEpIndex = 0;
 
   @override
@@ -44,6 +46,13 @@ class _ControlsState extends State<Controls> {
     _controller = widget.controller.videoPlayerController;
 
     _controller?.addListener(() {
+      if (_controller!.value.position.inSeconds ==
+          _controller!.value.duration?.inSeconds) {
+        if (preloadedSources.isNotEmpty) {
+          _betterPlayerController!.setupDataSource(
+              BetterPlayerDataSource.network(preloadedSources[0].link));
+        }
+      }
       if (mounted)
         setState(() {
           int duration = _controller?.value.duration?.inSeconds ?? 0;
@@ -55,6 +64,13 @@ class _ControlsState extends State<Controls> {
           currentTime = getFormattedTime(val);
           maxTime = getFormattedTime(duration);
         });
+      if ((_controller!.value.position.inSeconds *
+                  (_controller!.value.duration?.inSeconds ?? 0)) /
+              100 ==
+          75) {
+        preloadNextEpisode();
+      }
+      ;
     });
   }
 
@@ -65,6 +81,19 @@ class _ControlsState extends State<Controls> {
   bool isVisible = true;
   int selectedQuality = 0;
   List currentSources = [];
+  List preloadedSources = [];
+
+  Future preloadNextEpisode() async {
+    if ((currentEpIndex == 0) ||
+        (currentEpIndex + 1 > widget.episode['epLinks'].length)) {
+      return;
+    }
+    preloadedSources = [];
+    final index = currentEpIndex + 1;
+    final srcs = await widget
+        .episode['getEpisodeSources'](widget.episode['epLinks'][index]);
+    if (mounted) preloadedSources = srcs;
+  }
 
   Future getEpisodeSources(bool nextEpisode) async {
     if ((currentEpIndex == 0 && !nextEpisode) ||

@@ -1,6 +1,6 @@
 import 'package:animestream/core/anime/providers/gogoanime.dart';
+import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:flutter/material.dart';
-import 'package:animestream/core/anime/extractors/vidstream.dart';
 
 final List sources = ["gogoanime"];
 
@@ -57,11 +57,12 @@ getAnimeEpisodes(String source, String link) async {
 }
 
 generateQualitiesForMultiQuality(String link) async {
-  final qualities = await Vidstream().generateQualityStreams(link);
+  // final qualities = await Vidstream().generateQualityStreams(link);
+  final qualities = await getQualityStreams(link);
   return qualities;
 }
 
-getStreams(String source, String episodeId) async {
-  final streams = await getClass(source).getStreams(episodeId);
+getStreams(String source, String episodeId, Function(List<dynamic>, bool) updateFunction) async {
+  final streams = await getClass(source).getStreams(episodeId,  updateFunction);
   return streams;
 }

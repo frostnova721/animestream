@@ -3,6 +3,7 @@ import "dart:convert";
 import "package:http/http.dart";
 import "package:html/parser.dart" as html;
 import "package:encrypt/encrypt.dart";
+import "package:animestream/core/commons/types.dart";
 
 class Vidstream {
   final keys = {
@@ -13,10 +14,10 @@ class Vidstream {
 
   final baseUrl = "https://gogoanime3.net";
 
-  Future extractGogo(String episodeId) async {
-    if (!episodeId.startsWith(baseUrl)) episodeId = "$baseUrl/$episodeId";
-    final streamLink = await getIframeLink(episodeId);
-    if (streamLink == null) throw new Exception("No stream Links!");
+  Future extractGogo(String streamLink) async {
+    // if (!episodeId.startsWith(baseUrl)) episodeId = "$baseUrl/$episodeId";
+    // final streamLink = await getIframeLink(episodeId);
+    // if (streamLink == null) throw new Exception("No stream Links!");
     final epLink = Uri.parse(streamLink);
     final id = epLink.queryParameters['id'] ?? '';
     final encrypedKey = await getEncryptedKey(id);
@@ -121,18 +122,3 @@ class Vidstream {
   }
 }
 
-class Stream {
-  final String quality;
-  final String link;
-  final bool isM3u8;
-  final String server;
-  final bool backup;
-
-  Stream({
-    required this.quality,
-    required this.link,
-    required this.isM3u8,
-    required this.server,
-    required this.backup,
-  });
-}

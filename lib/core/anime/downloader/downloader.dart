@@ -36,7 +36,7 @@ class Downloader {
         if (segment.length != 0) {
           final uri =
               segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
-          print("fetching $segment  [$segment/${segments.length}]");
+          print("fetching segment [${segment.indexOf(segment)}/${segments.length}]");
           final res = await get(Uri.parse(uri));
           if (res.statusCode == 200) {
             out.add(res.bodyBytes);

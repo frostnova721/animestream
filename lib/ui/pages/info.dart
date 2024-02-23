@@ -1,14 +1,13 @@
-import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
+import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:animestream/ui/pages/watch.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
-import "package:animestream/core/data/watching.dart";
 import 'package:http/http.dart';
 import "package:image_gallery_saver/image_gallery_saver.dart";
 
@@ -30,16 +29,18 @@ class _InfoState extends State<Info> {
     getInfo(widget.id).then((value) => getEpisodes());
   }
 
+  
   bool dataLoaded = false;
   bool infoPage = true;
   dynamic data;
-  String selectedSouce = "gogoanime";
+  String selectedSource = "gogoanime";
   String? foundName;
   List<String> epLinks = [];
   List streamSources = [];
   int watched = 1;
   bool started = false;
   List qualities = [];
+  bool _epSearcherror = false;
 
   Future<void> getWatched() async {
     final box = await Hive.openBox('animestream');
@@ -92,30 +93,42 @@ class _InfoState extends State<Info> {
 
   Future getEpisodeSources(String epLink) async {
     streamSources = [];
-    final epSrcs = await getStreams(selectedSouce, epLink);
-    setState(() {
-      streamSources = epSrcs;
+    // final epSrcs =
+    await getStreams(selectedSource, epLink, (list, finished) {
+      if (mounted)
+        setState(() {
+          if (finished) streamSources = streamSources + list;
+        });
     });
+    // setState(() {
+    //   streamSources = epSrcs;
+    // });
   }
 
   Future getEpisodes() async {
     try {
       final sr = await searchInSource(
-          selectedSouce, data.title['english'] ?? data.title['romaji']);
-      final links = await getAnimeEpisodes(selectedSouce, sr[0]['alias']);
+          selectedSource, data.title['english'] ?? data.title['romaji']);
+      final links = await getAnimeEpisodes(selectedSource, sr[0]['alias']);
       getWatched();
-      setState(() {
-        epLinks = links;
-        foundName = sr[0]['name'];
-      });
+      if (mounted)
+        setState(() {
+          epLinks = links;
+          foundName = sr[0]['name'];
+        });
     } catch (err) {
-      final sr = await searchInSource(selectedSouce, data.title['romaji']);
-      final links = await getAnimeEpisodes(selectedSouce, sr[0]['alias']);
-      getWatched();
-      setState(() {
-        epLinks = links;
-        foundName = sr[0]['name'];
-      });
+      try {
+        final sr = await searchInSource(selectedSource, data.title['romaji']);
+        final links = await getAnimeEpisodes(selectedSource, sr[0]['alias']);
+        getWatched();
+        if (mounted)
+          setState(() {
+            epLinks = links;
+            foundName = sr[0]['name'];
+          });
+      } catch (err) {
+        _epSearcherror = true;
+      }
     }
   }
 
@@ -213,7 +226,7 @@ class _InfoState extends State<Info> {
                                     ),
                                   ),
                                   onSelected: (value) {
-                                    selectedSouce = value;
+                                    selectedSource = value;
                                     getEpisodes();
                                   },
                                   inputDecorationTheme: InputDecorationTheme(
@@ -248,19 +261,41 @@ class _InfoState extends State<Info> {
                                 child: Column(
                                   children: [
                                     _categoryTitle("Episodes"),
-                                    // Container(
-                                    // height: 500,
-                                    // alignment: Alignment.topCenter,
-                                    foundName != null
-                                        ? _episodes()
-                                        : Container(
+                                    _epSearcherror
+                                        ? Container(
                                             width: 350,
-                                            height: 100,
+                                            height: 120,
                                             child: Center(
-                                              child: CircularProgressIndicator(
-                                                  color: themeColor),
+                                              child: Column(
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.center,
+                                                children: [
+                                                  Image.asset(
+                                                    'lib/assets/images/broken_heart.png',
+                                                    scale: 7.5,
+                                                  ),
+                                                  Text(
+                                                      "Couldnt get any results :(",
+                                                      style: TextStyle(
+                                                          color: Colors.white,
+                                                          fontSize: 16,
+                                                          fontFamily:
+                                                              "NunitoSans"))
+                                                ],
+                                              ),
                                             ),
-                                          ),
+                                          )
+                                        : foundName != null
+                                            ? _episodes()
+                                            : Container(
+                                                width: 350,
+                                                height: 100,
+                                                child: Center(
+                                                  child:
+                                                      CircularProgressIndicator(
+                                                          color: themeColor),
+                                                ),
+                                              ),
                                     // ),
                                   ],
                                 ),
@@ -270,7 +305,11 @@ class _InfoState extends State<Info> {
                   ],
                 ),
               )
-            : Container(),
+            : Center(
+              child: CircularProgressIndicator(
+                color: themeColor,
+              ),
+            ),
       );
     } catch (err) {
       print(err);
@@ -329,17 +368,18 @@ class _InfoState extends State<Info> {
             backgroundColor: Color(0xff121212),
             context: context,
             builder: (BuildContext context) {
-              return _streamButton(0);
-            },
-          );
-          await getEpisodeSources(epLinks[watched - 1]);
-          Navigator.of(context).pop();
-          showModalBottomSheet(
-            showDragHandle: true,
-            backgroundColor: Color.fromARGB(255, 19, 19, 19),
-            context: context,
-            builder: (BuildContext context) {
-              return _streamButton(watched - 1);
+              return BottomSheetContent(
+                getStreams: getStreams,
+                bottomSheetContentData: BottomSheetContentData(
+                    epLinks: epLinks,
+                    episodeIndex: watched - 1,
+                    selectedSource: selectedSource,
+                    title: data.title['english'] ?? data.title['romaji'],
+                    id: widget.id,
+                    cover: data.cover),
+                type: Type.watch,
+                getWatched: getWatched,
+              );
             },
           );
         },
@@ -407,35 +447,23 @@ class _InfoState extends State<Info> {
           return GestureDetector(
             onTap: () async {
               showModalBottomSheet(
-                showDragHandle: true,
-                backgroundColor: Color(0xff121212),
-                context: context,
-                builder: (BuildContext context) {
-                  return _streamButton(0);
-                },
-              );
-              try {
-                await getEpisodeSources(epLinks[index]);
-                Navigator.of(context).pop();
-                showModalBottomSheet(
                   showDragHandle: true,
-                  backgroundColor: Color.fromARGB(255, 19, 19, 19),
                   context: context,
-                  builder: (BuildContext context) {
-                    return _streamButton(index);
-                  },
-                );
-              } catch (err) {
-                Navigator.of(context).pop();
-                showModalBottomSheet(
-                  showDragHandle: true,
-                  backgroundColor: Color.fromARGB(255, 19, 19, 19),
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Container();
-                  },
-                );
-              }
+                  backgroundColor: Color(0xff121212),
+                  builder: (context) {
+                    return BottomSheetContent(
+                      getStreams: getStreams,
+                      bottomSheetContentData: BottomSheetContentData(
+                          epLinks: epLinks,
+                          episodeIndex: index,
+                          selectedSource: selectedSource,
+                          title: data.title['english'] ?? data.title['romaji'],
+                          id: widget.id,
+                          cover: data.cover),
+                      type: Type.watch,
+                      getWatched: getWatched,
+                    );
+                  });
             },
             child: Stack(
               children: [
@@ -462,11 +490,6 @@ class _InfoState extends State<Info> {
                           ),
                         ),
                       ),
-                      // Padding(
-                      // padding: const EdgeInsets.only(
-                      //   left: 15,
-                      // ),
-                      // child:
                       Text(
                         "Episode ${index + 1}",
                         style: TextStyle(
@@ -483,122 +506,25 @@ class _InfoState extends State<Info> {
                           onPressed: () async {
                             showModalBottomSheet(
                               showDragHandle: true,
-                              backgroundColor: Color(0xff121212),
+                              backgroundColor: Color.fromARGB(255, 19, 19, 19),
                               context: context,
                               builder: (BuildContext context) {
-                                return Container(
-                                  height: 150,
-                                  child: Container(
-                                    height: 100,
-                                    child: Center(
-                                      child: CircularProgressIndicator(
-                                        color: themeColor,
-                                      ),
-                                    ),
+                                return BottomSheetContent(
+                                  getStreams: getStreams,
+                                  bottomSheetContentData:
+                                      BottomSheetContentData(
+                                    epLinks: epLinks,
+                                    episodeIndex: index,
+                                    selectedSource: selectedSource,
+                                    title: data.title['english'] ??
+                                        data.title['romaji'],
+                                    id: widget.id,
+                                    cover: data.cover,
                                   ),
+                                  type: Type.download,
                                 );
                               },
                             );
-                            try {
-                              await getEpisodeSources(epLinks[index]);
-                              await getQualities();
-                              Navigator.of(context).pop();
-                              showModalBottomSheet(
-                                showDragHandle: true,
-                                backgroundColor:
-                                    Color.fromARGB(255, 19, 19, 19),
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    padding: EdgeInsets.only(
-                                        left: 20, right: 20, bottom: 20),
-                                    child: ListView.builder(
-                                      itemCount: qualities.length,
-                                      shrinkWrap: true,
-                                      itemBuilder:
-                                          (BuildContext context, ind) =>
-                                              Container(
-                                        margin: EdgeInsets.only(top: 15),
-                                        decoration: BoxDecoration(
-                                          color:
-                                              Color.fromARGB(97, 190, 175, 255),
-                                          borderRadius:
-                                              BorderRadius.circular(20),
-                                        ),
-                                        child: ElevatedButton(
-                                          onPressed: () async {
-                                            print(index + 1);
-                                            Downloader().download(qualities[ind]['link'], "${data.title['enlish'] ?? data.title['romaji']}_Ep_${index + 1}");
-                                            floatingSnackBar(context, "Downloading the episode to your downloads folder");
-                                          },
-                                          style: ElevatedButton.styleFrom(
-                                            backgroundColor: Color.fromARGB(
-                                                68, 190, 175, 255),
-                                            padding: EdgeInsets.only(
-                                                top: 10,
-                                                bottom: 10,
-                                                left: 20,
-                                                right: 20),
-                                            shape: RoundedRectangleBorder(
-                                              borderRadius:
-                                                  BorderRadius.circular(20),
-                                            ),
-                                          ),
-                                          child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.center,
-                                                  children: [
-                                                    Padding(
-                                                      padding: EdgeInsets.only(
-                                                          top: 5),
-                                                      child: Text(
-                                                        "${qualities[ind]['server']} • ${qualities[ind]['quality']}",
-                                                        style: TextStyle(
-                                                          color: themeColor,
-                                                          fontSize: 18,
-                                                          fontFamily: "Rubik",
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ]),
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            } catch (err) {
-                              print(err);
-                              Navigator.of(context).pop();
-                              showModalBottomSheet(
-                                showDragHandle: true,
-                                backgroundColor:
-                                    Color.fromARGB(255, 19, 19, 19),
-                                context: context,
-                                builder: (BuildContext context) {
-                                  return Container(
-                                    height: 120,
-                                    child: Center(
-                                      child: Text(
-                                        "OOPS! SOME ERROR",
-                                        style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 18,
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            }
                           },
                           icon: Icon(
                             Icons.download_rounded,
@@ -626,103 +552,103 @@ class _InfoState extends State<Info> {
         });
   }
 
-  Container _streamButton(int episode) {
-    return Container(
-      padding: EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 30),
-      child: streamSources.length > 0
-          ? ListView.builder(
-              shrinkWrap: true,
-              // physics: NeverScrollableScrollPhysics(),
-              itemCount: streamSources.length,
-              itemBuilder: (context, i) {
-                return Container(
-                  margin: EdgeInsets.only(top: 15),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(97, 190, 175, 255),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      await storeWatching(
-                        data.title['english'] ?? data.title['romaji'],
-                        data.cover,
-                        widget.id,
-                        episode + 1,
-                      );
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Watch(
-                            selectedSource: selectedSouce,
-                            info: {
-                              'episodeNumber': episode + 1,
-                              'animeTitle':
-                                  data.title['english'] ?? data.title['romaji'],
-                              'streamInfo': streamSources[i]
-                            },
-                            episodes: epLinks,
-                          ),
-                        ),
-                      ).then((value) => getWatched());
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(68, 190, 175, 255),
-                      padding: EdgeInsets.only(
-                          top: 10, bottom: 10, left: 20, right: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              streamSources[i].server,
-                              style: TextStyle(
-                                fontFamily: "NotoSans",
-                                fontSize: 17,
-                                color: themeColor,
-                              ),
-                            ),
-                            if (streamSources[i].backup)
-                              Text(
-                                " • backup",
-                                style: TextStyle(
-                                  fontFamily: "NotoSans",
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
-                                ),
-                              )
-                          ],
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Text(
-                            streamSources[i].quality,
-                            style: TextStyle(
-                                color: Colors.white, fontFamily: "Rubik"),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            )
-          : Container(
-              height: 100,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: themeColor,
-                ),
-              ),
-            ),
-    );
-  }
+  // Container _streamButton(int episode) {
+  //   return Container(
+  //     padding: EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 30),
+  //     child: streamSources.length > 0
+  //         ? ListView.builder(
+  //             shrinkWrap: true,
+  //             // physics: NeverScrollableScrollPhysics(),
+  //             itemCount: streamSources.length,
+  //             itemBuilder: (context, i) {
+  //               return Container(
+  //                 margin: EdgeInsets.only(top: 15),
+  //                 decoration: BoxDecoration(
+  //                   color: Color.fromARGB(97, 190, 175, 255),
+  //                   borderRadius: BorderRadius.circular(20),
+  //                 ),
+  //                 child: ElevatedButton(
+  //                   onPressed: () async {
+  //                     await storeWatching(
+  //                       data.title['english'] ?? data.title['romaji'],
+  //                       data.cover,
+  //                       widget.id,
+  //                       episode + 1,
+  //                     );
+  //                     Navigator.push(
+  //                       context,
+  //                       MaterialPageRoute(
+  //                         builder: (context) => Watch(
+  //                           selectedSource: selectedSource,
+  //                           info: WatchPageInfo(
+  //                             episodeNumber: episode + 1,
+  //                             animeTitle:
+  //                                 data.title['english'] ?? data.title['romaji'],
+  //                             streamInfo: streamSources[i],
+  //                           ),
+  //                           episodes: epLinks,
+  //                         ),
+  //                       ),
+  //                     ).then((value) => getWatched());
+  //                   },
+  //                   style: ElevatedButton.styleFrom(
+  //                     backgroundColor: Color.fromARGB(68, 190, 175, 255),
+  //                     padding: EdgeInsets.only(
+  //                         top: 10, bottom: 10, left: 20, right: 20),
+  //                     shape: RoundedRectangleBorder(
+  //                       borderRadius: BorderRadius.circular(20),
+  //                     ),
+  //                   ),
+  //                   child: Column(
+  //                     crossAxisAlignment: CrossAxisAlignment.start,
+  //                     children: [
+  //                       Row(
+  //                         mainAxisAlignment: MainAxisAlignment.start,
+  //                         crossAxisAlignment: CrossAxisAlignment.center,
+  //                         children: [
+  //                           Text(
+  //                             streamSources[i].server,
+  //                             style: TextStyle(
+  //                               fontFamily: "NotoSans",
+  //                               fontSize: 17,
+  //                               color: themeColor,
+  //                             ),
+  //                           ),
+  //                           if (streamSources[i].backup)
+  //                             Text(
+  //                               " • backup",
+  //                               style: TextStyle(
+  //                                 fontFamily: "NotoSans",
+  //                                 fontSize: 14,
+  //                                 color: Colors.grey[500],
+  //                               ),
+  //                             )
+  //                         ],
+  //                       ),
+  //                       Padding(
+  //                         padding: EdgeInsets.only(top: 5),
+  //                         child: Text(
+  //                           streamSources[i].quality,
+  //                           style: TextStyle(
+  //                               color: Colors.white, fontFamily: "Rubik"),
+  //                         ),
+  //                       ),
+  //                     ],
+  //                   ),
+  //                 ),
+  //               );
+  //             },
+  //           )
+  //         : Container(
+  //             height: 100,
+  //             child: Center(
+  //               child: CircularProgressIndicator(
+  //                 color: themeColor,
+  //               ),
+  //             ),
+  //           ),
+  //   );
+  // }
 
   Column _infoItems(BuildContext context) {
     return Column(
@@ -1067,6 +993,21 @@ class _InfoState extends State<Info> {
               data.cover,
               height: 220,
             ),
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: 40),
+          child: IconButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            iconSize: 27,
+            icon: Icon(
+              Icons.arrow_back_rounded,
+              color: Colors.white,
+            ),
+            style: IconButton.styleFrom(
+                backgroundColor: Color.fromARGB(69, 0, 0, 0)),
           ),
         ),
       ],

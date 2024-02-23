@@ -12,10 +12,10 @@ floatingSnackBar(BuildContext context, String message) {
         )
         ),
       ),
-      backgroundColor: Color.fromARGB(206, 100, 100, 100),
+      backgroundColor: Color.fromARGB(235, 53, 53, 53),
       behavior: SnackBarBehavior.floating,
       dismissDirection: DismissDirection.down,
-      // margin: EdgeInsets.only(bottom: 40, left: 50, right: 50),
+      // margin: EdgeInsets.only(bottom: 40),
       width: 300,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(35)),
     ),

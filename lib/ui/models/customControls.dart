@@ -33,6 +33,7 @@ class _ControlsState extends State<Controls> {
   bool startedLoadingNext = false;
 
   int currentEpIndex = 0;
+  bool preloadStarted = false;
 
   @override
   void initState() {
@@ -66,8 +67,8 @@ class _ControlsState extends State<Controls> {
         });
       if ((_controller!.value.position.inSeconds *
                   (_controller!.value.duration?.inSeconds ?? 0)) /
-              100 ==
-          75) {
+              100 >=
+          75 && !preloadStarted) {
         preloadNextEpisode();
       }
       ;

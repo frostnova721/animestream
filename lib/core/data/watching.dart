@@ -2,6 +2,7 @@ import "package:hive/hive.dart";
 
 Future<void> storeWatching(
     String title, String imageUrl, int id, int watched) async {
+  try {
   var box = await Hive.openBox('animestream');
   if (!box.isOpen) {
     box = await Hive.openBox('animestream');
@@ -15,9 +16,13 @@ Future<void> storeWatching(
       {'title': title, 'imageUrl': imageUrl, 'id': id, 'watched': watched,});
   box.put('watching', watchingList);
   box.close();
+  } catch(err) {
+    print(err);
+  }
 }
 
 Future<void> updateWatching(String title, int watched) async {
+  try {
   var box = await Hive.openBox('animestream');
   if (!box.isOpen) {
     box = await Hive.openBox('animestream');
@@ -31,4 +36,7 @@ Future<void> updateWatching(String title, int watched) async {
   }
   box.put('watching', watchingList);
   box.close();
+  } catch(err) {
+    print(err);
+  }
 }

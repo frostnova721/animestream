@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
+import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -52,7 +53,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     currentEpIndex = info.episodeNumber - 1;
     epLinks = widget.episodes;
 
-    getQualities().then((val) => changeQuality(qualities[0]['link'], _controller.videoPlayerController!.value.position.inSeconds));
+    getQualities().then((val) => changeQuality(qualities[0]['link'],
+        _controller.videoPlayerController!.value.position.inSeconds));
 
     final config = BetterPlayerConfiguration(
       aspectRatio: 16 / 9,
@@ -63,17 +65,25 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     );
 
     _controller = BetterPlayerController(config);
-    _ds = BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      info.streamInfo.link,
-    );
+    
+    playVideo(info.streamInfo.link);
 
-    _controller.setupDataSource(_ds);
     _controller.setBetterPlayerControlsConfiguration(
       BetterPlayerControlsConfiguration(
         playerTheme: BetterPlayerTheme.custom,
         showControls: false,
       ),
+    );
+  }
+
+  Future<dynamic> playVideo(String url) async {
+    await _controller.setupDataSource(BetterPlayerDataSource(
+      BetterPlayerDataSourceType.network,
+      info.streamInfo.link,
+      bufferingConfiguration: BetterPlayerBufferingConfiguration(
+        maxBufferMs: 40000,
+      ),
+    ),
     );
   }
 
@@ -88,14 +98,14 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     await updateWatching(info.animeTitle, episodeIndex + 1);
   }
 
-  Future getEpisodeSources(String epLink) async {
-    final List<dynamic> srcs = [];
-    await getStreams(widget.selectedSource, epLink, (list, finished) {
-      setState(() {
-        srcs.add(list);
-      });
-    });
-    return srcs;
+  Future<void> updateWatchProgress(int episodeIndex) async {
+    await updateWatching(info.animeTitle, episodeIndex + 1);
+  }
+
+  Future getEpisodeSources(String epLink, Function(List<dynamic>, bool) cb) async {
+    // final List<dynamic> srcs = [];
+    await getStreams(widget.selectedSource, epLink, cb);
+    // return srcs;
   }
 
   Future<void> getQualities() async {
@@ -107,11 +117,10 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       });
   }
 
-  void changeQuality(String link, int currentTime) async {
+  void changeQuality(String link, int? currentTime) async {
     if (currentQualityLink != link) {
-      await _controller.setupDataSource(
-          BetterPlayerDataSource(BetterPlayerDataSourceType.network, link));
-      _controller.videoPlayerController!.seekTo(Duration(seconds: currentTime));
+      playVideo(link);
+      _controller.videoPlayerController!.seekTo(Duration(seconds: currentTime ?? 0));
       currentQualityLink = link;
     }
   }
@@ -185,6 +194,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                         'currentEpIndex': currentEpIndex,
                       },
                       refreshPage: refreshPage,
+                      updateWatchProgress: updateWatchProgress
                     ),
                   ),
                 ],

@@ -11,7 +11,8 @@ class Controls extends StatefulWidget {
   final Widget bottomControls;
   final Widget topControls;
   final Map<String, dynamic> episode;
-  final Function(int, dynamic) refreshPage;
+  final Future<void> Function(int, dynamic) refreshPage;
+  final Future<void> Function(int) updateWatchProgress;
 
   const Controls({
     super.key,
@@ -20,6 +21,7 @@ class Controls extends StatefulWidget {
     required this.topControls,
     required this.episode,
     required this.refreshPage,
+    required this.updateWatchProgress,
   });
 
   @override
@@ -34,6 +36,7 @@ class _ControlsState extends State<Controls> {
 
   int currentEpIndex = 0;
   bool preloadStarted = false;
+  bool calledAutoNext = false;
 
   @override
   void initState() {
@@ -65,13 +68,35 @@ class _ControlsState extends State<Controls> {
           currentTime = getFormattedTime(val);
           maxTime = getFormattedTime(duration);
         });
-      if ((_controller!.value.position.inSeconds *
-                  (_controller!.value.duration?.inSeconds ?? 0)) /
-              100 >=
-          75 && !preloadStarted) {
+      final currentByTotal = _controller!.value.position.inSeconds /
+          (_controller!.value.duration?.inSeconds ?? 1);
+      if (currentByTotal * 100 >= 75 && !preloadStarted) {
         preloadNextEpisode();
+        widget.updateWatchProgress(currentEpIndex + 1);
       }
-      ;
+      if (currentByTotal == 1 && calledAutoNext) {
+        //change 0 to last selected stream
+        calledAutoNext = true;
+        if (preloadedSources.isNotEmpty) {
+          playVideo(preloadedSources[0].link);
+          currentEpIndex = currentEpIndex + 1;
+          widget.refreshPage(currentEpIndex, preloadedSources[0]);
+        } else {
+          showModalBottomSheet(
+              context: context,
+              builder: (context) {
+                return CustomControlsBottomSheet(
+                  getEpisodeSources: widget.episode['getEpisodeSources'],
+                  currentSources: currentSources,
+                  playVideo: playVideo,
+                  next: true,
+                  epLinks: widget.episode['epLinks'],
+                  currentEpIndex: currentEpIndex,
+                  refreshPage: widget.refreshPage,
+                );
+              });
+        }
+      }
     });
   }
 
@@ -85,15 +110,35 @@ class _ControlsState extends State<Controls> {
   List preloadedSources = [];
 
   Future preloadNextEpisode() async {
-    if ((currentEpIndex == 0) ||
-        (currentEpIndex + 1 > widget.episode['epLinks'].length)) {
+    if (currentEpIndex + 1 > widget.episode['epLinks'].length) {
       return;
     }
+    preloadStarted = true;
     preloadedSources = [];
     final index = currentEpIndex + 1;
-    final srcs = await widget
-        .episode['getEpisodeSources'](widget.episode['epLinks'][index]);
-    if (mounted) preloadedSources = srcs;
+    List srcs = [];
+    await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index],
+        (list, finished) {
+      srcs = srcs + list;
+      if (finished) {
+        preloadedSources = srcs;
+      }
+    });
+  }
+
+  Future<dynamic> playVideo(String url) async {
+    preloadedSources = [];
+    preloadStarted = false;
+    calledAutoNext = false;
+    _betterPlayerController!.setupDataSource(
+      BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        url,
+        bufferingConfiguration: BetterPlayerBufferingConfiguration(
+          maxBufferMs: 40000,
+        ),
+      ),
+    );
   }
 
   Future getEpisodeSources(bool nextEpisode) async {
@@ -168,33 +213,51 @@ class _ControlsState extends State<Controls> {
                               child: InkWell(
                                 onTap: () async {
                                   showModalBottomSheet(
-                                    showDragHandle: true,
-                                    backgroundColor: Color(0xff121212),
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return _streamButton(0, false);
-                                    },
-                                  );
-                                  try {
-                                    await getEpisodeSources(false);
-                                    Navigator.of(context).pop();
-                                    showModalBottomSheet(
                                       showDragHandle: true,
-                                      backgroundColor:
-                                          Color.fromARGB(255, 19, 19, 19),
+                                      backgroundColor: Color(0xff121212),
                                       context: context,
                                       builder: (BuildContext context) {
-                                        return _streamButton(
-                                            currentEpIndex - 1, false);
-                                      },
-                                    );
-                                  } on Exception catch (e) {
-                                    Navigator.of(context).pop(context);
-                                    print(e);
-                                    floatingSnackBar(
-                                        context, "Already on first episode!");
-                                  }
+                                        return CustomControlsBottomSheet(
+                                          getEpisodeSources: widget
+                                              .episode['getEpisodeSources'],
+                                          currentSources: currentSources,
+                                          currentEpIndex: currentEpIndex,
+                                          playVideo: playVideo,
+                                          next: false,
+                                          refreshPage: widget.refreshPage,
+                                          epLinks: widget.episode['epLinks'],
+                                        );
+                                      });
                                 },
+
+                                //   showModalBottomSheet(
+                                //     showDragHandle: true,
+                                //     backgroundColor: Color(0xff121212),
+                                //     context: context,
+                                //     builder: (BuildContext context) {
+                                //       return _streamButton(0, false);
+                                //     },
+                                //   );
+                                //   try {
+                                //     await getEpisodeSources(false);
+                                //     Navigator.of(context).pop();
+                                //     showModalBottomSheet(
+                                //       showDragHandle: true,
+                                //       backgroundColor:
+                                //           Color.fromARGB(255, 19, 19, 19),
+                                //       context: context,
+                                //       builder: (BuildContext context) {
+                                //         return _streamButton(
+                                //             currentEpIndex - 1, false);
+                                //       },
+                                //     );
+                                //   } on Exception catch (e) {
+                                //     Navigator.of(context).pop(context);
+                                //     print(e);
+                                //     floatingSnackBar(
+                                //         context, "Already on first episode!");
+                                //   }
+                                // },
                                 child: Icon(
                                   Icons.skip_previous_rounded,
                                   color: Colors.white,
@@ -259,36 +322,31 @@ class _ControlsState extends State<Controls> {
                               child: InkWell(
                                 onTap: () async {
                                   //get next episode sources!
+                                  if (preloadedSources.isNotEmpty) {
+                                    print("from preload");
 
-                                  showModalBottomSheet(
-                                    showDragHandle: true,
-                                    backgroundColor: Color(0xff121212),
-                                    context: context,
-                                    builder: (BuildContext context) {
-                                      return _streamButton(0, true);
-                                    },
-                                  );
-                                  try {
-                                    await getEpisodeSources(true);
-                                    Navigator.of(context).pop();
+                                    await playVideo(preloadedSources[0].link);
+                                    currentEpIndex = currentEpIndex + 1;
+                                    widget.refreshPage(
+                                        currentEpIndex, preloadedSources[0]);
+                                  } else
                                     showModalBottomSheet(
                                       showDragHandle: true,
-                                      backgroundColor:
-                                          Color.fromARGB(255, 19, 19, 19),
+                                      backgroundColor: Color(0xff121212),
                                       context: context,
                                       builder: (BuildContext context) {
-                                        return _streamButton(
-                                            currentEpIndex + 1, true);
+                                        return CustomControlsBottomSheet(
+                                          getEpisodeSources: widget
+                                              .episode['getEpisodeSources'],
+                                          currentSources: currentSources,
+                                          currentEpIndex: currentEpIndex,
+                                          playVideo: playVideo,
+                                          next: true,
+                                          refreshPage: widget.refreshPage,
+                                          epLinks: widget.episode['epLinks'],
+                                        );
                                       },
                                     );
-                                  } on Exception catch (e) {
-                                    Navigator.of(context).pop(context);
-                                    print(e);
-                                    floatingSnackBar(
-                                      context,
-                                      "Already on the final available episode",
-                                    );
-                                  }
                                 },
                                 child: Icon(
                                   Icons.skip_next_rounded,
@@ -365,86 +423,251 @@ class _ControlsState extends State<Controls> {
     );
   }
 
-  Container _streamButton(int episode, bool next) {
-    return Container(
-      padding: EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 30),
-      child: currentSources.length > 0
-          ? ListView.builder(
-              shrinkWrap: true,
-              itemCount: currentSources.length,
-              itemBuilder: (context, i) {
-                return Container(
-                  margin: EdgeInsets.only(top: 15),
-                  decoration: BoxDecoration(
-                    color: Color.fromARGB(97, 190, 175, 255),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      _betterPlayerController!.setupDataSource(
-                          BetterPlayerDataSource.network(
-                              currentSources[i].link));
-                      currentEpIndex =
-                          next ? currentEpIndex + 1 : currentEpIndex - 1;
-                      widget.refreshPage(currentEpIndex, currentSources[i]);
-                      Navigator.pop(context);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(68, 190, 175, 255),
-                      padding: EdgeInsets.only(
-                          top: 10, bottom: 10, left: 20, right: 20),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Text(
-                              currentSources[i].server,
-                              style: TextStyle(
-                                fontFamily: "NotoSans",
-                                fontSize: 17,
-                                color: themeColor,
-                              ),
+//   Container _streamButton(int episode, bool next) {
+//     return Container(
+//       padding: EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 30),
+//       child: currentSources.length > 0
+//           ? ListView.builder(
+//               shrinkWrap: true,
+//               itemCount: currentSources.length,
+//               itemBuilder: (context, i) {
+//                 return Container(
+//                   margin: EdgeInsets.only(top: 15),
+//                   decoration: BoxDecoration(
+//                     color: Color.fromARGB(97, 190, 175, 255),
+//                     borderRadius: BorderRadius.circular(20),
+//                   ),
+//                   child: ElevatedButton(
+//                     onPressed: () async {
+//                       if (next && preloadedSources.isNotEmpty)
+//                         await playVideo(preloadedSources[i].link);
+//                       else
+//                         await playVideo(currentSources[i].link);
+//                       currentEpIndex =
+//                           next ? currentEpIndex + 1 : currentEpIndex - 1;
+//                       widget.refreshPage(currentEpIndex, currentSources[i]);
+//                       Navigator.pop(context);
+//                     },
+//                     style: ElevatedButton.styleFrom(
+//                       backgroundColor: Color.fromARGB(68, 190, 175, 255),
+//                       padding: EdgeInsets.only(
+//                           top: 10, bottom: 10, left: 20, right: 20),
+//                       shape: RoundedRectangleBorder(
+//                         borderRadius: BorderRadius.circular(20),
+//                       ),
+//                     ),
+//                     child: Column(
+//                       crossAxisAlignment: CrossAxisAlignment.start,
+//                       children: [
+//                         Row(
+//                           mainAxisAlignment: MainAxisAlignment.start,
+//                           crossAxisAlignment: CrossAxisAlignment.center,
+//                           children: [
+//                             Text(
+//                               currentSources[i].server,
+//                               style: TextStyle(
+//                                 fontFamily: "NotoSans",
+//                                 fontSize: 17,
+//                                 color: themeColor,
+//                               ),
+//                             ),
+//                             if (currentSources[i].backup)
+//                               Text(
+//                                 " • backup",
+//                                 style: TextStyle(
+//                                   fontFamily: "NotoSans",
+//                                   fontSize: 14,
+//                                   color: Colors.grey[500],
+//                                 ),
+//                               )
+//                           ],
+//                         ),
+//                         Padding(
+//                           padding: EdgeInsets.only(top: 5),
+//                           child: Text(
+//                             currentSources[i].quality,
+//                             style: TextStyle(
+//                                 color: Colors.white, fontFamily: "Rubik"),
+//                           ),
+//                         ),
+//                       ],
+//                     ),
+//                   ),
+//                 );
+//               },
+//             )
+//           : Container(
+//               height: 100,
+//               child: Center(
+//                 child: CircularProgressIndicator(
+//                   color: themeColor,
+//                 ),
+//               ),
+//             ),
+//     );
+//   }
+}
+
+class CustomControlsBottomSheet extends StatefulWidget {
+  final Function(String, Function(List<dynamic>, bool)) getEpisodeSources;
+  final List<dynamic> currentSources;
+  final Function playVideo;
+  final bool next;
+  final int currentEpIndex;
+  final List<String> epLinks;
+  final Function refreshPage;
+  const CustomControlsBottomSheet({
+    super.key,
+    required this.getEpisodeSources,
+    required this.currentSources,
+    required this.playVideo,
+    required this.next,
+    required this.epLinks,
+    required this.currentEpIndex,
+    required this.refreshPage,
+  });
+
+  @override
+  State<CustomControlsBottomSheet> createState() =>
+      CustomControls_BottomSheetState();
+}
+
+class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
+  List currentSources = [];
+  int currentEpIndex = 0;
+
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    currentEpIndex = widget.currentEpIndex;
+    currentSources = widget.currentSources;
+    getSources(widget.next);
+  }
+
+  Future getSources(bool nextEpisode) async {
+    if ((currentEpIndex == 0 && !nextEpisode) ||
+        (currentEpIndex + 1 > widget.epLinks.length && nextEpisode)) {
+      throw new Exception("Index too low or too high. Item not found!");
+    }
+    currentSources = [];
+    final index = nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
+    final srcs =
+        await widget.getEpisodeSources(widget.epLinks[index], (list, finished) {
+      if (mounted)
+        setState(() {
+          if (finished) _isLoading = false;
+          currentSources = currentSources + list;
+        });
+    });
+    if (mounted)
+      setState(() {
+        currentSources = srcs;
+      });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 20),
+        child: currentSources.length > 0
+            ? _isLoading
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _list(),
+                      Center(
+                        child: Container(
+                          height: 100,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: themeColor,
                             ),
-                            if (currentSources[i].backup)
-                              Text(
-                                " • backup",
-                                style: TextStyle(
-                                  fontFamily: "NotoSans",
-                                  fontSize: 14,
-                                  color: Colors.grey[500],
-                                ),
-                              )
-                          ],
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Text(
-                            currentSources[i].quality,
-                            style: TextStyle(
-                                color: Colors.white, fontFamily: "Rubik"),
                           ),
                         ),
-                      ],
-                    ),
+                      )
+                    ],
+                  )
+                : _list()
+            : Container(
+                height: 100,
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: themeColor,
                   ),
-                );
-              },
-            )
-          : Container(
-              height: 100,
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: themeColor,
                 ),
               ),
+      ),
+    );
+  }
+
+  ListView _list() {
+    return ListView.builder(
+      shrinkWrap: true,
+      itemCount: currentSources.length,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        return Container(
+          margin: EdgeInsets.only(top: 15),
+          decoration: BoxDecoration(
+            color: Color.fromARGB(97, 190, 175, 255),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: ElevatedButton(
+            onPressed: () async {
+              await widget.playVideo(currentSources[index].link);
+              currentEpIndex =
+                  widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
+              widget.refreshPage(currentEpIndex, currentSources[index]);
+              Navigator.pop(context);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Color.fromARGB(68, 190, 175, 255),
+              padding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      currentSources[index].server,
+                      style: TextStyle(
+                        fontFamily: "NotoSans",
+                        fontSize: 17,
+                        color: themeColor,
+                      ),
+                    ),
+                    if (currentSources[index].backup)
+                      Text(
+                        " • backup",
+                        style: TextStyle(
+                          fontFamily: "NotoSans",
+                          fontSize: 14,
+                          color: Colors.grey[500],
+                        ),
+                      )
+                  ],
+                ),
+                Padding(
+                  padding: EdgeInsets.only(top: 5),
+                  child: Text(
+                    currentSources[index].quality,
+                    style: TextStyle(color: Colors.white, fontFamily: "Rubik"),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

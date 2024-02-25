@@ -1,4 +1,5 @@
 import "dart:io";
+import "package:animestream/ui/models/notification.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "../../commons/utils.dart";
@@ -36,8 +37,15 @@ class Downloader {
         if (segment.length != 0) {
           final uri =
               segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
-          print("fetching segment [${segment.indexOf(segment)}/${segments.length}]");
+          print(
+              "fetching segment [${segments.indexOf(segment)}/${segments.length}]");
           final res = await get(Uri.parse(uri));
+          NotificationService().updateNotificationProgressBar(
+            id: 69,
+            currentStep: segments.indexOf(segment) + 1,
+            maxStep: segments.length,
+            fileName: "$fileName.mp4",
+          );
           if (res.statusCode == 200) {
             out.add(res.bodyBytes);
           }

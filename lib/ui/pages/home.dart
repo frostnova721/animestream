@@ -86,7 +86,9 @@ class _HomeState extends State<Home> {
       case 0:
         return _homePage(context);
       case 1:
-        return Discover(currentSeason: currentlyAiring,);
+        return Discover(
+          currentSeason: currentlyAiring,
+        );
       default:
         return _homePage(context);
     }
@@ -127,13 +129,14 @@ class _HomeState extends State<Home> {
                       icon: Icon(Icons.home_rounded),
                       tooltip: "home"),
                   BottomNavigationBarItem(
-                      label: "",
-                      icon: Image.asset(
-                        'lib/assets/images/shines.png',
-                        color: activeIndex == 1 ? themeColor : Colors.white,
-                        scale: 22,
-                      ),
-                      tooltip: "discover"),
+                    label: "",
+                    icon: Image.asset(
+                      'lib/assets/images/shines.png',
+                      color: activeIndex == 1 ? themeColor : Colors.white,
+                      scale: 22,
+                    ),
+                    tooltip: "discover",
+                  ),
                 ],
               ),
             ),
@@ -156,9 +159,13 @@ class _HomeState extends State<Home> {
                   MaterialPageRoute(
                     builder: (context) => Search(),
                   ),
-                ).then((value) => setState(() {
+                ).then(
+                  (value) => setState(
+                    () {
                       getLists();
-                    }));
+                    },
+                  ),
+                );
               },
               iconSize: 40,
               tooltip: "Discover",

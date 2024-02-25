@@ -52,13 +52,15 @@ dev_dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   path_provider: ^2.0.11
+  awesome_notifications: ^0.9.2
 
 flutter_launcher_icons:
   android: true
   ios: true
   image_path: "./lib/assets/icons/logo.png"
   adaptive_icon_background: "./lib/assets/icons/logo_background.png"
-  adaptive_icon_foreground: "./lib/assets/icons/logo.png"
+  adaptive_icon_foreground: "./lib/assets/icons/logo_foreground.png"
+  adaptive_icon_monochrome: "./lib/assets/icons/logo_monochrome.png"
   
 
   # The "flutter_lints" package below contains a set of recommended lints to
@@ -85,7 +87,7 @@ flutter:
     - lib/assets/images/broken_heart.png
     - lib/assets/images/shines.png
     - lib/assets/images/check.png
-    - lib/assets/icons/logo_transparent.png
+    - lib/assets/icons/logo_foreground.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

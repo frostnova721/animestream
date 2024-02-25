@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
-import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -27,7 +26,6 @@ class Watch extends StatefulWidget {
 
 class _WatchState extends State<Watch> with TickerProviderStateMixin {
   late BetterPlayerController _controller;
-  late BetterPlayerDataSource _ds;
 
   bool _visible = true;
   bool _controlsDisabled = false;

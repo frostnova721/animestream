@@ -64,7 +64,6 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     if (mounted)
       setState(() {
         qualities = qualities + mainList;
-        print(qualities);
       });
   }
 

@@ -153,7 +153,7 @@ class _HomeState extends State<Home> {
         Row(
           children: [
             IconButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.push(
                   context,
                   MaterialPageRoute(

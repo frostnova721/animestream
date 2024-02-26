@@ -4,6 +4,8 @@ import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "../../commons/utils.dart";
 
+bool downloading = false;
+
 class Downloader {
   String _makeBaseLink(String uri) {
     final split = uri.split('/');
@@ -11,9 +13,15 @@ class Downloader {
     return split.join('/');
   }
 
+  void cancelDownload() {
+    downloading = false;
+  }
+
   Future<void> download(String streamLink, String fileName) async {
     final downPath = await Directory('/storage/emulated/0/Download');
     String finalPath;
+    fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
+    downloading = true;
     if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/animestream/");
       if (!(await directory.exists())) {
@@ -33,16 +41,30 @@ class Downloader {
     final streamBaseLink = _makeBaseLink(streamLink);
     try {
       final List<String> segments = await _getSegments(streamLink);
-      for (final segment in segments) {
+      List<String> segmentsFiltered = [];
+      segments.forEach(
+        (element) {
+          if (element.length != 0) segmentsFiltered.add(element);
+        },
+      );
+      for (final segment in segmentsFiltered) {
+        if (!downloading) {
+          await NotificationService().pushBasicNotification(
+              "Download Cancelled", "The download has been cancelled.");
+          downloading = false;
+          await out.close();
+          await output.delete();
+          return;
+        }
         if (segment.length != 0) {
           final uri =
               segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
-          print(
-              "fetching segment [${segments.indexOf(segment)}/${segments.length}]");
+          final segmentNumber = segments.indexOf(segment) + 1;
+          print("fetching segment [$segmentNumber/${segments.length}]");
           final res = await get(Uri.parse(uri));
           NotificationService().updateNotificationProgressBar(
             id: 69,
-            currentStep: segments.indexOf(segment) + 1,
+            currentStep: segmentNumber,
             maxStep: segments.length,
             fileName: "$fileName.mp4",
           );
@@ -54,6 +76,9 @@ class Downloader {
       await out.close();
     } catch (err) {
       print(err);
+      await NotificationService().pushBasicNotification(
+          "Download failed", "The download has been cancelled.");
+      downloading = false;
       await out.close();
       await output.delete();
     }

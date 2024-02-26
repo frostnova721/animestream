@@ -1,6 +1,8 @@
+import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
+import 'package:open_file/open_file.dart';
 
 class NotificationService {
   Future<void> init() async {
@@ -29,7 +31,7 @@ class NotificationService {
       AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
-  pushBasicNotification(String title, String content, current) {
+  pushBasicNotification(String title, String content) {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
         id: 69,
@@ -40,38 +42,45 @@ class NotificationService {
     );
   }
 
-  void updateNotificationProgressBar({
+  removeNotification() {
+    AwesomeNotifications().cancel(69);
+  }
+
+  Future<void> updateNotificationProgressBar({
     required int id,
     required int currentStep,
     required int maxStep,
     required String fileName,
-  }) {
+  }) async {
     if (currentStep < maxStep) {
       int progress = ((currentStep / maxStep) * 100).round();
-      AwesomeNotifications().createNotification(
+      await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: id,
           channelKey: 'animestream',
           title: 'Downloading $fileName ($progress%)',
-          body: '$fileName',
+          body: 'The file is being downloaded',
           category: NotificationCategory.Progress,
           payload: {'file': '$fileName', 'path': ''},
           notificationLayout: NotificationLayout.ProgressBar,
           progress: progress.toDouble(),
           locked: true,
         ),
+        actionButtons: [
+          NotificationActionButton(key: "cancel", label: "cancel")
+        ]
       );
     } else {
-      AwesomeNotifications().createNotification(
+      await AwesomeNotifications().createNotification(
         content: NotificationContent(
           id: id,
           channelKey: 'animestream',
           title: 'Download finished',
           body: '$fileName has been downloaded succesfully!',
-          category: NotificationCategory.Progress,
           payload: {'file': '$fileName', 'path': ''},
           locked: false,
         ),
+        actionButtons: [NotificationActionButton(key: "open_file", label: "open")]
       );
     }
   }
@@ -93,6 +102,13 @@ class NotificationController {
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
+        if(receivedAction.buttonKeyPressed == 'cancel') {
+          NotificationService().removeNotification();
+          Downloader().cancelDownload();
+        }
+        if(receivedAction.buttonKeyPressed == 'open_file') {
+          OpenFile.open("/storage/emulated/0/Download/animestream");
+        }
     // MyApp.navigatorKey.currentState?.pushNamedAndRemoveUntil(
     //   '/notification-page',
     //   (route) => (route.settings.name != '/notification-page') || route.isFirst,

@@ -9,6 +9,7 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
+
 class Home extends StatefulWidget {
   const Home({super.key});
 
@@ -54,8 +55,6 @@ class _HomeState extends State<Home> {
       }
       box.close();
 
-      // print(recentlyWatched[0].widget);
-
       final List currentlyAiringResponse =
           await Anilist().getCurrentlyAiringAnime();
       if (currentlyAiringResponse.length == 0) return;
@@ -64,7 +63,6 @@ class _HomeState extends State<Home> {
       currentlyAiringResponse.forEach((e) {
         final title = e['title']['english'] ?? e['title']['romaji'];
         final image = e['coverImage']['large'] ?? e['coverImage']['extraLarge'];
-        // final id = e['id'];
         currentlyAiring
             .add(ListElement(widget: animeCard(title, image), info: e));
       });

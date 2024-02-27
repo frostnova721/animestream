@@ -1,4 +1,5 @@
 import "dart:io";
+import "dart:typed_data";
 import "package:animestream/ui/models/notification.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
@@ -37,7 +38,8 @@ class Downloader {
       finalPath = "${externalStorage?.path}/animestream/${fileName}.mp4";
     }
     final output = File(finalPath);
-    var out = output.openWrite();
+    final List<Uint8List> buffers = [];
+    // var out = output.openWrite();
     final streamBaseLink = _makeBaseLink(streamLink);
     try {
       final List<String> segments = await _getSegments(streamLink);
@@ -52,10 +54,12 @@ class Downloader {
           await NotificationService().pushBasicNotification(
               "Download Cancelled", "The download has been cancelled.");
           downloading = false;
-          await out.close();
-          await output.delete();
+          buffers.clear();
+          // await out.close();
+          // await output.delete();
           return;
         }
+        await Future.delayed(Duration(milliseconds: 50));
         if (segment.length != 0) {
           final uri =
               segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
@@ -63,15 +67,22 @@ class Downloader {
           print("fetching segment [$segmentNumber/${segments.length}]");
           final res = await get(Uri.parse(uri));
           NotificationService().updateNotificationProgressBar(
-            id: 69,
-            currentStep: segmentNumber,
-            maxStep: segments.length,
-            fileName: "$fileName.mp4",
-          );
+              id: 69,
+              currentStep: segmentNumber,
+              maxStep: segments.length - 1,
+              fileName: "$fileName.mp4",
+              path: finalPath);
           if (res.statusCode == 200) {
-            out.add(res.bodyBytes);
-          }
+            buffers.add(res.bodyBytes);
+          } else
+            throw new Exception("ERR_REQ_FAILED");
         }
+      }
+      //write the data after full download. (idk why)
+      //un comment the commented lines to make it write the data to file as soon as it is downloaded
+      final out = await output.openWrite();
+      for (final buffer in buffers) {
+        out.add(buffer);
       }
       await out.close();
     } catch (err) {
@@ -79,8 +90,10 @@ class Downloader {
       await NotificationService().pushBasicNotification(
           "Download failed", "The download has been cancelled.");
       downloading = false;
-      await out.close();
-      await output.delete();
+      buffers.clear();
+      if (await output.exists()) output.delete();
+      // await out.close();
+      // await output.delete();
     }
   }
 

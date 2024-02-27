@@ -34,11 +34,11 @@ class NotificationService {
   pushBasicNotification(String title, String content) {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
-        id: 69,
-        channelKey: "animestream",
-        title: title,
-        body: content,
-      ),
+          id: 69,
+          channelKey: "animestream",
+          title: title,
+          body: content,
+          backgroundColor: themeColor),
     );
   }
 
@@ -51,37 +51,44 @@ class NotificationService {
     required int currentStep,
     required int maxStep,
     required String fileName,
+    required String path,
   }) async {
     if (currentStep < maxStep) {
       int progress = ((currentStep / maxStep) * 100).round();
       await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: id,
-          channelKey: 'animestream',
-          title: 'Downloading $fileName ($progress%)',
-          body: 'The file is being downloaded',
-          category: NotificationCategory.Progress,
-          payload: {'file': '$fileName', 'path': ''},
-          notificationLayout: NotificationLayout.ProgressBar,
-          progress: progress.toDouble(),
-          locked: true,
-        ),
-        actionButtons: [
-          NotificationActionButton(key: "cancel", label: "cancel")
-        ]
-      );
+          content: NotificationContent(
+            id: id,
+            channelKey: 'animestream',
+            title: 'Downloading $fileName ($progress%)',
+            body: 'The file is being downloaded',
+            category: NotificationCategory.Progress,
+            payload: {
+              'path': path,
+            },
+            notificationLayout: NotificationLayout.ProgressBar,
+            progress: progress.toDouble(),
+            locked: true,
+            backgroundColor: themeColor,
+          ),
+          actionButtons: [
+            NotificationActionButton(key: "cancel", label: "cancel")
+          ]);
     } else {
       await AwesomeNotifications().createNotification(
-        content: NotificationContent(
-          id: id,
-          channelKey: 'animestream',
-          title: 'Download finished',
-          body: '$fileName has been downloaded succesfully!',
-          payload: {'file': '$fileName', 'path': ''},
-          locked: false,
-        ),
-        actionButtons: [NotificationActionButton(key: "open_file", label: "open")]
-      );
+          content: NotificationContent(
+            id: id,
+            channelKey: 'animestream',
+            title: 'Download finished',
+            body: '$fileName has been downloaded succesfully!',
+            payload: {
+              'path': path,
+            },
+            locked: false,
+            backgroundColor: themeColor,
+          ),
+          actionButtons: [
+            NotificationActionButton(key: "open_file", label: "open")
+          ]);
     }
   }
 }
@@ -102,17 +109,12 @@ class NotificationController {
   @pragma("vm:entry-point")
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
-        if(receivedAction.buttonKeyPressed == 'cancel') {
-          NotificationService().removeNotification();
-          Downloader().cancelDownload();
-        }
-        if(receivedAction.buttonKeyPressed == 'open_file') {
-          OpenFile.open("/storage/emulated/0/Download/animestream");
-        }
-    // MyApp.navigatorKey.currentState?.pushNamedAndRemoveUntil(
-    //   '/notification-page',
-    //   (route) => (route.settings.name != '/notification-page') || route.isFirst,
-    //   arguments: receivedAction,
-    // );
+    if (receivedAction.buttonKeyPressed == 'cancel') {
+      NotificationService().removeNotification();
+      Downloader().cancelDownload();
+    }
+    if (receivedAction.buttonKeyPressed == 'open_file') {
+      OpenFile.open(receivedAction.payload?['path'], type: "video/mp4");
+    }
   }
 }

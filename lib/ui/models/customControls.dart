@@ -212,6 +212,9 @@ class _ControlsState extends State<Controls> {
                               padding: EdgeInsets.only(right: 35),
                               child: InkWell(
                                 onTap: () async {
+                                  if (currentEpIndex == 0)
+                                    return floatingSnackBar(context,
+                                        "Already on the first episode");
                                   showModalBottomSheet(
                                       showDragHandle: true,
                                       backgroundColor: Color(0xff121212),
@@ -229,35 +232,6 @@ class _ControlsState extends State<Controls> {
                                         );
                                       });
                                 },
-
-                                //   showModalBottomSheet(
-                                //     showDragHandle: true,
-                                //     backgroundColor: Color(0xff121212),
-                                //     context: context,
-                                //     builder: (BuildContext context) {
-                                //       return _streamButton(0, false);
-                                //     },
-                                //   );
-                                //   try {
-                                //     await getEpisodeSources(false);
-                                //     Navigator.of(context).pop();
-                                //     showModalBottomSheet(
-                                //       showDragHandle: true,
-                                //       backgroundColor:
-                                //           Color.fromARGB(255, 19, 19, 19),
-                                //       context: context,
-                                //       builder: (BuildContext context) {
-                                //         return _streamButton(
-                                //             currentEpIndex - 1, false);
-                                //       },
-                                //     );
-                                //   } on Exception catch (e) {
-                                //     Navigator.of(context).pop(context);
-                                //     print(e);
-                                //     floatingSnackBar(
-                                //         context, "Already on first episode!");
-                                //   }
-                                // },
                                 child: Icon(
                                   Icons.skip_previous_rounded,
                                   color: Colors.white,
@@ -322,6 +296,10 @@ class _ControlsState extends State<Controls> {
                               child: InkWell(
                                 onTap: () async {
                                   //get next episode sources!
+                                  if (currentEpIndex + 1 ==
+                                      widget.episode['epLinks'].length)
+                                    return floatingSnackBar(context,
+                                        "You are already in the final episode!");
                                   if (preloadedSources.isNotEmpty) {
                                     print("from preload");
 
@@ -422,90 +400,6 @@ class _ControlsState extends State<Controls> {
       },
     );
   }
-
-//   Container _streamButton(int episode, bool next) {
-//     return Container(
-//       padding: EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 30),
-//       child: currentSources.length > 0
-//           ? ListView.builder(
-//               shrinkWrap: true,
-//               itemCount: currentSources.length,
-//               itemBuilder: (context, i) {
-//                 return Container(
-//                   margin: EdgeInsets.only(top: 15),
-//                   decoration: BoxDecoration(
-//                     color: Color.fromARGB(97, 190, 175, 255),
-//                     borderRadius: BorderRadius.circular(20),
-//                   ),
-//                   child: ElevatedButton(
-//                     onPressed: () async {
-//                       if (next && preloadedSources.isNotEmpty)
-//                         await playVideo(preloadedSources[i].link);
-//                       else
-//                         await playVideo(currentSources[i].link);
-//                       currentEpIndex =
-//                           next ? currentEpIndex + 1 : currentEpIndex - 1;
-//                       widget.refreshPage(currentEpIndex, currentSources[i]);
-//                       Navigator.pop(context);
-//                     },
-//                     style: ElevatedButton.styleFrom(
-//                       backgroundColor: Color.fromARGB(68, 190, 175, 255),
-//                       padding: EdgeInsets.only(
-//                           top: 10, bottom: 10, left: 20, right: 20),
-//                       shape: RoundedRectangleBorder(
-//                         borderRadius: BorderRadius.circular(20),
-//                       ),
-//                     ),
-//                     child: Column(
-//                       crossAxisAlignment: CrossAxisAlignment.start,
-//                       children: [
-//                         Row(
-//                           mainAxisAlignment: MainAxisAlignment.start,
-//                           crossAxisAlignment: CrossAxisAlignment.center,
-//                           children: [
-//                             Text(
-//                               currentSources[i].server,
-//                               style: TextStyle(
-//                                 fontFamily: "NotoSans",
-//                                 fontSize: 17,
-//                                 color: themeColor,
-//                               ),
-//                             ),
-//                             if (currentSources[i].backup)
-//                               Text(
-//                                 " • backup",
-//                                 style: TextStyle(
-//                                   fontFamily: "NotoSans",
-//                                   fontSize: 14,
-//                                   color: Colors.grey[500],
-//                                 ),
-//                               )
-//                           ],
-//                         ),
-//                         Padding(
-//                           padding: EdgeInsets.only(top: 5),
-//                           child: Text(
-//                             currentSources[i].quality,
-//                             style: TextStyle(
-//                                 color: Colors.white, fontFamily: "Rubik"),
-//                           ),
-//                         ),
-//                       ],
-//                     ),
-//                   ),
-//                 );
-//               },
-//             )
-//           : Container(
-//               height: 100,
-//               child: Center(
-//                 child: CircularProgressIndicator(
-//                   color: themeColor,
-//                 ),
-//               ),
-//             ),
-//     );
-//   }
 }
 
 class CustomControlsBottomSheet extends StatefulWidget {

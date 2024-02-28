@@ -123,8 +123,7 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
 
 Widget animeCard(String title, String imageUrl) {
   return Card(
-    color: Colors.black,
-    clipBehavior: Clip.hardEdge,
+    color: Colors.transparent,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
     ),
@@ -136,13 +135,13 @@ Widget animeCard(String title, String imageUrl) {
             borderRadius: BorderRadius.circular(20),
           ),
           clipBehavior: Clip.hardEdge,
-          height: 175,
-          width: 115,
+          height: 165,
+          width: 110,
           child: Image.network(
             fit: BoxFit.cover,
             imageUrl,
-            height: 175,
-            width: 115,
+            height: 165,
+            width: 110,
           ),
         ),
         Text(

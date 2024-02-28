@@ -1,6 +1,7 @@
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/pages/Discover.dart';
+import 'package:animestream/ui/pages/discover.dart';
+import 'package:animestream/ui/pages/newHome.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -8,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
-
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -117,9 +117,18 @@ class _HomeState extends State<Home> {
                 currentIndex: activeIndex,
                 backgroundColor: Color.fromARGB(255, 24, 24, 24),
                 elevation: 0,
-                onTap: (val) => setState(() {
-                  activeIndex = val;
-                }),
+                onTap: (val) {
+                  if (val == 2)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Home2(),
+                      ),
+                    );
+                  setState(() {
+                    activeIndex = val;
+                  });
+                },
                 selectedLabelStyle: TextStyle(fontSize: 0),
                 items: [
                   BottomNavigationBarItem(
@@ -135,6 +144,8 @@ class _HomeState extends State<Home> {
                     ),
                     tooltip: "discover",
                   ),
+                  BottomNavigationBarItem(
+                      icon: Icon(Icons.fiber_new_rounded), label: "")
                 ],
               ),
             ),

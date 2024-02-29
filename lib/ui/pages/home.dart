@@ -10,14 +10,14 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class HomeOld extends StatefulWidget {
+  const HomeOld({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeOld> createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> {
+class _HomeState extends State<HomeOld> {
   @override
   void initState() {
     super.initState();
@@ -122,7 +122,7 @@ class _HomeState extends State<Home> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Home2(),
+                        builder: (context) => Home(),
                       ),
                     );
                   setState(() {
@@ -163,18 +163,18 @@ class _HomeState extends State<Home> {
           children: [
             IconButton(
               onPressed: () async {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Search(),
-                  ),
-                ).then(
-                  (value) => setState(
-                    () {
-                      getLists();
-                    },
-                  ),
-                );
+                // Navigator.push(
+                  // context,
+                  // MaterialPageRoute(
+                    // builder: (context) => Search(),
+                  // ),
+                // ).then(
+                  // (value) => setState(
+                    // () {
+                      // getLists();
+                    // },
+                  // ),
+                // );
               },
               iconSize: 40,
               tooltip: "Discover",

@@ -7,7 +7,8 @@ import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'info.dart';
 
 class Search extends StatefulWidget {
-  const Search({super.key});
+  final String searchedText;
+  const Search({super.key, required this.searchedText});
 
   @override
   State<Search> createState() => _SearchState();
@@ -15,6 +16,8 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   List<ListElement> results = [];
+
+  TextEditingController textEditingController = TextEditingController();
 
   bool _searching = false;
 
@@ -34,9 +37,19 @@ class _SearchState extends State<Search> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    textEditingController.value = TextEditingValue(text: widget.searchedText);
+    setState(() {
+      _searching = true;
+    });
+    addCards(widget.searchedText);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: Column(
         children: [
           SizedBox(
@@ -49,25 +62,25 @@ class _SearchState extends State<Search> {
           Expanded(
               child: _searching
                   ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      SpinKitThreeBounce(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SpinKitThreeBounce(
                           color: themeColor,
                           size: 35,
                         ),
                         Padding(
                           padding: const EdgeInsets.all(10.0),
-                          child: Text("searching...",
-                          style: TextStyle(
-                            color: themeColor,
-                            fontFamily: "NotoSans",
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16
-                          ),
+                          child: Text(
+                            "searching...",
+                            style: TextStyle(
+                                color: themeColor,
+                                fontFamily: "NotoSans",
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16),
                           ),
                         )
-                    ],
-                  )
+                      ],
+                    )
                   : _searchResults()),
         ],
       ),
@@ -116,6 +129,7 @@ class _SearchState extends State<Search> {
 
   TextField _searchBar() {
     return TextField(
+      controller: textEditingController,
       onSubmitted: (val) async {
         setState(() {
           _searching = true;

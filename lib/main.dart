@@ -53,6 +53,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       title: 'Animestream',
       theme: ThemeData(
+        useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.transparent),
       ),
       home: AnimatedSplashScreen(

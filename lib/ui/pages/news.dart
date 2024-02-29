@@ -34,7 +34,7 @@ class _NewsState extends State<News> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: !loaded
           ? Center(
             child: CircularProgressIndicator(
@@ -44,10 +44,11 @@ class _NewsState extends State<News> {
           : SingleChildScrollView(
               child: Column(
                 children: [
+                  // Container(
+                  //   height: 50,
+                  // ),
                   Container(
-                    height: 50,
-                  ),
-                  Container(
+                    padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                     child: Text(
                       "News",
                       style: TextStyle(
@@ -65,7 +66,7 @@ class _NewsState extends State<News> {
                         Navigator.of(context).push(MaterialPageRoute(builder: (context) => NewsDetails(url: newses[index]['url'],)));
                       },
                       child: Container(
-                        decoration: BoxDecoration(color: Colors.black),
+                        decoration: BoxDecoration(color: Colors.transparent),
                         padding: EdgeInsets.only(top: 5, left: 10, right: 10),
                         child: NewsCard(
                             newses[index]['title'],

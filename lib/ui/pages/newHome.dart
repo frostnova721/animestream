@@ -1,19 +1,21 @@
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/drawer.dart';
+import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/info.dart';
+import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
-class Home2 extends StatefulWidget {
-  const Home2({super.key});
+class Home extends StatefulWidget {
+  const Home({super.key});
 
   @override
-  State<Home2> createState() => _Home2State();
+  State<Home> createState() => _HomeState();
 }
 
-class _Home2State extends State<Home2> {
+class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
@@ -23,16 +25,21 @@ class _Home2State extends State<Home2> {
 
   int activeIndex = 0;
 
+  TextEditingController textEditingController = TextEditingController();
+
   List<ListElement> recentlyWatched = [];
   List<ListElement> currentlyAiring = [];
 
   bool dataLoaded = false;
   bool error = false;
 
-  Future<void> getLists() async {
-    // currentlyAiring = [];
-    // recentlyWatched = [];
+  onItemTapped(int index) {
+    setState(() {
+      activeIndex = index;
+    });
+  }
 
+  Future<void> getLists() async {
     try {
       final box = await Hive.openBox('animestream');
       List watching = box.get('watching') ?? [];
@@ -77,50 +84,15 @@ class _Home2State extends State<Home2> {
     return Scaffold(
       key: _globalKey,
       backgroundColor: backgroundColor,
-      drawer: HomeDrawer(),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      // floatingActionButton: Container(
-      //   width: 200,
-      //   decoration: BoxDecoration(borderRadius: BorderRadius.circular(40)),
-      //   clipBehavior: Clip.hardEdge,
-      //   child: BottomNavigationBar(
-      //     selectedItemColor: themeColor,
-      //     unselectedItemColor: Colors.white,
-      //     currentIndex: activeIndex,
-      //     selectedLabelStyle: TextStyle(fontSize: 0),
-      //     onTap: (index) {
-      //       setState(() {
-      //         activeIndex = index;
-      //       });
-      //     },
-      //     backgroundColor: Color.fromARGB(164, 56, 56, 56),
-      //     items: [
-      //       BottomNavigationBarItem(
-      //         label: "",
-      //         icon: Icon(
-      //           Icons.home,
-      //           size: 30,
-      //           // color: Colors.white,
-      //         ),
-      //       ),
-      //       BottomNavigationBarItem(
-      //           icon: Image.asset(
-      //             "lib/assets/images/shines.png",
-      //             scale: 20,
-      //             color: activeIndex == 1 ? themeColor : Colors.white,
-      //           ),
-      //           label: ""),
-      //     ],
-      //   ),
-      // ),
+      drawer: HomeDrawer(
+        onItemTapped: onItemTapped,
+        activeIndex: activeIndex,
+      ),
       body: SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
           child: Column(
             children: [
-              // Container(
-              //   height: 0,
-              // ),
               Row(
                 children: [
                   IconButton(
@@ -138,7 +110,7 @@ class _Home2State extends State<Home2> {
                     child: Text(
                       "AnimeStream",
                       style: TextStyle(
-                        color: textColor,
+                        color: textMainColor,
                         fontSize: 23,
                         fontFamily: 'NunitoSans',
                         fontWeight: FontWeight.bold,
@@ -150,9 +122,18 @@ class _Home2State extends State<Home2> {
               Container(
                 padding: EdgeInsets.only(left: 30, right: 30, top: 10),
                 child: TextField(
+                  controller: textEditingController,
                   autocorrect: false,
                   maxLines: 1,
-                  onSubmitted: (String input) {},
+                  onSubmitted: (String input) {
+                    textEditingController.value = TextEditingValue.empty;
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Search(searchedText: input),
+                      ),
+                    );
+                  },
                   cursorColor: themeColor,
                   decoration: InputDecoration(
                     prefixIcon: Padding(
@@ -188,64 +169,92 @@ class _Home2State extends State<Home2> {
                   ),
                   style: TextStyle(
                     backgroundColor: backgroundColor,
-                    color: textColor,
+                    color: textMainColor,
                     fontFamily: 'Poppins',
                     fontSize: 16,
                   ),
                 ),
               ),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(top: 40, left: 20, right: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Recently Watched",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: textColor,
-                        fontFamily: "Rubik",
-                        fontSize: 20,
-                      ),
-                    ),
-                    _cardListMaker(currentlyAiring)
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-                height: 5,
-                decoration: BoxDecoration(
-                  color: themeColor.withOpacity(0.4),
-                  borderRadius: BorderRadius.circular(
-                    50,
-                  ),
-                ),
-              ),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.only(top: 10, left: 20, right: 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Currently Airing",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: textColor,
-                        fontFamily: "Rubik",
-                        fontSize: 20,
-                      ),
-                    ),
-                    _cardListMaker(currentlyAiring)
-                  ],
-                ),
-              ),
+              activeIndex == 0
+                  ? _homeItems()
+                  : Discover(currentSeason: currentlyAiring),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Column _homeItems() {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(top: 40, left: 20, right: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Recently Watched",
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: textMainColor,
+                  fontFamily: "Rubik",
+                  fontSize: 20,
+                ),
+              ),
+              dataLoaded
+                  ? _cardListMaker(recentlyWatched)
+                  : Container(
+                      height: 250,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: themeColor,
+                        ),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+          height: 5,
+          decoration: BoxDecoration(
+            color: themeColor.withOpacity(0.4),
+            borderRadius: BorderRadius.circular(
+              50,
+            ),
+          ),
+        ),
+        Container(
+          width: double.infinity,
+          padding: EdgeInsets.only(top: 10, left: 20, right: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                "Currently Airing",
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: textMainColor,
+                  fontFamily: "Rubik",
+                  fontSize: 20,
+                ),
+              ),
+              dataLoaded
+                  ? _cardListMaker(currentlyAiring)
+                  : Container(
+                      height: 250,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: themeColor,
+                        ),
+                      ),
+                    ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
@@ -283,17 +292,29 @@ class _Home2State extends State<Home2> {
               )
             : Center(
                 child: Container(
-                  height: 280,
-                  padding: EdgeInsets.only(top: 125),
-                  child: Text(
-                    "Nothing to see here!",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: "NunitoSans",
-                      fontWeight: FontWeight.w500,
-                      color: Color.fromARGB(255, 80, 80, 80),
-                      fontSize: 18,
-                    ),
+                  height: 250,
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        "lib/assets/images/ghost.png",
+                        color: Color.fromARGB(255, 80, 80, 80),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Text(
+                          "Boo! Nothing's here!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "NunitoSans",
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromARGB(255, 80, 80, 80),
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

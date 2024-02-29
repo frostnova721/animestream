@@ -1,3 +1,4 @@
+import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class ListElement {
@@ -61,13 +62,13 @@ Widget characterCard(String name, String role, String imageUrl) {
 
 Widget NewsCard(String title, String imageUrl, String date, String time) {
   return Card(
-    color: Colors.black,
+    color: backgroundColor,
     child: Container(
       decoration: BoxDecoration(
           // boxShadow: [BoxShadow(color: Color.fromARGB(82, 92, 92, 92), blurRadius: 10, blurStyle: BlurStyle.normal, offset: Offset(0.0, 3), spreadRadius: 0)],
           color: Colors.transparent),
       height: 200,
-      padding: EdgeInsets.only(left: 10, right: 10),
+      padding: EdgeInsets.only( right: 10),
       child: Row(
         children: [
           Container(
@@ -123,7 +124,10 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
 
 Widget animeCard(String title, String imageUrl) {
   return Card(
-    color: Colors.transparent,
+    color: backgroundColor,
+    shadowColor: null,
+    borderOnForeground: false,
+    elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
     ),

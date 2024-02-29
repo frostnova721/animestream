@@ -1,3 +1,4 @@
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:graphql/client.dart';
 
 class Anilist {
@@ -22,7 +23,7 @@ class Anilist {
                 }
             }
         ''';
-    final data = await fetchQuery(gquery);
+    final data = await fetchQuery(gquery, RequestType.media);
 
     return data;
   }
@@ -51,7 +52,7 @@ class Anilist {
             }
           }''';
 
-    final data = await fetchQuery(query);
+    final data = await fetchQuery(query, RequestType.media);
 
     return data;
   }
@@ -168,7 +169,7 @@ class Anilist {
 }''';
 
     try {
-      final result = await fetchQuery(query);
+      final result = await fetchQuery(query, RequestType.media);
 
       final Map<String, dynamic> info = result[0];
 
@@ -196,7 +197,7 @@ class Anilist {
 
         info['recommendations']['nodes'].forEach((recommendation) {
           final rec = recommendation['mediaRecommendation'];
-          if(rec != null) {
+          if (rec != null) {
             recommended.add((
               id: rec['id'],
               title: {
@@ -258,7 +259,9 @@ class Anilist {
           type: info['type'],
           studios: studios,
           synonyms: info['synonyms'],
-          synopsis: info['description'].replaceAll(RegExp(r'<[^>]*>'), "").replaceAll(RegExp(r'\n+'), '\n'),
+          synopsis: info['description']
+              .replaceAll(RegExp(r'<[^>]*>'), "")
+              .replaceAll(RegExp(r'\n+'), '\n'),
           tags: info['tags'].map((tag) => tag['name']),
         );
 
@@ -269,6 +272,59 @@ class Anilist {
     } catch (err) {
       print(err);
       throw Exception('Error Getting Anime Details');
+    }
+  }
+
+  //maybe latest and not trending!
+  Future<List<TrendingResult>> getTrending() async {
+    final timeMs = (new DateTime.now().millisecondsSinceEpoch ~/ 1000) - 10000;
+    final query = '''{
+        Page(perPage: 15) {
+    airingSchedules (airingAt_greater: 0, airingAt_lesser: $timeMs, sort: TIME_DESC) {
+      episode
+      media {
+        title {
+          english
+          romaji
+        }
+        id
+        type
+        bannerImage
+        coverImage {
+          large
+        }
+        genres
+        averageScore
+      }
+    }
+  }
+}''';
+    try {
+      final res = await fetchQuery(query, RequestType.trending);
+      final List<dynamic> trendings = res;
+
+      final List<TrendingResult> trendingList = [];
+
+      for (final trending in trendings) {
+        final TrendingResult data = TrendingResult(
+          episode: trending['episode'],
+          title: {
+            'english': trending['media']['title']['english'],
+            'romaji': trending['media']['title']['romaji']
+          },
+          id: trending['media']['id'],
+          type: trending['media']['type'],
+          banner: trending['media']['banner'],
+          cover: trending['media']['coverImage']['large'] ?? '',
+          genres: trending['media']['genres'],
+          rating: trending['media']['averageScore'],
+        );
+        trendingList.add(data);
+      }
+      return trendingList;
+    } catch (err) {
+      print(err);
+      throw new Exception("ERR_COULDNT_GET_TRENDING_LIST");
     }
   }
 
@@ -297,7 +353,7 @@ class Anilist {
     };
   }
 
-  fetchQuery(String query) async {
+  fetchQuery(String query, RequestType type) async {
     final GraphQLClient client =
         GraphQLClient(link: httpLink, cache: GraphQLCache());
 
@@ -311,8 +367,17 @@ class Anilist {
       print(res.exception.toString());
     }
 
-    final data = res.data?['Page']['media'];
+    if (type == RequestType.media) {
+      final data = res.data?['Page']['media'];
 
-    return data;
+      return data;
+    }
+    if (type == RequestType.trending) {
+      final data = res.data?['Page']['airingSchedules'];
+
+      return data;
+    }
   }
 }
+
+enum RequestType { trending, media }

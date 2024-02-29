@@ -88,6 +88,7 @@ flutter:
     - lib/assets/images/broken_heart.png
     - lib/assets/images/shines.png
     - lib/assets/images/check.png
+    - lib/assets/images/ghost.png
     - lib/assets/icons/logo_foreground.png
 
   # An image asset can refer to one or more resolution-specific "variants", see

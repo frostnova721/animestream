@@ -10,8 +10,9 @@ class ListElement {
 
 Widget characterCard(String name, String role, String imageUrl) {
   return Card(
-    color: Colors.black,
+    color: backgroundColor,
     clipBehavior: Clip.hardEdge,
+    elevation: 0,
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
     ),

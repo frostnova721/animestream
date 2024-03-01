@@ -29,7 +29,6 @@ class _InfoState extends State<Info> {
     getInfo(widget.id).then((value) => getEpisodes());
   }
 
-  
   bool dataLoaded = false;
   bool infoPage = true;
   dynamic data;
@@ -141,7 +140,7 @@ class _InfoState extends State<Info> {
   Widget build(BuildContext context) {
     try {
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: backgroundColor,
         body: dataLoaded
             ? SingleChildScrollView(
                 child: Column(
@@ -306,10 +305,10 @@ class _InfoState extends State<Info> {
                 ),
               )
             : Center(
-              child: CircularProgressIndicator(
-                color: themeColor,
+                child: CircularProgressIndicator(
+                  color: themeColor,
+                ),
               ),
-            ),
       );
     } catch (err) {
       print(err);
@@ -975,13 +974,11 @@ class _InfoState extends State<Info> {
           margin: EdgeInsets.only(top: 190),
           decoration: BoxDecoration(
             gradient: LinearGradient(
-                colors: [
-                  Color.fromARGB(255, 0, 0, 0),
-                  Color.fromARGB(0, 0, 0, 0)
-                ],
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                stops: [0.35, 0.8]),
+              colors: [backgroundColor, Colors.transparent],
+              begin: Alignment.bottomCenter,
+              end: Alignment.topCenter,
+              stops: [0.25, 0.85],
+            ),
           ),
         ),
         Container(

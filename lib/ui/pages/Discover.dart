@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
@@ -24,10 +25,12 @@ class _DiscoverState extends State<Discover> {
     super.initState();
     getLists();
     getTrendingList();
+    getRecentlyUpdated();
   }
 
   List thisSeason = [];
   List<TrendingResult> trendingList = [];
+  List<ListElement> recentlyUpdatedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   late Timer timer;
@@ -40,23 +43,38 @@ class _DiscoverState extends State<Discover> {
 
   Future<void> getTrendingList() async {
     final list = await Anilist().getTrending();
-    setState(() {
-      trendingList = list.sublist(0, 10);
-      pageTimeout();
-    });
+    if (mounted)
+      setState(() {
+        trendingList = list.sublist(0, 10);
+        pageTimeout();
+      });
+  }
+
+  Future<void> getRecentlyUpdated() async {
+    final list = await Anilist().recentlyUpdated();
+    for (final elem in list) {
+      recentlyUpdatedList.add(
+        ListElement(
+          widget: animeCard(
+              elem.title['english'] ?? elem.title['romaji'] ?? '', elem.cover),
+          info: {'id': elem.id},
+        ),
+      );
+    }
+    if (mounted) setState(() {});
   }
 
   Future<void> pageTimeout() async {
     timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
-      if (currentPage < trendingList.length - 2) {
+      if (currentPage < trendingList.length - 1) {
         currentPage++;
-        if (mounted)
-          setState(() {
-            _pageController.animateToPage(currentPage,
-                duration: Duration(milliseconds: 200), curve: Curves.easeIn);
-          });
       } else
         currentPage = 0;
+      if (mounted)
+        setState(() {
+          _pageController.animateToPage(currentPage,
+              duration: Duration(milliseconds: 200), curve: Curves.easeIn);
+        });
     });
   }
 
@@ -138,18 +156,23 @@ class _DiscoverState extends State<Discover> {
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      trendingList[index].title['english'] ??
-                                          trendingList[index].title['romaji'] ??
-                                          '',
-                                      style: TextStyle(
-                                        color: textMainColor,
-                                        fontFamily: 'NunitoSans',
-                                        fontSize: 17,
-                                        fontWeight: FontWeight.bold,
-                                        overflow: TextOverflow.ellipsis,
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 10.0),
+                                      child: Text(
+                                        trendingList[index].title['english'] ??
+                                            trendingList[index]
+                                                .title['romaji'] ??
+                                            '',
+                                        style: TextStyle(
+                                          color: textMainColor,
+                                          fontFamily: 'NunitoSans',
+                                          fontSize: 17,
+                                          fontWeight: FontWeight.bold,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                        maxLines: 2,
                                       ),
-                                      maxLines: 2,
                                     ),
                                     Text(
                                       trendingList[index].genres.join(', '),
@@ -160,6 +183,28 @@ class _DiscoverState extends State<Discover> {
                                           fontSize: 15,
                                           fontWeight: FontWeight.bold,
                                           overflow: TextOverflow.ellipsis),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            color: textMainColor,
+                                            size: 20,
+                                          ),
+                                          Text(
+                                            "${trendingList[index].rating != null ? trendingList[index].rating! / 10 : '??'}",
+                                            style: TextStyle(
+                                              color: textMainColor,
+                                              fontFamily: "Rubik",
+                                              fontSize: 17
+                                            ),
+                                          ),
+                                        ],
+                                      ),
                                     ),
                                   ],
                                 ),
@@ -173,24 +218,26 @@ class _DiscoverState extends State<Discover> {
                 );
               }),
         ),
-        Container(
-          margin: EdgeInsets.only(top: 10),
-          child: SmoothPageIndicator(
-            controller: _pageController,
-            count: trendingList.length,
-            axisDirection: Axis.horizontal,
-            effect: ScrollingDotsEffect(
-              activeDotColor: themeColor,
-              dotColor: textMainColor,
-              dotHeight: 10,
-              dotWidth: 10,
+        if (trendingList.isNotEmpty)
+          Container(
+            margin: EdgeInsets.only(top: 10),
+            child: SmoothPageIndicator(
+              controller: _pageController,
+              count: trendingList.length,
+              axisDirection: Axis.horizontal,
+              effect: ScrollingDotsEffect(
+                activeDotColor: themeColor,
+                dotColor: textMainColor,
+                dotHeight: 5,
+                dotWidth: 5,
+              ),
+              onDotClicked: (index) {
+                _pageController.animateToPage(index,
+                    duration: Duration(milliseconds: 250),
+                    curve: Curves.easeIn);
+              },
             ),
-            onDotClicked: (index) {
-              _pageController.animateToPage(index,
-                  duration: Duration(milliseconds: 250), curve: Curves.easeIn);
-            },
           ),
-        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -208,12 +255,11 @@ class _DiscoverState extends State<Discover> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     image: DecorationImage(
-                      image: AssetImage(
-                        'lib/assets/images/chisato.jpeg',
-                      ),
-                      fit: BoxFit.cover,
-                      opacity: 0.35
-                    ),
+                        image: AssetImage(
+                          'lib/assets/images/chisato.jpeg',
+                        ),
+                        fit: BoxFit.cover,
+                        opacity: 0.35),
                     border: Border.all(color: themeColor),
                   ),
                   child: Center(
@@ -235,8 +281,8 @@ class _DiscoverState extends State<Discover> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => GenresPage()));
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => GenresPage()));
                 },
                 child: Container(
                   height: 50,
@@ -244,12 +290,11 @@ class _DiscoverState extends State<Discover> {
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
                     image: DecorationImage(
-                      image: AssetImage(
-                        'lib/assets/images/chisato.jpeg',
-                      ),
-                      fit: BoxFit.cover,
-                      opacity: 0.35
-                    ),
+                        image: AssetImage(
+                          'lib/assets/images/mitsuha.jpg',
+                        ),
+                        fit: BoxFit.cover,
+                        opacity: 0.35),
                     border: Border.all(color: themeColor),
                   ),
                   child: Center(
@@ -268,39 +313,49 @@ class _DiscoverState extends State<Discover> {
             ),
           ],
         ),
-        Container(
-          alignment: Alignment.centerLeft,
-          padding: EdgeInsets.only(top: 50, left: 25, right: 25, bottom: 20),
-          child: Text(
-            "This season",
-            style: basicTextStyle("Rubik", 20),
-          ),
-        ),
-        Container(
-          height: 255,
-          padding: EdgeInsets.only(left: 10, right: 10),
-          child: ListView.builder(
-            itemCount: thisSeason.length,
-            scrollDirection: Axis.horizontal,
-            itemBuilder: (context, index) => GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => Info(
-                      id: thisSeason[index].info['id'],
-                    ),
-                  ),
-                );
-              },
-              child: Container(
-                width: 125,
-                child: thisSeason[index].widget,
-              ),
-            ),
-          ),
-        ),
+        _itemTitle("Recently updated"),
+        _scrollList(recentlyUpdatedList),
+        _itemTitle("This season"),
+        _scrollList(thisSeason),
       ],
+    );
+  }
+
+  Container _scrollList(List<dynamic> list) {
+    return Container(
+      height: 230,
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: ListView.builder(
+        itemCount: list.length,
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) => GestureDetector(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => Info(
+                  id: list[index].info['id'],
+                ),
+              ),
+            );
+          },
+          child: Container(
+            width: 125,
+            child: list[index].widget,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container _itemTitle(String title) {
+    return Container(
+      alignment: Alignment.centerLeft,
+      padding: EdgeInsets.only(top: 25, left: 25, right: 25, bottom: 20),
+      child: Text(
+        title,
+        style: basicTextStyle("Rubik", 20),
+      ),
     );
   }
 

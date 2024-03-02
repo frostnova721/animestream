@@ -34,6 +34,7 @@ class _HomeState extends State<Home> {
   bool error = false;
 
   onItemTapped(int index) {
+    if(mounted)
     setState(() {
       activeIndex = index;
     });
@@ -58,7 +59,7 @@ class _HomeState extends State<Home> {
       if (currentlyAiringResponse.length == 0) return;
 
       currentlyAiring = [];
-      currentlyAiringResponse.forEach((e) {
+      currentlyAiringResponse.sublist(0, 20).forEach((e) {
         final title = e['title']['english'] ?? e['title']['romaji'];
         final image = e['coverImage']['large'] ?? e['coverImage']['extraLarge'];
         currentlyAiring
@@ -90,7 +91,7 @@ class _HomeState extends State<Home> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: 20),
           child: Column(
             children: [
               Row(
@@ -280,9 +281,14 @@ class _HomeState extends State<Home> {
                               builder: (context) =>
                                   Info(id: widgetList[index].info['id']),
                             ),
-                          ).then((value) => setState(() {
-                                getLists();
-                              }));
+                          ).then(
+                            (value) {
+                              if (mounted)
+                                setState(() {
+                                  getLists();
+                                });
+                            },
+                          );
                         },
                         child: widgetList[index].widget,
                       ),

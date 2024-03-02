@@ -89,42 +89,43 @@ class _SearchState extends State<Search> {
 
   Container _searchResults() {
     return Container(
-        foregroundDecoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Colors.black,
-              Colors.transparent,
-            ],
-            begin: Alignment.bottomCenter,
-            end: Alignment.topCenter,
-            stops: [0, 0.05],
-          ),
+      foregroundDecoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Colors.black,
+            Colors.transparent,
+          ],
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          stops: [0, 0.05],
         ),
-        padding: EdgeInsets.only(left: 15, right: 15),
-        child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              mainAxisSpacing: 15,
-              crossAxisCount: 3,
-              crossAxisSpacing: 3,
-              childAspectRatio: 1 / 2.055),
-          shrinkWrap: false,
-          itemCount: results.length,
-          itemBuilder: (context, index) {
-            return Container(
-              child: GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            Info(id: results[index].info['id']),
-                      ),
-                    );
-                  },
-                  child: results[index].widget),
-            );
-          },
-        ));
+      ),
+      padding: EdgeInsets.only(left: 15, right: 15),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          mainAxisSpacing: 15,
+          crossAxisCount: 3,
+          crossAxisSpacing: 3,
+          childAspectRatio: 1 / 2.055,
+        ),
+        shrinkWrap: false,
+        itemCount: results.length,
+        itemBuilder: (context, index) {
+          return Container(
+            child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => Info(id: results[index].info['id']),
+                    ),
+                  );
+                },
+                child: results[index].widget),
+          );
+        },
+      ),
+    );
   }
 
   TextField _searchBar() {

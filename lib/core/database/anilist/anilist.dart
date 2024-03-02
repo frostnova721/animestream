@@ -4,7 +4,7 @@ import 'package:graphql/client.dart';
 class Anilist {
   final httpLink = HttpLink("https://graphql.anilist.co");
 
-  search(String query) async {
+  Future search(String query) async {
     final gquery = '''
             query {
                 Page(perPage: 10) {
@@ -275,11 +275,11 @@ class Anilist {
     }
   }
 
-  //maybe latest and not trending!
-  Future<List<TrendingResult>> getTrending() async {
+  //maybe latest and not recentlyUpdatedAnime!
+  Future<List<RecentlyUpdatedResult>> recentlyUpdated() async {
     final timeMs = (new DateTime.now().millisecondsSinceEpoch ~/ 1000) - 10000;
     final query = '''{
-        Page(perPage: 15) {
+        Page(perPage: 25) {
     airingSchedules (airingAt_greater: 0, airingAt_lesser: $timeMs, sort: TIME_DESC) {
       episode
       media {
@@ -295,29 +295,33 @@ class Anilist {
         }
         genres
         averageScore
+        countryOfOrigin
+        isAdult
       }
     }
   }
 }''';
     try {
-      final res = await fetchQuery(query, RequestType.trending);
-      final List<dynamic> trendings = res;
+      final res = await fetchQuery(query, RequestType.recentlyUpdatedAnime);
+      final List<dynamic> recentlyUpdatedAnimes = res;
 
-      final List<TrendingResult> trendingList = [];
+      final List<RecentlyUpdatedResult> trendingList = [];
 
-      for (final trending in trendings) {
-        final TrendingResult data = TrendingResult(
-          episode: trending['episode'],
+      for (final recentlyUpdatedAnime in recentlyUpdatedAnimes) {
+        if (recentlyUpdatedAnime['media']['isAdult'] == true ||
+            recentlyUpdatedAnime['media']['countryOfOrigin'] != "JP") continue;
+        final RecentlyUpdatedResult data = RecentlyUpdatedResult(
+          episode: recentlyUpdatedAnime['episode'],
           title: {
-            'english': trending['media']['title']['english'],
-            'romaji': trending['media']['title']['romaji']
+            'english': recentlyUpdatedAnime['media']['title']['english'],
+            'romaji': recentlyUpdatedAnime['media']['title']['romaji']
           },
-          id: trending['media']['id'],
-          type: trending['media']['type'],
-          banner: trending['media']['banner'],
-          cover: trending['media']['coverImage']['large'] ?? '',
-          genres: trending['media']['genres'],
-          rating: trending['media']['averageScore'],
+          id: recentlyUpdatedAnime['media']['id'],
+          type: recentlyUpdatedAnime['media']['type'],
+          banner: recentlyUpdatedAnime['media']['banner'],
+          cover: recentlyUpdatedAnime['media']['coverImage']['large'] ?? '',
+          genres: recentlyUpdatedAnime['media']['genres'],
+          rating: recentlyUpdatedAnime['media']['averageScore'],
         );
         trendingList.add(data);
       }
@@ -326,6 +330,49 @@ class Anilist {
       print(err);
       throw new Exception("ERR_COULDNT_GET_TRENDING_LIST");
     }
+  }
+
+  Future<List<TrendingResult>> getTrending() async {
+    final gquery = '''
+            query {
+                Page(perPage: 10) {
+                    media(type: ANIME, sort: TRENDING_DESC, isAdult: false) {
+                        id
+                        title {
+                            english
+                            romaji
+                        }
+                        genres
+                        averageScore
+                        bannerImage
+                        coverImage {
+                            large
+                        }
+                    }
+                }
+            }
+        ''';
+    final List<dynamic> trendings =
+        await fetchQuery(gquery, RequestType.media);
+
+    final List<TrendingResult> typed = [];
+
+    for (final trending in trendings) {
+      final TrendingResult data = TrendingResult(
+        id: trending['id'],
+        banner: trending['bannerImage'],
+        cover: trending['coverImage']['large'],
+        genres: trending['genres'],
+        rating: trending['averageScore'],
+        title: {
+          'english': trending['title']['english'],
+          'romaji': trending['title']['romaji']
+        },
+      );
+      typed.add(data);
+    }
+
+    return typed;
   }
 
   MonthnumberToMonthName(
@@ -372,7 +419,7 @@ class Anilist {
 
       return data;
     }
-    if (type == RequestType.trending) {
+    if (type == RequestType.recentlyUpdatedAnime) {
       final data = res.data?['Page']['airingSchedules'];
 
       return data;
@@ -380,4 +427,4 @@ class Anilist {
   }
 }
 
-enum RequestType { trending, media }
+enum RequestType { recentlyUpdatedAnime, media }

@@ -1,4 +1,4 @@
-class TrendingResult {
+class RecentlyUpdatedResult {
   final int episode;
   final Map<String, String?> title;
   final int id;
@@ -8,7 +8,7 @@ class TrendingResult {
   final dynamic genres;
   final int? rating;
 
-  TrendingResult({
+  RecentlyUpdatedResult({
     required this.episode,
     required this.title,
     required this.id,
@@ -17,5 +17,23 @@ class TrendingResult {
     required this.cover,
     required this.genres,
     this.rating = null,
+  });
+}
+
+class TrendingResult {
+  final int id;
+  final Map<String, String?> title;
+  final List<Object?> genres;
+  final int? rating;
+  final String cover;
+  final String? banner;
+
+  TrendingResult({
+    required this.id,
+    required this.banner,
+    required this.cover,
+    required this.genres,
+    required this.rating,
+    required this.title,
   });
 }

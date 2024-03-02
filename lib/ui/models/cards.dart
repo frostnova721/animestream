@@ -133,6 +133,7 @@ Widget animeCard(String title, String imageUrl) {
       borderRadius: BorderRadius.circular(20),
     ),
     child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
           margin: EdgeInsets.only(bottom: 10),
@@ -158,6 +159,7 @@ Widget animeCard(String title, String imageUrl) {
             overflow: TextOverflow.ellipsis,
           ),
           maxLines: 2,
+          textAlign: TextAlign.left,
         ),
       ],
     ),

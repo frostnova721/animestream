@@ -148,6 +148,10 @@ Widget animeCard(String title, String imageUrl) {
             imageUrl,
             height: 165,
             width: 110,
+            loadingBuilder: (context, child, loadingProgress) {
+              if(loadingProgress == null) return child;
+              return Container(color: const Color.fromARGB(255, 114, 114, 114));
+            },
           ),
         ),
         Text(

@@ -4,6 +4,7 @@ import 'package:animestream/ui/models/drawer.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/search.dart';
+import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
@@ -34,10 +35,10 @@ class _HomeState extends State<Home> {
   bool error = false;
 
   onItemTapped(int index) {
-    if(mounted)
-    setState(() {
-      activeIndex = index;
-    });
+    if (mounted)
+      setState(() {
+        activeIndex = index;
+      });
   }
 
   Future<void> getLists() async {
@@ -91,90 +92,126 @@ class _HomeState extends State<Home> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: 20),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                    onPressed: () {
-                      _globalKey.currentState!.openDrawer();
-                    },
-                    icon: Icon(
-                      Icons.menu_rounded,
-                      color: Colors.white,
-                      size: 30,
+                  Container(
+                    // width: MediaQuery.of(context).size.width - 100,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () {
+                                _globalKey.currentState!.openDrawer();
+                              },
+                              icon: Icon(
+                                Icons.menu_rounded,
+                                color: Colors.white,
+                                size: 30,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 10),
+                              child: Text(
+                                "AnimeStream",
+                                style: TextStyle(
+                                  color: textMainColor,
+                                  fontSize: 23,
+                                  fontFamily: 'NunitoSans',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        Container(
+                          padding: EdgeInsets.only(left: 10, right: 0, top: 10),
+                          width: 300,
+                          child: TextField(
+                            controller: textEditingController,
+                            autocorrect: false,
+                            maxLines: 1,
+                            onSubmitted: (String input) {
+                              textEditingController.value =
+                                  TextEditingValue.empty;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      Search(searchedText: input),
+                                ),
+                              );
+                            },
+                            cursorColor: themeColor,
+                            decoration: InputDecoration(
+                              prefixIcon: Padding(
+                                padding: const EdgeInsets.only(left: 5),
+                                child: Image.asset(
+                                  "lib/assets/images/search.png",
+                                  color: Colors.white,
+                                  scale: 1.75,
+                                ),
+                              ),
+                              hintText: "Search...",
+                              hintStyle: TextStyle(
+                                color: const Color.fromARGB(255, 129, 129, 129),
+                                fontFamily: "Poppins",
+                                fontSize: 16,
+                              ),
+                              focusColor: themeColor,
+                              contentPadding: EdgeInsets.only(
+                                  top: 5, bottom: 5, left: 20, right: 20),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: themeColor,
+                                ),
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  color: Colors.white,
+                                  width: 1.5,
+                                ),
+                                borderRadius: BorderRadius.circular(25),
+                              ),
+                            ),
+                            style: TextStyle(
+                              backgroundColor: backgroundColor,
+                              color: textMainColor,
+                              fontFamily: 'Poppins',
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                      "AnimeStream",
-                      style: TextStyle(
+                  Container(
+                    padding: EdgeInsets.only(right: 15),
+                    child: IconButton(
+                      onPressed: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Settings(),));
+                      },
+                      icon: Icon(
+                        Icons.settings,
                         color: textMainColor,
-                        fontSize: 23,
-                        fontFamily: 'NunitoSans',
-                        fontWeight: FontWeight.bold,
+                        size: 45,
                       ),
                     ),
-                  ),
+                    // padding: EdgeInsets.only(right: 25),
+                    // child: CircleAvatar(
+                    //   radius: 25,
+                    //   backgroundColor: ,
+                    // ),
+                  )
                 ],
-              ),
-              Container(
-                padding: EdgeInsets.only(left: 30, right: 30, top: 10),
-                child: TextField(
-                  controller: textEditingController,
-                  autocorrect: false,
-                  maxLines: 1,
-                  onSubmitted: (String input) {
-                    textEditingController.value = TextEditingValue.empty;
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Search(searchedText: input),
-                      ),
-                    );
-                  },
-                  cursorColor: themeColor,
-                  decoration: InputDecoration(
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.only(left: 5),
-                      child: Image.asset(
-                        "lib/assets/images/search.png",
-                        color: Colors.white,
-                        scale: 1.75,
-                      ),
-                    ),
-                    hintText: "Search...",
-                    hintStyle: TextStyle(
-                      color: const Color.fromARGB(255, 129, 129, 129),
-                      fontFamily: "Poppins",
-                      fontSize: 16,
-                    ),
-                    focusColor: themeColor,
-                    contentPadding:
-                        EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: themeColor,
-                      ),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        color: Colors.white,
-                        width: 1.5,
-                      ),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  style: TextStyle(
-                    backgroundColor: backgroundColor,
-                    color: textMainColor,
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                  ),
-                ),
               ),
               activeIndex == 0
                   ? _homeItems()

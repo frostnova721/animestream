@@ -34,6 +34,7 @@ class _DiscoverState extends State<Discover> {
   int currentPage = 0;
   final PageController _pageController = PageController();
   late Timer timer;
+  bool trendingLoaded = false, recentlyUpdatedLoaded = false;
 
   Future getLists() async {
     thisSeason = widget.currentSeason;
@@ -46,6 +47,7 @@ class _DiscoverState extends State<Discover> {
     if (mounted)
       setState(() {
         trendingList = list.sublist(0, 10);
+        trendingLoaded = true;
         pageTimeout();
       });
   }
@@ -61,7 +63,10 @@ class _DiscoverState extends State<Discover> {
         ),
       );
     }
-    if (mounted) setState(() {});
+    if (mounted)
+      setState(() {
+        recentlyUpdatedLoaded = true;
+      });
   }
 
   Future<void> pageTimeout() async {
@@ -187,7 +192,8 @@ class _DiscoverState extends State<Discover> {
                                     Padding(
                                       padding: const EdgeInsets.only(top: 10),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.min,
                                         children: [
                                           Icon(
@@ -198,10 +204,9 @@ class _DiscoverState extends State<Discover> {
                                           Text(
                                             "${trendingList[index].rating != null ? trendingList[index].rating! / 10 : '??'}",
                                             style: TextStyle(
-                                              color: textMainColor,
-                                              fontFamily: "Rubik",
-                                              fontSize: 17
-                                            ),
+                                                color: textMainColor,
+                                                fontFamily: "Rubik",
+                                                fontSize: 17),
                                           ),
                                         ],
                                       ),

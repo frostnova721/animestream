@@ -1,3 +1,4 @@
+import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -48,6 +49,8 @@ class _ControlsState extends State<Controls> {
 
     _betterPlayerController = widget.controller;
     _controller = widget.controller.videoPlayerController;
+
+    assignSettings();
 
     _controller?.addListener(() {
       if (_controller!.value.position.inSeconds ==
@@ -108,6 +111,15 @@ class _ControlsState extends State<Controls> {
   int selectedQuality = 0;
   List currentSources = [];
   List preloadedSources = [];
+  late int skipDuration;
+  int megaSkipDuration = 85;
+
+  Future<void> assignSettings() async {
+    final settings = await Settings().getSettings();
+    setState(() {
+      skipDuration = settings.skipDuration;
+    });
+  }
 
   Future preloadNextEpisode() async {
     if (currentEpIndex + 1 > widget.episode['epLinks'].length) {
@@ -241,7 +253,7 @@ class _ControlsState extends State<Controls> {
                             ),
                             InkWell(
                               onTap: () {
-                                fastForward(-10);
+                                fastForward(-skipDuration);
                               },
                               child: Icon(
                                 Icons.fast_rewind_rounded,
@@ -283,7 +295,7 @@ class _ControlsState extends State<Controls> {
                             ),
                             InkWell(
                               onTap: () {
-                                fastForward(10);
+                                fastForward(skipDuration);
                               },
                               child: Icon(
                                 Icons.fast_forward_rounded,
@@ -342,25 +354,64 @@ class _ControlsState extends State<Controls> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Row(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                currentTime,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'NunitoSans'),
+                              Row(
+                                children: [
+                                  Text(
+                                    currentTime,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'NunitoSans'),
+                                  ),
+                                  const Text(
+                                    " / ",
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'NunitoSans'),
+                                  ),
+                                  Text(
+                                    maxTime,
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontFamily: 'NunitoSans'),
+                                  ),
+                                ],
                               ),
-                              const Text(
-                                " / ",
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'NunitoSans'),
-                              ),
-                              Text(
-                                maxTime,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: 'NunitoSans'),
-                              ),
+                              ElevatedButton(
+                                  onPressed: () {
+                                    fastForward(megaSkipDuration);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor:
+                                        Color.fromARGB(68, 0, 0, 0),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                        side: BorderSide(color: themeColor)),
+                                  ),
+                                  child: Container(
+                                    height: 50,
+                                    child: Row(
+                                      children: [
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 5),
+                                          child: Text(
+                                            "+$megaSkipDuration",
+                                            style: TextStyle(
+                                                color: textMainColor,
+                                                fontFamily: "Rubik",
+                                                fontSize: 17),
+                                          ),
+                                        ),
+                                        Icon(
+                                          Icons.fast_forward_rounded,
+                                          color: textMainColor,
+                                        )
+                                      ],
+                                    ),
+                                  )),
                             ],
                           ),
                           Container(

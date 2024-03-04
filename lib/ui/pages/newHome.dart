@@ -197,7 +197,7 @@ class _HomeState extends State<Home> {
                     padding: EdgeInsets.only(right: 15),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => Settings(),));
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(),));
                       },
                       icon: Icon(
                         Icons.settings,

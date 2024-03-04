@@ -1,3 +1,5 @@
+import 'package:animestream/core/data/settings.dart';
+import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +12,31 @@ class PlayerSetting extends StatefulWidget {
 }
 
 class PlayerSettingState extends State<PlayerSetting> {
-  int skipDuration = 10;
+  @override
+  void initState() {
+    super.initState();
+    readSettings();
+  }
+
+  late int skipDuration;
+  late int megaSkipDuration;
+  bool loaded = false;
+
+  Future<void> readSettings() async {
+    final settings = await Settings().getSettings();
+    loaded = true;
+    setState(() {
+      skipDuration = settings.skipDuration;
+      megaSkipDuration = settings.megaSkipDuration;
+    });
+  }
+
+  Future<void> writeSettings(SettingsModal settings) async {
+    await Settings().writeSettings(settings);
+    setState(() {
+      readSettings();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,63 +45,67 @@ class PlayerSettingState extends State<PlayerSetting> {
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: Container(
-          child: Column(
-            children: [
-              topRow(context, "Player"),
-              Container(
-                padding: EdgeInsets.only(left: 20, right: 20, top: 30),
-                child: Column(
+          child: loaded
+              ? Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Skip duration",
-                          style: textStyle(),
-                        ),
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  if (skipDuration > 5)
-                                    skipDuration = skipDuration - 5;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.remove_rounded,
-                                color: textMainColor,
-                              ),
-                            ),
-                            Container(
-                              alignment: Alignment.center,
-                              width: 40,
-                              child: Text(
-                                "$skipDuration",
+                    topRow(context, "Player"),
+                    Container(
+                      padding: EdgeInsets.only(left: 20, right: 20, top: 30),
+                      child: Column(
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Skip duration",
                                 style: textStyle(),
                               ),
-                            ),
-                            IconButton(
-                              onPressed: () {
-                                setState(() {
-                                  if (skipDuration < 50)
-                                    skipDuration = skipDuration + 5;
-                                });
-                              },
-                              icon: Icon(
-                                Icons.add_rounded,
-                                color: textMainColor,
+                              Row(
+                                children: [
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        if (skipDuration > 5)
+                                          writeSettings(SettingsModal(
+                                              skipDuration: skipDuration - 5));
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.remove_rounded,
+                                      color: textMainColor,
+                                    ),
+                                  ),
+                                  Container(
+                                    alignment: Alignment.center,
+                                    width: 40,
+                                    child: Text(
+                                      "$skipDuration",
+                                      style: textStyle(),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        if (skipDuration < 50)
+                                          writeSettings(SettingsModal(
+                                              skipDuration: skipDuration + 5));
+                                      });
+                                    },
+                                    icon: Icon(
+                                      Icons.add_rounded,
+                                      color: textMainColor,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
                   ],
-                ),
-              )
-            ],
-          ),
+                )
+              : Container(),
         ),
       ),
     );

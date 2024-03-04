@@ -903,46 +903,48 @@ class _InfoState extends State<Info> {
               showDragHandle: true,
               backgroundColor: Color.fromARGB(255, 19, 19, 19),
               builder: (BuildContext context) {
-                return Container(
-                  padding: EdgeInsets.all(20),
-                  child: ListView(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      Image.network(img),
-                      Container(
-                        margin: EdgeInsets.only(top: 20),
-                        alignment: Alignment.center,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () async {
-                            final res = await get(Uri.parse(img));
-                            await ImageGallerySaver.saveImage(
-                              res.bodyBytes,
-                              quality: 100,
-                              name:
-                                  data.title['english'] ?? data.title['romaji'],
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            fixedSize: Size(150, 75),
-                            backgroundColor: Colors.black,
-                            shape: RoundedRectangleBorder(
-                              side: BorderSide(color: themeColor),
-                              borderRadius: BorderRadius.circular(15),
+                return SingleChildScrollView(
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    child: ListView(
+                      shrinkWrap: true,
+                      physics: NeverScrollableScrollPhysics(),
+                      children: [
+                        Image.network(img),
+                        Container(
+                          margin: EdgeInsets.only(top: 20),
+                          alignment: Alignment.center,
+                          height: 50,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              final res = await get(Uri.parse(img));
+                              await ImageGallerySaver.saveImage(
+                                res.bodyBytes,
+                                quality: 100,
+                                name:
+                                    data.title['english'] ?? data.title['romaji'],
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              fixedSize: Size(150, 75),
+                              backgroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(
+                                side: BorderSide(color: themeColor),
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
+                            child: Text(
+                              "save",
+                              style: TextStyle(
+                                  color: themeColor,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20),
                             ),
                           ),
-                          child: Text(
-                            "save",
-                            style: TextStyle(
-                                color: themeColor,
-                                fontFamily: "Poppins",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20),
-                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 );
               },
@@ -969,8 +971,9 @@ class _InfoState extends State<Info> {
             height: 250,
           ),
         ),
+        //kinda unneeded. might remove sometime ig! (replace with a shaderMask)
         Container(
-          height: 100,
+          height: 90,
           margin: EdgeInsets.only(top: 190),
           decoration: BoxDecoration(
             gradient: LinearGradient(

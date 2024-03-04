@@ -17,7 +17,7 @@ class Search {
 
 class GogoAnime {
   final String _baseUrl = "https://gogoanime3.net";
-  final String _ajaxUrl = "https://ajax.gogo-load.com/ajax";
+  final String _ajaxUrl = "https://ajax.gogocdn.net/ajax";
 
   search(String query) async {
     String searchUrl =

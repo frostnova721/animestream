@@ -53,52 +53,105 @@ class PlayerSettingState extends State<PlayerSetting> {
                       padding: EdgeInsets.only(left: 20, right: 20, top: 30),
                       child: Column(
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Skip duration",
-                                style: textStyle(),
-                              ),
-                              Row(
-                                children: [
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (skipDuration > 5)
-                                          writeSettings(SettingsModal(
-                                              skipDuration: skipDuration - 5));
-                                      });
-                                    },
-                                    icon: Icon(
-                                      Icons.remove_rounded,
-                                      color: textMainColor,
+                          Container(
+                            height: 60,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Skip duration",
+                                  style: textStyle(),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (skipDuration > 5)
+                                            writeSettings(SettingsModal(
+                                                skipDuration: skipDuration - 5));
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.remove_rounded,
+                                        color: textMainColor,
+                                      ),
                                     ),
-                                  ),
-                                  Container(
-                                    alignment: Alignment.center,
-                                    width: 40,
-                                    child: Text(
-                                      "$skipDuration",
-                                      style: textStyle(),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      width: 40,
+                                      child: Text(
+                                        "$skipDuration",
+                                        style: textStyle(),
+                                      ),
                                     ),
-                                  ),
-                                  IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        if (skipDuration < 50)
-                                          writeSettings(SettingsModal(
-                                              skipDuration: skipDuration + 5));
-                                      });
-                                    },
-                                    icon: Icon(
-                                      Icons.add_rounded,
-                                      color: textMainColor,
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (skipDuration < 50)
+                                            writeSettings(SettingsModal(
+                                                skipDuration: skipDuration + 5));
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.add_rounded,
+                                        color: textMainColor,
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            height: 60,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Mega skip duration",
+                                  style: textStyle(),
+                                ),
+                                Row(
+                                  children: [
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (megaSkipDuration > 20)
+                                            writeSettings(SettingsModal(
+                                                megaSkipDuration: megaSkipDuration - 5));
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.remove_rounded,
+                                        color: textMainColor,
+                                      ),
+                                    ),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      width: 40,
+                                      child: Text(
+                                        "$megaSkipDuration",
+                                        style: textStyle(),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          if (megaSkipDuration < 150)
+                                            writeSettings(SettingsModal(
+                                                megaSkipDuration: megaSkipDuration + 5));
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.add_rounded,
+                                        color: textMainColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ],
                       ),

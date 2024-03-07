@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/update.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 

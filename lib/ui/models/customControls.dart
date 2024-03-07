@@ -112,12 +112,13 @@ class _ControlsState extends State<Controls> {
   List currentSources = [];
   List preloadedSources = [];
   late int skipDuration;
-  int megaSkipDuration = 85;
+  late int megaSkipDuration;
 
   Future<void> assignSettings() async {
     final settings = await Settings().getSettings();
     setState(() {
-      skipDuration = settings.skipDuration;
+      skipDuration = settings.skipDuration | 10;
+      megaSkipDuration = settings.megaSkipDuration | 85;
     });
   }
 

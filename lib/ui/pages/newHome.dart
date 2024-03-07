@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/update.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/drawer.dart';
@@ -22,6 +23,11 @@ class _HomeState extends State<Home> {
     super.initState();
 
     getLists();
+    checkForUpdates().then((value) {
+      if(value != null) {
+        showUpdateSheet(context, value.description, value.downloadLink, value.preRelease);
+      }
+    },);
   }
 
   int activeIndex = 0;

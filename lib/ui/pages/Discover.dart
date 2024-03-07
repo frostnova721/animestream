@@ -33,7 +33,7 @@ class _DiscoverState extends State<Discover> {
   List<ListElement> recentlyUpdatedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
-  late Timer timer;
+  Timer? timer;
   bool trendingLoaded = false, recentlyUpdatedLoaded = false;
 
   Future getLists() async {
@@ -70,7 +70,8 @@ class _DiscoverState extends State<Discover> {
   }
 
   Future<void> pageTimeout() async {
-    timer = Timer.periodic(Duration(seconds: 5), (Timer timer) {
+    if(timer != null && timer!.isActive) timer!.cancel();
+    timer = Timer(Duration(seconds: 5), () {
       if (currentPage < trendingList.length - 1) {
         currentPage++;
       } else
@@ -95,7 +96,10 @@ class _DiscoverState extends State<Discover> {
               pageSnapping: true,
               controller: _pageController,
               itemCount: trendingList.length,
-              onPageChanged: (page) => currentPage = page,
+              onPageChanged: (page) async {
+                 currentPage = page;
+                 await pageTimeout();
+              },
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 return GestureDetector(
@@ -376,6 +380,6 @@ class _DiscoverState extends State<Discover> {
   void dispose() {
     super.dispose();
     _pageController.dispose();
-    if (timer.isActive) timer.cancel();
+    if (timer != null && timer!.isActive) timer?.cancel();
   }
 }

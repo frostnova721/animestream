@@ -32,7 +32,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   final String latestVersion = releasesRes['tag_name'];
   final String description = releasesRes['body'];
   final bool pre = releasesRes['prerelease'];
-  if (currentVersion != latestVersion.replaceAll('v', '')) {
+  if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
     final apkItem = releasesRes['assets']
         .where((item) => item['name'] == "app-release.apk")
         .toList();

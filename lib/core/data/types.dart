@@ -1,10 +1,10 @@
 class SettingsModal {
-  final int skipDuration;
-  final int megaSkipDuration;
+  final int? skipDuration;
+  final int? megaSkipDuration;
 
   SettingsModal({
-    this.megaSkipDuration = 85,
-    this.skipDuration = 10,
+    this.megaSkipDuration,
+    this.skipDuration,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {

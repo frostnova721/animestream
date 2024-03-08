@@ -28,3 +28,12 @@ Widget topRow(BuildContext context, String title) {
     ],
   );
 }
+
+TextStyle textStyle() {
+    return TextStyle(
+      color: textMainColor,
+      fontFamily: "NotoSans",
+      fontWeight: FontWeight.bold,
+      fontSize: 20,
+    );
+  }

@@ -37,7 +37,6 @@ Future<UpdateCheckResult?> checkForUpdates() async {
         .where((item) => item['name'] == "app-release.apk")
         .toList();
     final downloadLink = apkItem[0]['browser_download_url'];
-    print(downloadLink);
     return UpdateCheckResult(
       latestVersion: latestVersion,
       currentVersion: currentVersion,
@@ -97,7 +96,7 @@ showUpdateSheet(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                           side: BorderSide(
-                            color: themeColor,
+                            color: accentColor,
                           ),
                         ),
                       ),
@@ -105,7 +104,7 @@ showUpdateSheet(
                         child: Text(
                           "download",
                           style: TextStyle(
-                            color: themeColor,
+                            color: accentColor,
                             fontFamily: "Rubik",
                             fontSize: 20,
                           ),
@@ -124,14 +123,14 @@ showUpdateSheet(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
                           side: BorderSide(
-                            color: themeColor,
+                            color: accentColor,
                           ),
                         ),
                       ),
                       child: Container(
                         child: Text("maybe later",
                             style: TextStyle(
-                              color: themeColor,
+                              color: accentColor,
                               fontFamily: "Rubik",
                               fontSize: 20,
                             )),

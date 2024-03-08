@@ -20,7 +20,7 @@ class Settings {
     print(currentSettings);
     print(updatedSettings);
     currentSettings.forEach((key, value) {
-      if (value != updatedSettings[key]) {
+      if (updatedSettings[key] != null) {
         currentSettings[key] = updatedSettings[key];
       }
     });

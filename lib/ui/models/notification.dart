@@ -14,7 +14,7 @@ class NotificationService {
           channelKey: 'animestream',
           channelName: 'animestream',
           channelDescription: 'animestream notification channel',
-          defaultColor: themeColor,
+          defaultColor: accentColor,
           ledColor: Colors.white,
         ),
       ],
@@ -38,7 +38,7 @@ class NotificationService {
           channelKey: "animestream",
           title: title,
           body: content,
-          backgroundColor: themeColor),
+          backgroundColor: accentColor),
     );
   }
 
@@ -68,7 +68,7 @@ class NotificationService {
             notificationLayout: NotificationLayout.ProgressBar,
             progress: progress.toDouble(),
             locked: true,
-            backgroundColor: themeColor,
+            backgroundColor: accentColor,
           ),
           actionButtons: [
             NotificationActionButton(key: "cancel", label: "cancel")
@@ -84,7 +84,7 @@ class NotificationService {
               'path': path,
             },
             locked: false,
-            backgroundColor: themeColor,
+            backgroundColor: accentColor,
           ),
           actionButtons: [
             NotificationActionButton(key: "open_file", label: "open")

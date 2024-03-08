@@ -2,7 +2,6 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/newHome.dart';
-import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +111,7 @@ class _HomeState extends State<HomeOld> {
                   highlightColor: Colors.transparent,
                   hoverColor: Colors.transparent),
               child: BottomNavigationBar(
-                selectedItemColor: themeColor,
+                selectedItemColor: accentColor,
                 unselectedItemColor: Colors.white,
                 currentIndex: activeIndex,
                 backgroundColor: Color.fromARGB(255, 24, 24, 24),
@@ -139,7 +138,7 @@ class _HomeState extends State<HomeOld> {
                     label: "",
                     icon: Image.asset(
                       'lib/assets/images/shines.png',
-                      color: activeIndex == 1 ? themeColor : Colors.white,
+                      color: activeIndex == 1 ? accentColor : Colors.white,
                       scale: 22,
                     ),
                     tooltip: "discover",
@@ -209,7 +208,7 @@ class _HomeState extends State<HomeOld> {
                         height: 280,
                         child: Center(
                           child: SpinKitThreeBounce(
-                            color: themeColor,
+                            color: accentColor,
                             size: 30,
                           ),
                         ),
@@ -234,7 +233,7 @@ class _HomeState extends State<HomeOld> {
                         height: 280,
                         child: Center(
                           child: SpinKitThreeBounce(
-                            color: themeColor,
+                            color: accentColor,
                             size: 30,
                           ),
                         ),

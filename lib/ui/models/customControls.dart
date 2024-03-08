@@ -111,14 +111,14 @@ class _ControlsState extends State<Controls> {
   int selectedQuality = 0;
   List currentSources = [];
   List preloadedSources = [];
-  late int skipDuration;
-  late int megaSkipDuration;
+  int? skipDuration;
+  int? megaSkipDuration;
 
   Future<void> assignSettings() async {
     final settings = await Settings().getSettings();
     setState(() {
-      skipDuration = settings.skipDuration | 10;
-      megaSkipDuration = settings.megaSkipDuration | 85;
+      skipDuration = settings.skipDuration ?? 10;
+      megaSkipDuration = settings.megaSkipDuration ?? 85;
     });
   }
 
@@ -254,7 +254,7 @@ class _ControlsState extends State<Controls> {
                             ),
                             InkWell(
                               onTap: () {
-                                fastForward(-skipDuration);
+                                fastForward(skipDuration == null ? -skipDuration! : -10);
                               },
                               child: Icon(
                                 Icons.fast_rewind_rounded,
@@ -289,14 +289,14 @@ class _ControlsState extends State<Controls> {
                                       height: 40,
                                       child: Center(
                                         child: CircularProgressIndicator(
-                                          color: themeColor,
+                                          color: accentColor,
                                         ),
                                       ),
                                     ),
                             ),
                             InkWell(
                               onTap: () {
-                                fastForward(skipDuration);
+                                fastForward(skipDuration ?? 10);
                               },
                               child: Icon(
                                 Icons.fast_forward_rounded,
@@ -380,16 +380,16 @@ class _ControlsState extends State<Controls> {
                                   ),
                                 ],
                               ),
-                              ElevatedButton(
+                              if(megaSkipDuration != null) ElevatedButton(
                                   onPressed: () {
-                                    fastForward(megaSkipDuration);
+                                    fastForward(megaSkipDuration!);
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor:
                                         Color.fromARGB(68, 0, 0, 0),
                                     shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(15),
-                                        side: BorderSide(color: themeColor)),
+                                        side: BorderSide(color: accentColor)),
                                   ),
                                   child: Container(
                                     height: 50,
@@ -429,8 +429,8 @@ class _ControlsState extends State<Controls> {
                                   widget.controller.play();
                                 },
                                 colors: BetterPlayerProgressColors(
-                                  playedColor: themeColor,
-                                  handleColor: themeColor,
+                                  playedColor: accentColor,
+                                  handleColor: accentColor,
                                   bufferedColor:
                                       const Color.fromARGB(255, 126, 126, 126),
                                   backgroundColor:
@@ -529,7 +529,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                           height: 100,
                           child: Center(
                             child: CircularProgressIndicator(
-                              color: themeColor,
+                              color: accentColor,
                             ),
                           ),
                         ),
@@ -541,7 +541,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                 height: 100,
                 child: Center(
                   child: CircularProgressIndicator(
-                    color: themeColor,
+                    color: accentColor,
                   ),
                 ),
               ),
@@ -588,7 +588,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                       style: TextStyle(
                         fontFamily: "NotoSans",
                         fontSize: 17,
-                        color: themeColor,
+                        color: accentColor,
                       ),
                     ),
                     if (currentSources[index].backup)

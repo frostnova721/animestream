@@ -98,7 +98,7 @@ class _HomeState extends State<Home> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: MediaQuery.of(context).padding.bottom),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -155,7 +155,7 @@ class _HomeState extends State<Home> {
                                 ),
                               );
                             },
-                            cursorColor: themeColor,
+                            cursorColor: accentColor,
                             decoration: InputDecoration(
                               prefixIcon: Padding(
                                 padding: const EdgeInsets.only(left: 5),
@@ -171,12 +171,12 @@ class _HomeState extends State<Home> {
                                 fontFamily: "Poppins",
                                 fontSize: 16,
                               ),
-                              focusColor: themeColor,
+                              focusColor: accentColor,
                               contentPadding: EdgeInsets.only(
                                   top: 5, bottom: 5, left: 20, right: 20),
                               focusedBorder: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: themeColor,
+                                  color: accentColor,
                                 ),
                                 borderRadius: BorderRadius.circular(25),
                               ),
@@ -253,7 +253,7 @@ class _HomeState extends State<Home> {
                       height: 250,
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: themeColor,
+                          color: accentColor,
                         ),
                       ),
                     ),
@@ -264,7 +264,7 @@ class _HomeState extends State<Home> {
           margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
           height: 5,
           decoration: BoxDecoration(
-            color: themeColor.withOpacity(0.4),
+            color: accentColor.withOpacity(0.4),
             borderRadius: BorderRadius.circular(
               50,
             ),
@@ -291,7 +291,7 @@ class _HomeState extends State<Home> {
                       height: 250,
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: themeColor,
+                          color: accentColor,
                         ),
                       ),
                     ),

@@ -38,17 +38,14 @@ class _NewsState extends State<News> {
       body: !loaded
           ? Center(
             child: CircularProgressIndicator(
-                color: themeColor,
+                color: accentColor,
               ),
           )
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  // Container(
-                  //   height: 50,
-                  // ),
                   Container(
-                    padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                    padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: MediaQuery.of(context).padding.bottom),
                     child: Text(
                       "News",
                       style: TextStyle(

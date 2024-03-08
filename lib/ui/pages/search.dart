@@ -65,7 +65,7 @@ class _SearchState extends State<Search> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         SpinKitThreeBounce(
-                          color: themeColor,
+                          color: accentColor,
                           size: 35,
                         ),
                         Padding(
@@ -73,7 +73,7 @@ class _SearchState extends State<Search> {
                           child: Text(
                             "searching...",
                             style: TextStyle(
-                                color: themeColor,
+                                color: accentColor,
                                 fontFamily: "NotoSans",
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16),
@@ -138,7 +138,7 @@ class _SearchState extends State<Search> {
         await addCards(val);
       },
       autocorrect: false,
-      cursorColor: themeColor,
+      cursorColor: accentColor,
       decoration: InputDecoration(
         suffixIcon: Padding(
           padding: EdgeInsets.only(right: 10),
@@ -154,7 +154,7 @@ class _SearchState extends State<Search> {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
-          borderSide: BorderSide(color: themeColor),
+          borderSide: BorderSide(color: accentColor),
         ),
         hintText: "Search...",
         hintStyle: TextStyle(

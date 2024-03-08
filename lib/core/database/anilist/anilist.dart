@@ -99,7 +99,7 @@ class Anilist {
               month
               day
             },
-            meanScore
+            averageScore
             studios {
               edges {
                 isMain
@@ -252,7 +252,7 @@ class Anilist {
             timeLeft: info['nextAiringEpisode']?['timeUntilAiring'] ?? '',
             episode: info['nextAiringEpisode']?['episode'] ?? '',
           ),
-          rating: (info['meanScore'] / 10)?.toDouble() ?? null,
+          rating: info['averageScore'] != null ? (info['averageScore'] / 10)?.toDouble() : null,
           recommended: recommended,
           related: relations,
           status: info['status'],

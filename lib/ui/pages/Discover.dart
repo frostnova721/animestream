@@ -235,7 +235,7 @@ class _DiscoverState extends State<Discover> {
               count: trendingList.length,
               axisDirection: Axis.horizontal,
               effect: ScrollingDotsEffect(
-                activeDotColor: themeColor,
+                activeDotColor: accentColor,
                 dotColor: textMainColor,
                 dotHeight: 5,
                 dotWidth: 5,
@@ -269,7 +269,7 @@ class _DiscoverState extends State<Discover> {
                         ),
                         fit: BoxFit.cover,
                         opacity: 0.35),
-                    border: Border.all(color: themeColor),
+                    border: Border.all(color: accentColor),
                   ),
                   child: Center(
                     child: Text(
@@ -304,7 +304,7 @@ class _DiscoverState extends State<Discover> {
                         ),
                         fit: BoxFit.cover,
                         opacity: 0.35),
-                    border: Border.all(color: themeColor),
+                    border: Border.all(color: accentColor),
                   ),
                   child: Center(
                     child: Text(

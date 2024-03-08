@@ -264,7 +264,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                       backgroundColor: Colors.black,
                       contentTextStyle: TextStyle(color: Colors.white),
                       title: Text("Stream info",
-                          style: TextStyle(color: themeColor)),
+                          style: TextStyle(color: accentColor)),
                       content: Text(
                         //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
                         "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info.streamInfo.server} ${info.streamInfo.backup ? "\(backup\)" : ''}",
@@ -352,7 +352,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                               ),
                               backgroundColor:
                                   qualities[index]['link'] == currentQualityLink
-                                      ? themeColor
+                                      ? accentColor
                                       : Color.fromARGB(78, 7, 7, 7),
                             ),
                             child: Text(
@@ -361,7 +361,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                 color: qualities[index]['link'] ==
                                         currentQualityLink
                                     ? Colors.black
-                                    : themeColor,
+                                    : accentColor,
                                 fontFamily: "Poppins",
                               ),
                             ),

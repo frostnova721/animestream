@@ -62,25 +62,34 @@ class GogoAnime {
   }
 
   String _getServerLink(String serverName, List<Map<String, String>> servers) {
-    final src = servers.where((element) => element['server'] == serverName).toList()[0]['src'];
+    final src = servers.where((element) => element['server']?.toLowerCase() == serverName.toLowerCase()).toList()[0]['src'];
     return src ?? '';
   }
 
   Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {
+    //get link of all listed servers from gogoanime
     final servers = await getAllServerLinks(episodeId);
+
+    //pick the iframe link of given server
     final vsLink = _getServerLink("vidstreaming", servers);
     final swLink = _getServerLink("streamwish", servers);
+    final alLink = _getServerLink("filelions", servers);
     // final sources = [];
     int returns = 0;
     int totalStreams = 2;
     final vidstream = Vidstream().extractGogo(vsLink);
     final streamwish = StreamWish().extract(swLink);
+    final alions = StreamWish().extract(alLink);
 
     vidstream.then((res) {
       returns++;
       update(res, returns == totalStreams);
     });
     streamwish.then((res) {
+      returns++;
+      update(res, returns == totalStreams);
+    });
+    alions.then((res) {
       returns++;
       update(res, returns == totalStreams);
     });

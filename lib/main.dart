@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/pages/newHome.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +10,7 @@ import 'package:page_transition/page_transition.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,10 +25,6 @@ class MyApp extends StatefulWidget {
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
-
-  static const String name = 'Awesome Notifications - Example App';
-  static const Color mainColor = Colors.deepPurple;
-
   @override
   State<MyApp> createState() => _MyAppState();
 }
@@ -44,12 +41,23 @@ class _MyAppState extends State<MyApp> {
         onDismissActionReceivedMethod:
             NotificationController.onDismissActionReceivedMethod);
 
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: Colors.black.withOpacity(0.002)));
+
+    getTheme().then((theme) => {
+      accentColor = theme.accentColor,
+      textMainColor = theme.textMainColor,
+      textSubColor = theme.textSubColor,
+      backgroundColor = theme.backgroundColor
+    });
+
     super.initState();
   }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp(
       title: 'Animestream',
       theme: ThemeData(

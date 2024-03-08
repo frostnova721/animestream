@@ -1,4 +1,3 @@
-import 'package:animestream/core/app/update.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -55,7 +54,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     topRight: Radius.circular(25),
                   ),
                   color:
-                      selectedIndex == index ? themeColor : Colors.transparent,
+                      selectedIndex == index ? accentColor : Colors.transparent,
                 ),
                 child: Row(
                   children: [

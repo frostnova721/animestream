@@ -360,6 +360,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.6.7"
+  js_unpack:
+    dependency: "direct main"
+    description:
+      name: js_unpack
+      sha256: "5697ffebf995d3ddb27b58fafd0c87bc01251cb1cf1afb9f71685559e8578dd6"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.4"
   json_annotation:
     dependency: transitive
     description:

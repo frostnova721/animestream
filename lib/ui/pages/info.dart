@@ -126,7 +126,9 @@ class _InfoState extends State<Info> {
             foundName = sr[0]['name'];
           });
       } catch (err) {
-        _epSearcherror = true;
+        setState(() {
+          _epSearcherror = true;
+        });
       }
     }
   }
@@ -152,7 +154,7 @@ class _InfoState extends State<Info> {
                       margin: EdgeInsets.only(top: 30),
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                            backgroundColor: themeColor,
+                            backgroundColor: accentColor,
                             fixedSize: Size(135, 55)),
                         onPressed: () {
                           setState(() {
@@ -292,7 +294,7 @@ class _InfoState extends State<Info> {
                                                 child: Center(
                                                   child:
                                                       CircularProgressIndicator(
-                                                          color: themeColor),
+                                                          color: accentColor),
                                                 ),
                                               ),
                                     // ),
@@ -306,7 +308,7 @@ class _InfoState extends State<Info> {
               )
             : Center(
                 child: CircularProgressIndicator(
-                  color: themeColor,
+                  color: accentColor,
                 ),
               ),
       );
@@ -349,7 +351,7 @@ class _InfoState extends State<Info> {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: themeColor),
+        border: Border.all(color: accentColor),
         image: DecorationImage(
           image: data.banner.length > 1
               ? NetworkImage(data.banner)
@@ -392,7 +394,7 @@ class _InfoState extends State<Info> {
                 Text(
                   '${started ? 'Continue' : 'Start'} from:',
                   style: TextStyle(
-                    color: themeColor,
+                    color: accentColor,
                     fontFamily: "Rubik",
                     fontSize: 14,
                   ),
@@ -400,7 +402,7 @@ class _InfoState extends State<Info> {
                 Text(
                   'Episode $watched',
                   style: TextStyle(
-                    color: themeColor,
+                    color: accentColor,
                     fontFamily: "Rubik",
                     fontSize: 17,
                   ),
@@ -418,6 +420,8 @@ class _InfoState extends State<Info> {
         "searching: ${data.title['english'] ?? data.title['romaji']}";
     if (foundName != null) {
       text = "found: $foundName";
+    } else if(_epSearcherror) {
+      text = "couldnt't find any matches";
     }
     return Container(
       width: 300,
@@ -550,104 +554,6 @@ class _InfoState extends State<Info> {
           );
         });
   }
-
-  // Container _streamButton(int episode) {
-  //   return Container(
-  //     padding: EdgeInsets.only(top: 20, left: 25, right: 25, bottom: 30),
-  //     child: streamSources.length > 0
-  //         ? ListView.builder(
-  //             shrinkWrap: true,
-  //             // physics: NeverScrollableScrollPhysics(),
-  //             itemCount: streamSources.length,
-  //             itemBuilder: (context, i) {
-  //               return Container(
-  //                 margin: EdgeInsets.only(top: 15),
-  //                 decoration: BoxDecoration(
-  //                   color: Color.fromARGB(97, 190, 175, 255),
-  //                   borderRadius: BorderRadius.circular(20),
-  //                 ),
-  //                 child: ElevatedButton(
-  //                   onPressed: () async {
-  //                     await storeWatching(
-  //                       data.title['english'] ?? data.title['romaji'],
-  //                       data.cover,
-  //                       widget.id,
-  //                       episode + 1,
-  //                     );
-  //                     Navigator.push(
-  //                       context,
-  //                       MaterialPageRoute(
-  //                         builder: (context) => Watch(
-  //                           selectedSource: selectedSource,
-  //                           info: WatchPageInfo(
-  //                             episodeNumber: episode + 1,
-  //                             animeTitle:
-  //                                 data.title['english'] ?? data.title['romaji'],
-  //                             streamInfo: streamSources[i],
-  //                           ),
-  //                           episodes: epLinks,
-  //                         ),
-  //                       ),
-  //                     ).then((value) => getWatched());
-  //                   },
-  //                   style: ElevatedButton.styleFrom(
-  //                     backgroundColor: Color.fromARGB(68, 190, 175, 255),
-  //                     padding: EdgeInsets.only(
-  //                         top: 10, bottom: 10, left: 20, right: 20),
-  //                     shape: RoundedRectangleBorder(
-  //                       borderRadius: BorderRadius.circular(20),
-  //                     ),
-  //                   ),
-  //                   child: Column(
-  //                     crossAxisAlignment: CrossAxisAlignment.start,
-  //                     children: [
-  //                       Row(
-  //                         mainAxisAlignment: MainAxisAlignment.start,
-  //                         crossAxisAlignment: CrossAxisAlignment.center,
-  //                         children: [
-  //                           Text(
-  //                             streamSources[i].server,
-  //                             style: TextStyle(
-  //                               fontFamily: "NotoSans",
-  //                               fontSize: 17,
-  //                               color: themeColor,
-  //                             ),
-  //                           ),
-  //                           if (streamSources[i].backup)
-  //                             Text(
-  //                               " • backup",
-  //                               style: TextStyle(
-  //                                 fontFamily: "NotoSans",
-  //                                 fontSize: 14,
-  //                                 color: Colors.grey[500],
-  //                               ),
-  //                             )
-  //                         ],
-  //                       ),
-  //                       Padding(
-  //                         padding: EdgeInsets.only(top: 5),
-  //                         child: Text(
-  //                           streamSources[i].quality,
-  //                           style: TextStyle(
-  //                               color: Colors.white, fontFamily: "Rubik"),
-  //                         ),
-  //                       ),
-  //                     ],
-  //                   ),
-  //                 ),
-  //               );
-  //             },
-  //           )
-  //         : Container(
-  //             height: 100,
-  //             child: Center(
-  //               child: CircularProgressIndicator(
-  //                 color: themeColor,
-  //               ),
-  //             ),
-  //           ),
-  //   );
-  // }
 
   Column _infoItems(BuildContext context) {
     return Column(
@@ -921,22 +827,22 @@ class _InfoState extends State<Info> {
                               await ImageGallerySaver.saveImage(
                                 res.bodyBytes,
                                 quality: 100,
-                                name:
-                                    data.title['english'] ?? data.title['romaji'],
+                                name: data.title['english'] ??
+                                    data.title['romaji'],
                               );
                             },
                             style: ElevatedButton.styleFrom(
                               fixedSize: Size(150, 75),
                               backgroundColor: Colors.black,
                               shape: RoundedRectangleBorder(
-                                side: BorderSide(color: themeColor),
+                                side: BorderSide(color: accentColor),
                                 borderRadius: BorderRadius.circular(15),
                               ),
                             ),
                             child: Text(
                               "save",
                               style: TextStyle(
-                                  color: themeColor,
+                                  color: accentColor,
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20),

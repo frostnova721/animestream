@@ -32,10 +32,10 @@ class _NewsDetailsState extends State<NewsDetails> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: backgroundColor,
       body: !loaded
           ? Center(
-              child: CircularProgressIndicator(color: themeColor),
+              child: CircularProgressIndicator(color: accentColor),
             )
           : SingleChildScrollView(
               child: Column(

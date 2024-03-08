@@ -66,7 +66,7 @@ class _GenresPageState extends State<GenresPage> {
                         ),
                         fit: BoxFit.cover,
                         opacity: 0.35),
-                    border: Border.all(color: themeColor),
+                    border: Border.all(color: accentColor),
                   ),
                   child: Center(
                     child: Text(

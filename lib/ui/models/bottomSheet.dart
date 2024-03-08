@@ -89,7 +89,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                   padding: EdgeInsets.only(bottom: 30),
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: themeColor,
+                      color: accentColor,
                     ),
                   ),
                 )
@@ -156,7 +156,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                             style: TextStyle(
                               fontFamily: "NotoSans",
                               fontSize: 17,
-                              color: themeColor,
+                              color: accentColor,
                             ),
                           ),
                           if (streamSources[index].backup)
@@ -220,7 +220,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                             child: Text(
                               "${qualities[ind]['server']} • ${qualities[ind]['quality']}p",
                               style: TextStyle(
-                                color: themeColor,
+                                color: accentColor,
                                 fontSize: 18,
                                 fontFamily: "Rubik",
                               ),

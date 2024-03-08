@@ -18,8 +18,8 @@ class PlayerSettingState extends State<PlayerSetting> {
     readSettings();
   }
 
-  late int skipDuration;
-  late int megaSkipDuration;
+  int? skipDuration;
+  int? megaSkipDuration;
   bool loaded = false;
 
   Future<void> readSettings() async {
@@ -67,9 +67,9 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          if (skipDuration > 5)
+                                          if (skipDuration! > 5)
                                             writeSettings(SettingsModal(
-                                                skipDuration: skipDuration - 5));
+                                                skipDuration: skipDuration! - 5));
                                         });
                                       },
                                       icon: Icon(
@@ -88,9 +88,9 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          if (skipDuration < 50)
+                                          if (skipDuration! < 50)
                                             writeSettings(SettingsModal(
-                                                skipDuration: skipDuration + 5));
+                                                skipDuration: skipDuration! + 5));
                                         });
                                       },
                                       icon: Icon(
@@ -117,9 +117,9 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          if (megaSkipDuration > 20)
+                                          if (megaSkipDuration! > 20)
                                             writeSettings(SettingsModal(
-                                                megaSkipDuration: megaSkipDuration - 5));
+                                                megaSkipDuration: megaSkipDuration! - 5));
                                         });
                                       },
                                       icon: Icon(
@@ -138,9 +138,9 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     IconButton(
                                       onPressed: () {
                                         setState(() {
-                                          if (megaSkipDuration < 150)
+                                          if (megaSkipDuration! < 150)
                                             writeSettings(SettingsModal(
-                                                megaSkipDuration: megaSkipDuration + 5));
+                                                megaSkipDuration: megaSkipDuration! + 5));
                                         });
                                       },
                                       icon: Icon(
@@ -161,15 +161,6 @@ class PlayerSettingState extends State<PlayerSetting> {
               : Container(),
         ),
       ),
-    );
-  }
-
-  TextStyle textStyle() {
-    return TextStyle(
-      color: textMainColor,
-      fontFamily: "NotoSans",
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
     );
   }
 }

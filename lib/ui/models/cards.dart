@@ -38,7 +38,7 @@ Widget characterCard(String name, String role, String imageUrl) {
           child: Text(
             name,
             style: TextStyle(
-              color: Colors.white,
+              color: textMainColor,
               fontFamily: 'NotoSans',
               fontSize: 15,
               overflow: TextOverflow.ellipsis,
@@ -50,7 +50,7 @@ Widget characterCard(String name, String role, String imageUrl) {
         Text(
           role,
           style: TextStyle(
-            color: const Color.fromARGB(255, 141, 141, 141),
+            color: textSubColor,
             fontFamily: 'NotoSans',
             fontSize: 12,
             overflow: TextOverflow.ellipsis,
@@ -95,7 +95,7 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
                     overflow: TextOverflow.ellipsis,
                     maxLines: 5,
                     style: TextStyle(
-                      color: Colors.white,
+                      color: textMainColor,
                       fontSize: 18,
                       fontFamily: "Rubik",
                     ),
@@ -109,7 +109,7 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
                     style: TextStyle(
                       fontFamily: "NotoSans",
                       fontSize: 13,
-                      color: const Color.fromARGB(255, 151, 151, 151),
+                      color: textSubColor,
                     ),
                   ),
                 ),
@@ -157,46 +157,13 @@ Widget animeCard(String title, String imageUrl) {
         Text(
           title,
           style: TextStyle(
-            color: Colors.white,
+            color: textMainColor,
             fontFamily: 'NotoSans',
             fontSize: 15,
             overflow: TextOverflow.ellipsis,
           ),
           maxLines: 2,
           textAlign: TextAlign.left,
-        ),
-      ],
-    ),
-  );
-}
-
-Widget animeCardSkeleton(String title) {
-  return Card(
-    color: Colors.black,
-    clipBehavior: Clip.hardEdge,
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(20),
-    ),
-    child: Column(
-      children: [
-        Container(
-          margin: EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          clipBehavior: Clip.hardEdge,
-          height: 175,
-          width: 115,
-        ),
-        Text(
-          title,
-          style: TextStyle(
-            color: Colors.white,
-            fontFamily: 'NotoSans',
-            fontSize: 15,
-            overflow: TextOverflow.ellipsis,
-          ),
-          maxLines: 2,
         ),
       ],
     ),

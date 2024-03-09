@@ -30,6 +30,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   final releasesRes = json.decode(await fetch(releasesUrl))[0];
   final String currentVersion = packageInfo.version;
   final String latestVersion = releasesRes['tag_name'];
+  print("$currentVersion , $latestVersion");
   final String description = releasesRes['body'];
   final bool pre = releasesRes['prerelease'];
   if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
@@ -53,6 +54,7 @@ showUpdateSheet(
   showModalBottomSheet(
     showDragHandle: true,
     backgroundColor: backgroundColor,
+    isScrollControlled: true,
     context: context,
     builder: (context) {
       return Container(
@@ -61,19 +63,28 @@ showUpdateSheet(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (pre)
-              Text("Test Version",
-                  style: TextStyle(color: textSubColor, fontFamily: "Poppins")),
-            MarkdownBody(
-              data: markdownText,
-              styleSheet: MarkdownStyleSheet(
-                h1: style(),
-                h2: style(),
-                listBullet: style(),
-                h3: style(),
-                h4: style(),
-                h5: style(),
-                h6: style(),
-                p: style(),
+              Text(
+                "Test Version",
+                style: TextStyle(color: textSubColor, fontFamily: "Poppins"),
+              ),
+            Container(
+              child: ListView(
+                shrinkWrap: true,
+                children: [
+                  MarkdownBody(
+                    data: markdownText,
+                    styleSheet: MarkdownStyleSheet(
+                      h1: style(),
+                      h2: style(),
+                      listBullet: style(),
+                      h3: style(),
+                      h4: style(),
+                      h5: style(),
+                      h6: style(),
+                      p: style(),
+                    ),
+                  ),
+                ],
               ),
             ),
             Container(
@@ -139,7 +150,7 @@ showUpdateSheet(
                   ),
                 ],
               ),
-            )
+            ),
           ],
         ),
       );

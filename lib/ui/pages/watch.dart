@@ -284,7 +284,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     );
   }
 
-  //idea use this in customControls file!
+  //idea: use this in customControls file!
   Container overlay() {
     return Container(
       decoration: BoxDecoration(

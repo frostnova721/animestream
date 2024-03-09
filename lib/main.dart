@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/pages/newHome.dart';
+import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animated_splash_screen/animated_splash_screen.dart';
@@ -41,15 +41,18 @@ class _MyAppState extends State<MyApp> {
         onDismissActionReceivedMethod:
             NotificationController.onDismissActionReceivedMethod);
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        systemNavigationBarColor: Colors.black.withOpacity(0.002)));
-
     getTheme().then((theme) => {
-      accentColor = theme.accentColor,
-      textMainColor = theme.textMainColor,
-      textSubColor = theme.textSubColor,
-      backgroundColor = theme.backgroundColor
-    });
+          accentColor = theme.accentColor,
+          textMainColor = theme.textMainColor,
+          textSubColor = theme.textSubColor,
+          backgroundColor = theme.backgroundColor
+        });
+
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.black.withOpacity(0.002),
+    ));
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
 
     super.initState();
   }
@@ -57,7 +60,6 @@ class _MyAppState extends State<MyApp> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-
     return MaterialApp(
       title: 'Animestream',
       theme: ThemeData(

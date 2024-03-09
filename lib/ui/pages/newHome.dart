@@ -2,7 +2,7 @@ import 'package:animestream/core/app/update.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/drawer.dart';
-import 'package:animestream/ui/pages/discover.dart';
+import 'package:animestream/ui/pages/Discover.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/settings.dart';

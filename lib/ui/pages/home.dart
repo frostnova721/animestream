@@ -1,6 +1,6 @@
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/pages/discover.dart';
+import 'package:animestream/ui/pages/Discover.dart';
 import 'package:animestream/ui/pages/newHome.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';

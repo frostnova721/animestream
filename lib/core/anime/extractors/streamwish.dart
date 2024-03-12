@@ -20,7 +20,7 @@ class StreamWish {
           }
         }
       });
-      if (streamLink.isEmpty) throw new Exception("Couldnt get any streams");
+      if (streamLink.isEmpty) throw new Exception("Couldnt get any awish streams");
       return [
         Stream(
             server: "streamwish",
@@ -49,7 +49,7 @@ class StreamWish {
           streamLink = dataMatch.replaceAll(RegExp(r'{|}|\"|file:'), '');
         }
       });
-      // if(streamLink.isEmpty) throw new Exception("Couldnt get any streams");
+      if(streamLink.isEmpty) throw new Exception("Couldnt get any alions streams");
       return [
         Stream(
           quality: "multi-quality",

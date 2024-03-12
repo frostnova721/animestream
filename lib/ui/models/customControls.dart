@@ -14,6 +14,7 @@ class Controls extends StatefulWidget {
   final Map<String, dynamic> episode;
   final Future<void> Function(int, dynamic) refreshPage;
   final Future<void> Function(int) updateWatchProgress;
+  final bool Function() isControlsLocked;
 
   const Controls({
     super.key,
@@ -23,6 +24,7 @@ class Controls extends StatefulWidget {
     required this.episode,
     required this.refreshPage,
     required this.updateWatchProgress,
+    required this.isControlsLocked,
   });
 
   @override
@@ -215,140 +217,9 @@ class _ControlsState extends State<Controls> {
                   children: [
                     widget.topControls,
                     Expanded(
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.only(right: 35),
-                              child: InkWell(
-                                onTap: () async {
-                                  if (currentEpIndex == 0)
-                                    return floatingSnackBar(context,
-                                        "Already on the first episode");
-                                  showModalBottomSheet(
-                                      showDragHandle: true,
-                                      backgroundColor: Color(0xff121212),
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return CustomControlsBottomSheet(
-                                          getEpisodeSources: widget
-                                              .episode['getEpisodeSources'],
-                                          currentSources: currentSources,
-                                          currentEpIndex: currentEpIndex,
-                                          playVideo: playVideo,
-                                          next: false,
-                                          refreshPage: widget.refreshPage,
-                                          epLinks: widget.episode['epLinks'],
-                                        );
-                                      });
-                                },
-                                child: Icon(
-                                  Icons.skip_previous_rounded,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                              ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                fastForward(skipDuration == null ? -skipDuration! : -10);
-                              },
-                              child: Icon(
-                                Icons.fast_rewind_rounded,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
-                            Container(
-                              padding: EdgeInsets.only(left: 35, right: 35),
-                              width: 120,
-                              child: !buffering
-                                  ? InkWell(
-                                      onTap: () {
-                                        if (widget.controller.isPlaying()!) {
-                                          playPause = Icons.play_arrow_rounded;
-                                          widget.controller.pause();
-                                          Wakelock.disable();
-                                        } else {
-                                          playPause = Icons.pause_rounded;
-                                          widget.controller.play();
-                                          Wakelock.enable();
-                                        }
-                                      },
-                                      child: Icon(
-                                        playPause,
-                                        color: Colors.white,
-                                        size: 40,
-                                      ),
-                                    )
-                                  : Container(
-                                      width: 40,
-                                      height: 40,
-                                      child: Center(
-                                        child: CircularProgressIndicator(
-                                          color: accentColor,
-                                        ),
-                                      ),
-                                    ),
-                            ),
-                            InkWell(
-                              onTap: () {
-                                fastForward(skipDuration ?? 10);
-                              },
-                              child: Icon(
-                                Icons.fast_forward_rounded,
-                                color: Colors.white,
-                                size: 40,
-                              ),
-                            ),
-                            Padding(
-                              padding: EdgeInsets.only(left: 35),
-                              child: InkWell(
-                                onTap: () async {
-                                  //get next episode sources!
-                                  if (currentEpIndex + 1 ==
-                                      widget.episode['epLinks'].length)
-                                    return floatingSnackBar(context,
-                                        "You are already in the final episode!");
-                                  if (preloadedSources.isNotEmpty) {
-                                    print("from preload");
-
-                                    await playVideo(preloadedSources[0].link);
-                                    currentEpIndex = currentEpIndex + 1;
-                                    widget.refreshPage(
-                                        currentEpIndex, preloadedSources[0]);
-                                  } else
-                                    showModalBottomSheet(
-                                      showDragHandle: true,
-                                      backgroundColor: Color(0xff121212),
-                                      context: context,
-                                      builder: (BuildContext context) {
-                                        return CustomControlsBottomSheet(
-                                          getEpisodeSources: widget
-                                              .episode['getEpisodeSources'],
-                                          currentSources: currentSources,
-                                          currentEpIndex: currentEpIndex,
-                                          playVideo: playVideo,
-                                          next: true,
-                                          refreshPage: widget.refreshPage,
-                                          epLinks: widget.episode['epLinks'],
-                                        );
-                                      },
-                                    );
-                                },
-                                child: Icon(
-                                  Icons.skip_next_rounded,
-                                  color: Colors.white,
-                                  size: 40,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
+                      child: widget.isControlsLocked()
+                          ? lockedCenterControls()
+                          : centerControls(context),
                     ),
                     Expanded(
                       child: Column(
@@ -380,61 +251,35 @@ class _ControlsState extends State<Controls> {
                                   ),
                                 ],
                               ),
-                              if(megaSkipDuration != null) ElevatedButton(
-                                  onPressed: () {
-                                    fastForward(megaSkipDuration!);
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor:
-                                        Color.fromARGB(68, 0, 0, 0),
-                                    shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(15),
-                                        side: BorderSide(color: accentColor)),
-                                  ),
-                                  child: Container(
-                                    height: 50,
-                                    child: Row(
-                                      children: [
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(right: 5),
-                                          child: Text(
-                                            "+$megaSkipDuration",
-                                            style: TextStyle(
-                                                color: textMainColor,
-                                                fontFamily: "Rubik",
-                                                fontSize: 17),
-                                          ),
-                                        ),
-                                        Icon(
-                                          Icons.fast_forward_rounded,
-                                          color: textMainColor,
-                                        )
-                                      ],
-                                    ),
-                                  )),
+                              if (megaSkipDuration != null)
+                                widget.isControlsLocked()
+                                    ? Container()
+                                    : megaSkipButton(),
                             ],
                           ),
                           Container(
                             alignment: Alignment.bottomCenter,
                             child: Container(
                               height: 20,
-                              child: BetterPlayerMaterialVideoProgressBar(
-                                _controller,
-                                _betterPlayerController,
-                                onDragStart: () {
-                                  widget.controller.pause();
-                                },
-                                onDragEnd: () {
-                                  widget.controller.play();
-                                },
-                                colors: BetterPlayerProgressColors(
-                                  playedColor: accentColor,
-                                  handleColor: accentColor,
-                                  bufferedColor:
-                                      const Color.fromARGB(255, 126, 126, 126),
-                                  backgroundColor:
-                                      Color.fromARGB(255, 63, 63, 63),
+                              child: IgnorePointer(
+                                ignoring: widget.isControlsLocked(),
+                                child: BetterPlayerMaterialVideoProgressBar(
+                                  _controller,
+                                  _betterPlayerController,
+                                  onDragStart: () {
+                                    widget.controller.pause();
+                                  },
+                                  onDragEnd: () {
+                                    widget.controller.play();
+                                  },
+                                  colors: BetterPlayerProgressColors(
+                                    playedColor: accentColor,
+                                    handleColor: accentColor,
+                                    bufferedColor: const Color.fromARGB(
+                                        255, 126, 126, 126),
+                                    backgroundColor:
+                                        Color.fromARGB(255, 63, 63, 63),
+                                  ),
                                 ),
                               ),
                             ),
@@ -450,6 +295,195 @@ class _ControlsState extends State<Controls> {
           ),
         );
       },
+    );
+  }
+
+  ElevatedButton megaSkipButton() {
+    return ElevatedButton(
+        onPressed: () {
+          fastForward(megaSkipDuration!);
+        },
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color.fromARGB(68, 0, 0, 0),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+              side: BorderSide(color: accentColor)),
+        ),
+        child: Container(
+          height: 50,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 5),
+                child: Text(
+                  "+$megaSkipDuration",
+                  style: TextStyle(
+                    color: textMainColor,
+                    fontFamily: "Rubik",
+                    fontSize: 17,
+                  ),
+                ),
+              ),
+              Icon(
+                Icons.fast_forward_rounded,
+                color: textMainColor,
+              )
+            ],
+          ),
+        ));
+  }
+
+  Container lockedCenterControls() {
+    return Container(
+      alignment: Alignment.center,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          if (buffering)
+            Container(
+              width: 40,
+              height: 40,
+              child: Center(
+                child: CircularProgressIndicator(
+                  color: accentColor,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Container centerControls(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Padding(
+            padding: EdgeInsets.only(right: 35),
+            child: InkWell(
+              onTap: () async {
+                if (currentEpIndex == 0)
+                  return floatingSnackBar(
+                      context, "Already on the first episode");
+                showModalBottomSheet(
+                    showDragHandle: true,
+                    backgroundColor: Color(0xff121212),
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CustomControlsBottomSheet(
+                        getEpisodeSources: widget.episode['getEpisodeSources'],
+                        currentSources: currentSources,
+                        currentEpIndex: currentEpIndex,
+                        playVideo: playVideo,
+                        next: false,
+                        refreshPage: widget.refreshPage,
+                        epLinks: widget.episode['epLinks'],
+                      );
+                    });
+              },
+              child: Icon(
+                Icons.skip_previous_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+          InkWell(
+            onTap: () {
+              fastForward(skipDuration ?? 10);
+            },
+            child: Icon(
+              Icons.fast_rewind_rounded,
+              color: Colors.white,
+              size: 40,
+            ),
+          ),
+          Container(
+            padding: EdgeInsets.only(left: 35, right: 35),
+            width: 120,
+            child: !buffering
+                ? InkWell(
+                    onTap: () {
+                      if (widget.controller.isPlaying()!) {
+                        playPause = Icons.play_arrow_rounded;
+                        widget.controller.pause();
+                        Wakelock.disable();
+                      } else {
+                        playPause = Icons.pause_rounded;
+                        widget.controller.play();
+                        Wakelock.enable();
+                      }
+                    },
+                    child: Icon(
+                      playPause,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  )
+                : Container(
+                    width: 40,
+                    height: 40,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: accentColor,
+                      ),
+                    ),
+                  ),
+          ),
+          InkWell(
+            onTap: () {
+              fastForward(skipDuration ?? 10);
+            },
+            child: Icon(
+              Icons.fast_forward_rounded,
+              color: Colors.white,
+              size: 40,
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 35),
+            child: InkWell(
+              onTap: () async {
+                //get next episode sources!
+                if (currentEpIndex + 1 == widget.episode['epLinks'].length)
+                  return floatingSnackBar(
+                      context, "You are already in the final episode!");
+                if (preloadedSources.isNotEmpty) {
+                  print("from preload");
+
+                  await playVideo(preloadedSources[0].link);
+                  currentEpIndex = currentEpIndex + 1;
+                  widget.refreshPage(currentEpIndex, preloadedSources[0]);
+                } else
+                  showModalBottomSheet(
+                    showDragHandle: true,
+                    backgroundColor: Color(0xff121212),
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CustomControlsBottomSheet(
+                        getEpisodeSources: widget.episode['getEpisodeSources'],
+                        currentSources: currentSources,
+                        currentEpIndex: currentEpIndex,
+                        playVideo: playVideo,
+                        next: true,
+                        refreshPage: widget.refreshPage,
+                        epLinks: widget.episode['epLinks'],
+                      );
+                    },
+                  );
+              },
+              child: Icon(
+                Icons.skip_next_rounded,
+                color: Colors.white,
+                size: 40,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

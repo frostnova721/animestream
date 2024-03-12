@@ -4,6 +4,7 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
@@ -34,6 +35,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   List<String> epLinks = [];
   late WatchPageInfo info;
   int currentEpIndex = 0;
+  bool controlsLocked = false;
 
   List qualities = [];
 
@@ -63,7 +65,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     );
 
     _controller = BetterPlayerController(config);
-    
+
     playVideo(info.streamInfo.link);
 
     _controller.setBetterPlayerControlsConfiguration(
@@ -75,14 +77,19 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<dynamic> playVideo(String url) async {
-    await _controller.setupDataSource(BetterPlayerDataSource(
-      BetterPlayerDataSourceType.network,
-      info.streamInfo.link,
-      bufferingConfiguration: BetterPlayerBufferingConfiguration(
-        maxBufferMs: 40000,
+    await _controller.setupDataSource(
+      BetterPlayerDataSource(
+        BetterPlayerDataSourceType.network,
+        info.streamInfo.link,
+        bufferingConfiguration: BetterPlayerBufferingConfiguration(
+          maxBufferMs: 40000,
+        ),
       ),
-    ),
     );
+  }
+
+  bool isControlsLocked() {
+    return controlsLocked;
   }
 
   Future<void> refreshPage(int episodeIndex, dynamic streamInfo) async {
@@ -100,7 +107,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     await updateWatching(info.animeTitle, episodeIndex + 1);
   }
 
-  Future getEpisodeSources(String epLink, Function(List<dynamic>, bool) cb) async {
+  Future getEpisodeSources(
+      String epLink, Function(List<dynamic>, bool) cb) async {
     // final List<dynamic> srcs = [];
     await getStreams(widget.selectedSource, epLink, cb);
     // return srcs;
@@ -118,7 +126,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   void changeQuality(String link, int? currentTime) async {
     if (currentQualityLink != link) {
       playVideo(link);
-      _controller.videoPlayerController!.seekTo(Duration(seconds: currentTime ?? 0));
+      _controller.videoPlayerController
+          ?.seekTo(Duration(seconds: currentTime ?? 0));
       currentQualityLink = link;
     }
   }
@@ -192,7 +201,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                         'currentEpIndex': currentEpIndex,
                       },
                       refreshPage: refreshPage,
-                      updateWatchProgress: updateWatchProgress
+                      updateWatchProgress: updateWatchProgress,
+                      isControlsLocked: isControlsLocked,
                     ),
                   ),
                 ],
@@ -243,19 +253,33 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                       child: Text(
                         "${info.animeTitle}",
                         style: TextStyle(
-                            color: Color.fromARGB(255, 190, 190, 190),
-                            fontFamily: 'NotoSans',
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                            overflow: TextOverflow.ellipsis),
+                          color: Color.fromARGB(255, 190, 190, 190),
+                          fontFamily: 'NotoSans',
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                         maxLines: 1,
-                        // overflow: TextOverflow.ellipsis,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
                 ),
               ),
-              Spacer(),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    controlsLocked = !controlsLocked;
+                  });
+                },
+                icon: Icon(
+                  !controlsLocked
+                      ? Icons.lock_open_rounded
+                      // : Icons.lock_outline_rounded,
+                      : Icons.lock_rounded,
+                  color: textMainColor,
+                ),
+              ),
               IconButton(
                 onPressed: () {
                   showDialog(
@@ -316,11 +340,12 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       height: 40,
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
-        // mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
             onPressed: () {
               showModalBottomSheet(
+                isScrollControlled: true,
                 context: context,
                 backgroundColor: Colors.black,
                 showDragHandle: false,
@@ -329,45 +354,60 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   return Container(
                     width: 400,
                     padding: EdgeInsets.all(20),
-                    child: ListView.builder(
-                      itemCount: qualities.length,
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
-                      itemBuilder: (BuildContext context, index) {
-                        return Container(
-                          padding: EdgeInsets.only(left: 25, right: 25),
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              final src = qualities[index]['link'];
-                              changeQuality(
-                                  src,
-                                  _controller.videoPlayerController!.value
-                                      .position.inSeconds);
-                              Navigator.pop(context);
-                            },
-                            style: ElevatedButton.styleFrom(
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                // side: BorderSide(color: Colors.white)
-                              ),
-                              backgroundColor:
-                                  qualities[index]['link'] == currentQualityLink
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 10),
+                          child: Text(
+                            "Choose Quality",
+                            style: TextStyle(
+                                color: textMainColor,
+                                fontFamily: "Rubik",
+                                fontSize: 20),
+                          ),
+                        ),
+                        ListView.builder(
+                          itemCount: qualities.length,
+                          shrinkWrap: true,
+                          physics: NeverScrollableScrollPhysics(),
+                          itemBuilder: (BuildContext context, index) {
+                            return Container(
+                              padding: EdgeInsets.only(left: 25, right: 25),
+                              child: ElevatedButton(
+                                onPressed: () async {
+                                  final src = qualities[index]['link'];
+                                  changeQuality(
+                                      src,
+                                      _controller.videoPlayerController!.value
+                                          .position.inSeconds);
+                                  Navigator.pop(context);
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                    // side: BorderSide(color: Colors.white)
+                                  ),
+                                  backgroundColor: qualities[index]['link'] ==
+                                          currentQualityLink
                                       ? accentColor
                                       : Color.fromARGB(78, 7, 7, 7),
-                            ),
-                            child: Text(
-                              qualities[index]['quality'],
-                              style: TextStyle(
-                                color: qualities[index]['link'] ==
-                                        currentQualityLink
-                                    ? Colors.black
-                                    : accentColor,
-                                fontFamily: "Poppins",
+                                ),
+                                child: Text(
+                                  "${qualities[index]['quality']}p",
+                                  style: TextStyle(
+                                    color: qualities[index]['link'] ==
+                                            currentQualityLink
+                                        ? Colors.black
+                                        : accentColor,
+                                    fontFamily: "Poppins",
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   );
                 },
@@ -378,6 +418,20 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
               color: Colors.white,
             ),
           ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.push(context,
+                      MaterialPageRoute(builder: (context) => PlayerSetting()));
+                },
+                icon: Icon(
+                  Icons.video_settings_rounded,
+                  color: textMainColor,
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

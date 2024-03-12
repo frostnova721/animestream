@@ -6,7 +6,6 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart';
 import "package:image_gallery_saver/image_gallery_saver.dart";
@@ -23,9 +22,6 @@ class _InfoState extends State<Info> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-    ));
     getInfo(widget.id).then((value) => getEpisodes());
   }
 

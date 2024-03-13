@@ -275,7 +275,6 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                 icon: Icon(
                   !controlsLocked
                       ? Icons.lock_open_rounded
-                      // : Icons.lock_outline_rounded,
                       : Icons.lock_rounded,
                   color: textMainColor,
                 ),

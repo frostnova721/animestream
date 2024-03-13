@@ -70,7 +70,7 @@ class _MyAppState extends State<MyApp> {
         splash: Image.asset("lib/assets/icons/logo_foreground.png"),
         nextScreen: const Home(),
         duration: 1000,
-        backgroundColor: Color(0xFF191918),
+        backgroundColor: backgroundColor,
         animationDuration: Durations.long1,
         splashTransition: SplashTransition.fadeTransition,
         pageTransitionType: PageTransitionType.rightToLeft,

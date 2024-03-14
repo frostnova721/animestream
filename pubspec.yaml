@@ -50,6 +50,7 @@ dependencies:
   flutter_markdown: ^0.6.20
   url_launcher: ^6.2.5
   js_unpack: ^1.0.4
+  webview_flutter: ^4.7.0
 
 
   # The following adds the Cupertino Icons font to your application.

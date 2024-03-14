@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 class HomeDrawer extends StatefulWidget {
   final void Function(int) onItemTapped;
   final int activeIndex;
-  const HomeDrawer({super.key, required this.onItemTapped, required this.activeIndex});
+  const HomeDrawer(
+      {super.key, required this.onItemTapped, required this.activeIndex});
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
 }
 
 class _HomeDrawerState extends State<HomeDrawer> {
-
   int selectedIndex = 0;
 
   @override
@@ -85,12 +85,12 @@ class _HomeDrawerState extends State<HomeDrawer> {
                     Text(
                       items[index]['text'],
                       style: TextStyle(
-                        color:
-                            selectedIndex == index ? Colors.black : textMainColor,
-                        fontFamily: "NotoSans",
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold
-                      ),
+                          color: selectedIndex == index
+                              ? Colors.black
+                              : textMainColor,
+                          fontFamily: "NotoSans",
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold),
                     )
                   ],
                 ),

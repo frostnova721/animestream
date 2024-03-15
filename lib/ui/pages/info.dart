@@ -416,7 +416,7 @@ class _InfoState extends State<Info> {
         "searching: ${data.title['english'] ?? data.title['romaji']}";
     if (foundName != null) {
       text = "found: $foundName";
-    } else if(_epSearcherror) {
+    } else if (_epSearcherror) {
       text = "couldnt't find any matches";
     }
     return Container(
@@ -464,6 +464,34 @@ class _InfoState extends State<Info> {
                     );
                   });
             },
+
+            //list style
+            // child: Container(
+            //   padding: EdgeInsets.only(left: 20, right: 20),
+            //   child: Container(
+            //     child: Column(
+            //       mainAxisSize: MainAxisSize.min,
+            //       children: [
+            //         Padding(
+            //           padding: EdgeInsets.only(left: 20, right: 20),
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //             children: [
+            //               Text("Episode ${index+1}", style: TextStyle(color: textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 17),),
+            //               Icon(Icons.download_rounded, color: textMainColor,)
+            //             ],
+            //           ),
+            //         ),
+            //         Padding(
+            //           padding: const EdgeInsets.only(top:8, left: 40, right: 40),
+            //           child: Divider(),
+            //         )
+            //       ],
+            //     ),
+            //   ),
+            // ),
+
+            //saikou style
             child: Stack(
               children: [
                 Container(

@@ -30,7 +30,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   final releasesRes = json.decode(await fetch(releasesUrl))[0];
   final String currentVersion = packageInfo.version;
   final String latestVersion = releasesRes['tag_name'];
-  print("$currentVersion , $latestVersion");
+  print("current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
   final String description = releasesRes['body'];
   final bool pre = releasesRes['prerelease'];
   if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {

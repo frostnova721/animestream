@@ -34,7 +34,7 @@ class _WebViewState extends State<WebView> {
           onUrlChange: (change) {
             if (change.url!.contains("access_token")) {
               storeVal("token", _extractToken(change.url!))
-                  .then((value) => Navigator.of(context).pop());
+                  .then((value) => Navigator.of(context).pop(true));
             }
           },
           onWebResourceError: (WebResourceError error) {},

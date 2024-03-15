@@ -37,3 +37,17 @@ class TrendingResult {
     required this.title,
   });
 }
+
+class UserModal {
+  final int id;
+  final String? banner;
+  final String? avatar;
+  final String name;
+
+  UserModal({
+    required this.avatar,
+    required this.banner,
+    required this.id,
+    required this.name,
+  });
+}

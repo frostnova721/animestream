@@ -1,3 +1,4 @@
+import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/pages/settingPages/theme.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -12,8 +13,9 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsState extends State<SettingsPage> {
   final List<SettingItem> items = [
+    SettingItem(label: "Account", page: AccountSetting()),
     SettingItem(label: "Theme", page: ThemeSetting()),
-    SettingItem(label: "Player", page: PlayerSetting())
+    SettingItem(label: "Player", page: PlayerSetting()),
   ];
 
   @override

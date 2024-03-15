@@ -1,6 +1,6 @@
 import 'package:hive/hive.dart';
 
-Future<void> getVal(String itemKey) async {
+Future<dynamic> getVal(String itemKey) async {
   var box = await Hive.openBox('animestream');
   if (!box.isOpen) {
     box = await Hive.openBox('animestream');

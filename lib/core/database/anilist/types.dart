@@ -51,3 +51,29 @@ class UserModal {
     required this.name,
   });
 }
+
+class UserAnimeList {
+  final String name;
+  final String status;
+  final List<UserAnimeListItem> list;
+
+  UserAnimeList({
+    required this.list,
+    required this.name,
+    required this.status,
+  });
+}
+
+class UserAnimeListItem {
+  final int id;
+  final Map<String, String?> title;
+  final String coverImage;
+
+  UserAnimeListItem({
+    required this.id,
+    required this.title,
+    required this.coverImage,
+  });
+}
+
+enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }

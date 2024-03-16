@@ -2,7 +2,6 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:graphql/client.dart';
 
 class Anilist {
-  final httpLink = HttpLink("https://graphql.anilist.co");
 
   Future search(String query) async {
     final gquery = '''
@@ -252,7 +251,9 @@ class Anilist {
             timeLeft: info['nextAiringEpisode']?['timeUntilAiring'] ?? '',
             episode: info['nextAiringEpisode']?['episode'] ?? '',
           ),
-          rating: info['averageScore'] != null ? (info['averageScore'] / 10)?.toDouble() : null,
+          rating: info['averageScore'] != null
+              ? (info['averageScore'] / 10)?.toDouble()
+              : null,
           recommended: recommended,
           related: relations,
           status: info['status'],
@@ -352,8 +353,7 @@ class Anilist {
                 }
             }
         ''';
-    final List<dynamic> trendings =
-        await fetchQuery(gquery, RequestType.media);
+    final List<dynamic> trendings = await fetchQuery(gquery, RequestType.media);
 
     final List<TrendingResult> typed = [];
 
@@ -400,19 +400,38 @@ class Anilist {
     };
   }
 
-  fetchQuery(String query, RequestType type) async {
-    final GraphQLClient client =
-        GraphQLClient(link: httpLink, cache: GraphQLCache());
+  fetchQuery(String query, RequestType? type, {String? token}) async {
+    GraphQLClient client;
+    if (token != null)
+      client = GraphQLClient(
+        link: HttpLink("https://graphql.anilist.co",
+            defaultHeaders: {'Authorization': 'Bearer $token'}),
+        cache: GraphQLCache(),
+      );
+    else
+      client = GraphQLClient(
+        link: HttpLink("https://graphql.anilist.co"),
+        cache: GraphQLCache(),
+      );
 
-    final QueryOptions options = QueryOptions(
-      document: gql(query),
-    );
+    QueryResult res;
 
-    final QueryResult res = await client.query(options);
-
+    if (type == RequestType.mutate) {
+      final MutationOptions options = MutationOptions(
+        document: gql(query),
+      );
+      res = await client.mutate(options);
+    } else {
+      final QueryOptions options = QueryOptions(
+        document: gql(query),
+      );
+      res = await client.query(options);
+    }
     if (res.hasException) {
       print(res.exception.toString());
     }
+
+    if (type == null) return res.data;
 
     if (type == RequestType.media) {
       final data = res.data?['Page']['media'];
@@ -427,4 +446,4 @@ class Anilist {
   }
 }
 
-enum RequestType { recentlyUpdatedAnime, media }
+enum RequestType { recentlyUpdatedAnime, media, mutate }

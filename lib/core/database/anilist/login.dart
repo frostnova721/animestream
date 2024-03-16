@@ -1,8 +1,8 @@
 import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/webView.dart';
 import 'package:flutter/material.dart';
-import 'package:graphql/client.dart';
 
 class AniListLogin {
   String url =
@@ -38,20 +38,10 @@ class AniListLogin {
     final String? token = await getVal("token");
     if (token == null) throw new Exception("ERR_COULDNT_GET_TOKEN");
 
-    final GraphQLClient client = GraphQLClient(
-      link: HttpLink("https://graphql.anilist.co",
-          defaultHeaders: {'Authorization': 'Bearer $token'}),
-      cache: GraphQLCache(),
-    );
 
-    final QueryOptions options = QueryOptions(
-      document: gql(query),
-    );
+    final res = await Anilist().fetchQuery(query, null, token: token);
 
-    final res = await client.query(options);
-
-    if(res.hasException) throw new Exception(res.exception);
-    final data = res.data!['Viewer'];
+    final data = res['Viewer'];
     return UserModal(
       id: data['id'],
       avatar: data['avatar']['medium'],
@@ -59,4 +49,12 @@ class AniListLogin {
       banner: data['bannerImage']
     );
   }
+
+  Future<bool> isAnilistLoggedIn() async {
+  final token = await getVal('token');
+  if(token != null)
+   return true;
+  return false;
+}
+
 }

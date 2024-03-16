@@ -1,5 +1,8 @@
 import 'package:animestream/core/app/update.dart';
+import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
+import 'package:animestream/core/database/anilist/login.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/drawer.dart';
 import 'package:animestream/ui/pages/Discover.dart';
@@ -8,7 +11,6 @@ import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -21,16 +23,27 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    AniListLogin().isAnilistLoggedIn().then((loggedIn) {
+      if (loggedIn)
+        AniListLogin().getUserProfile().then(
+            (user) => {userProfile = user, getLists(userName: user.name)});
+      else
+        getLists();
+    });
 
-    getLists();
-    checkForUpdates().then((value) {
-      if(value != null) {
-        showUpdateSheet(context, value.description, value.downloadLink, value.preRelease);
-      }
-    },);
+    checkForUpdates().then(
+      (value) {
+        if (value != null) {
+          showUpdateSheet(
+              context, value.description, value.downloadLink, value.preRelease);
+        }
+      },
+    );
   }
 
   int activeIndex = 0;
+
+  UserModal? userProfile;
 
   TextEditingController textEditingController = TextEditingController();
 
@@ -47,19 +60,10 @@ class _HomeState extends State<Home> {
       });
   }
 
-  Future<void> getLists() async {
+  Future<void> getLists({String? userName}) async {
     try {
-      final box = await Hive.openBox('animestream');
-      List watching = box.get('watching') ?? [];
       recentlyWatched = [];
-      if (watching.length != 0) {
-        if (watching.length > 20) watching = watching.sublist(0, 20);
-        watching.reversed.toList().forEach((e) {
-          recentlyWatched.add(ListElement(
-              widget: animeCard(e['title'], e['imageUrl']), info: e));
-        });
-      }
-      box.close();
+      recentlyWatched = await getWatched(userName: userName);
 
       final List currentlyAiringResponse =
           await Anilist().getCurrentlyAiringAnime();
@@ -98,7 +102,9 @@ class _HomeState extends State<Home> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: MediaQuery.of(context).padding.bottom),
+          padding: EdgeInsets.only(
+              top: MediaQuery.of(context).padding.top,
+              bottom: MediaQuery.of(context).padding.bottom),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -203,7 +209,11 @@ class _HomeState extends State<Home> {
                     padding: EdgeInsets.only(right: 15),
                     child: IconButton(
                       onPressed: () {
-                        Navigator.push(context, MaterialPageRoute(builder: (context) => SettingsPage(),));
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => SettingsPage(),
+                            ));
                       },
                       icon: Icon(
                         Icons.settings,
@@ -325,11 +335,10 @@ class _HomeState extends State<Home> {
                                   Info(id: widgetList[index].info['id']),
                             ),
                           ).then(
-                            (value) {
-                              if (mounted)
-                                setState(() {
-                                  getLists();
-                                });
+                            (value) async {
+                              await getLists(
+                                  userName: userProfile?.name ?? null);
+                              if (mounted) setState(() {});
                             },
                           );
                         },

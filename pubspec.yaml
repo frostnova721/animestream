@@ -103,6 +103,7 @@ flutter:
     - lib/assets/icons/logo_foreground.png
     - lib/assets/images/chisato.jpeg
     - lib/assets/images/mitsuha.jpg
+    - lib/assets/images/profile_banner.jpg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

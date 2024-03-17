@@ -163,4 +163,9 @@ class PlayerSettingState extends State<PlayerSetting> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

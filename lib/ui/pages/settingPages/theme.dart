@@ -87,4 +87,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

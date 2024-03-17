@@ -100,11 +100,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       info.episodeNumber = episodeIndex + 1;
       currentEpIndex = episodeIndex;
     });
-    await updateWatching(info.animeTitle, episodeIndex + 1);
+    await updateWatching( widget.info.id, info.animeTitle, episodeIndex + 1,);
   }
 
   Future<void> updateWatchProgress(int episodeIndex) async {
-    await updateWatching(info.animeTitle, episodeIndex + 1);
+    await updateWatching( widget.info.id, info.animeTitle, episodeIndex + 1, );
   }
 
   Future getEpisodeSources(

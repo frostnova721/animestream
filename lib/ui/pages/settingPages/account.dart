@@ -231,4 +231,9 @@ class _AccountSettingState extends State<AccountSetting> {
       ),
     );
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
 }

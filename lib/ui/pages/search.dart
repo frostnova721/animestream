@@ -108,7 +108,7 @@ class _SearchState extends State<Search> {
           crossAxisSpacing: 3,
           childAspectRatio: 1 / 2.055,
         ),
-        shrinkWrap: false,
+        shrinkWrap: true,
         itemCount: results.length,
         itemBuilder: (context, index) {
           return Container(

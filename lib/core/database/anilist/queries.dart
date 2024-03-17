@@ -15,7 +15,7 @@ class AnilistQueries {
             english
           }
           coverImage {
-            medium
+            large
           }
         }
       }
@@ -37,7 +37,7 @@ class AnilistQueries {
             'english': e['title']['english'],
             'romaji': e['title']['romaji'],
           },
-          coverImage: e['coverImage']['medium'],
+          coverImage: e['coverImage']['large'],
         ));
       });
       arrangedList.add(UserAnimeList(

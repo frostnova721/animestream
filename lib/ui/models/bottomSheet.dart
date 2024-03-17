@@ -130,6 +130,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                             episodeNumber:
                                 widget.bottomSheetContentData.episodeIndex + 1,
                             streamInfo: streamSources[index],
+                            id: widget.bottomSheetContentData.id
                           ),
                           episodes: widget.bottomSheetContentData.epLinks,
                         ),
@@ -232,5 +233,10 @@ class BottomSheetContentState extends State<BottomSheetContent> {
               ),
             ),
           );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

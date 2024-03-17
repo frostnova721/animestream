@@ -1,4 +1,5 @@
 import "package:animestream/core/database/anilist/login.dart";
+import "package:animestream/core/database/anilist/mutations.dart";
 import "package:animestream/core/database/anilist/queries.dart";
 import "package:animestream/core/database/anilist/types.dart";
 import "package:animestream/ui/models/cards.dart";
@@ -9,7 +10,8 @@ Future<void> storeWatching(
   try {
     //add to anilist if the user is logged in
     if (await AniListLogin().isAnilistLoggedIn()) {
-      // final
+      AnilistMutations().mutateAnimeList(
+          id: id, status: MediaStatus.CURRENT, progress: watched);
     } else {
       var box = await Hive.openBox('animestream');
       if (!box.isOpen) {
@@ -34,21 +36,30 @@ Future<void> storeWatching(
   }
 }
 
-Future<void> updateWatching(String title, int watched) async {
+Future<void> updateWatching(int? id, String title, int watched) async {
   try {
-    var box = await Hive.openBox('animestream');
-    if (!box.isOpen) {
-      box = await Hive.openBox('animestream');
-    }
-    final List watchingList = box.get('watching') ?? [];
-    final index = watchingList.indexWhere((item) => item['title'] == title);
-    if (index != -1) {
-      watchingList[index]['watched'] = watched;
+    if (await AniListLogin().isAnilistLoggedIn()) {
+      if (id == null) throw new Exception("ERR_NO_ID_PROVIDED");
+      AnilistMutations().mutateAnimeList(
+        id: id,
+        status: MediaStatus.CURRENT,
+        progress: watched,
+      );
     } else {
-      print('noData');
+      var box = await Hive.openBox('animestream');
+      if (!box.isOpen) {
+        box = await Hive.openBox('animestream');
+      }
+      final List watchingList = box.get('watching') ?? [];
+      final index = watchingList.indexWhere((item) => item['title'] == title);
+      if (index != -1) {
+        watchingList[index]['watched'] = watched;
+      } else {
+        print('noData');
+      }
+      box.put('watching', watchingList);
+      box.close();
     }
-    box.put('watching', watchingList);
-    box.close();
   } catch (err) {
     print(err);
   }
@@ -61,21 +72,21 @@ Future<List<ListElement>> getWatched({String? userName}) async {
       List<UserAnimeList> watchedList = await AnilistQueries()
           .getUserAnimeList(userName, status: MediaStatus.CURRENT);
       final List<ListElement> widgeted = [];
-       if (watchedList.length != 0) {
-      if (watchedList.length > 20) watchedList = watchedList.sublist(0, 20);
-      watchedList[0].list.forEach((element) {
-        //idk why info is necessary :)
-        widgeted.add(ListElement(
-          widget: animeCard(
-              element.title['english'] ?? element.title['romaji'] ?? '',
-              element.coverImage),
-          info: {"id":element.id},
-        ));
-      });
-      return widgeted;
+      if (watchedList.length != 0) {
+        if (watchedList.length > 20) watchedList = watchedList.sublist(0, 20);
+        watchedList[0].list.forEach((element) {
+          //idk why info is necessary :)
+          widgeted.add(ListElement(
+            widget: animeCard(
+                element.title['english'] ?? element.title['romaji'] ?? '',
+                element.coverImage),
+            info: {"id": element.id},
+          ));
+        });
+        return widgeted;
+      }
+      throw new Exception("ERR_USERNAME_NOT_PASSED");
     }
-    throw new Exception("ERR_USERNAME_NOT_PASSED");
-    } 
   } else {
     final box = await Hive.openBox('animestream');
     List watching = box.get('watching') ?? [];

@@ -36,8 +36,10 @@ class WatchPageInfo {
   int episodeNumber;
   final String animeTitle;
   dynamic streamInfo;
+  int id;
 
   WatchPageInfo({
+    required this.id,
     required this.animeTitle,
     required this.episodeNumber,
     required this.streamInfo,

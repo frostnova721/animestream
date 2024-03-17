@@ -51,6 +51,7 @@ class _HomeState extends State<Home> {
   List<ListElement> currentlyAiring = [];
 
   bool dataLoaded = false;
+  bool refreshing = false;
   bool error = false;
 
   onItemTapped(int index) {
@@ -248,14 +249,28 @@ class _HomeState extends State<Home> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                "Recently Watched",
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: textMainColor,
-                  fontFamily: "Rubik",
-                  fontSize: 20,
-                ),
+              Row(
+                children: [
+                  Text(
+                    "Recently Watched",
+                    textAlign: TextAlign.left,
+                    style: TextStyle(
+                      color: textMainColor,
+                      fontFamily: "Rubik",
+                      fontSize: 20,
+                    ),
+                  ),
+                  if (refreshing)
+                    Container(
+                      margin: EdgeInsets.only(left: 15),
+                      height: 15,
+                      width: 15,
+                      child: CircularProgressIndicator(
+                        color: accentColor,
+                        strokeWidth: 2,
+                      ),
+                    )
+                ],
               ),
               dataLoaded
                   ? _cardListMaker(recentlyWatched)
@@ -336,9 +351,15 @@ class _HomeState extends State<Home> {
                             ),
                           ).then(
                             (value) async {
+                              setState(() {
+                                refreshing = true;
+                              });
                               await getLists(
                                   userName: userProfile?.name ?? null);
-                              if (mounted) setState(() {});
+                              if (mounted)
+                                setState(() {
+                                  refreshing = false;
+                                });
                             },
                           );
                         },

@@ -68,11 +68,13 @@ class UserAnimeListItem {
   final int id;
   final Map<String, String?> title;
   final String coverImage;
+  final int? watchProgress;
 
   UserAnimeListItem({
     required this.id,
     required this.title,
     required this.coverImage,
+    required this.watchProgress,
   });
 }
 

@@ -95,16 +95,26 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Future<void> refreshPage(int episodeIndex, dynamic streamInfo) async {
     info.streamInfo = streamInfo;
     qualities = [];
+    bool shouldUpdate = currentEpIndex < episodeIndex;
     await getQualities();
     setState(() {
       info.episodeNumber = episodeIndex + 1;
       currentEpIndex = episodeIndex;
     });
-    await updateWatching( widget.info.id, info.animeTitle, episodeIndex + 1,);
+    if (shouldUpdate)
+      await updateWatching(
+        widget.info.id,
+        info.animeTitle,
+        episodeIndex + 1,
+      );
   }
 
   Future<void> updateWatchProgress(int episodeIndex) async {
-    await updateWatching( widget.info.id, info.animeTitle, episodeIndex + 1, );
+    await updateWatching(
+      widget.info.id,
+      info.animeTitle,
+      episodeIndex + 1,
+    );
   }
 
   Future getEpisodeSources(

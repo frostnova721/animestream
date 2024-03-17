@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
@@ -96,74 +98,79 @@ class _AccountSettingState extends State<AccountSetting> {
                                   ),
                                 ),
                                 alignment: Alignment.bottomCenter,
-                                child: Container(
-                                  height: 65,
-                                  padding: EdgeInsets.only(
-                                      left: 15, right: 15, bottom: 10, top: 10),
-                                  decoration: BoxDecoration(
-                                    color: backgroundColor.withOpacity(0.7),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
+                                child: ClipRRect(
+                                  child: BackdropFilter(
+                                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                                    child: Container(
+                                      height: 65,
+                                      padding: EdgeInsets.only(
+                                          left: 15, right: 15, bottom: 10, top: 10),
+                                      decoration: BoxDecoration(
+                                        color: backgroundColor.withOpacity(0.5),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Padding(
-                                            padding: const EdgeInsets.only(
-                                                right: 15),
-                                            child: CircleAvatar(
-                                              radius: 25,
-                                              backgroundColor: textSubColor,
-                                              backgroundImage: user?.avatar !=
-                                                      null
-                                                  ? NetworkImage(user!.avatar!)
-                                                  : AssetImage(
-                                                      "lib/assets/images/ghost.png",
-                                                    ) as ImageProvider,
-                                            ),
+                                          Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.only(
+                                                    right: 15),
+                                                child: CircleAvatar(
+                                                  radius: 25,
+                                                  backgroundColor: textSubColor,
+                                                  backgroundImage: user?.avatar !=
+                                                          null
+                                                      ? NetworkImage(user!.avatar!)
+                                                      : AssetImage(
+                                                          "lib/assets/images/ghost.png",
+                                                        ) as ImageProvider,
+                                                ),
+                                              ),
+                                              Text(
+                                                user?.name ?? "NO_NAME_ERR", //lol
+                                                style: TextStyle(
+                                                    color: textMainColor,
+                                                    fontFamily: "NotoSans",
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 20,
+                                                    overflow:
+                                                        TextOverflow.ellipsis),
+                                                maxLines: 2,
+                                              ),
+                                            ],
                                           ),
-                                          Text(
-                                            user?.name ?? "NO_NAME_ERR", //lol
-                                            style: TextStyle(
-                                                color: textMainColor,
+                                          ElevatedButton(
+                                            onPressed: () {
+                                              setState(() {
+                                                AniListLogin().removeToken().then(
+                                                      (value) => setState(() {
+                                                        anilistLoggedIn = false;
+                                                      }),
+                                                    );
+                                              });
+                                            },
+                                            style: ElevatedButton.styleFrom(
+                                                backgroundColor: Colors.transparent,
+                                                shape: RoundedRectangleBorder(
+                                                    side: BorderSide(
+                                                        color: accentColor),
+                                                    borderRadius:
+                                                        BorderRadius.circular(35))),
+                                            child: Text(
+                                              "Logout",
+                                              style: TextStyle(
+                                                color: accentColor,
                                                 fontFamily: "NotoSans",
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 20,
-                                                overflow:
-                                                    TextOverflow.ellipsis),
-                                            maxLines: 2,
+                                              ),
+                                            ),
                                           ),
                                         ],
                                       ),
-                                      ElevatedButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            AniListLogin().removeToken().then(
-                                                  (value) => setState(() {
-                                                    anilistLoggedIn = false;
-                                                  }),
-                                                );
-                                          });
-                                        },
-                                        style: ElevatedButton.styleFrom(
-                                            backgroundColor: backgroundColor,
-                                            shape: RoundedRectangleBorder(
-                                                side: BorderSide(
-                                                    color: accentColor),
-                                                borderRadius:
-                                                    BorderRadius.circular(35))),
-                                        child: Text(
-                                          "Logout",
-                                          style: TextStyle(
-                                            color: accentColor,
-                                            fontFamily: "NotoSans",
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                                    ),
                                   ),
                                 ),
                               )

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class ListElement {
   Widget widget;
-  dynamic info;
+  Map<String, dynamic> info;
 
   ListElement({required this.widget, required this.info});
 }

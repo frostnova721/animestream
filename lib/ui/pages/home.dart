@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/app/update.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
@@ -25,8 +26,12 @@ class _HomeState extends State<Home> {
     super.initState();
     AniListLogin().isAnilistLoggedIn().then((loggedIn) {
       if (loggedIn)
-        AniListLogin().getUserProfile().then(
-            (user) => {userProfile = user, getLists(userName: user.name)});
+        AniListLogin().getUserProfile().then((user) => {
+              userProfile = user,
+              storedUserData = user,
+              print(storedUserData?.name),
+              getLists(userName: user.name),
+            });
       else
         getLists();
     });
@@ -51,8 +56,8 @@ class _HomeState extends State<Home> {
   List<ListElement> currentlyAiring = [];
 
   bool dataLoaded = false;
-  bool refreshing = false;
   bool error = false;
+  bool refreshing = false;
 
   onItemTapped(int index) {
     if (mounted)
@@ -64,7 +69,21 @@ class _HomeState extends State<Home> {
   Future<void> getLists({String? userName}) async {
     try {
       recentlyWatched = [];
-      recentlyWatched = await getWatched(userName: userName);
+      List<UserAnimeListItem> watched =
+          await getWatchedList(userName: userName);
+      if (watched.length > 20) watched = watched.sublist(0, 20);
+      watched.forEach((item) {
+        final title = item.title['title'] ??
+            item.title['english'] ??
+            item.title['romaji'] ??
+            '';
+        recentlyWatched.add(
+          ListElement(
+            widget: animeCard(title, item.coverImage),
+            info: {'id': item.id},
+          ),
+        );
+      });
 
       final List currentlyAiringResponse =
           await Anilist().getCurrentlyAiringAnime();
@@ -114,7 +133,6 @@ class _HomeState extends State<Home> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Container(
-                    // width: MediaQuery.of(context).size.width - 100,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -160,6 +178,18 @@ class _HomeState extends State<Home> {
                                   builder: (context) =>
                                       Search(searchedText: input),
                                 ),
+                              ).then(
+                                (value) async {
+                                  setState(() {
+                                    refreshing = true;
+                                  });
+                                  await getLists(
+                                      userName: userProfile?.name ?? null);
+                                  if (mounted)
+                                    setState(() {
+                                      refreshing = false;
+                                    });
+                                },
                               );
                             },
                             cursorColor: accentColor,

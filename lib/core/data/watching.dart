@@ -1,8 +1,8 @@
+import "package:animestream/core/app/runtimeDatas.dart";
 import "package:animestream/core/database/anilist/login.dart";
 import "package:animestream/core/database/anilist/mutations.dart";
 import "package:animestream/core/database/anilist/queries.dart";
 import "package:animestream/core/database/anilist/types.dart";
-import "package:animestream/ui/models/cards.dart";
 import "package:hive/hive.dart";
 
 Future<void> storeWatching(
@@ -65,40 +65,54 @@ Future<void> updateWatching(int? id, String title, int watched) async {
   }
 }
 
-Future<List<ListElement>> getWatched({String? userName}) async {
-  final List<ListElement> recentlyWatched = [];
+Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
+  final List<UserAnimeListItem> recentlyWatched = [];
   if (await AniListLogin().isAnilistLoggedIn()) {
     if (userName != null) {
       List<UserAnimeList> watchedList = await AnilistQueries()
           .getUserAnimeList(userName, status: MediaStatus.CURRENT);
-      final List<ListElement> widgeted = [];
-      if (watchedList.length != 0) {
-        if (watchedList.length > 20) watchedList = watchedList.sublist(0, 20);
-        watchedList[0].list.forEach((element) {
-          //idk why info is necessary :)
-          widgeted.add(ListElement(
-            widget: animeCard(
-                element.title['english'] ?? element.title['romaji'] ?? '',
-                element.coverImage),
-            info: {"id": element.id},
-          ));
-        });
-        return widgeted;
+      final list = watchedList[0].list.reversed.toList();
+      if (list.length != 0) {
+        return list;
+      } else {
+        throw new Exception("COULDNT_FIND_ANY_ANIMES_IN_CURRENT");
       }
-      throw new Exception("ERR_USERNAME_NOT_PASSED");
     }
+    throw new Exception("ERR_USERNAME_NOT_PASSED");
   } else {
     final box = await Hive.openBox('animestream');
     List watching = box.get('watching') ?? [];
 
     if (watching.length != 0) {
-      if (watching.length > 20) watching = watching.sublist(0, 20);
       watching.reversed.toList().forEach((e) {
-        recentlyWatched.add(
-            ListElement(widget: animeCard(e['title'], e['imageUrl']), info: e));
+        print(e);
+        recentlyWatched.add(UserAnimeListItem(
+          id: e['id'],
+          //just give the key as title since its just one
+          title: {
+            'title': e['title']
+          },
+          coverImage: e['imageUrl'],
+          watchProgress: e['watched']
+        ));
       });
+      box.close();
     }
-    box.close();
+    return recentlyWatched;
   }
-  return recentlyWatched;
+}
+
+Future<int> getAnimeWatchProgress(int id) async {
+  if (await AniListLogin().isAnilistLoggedIn()) {
+    if(storedUserData == null) throw new Exception("ERR_NO_USERDATA");
+    final watching = await getWatchedList(userName: storedUserData!.name);
+    final item = watching.where((item) => item.id == id).firstOrNull;
+    if(item != null) return item.watchProgress ?? 0;
+  } else {
+    final box = await Hive.openBox('animestream');
+    final List watching = box.get('watching') ?? [];
+    final item = watching.where((item) => item['id'] == id).firstOrNull;
+    if (item != null) return item['watched'];
+  }
+  return 0;
 }

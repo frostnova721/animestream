@@ -393,7 +393,7 @@ class _ControlsState extends State<Controls> {
           ),
           InkWell(
             onTap: () {
-              fastForward(skipDuration ?? 10);
+              fastForward(skipDuration != null ? -skipDuration! : -10);
             },
             child: Icon(
               Icons.fast_rewind_rounded,

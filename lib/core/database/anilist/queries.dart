@@ -8,6 +8,7 @@ class AnilistQueries {
     lists {
       name
       entries {
+        progress
         media {
           id
           title {
@@ -30,14 +31,15 @@ class AnilistQueries {
     data.forEach((element) {
       final List<UserAnimeListItem> animes = [];
       element['entries'].forEach((e) {
-        e = e['media'];
+        final media = e['media'];
         animes.add(UserAnimeListItem(
-          id: e['id'],
+          id: media['id'],
           title: {
-            'english': e['title']['english'],
-            'romaji': e['title']['romaji'],
+            'english': media['title']['english'],
+            'romaji': media['title']['romaji'],
           },
-          coverImage: e['coverImage']['large'],
+          coverImage: media['coverImage']['large'],
+          watchProgress: e['progress']
         ));
       });
       arrangedList.add(UserAnimeList(

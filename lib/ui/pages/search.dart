@@ -16,6 +16,7 @@ class Search extends StatefulWidget {
 
 class _SearchState extends State<Search> {
   List<ListElement> results = [];
+  List<ListElement> exactMatches = [];
 
   TextEditingController textEditingController = TextEditingController();
 
@@ -27,12 +28,16 @@ class _SearchState extends State<Search> {
     searchResults.forEach((ele) {
       final image =
           ele['coverImage']['large'] ?? ele['coverImage']['extraLarge'];
-      final title = ele['title']['english'] ?? ele['title']['romaji'];
+      final String title = ele['title']['english'] ?? ele['title']['romaji'];
       // final id = ele['id'];
       results.add(ListElement(widget: animeCard(title, image), info: ele));
-      setState(() {
-        _searching = false;
-      });
+      if (query.toLowerCase() == title.toLowerCase()) {
+        exactMatches
+            .add(ListElement(widget: animeCard(title, image), info: ele));
+      }
+    });
+    setState(() {
+      _searching = false;
     });
   }
 
@@ -46,20 +51,26 @@ class _SearchState extends State<Search> {
     addCards(widget.searchedText);
   }
 
+  bool exactMatch = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Column(
-        children: [
-          SizedBox(
-            height: 60,
-          ),
-          Container(
-            padding: EdgeInsets.only(left: 25, right: 25, top: 25),
-            child: _searchBar(),
-          ),
-          Expanded(
+      body: Padding(
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                top: 15,
+                left: 25,
+                right: 25,
+                bottom: 25
+              ),
+              child: _searchBar(),
+            ),
+            Expanded(
               child: _searching
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -81,49 +92,82 @@ class _SearchState extends State<Search> {
                         )
                       ],
                     )
-                  : _searchResults()),
-        ],
+                  : _searchResults(),
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Container _searchResults() {
     return Container(
-      foregroundDecoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Colors.black,
-            Colors.transparent,
-          ],
-          begin: Alignment.bottomCenter,
-          end: Alignment.topCenter,
-          stops: [0, 0.05],
-        ),
-      ),
       padding: EdgeInsets.only(left: 15, right: 15),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          mainAxisSpacing: 15,
-          crossAxisCount: 3,
-          crossAxisSpacing: 3,
-          childAspectRatio: 1 / 2.055,
-        ),
-        shrinkWrap: true,
-        itemCount: results.length,
-        itemBuilder: (context, index) {
-          return Container(
-            child: GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Info(id: results[index].info['id']),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: EdgeInsets.only(bottom: 20),
+              child: Row(
+                children: [
+                  Checkbox(
+                    value: exactMatch,
+                    onChanged: (val) => setState(() {
+                      exactMatch = val!;
+                    }),
+                    activeColor: accentColor,
+                    checkColor: Colors.black,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  Text(
+                    "exact match",
+                    style: TextStyle(
+                      color: textMainColor,
+                      fontFamily: "NotoSans",
+                      fontWeight: FontWeight.bold,
+                    ),
+                  )
+                ],
+              ),
+            ),
+            OrientationBuilder(
+              builder: (context, orientation) => GridView.builder(
+                padding: EdgeInsets.zero,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: orientation == Orientation.portrait ? 3 : 7,
+                    // childAspectRatio: 1 / 1.88,
+                    childAspectRatio: 120 /
+                        225 //set as width and height of each child container
+                    ),
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemCount: exactMatch ? exactMatches.length : results.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Info(
+                              id: exactMatch
+                                  ? exactMatches[index].info['id']
+                                  : results[index].info['id'],
+                            ),
+                          ),
+                        );
+                      },
+                      child: exactMatch
+                          ? exactMatches[index].widget
+                          : results[index].widget,
                     ),
                   );
                 },
-                child: results[index].widget),
-          );
-        },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

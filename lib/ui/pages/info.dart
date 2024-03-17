@@ -1,4 +1,5 @@
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/cards.dart';
@@ -6,7 +7,6 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
 import 'package:http/http.dart';
 import "package:image_gallery_saver/image_gallery_saver.dart";
 
@@ -23,6 +23,7 @@ class _InfoState extends State<Info> {
   void initState() {
     super.initState();
     getInfo(widget.id).then((value) => getEpisodes());
+    getWatched();
   }
 
   bool dataLoaded = false;
@@ -38,13 +39,10 @@ class _InfoState extends State<Info> {
   bool _epSearcherror = false;
 
   Future<void> getWatched() async {
-    final box = await Hive.openBox('animestream');
-    final List watching = box.get('watching') ?? [];
-    final item = watching.where((item) => item['id'] == widget.id).firstOrNull;
-    if (item != null) {
-      watched = item['watched'];
-      started = true;
-    }
+    final item = await getAnimeWatchProgress(widget.id);
+    watched = item == 0 ? 1 : item;
+    started = item == 0 ? false : true;
+
     if (mounted) setState(() {});
   }
 
@@ -105,7 +103,6 @@ class _InfoState extends State<Info> {
       final sr = await searchInSource(
           selectedSource, data.title['english'] ?? data.title['romaji']);
       final links = await getAnimeEpisodes(selectedSource, sr[0]['alias']);
-      getWatched();
       if (mounted)
         setState(() {
           epLinks = links;
@@ -115,7 +112,6 @@ class _InfoState extends State<Info> {
       try {
         final sr = await searchInSource(selectedSource, data.title['romaji']);
         final links = await getAnimeEpisodes(selectedSource, sr[0]['alias']);
-        getWatched();
         if (mounted)
           setState(() {
             epLinks = links;

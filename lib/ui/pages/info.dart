@@ -34,6 +34,7 @@ class _InfoState extends State<Info> {
   List<String> epLinks = [];
   List streamSources = [];
   int watched = 1;
+  int watchedPercentage = 0;
   bool started = false;
   List qualities = [];
   bool _epSearcherror = false;
@@ -376,7 +377,12 @@ class _InfoState extends State<Info> {
             },
           );
         },
-        child: Container(
+        child:
+            // Column(
+            // crossAxisAlignment: CrossAxisAlignment.start,
+            // mainAxisSize: MainAxisSize.min,
+            // children: [
+            Container(
           width: 325,
           height: 80,
           child: Center(
@@ -403,6 +409,19 @@ class _InfoState extends State<Info> {
             ),
           ),
         ),
+
+        //needs to store progress :(
+        // Container(
+        //   width: 325 * (watchedPercentage / 100),
+        //   margin: EdgeInsets.only(left: 15),
+        //   height: 2,
+        //   decoration: BoxDecoration(
+        //     borderRadius: BorderRadius.circular(10),
+        //     color: textMainColor,
+        //   ),
+        // ),
+        // ],
+        // ),
       ),
     );
   }

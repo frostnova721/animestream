@@ -62,12 +62,8 @@ class _SearchState extends State<Search> {
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.only(
-                top: 15,
-                left: 25,
-                right: 25,
-                bottom: 25
-              ),
+              padding:
+                  EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
               child: _searchBar(),
             ),
             Expanded(
@@ -132,39 +128,42 @@ class _SearchState extends State<Search> {
               ),
             ),
             OrientationBuilder(
-              builder: (context, orientation) => GridView.builder(
-                padding: EdgeInsets.zero,
-                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: orientation == Orientation.portrait ? 3 : 7,
-                    // childAspectRatio: 1 / 1.88,
-                    childAspectRatio: 120 /
-                        225 //set as width and height of each child container
-                    ),
-                shrinkWrap: true,
-                physics: NeverScrollableScrollPhysics(),
-                itemCount: exactMatch ? exactMatches.length : results.length,
-                itemBuilder: (context, index) {
-                  return Container(
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Info(
-                              id: exactMatch
-                                  ? exactMatches[index].info['id']
-                                  : results[index].info['id'],
+              builder: (context, orientation) {
+                return GridView.builder(
+                  padding: EdgeInsets.zero,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount:
+                          orientation == Orientation.portrait ? 3 : 7,
+                      // childAspectRatio: 1 / 1.88,
+                      childAspectRatio: 120 /
+                          225 //set as width and height of each child container
+                      ),
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
+                  itemCount: exactMatch ? exactMatches.length : results.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Info(
+                                id: exactMatch
+                                    ? exactMatches[index].info['id']
+                                    : results[index].info['id'],
+                              ),
                             ),
-                          ),
-                        );
-                      },
-                      child: exactMatch
-                          ? exactMatches[index].widget
-                          : results[index].widget,
-                    ),
-                  );
-                },
-              ),
+                          );
+                        },
+                        child: exactMatch
+                            ? exactMatches[index].widget
+                            : results[index].widget,
+                      ),
+                    );
+                  },
+                );
+              },
             ),
           ],
         ),
@@ -208,5 +207,10 @@ class _SearchState extends State<Search> {
       ),
       style: TextStyle(color: Colors.white, fontFamily: "Poppins"),
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }

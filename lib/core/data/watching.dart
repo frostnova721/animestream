@@ -112,7 +112,10 @@ Future<int> getAnimeWatchProgress(int id) async {
     final box = await Hive.openBox('animestream');
     final List watching = box.get('watching') ?? [];
     final item = watching.where((item) => item['id'] == id).firstOrNull;
-    if (item != null) return item['watched'];
+    await box.close();
+    if (item != null) {
+      return item['watched'];
+    }
   }
   return 0;
 }

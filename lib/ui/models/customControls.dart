@@ -98,6 +98,7 @@ class _ControlsState extends State<Controls> {
                   epLinks: widget.episode['epLinks'],
                   currentEpIndex: currentEpIndex,
                   refreshPage: widget.refreshPage,
+                  updateCurrentEpIndex: updateCurrentEpIndex,
                 );
               });
         }
@@ -115,6 +116,10 @@ class _ControlsState extends State<Controls> {
   List preloadedSources = [];
   int? skipDuration;
   int? megaSkipDuration;
+
+  void updateCurrentEpIndex(int updatedIndex) {
+    currentEpIndex = updatedIndex;
+  }
 
   Future<void> assignSettings() async {
     final settings = await Settings().getSettings();
@@ -364,6 +369,7 @@ class _ControlsState extends State<Controls> {
           Padding(
             padding: EdgeInsets.only(right: 35),
             child: InkWell(
+              borderRadius: BorderRadius.circular(10),
               onTap: () async {
                 if (currentEpIndex == 0)
                   return floatingSnackBar(
@@ -381,6 +387,7 @@ class _ControlsState extends State<Controls> {
                         next: false,
                         refreshPage: widget.refreshPage,
                         epLinks: widget.episode['epLinks'],
+                        updateCurrentEpIndex: updateCurrentEpIndex,
                       );
                     });
               },
@@ -392,6 +399,7 @@ class _ControlsState extends State<Controls> {
             ),
           ),
           InkWell(
+            borderRadius: BorderRadius.circular(10),
             onTap: () {
               fastForward(skipDuration != null ? -skipDuration! : -10);
             },
@@ -406,6 +414,7 @@ class _ControlsState extends State<Controls> {
             width: 120,
             child: !buffering
                 ? InkWell(
+                    borderRadius: BorderRadius.circular(10),
                     onTap: () {
                       if (widget.controller.isPlaying()!) {
                         playPause = Icons.play_arrow_rounded;
@@ -434,6 +443,7 @@ class _ControlsState extends State<Controls> {
                   ),
           ),
           InkWell(
+            borderRadius: BorderRadius.circular(10),
             onTap: () {
               fastForward(skipDuration ?? 10);
             },
@@ -446,6 +456,7 @@ class _ControlsState extends State<Controls> {
           Padding(
             padding: EdgeInsets.only(left: 35),
             child: InkWell(
+              borderRadius: BorderRadius.circular(10),
               onTap: () async {
                 //get next episode sources!
                 if (currentEpIndex + 1 == widget.episode['epLinks'].length)
@@ -455,25 +466,26 @@ class _ControlsState extends State<Controls> {
                   print("from preload");
 
                   await playVideo(preloadedSources[0].link);
-                  currentEpIndex = currentEpIndex + 1;
+                  print(currentEpIndex);
                   widget.refreshPage(currentEpIndex, preloadedSources[0]);
                 } else
-                  showModalBottomSheet(
-                    showDragHandle: true,
-                    backgroundColor: Color(0xff121212),
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CustomControlsBottomSheet(
-                        getEpisodeSources: widget.episode['getEpisodeSources'],
-                        currentSources: currentSources,
-                        currentEpIndex: currentEpIndex,
-                        playVideo: playVideo,
-                        next: true,
-                        refreshPage: widget.refreshPage,
-                        epLinks: widget.episode['epLinks'],
-                      );
-                    },
-                  );
+                showModalBottomSheet(
+                  showDragHandle: true,
+                  backgroundColor: Color(0xff121212),
+                  context: context,
+                  builder: (BuildContext context) {
+                    return CustomControlsBottomSheet(
+                      getEpisodeSources: widget.episode['getEpisodeSources'],
+                      currentSources: currentSources,
+                      currentEpIndex: currentEpIndex,
+                      playVideo: playVideo,
+                      next: true,
+                      refreshPage: widget.refreshPage,
+                      epLinks: widget.episode['epLinks'],
+                      updateCurrentEpIndex: updateCurrentEpIndex,
+                    );
+                  },
+                );
               },
               child: Icon(
                 Icons.skip_next_rounded,
@@ -496,6 +508,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
   final int currentEpIndex;
   final List<String> epLinks;
   final Function refreshPage;
+  final Function(int) updateCurrentEpIndex;
   const CustomControlsBottomSheet({
     super.key,
     required this.getEpisodeSources,
@@ -505,6 +518,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
     required this.epLinks,
     required this.currentEpIndex,
     required this.refreshPage,
+    required this.updateCurrentEpIndex, //this updation is just for custom controls. i think this whole file needs a redesign (its really confusing than other files)
   });
 
   @override
@@ -601,6 +615,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
               currentEpIndex =
                   widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
               widget.refreshPage(currentEpIndex, currentSources[index]);
+              widget.updateCurrentEpIndex(currentEpIndex);
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(

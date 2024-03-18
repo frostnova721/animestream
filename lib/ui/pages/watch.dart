@@ -96,16 +96,16 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     info.streamInfo = streamInfo;
     qualities = [];
     bool shouldUpdate = currentEpIndex < episodeIndex;
-    await getQualities();
-    setState(() {
+     setState(() {
       info.episodeNumber = episodeIndex + 1;
       currentEpIndex = episodeIndex;
     });
+    await getQualities();
     if (shouldUpdate)
       await updateWatching(
         widget.info.id,
         info.animeTitle,
-        episodeIndex + 1,
+        episodeIndex,
       );
   }
 
@@ -137,7 +137,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     if (currentQualityLink != link) {
       playVideo(link);
       _controller.videoPlayerController
-          ?.seekTo(Duration(seconds: currentTime ?? 0));
+          !.seekTo(Duration(seconds: currentTime ?? 0));
       currentQualityLink = link;
     }
   }

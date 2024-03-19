@@ -4,7 +4,7 @@ import 'package:animestream/core/database/anilist/types.dart';
 class AnilistQueries {
   Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) async {
     final query = '''query {
-  MediaListCollection(userName: "$userName", type: ANIME ${status != null ? ", status: ${status.name}" : ''}) {
+  MediaListCollection(userName: "$userName", type: ANIME ${status != null ? ", status: ${status.name}" : ''}, sort: UPDATED_TIME) {
     lists {
       name
       entries {

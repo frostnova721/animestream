@@ -135,7 +135,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   void changeQuality(String link, int? currentTime) async {
     if (currentQualityLink != link) {
-      playVideo(link);
+      await playVideo(link);
       _controller.videoPlayerController
           !.seekTo(Duration(seconds: currentTime ?? 0));
       currentQualityLink = link;

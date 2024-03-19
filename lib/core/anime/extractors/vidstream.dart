@@ -40,6 +40,8 @@ class Vidstream {
 
     List<Stream> qualityList = [];
 
+    if(parsed['source'] == null && parsed['source_bk'] == null) throw new Exception("No stream found");
+
     for(final src in parsed['source']) {
       qualityList.add(Stream(
         quality: "multi-quality",

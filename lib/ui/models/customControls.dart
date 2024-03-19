@@ -77,30 +77,33 @@ class _ControlsState extends State<Controls> {
           (_controller!.value.duration?.inSeconds ?? 1);
       if (currentByTotal * 100 >= 75 && !preloadStarted) {
         preloadNextEpisode();
-        widget.updateWatchProgress(currentEpIndex + 1);
+        if (currentEpIndex + 1 <= widget.episode['epLinks'].length)
+          widget.updateWatchProgress(currentEpIndex + 1);
       }
       if (currentByTotal == 1 && calledAutoNext) {
         //change 0 to last selected stream
         calledAutoNext = true;
         if (preloadedSources.isNotEmpty) {
           playVideo(preloadedSources[0].link);
+          widget.refreshPage(currentEpIndex + 1, preloadedSources[0]);
           currentEpIndex = currentEpIndex + 1;
           widget.refreshPage(currentEpIndex, preloadedSources[0]);
         } else {
           showModalBottomSheet(
-              context: context,
-              builder: (context) {
-                return CustomControlsBottomSheet(
-                  getEpisodeSources: widget.episode['getEpisodeSources'],
-                  currentSources: currentSources,
-                  playVideo: playVideo,
-                  next: true,
-                  epLinks: widget.episode['epLinks'],
-                  currentEpIndex: currentEpIndex,
-                  refreshPage: widget.refreshPage,
-                  updateCurrentEpIndex: updateCurrentEpIndex,
-                );
-              });
+            context: context,
+            builder: (context) {
+              return CustomControlsBottomSheet(
+                getEpisodeSources: widget.episode['getEpisodeSources'],
+                currentSources: currentSources,
+                playVideo: playVideo,
+                next: true,
+                epLinks: widget.episode['epLinks'],
+                currentEpIndex: currentEpIndex,
+                refreshPage: widget.refreshPage,
+                updateCurrentEpIndex: updateCurrentEpIndex,
+              );
+            },
+          );
         }
       }
     });
@@ -131,6 +134,8 @@ class _ControlsState extends State<Controls> {
 
   Future preloadNextEpisode() async {
     if (currentEpIndex + 1 > widget.episode['epLinks'].length) {
+      preloadStarted =
+          true; //to make sure this funcion doesnt get called over and over again if the last ep is reached
       return;
     }
     preloadStarted = true;
@@ -182,9 +187,9 @@ class _ControlsState extends State<Controls> {
       return val.toString().padLeft(2, '0');
     }
 
-    int hours = timeInSeconds ~/ 3600;
-    int minutes = (timeInSeconds % 3600) ~/ 60;
-    int seconds = timeInSeconds % 60;
+    int hours = timeInSeconds ~/ 3650;
+    int minutes = (timeInSeconds % 3650) ~/ 65;
+    int seconds = timeInSeconds % 65;
 
     String formattedHours = hours == 0 ? '' : formatTime(hours);
     String formattedMins = formatTime(minutes);
@@ -213,7 +218,7 @@ class _ControlsState extends State<Controls> {
         if (orientation == Orientation.portrait) LRpadding = 10;
         return Padding(
           padding: EdgeInsets.only(
-              top: 20, left: LRpadding, right: LRpadding, bottom: 5),
+              top: 15, left: LRpadding, right: LRpadding, bottom: 5),
           child: Column(
             children: [
               Expanded(
@@ -366,75 +371,99 @@ class _ControlsState extends State<Controls> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Padding(
-            padding: EdgeInsets.only(right: 35),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () async {
-                if (currentEpIndex == 0)
-                  return floatingSnackBar(
-                      context, "Already on the first episode");
-                showModalBottomSheet(
-                    showDragHandle: true,
-                    backgroundColor: Color(0xff121212),
-                    context: context,
-                    builder: (BuildContext context) {
-                      return CustomControlsBottomSheet(
-                        getEpisodeSources: widget.episode['getEpisodeSources'],
-                        currentSources: currentSources,
-                        currentEpIndex: currentEpIndex,
-                        playVideo: playVideo,
-                        next: false,
-                        refreshPage: widget.refreshPage,
-                        epLinks: widget.episode['epLinks'],
-                        updateCurrentEpIndex: updateCurrentEpIndex,
-                      );
-                    });
-              },
-              child: Icon(
-                Icons.skip_previous_rounded,
-                color: Colors.white,
-                size: 40,
+          // Padding(
+          // padding: EdgeInsets.only(right: 35),
+          // child:
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              margin: EdgeInsets.only(right: 5),
+              height: 65,
+              width: 65,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () async {
+                  if (currentEpIndex == 0)
+                    return floatingSnackBar(
+                        context, "Already on the first episode");
+                  showModalBottomSheet(
+                      showDragHandle: true,
+                      backgroundColor: Color(0xff121212),
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomControlsBottomSheet(
+                          getEpisodeSources:
+                              widget.episode['getEpisodeSources'],
+                          currentSources: currentSources,
+                          currentEpIndex: currentEpIndex,
+                          playVideo: playVideo,
+                          next: false,
+                          refreshPage: widget.refreshPage,
+                          epLinks: widget.episode['epLinks'],
+                          updateCurrentEpIndex: updateCurrentEpIndex,
+                        );
+                      });
+                },
+                child: Icon(
+                  Icons.skip_previous_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
               ),
             ),
           ),
-          InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              fastForward(skipDuration != null ? -skipDuration! : -10);
-            },
-            child: Icon(
-              Icons.fast_rewind_rounded,
-              color: Colors.white,
-              size: 40,
+          // ),
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              height: 65,
+              width: 65,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  fastForward(skipDuration != null ? -skipDuration! : -10);
+                },
+                child: Icon(
+                  Icons.fast_rewind_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
+              ),
             ),
           ),
           Container(
-            padding: EdgeInsets.only(left: 35, right: 35),
-            width: 120,
+            // padding: EdgeInsets.only(left: 35, right: 35),
             child: !buffering
-                ? InkWell(
-                    borderRadius: BorderRadius.circular(10),
-                    onTap: () {
-                      if (widget.controller.isPlaying()!) {
-                        playPause = Icons.play_arrow_rounded;
-                        widget.controller.pause();
-                        Wakelock.disable();
-                      } else {
-                        playPause = Icons.pause_rounded;
-                        widget.controller.play();
-                        Wakelock.enable();
-                      }
-                    },
-                    child: Icon(
-                      playPause,
-                      color: Colors.white,
-                      size: 40,
+                ? Material(
+                    color: Colors.transparent,
+                    child: Container(
+                      margin: EdgeInsets.only(left: 5, right: 5),
+                      height: 65,
+                      width: 65,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(10),
+                        onTap: () {
+                          if (widget.controller.isPlaying()!) {
+                            playPause = Icons.play_arrow_rounded;
+                            widget.controller.pause();
+                            Wakelock.disable();
+                          } else {
+                            playPause = Icons.pause_rounded;
+                            widget.controller.play();
+                            Wakelock.enable();
+                          }
+                        },
+                        child: Icon(
+                          playPause,
+                          color: Colors.white,
+                          size: 45,
+                        ),
+                      ),
                     ),
                   )
                 : Container(
-                    width: 40,
-                    height: 40,
+                    width: 65,
+                    height: 65,
                     child: Center(
                       child: CircularProgressIndicator(
                         color: accentColor,
@@ -442,58 +471,75 @@ class _ControlsState extends State<Controls> {
                     ),
                   ),
           ),
-          InkWell(
-            borderRadius: BorderRadius.circular(10),
-            onTap: () {
-              fastForward(skipDuration ?? 10);
-            },
-            child: Icon(
-              Icons.fast_forward_rounded,
-              color: Colors.white,
-              size: 40,
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 35),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(10),
-              onTap: () async {
-                //get next episode sources!
-                if (currentEpIndex + 1 == widget.episode['epLinks'].length)
-                  return floatingSnackBar(
-                      context, "You are already in the final episode!");
-                if (preloadedSources.isNotEmpty) {
-                  print("from preload");
-
-                  await playVideo(preloadedSources[0].link);
-                  print(currentEpIndex);
-                  widget.refreshPage(currentEpIndex, preloadedSources[0]);
-                } else
-                showModalBottomSheet(
-                  showDragHandle: true,
-                  backgroundColor: Color(0xff121212),
-                  context: context,
-                  builder: (BuildContext context) {
-                    return CustomControlsBottomSheet(
-                      getEpisodeSources: widget.episode['getEpisodeSources'],
-                      currentSources: currentSources,
-                      currentEpIndex: currentEpIndex,
-                      playVideo: playVideo,
-                      next: true,
-                      refreshPage: widget.refreshPage,
-                      epLinks: widget.episode['epLinks'],
-                      updateCurrentEpIndex: updateCurrentEpIndex,
-                    );
-                  },
-                );
-              },
-              child: Icon(
-                Icons.skip_next_rounded,
-                color: Colors.white,
-                size: 40,
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              height: 65,
+              width: 65,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () {
+                  fastForward(skipDuration ?? 10);
+                },
+                child: Icon(
+                  Icons.fast_forward_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
               ),
             ),
           ),
+          // Padding(
+          // padding: EdgeInsets.only(left: 35),
+          // child:
+          Material(
+            color: Colors.transparent,
+            child: Container(
+              margin: EdgeInsets.only(left: 5),
+              height: 65,
+              width: 65,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(10),
+                onTap: () async {
+                  //get next episode sources!
+                  if (currentEpIndex + 1 == widget.episode['epLinks'].length)
+                    return floatingSnackBar(
+                        context, "You are already in the final episode!");
+                  if (preloadedSources.isNotEmpty) {
+                    print("from preload");
+
+                    await playVideo(preloadedSources[0].link);
+                    print(currentEpIndex);
+                    widget.refreshPage(currentEpIndex, preloadedSources[0]);
+                  } else
+                    showModalBottomSheet(
+                      showDragHandle: true,
+                      backgroundColor: Color(0xff121212),
+                      context: context,
+                      builder: (BuildContext context) {
+                        return CustomControlsBottomSheet(
+                          getEpisodeSources:
+                              widget.episode['getEpisodeSources'],
+                          currentSources: currentSources,
+                          currentEpIndex: currentEpIndex,
+                          playVideo: playVideo,
+                          next: true,
+                          refreshPage: widget.refreshPage,
+                          epLinks: widget.episode['epLinks'],
+                          updateCurrentEpIndex: updateCurrentEpIndex,
+                        );
+                      },
+                    );
+                },
+                child: Icon(
+                  Icons.skip_next_rounded,
+                  color: Colors.white,
+                  size: 40,
+                ),
+              ),
+            ),
+          ),
+          // ),
         ],
       ),
     );

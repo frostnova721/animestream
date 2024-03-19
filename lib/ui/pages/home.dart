@@ -71,7 +71,7 @@ class _HomeState extends State<Home> {
       recentlyWatched = [];
       List<UserAnimeListItem> watched =
           await getWatchedList(userName: userName);
-      if (watched.length > 20) watched = watched.sublist(0, 20);
+      if (watched.length > 40) watched = watched.sublist(0, 40);
       watched.forEach((item) {
         final title = item.title['title'] ??
             item.title['english'] ??

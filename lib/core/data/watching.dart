@@ -85,7 +85,6 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
 
     if (watching.length != 0) {
       watching.reversed.toList().forEach((e) {
-        print(e);
         recentlyWatched.add(UserAnimeListItem(
           id: e['id'],
           //just give the key as title since its just one

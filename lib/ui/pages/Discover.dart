@@ -54,14 +54,20 @@ class _DiscoverState extends State<Discover> {
 
   Future<void> getRecentlyUpdated() async {
     final list = await Anilist().recentlyUpdated();
+    //to filter out the dupes
+    Set<int> ids = {};
     for (final elem in list) {
-      recentlyUpdatedList.add(
-        ListElement(
-          widget: animeCard(
-              elem.title['english'] ?? elem.title['romaji'] ?? '', elem.cover),
-          info: {'id': elem.id},
-        ),
-      );
+      if (!ids.contains(elem.id)) {
+        ids.add(elem.id);
+        recentlyUpdatedList.add(
+          ListElement(
+            widget: animeCard(
+                elem.title['english'] ?? elem.title['romaji'] ?? '',
+                elem.cover),
+            info: {'id': elem.id},
+          ),
+        );
+      }
     }
     if (mounted)
       setState(() {
@@ -70,7 +76,7 @@ class _DiscoverState extends State<Discover> {
   }
 
   Future<void> pageTimeout() async {
-    if(timer != null && timer!.isActive) timer!.cancel();
+    if (timer != null && timer!.isActive) timer!.cancel();
     timer = Timer(Duration(seconds: 5), () {
       if (currentPage < trendingList.length - 1) {
         currentPage++;
@@ -97,8 +103,8 @@ class _DiscoverState extends State<Discover> {
               controller: _pageController,
               itemCount: trendingList.length,
               onPageChanged: (page) async {
-                 currentPage = page;
-                 await pageTimeout();
+                currentPage = page;
+                await pageTimeout();
               },
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {

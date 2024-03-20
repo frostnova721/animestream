@@ -42,6 +42,7 @@ List<DropdownMenuEntry> getSourceDropdownList() {
 }
 
 searchInSource(String source, String query) async {
+  if(query.isEmpty) throw new Exception("ERR_EMPTY_QUERY");
   final searchResults = await getClass(source).search(query);
   return searchResults;
 }

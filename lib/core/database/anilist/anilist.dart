@@ -1,8 +1,9 @@
+import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:graphql/client.dart';
 
 class Anilist {
-
   Future search(String query) async {
     final gquery = '''
             query {
@@ -56,7 +57,7 @@ class Anilist {
     return data;
   }
 
-  Future getAnimeInfo(int anilistId) async {
+  Future<AnilistInfo> getAnimeInfo(int anilistId) async {
     final query = '''
       {
         Page(perPage: 100) {
@@ -163,16 +164,20 @@ class Anilist {
           }
         }
       }
+      mediaListEntry {
+        status
+      }
     }
   }
 }''';
 
     try {
-      final result = await fetchQuery(query, RequestType.media);
+      final String? token = await getVal("token");
+      final result = await fetchQuery(query, RequestType.media, token: token);
 
       final Map<String, dynamic> info = result[0];
 
-      convertToIAnimeDetails() {
+      AnilistInfo convertToIAnimeDetails() {
         final List<Map<String, dynamic>> characters = [];
 
         info['characters']['edges'].forEach((character) {
@@ -228,7 +233,7 @@ class Anilist {
           ));
         });
 
-        final convertedGuy = (
+        final convertedGuy = AnilistInfo(
           title: {
             'english': info['title']['english'],
             'native': info['title']['native'],
@@ -264,6 +269,7 @@ class Anilist {
               .replaceAll(RegExp(r'<[^>]*>'), "")
               .replaceAll(RegExp(r'\n+'), '\n'),
           tags: info['tags'].map((tag) => tag['name']),
+          mediaListStatus: info['mediaListEntry']?['status'],
         );
 
         return convertedGuy;
@@ -337,7 +343,7 @@ class Anilist {
     final gquery = '''
             query {
                 Page(perPage: 10) {
-                    media(type: ANIME, sort: TRENDING_DESC, isAdult: false) {
+                    media(type: ANIME, sort: TRENDING_DESC, isAdult: false, season: ${getCurrentSeason()}) {
                         id
                         title {
                             english

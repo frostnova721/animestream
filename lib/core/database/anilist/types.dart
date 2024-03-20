@@ -78,4 +78,48 @@ class UserAnimeListItem {
   });
 }
 
+class AnilistInfo {
+  final Map<String, String?> title;
+  final Map<String, String> aired;
+  final String? banner;
+  final String cover;
+  final String duration;
+  final int? episodes;
+  final List<dynamic> genres;
+  final List<Map<String, dynamic>> characters;
+  final Object nextAiringEpisode;
+  final double? rating;
+  final List<dynamic> recommended;
+  final List<dynamic> related;
+  final String? status;
+  final String type;
+  final List<String?> studios;
+  final List<Object?> synonyms;
+  final String? synopsis;
+  final dynamic tags;
+  final String? mediaListStatus;
+
+  AnilistInfo({
+    required this.aired,
+    required this.banner,
+    required this.characters,
+    required this.cover,
+    required this.duration,
+    required this.episodes,
+    required this.genres,
+    required this.mediaListStatus,
+    required this.nextAiringEpisode,
+    required this.rating,
+    required this.recommended,
+    required this.related,
+    required this.status,
+    required this.studios,
+    required this.synonyms,
+    required this.synopsis,
+    required this.tags,
+    required this.title,
+    required this.type,
+  });
+}
+
 enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }

@@ -126,12 +126,12 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                           selectedSource:
                               widget.bottomSheetContentData.selectedSource,
                           info: WatchPageInfo(
-                            animeTitle: widget.bottomSheetContentData.title,
-                            episodeNumber:
-                                widget.bottomSheetContentData.episodeIndex + 1,
-                            streamInfo: streamSources[index],
-                            id: widget.bottomSheetContentData.id
-                          ),
+                              animeTitle: widget.bottomSheetContentData.title,
+                              episodeNumber:
+                                  widget.bottomSheetContentData.episodeIndex +
+                                      1,
+                              streamInfo: streamSources[index],
+                              id: widget.bottomSheetContentData.id),
                           episodes: widget.bottomSheetContentData.epLinks,
                         ),
                       ),
@@ -238,5 +238,116 @@ class BottomSheetContentState extends State<BottomSheetContent> {
   @override
   void dispose() {
     super.dispose();
+  }
+}
+
+//long name lol
+class MediaListStatusBottomSheet extends StatefulWidget {
+  final String status;
+  const MediaListStatusBottomSheet({super.key, required this.status});
+
+  @override
+  State<MediaListStatusBottomSheet> createState() =>
+      _MediaListStatusBottomSheetState();
+}
+
+class _MediaListStatusBottomSheetState
+    extends State<MediaListStatusBottomSheet> {
+  @override
+  void initState() {
+    super.initState();
+    itemList = makeItemList();
+  }
+
+  final List<String> statuses = ["PLANNED", "CURRENT", "COMPLETED"];
+
+  List<DropdownMenuEntry> itemList = [];
+
+  List<DropdownMenuEntry> makeItemList() {
+    final List<DropdownMenuEntry> itemList = [];
+    statuses.forEach((element) {
+      itemList.add(
+        DropdownMenuEntry(
+          value: element,
+          label: element,
+          style: ButtonStyle(
+            foregroundColor: MaterialStatePropertyAll(Colors.white),
+            textStyle: MaterialStatePropertyAll(
+              TextStyle(
+                color: Colors.white,
+                fontFamily: "Rubik",
+                fontSize: 16,
+              ),
+            ),
+          ),
+        ),
+      );
+    });
+    return itemList;
+  }
+
+  String getInitialSelection() {
+    if (widget.status == "UNTRACKED")
+      return itemList[0].value;
+    else
+      return widget.status;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      width: double.infinity,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          DropdownMenu(
+            menuStyle: MenuStyle(
+              backgroundColor: MaterialStatePropertyAll(backgroundColor),
+              shape: MaterialStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  side: BorderSide(
+                    width: 1,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            textStyle: TextStyle(
+              color: Colors.white,
+              fontFamily: "Poppins",
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              border: OutlineInputBorder(
+                borderSide: BorderSide(width: 1, color: Colors.white),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              contentPadding: EdgeInsets.only(left: 20, right: 20),
+            ),
+            width: 300,
+            label: Text(
+              "status",
+              style: TextStyle(color: textMainColor, fontFamily: "Poppins"),
+            ),
+            initialSelection: getInitialSelection(),
+            dropdownMenuEntries: itemList,
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ElevatedButton(
+                onPressed: () {},
+                child: Text("cancel"),
+              ),
+              ElevatedButton(
+                onPressed: () {},
+                child: Text("save"),
+              ),
+            ],
+          )
+        ],
+      ),
+    );
   }
 }

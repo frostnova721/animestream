@@ -1,6 +1,7 @@
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -38,6 +39,7 @@ class _InfoState extends State<Info> {
   bool started = false;
   List qualities = [];
   bool _epSearcherror = false;
+  MediaStatus? status;
 
   Future<void> getWatched() async {
     final item = await getAnimeWatchProgress(widget.id);
@@ -60,11 +62,23 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     final info = await Anilist().getAnimeInfo(id);
-    if (info != null || info.length != 0) {
-      setState(() {
-        dataLoaded = true;
-        data = info;
-      });
+    setState(() {
+      dataLoaded = true;
+      data = info;
+    });
+  }
+
+  IconData getTrackerIcon() {
+    switch (data!.mediaListStatus) {
+      case "CURRENT":
+        return Icons.movie_outlined;
+      case "PLANNED":
+        return Icons.calendar_month_outlined;
+      case "COMPLETED":
+        return Icons.done_all_rounded;
+      //add more :(
+      default:
+        return Icons.add_rounded;
     }
   }
 
@@ -143,37 +157,73 @@ class _InfoState extends State<Info> {
                   children: [
                     _stack(),
                     Container(
-                      // width: 120,
                       margin: EdgeInsets.only(top: 30),
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                            backgroundColor: accentColor,
-                            fixedSize: Size(135, 55)),
-                        onPressed: () {
-                          setState(() {
-                            infoPage = !infoPage;
-                          });
-                        },
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              infoPage
-                                  ? Icons.play_arrow_rounded
-                                  : Icons.info_rounded,
-                              color: Colors.black,
-                              size: 28,
-                            ),
-                            Text(
-                              infoPage ? "watch" : "info",
-                              style: TextStyle(
-                                color: Colors.black,
-                                fontFamily: "Poppins",
-                                fontSize: 18,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            // width: 120,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                  backgroundColor: accentColor,
+                                  fixedSize: Size(135, 55)),
+                              onPressed: () {
+                                setState(() {
+                                  infoPage = !infoPage;
+                                });
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    infoPage
+                                        ? Icons.play_arrow_rounded
+                                        : Icons.info_rounded,
+                                    color: Colors.black,
+                                    size: 28,
+                                  ),
+                                  Text(
+                                    infoPage ? "watch" : "info",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: "Poppins",
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ),
-                          ],
-                        ),
+                          ),
+                          Container(
+                            child: ElevatedButton(
+                              onPressed: () {
+                                showModalBottomSheet(
+                                  context: context,
+                                  backgroundColor: backgroundColor,
+                                  showDragHandle: true,
+                                  builder: (context) =>
+                                      MediaListStatusBottomSheet(status: data.mediaListStatus != null ? data.mediaListStatus : "UNTRACKED",),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                shape: CircleBorder(
+                                  side: BorderSide(
+                                    color: accentColor,
+                                  ),
+                                ),
+                                fixedSize: Size(50, 50),
+                                backgroundColor: backgroundColor,
+                                padding: EdgeInsets.zero,
+                              ),
+                              child: Icon(
+                                getTrackerIcon(),
+                                color: accentColor,
+                                size: 28,
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                     ),
                     Container(

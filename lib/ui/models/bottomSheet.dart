@@ -2,6 +2,8 @@ import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
+import 'package:animestream/core/database/anilist/mutations.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -243,8 +245,11 @@ class BottomSheetContentState extends State<BottomSheetContent> {
 
 //long name lol
 class MediaListStatusBottomSheet extends StatefulWidget {
-  final String status;
-  const MediaListStatusBottomSheet({super.key, required this.status});
+  final String? status;
+  final int id;
+  final Function(String) refreshListStatus;
+  const MediaListStatusBottomSheet(
+      {super.key, required this.status, required this.id, required this.refreshListStatus});
 
   @override
   State<MediaListStatusBottomSheet> createState() =>
@@ -259,9 +264,23 @@ class _MediaListStatusBottomSheetState
     itemList = makeItemList();
   }
 
-  final List<String> statuses = ["PLANNED", "CURRENT", "COMPLETED"];
+  final List<String> statuses = ["PLANNING", "CURRENT", "COMPLETED"];
 
   List<DropdownMenuEntry> itemList = [];
+  String? initialSelection;
+
+  MediaStatus assignItemEnum(String valueInString) {
+    switch (valueInString) {
+      case "CURRENT":
+        return MediaStatus.CURRENT;
+      case "PLANNING":
+        return MediaStatus.PLANNING;
+      case "COMPLETED":
+        return MediaStatus.COMPLETED;
+      default:
+        throw new Exception("ERR_BAD_STRING");
+    }
+  }
 
   List<DropdownMenuEntry> makeItemList() {
     final List<DropdownMenuEntry> itemList = [];
@@ -287,11 +306,16 @@ class _MediaListStatusBottomSheetState
   }
 
   String getInitialSelection() {
-    if (widget.status == "UNTRACKED")
+    if (widget.status == null) {
+      initialSelection = itemList[0].value;
       return itemList[0].value;
-    else
-      return widget.status;
+    } else {
+      initialSelection = widget.status!;
+      return widget.status!;
+    }
   }
+
+  String? selectedValue;
 
   @override
   Widget build(BuildContext context) {
@@ -302,6 +326,9 @@ class _MediaListStatusBottomSheetState
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           DropdownMenu(
+            onSelected: (value) => {
+              if (value != initialSelection) selectedValue = value,
+            },
             menuStyle: MenuStyle(
               backgroundColor: MaterialStatePropertyAll(backgroundColor),
               shape: MaterialStatePropertyAll(
@@ -336,13 +363,69 @@ class _MediaListStatusBottomSheetState
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              ElevatedButton(
-                onPressed: () {},
-                child: Text("cancel"),
+              Padding(
+                padding: const EdgeInsets.only(right: 20),
+                child: ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    side: BorderSide(
+                      color: accentColor,
+                    ),
+                    textStyle: TextStyle(
+                      color: accentColor,
+                      fontFamily: "Rubik",
+                      fontSize: 18,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    "cancel",
+                    style: TextStyle(
+                      color: accentColor,
+                      fontFamily: "Rubik",
+                      fontSize: 18,
+                    ),
+                  ),
+                ),
               ),
               ElevatedButton(
-                onPressed: () {},
-                child: Text("save"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  side: BorderSide(
+                    color: accentColor,
+                  ),
+                  textStyle: TextStyle(
+                    color: accentColor,
+                    fontFamily: "Rubik",
+                    fontSize: 18,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                ),
+                onPressed: () {
+                  if (selectedValue != null) {
+                    AnilistMutations()
+                        .mutateAnimeList(
+                            id: widget.id,
+                            status: assignItemEnum(selectedValue!));
+                            initialSelection = selectedValue;
+                            widget.refreshListStatus(selectedValue!);
+                  }
+                },
+                child: Text(
+                  "save",
+                  style: TextStyle(
+                    color: accentColor,
+                    fontFamily: "Rubik",
+                    fontSize: 18,
+                  ),
+                ),
               ),
             ],
           )

@@ -66,6 +66,14 @@ class _HomeState extends State<Home> {
       });
   }
 
+  Widget useWidget() {
+    switch(activeIndex) {
+      case 0: return _homeItems();
+      case 1: return Discover(currentSeason: currentlyAiring);
+      default: return _homeItems();
+    }
+  }
+
   Future<void> getLists({String? userName}) async {
     try {
       recentlyWatched = [];
@@ -260,9 +268,7 @@ class _HomeState extends State<Home> {
                   )
                 ],
               ),
-              activeIndex == 0
-                  ? _homeItems()
-                  : Discover(currentSeason: currentlyAiring),
+              useWidget()
             ],
           ),
         ),

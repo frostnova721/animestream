@@ -1,7 +1,6 @@
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
-import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -39,7 +38,7 @@ class _InfoState extends State<Info> {
   bool started = false;
   List qualities = [];
   bool _epSearcherror = false;
-  MediaStatus? status;
+  String? mediaListStatus;
 
   Future<void> getWatched() async {
     final item = await getAnimeWatchProgress(widget.id);
@@ -65,14 +64,15 @@ class _InfoState extends State<Info> {
     setState(() {
       dataLoaded = true;
       data = info;
+      mediaListStatus = data.mediaListStatus;
     });
   }
 
   IconData getTrackerIcon() {
-    switch (data!.mediaListStatus) {
+    switch (mediaListStatus) {
       case "CURRENT":
         return Icons.movie_outlined;
-      case "PLANNED":
+      case "PLANNING":
         return Icons.calendar_month_outlined;
       case "COMPLETED":
         return Icons.done_all_rounded;
@@ -80,6 +80,13 @@ class _InfoState extends State<Info> {
       default:
         return Icons.add_rounded;
     }
+  }
+
+  //to refresh the mediaList status
+  void refreshListStatus(String status) {
+    setState(() {
+      mediaListStatus = status;
+    });
   }
 
   Future<void> getQualities() async {
@@ -203,7 +210,7 @@ class _InfoState extends State<Info> {
                                   backgroundColor: backgroundColor,
                                   showDragHandle: true,
                                   builder: (context) =>
-                                      MediaListStatusBottomSheet(status: data.mediaListStatus != null ? data.mediaListStatus : "UNTRACKED",),
+                                      MediaListStatusBottomSheet(status: mediaListStatus, id: widget.id,refreshListStatus: refreshListStatus,),
                                 );
                               },
                               style: ElevatedButton.styleFrom(

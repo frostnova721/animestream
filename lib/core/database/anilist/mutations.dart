@@ -3,7 +3,7 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 
 class AnilistMutations {
-  Future mutateAnimeList({
+  Future<AnilistMutationResult> mutateAnimeList({
     required int id,
     int? score,
     MediaStatus? status,
@@ -16,6 +16,7 @@ class AnilistMutations {
         }
       }
     ''';
-    await Anilist().fetchQuery(query, RequestType.mutate, token: await getVal("token"));
+    final res = await Anilist().fetchQuery(query, RequestType.mutate, token: await getVal("token"));
+    return AnilistMutationResult(status: res?['SaveMediaListEntry']?['status']);
   }
 }

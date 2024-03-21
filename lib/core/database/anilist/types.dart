@@ -122,4 +122,10 @@ class AnilistInfo {
   });
 }
 
+class AnilistMutationResult {
+  final String status;
+
+  AnilistMutationResult({required this.status});
+}
+
 enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }

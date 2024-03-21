@@ -427,6 +427,7 @@ class Anilist {
         document: gql(query),
       );
       res = await client.mutate(options);
+      return res.data;
     } else {
       final QueryOptions options = QueryOptions(
         document: gql(query),

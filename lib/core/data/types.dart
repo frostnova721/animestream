@@ -21,8 +21,3 @@ class SettingsModal {
     };
   }
 }
-
-enum SettingKey {
-  megaSkipDuration,
-  skipDuration
-}

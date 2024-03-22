@@ -8,6 +8,7 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
+import 'package:animestream/core/commons/enums.dart';
 import "package:image_gallery_saver/image_gallery_saver.dart";
 
 class Info extends StatefulWidget {
@@ -76,6 +77,8 @@ class _InfoState extends State<Info> {
         return Icons.calendar_month_outlined;
       case "COMPLETED":
         return Icons.done_all_rounded;
+        case "DROPPED":
+        return Icons.close_rounded;
       //add more :(
       default:
         return Icons.add_rounded;

@@ -3,6 +3,7 @@ import "package:animestream/core/database/anilist/login.dart";
 import "package:animestream/core/database/anilist/mutations.dart";
 import "package:animestream/core/database/anilist/queries.dart";
 import "package:animestream/core/database/anilist/types.dart";
+import 'package:animestream/core/commons/enums.dart';
 import "package:hive/hive.dart";
 
 Future<void> storeWatching(
@@ -92,7 +93,8 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
             'title': e['title']
           },
           coverImage: e['imageUrl'],
-          watchProgress: e['watched']
+          watchProgress: e['watched'],
+          rating: e['rating'] ?? null,
         ));
       });
       box.close();

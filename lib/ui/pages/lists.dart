@@ -1,5 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -16,7 +18,7 @@ class AnimeLists extends StatefulWidget {
 class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   @override
   void initState() {
-    tabController = TabController(length: 3, vsync: this);
+    tabController = TabController(length: 4, vsync: this);
     getAnimeList();
     super.initState();
   }
@@ -24,6 +26,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   List<ListElement> watchingList = [];
   List<ListElement> plannedList = [];
   List<ListElement> completedList = [];
+  List<ListElement> droppedList = [];
+  List<UserAnimeList> rawAnimeList = [];
 
   List<ListElement> getSelectedTabView() {
     switch (tabIndex) {
@@ -32,18 +36,21 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       case 1:
         return plannedList;
       case 2:
+        return droppedList;
+      case 3:
         return completedList;
       default:
         throw new Exception("UNKNOWN STUFF (BAD INDEX)");
     }
   }
 
-  Future<void> getAnimeList() async {
-    final list = await AnilistQueries().getUserAnimeList(storedUserData!.name);
-    if (list.isEmpty) throw new Exception("List is empty lil bro!");
+  void injectToCorrespondingList(List<UserAnimeList> list) {
+    //empty all the lists first
     watchingList = [];
     plannedList = [];
     completedList = [];
+
+    //inject em boi!
     list.forEach((element) {
       if (element.name == "Watching") {
         element.list.forEach((item) {
@@ -69,6 +76,18 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
               }));
         });
       }
+      if (element.name == "Dropped") {
+        element.list.forEach((item) {
+          droppedList.add(ListElement(
+              widget: animeCard(
+                item.title['english'] ?? item.title['romaji'] ?? '',
+                item.coverImage,
+              ),
+              info: {
+                'id': item.id,
+              }));
+        });
+      }
       if (element.name == "Completed") {
         element.list.forEach((item) {
           completedList.add(ListElement(
@@ -82,10 +101,64 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
         });
       }
     });
+  }
 
+  Future<void> getAnimeList() async {
+    final list = await AnilistQueries().getUserAnimeList(storedUserData!.name);
+    if (list.isEmpty) throw new Exception("List is empty lil bro!");
+    rawAnimeList = list.reversed.toList();
+    injectToCorrespondingList(rawAnimeList);
     setState(() {
       dataLoaded = true;
     });
+  }
+
+  void sort(SortType type) {
+    switch (type) {
+      case SortType.AtoZ:
+        return setState(() {
+          final atozList = [...rawAnimeList];
+          atozList.forEach(
+            (element) {
+              element.list.sort(
+                (a, b) => a.title['english'] != null
+                    ? a.title['english']!
+                        .compareTo(b.title['english'] ?? b.title['romaji']!)
+                    : a.title['romaji']!
+                        .compareTo(b.title['english'] ?? b.title['romaji']!),
+              );
+            },
+          );
+          injectToCorrespondingList(atozList);
+        });
+
+      case SortType.RecentlyUpdated:
+      //not working as expected. the rawAnimeList is getting modified :(
+        return setState(() {
+          final recentlyUpdatedList = [...rawAnimeList];
+          recentlyUpdatedList[0].list.asMap().values.forEach((element) { print(element.title);});
+          injectToCorrespondingList(recentlyUpdatedList);
+        });
+      case SortType.TopRated:
+      setState(() {
+        final List<UserAnimeList> ratingList = [...rawAnimeList]; 
+          ratingList.forEach(
+            (element) {
+              element.list.sort(
+                (a, b) {
+                  double? ratingA = a.rating;
+                  double? ratingB = b.rating;
+                  if(ratingA == null) ratingA = 0;
+                  if(ratingB == null) ratingB = 0;
+                  return ratingB.compareTo(ratingA);
+                }
+              );
+            },
+          );
+          injectToCorrespondingList(ratingList);
+          rawAnimeList[0].list.asMap().values.forEach((element) { print(element.title);});
+      });
+    }
   }
 
   bool dataLoaded = false;
@@ -134,8 +207,45 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           ),
                         ],
                       ),
-                      IconButton(
-                        onPressed: () {},
+                      PopupMenuButton(
+                        color: backgroundColor,
+                        surfaceTintColor: Colors.white,
+                        tooltip: "sort",
+                        itemBuilder: (context) {
+                          return [
+                            PopupMenuItem(
+                              onTap: () => sort(SortType.AtoZ),
+                              child: Text(
+                                "A-Z",
+                                style: TextStyle(
+                                    color: textMainColor,
+                                    fontFamily: "NotoSans-Bold",
+                                    fontSize: 16),
+                              ),
+                            ),
+                            //shhh
+                            // PopupMenuItem(
+                            //   onTap: () {sort(SortType.RecentlyUpdated);},
+                            //   child: Text(
+                            //     "Recently updated",
+                            //     style: TextStyle(
+                            //         color: textMainColor,
+                            //         fontFamily: "NotoSans-Bold",
+                            //         fontSize: 16),
+                            //   ),
+                            // ),
+                            PopupMenuItem(
+                               onTap: () {sort(SortType.TopRated);},
+                              child: Text(
+                                "Top rated",
+                                style: TextStyle(
+                                    color: textMainColor,
+                                    fontFamily: "NotoSans-Bold",
+                                    fontSize: 16),
+                              ),
+                            ),
+                          ];
+                        },
                         icon: Icon(
                           Icons.sort,
                           color: textMainColor,
@@ -176,6 +286,14 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           height: 50,
                           child: Text(
                             "Planning",
+                            style: _textStyle(),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          height: 50,
+                          child: Text(
+                            "Dropped",
                             style: _textStyle(),
                           ),
                         ),

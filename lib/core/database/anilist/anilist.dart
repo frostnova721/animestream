@@ -1,6 +1,7 @@
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:graphql/client.dart';
 
 class Anilist {
@@ -453,4 +454,3 @@ class Anilist {
   }
 }
 
-enum RequestType { recentlyUpdatedAnime, media, mutate }

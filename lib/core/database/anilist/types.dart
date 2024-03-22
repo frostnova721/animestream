@@ -69,12 +69,14 @@ class UserAnimeListItem {
   final Map<String, String?> title;
   final String coverImage;
   final int? watchProgress;
+  final double? rating;
 
   UserAnimeListItem({
     required this.id,
     required this.title,
     required this.coverImage,
     required this.watchProgress,
+    required this.rating,
   });
 }
 
@@ -128,4 +130,4 @@ class AnilistMutationResult {
   AnilistMutationResult({required this.status});
 }
 
-enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }
+

@@ -3,7 +3,7 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
-import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -27,8 +27,6 @@ class BottomSheetContent extends StatefulWidget {
   @override
   State<BottomSheetContent> createState() => BottomSheetContentState();
 }
-
-enum Type { watch, download }
 
 class BottomSheetContentState extends State<BottomSheetContent> {
   List streamSources = [];
@@ -249,7 +247,10 @@ class MediaListStatusBottomSheet extends StatefulWidget {
   final int id;
   final Function(String) refreshListStatus;
   const MediaListStatusBottomSheet(
-      {super.key, required this.status, required this.id, required this.refreshListStatus});
+      {super.key,
+      required this.status,
+      required this.id,
+      required this.refreshListStatus});
 
   @override
   State<MediaListStatusBottomSheet> createState() =>
@@ -264,7 +265,7 @@ class _MediaListStatusBottomSheetState
     itemList = makeItemList();
   }
 
-  final List<String> statuses = ["PLANNING", "CURRENT", "COMPLETED"];
+  final List<String> statuses = ["PLANNING", "CURRENT", "DROPPED", "COMPLETED"];
 
   List<DropdownMenuEntry> itemList = [];
   String? initialSelection;
@@ -275,6 +276,8 @@ class _MediaListStatusBottomSheetState
         return MediaStatus.CURRENT;
       case "PLANNING":
         return MediaStatus.PLANNING;
+      case "DROPPED":
+        return MediaStatus.DROPPED;
       case "COMPLETED":
         return MediaStatus.COMPLETED;
       default:
@@ -320,45 +323,90 @@ class _MediaListStatusBottomSheetState
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+      padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom, left: 20, right: 20),
       width: double.infinity,
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          DropdownMenu(
-            onSelected: (value) => {
-              if (value != initialSelection) selectedValue = value,
-            },
-            menuStyle: MenuStyle(
-              backgroundColor: MaterialStatePropertyAll(backgroundColor),
-              shape: MaterialStatePropertyAll(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                  side: BorderSide(
-                    width: 1,
-                    color: Colors.white,
+          Column(
+            children: [
+              DropdownMenu(
+                onSelected: (value) => {
+                  if (value != initialSelection) selectedValue = value,
+                },
+                menuStyle: MenuStyle(
+                  backgroundColor: MaterialStatePropertyAll(backgroundColor),
+                  shape: MaterialStatePropertyAll(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(
+                        width: 1,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                ),
+                textStyle: TextStyle(
+                  color: Colors.white,
+                  fontFamily: "Poppins",
+                ),
+                inputDecorationTheme: InputDecorationTheme(
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(width: 1, color: Colors.white),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  contentPadding: EdgeInsets.only(left: 20, right: 20),
+                ),
+                width: 300,
+                label: Text(
+                  "status",
+                  style: TextStyle(color: textMainColor, fontFamily: "Poppins"),
+                ),
+                initialSelection: getInitialSelection(),
+                dropdownMenuEntries: itemList,
+              ),
+              Container(
+                padding: EdgeInsets.only(top: 20),
+                child: Text(
+                  "Score",
+                  style: TextStyle(
+                    color: textMainColor,
+                    fontFamily: "Rubik",
+                    fontSize: 22,
                   ),
                 ),
               ),
-            ),
-            textStyle: TextStyle(
-              color: Colors.white,
-              fontFamily: "Poppins",
-            ),
-            inputDecorationTheme: InputDecorationTheme(
-              border: OutlineInputBorder(
-                borderSide: BorderSide(width: 1, color: Colors.white),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              contentPadding: EdgeInsets.only(left: 20, right: 20),
-            ),
-            width: 300,
-            label: Text(
-              "status",
-              style: TextStyle(color: textMainColor, fontFamily: "Poppins"),
-            ),
-            initialSelection: getInitialSelection(),
-            dropdownMenuEntries: itemList,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.remove_circle_outline_rounded,
+                      color: textMainColor,
+                      size: 35,
+                    ),
+                  ),
+                  Container(
+                    width: 100,
+                    child: TextField(
+                      keyboardType: TextInputType.number,
+                      decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: textMainColor,))),
+                      autocorrect: false,
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {},
+                    icon: Icon(
+                      Icons.add_circle_outline_rounded,
+                      color: textMainColor,
+                      size: 35,
+                    ),
+                  )
+                ],
+              )
+            ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -388,7 +436,7 @@ class _MediaListStatusBottomSheetState
                     style: TextStyle(
                       color: accentColor,
                       fontFamily: "Rubik",
-                      fontSize: 18,
+                      fontSize: 22,
                     ),
                   ),
                 ),
@@ -410,12 +458,10 @@ class _MediaListStatusBottomSheetState
                 ),
                 onPressed: () {
                   if (selectedValue != null) {
-                    AnilistMutations()
-                        .mutateAnimeList(
-                            id: widget.id,
-                            status: assignItemEnum(selectedValue!));
-                            initialSelection = selectedValue;
-                            widget.refreshListStatus(selectedValue!);
+                    AnilistMutations().mutateAnimeList(
+                        id: widget.id, status: assignItemEnum(selectedValue!));
+                    initialSelection = selectedValue;
+                    widget.refreshListStatus(selectedValue!);
                   }
                 },
                 child: Text(
@@ -423,7 +469,7 @@ class _MediaListStatusBottomSheetState
                   style: TextStyle(
                     color: accentColor,
                     fontFamily: "Rubik",
-                    fontSize: 18,
+                    fontSize: 22,
                   ),
                 ),
               ),

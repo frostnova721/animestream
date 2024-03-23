@@ -41,7 +41,7 @@ List<DropdownMenuEntry> getSourceDropdownList() {
   return widget;
 }
 
-searchInSource(String source, String query) async {
+Future<List<Map<String, String?>>> searchInSource(String source, String query) async {
   if(query.isEmpty) throw new Exception("ERR_EMPTY_QUERY");
   final searchResults = await getClass(source).search(query);
   return searchResults;

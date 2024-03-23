@@ -101,7 +101,7 @@ class _DiscoverState extends State<Discover> {
           child: PageView.builder(
               pageSnapping: true,
               controller: _pageController,
-              itemCount: trendingList.length,
+              // itemCount: trendingList.length,
               onPageChanged: (page) async {
                 currentPage = page;
                 await pageTimeout();
@@ -114,7 +114,7 @@ class _DiscoverState extends State<Discover> {
                         context,
                         MaterialPageRoute(
                             builder: (context) => Info(
-                                  id: trendingList[index].id,
+                                  id: trendingList[index % trendingList.length].id,
                                 )));
                   },
                   child: Container(
@@ -140,8 +140,8 @@ class _DiscoverState extends State<Discover> {
                               imageFilter:
                                   ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                               child: Image.network(
-                                trendingList[index].banner ??
-                                    trendingList[index].cover,
+                                trendingList[index % trendingList.length].banner ??
+                                    trendingList[index % trendingList.length].cover,
                                 opacity: AlwaysStoppedAnimation(0.5),
                                 height: 260,
                                 fit: BoxFit.cover,
@@ -158,7 +158,7 @@ class _DiscoverState extends State<Discover> {
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(20),
                                 child: Image.network(
-                                  trendingList[index].cover,
+                                  trendingList[index % trendingList.length].cover,
                                   height: 170,
                                   width: 120,
                                 ),
@@ -175,8 +175,8 @@ class _DiscoverState extends State<Discover> {
                                       padding:
                                           const EdgeInsets.only(bottom: 10.0),
                                       child: Text(
-                                        trendingList[index].title['english'] ??
-                                            trendingList[index]
+                                        trendingList[index % trendingList.length].title['english'] ??
+                                            trendingList[index % trendingList.length]
                                                 .title['romaji'] ??
                                             '',
                                         style: TextStyle(
@@ -190,7 +190,7 @@ class _DiscoverState extends State<Discover> {
                                       ),
                                     ),
                                     Text(
-                                      trendingList[index].genres.join(', '),
+                                      trendingList[index % trendingList.length].genres.join(', '),
                                       style: TextStyle(
                                           color: Color.fromARGB(
                                               255, 180, 180, 180),
@@ -212,7 +212,7 @@ class _DiscoverState extends State<Discover> {
                                             size: 20,
                                           ),
                                           Text(
-                                            "${trendingList[index].rating != null ? trendingList[index].rating! / 10 : '??'}",
+                                            "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
                                             style: TextStyle(
                                                 color: textMainColor,
                                                 fontFamily: "Rubik",

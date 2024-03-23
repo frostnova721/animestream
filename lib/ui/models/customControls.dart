@@ -77,8 +77,9 @@ class _ControlsState extends State<Controls> {
           (_controller!.value.duration?.inSeconds ?? 1);
       if (currentByTotal * 100 >= 75 && !preloadStarted) {
         preloadNextEpisode();
-        if (currentEpIndex + 1 <= widget.episode['epLinks'].length)
+        if (currentEpIndex + 1 < widget.episode['epLinks'].length) {
           widget.updateWatchProgress(currentEpIndex + 1);
+        }
       }
       if (currentByTotal == 1 && calledAutoNext) {
         //change 0 to last selected stream
@@ -284,7 +285,9 @@ class _ControlsState extends State<Controls> {
                                   },
                                   colors: BetterPlayerProgressColors(
                                     playedColor: accentColor,
-                                    handleColor: accentColor,
+                                    handleColor: widget.isControlsLocked()
+                                        ? Colors.transparent
+                                        : accentColor,
                                     bufferedColor: const Color.fromARGB(
                                         255, 126, 126, 126),
                                     backgroundColor:
@@ -310,37 +313,39 @@ class _ControlsState extends State<Controls> {
 
   ElevatedButton megaSkipButton() {
     return ElevatedButton(
-        onPressed: () {
-          fastForward(megaSkipDuration!);
-        },
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color.fromARGB(68, 0, 0, 0),
-          shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15),
-              side: BorderSide(color: accentColor)),
+      onPressed: () {
+        fastForward(megaSkipDuration!);
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color.fromARGB(68, 0, 0, 0),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+          side: BorderSide(color: accentColor),
         ),
-        child: Container(
-          height: 50,
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 5),
-                child: Text(
-                  "+$megaSkipDuration",
-                  style: TextStyle(
-                    color: textMainColor,
-                    fontFamily: "Rubik",
-                    fontSize: 17,
-                  ),
+      ),
+      child: Container(
+        height: 50,
+        child: Row(
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(right: 5),
+              child: Text(
+                "+$megaSkipDuration",
+                style: TextStyle(
+                  color: textMainColor,
+                  fontFamily: "Rubik",
+                  fontSize: 17,
                 ),
               ),
-              Icon(
-                Icons.fast_forward_rounded,
-                color: textMainColor,
-              )
-            ],
-          ),
-        ));
+            ),
+            Icon(
+              Icons.fast_forward_rounded,
+              color: textMainColor,
+            )
+          ],
+        ),
+      ),
+    );
   }
 
   Container lockedCenterControls() {
@@ -464,6 +469,7 @@ class _ControlsState extends State<Controls> {
                 : Container(
                     width: 65,
                     height: 65,
+                    margin: EdgeInsets.only(left: 5, right: 5),
                     child: Center(
                       child: CircularProgressIndicator(
                         color: accentColor,

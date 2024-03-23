@@ -77,7 +77,7 @@ class _InfoState extends State<Info> {
         return Icons.calendar_month_outlined;
       case "COMPLETED":
         return Icons.done_all_rounded;
-        case "DROPPED":
+      case "DROPPED":
         return Icons.close_rounded;
       //add more :(
       default:
@@ -86,9 +86,10 @@ class _InfoState extends State<Info> {
   }
 
   //to refresh the mediaList status
-  void refreshListStatus(String status) {
+  void refreshListStatus(String status, int progress) {
     setState(() {
       mediaListStatus = status;
+      watched = progress;
     });
   }
 
@@ -127,20 +128,34 @@ class _InfoState extends State<Info> {
     try {
       final sr = await searchInSource(
           selectedSource, data.title['english'] ?? data.title['romaji']);
-      final links = await getAnimeEpisodes(selectedSource, sr[0]['alias']);
+          //to find a exact match
+      List<dynamic> match = sr
+          .where(
+            (e) => e['name'] == (data.title['english'] ?? data.title['romaji']),
+          )
+          .toList();
+      if (match.isEmpty) match = sr;
+      final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
       if (mounted)
         setState(() {
           epLinks = links;
-          foundName = sr[0]['name'];
+          foundName = match[0]['name'];
         });
     } catch (err) {
       try {
         final sr = await searchInSource(selectedSource, data.title['romaji']);
-        final links = await getAnimeEpisodes(selectedSource, sr[0]['alias']);
+        //find em match boi
+        List<dynamic> match = sr
+          .where(
+            (e) => e['name'] == data.title['romaji'],
+          )
+          .toList();
+      if (match.isEmpty) match = sr;
+        final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
         if (mounted)
           setState(() {
             epLinks = links;
-            foundName = sr[0]['name'];
+            foundName = match[0]['name'];
           });
       } catch (err) {
         setState(() {
@@ -162,201 +177,210 @@ class _InfoState extends State<Info> {
         backgroundColor: backgroundColor,
         body: dataLoaded
             ? SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _stack(),
-                    Container(
-                      margin: EdgeInsets.only(top: 30),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            // width: 120,
-                            child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                  backgroundColor: accentColor,
-                                  fixedSize: Size(135, 55)),
-                              onPressed: () {
-                                setState(() {
-                                  infoPage = !infoPage;
-                                });
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    infoPage
-                                        ? Icons.play_arrow_rounded
-                                        : Icons.info_rounded,
-                                    color: Colors.black,
-                                    size: 28,
-                                  ),
-                                  Text(
-                                    infoPage ? "watch" : "info",
-                                    style: TextStyle(
+                child: Padding(
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      _stack(),
+                      Container(
+                        margin: EdgeInsets.only(top: 30),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Container(
+                              // width: 120,
+                              child: ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                    backgroundColor: accentColor,
+                                    fixedSize: Size(135, 55)),
+                                onPressed: () {
+                                  setState(() {
+                                    infoPage = !infoPage;
+                                  });
+                                },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      infoPage
+                                          ? Icons.play_arrow_rounded
+                                          : Icons.info_rounded,
                                       color: Colors.black,
-                                      fontFamily: "Poppins",
-                                      fontSize: 18,
+                                      size: 28,
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          Container(
-                            child: ElevatedButton(
-                              onPressed: () {
-                                showModalBottomSheet(
-                                  context: context,
-                                  backgroundColor: backgroundColor,
-                                  showDragHandle: true,
-                                  builder: (context) =>
-                                      MediaListStatusBottomSheet(status: mediaListStatus, id: widget.id,refreshListStatus: refreshListStatus,),
-                                );
-                              },
-                              style: ElevatedButton.styleFrom(
-                                shape: CircleBorder(
-                                  side: BorderSide(
-                                    color: accentColor,
-                                  ),
-                                ),
-                                fixedSize: Size(50, 50),
-                                backgroundColor: backgroundColor,
-                                padding: EdgeInsets.zero,
-                              ),
-                              child: Icon(
-                                getTrackerIcon(),
-                                color: accentColor,
-                                size: 28,
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 45),
-                      padding: EdgeInsets.only(left: 20, right: 20),
-                      alignment: Alignment.center,
-                      // padding: EdgeInsets.only(left: 40, right: 25),
-                      child: Text(
-                        data.title['english'] ?? data.title['romaji'],
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: "NunitoSans",
-                          fontSize: 25,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    infoPage
-                        ? _infoItems(context)
-                        : Column(
-                            children: [
-                              Container(
-                                margin: EdgeInsets.only(top: 30),
-                                child: DropdownMenu(
-                                  initialSelection: sources.first,
-                                  dropdownMenuEntries: getSourceDropdownList(),
-                                  menuHeight: 75,
-                                  width: 300,
-                                  textStyle: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: "Poppins",
-                                  ),
-                                  menuStyle: MenuStyle(
-                                    backgroundColor: MaterialStatePropertyAll(
-                                        Color.fromARGB(255, 0, 0, 0)),
-                                    shape: MaterialStatePropertyAll(
-                                      RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                        side: BorderSide(
-                                          width: 1,
-                                          color: Colors.white,
-                                        ),
+                                    Text(
+                                      infoPage ? "watch" : "info",
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontFamily: "Poppins",
+                                        fontSize: 18,
                                       ),
                                     ),
-                                  ),
-                                  onSelected: (value) {
-                                    selectedSource = value;
-                                    getEpisodes();
-                                  },
-                                  inputDecorationTheme: InputDecorationTheme(
-                                    border: OutlineInputBorder(
-                                      borderSide: BorderSide(
-                                          width: 1, color: Colors.white),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    contentPadding:
-                                        EdgeInsets.only(left: 20, right: 20),
-                                  ),
-                                  label: Text(
-                                    "source",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 20,
-                                        fontFamily: "Rubik",
-                                        overflow: TextOverflow.ellipsis),
-                                  ),
-                                ),
-                              ),
-                              _searchStatus(),
-                              if (foundName != null) _continueButton(),
-                              Container(
-                                margin: EdgeInsets.only(
-                                    top: 25, left: 20, right: 20),
-                                padding: EdgeInsets.only(top: 15, bottom: 20),
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
-                                    color:
-                                        const Color.fromARGB(255, 29, 29, 29)),
-                                child: Column(
-                                  children: [
-                                    _categoryTitle("Episodes"),
-                                    _epSearcherror
-                                        ? Container(
-                                            width: 350,
-                                            height: 120,
-                                            child: Center(
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Image.asset(
-                                                    'lib/assets/images/broken_heart.png',
-                                                    scale: 7.5,
-                                                  ),
-                                                  Text(
-                                                      "Couldnt get any results :(",
-                                                      style: TextStyle(
-                                                          color: Colors.white,
-                                                          fontSize: 16,
-                                                          fontFamily:
-                                                              "NunitoSans"))
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        : foundName != null
-                                            ? _episodes()
-                                            : Container(
-                                                width: 350,
-                                                height: 100,
-                                                child: Center(
-                                                  child:
-                                                      CircularProgressIndicator(
-                                                          color: accentColor),
-                                                ),
-                                              ),
-                                    // ),
                                   ],
                                 ),
                               ),
-                            ],
+                            ),
+                            Container(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: backgroundColor,
+                                    showDragHandle: true,
+                                    builder: (context) =>
+                                        MediaListStatusBottomSheet(
+                                      status: mediaListStatus,
+                                      id: widget.id,
+                                      refreshListStatus: refreshListStatus,
+                                      totalEpisodes: data.episodes ?? 0,
+                                      episodesWatched: watched,
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  shape: CircleBorder(
+                                    side: BorderSide(
+                                      color: accentColor,
+                                    ),
+                                  ),
+                                  fixedSize: Size(50, 50),
+                                  backgroundColor: backgroundColor,
+                                  padding: EdgeInsets.zero,
+                                ),
+                                child: Icon(
+                                  getTrackerIcon(),
+                                  color: accentColor,
+                                  size: 28,
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
+                      Container(
+                        margin: EdgeInsets.only(top: 45),
+                        padding: EdgeInsets.only(left: 20, right: 20),
+                        alignment: Alignment.center,
+                        // padding: EdgeInsets.only(left: 40, right: 25),
+                        child: Text(
+                          data.title['english'] ?? data.title['romaji'],
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontFamily: "NunitoSans",
+                            fontSize: 25,
                           ),
-                  ],
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      infoPage
+                          ? _infoItems(context)
+                          : Column(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(top: 30),
+                                  child: DropdownMenu(
+                                    initialSelection: sources.first,
+                                    dropdownMenuEntries: getSourceDropdownList(),
+                                    menuHeight: 75,
+                                    width: 300,
+                                    textStyle: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "Poppins",
+                                    ),
+                                    menuStyle: MenuStyle(
+                                      backgroundColor: MaterialStatePropertyAll(
+                                          Color.fromARGB(255, 0, 0, 0)),
+                                      shape: MaterialStatePropertyAll(
+                                        RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          side: BorderSide(
+                                            width: 1,
+                                            color: Colors.white,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    onSelected: (value) {
+                                      selectedSource = value;
+                                      getEpisodes();
+                                    },
+                                    inputDecorationTheme: InputDecorationTheme(
+                                      border: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                            width: 1, color: Colors.white),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      contentPadding:
+                                          EdgeInsets.only(left: 20, right: 20),
+                                    ),
+                                    label: Text(
+                                      "source",
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 20,
+                                          fontFamily: "Rubik",
+                                          overflow: TextOverflow.ellipsis),
+                                    ),
+                                  ),
+                                ),
+                                _searchStatus(),
+                                if (foundName != null) _continueButton(),
+                                Container(
+                                  margin: EdgeInsets.only(
+                                      top: 25, left: 20, right: 20),
+                                  padding: EdgeInsets.only(top: 15, bottom: 20),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color:
+                                          const Color.fromARGB(255, 29, 29, 29)),
+                                  child: Column(
+                                    children: [
+                                      _categoryTitle("Episodes"),
+                                      _epSearcherror
+                                          ? Container(
+                                              width: 350,
+                                              height: 120,
+                                              child: Center(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Image.asset(
+                                                      'lib/assets/images/broken_heart.png',
+                                                      scale: 7.5,
+                                                    ),
+                                                    Text(
+                                                        "Couldnt get any results :(",
+                                                        style: TextStyle(
+                                                            color: Colors.white,
+                                                            fontSize: 16,
+                                                            fontFamily:
+                                                                "NunitoSans"))
+                                                  ],
+                                                ),
+                                              ),
+                                            )
+                                          : foundName != null
+                                              ? _episodes()
+                                              : Container(
+                                                  width: 350,
+                                                  height: 100,
+                                                  child: Center(
+                                                    child:
+                                                        CircularProgressIndicator(
+                                                            color: accentColor),
+                                                  ),
+                                                ),
+                                      // ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ],
+                  ),
                 ),
               )
             : Center(
@@ -583,7 +607,7 @@ class _InfoState extends State<Info> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(15),
                         child: Opacity(
-                          opacity: index + 2 > watched ? 1.0 : 0.6,
+                          opacity: index + 1 > watched ? 1.0 : 0.6,
                           child: Image.network(
                             data.cover,
                             width: 140,
@@ -595,7 +619,7 @@ class _InfoState extends State<Info> {
                       Text(
                         "Episode ${index + 1}",
                         style: TextStyle(
-                          color: index + 2 > watched
+                          color: index + 1 > watched
                               ? Colors.white
                               : Color.fromARGB(155, 255, 255, 255),
                           fontFamily: "Poppins",
@@ -637,7 +661,7 @@ class _InfoState extends State<Info> {
                     ],
                   ),
                 ),
-                if (watched > index + 1)
+                if (watched > index)
                   Align(
                       alignment: Alignment.topRight,
                       child: Padding(
@@ -740,7 +764,7 @@ class _InfoState extends State<Info> {
             children: [
               _categoryTitle('Characters'),
               SizedBox(
-                height: 275,
+                height: 260,
                 child: ListView.builder(
                   itemCount: data.characters.length,
                   scrollDirection: Axis.horizontal,
@@ -761,7 +785,7 @@ class _InfoState extends State<Info> {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 30),
+          margin: EdgeInsets.only(top: 20),
           child: Column(
             children: [
               _categoryTitle('Related'),
@@ -770,7 +794,7 @@ class _InfoState extends State<Info> {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 30),
+          margin: EdgeInsets.only(top: 20),
           child: Column(
             children: [
               _categoryTitle('Recommended'),
@@ -799,7 +823,7 @@ class _InfoState extends State<Info> {
   SizedBox _buildRecAndRel(List data, bool recommended) {
     if (data.length == 0)
       return SizedBox(
-        height: 275,
+        height: 240,
         child: Center(
           child: const Text(
             'Nothing to see here!',
@@ -812,7 +836,7 @@ class _InfoState extends State<Info> {
         ),
       );
     return SizedBox(
-      height: 275,
+      height: 260,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: data.length,

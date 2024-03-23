@@ -14,10 +14,11 @@ class AnilistMutations {
       mutation {
         SaveMediaListEntry(mediaId: $id, status: ${ status?.name ?? MediaStatus.CURRENT.name}, progress: ${progress ?? 0}) {
           status
+          progress
         }
       }
     ''';
     final res = await Anilist().fetchQuery(query, RequestType.mutate, token: await getVal("token"));
-    return AnilistMutationResult(status: res?['SaveMediaListEntry']?['status']);
+    return AnilistMutationResult(status: res?['SaveMediaListEntry']?['status'], progress: res?['SaveMediaListEntry']?['progress']);
   }
 }

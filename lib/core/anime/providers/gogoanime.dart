@@ -19,7 +19,7 @@ class GogoAnime {
   final String _baseUrl = "https://gogoanime3.net";
   final String _ajaxUrl = "https://ajax.gogocdn.net/ajax";
 
-  search(String query) async {
+  Future<List<Map<String, String?>>> search(String query) async {
     String searchUrl =
         "$_baseUrl/search.html?keyword=${Uri.encodeComponent(query)}";
     final res = await get(searchUrl);
@@ -48,11 +48,11 @@ class GogoAnime {
       throw new Exception("NO_SEARCH_RESULTS");
     }
 
-    List searchResults = [];
+    List<Map<String, String?>> searchResults = [];
 
     for (int i = 0; i < list.length; i++) {
       searchResults.add({
-        'name': list[i],
+        'name': list[i].trim(),
         'alias': _baseUrl + links[list.indexOf(list[i])],
         'imageUrl': images[list.indexOf(list[i])]
       });

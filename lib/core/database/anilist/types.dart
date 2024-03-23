@@ -126,8 +126,9 @@ class AnilistInfo {
 
 class AnilistMutationResult {
   final String status;
+  final int? progress;
 
-  AnilistMutationResult({required this.status});
+  AnilistMutationResult({required this.status, required this.progress});
 }
 
 

@@ -245,12 +245,18 @@ class BottomSheetContentState extends State<BottomSheetContent> {
 class MediaListStatusBottomSheet extends StatefulWidget {
   final String? status;
   final int id;
-  final Function(String) refreshListStatus;
-  const MediaListStatusBottomSheet(
-      {super.key,
-      required this.status,
-      required this.id,
-      required this.refreshListStatus});
+  final Function(String, int) refreshListStatus;
+  final int totalEpisodes;
+  final int episodesWatched;
+
+  const MediaListStatusBottomSheet({
+    super.key,
+    required this.status,
+    required this.id,
+    required this.refreshListStatus,
+    required this.totalEpisodes,
+    required this.episodesWatched,
+  });
 
   @override
   State<MediaListStatusBottomSheet> createState() =>
@@ -263,6 +269,8 @@ class _MediaListStatusBottomSheetState
   void initState() {
     super.initState();
     itemList = makeItemList();
+    textEditingController.value =
+        TextEditingValue(text: "${widget.episodesWatched}");
   }
 
   final List<String> statuses = ["PLANNING", "CURRENT", "DROPPED", "COMPLETED"];
@@ -314,11 +322,15 @@ class _MediaListStatusBottomSheetState
       return itemList[0].value;
     } else {
       initialSelection = widget.status!;
+      selectedValue = initialSelection;
       return widget.status!;
     }
   }
 
   String? selectedValue;
+
+  TextEditingController textEditingController = TextEditingController();
+  TextEditingController menuController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -332,6 +344,7 @@ class _MediaListStatusBottomSheetState
           Column(
             children: [
               DropdownMenu(
+                controller: menuController,
                 onSelected: (value) => {
                   if (value != initialSelection) selectedValue = value,
                 },
@@ -367,9 +380,9 @@ class _MediaListStatusBottomSheetState
                 dropdownMenuEntries: itemList,
               ),
               Container(
-                padding: EdgeInsets.only(top: 20),
+                padding: EdgeInsets.only(top: 20, bottom: 20),
                 child: Text(
-                  "Score",
+                  "Progress",
                   style: TextStyle(
                     color: textMainColor,
                     fontFamily: "Rubik",
@@ -381,23 +394,82 @@ class _MediaListStatusBottomSheetState
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      final currentNumber = int.parse(
+                          textEditingController.value.text.isEmpty
+                              ? "0"
+                              : textEditingController.value.text);
+                      if (currentNumber < 1) return;
+                      textEditingController.value =
+                          TextEditingValue(text: "${currentNumber - 1}");
+                    },
                     icon: Icon(
                       Icons.remove_circle_outline_rounded,
                       color: textMainColor,
                       size: 35,
                     ),
                   ),
-                  Container(
-                    width: 100,
-                    child: TextField(
-                      keyboardType: TextInputType.number,
-                      decoration: InputDecoration(border: OutlineInputBorder(borderSide: BorderSide(color: textMainColor,))),
-                      autocorrect: false,
-                    ),
+                  Row(
+                    children: [
+                      Container(
+                        padding: EdgeInsets.only(right: 10),
+                        height: 50,
+                        width: 100,
+                        child: TextField(
+                          controller: textEditingController,
+                          onChanged: (value) => {
+                            if (value.isNotEmpty &&
+                                int.parse(value) > widget.totalEpisodes)
+                              {
+                                textEditingController.value = TextEditingValue(
+                                  text: "${widget.totalEpisodes}",
+                                ),
+                              }
+                          },
+                          keyboardType: TextInputType.number,
+                          textAlign: TextAlign.end,
+                          decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(
+                                top: 5, bottom: 5, left: 10, right: 10),
+                            border: OutlineInputBorder(
+                              borderSide: BorderSide(
+                                color: textMainColor,
+                              ),
+                            ),
+                          ),
+                          style: TextStyle(
+                            color: textMainColor,
+                            fontFamily: "Rubik",
+                            fontSize: 20,
+                          ),
+                          autocorrect: false,
+                        ),
+                      ),
+                      Text(
+                        "/ ${widget.totalEpisodes}",
+                        style: TextStyle(
+                          color: textMainColor,
+                          fontFamily: "Rubik",
+                          fontSize: 20,
+                        ),
+                      ),
+                    ],
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      final currentNumber = int.parse(
+                          textEditingController.value.text.isEmpty
+                              ? "0"
+                              : textEditingController.value.text);
+                      if (currentNumber + 1 >= widget.totalEpisodes) {
+                        menuController.value =
+                            TextEditingValue(text: "COMPLETED");
+                        selectedValue = "COMPLETED";
+                      }
+                      if (currentNumber + 1 > widget.totalEpisodes) return;
+                      textEditingController.value =
+                          TextEditingValue(text: "${currentNumber + 1}");
+                    },
                     icon: Icon(
                       Icons.add_circle_outline_rounded,
                       color: textMainColor,
@@ -457,11 +529,22 @@ class _MediaListStatusBottomSheetState
                   ),
                 ),
                 onPressed: () {
-                  if (selectedValue != null) {
+                  final int progress =
+                      int.parse(textEditingController.value.text);
+                  if (selectedValue != null ||
+                      progress != widget.episodesWatched) {
                     AnilistMutations().mutateAnimeList(
-                        id: widget.id, status: assignItemEnum(selectedValue!));
+                      id: widget.id,
+                      status: assignItemEnum(selectedValue!),
+                      progress: progress,
+                    ).then((value) {
+                      if(mounted) {
+                        Navigator.of(context).pop();
+                      }
+                      floatingSnackBar(context, "The list has been updated!");
+                    });
                     initialSelection = selectedValue;
-                    widget.refreshListStatus(selectedValue!);
+                    widget.refreshListStatus(selectedValue!, progress);
                   }
                 },
                 child: Text(
@@ -478,5 +561,12 @@ class _MediaListStatusBottomSheetState
         ],
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    menuController.dispose();
+    super.dispose();
   }
 }

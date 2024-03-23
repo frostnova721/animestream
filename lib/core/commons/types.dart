@@ -45,3 +45,4 @@ class WatchPageInfo {
     required this.streamInfo,
   });
 }
+

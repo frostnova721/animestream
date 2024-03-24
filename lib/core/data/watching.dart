@@ -10,6 +10,7 @@ Future<void> storeWatching(
     String title, String imageUrl, int id, int watched) async {
   try {
     //add to anilist if the user is logged in
+    print("SETTING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
       AnilistMutations().mutateAnimeList(
           id: id, status: MediaStatus.CURRENT, progress: watched);
@@ -39,6 +40,7 @@ Future<void> storeWatching(
 
 Future<void> updateWatching(int? id, String title, int watched) async {
   try {
+    print("UPDATING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
       if (id == null) throw new Exception("ERR_NO_ID_PROVIDED");
       AnilistMutations().mutateAnimeList(
@@ -103,12 +105,16 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   }
 }
 
-Future<int> getAnimeWatchProgress(int id) async {
+Future<int> getAnimeWatchProgress(int id, MediaStatus status) async {
   if (await AniListLogin().isAnilistLoggedIn()) {
     if(storedUserData == null) throw new Exception("ERR_NO_USERDATA");
-    final watching = await getWatchedList(userName: storedUserData!.name);
-    final item = watching.where((item) => item.id == id).firstOrNull;
+    print(status);
+    final list = await AnilistQueries().getUserAnimeList(storedUserData!.name, status: status);
+    if(list.isEmpty) throw new Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
+    else {
+    final item = list[0].list.where((item) => item.id == id).firstOrNull;
     if(item != null) return item.watchProgress ?? 0;
+    }
   } else {
     final box = await Hive.openBox('animestream');
     final List watching = box.get('watching') ?? [];

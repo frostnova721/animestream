@@ -1,3 +1,4 @@
+import 'package:animestream/core/commons/enums.dart';
 import 'package:http/http.dart';
 
 Future<String> fetch(String uri) async {
@@ -28,3 +29,18 @@ String getCurrentSeason() {
       return 'Unknown';
   }
 }
+
+MediaStatus assignItemEnum(String valueInString) {
+    switch (valueInString) {
+      case "CURRENT":
+        return MediaStatus.CURRENT;
+      case "PLANNING":
+        return MediaStatus.PLANNING;
+      case "DROPPED":
+        return MediaStatus.DROPPED;
+      case "COMPLETED":
+        return MediaStatus.COMPLETED;
+      default:
+        throw new Exception("ERR_BAD_STRING");
+    }
+  }

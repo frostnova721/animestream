@@ -63,6 +63,7 @@ Widget characterCard(String name, String role, String imageUrl) {
 
 Widget NewsCard(String title, String imageUrl, String date, String time) {
   return Card(
+    surfaceTintColor: textSubColor,
     color: backgroundColor,
     child: Container(
       decoration: BoxDecoration(

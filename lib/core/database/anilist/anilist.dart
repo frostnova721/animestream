@@ -343,7 +343,7 @@ class Anilist {
   Future<List<TrendingResult>> getTrending() async {
     final gquery = '''
             query {
-                Page(perPage: 10) {
+                Page(perPage: 25) {
                     media(type: ANIME, sort: TRENDING_DESC, isAdult: false, season: ${getCurrentSeason()}) {
                         id
                         title {

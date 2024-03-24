@@ -21,16 +21,20 @@ class _AccountSettingState extends State<AccountSetting> {
     isLoggedIn().then((value) {
       //load user profile if logged in
       if (value) {
-        AniListLogin().getUserProfile().then((res) => setState(() {
+        AniListLogin().getUserProfile().then((res) {
+          if (mounted)
+            setState(() {
               user = res;
               loading = false;
-            }));
+            });
+        });
       }
       //display login button if not logged in
       else {
-        setState(() {
-          loading = false;
-        });
+        if (mounted)
+          setState(() {
+            loading = false;
+          });
       }
     });
     super.initState();
@@ -42,7 +46,7 @@ class _AccountSettingState extends State<AccountSetting> {
 
   Future<bool> isLoggedIn() async {
     final token = await getVal("token");
-    if (token != null) {
+    if (token != null && mounted) {
       setState(() {
         anilistLoggedIn = true;
       });
@@ -100,11 +104,15 @@ class _AccountSettingState extends State<AccountSetting> {
                                 alignment: Alignment.bottomCenter,
                                 child: ClipRRect(
                                   child: BackdropFilter(
-                                    filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+                                    filter:
+                                        ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                                     child: Container(
                                       height: 65,
                                       padding: EdgeInsets.only(
-                                          left: 15, right: 15, bottom: 10, top: 10),
+                                          left: 15,
+                                          right: 15,
+                                          bottom: 10,
+                                          top: 10),
                                       decoration: BoxDecoration(
                                         color: backgroundColor.withOpacity(0.5),
                                         borderRadius: BorderRadius.circular(10),
@@ -121,16 +129,18 @@ class _AccountSettingState extends State<AccountSetting> {
                                                 child: CircleAvatar(
                                                   radius: 25,
                                                   backgroundColor: textSubColor,
-                                                  backgroundImage: user?.avatar !=
-                                                          null
-                                                      ? NetworkImage(user!.avatar!)
-                                                      : AssetImage(
-                                                          "lib/assets/images/ghost.png",
-                                                        ) as ImageProvider,
+                                                  backgroundImage:
+                                                      user?.avatar != null
+                                                          ? NetworkImage(
+                                                              user!.avatar!)
+                                                          : AssetImage(
+                                                              "lib/assets/images/ghost.png",
+                                                            ) as ImageProvider,
                                                 ),
                                               ),
                                               Text(
-                                                user?.name ?? "NO_NAME_ERR", //lol
+                                                user?.name ??
+                                                    "NO_NAME_ERR", //lol
                                                 style: TextStyle(
                                                     color: textMainColor,
                                                     fontFamily: "NotoSans",
@@ -144,8 +154,11 @@ class _AccountSettingState extends State<AccountSetting> {
                                           ),
                                           ElevatedButton(
                                             onPressed: () {
+                                              if(mounted)
                                               setState(() {
-                                                AniListLogin().removeToken().then(
+                                                AniListLogin()
+                                                    .removeToken()
+                                                    .then(
                                                       (value) => setState(() {
                                                         anilistLoggedIn = false;
                                                       }),
@@ -153,12 +166,14 @@ class _AccountSettingState extends State<AccountSetting> {
                                               });
                                             },
                                             style: ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.transparent,
+                                                backgroundColor:
+                                                    Colors.transparent,
                                                 shape: RoundedRectangleBorder(
                                                     side: BorderSide(
                                                         color: accentColor),
                                                     borderRadius:
-                                                        BorderRadius.circular(35))),
+                                                        BorderRadius.circular(
+                                                            35))),
                                             child: Text(
                                               "Logout",
                                               style: TextStyle(

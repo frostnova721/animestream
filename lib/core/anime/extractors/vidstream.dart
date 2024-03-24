@@ -14,7 +14,7 @@ class Vidstream {
 
   final baseUrl = "https://gogoanime3.net";
 
-  Future extractGogo(String streamLink) async {
+  Future<List<Stream>> extractGogo(String streamLink) async {
     // if (!episodeId.startsWith(baseUrl)) episodeId = "$baseUrl/$episodeId";
     // final streamLink = await getIframeLink(episodeId);
     // if (streamLink == null) throw new Exception("No stream Links!");

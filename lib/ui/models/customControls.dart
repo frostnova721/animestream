@@ -77,9 +77,9 @@ class _ControlsState extends State<Controls> {
           (_controller!.value.duration?.inSeconds ?? 1);
       if (currentByTotal * 100 >= 75 && !preloadStarted) {
         preloadNextEpisode();
-        if (currentEpIndex + 1 < widget.episode['epLinks'].length) {
-          widget.updateWatchProgress(currentEpIndex + 1);
-        }
+        // if (currentEpIndex< widget.episode['epLinks'].length) {
+          widget.updateWatchProgress(currentEpIndex);
+        // }
       }
       if (currentByTotal == 1 && calledAutoNext) {
         //change 0 to last selected stream

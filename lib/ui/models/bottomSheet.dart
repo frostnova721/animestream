@@ -1,6 +1,7 @@
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
 import 'package:animestream/core/commons/enums.dart';
@@ -80,22 +81,34 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     return Container(
       padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 30),
       width: double.infinity,
-      child: _isLoading
-          ? Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _list(),
-                Container(
-                  padding: EdgeInsets.only(bottom: 30),
+      child: streamSources.isNotEmpty
+          ? _isLoading
+              ? Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _list(),
+                    Container(
+                      padding: EdgeInsets.only(bottom: 10),
+                      child: CircularProgressIndicator(
+                        color: accentColor,
+                      ),
+                    ),
+                  ],
+                )
+              : _list()
+          : Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                  padding: EdgeInsets.only(bottom: 10, top: 20),
                   child: Center(
                     child: CircularProgressIndicator(
                       color: accentColor,
                     ),
                   ),
-                )
-              ],
-            )
-          : _list(),
+                ),
+            ],
+          ),
     );
   }
 
@@ -117,7 +130,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                       widget.bottomSheetContentData.title,
                       widget.bottomSheetContentData.cover,
                       widget.bottomSheetContentData.id,
-                      widget.bottomSheetContentData.episodeIndex + 1,
+                      widget.bottomSheetContentData.episodeIndex,
                     );
                     Navigator.push(
                       context,
@@ -243,7 +256,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
 
 //long name lol
 class MediaListStatusBottomSheet extends StatefulWidget {
-  final String? status;
+  final MediaStatus? status;
   final int id;
   final Function(String, int) refreshListStatus;
   final int totalEpisodes;
@@ -278,21 +291,6 @@ class _MediaListStatusBottomSheetState
   List<DropdownMenuEntry> itemList = [];
   String? initialSelection;
 
-  MediaStatus assignItemEnum(String valueInString) {
-    switch (valueInString) {
-      case "CURRENT":
-        return MediaStatus.CURRENT;
-      case "PLANNING":
-        return MediaStatus.PLANNING;
-      case "DROPPED":
-        return MediaStatus.DROPPED;
-      case "COMPLETED":
-        return MediaStatus.COMPLETED;
-      default:
-        throw new Exception("ERR_BAD_STRING");
-    }
-  }
-
   List<DropdownMenuEntry> makeItemList() {
     final List<DropdownMenuEntry> itemList = [];
     statuses.forEach((element) {
@@ -321,9 +319,9 @@ class _MediaListStatusBottomSheetState
       initialSelection = itemList[0].value;
       return itemList[0].value;
     } else {
-      initialSelection = widget.status!;
+      initialSelection = widget.status!.name;
       selectedValue = initialSelection;
-      return widget.status!;
+      return widget.status!.name;
     }
   }
 
@@ -533,12 +531,14 @@ class _MediaListStatusBottomSheetState
                       int.parse(textEditingController.value.text);
                   if (selectedValue != null ||
                       progress != widget.episodesWatched) {
-                    AnilistMutations().mutateAnimeList(
+                    AnilistMutations()
+                        .mutateAnimeList(
                       id: widget.id,
                       status: assignItemEnum(selectedValue!),
                       progress: progress,
-                    ).then((value) {
-                      if(mounted) {
+                    )
+                        .then((value) {
+                      if (mounted) {
                         Navigator.of(context).pop();
                       }
                       floatingSnackBar(context, "The list has been updated!");

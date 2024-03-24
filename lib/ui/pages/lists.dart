@@ -6,7 +6,6 @@ import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class AnimeLists extends StatefulWidget {
   const AnimeLists({super.key});
@@ -49,6 +48,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     watchingList = [];
     plannedList = [];
     completedList = [];
+    droppedList = [];
 
     //inject em boi!
     list.forEach((element) {
@@ -136,7 +136,6 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       //not working as expected. the rawAnimeList is getting modified :(
         return setState(() {
           final recentlyUpdatedList = [...rawAnimeList];
-          recentlyUpdatedList[0].list.asMap().values.forEach((element) { print(element.title);});
           injectToCorrespondingList(recentlyUpdatedList);
         });
       case SortType.TopRated:
@@ -156,7 +155,6 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
             },
           );
           injectToCorrespondingList(ratingList);
-          rawAnimeList[0].list.asMap().values.forEach((element) { print(element.title);});
       });
     }
   }
@@ -268,6 +266,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       indicatorColor: accentColor,
                       overlayColor: MaterialStatePropertyAll(
                           accentColor.withOpacity(0.3)),
+                          labelColor: textMainColor,
+                          unselectedLabelColor: textSubColor,
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: "NotoSans",
@@ -367,7 +367,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
 
   TextStyle _textStyle() {
     return TextStyle(
-      color: textMainColor,
+      // color: textMainColor,
       fontFamily: "NotoSans-Bold",
       fontSize: 18,
     );

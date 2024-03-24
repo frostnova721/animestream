@@ -6,6 +6,7 @@ import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/drawer.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/Discover.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/search.dart';
@@ -110,6 +111,7 @@ class _HomeState extends State<Home> {
         });
     } catch (err) {
       print(err);
+      floatingSnackBar(context, err.toString());
       if (mounted)
         setState(() {
           error = true;
@@ -132,7 +134,9 @@ class _HomeState extends State<Home> {
         child: Padding(
           padding: EdgeInsets.only(
               top: MediaQuery.of(context).padding.top,
-              bottom: MediaQuery.of(context).padding.bottom),
+              bottom: MediaQuery.of(context).padding.bottom,
+              left: MediaQuery.of(context).padding.left
+              ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -373,6 +377,7 @@ class _HomeState extends State<Home> {
                 child: ListView.builder(
                   itemCount: widgetList.length,
                   scrollDirection: Axis.horizontal,
+                  padding: EdgeInsets.zero,
                   itemBuilder: (context, index) {
                     return Container(
                       alignment: Alignment.centerLeft,

@@ -46,7 +46,7 @@ class _DiscoverState extends State<Discover> {
     final list = await Anilist().getTrending();
     if (mounted)
       setState(() {
-        trendingList = list.sublist(0, 10);
+        trendingList = list.sublist(0, 20);
         trendingLoaded = true;
         pageTimeout();
       });
@@ -95,144 +95,169 @@ class _DiscoverState extends State<Discover> {
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.only(top: 30),
-          height: 260,
-          width: double.infinity,
-          child: PageView.builder(
-              pageSnapping: true,
-              controller: _pageController,
-              // itemCount: trendingList.length,
-              onPageChanged: (page) async {
-                currentPage = page;
-                await pageTimeout();
-              },
-              scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) {
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Info(
-                                  id: trendingList[index % trendingList.length].id,
-                                )));
-                  },
-                  child: Container(
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          width: double.infinity,
-                          //add for fade in at bottom
-                          // child:
-                          // ShaderMask(
-                          //   shaderCallback: (rect) {
-                          //     return LinearGradient(
-                          //       begin: Alignment.topCenter,
-                          //       end: Alignment.bottomCenter,
-                          //       colors: [backgroundColor, Color.fromARGB(54, 0, 0, 0)],
-                          //     ).createShader(
-                          //         Rect.fromLTRB(0, 0, rect.width, rect.height+10));
-                          //   },
-                          //   blendMode: BlendMode.dstIn,
-                          child: ClipRRect(
-                            child: ImageFiltered(
-                              imageFilter:
-                                  ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                              child: Image.network(
-                                trendingList[index % trendingList.length].banner ??
-                                    trendingList[index % trendingList.length].cover,
-                                opacity: AlwaysStoppedAnimation(0.5),
-                                height: 260,
-                                fit: BoxFit.cover,
+            margin: EdgeInsets.only(top: 30),
+            height: 260,
+            // width: double.infinity,
+            child: trendingLoaded
+                ? PageView.builder(
+                    pageSnapping: true,
+                    controller: _pageController,
+                    // itemCount: trendingList.length,
+                    onPageChanged: (page) async {
+                      currentPage = page;
+                      await pageTimeout();
+                    },
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => Info(
+                                id: trendingList[index % trendingList.length]
+                                    .id,
                               ),
                             ),
-                          ),
-                          // ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(left: 20.0),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.center,
+                          );
+                        },
+                        child: Container(
+                          child: Stack(
+                            alignment: Alignment.center,
                             children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(20),
-                                child: Image.network(
-                                  trendingList[index % trendingList.length].cover,
-                                  height: 170,
-                                  width: 120,
-                                ),
-                              ),
                               Container(
-                                padding: EdgeInsets.only(left: 10, right: 10),
-                                width: 250,
-                                child: Column(
-                                  // mainAxisAlignment: MainAxisAlignment.center,
-                                  mainAxisSize: MainAxisSize.min,
-                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                width: double.infinity,
+                                //add for fade in at bottom
+                                // child:
+                                // ShaderMask(
+                                //   shaderCallback: (rect) {
+                                //     return LinearGradient(
+                                //       begin: Alignment.topCenter,
+                                //       end: Alignment.bottomCenter,
+                                //       colors: [backgroundColor, Color.fromARGB(54, 0, 0, 0)],
+                                //     ).createShader(
+                                //         Rect.fromLTRB(0, 0, rect.width, rect.height+10));
+                                //   },
+                                //   blendMode: BlendMode.dstIn,
+                                child: ClipRRect(
+                                  child: ImageFiltered(
+                                    imageFilter:
+                                        ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                                    child: Image.network(
+                                      trendingList[index % trendingList.length]
+                                              .banner ??
+                                          trendingList[
+                                                  index % trendingList.length]
+                                              .cover,
+                                      opacity: AlwaysStoppedAnimation(0.5),
+                                      height: 260,
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                                // ),
+                              ),
+                              Padding(
+                                padding: EdgeInsets.only(left: 20.0),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
                                   children: [
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 10.0),
-                                      child: Text(
-                                        trendingList[index % trendingList.length].title['english'] ??
-                                            trendingList[index % trendingList.length]
-                                                .title['romaji'] ??
-                                            '',
-                                        style: TextStyle(
-                                          color: textMainColor,
-                                          fontFamily: 'NunitoSans',
-                                          fontSize: 17,
-                                          fontWeight: FontWeight.bold,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                        maxLines: 2,
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(20),
+                                      child: Image.network(
+                                        trendingList[
+                                                index % trendingList.length]
+                                            .cover,
+                                        height: 170,
+                                        width: 120,
                                       ),
                                     ),
-                                    Text(
-                                      trendingList[index % trendingList.length].genres.join(', '),
-                                      style: TextStyle(
-                                          color: Color.fromARGB(
-                                              255, 180, 180, 180),
-                                          fontFamily: 'NunitoSans',
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          overflow: TextOverflow.ellipsis),
-                                    ),
-                                    Padding(
-                                      padding: const EdgeInsets.only(top: 10),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                    Container(
+                                      padding:
+                                          EdgeInsets.only(left: 10, right: 10),
+                                      width: 250,
+                                      child: Column(
+                                        // mainAxisAlignment: MainAxisAlignment.center,
                                         mainAxisSize: MainAxisSize.min,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
                                         children: [
-                                          Icon(
-                                            Icons.star,
-                                            color: textMainColor,
-                                            size: 20,
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                bottom: 10.0),
+                                            child: Text(
+                                              trendingList[index %
+                                                          trendingList.length]
+                                                      .title['english'] ??
+                                                  trendingList[index %
+                                                          trendingList.length]
+                                                      .title['romaji'] ??
+                                                  '',
+                                              style: TextStyle(
+                                                color: textMainColor,
+                                                fontFamily: 'NunitoSans',
+                                                fontSize: 17,
+                                                fontWeight: FontWeight.bold,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                              maxLines: 2,
+                                            ),
                                           ),
                                           Text(
-                                            "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
+                                            trendingList[
+                                                    index % trendingList.length]
+                                                .genres
+                                                .join(', '),
                                             style: TextStyle(
-                                                color: textMainColor,
-                                                fontFamily: "Rubik",
-                                                fontSize: 17),
+                                                color: Color.fromARGB(
+                                                    255, 180, 180, 180),
+                                                fontFamily: 'NunitoSans',
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.bold,
+                                                overflow:
+                                                    TextOverflow.ellipsis),
+                                          ),
+                                          Padding(
+                                            padding:
+                                                const EdgeInsets.only(top: 10),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              mainAxisSize: MainAxisSize.min,
+                                              children: [
+                                                Icon(
+                                                  Icons.star,
+                                                  color: textMainColor,
+                                                  size: 20,
+                                                ),
+                                                Text(
+                                                  "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
+                                                  style: TextStyle(
+                                                      color: textMainColor,
+                                                      fontFamily: "Rubik",
+                                                      fontSize: 17),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ],
                                       ),
-                                    ),
+                                    )
                                   ],
                                 ),
-                              )
+                              ),
                             ],
                           ),
                         ),
-                      ],
+                      );
+                    })
+                : Container(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: accentColor,
+                      ),
                     ),
-                  ),
-                );
-              }),
-        ),
+                  )),
         if (trendingList.isNotEmpty)
           Container(
             margin: EdgeInsets.only(top: 10),
@@ -341,6 +366,7 @@ class _DiscoverState extends State<Discover> {
       height: 230,
       padding: EdgeInsets.only(left: 10, right: 10),
       child: ListView.builder(
+        padding: EdgeInsets.zero,
         itemCount: list.length,
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) => GestureDetector(

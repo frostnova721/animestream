@@ -76,7 +76,7 @@ class GogoAnime {
     final alLink = _getServerLink("filelions", servers);
     // final sources = [];
     int returns = 0;
-    int totalStreams = 2;
+    int totalStreams = 3; //update this when new source is added for gogo
     final vidstream = Vidstream().extractGogo(vsLink);
     final streamwish = StreamWish().extract(swLink);
     final alions = StreamWish().extract(alLink);

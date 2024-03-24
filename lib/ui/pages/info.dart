@@ -1,4 +1,5 @@
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/bottomSheet.dart';
@@ -23,8 +24,10 @@ class _InfoState extends State<Info> {
   @override
   void initState() {
     super.initState();
-    getInfo(widget.id).then((value) => getEpisodes());
-    getWatched();
+    getInfo(widget.id).then((value) {
+      getEpisodes();
+      getWatched();
+    });
   }
 
   bool dataLoaded = false;
@@ -39,11 +42,12 @@ class _InfoState extends State<Info> {
   bool started = false;
   List qualities = [];
   bool _epSearcherror = false;
-  String? mediaListStatus;
+  MediaStatus? mediaListStatus;
 
   Future<void> getWatched() async {
-    final item = await getAnimeWatchProgress(widget.id);
-    watched = item == 0 ? 1 : item;
+    final item = await getAnimeWatchProgress(
+        widget.id, mediaListStatus ?? MediaStatus.CURRENT);
+    watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 
     if (mounted) setState(() {});
@@ -65,12 +69,12 @@ class _InfoState extends State<Info> {
     setState(() {
       dataLoaded = true;
       data = info;
-      mediaListStatus = data.mediaListStatus;
+      mediaListStatus = assignItemEnum(data.mediaListStatus);
     });
   }
 
   IconData getTrackerIcon() {
-    switch (mediaListStatus) {
+    switch (mediaListStatus!.name) {
       case "CURRENT":
         return Icons.movie_outlined;
       case "PLANNING":
@@ -88,7 +92,7 @@ class _InfoState extends State<Info> {
   //to refresh the mediaList status
   void refreshListStatus(String status, int progress) {
     setState(() {
-      mediaListStatus = status;
+      mediaListStatus = assignItemEnum(status);
       watched = progress;
     });
   }
@@ -128,7 +132,7 @@ class _InfoState extends State<Info> {
     try {
       final sr = await searchInSource(
           selectedSource, data.title['english'] ?? data.title['romaji']);
-          //to find a exact match
+      //to find a exact match
       List<dynamic> match = sr
           .where(
             (e) => e['name'] == (data.title['english'] ?? data.title['romaji']),
@@ -146,11 +150,11 @@ class _InfoState extends State<Info> {
         final sr = await searchInSource(selectedSource, data.title['romaji']);
         //find em match boi
         List<dynamic> match = sr
-          .where(
-            (e) => e['name'] == data.title['romaji'],
-          )
-          .toList();
-      if (match.isEmpty) match = sr;
+            .where(
+              (e) => e['name'] == data.title['romaji'],
+            )
+            .toList();
+        if (match.isEmpty) match = sr;
         final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
         if (mounted)
           setState(() {
@@ -178,7 +182,8 @@ class _InfoState extends State<Info> {
         body: dataLoaded
             ? SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -282,7 +287,8 @@ class _InfoState extends State<Info> {
                                   margin: EdgeInsets.only(top: 30),
                                   child: DropdownMenu(
                                     initialSelection: sources.first,
-                                    dropdownMenuEntries: getSourceDropdownList(),
+                                    dropdownMenuEntries:
+                                        getSourceDropdownList(),
                                     menuHeight: 75,
                                     width: 300,
                                     textStyle: TextStyle(
@@ -294,7 +300,8 @@ class _InfoState extends State<Info> {
                                           Color.fromARGB(255, 0, 0, 0)),
                                       shape: MaterialStatePropertyAll(
                                         RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           side: BorderSide(
                                             width: 1,
                                             color: Colors.white,
@@ -333,8 +340,8 @@ class _InfoState extends State<Info> {
                                   padding: EdgeInsets.only(top: 15, bottom: 20),
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
-                                      color:
-                                          const Color.fromARGB(255, 29, 29, 29)),
+                                      color: const Color.fromARGB(
+                                          255, 29, 29, 29)),
                                   child: Column(
                                     children: [
                                       _categoryTitle("Episodes"),
@@ -449,12 +456,13 @@ class _InfoState extends State<Info> {
               return BottomSheetContent(
                 getStreams: getStreams,
                 bottomSheetContentData: BottomSheetContentData(
-                    epLinks: epLinks,
-                    episodeIndex: watched - 1,
-                    selectedSource: selectedSource,
-                    title: data.title['english'] ?? data.title['romaji'],
-                    id: widget.id,
-                    cover: data.cover),
+                  epLinks: epLinks,
+                  episodeIndex: watched,
+                  selectedSource: selectedSource,
+                  title: data.title['english'] ?? data.title['romaji'],
+                  id: widget.id,
+                  cover: data.cover,
+                ),
                 type: Type.watch,
                 getWatched: getWatched,
               );
@@ -482,7 +490,7 @@ class _InfoState extends State<Info> {
                   ),
                 ),
                 Text(
-                  'Episode $watched',
+                  'Episode ${watched < epLinks.length ? watched + 1 : watched}',
                   style: TextStyle(
                     color: accentColor,
                     fontFamily: "Rubik",
@@ -979,37 +987,25 @@ class _InfoState extends State<Info> {
               },
             );
           },
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: [
-                BoxShadow(
-                    color: Colors.black,
-                    blurRadius: 20,
-                    offset: Offset(10, 10),
-                    spreadRadius: 10)
-              ],
-              color: Color.fromARGB(255, 0, 0, 0),
-              image: DecorationImage(
-                opacity: 0.5,
-                image: data.banner.length > 0
-                    ? NetworkImage(data.banner)
-                    : NetworkImage(data.cover),
-                fit: BoxFit.cover,
+          child: ShaderMask(
+            shaderCallback: (bounds) => LinearGradient(
+                colors: [backgroundColor, Colors.transparent],
+                begin: Alignment.bottomCenter,
+                end: Alignment.topCenter,
+                stops: [0.09, 0.23]).createShader(bounds),
+            blendMode: BlendMode.darken,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Color.fromARGB(255, 0, 0, 0),
+                image: DecorationImage(
+                  opacity: 0.5,
+                  image: data.banner.length > 0
+                      ? NetworkImage(data.banner)
+                      : NetworkImage(data.cover),
+                  fit: BoxFit.cover,
+                ),
               ),
-            ),
-            height: 250,
-          ),
-        ),
-        //kinda unneeded. might remove sometime ig! (replace with a shaderMask)
-        Container(
-          height: 90,
-          margin: EdgeInsets.only(top: 190),
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [backgroundColor, Colors.transparent],
-              begin: Alignment.bottomCenter,
-              end: Alignment.topCenter,
-              stops: [0.25, 0.85],
+              height: 270,
             ),
           ),
         ),
@@ -1025,7 +1021,7 @@ class _InfoState extends State<Info> {
           ),
         ),
         Container(
-          margin: EdgeInsets.only(top: 40),
+          margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
           child: IconButton(
             onPressed: () {
               Navigator.of(context).pop();

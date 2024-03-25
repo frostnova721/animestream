@@ -25,7 +25,7 @@ class _InfoState extends State<Info> {
   @override
   void initState() {
     super.initState();
-    AniListLogin().isAnilistLoggedIn().then((value) => value = loggedIn);
+    AniListLogin().isAnilistLoggedIn().then((value) => loggedIn = value);
     getInfo(widget.id).then((value) {
       getEpisodes();
       getWatched();

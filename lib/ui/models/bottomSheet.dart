@@ -97,9 +97,9 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                 )
               : _list()
           : Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Container(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
                   padding: EdgeInsets.only(bottom: 10, top: 20),
                   child: Center(
                     child: CircularProgressIndicator(
@@ -107,8 +107,8 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                     ),
                   ),
                 ),
-            ],
-          ),
+              ],
+            ),
     );
   }
 
@@ -148,7 +148,10 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                           episodes: widget.bottomSheetContentData.epLinks,
                         ),
                       ),
-                    ).then((value) => widget.getWatched!());
+                    ).then((value) {
+                      widget.getWatched!();
+                      Navigator.of(context).pop();
+                    });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Color.fromARGB(68, 190, 175, 255),

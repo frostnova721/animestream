@@ -5,8 +5,9 @@ import 'package:flutter/material.dart';
 class HomeDrawer extends StatefulWidget {
   final void Function(int) onItemTapped;
   final int activeIndex;
+  final bool loggedIn;
   const HomeDrawer(
-      {super.key, required this.onItemTapped, required this.activeIndex});
+      {super.key, required this.onItemTapped, required this.activeIndex, required this.loggedIn});
 
   @override
   State<HomeDrawer> createState() => _HomeDrawerState();
@@ -124,6 +125,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
               //   ),
               // ),
             ),
+            if(widget.loggedIn)
             InkWell(
               borderRadius: BorderRadius.only(
                   topRight: Radius.circular(25),

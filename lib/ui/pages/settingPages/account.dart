@@ -164,6 +164,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                                       }),
                                                     );
                                               });
+                                              floatingSnackBar(context, "Logged out successfully!");
                                             },
                                             style: ElevatedButton.styleFrom(
                                                 backgroundColor:

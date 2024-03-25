@@ -68,10 +68,13 @@ class _HomeState extends State<Home> {
   }
 
   Widget useWidget() {
-    switch(activeIndex) {
-      case 0: return _homeItems();
-      case 1: return Discover(currentSeason: currentlyAiring);
-      default: return _homeItems();
+    switch (activeIndex) {
+      case 0:
+        return _homeItems();
+      case 1:
+        return Discover(currentSeason: currentlyAiring);
+      default:
+        return _homeItems();
     }
   }
 
@@ -119,6 +122,36 @@ class _HomeState extends State<Home> {
     }
   }
 
+  Future<void> refresh({bool fromSettings = false}) async {
+    setState(() {
+      refreshing = true;
+    });
+    final loggedIn = await AniListLogin().isAnilistLoggedIn();
+    if (loggedIn && userProfile == null) {
+      //load the userprofile and list if the user just signed in!
+      final user = await AniListLogin().getUserProfile();
+      userProfile = user;
+      storedUserData = user;
+      print(storedUserData?.name);
+      await getLists(userName: user.name);
+    } else if (loggedIn && userProfile != null) {
+      //just load the list if the user was already signed in.
+      //also dont refrest the list if user just visited the settings page and were already logged in 
+      if (fromSettings)
+        return setState(() {
+          refreshing = false;
+        });
+      ;
+      await getLists(userName: userProfile!.name);
+    } else {
+      await getLists();
+      userProfile = null;
+    }
+    setState(() {
+      refreshing = false;
+    });
+  }
+
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   @override
@@ -129,151 +162,158 @@ class _HomeState extends State<Home> {
       drawer: HomeDrawer(
         onItemTapped: onItemTapped,
         activeIndex: activeIndex,
+        loggedIn: userProfile != null ? true : false,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top,
-              bottom: MediaQuery.of(context).padding.bottom,
-              left: MediaQuery.of(context).padding.left
-              ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            IconButton(
-                              onPressed: () {
-                                _globalKey.currentState!.openDrawer();
-                              },
-                              icon: Icon(
-                                Icons.menu_rounded,
-                                color: textMainColor,
-                                size: 30,
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 10),
-                              child: Text(
-                                "AnimeStream",
-                                style: TextStyle(
-                                  color: textMainColor,
-                                  fontSize: 23,
-                                  fontFamily: 'NunitoSans',
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        Container(
-                          padding: EdgeInsets.only(left: 10, right: 0, top: 10),
-                          width: 300,
-                          child: TextField(
-                            controller: textEditingController,
-                            autocorrect: false,
-                            maxLines: 1,
-                            onSubmitted: (String input) {
-                              textEditingController.value =
-                                  TextEditingValue.empty;
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      Search(searchedText: input),
-                                ),
-                              ).then(
-                                (value) async {
-                                  setState(() {
-                                    refreshing = true;
-                                  });
-                                  await getLists(
-                                      userName: userProfile?.name ?? null);
-                                  if (mounted)
-                                    setState(() {
-                                      refreshing = false;
-                                    });
+      body: RefreshIndicator(
+        onRefresh: refresh,
+        color: accentColor,
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.only(
+                top: MediaQuery.of(context).padding.top,
+                bottom: MediaQuery.of(context).padding.bottom,
+                left: MediaQuery.of(context).padding.left),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              IconButton(
+                                onPressed: () {
+                                  _globalKey.currentState!.openDrawer();
                                 },
-                              );
-                            },
-                            cursorColor: accentColor,
-                            decoration: InputDecoration(
-                              prefixIcon: Padding(
-                                padding: const EdgeInsets.only(left: 5),
-                                child: Image.asset(
-                                  "lib/assets/images/search.png",
+                                icon: Icon(
+                                  Icons.menu_rounded,
                                   color: textMainColor,
-                                  scale: 1.75,
+                                  size: 30,
                                 ),
                               ),
-                              hintText: "Search...",
-                              hintStyle: TextStyle(
-                                color: textSubColor,
-                                fontFamily: "Poppins",
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(
+                                  "AnimeStream",
+                                  style: TextStyle(
+                                    color: textMainColor,
+                                    fontSize: 23,
+                                    fontFamily: 'NunitoSans',
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Container(
+                            padding:
+                                EdgeInsets.only(left: 10, right: 0, top: 10),
+                            width: 300,
+                            child: TextField(
+                              controller: textEditingController,
+                              autocorrect: false,
+                              maxLines: 1,
+                              onSubmitted: (String input) {
+                                textEditingController.value =
+                                    TextEditingValue.empty;
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) =>
+                                        Search(searchedText: input),
+                                  ),
+                                ).then(
+                                  (value) async {
+                                    setState(() {
+                                      refreshing = true;
+                                    });
+                                    await getLists(
+                                        userName: userProfile?.name ?? null);
+                                    if (mounted)
+                                      setState(() {
+                                        refreshing = false;
+                                      });
+                                  },
+                                );
+                              },
+                              cursorColor: accentColor,
+                              decoration: InputDecoration(
+                                prefixIcon: Padding(
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: Image.asset(
+                                    "lib/assets/images/search.png",
+                                    color: textMainColor,
+                                    scale: 1.75,
+                                  ),
+                                ),
+                                hintText: "Search...",
+                                hintStyle: TextStyle(
+                                  color: textSubColor,
+                                  fontFamily: "Poppins",
+                                  fontSize: 16,
+                                ),
+                                focusColor: accentColor,
+                                contentPadding: EdgeInsets.only(
+                                    top: 5, bottom: 5, left: 20, right: 20),
+                                focusedBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: accentColor,
+                                  ),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderSide: BorderSide(
+                                    color: textMainColor,
+                                    width: 1.5,
+                                  ),
+                                  borderRadius: BorderRadius.circular(25),
+                                ),
+                              ),
+                              style: TextStyle(
+                                backgroundColor: backgroundColor,
+                                color: textMainColor,
+                                fontFamily: 'Poppins',
                                 fontSize: 16,
                               ),
-                              focusColor: accentColor,
-                              contentPadding: EdgeInsets.only(
-                                  top: 5, bottom: 5, left: 20, right: 20),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: accentColor,
-                                ),
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: textMainColor,
-                                  width: 1.5,
-                                ),
-                                borderRadius: BorderRadius.circular(25),
-                              ),
-                            ),
-                            style: TextStyle(
-                              backgroundColor: backgroundColor,
-                              color: textMainColor,
-                              fontFamily: 'Poppins',
-                              fontSize: 16,
                             ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(right: 15),
-                    child: IconButton(
-                      onPressed: () {
-                        Navigator.push(
+                    Container(
+                      padding: EdgeInsets.only(right: 15),
+                      child: IconButton(
+                        onPressed: () {
+                          Navigator.push(
                             context,
                             MaterialPageRoute(
                               builder: (context) => SettingsPage(),
-                            ));
-                      },
-                      icon: Icon(
-                        Icons.settings,
-                        color: textMainColor,
-                        size: 45,
+                            ),
+                          ).then((value) => refresh(fromSettings: true));
+                        },
+                        icon: Icon(
+                          Icons.settings,
+                          color: textMainColor,
+                          size: 45,
+                        ),
                       ),
-                    ),
-                    // padding: EdgeInsets.only(right: 25),
-                    // child: CircleAvatar(
-                    //   radius: 25,
-                    //   backgroundColor: ,
-                    // ),
-                  )
-                ],
-              ),
-              useWidget()
-            ],
+                      // padding: EdgeInsets.only(right: 25),
+                      // child: CircleAvatar(
+                      //   radius: 25,
+                      //   backgroundColor: ,
+                      // ),
+                    )
+                  ],
+                ),
+                useWidget()
+              ],
+            ),
           ),
         ),
       ),

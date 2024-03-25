@@ -8,11 +8,7 @@ class Search {
   String alias;
   String imageUrl;
 
-  Search({
-    required this.name, 
-    required this.alias,
-    required this.imageUrl
-  });
+  Search({required this.name, required this.alias, required this.imageUrl});
 }
 
 class GogoAnime {
@@ -62,11 +58,15 @@ class GogoAnime {
   }
 
   String _getServerLink(String serverName, List<Map<String, String>> servers) {
-    final src = servers.where((element) => element['server']?.toLowerCase() == serverName.toLowerCase()).toList()[0]['src'];
+    final src = servers
+        .where((element) =>
+            element['server']?.toLowerCase() == serverName.toLowerCase())
+        .toList()[0]['src'];
     return src ?? '';
   }
 
-  Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {
+  Future<void> getStreams(
+      String episodeId, Function(List<dynamic>, bool) update) async {
     //get link of all listed servers from gogoanime
     final servers = await getAllServerLinks(episodeId);
 
@@ -81,38 +81,57 @@ class GogoAnime {
     final streamwish = StreamWish().extract(swLink);
     final alions = StreamWish().extract(alLink);
 
+    //updates the array when a new source is found
     vidstream.then((res) {
       returns++;
       update(res, returns == totalStreams);
+    }).catchError((error) {
+      print(error);
+      returns++;
+      update([], returns == totalStreams);
     });
+
     streamwish.then((res) {
       returns++;
       update(res, returns == totalStreams);
+    }).catchError((error) {
+      print(error);
+      returns++;
+      update([], returns == totalStreams);
     });
+
     alions.then((res) {
       returns++;
       update(res, returns == totalStreams);
+    }).catchError((error) {
+      print(error);
+      returns++;
+      update([], returns == totalStreams);
     });
     // sources.addAll([vidstream, streamwish]);
     // return sources.expand((element) => element).toList();
   }
 
-   getAnimeEpisodeLink(String aliasId) async {
+  getAnimeEpisodeLink(String aliasId) async {
     dynamic url = aliasId;
-    if(!url.startsWith("http"))
-      url = '$_baseUrl/category/$aliasId';
+    if (!url.startsWith("http")) url = '$_baseUrl/category/$aliasId';
     final res = await get(url);
     final document = html.parse(res.body);
 
-    final epStart = document.querySelector('.anime_video_body > ul > li > a')?.attributes['ep_start'];
-    final epEnd = document.querySelector('.anime_video_body > ul > li:last-child > a')?.attributes['ep_end'];
+    final epStart = document
+        .querySelector('.anime_video_body > ul > li > a')
+        ?.attributes['ep_start'];
+    final epEnd = document
+        .querySelector('.anime_video_body > ul > li:last-child > a')
+        ?.attributes['ep_end'];
     if (epEnd == null) {
       throw Exception('Couldn\'t find end Eps');
     }
     final alias = document.querySelector('#alias_anime')?.attributes['value'];
     final movieId = document.querySelector('#movie_id')?.attributes['value'];
 
-    final ajaxurl = '$_ajaxUrl/load-list-episode?ep_start=$epStart&ep_end=$epEnd&id=$movieId&default_ep=0&alias=$alias';
+    final ajaxurl =
+        '$_ajaxUrl/load-list-episode?ep_start=$epStart&ep_end=$epEnd&id=$movieId&default_ep=0&alias=$alias';
     final ajaxres = await get(ajaxurl);
     final parsedAjaxRes = html.parse(ajaxres.body);
 
@@ -123,31 +142,32 @@ class GogoAnime {
 
     final split = link.split('-');
     return {
-      'link': _baseUrl + '${split.sublist(0, split.length - 1).join('-')}-'.trim(),
+      'link':
+          _baseUrl + '${split.sublist(0, split.length - 1).join('-')}-'.trim(),
       'episodes': int.parse(epEnd)
     };
   }
 
   Future<List<Map<String, String>>> getAllServerLinks(String epUrl) async {
-        final res = await get(epUrl);
-        final $ = html.parse(res.body);
-        List<Map<String, String>> serverArray = [];
-        $.querySelectorAll('div.anime_muti_link > ul > li').forEach((e) {
-            final serverName = e.attributes['class'] ?? '';
-            final srcChildren = e.children;
-            var src;
-            for(var child in srcChildren) {
-              final dataVideo = child.attributes['data-video'];
-              if(dataVideo != null) {
-                src = dataVideo;
-              }
-            }
-            serverArray.add({
-                'server': serverName == 'anime' ? 'vidstreaming' : serverName,
-                'src': src,
-            });
-        });
-        return serverArray;
+    final res = await get(epUrl);
+    final $ = html.parse(res.body);
+    List<Map<String, String>> serverArray = [];
+    $.querySelectorAll('div.anime_muti_link > ul > li').forEach((e) {
+      final serverName = e.attributes['class'] ?? '';
+      final srcChildren = e.children;
+      var src;
+      for (var child in srcChildren) {
+        final dataVideo = child.attributes['data-video'];
+        if (dataVideo != null) {
+          src = dataVideo;
+        }
+      }
+      serverArray.add({
+        'server': serverName == 'anime' ? 'vidstreaming' : serverName,
+        'src': src,
+      });
+    });
+    return serverArray;
   }
 
   Future<http.Response> get(String url) async {

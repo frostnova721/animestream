@@ -2,6 +2,7 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
+import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/ui/models/bottomSheet.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -24,6 +25,7 @@ class _InfoState extends State<Info> {
   @override
   void initState() {
     super.initState();
+    AniListLogin().isAnilistLoggedIn().then((value) => value = loggedIn);
     getInfo(widget.id).then((value) {
       getEpisodes();
       getWatched();
@@ -42,6 +44,7 @@ class _InfoState extends State<Info> {
   bool started = false;
   List qualities = [];
   bool _epSearcherror = false;
+  bool loggedIn = false;
   MediaStatus? mediaListStatus;
 
   Future<void> getWatched() async {
@@ -227,40 +230,41 @@ class _InfoState extends State<Info> {
                                 ),
                               ),
                             ),
-                            Container(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
+                            if (loggedIn)
+                              Container(
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                    showModalBottomSheet(
+                                      context: context,
+                                      backgroundColor: backgroundColor,
+                                      showDragHandle: true,
+                                      builder: (context) =>
+                                          MediaListStatusBottomSheet(
+                                        status: mediaListStatus,
+                                        id: widget.id,
+                                        refreshListStatus: refreshListStatus,
+                                        totalEpisodes: data.episodes ?? 0,
+                                        episodesWatched: watched,
+                                      ),
+                                    );
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    shape: CircleBorder(
+                                      side: BorderSide(
+                                        color: accentColor,
+                                      ),
+                                    ),
+                                    fixedSize: Size(50, 50),
                                     backgroundColor: backgroundColor,
-                                    showDragHandle: true,
-                                    builder: (context) =>
-                                        MediaListStatusBottomSheet(
-                                      status: mediaListStatus,
-                                      id: widget.id,
-                                      refreshListStatus: refreshListStatus,
-                                      totalEpisodes: data.episodes ?? 0,
-                                      episodesWatched: watched,
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: CircleBorder(
-                                    side: BorderSide(
-                                      color: accentColor,
-                                    ),
+                                    padding: EdgeInsets.zero,
                                   ),
-                                  fixedSize: Size(50, 50),
-                                  backgroundColor: backgroundColor,
-                                  padding: EdgeInsets.zero,
+                                  child: Icon(
+                                    getTrackerIcon(),
+                                    color: accentColor,
+                                    size: 28,
+                                  ),
                                 ),
-                                child: Icon(
-                                  getTrackerIcon(),
-                                  color: accentColor,
-                                  size: 28,
-                                ),
-                              ),
-                            )
+                              )
                           ],
                         ),
                       ),

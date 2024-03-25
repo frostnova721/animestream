@@ -20,16 +20,17 @@ Future<void> storeWatching(
         box = await Hive.openBox('animestream');
       }
       final List watchingList = box.get('watching') ?? [];
-      final currList = watchingList.where((item) => item['id'] == id).toList();
-      if (currList.length != 0 && currList[0]['watched'] <= watched) {
+      // final currList = watchingList.where((item) => item['id'] == id).toList();
+      // if (currList.length != 0 && currList[0]['watched'] <= watched) {
         watchingList.removeWhere((item) => item['id'] == id);
-      }
+      // }
       watchingList.add({
         'title': title,
         'imageUrl': imageUrl,
         'id': id,
         'watched': watched,
       });
+      print(watchingList);
       box.put('watching', watchingList);
       box.close();
     }

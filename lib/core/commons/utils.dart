@@ -30,7 +30,8 @@ String getCurrentSeason() {
   }
 }
 
-MediaStatus assignItemEnum(String valueInString) {
+MediaStatus assignItemEnum(String? valueInString) {
+  if(valueInString == null) return MediaStatus.CURRENT;
     switch (valueInString) {
       case "CURRENT":
         return MediaStatus.CURRENT;

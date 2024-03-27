@@ -1,5 +1,6 @@
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 final List sources = ["gogoanime"];
@@ -28,7 +29,7 @@ List<DropdownMenuEntry> getSourceDropdownList() {
           foregroundColor: MaterialStatePropertyAll(Colors.white),
           textStyle: MaterialStatePropertyAll(
             TextStyle(
-              color:  Colors.white,
+              color:  textMainColor,
               fontFamily: "Rubik",
               fontSize: 18,
             )

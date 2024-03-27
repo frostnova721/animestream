@@ -49,6 +49,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                   _themeItem("Dark Ash - Lime", lime),
                   _themeItem("Monochrome", monochrome),
                   _themeItem("Hot Pink", hotPink),
+                  _themeItem("Cold Purple", coldPurple)
                 ],
               ),
             ),

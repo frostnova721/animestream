@@ -30,8 +30,33 @@ String getCurrentSeason() {
   }
 }
 
-MediaStatus assignItemEnum(String? valueInString) {
-  if(valueInString == null) return MediaStatus.CURRENT;
+ MonthnumberToMonthName(
+    dynamic monthNumber,
+  ) {
+    if (monthNumber == null) return {'short': '', 'full': ''};
+    if (monthNumber > 12 || monthNumber < 1) return null;
+    const monthName = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    return {
+      'full': monthName[monthNumber - 1],
+      'short': monthName[monthNumber - 1].substring(0, 3),
+    };
+  }
+
+MediaStatus? assignItemEnum(String? valueInString) {
+  if(valueInString == null) return null;
     switch (valueInString) {
       case "CURRENT":
         return MediaStatus.CURRENT;

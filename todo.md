@@ -5,3 +5,4 @@
 - add more sources
 - redesign episode selection
 - enable support for multiple notifications
+- fix downloader

@@ -13,6 +13,7 @@ import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -136,7 +137,7 @@ class _HomeState extends State<Home> {
       await getLists(userName: user.name);
     } else if (loggedIn && userProfile != null) {
       //just load the list if the user was already signed in.
-      //also dont refrest the list if user just visited the settings page and were already logged in 
+      //also dont refrest the list if user just visited the settings page and were already logged in
       if (fromSettings)
         return setState(() {
           refreshing = false;
@@ -152,167 +153,186 @@ class _HomeState extends State<Home> {
     });
   }
 
+  bool popInvoked = false;
+
+  //reset the popInvoke
+  Future<void> popTimeoutWindow() async {
+    await Future.delayed(Duration(seconds: 3));
+    popInvoked = false;
+  }
+
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _globalKey,
-      backgroundColor: backgroundColor,
-      drawer: HomeDrawer(
-        onItemTapped: onItemTapped,
-        activeIndex: activeIndex,
-        loggedIn: userProfile != null ? true : false,
-      ),
-      body: RefreshIndicator(
-        onRefresh: refresh,
-        color: accentColor,
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: Padding(
-            padding: EdgeInsets.only(
-                top: MediaQuery.of(context).padding.top,
-                bottom: MediaQuery.of(context).padding.bottom,
-                left: MediaQuery.of(context).padding.left),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              IconButton(
-                                onPressed: () {
-                                  _globalKey.currentState!.openDrawer();
-                                },
-                                icon: Icon(
-                                  Icons.menu_rounded,
-                                  color: textMainColor,
-                                  size: 30,
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.only(left: 10),
-                                child: Text(
-                                  "AnimeStream",
-                                  style: TextStyle(
-                                    color: textMainColor,
-                                    fontSize: 23,
-                                    fontFamily: 'NunitoSans',
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Container(
-                            padding:
-                                EdgeInsets.only(left: 10, right: 0, top: 10),
-                            width: 300,
-                            child: TextField(
-                              controller: textEditingController,
-                              autocorrect: false,
-                              maxLines: 1,
-                              onSubmitted: (String input) {
-                                textEditingController.value =
-                                    TextEditingValue.empty;
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        Search(searchedText: input),
-                                  ),
-                                ).then(
-                                  (value) async {
-                                    setState(() {
-                                      refreshing = true;
-                                    });
-                                    await getLists(
-                                        userName: userProfile?.name ?? null);
-                                    if (mounted)
-                                      setState(() {
-                                        refreshing = false;
-                                      });
+    return PopScope(
+      canPop: false,
+      onPopInvoked: (didPop) async {
+        //exit the app if back is pressed again within 3 sec window
+        if (popInvoked) return await SystemNavigator.pop();
+
+        floatingSnackBar(context, "Hit back once again to exit the app");
+        popInvoked = true;
+        popTimeoutWindow();
+      },
+      child: Scaffold(
+        key: _globalKey,
+        backgroundColor: backgroundColor,
+        drawer: HomeDrawer(
+          onItemTapped: onItemTapped,
+          activeIndex: activeIndex,
+          loggedIn: userProfile != null ? true : false,
+        ),
+        body: RefreshIndicator(
+          onRefresh: refresh,
+          color: accentColor,
+          child: SingleChildScrollView(
+            physics: AlwaysScrollableScrollPhysics(),
+            child: Padding(
+              padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top,
+                  bottom: MediaQuery.of(context).padding.bottom,
+                  left: MediaQuery.of(context).padding.left),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Container(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                IconButton(
+                                  onPressed: () {
+                                    _globalKey.currentState!.openDrawer();
                                   },
-                                );
-                              },
-                              cursorColor: accentColor,
-                              decoration: InputDecoration(
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsets.only(left: 5),
-                                  child: Image.asset(
-                                    "lib/assets/images/search.png",
+                                  icon: Icon(
+                                    Icons.menu_rounded,
                                     color: textMainColor,
-                                    scale: 1.75,
+                                    size: 30,
                                   ),
                                 ),
-                                hintText: "Search...",
-                                hintStyle: TextStyle(
-                                  color: textSubColor,
-                                  fontFamily: "Poppins",
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 10),
+                                  child: Text(
+                                    "AnimeStream",
+                                    style: TextStyle(
+                                      color: textMainColor,
+                                      fontSize: 23,
+                                      fontFamily: 'NunitoSans',
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              padding:
+                                  EdgeInsets.only(left: 10, right: 0, top: 10),
+                              width: 300,
+                              child: TextField(
+                                controller: textEditingController,
+                                autocorrect: false,
+                                maxLines: 1,
+                                onSubmitted: (String input) {
+                                  textEditingController.value =
+                                      TextEditingValue.empty;
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          Search(searchedText: input),
+                                    ),
+                                  ).then(
+                                    (value) async {
+                                      setState(() {
+                                        refreshing = true;
+                                      });
+                                      await getLists(
+                                          userName: userProfile?.name ?? null);
+                                      if (mounted)
+                                        setState(() {
+                                          refreshing = false;
+                                        });
+                                    },
+                                  );
+                                },
+                                cursorColor: accentColor,
+                                decoration: InputDecoration(
+                                  prefixIcon: Padding(
+                                    padding: const EdgeInsets.only(left: 5),
+                                    child: Image.asset(
+                                      "lib/assets/images/search.png",
+                                      color: textMainColor,
+                                      scale: 1.75,
+                                    ),
+                                  ),
+                                  hintText: "Search...",
+                                  hintStyle: TextStyle(
+                                    color: textSubColor,
+                                    fontFamily: "Poppins",
+                                    fontSize: 16,
+                                  ),
+                                  focusColor: accentColor,
+                                  contentPadding: EdgeInsets.only(
+                                      top: 5, bottom: 5, left: 20, right: 20),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: accentColor,
+                                    ),
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: textMainColor,
+                                      width: 1.5,
+                                    ),
+                                    borderRadius: BorderRadius.circular(25),
+                                  ),
+                                ),
+                                style: TextStyle(
+                                  backgroundColor: backgroundColor,
+                                  color: textMainColor,
+                                  fontFamily: 'Poppins',
                                   fontSize: 16,
                                 ),
-                                focusColor: accentColor,
-                                contentPadding: EdgeInsets.only(
-                                    top: 5, bottom: 5, left: 20, right: 20),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: accentColor,
-                                  ),
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: textMainColor,
-                                    width: 1.5,
-                                  ),
-                                  borderRadius: BorderRadius.circular(25),
-                                ),
-                              ),
-                              style: TextStyle(
-                                backgroundColor: backgroundColor,
-                                color: textMainColor,
-                                fontFamily: 'Poppins',
-                                fontSize: 16,
                               ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.only(right: 15),
-                      child: IconButton(
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => SettingsPage(),
-                            ),
-                          ).then((value) => refresh(fromSettings: true));
-                        },
-                        icon: Icon(
-                          Icons.settings,
-                          color: textMainColor,
-                          size: 45,
+                          ],
                         ),
                       ),
-                      // padding: EdgeInsets.only(right: 25),
-                      // child: CircleAvatar(
-                      //   radius: 25,
-                      //   backgroundColor: ,
-                      // ),
-                    )
-                  ],
-                ),
-                useWidget()
-              ],
+                      Container(
+                        padding: EdgeInsets.only(right: 15),
+                        child: IconButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SettingsPage(),
+                              ),
+                            ).then((value) => refresh(fromSettings: true));
+                          },
+                          icon: Icon(
+                            Icons.settings,
+                            color: textMainColor,
+                            size: 45,
+                          ),
+                        ),
+                        // padding: EdgeInsets.only(right: 25),
+                        // child: CircleAvatar(
+                        //   radius: 25,
+                        //   backgroundColor: ,
+                        // ),
+                      )
+                    ],
+                  ),
+                  useWidget()
+                ],
+              ),
             ),
           ),
         ),

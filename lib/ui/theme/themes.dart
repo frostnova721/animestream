@@ -27,3 +27,19 @@ final hotPink = AnimeStreamTheme(
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
 );
+
+//NO! JUST NO
+final lightcaf = AnimeStreamTheme(
+  accentColor: Color(0xffcaf979),
+  backgroundColor: Colors.white,
+  textMainColor: Colors.black,
+  textSubColor: Color.fromARGB(255, 143, 143, 143),
+);
+
+/**Cold Purple accent */
+final coldPurple = AnimeStreamTheme(
+  accentColor: Color(0xff9D8ABF),
+  backgroundColor: Colors.black,
+  textMainColor: Colors.white,
+  textSubColor: Color.fromARGB(255, 180, 180, 180),
+);

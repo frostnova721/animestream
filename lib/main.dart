@@ -64,7 +64,7 @@ class _MyAppState extends State<MyApp> {
       title: 'Animestream',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.transparent),
+        colorScheme: ColorScheme.fromSeed(seedColor: accentColor),
       ),
       home: AnimatedSplashScreen(
         splash: Image.asset("lib/assets/icons/logo_foreground.png"),

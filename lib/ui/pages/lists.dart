@@ -28,7 +28,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   List<ListElement> droppedList = [];
   List<UserAnimeList> rawAnimeList = [];
 
-  List<ListElement> getSelectedTabView() {
+  List<ListElement> getSelectedTabView(int tabIndex) {
     switch (tabIndex) {
       case 0:
         return watchingList;
@@ -106,8 +106,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   Future<void> getAnimeList() async {
     final list = await AnilistQueries().getUserAnimeList(storedUserData!.name);
     if (list.isEmpty) throw new Exception("List is empty lil bro!");
-    rawAnimeList = list.reversed.toList();
-    injectToCorrespondingList(rawAnimeList);
+    rawAnimeList = list;
+    sort(SortType.TopRated);
     setState(() {
       dataLoaded = true;
     });
@@ -117,7 +117,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     switch (type) {
       case SortType.AtoZ:
         return setState(() {
-          final atozList = [...rawAnimeList];
+          final List<UserAnimeList> atozList = copyRawAnimeList(false);
           atozList.forEach(
             (element) {
               element.list.sort(
@@ -133,34 +133,43 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
         });
 
       case SortType.RecentlyUpdated:
-      //not working as expected. the rawAnimeList is getting modified :(
+        //not working as expected. the rawAnimeList is getting modified :(
         return setState(() {
-          final recentlyUpdatedList = [...rawAnimeList];
+          final List<UserAnimeList> recentlyUpdatedList = copyRawAnimeList(true);
           injectToCorrespondingList(recentlyUpdatedList);
         });
       case SortType.TopRated:
-      setState(() {
-        final List<UserAnimeList> ratingList = [...rawAnimeList]; 
+        setState(() {
+          final List<UserAnimeList> ratingList = copyRawAnimeList(false);
           ratingList.forEach(
             (element) {
-              element.list.sort(
-                (a, b) {
-                  double? ratingA = a.rating;
-                  double? ratingB = b.rating;
-                  if(ratingA == null) ratingA = 0;
-                  if(ratingB == null) ratingB = 0;
-                  return ratingB.compareTo(ratingA);
-                }
-              );
+              element.list.sort((a, b) {
+                double? ratingA = a.rating;
+                double? ratingB = b.rating;
+                if (ratingA == null) ratingA = 0;
+                if (ratingB == null) ratingB = 0;
+                return ratingB.compareTo(ratingA);
+              });
             },
           );
           injectToCorrespondingList(ratingList);
-      });
+        });
     }
   }
 
+  List<UserAnimeList> copyRawAnimeList(bool reverse) {
+    final List<UserAnimeList> cloneList = [];
+    for (final list in rawAnimeList) {
+      cloneList.add(UserAnimeList(
+        list: reverse ? list.list.reversed.toList() : list.list,
+        name: list.name,
+        status: list.status,
+      ));
+    }
+    return cloneList;
+  }
+
   bool dataLoaded = false;
-  int tabIndex = 0;
 
   late TabController tabController;
 
@@ -170,8 +179,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       backgroundColor: backgroundColor,
       body: Padding(
         padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-        ),
+            top: MediaQuery.of(context).padding.top,
+            left: MediaQuery.of(context).padding.left),
         child: dataLoaded
             ? Column(
                 children: [
@@ -211,37 +220,9 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                         tooltip: "sort",
                         itemBuilder: (context) {
                           return [
-                            PopupMenuItem(
-                              onTap: () => sort(SortType.AtoZ),
-                              child: Text(
-                                "A-Z",
-                                style: TextStyle(
-                                    color: textMainColor,
-                                    fontFamily: "NotoSans-Bold",
-                                    fontSize: 16),
-                              ),
-                            ),
-                            //shhh
-                            // PopupMenuItem(
-                            //   onTap: () {sort(SortType.RecentlyUpdated);},
-                            //   child: Text(
-                            //     "Recently updated",
-                            //     style: TextStyle(
-                            //         color: textMainColor,
-                            //         fontFamily: "NotoSans-Bold",
-                            //         fontSize: 16),
-                            //   ),
-                            // ),
-                            PopupMenuItem(
-                               onTap: () {sort(SortType.TopRated);},
-                              child: Text(
-                                "Top rated",
-                                style: TextStyle(
-                                    color: textMainColor,
-                                    fontFamily: "NotoSans-Bold",
-                                    fontSize: 16),
-                              ),
-                            ),
+                            sortOptionButton("A-Z", SortType.AtoZ),
+                            sortOptionButton("Top rated", SortType.TopRated),
+                            // sortOptionButton("Recent",SortType.RecentlyUpdated), // aint workin' :(
                           ];
                         },
                         icon: Icon(
@@ -255,19 +236,14 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                   Container(
                     margin: EdgeInsets.only(top: 10),
                     child: TabBar(
-                      onTap: ((value) {
-                        setState(() {
-                          tabIndex = value;
-                        });
-                      }),
                       tabAlignment: TabAlignment.center,
                       isScrollable: true,
                       controller: tabController,
                       indicatorColor: accentColor,
                       overlayColor: MaterialStatePropertyAll(
                           accentColor.withOpacity(0.3)),
-                          labelColor: textMainColor,
-                          unselectedLabelColor: textSubColor,
+                      labelColor: textMainColor,
+                      unselectedLabelColor: textSubColor,
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: "NotoSans",
@@ -309,7 +285,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                     ),
                   ),
                   Expanded(
-                    child: getSelectedTabView().length == 0
+                    child: getSelectedTabView(tabController.index).length == 0
                         ? Center(
                             child: Text(
                               "Such a void!",
@@ -320,38 +296,12 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                               ),
                             ),
                           )
-                        : Container(
-                            padding: EdgeInsets.only(left: 10, right: 10),
-                            child: GridView.builder(
-                              gridDelegate:
-                                  SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 3,
-                                childAspectRatio: 120 / 220,
-                              ),
-                              padding: EdgeInsets.only(top: 20),
-                              // shrinkWrap: true,
-                              itemCount: getSelectedTabView().length,
-                              itemBuilder: (context, index) {
-                                return GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => Info(
-                                          id: getSelectedTabView()[index]
-                                              .info['id'],
-                                        ),
-                                      ),
-                                    ).then((value) => getAnimeList());
-                                  },
-                                  child: Container(
-                                    child: getSelectedTabView()[index].widget,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                  )
+                        : TabBarView(
+                            controller: tabController,
+                            children: List.generate(tabController.length,
+                                (index) => itemGrid(context, index))),
+                  ),
+                  // )
                 ],
               )
             : Center(
@@ -361,6 +311,52 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                   ),
                 ),
               ),
+      ),
+    );
+  }
+
+  PopupMenuItem sortOptionButton(String label, SortType sortType) {
+    return PopupMenuItem(
+      onTap: () => sort(sortType),
+      child: Text(
+        label,
+        style: TextStyle(
+            color: textMainColor, fontFamily: "NotoSans-Bold", fontSize: 16),
+      ),
+    );
+  }
+
+  Container itemGrid(BuildContext context, int currentTabIndex) {
+    return Container(
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: GridView.builder(
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount:
+              MediaQuery.of(context).orientation == Orientation.portrait
+                  ? 3
+                  : 6,
+          childAspectRatio: 120 / 220,
+        ),
+        padding: EdgeInsets.only(top: 20),
+        // shrinkWrap: true,
+        itemCount: getSelectedTabView(currentTabIndex).length,
+        itemBuilder: (context, index) {
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => Info(
+                    id: getSelectedTabView(currentTabIndex)[index].info['id'],
+                  ),
+                ),
+              ).then((value) => getAnimeList());
+            },
+            child: Container(
+              child: getSelectedTabView(currentTabIndex)[index].widget,
+            ),
+          );
+        },
       ),
     );
   }

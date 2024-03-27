@@ -58,7 +58,7 @@ class _SearchState extends State<Search> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: MediaQuery.of(context).padding.left),
         child: Column(
           children: [
             Container(
@@ -127,41 +127,37 @@ class _SearchState extends State<Search> {
                 ],
               ),
             ),
-            OrientationBuilder(
-              builder: (context, orientation) {
-                return GridView.builder(
-                  padding: EdgeInsets.zero,
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount:
-                          orientation == Orientation.portrait ? 3 : 7,
-                      // childAspectRatio: 1 / 1.88,
-                      childAspectRatio: 120 /
-                          225 //set as width and height of each child container
-                      ),
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemCount: exactMatch ? exactMatches.length : results.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Info(
-                                id: exactMatch
-                                    ? exactMatches[index].info['id']
-                                    : results[index].info['id'],
-                              ),
-                            ),
-                          );
-                        },
-                        child: exactMatch
-                            ? exactMatches[index].widget
-                            : results[index].widget,
-                      ),
-                    );
-                  },
+            GridView.builder(
+              padding: EdgeInsets.zero,
+              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount:
+                      MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                  // childAspectRatio: 1 / 1.88,
+                  childAspectRatio: 120 /
+                      225 //set as width and height of each child container
+                  ),
+              shrinkWrap: true,
+              physics: NeverScrollableScrollPhysics(),
+              itemCount: exactMatch ? exactMatches.length : results.length,
+              itemBuilder: (context, index) {
+                return Container(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => Info(
+                            id: exactMatch
+                                ? exactMatches[index].info['id']
+                                : results[index].info['id'],
+                          ),
+                        ),
+                      );
+                    },
+                    child: exactMatch
+                        ? exactMatches[index].widget
+                        : results[index].widget,
+                  ),
                 );
               },
             ),

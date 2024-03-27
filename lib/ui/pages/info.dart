@@ -1,9 +1,10 @@
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/watching.dart';
-import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
-import 'package:animestream/ui/models/bottomSheet.dart';
+import 'package:animestream/core/database/anilist/queries.dart';
+import 'package:animestream/ui/models/bottomSheets/bottomSheet.dart';
+import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
@@ -48,8 +49,14 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
 
   Future<void> getWatched() async {
+    if(mediaListStatus == null) {
+      return setState(() {
+        watched = 0;
+        started = false;
+      });
+    }
     final item = await getAnimeWatchProgress(
-        widget.id, mediaListStatus ?? MediaStatus.CURRENT);
+        widget.id, mediaListStatus!);
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 
@@ -68,7 +75,7 @@ class _InfoState extends State<Info> {
   // }
 
   Future getInfo(int id) async {
-    final info = await Anilist().getAnimeInfo(id);
+    final info = await AnilistQueries().getAnimeInfo(id);
     setState(() {
       dataLoaded = true;
       data = info;
@@ -77,7 +84,7 @@ class _InfoState extends State<Info> {
   }
 
   IconData getTrackerIcon() {
-    switch (mediaListStatus!.name) {
+    switch (mediaListStatus?.name) {
       case "CURRENT":
         return Icons.movie_outlined;
       case "PLANNING":
@@ -276,7 +283,7 @@ class _InfoState extends State<Info> {
                         child: Text(
                           data.title['english'] ?? data.title['romaji'],
                           style: TextStyle(
-                            color: Colors.white,
+                            color: textMainColor,
                             fontFamily: "NunitoSans",
                             fontSize: 25,
                           ),
@@ -296,20 +303,20 @@ class _InfoState extends State<Info> {
                                     menuHeight: 75,
                                     width: 300,
                                     textStyle: TextStyle(
-                                      color: Colors.white,
+                                      color: textMainColor,
                                       fontFamily: "Poppins",
                                     ),
                                     menuStyle: MenuStyle(
+                                      surfaceTintColor:
+                                          MaterialStatePropertyAll(accentColor),
                                       backgroundColor: MaterialStatePropertyAll(
                                           Color.fromARGB(255, 0, 0, 0)),
                                       shape: MaterialStatePropertyAll(
                                         RoundedRectangleBorder(
+                                          side:
+                                              BorderSide(color: textMainColor),
                                           borderRadius:
                                               BorderRadius.circular(10),
-                                          side: BorderSide(
-                                            width: 1,
-                                            color: Colors.white,
-                                          ),
                                         ),
                                       ),
                                     ),
@@ -320,16 +327,25 @@ class _InfoState extends State<Info> {
                                     inputDecorationTheme: InputDecorationTheme(
                                       border: OutlineInputBorder(
                                         borderSide: BorderSide(
-                                            width: 1, color: Colors.white),
+                                          width: 1,
+                                          color: Colors.white,
+                                        ),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
                                       contentPadding:
                                           EdgeInsets.only(left: 20, right: 20),
+                                          enabledBorder: OutlineInputBorder(
+                                        borderSide: BorderSide(
+                                          width: 1,
+                                          color: Colors.white,
+                                        ),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
                                     ),
                                     label: Text(
                                       "source",
                                       style: TextStyle(
-                                          color: Colors.white,
+                                          color: textMainColor,
                                           fontSize: 20,
                                           fontFamily: "Rubik",
                                           overflow: TextOverflow.ellipsis),
@@ -737,12 +753,12 @@ class _InfoState extends State<Info> {
                       margin: EdgeInsets.all(5),
                       padding: EdgeInsets.only(left: 15, right: 15),
                       decoration: BoxDecoration(
-                          color: Colors.white12,
+                          color: Colors.grey.shade700,
                           borderRadius: BorderRadius.circular(25)),
                       child: Text(
                         data.genres[index],
                         style: TextStyle(
-                          color: Colors.white,
+                          color: textMainColor,
                           fontSize: 20,
                         ),
                       ),
@@ -762,7 +778,7 @@ class _InfoState extends State<Info> {
               Text(
                 data.synopsis,
                 style: TextStyle(
-                  color: Colors.white,
+                  color: textMainColor,
                   fontFamily: "NunitoSans",
                   fontSize: 15,
                 ),
@@ -893,7 +909,7 @@ class _InfoState extends State<Info> {
       child: Text(
         title,
         style: TextStyle(
-          color: Colors.white,
+          color: textMainColor,
           fontFamily: "NatoSans",
           fontWeight: FontWeight.bold,
           fontSize: 20,
@@ -923,7 +939,7 @@ class _InfoState extends State<Info> {
       child: Text(
         text,
         style: TextStyle(
-          color: Color.fromARGB(255, 255, 255, 255),
+          color: textMainColor,
           fontSize: 17,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,

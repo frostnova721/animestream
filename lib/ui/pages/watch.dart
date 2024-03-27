@@ -46,7 +46,6 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     SystemChrome.setPreferredOrientations([
       DeviceOrientation.landscapeLeft,
       DeviceOrientation.landscapeRight,
-      DeviceOrientation.portraitUp,
     ]);
 
     info = widget.info;
@@ -93,6 +92,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> refreshPage(int episodeIndex, dynamic streamInfo) async {
+    print('refreshing $episodeIndex');
     info.streamInfo = streamInfo;
     qualities = [];
     bool shouldUpdate = currentEpIndex < episodeIndex;

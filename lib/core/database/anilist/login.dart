@@ -38,23 +38,19 @@ class AniListLogin {
     final String? token = await getVal("token");
     if (token == null) throw new Exception("ERR_COULDNT_GET_TOKEN");
 
-
     final res = await Anilist().fetchQuery(query, null, token: token);
 
     final data = res['Viewer'];
     return UserModal(
-      id: data['id'],
-      avatar: data['avatar']['medium'],
-      name: data['name'],
-      banner: data['bannerImage']
-    );
+        id: data['id'],
+        avatar: data['avatar']['medium'],
+        name: data['name'],
+        banner: data['bannerImage']);
   }
 
   Future<bool> isAnilistLoggedIn() async {
-  final token = await getVal('token');
-  if(token != null)
-   return true;
-  return false;
-}
-
+    final token = await getVal('token');
+    if (token != null) return true;
+    return false;
+  }
 }

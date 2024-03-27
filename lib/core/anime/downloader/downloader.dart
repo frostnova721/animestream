@@ -65,13 +65,15 @@ class Downloader {
               segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
           print("fetching segment [$segmentNumber/${segments.length}]");
-          final res = await get(Uri.parse(uri));
+
           NotificationService().updateNotificationProgressBar(
-              id: 69,
-              currentStep: segmentNumber,
-              maxStep: segments.length - 1,
-              fileName: "$fileName.mp4",
-              path: finalPath);
+            id: 69,
+            currentStep: segmentNumber,
+            maxStep: segments.length - 1,
+            fileName: "$fileName.mp4",
+            path: finalPath,
+          );
+          final res = await downloadSegment(uri);
           if (res.statusCode == 200) {
             buffers.add(res.bodyBytes);
           } else
@@ -87,6 +89,8 @@ class Downloader {
       await out.close();
     } catch (err) {
       print(err);
+
+      //send download failed notification
       await NotificationService().pushBasicNotification(
           "Download failed", "The download has been cancelled.");
       downloading = false;
@@ -94,6 +98,17 @@ class Downloader {
       if (await output.exists()) output.delete();
       // await out.close();
       // await output.delete();
+    }
+  }
+
+
+  //download the segment
+  Future<Response> downloadSegment(String url) async {
+    try {
+      final res = await get(Uri.parse(url));
+      return res;
+    } catch (err) {
+      throw Exception("Failed to download segment: $err");
     }
   }
 

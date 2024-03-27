@@ -22,7 +22,7 @@ Future<void> storeWatching(
       final List watchingList = box.get('watching') ?? [];
       // final currList = watchingList.where((item) => item['id'] == id).toList();
       // if (currList.length != 0 && currList[0]['watched'] <= watched) {
-        watchingList.removeWhere((item) => item['id'] == id);
+      watchingList.removeWhere((item) => item['id'] == id);
       // }
       watchingList.add({
         'title': title,
@@ -92,9 +92,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
         recentlyWatched.add(UserAnimeListItem(
           id: e['id'],
           //just give the key as title since its just one
-          title: {
-            'title': e['title']
-          },
+          title: {'title': e['title']},
           coverImage: e['imageUrl'],
           watchProgress: e['watched'],
           rating: e['rating'] ?? null,
@@ -108,13 +106,14 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
 
 Future<int> getAnimeWatchProgress(int id, MediaStatus status) async {
   if (await AniListLogin().isAnilistLoggedIn()) {
-    if(storedUserData == null) throw new Exception("ERR_NO_USERDATA");
-    print(status);
-    final list = await AnilistQueries().getUserAnimeList(storedUserData!.name, status: status);
-    if(list.isEmpty) throw new Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
+    if (storedUserData == null) throw new Exception("ERR_NO_USERDATA");
+    final list = await AnilistQueries()
+        .getUserAnimeList(storedUserData!.name, status: status);
+    if (list.isEmpty)
+      throw new Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
     else {
-    final item = list[0].list.where((item) => item.id == id).firstOrNull;
-    if(item != null) return item.watchProgress ?? 0;
+      final item = list[0].list.where((item) => item.id == id).firstOrNull;
+      if (item != null) return item.watchProgress ?? 0;
     }
   } else {
     final box = await Hive.openBox('animestream');

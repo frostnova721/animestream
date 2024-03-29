@@ -75,12 +75,16 @@ class _InfoState extends State<Info> {
   // }
 
   Future getInfo(int id) async {
+    try {
     final info = await AnilistQueries().getAnimeInfo(id);
     setState(() {
       dataLoaded = true;
       data = info;
       mediaListStatus = assignItemEnum(data.mediaListStatus);
-    });
+    }); 
+    } catch(err) {
+      floatingSnackBar(context, err.toString());
+    }
   }
 
   IconData getTrackerIcon() {

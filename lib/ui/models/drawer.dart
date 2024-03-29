@@ -32,6 +32,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
     return Drawer(
       width: 250,
       backgroundColor: backgroundColor,
+      surfaceTintColor: Colors.transparent,
       child: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         child: Column(

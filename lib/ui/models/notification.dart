@@ -31,19 +31,21 @@ class NotificationService {
       AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
-  pushBasicNotification(String title, String content) {
+  pushBasicNotification(int id, String title, String content) {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
-          id: 69,
+          id: id,
           channelKey: "animestream",
           title: title,
           body: content,
-          backgroundColor: accentColor),
+          backgroundColor: accentColor,
+          // autoDismissible: false
+          ),
     );
   }
 
-  removeNotification() {
-    AwesomeNotifications().cancel(69);
+  removeNotification(int id) {
+    AwesomeNotifications().cancel(id);
   }
 
   Future<void> updateNotificationProgressBar({
@@ -64,6 +66,7 @@ class NotificationService {
             category: NotificationCategory.Progress,
             payload: {
               'path': path,
+              'id': id.toString(),
             },
             notificationLayout: NotificationLayout.ProgressBar,
             progress: progress.toDouble(),
@@ -82,6 +85,7 @@ class NotificationService {
             body: '$fileName has been downloaded succesfully!',
             payload: {
               'path': path,
+              'id': id.toString(),
             },
             locked: false,
             backgroundColor: accentColor,
@@ -110,8 +114,9 @@ class NotificationController {
   static Future<void> onActionReceivedMethod(
       ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'cancel') {
-      NotificationService().removeNotification();
-      Downloader().cancelDownload();
+      final id = receivedAction.payload!['id']!;
+      NotificationService().removeNotification(int.parse(id));
+      Downloader().cancelDownload(int.parse(id));
     }
     if (receivedAction.buttonKeyPressed == 'open_file') {
       OpenFile.open(receivedAction.payload?['path'], type: "video/mp4");

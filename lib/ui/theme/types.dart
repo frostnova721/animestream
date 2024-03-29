@@ -6,10 +6,12 @@ class AnimeStreamTheme {
   Color accentColor;
   Color textMainColor;
   Color textSubColor;
+  Color backgroundSubColor;
 
   AnimeStreamTheme({
     required this.accentColor,
     required this.backgroundColor,
+    required this.backgroundSubColor,
     required this.textMainColor,
     required this.textSubColor,
   });
@@ -24,6 +26,8 @@ class AnimeStreamTheme {
           int.parse(lime.textSubColor.value.toRadixString(16))),
       backgroundColor: Color(int.tryParse(map['backgroundColor'], radix: 16) ??
           int.parse(lime.backgroundColor.value.toRadixString(16))),
+          backgroundSubColor: Color(int.tryParse(map['backgroundSubColor'], radix: 16) ??
+          int.parse(lime.backgroundSubColor.value.toRadixString(16))),
     );
   }
 
@@ -31,6 +35,7 @@ class AnimeStreamTheme {
     return {
       'accentColor': accentColor.value.toRadixString(16),
       'backgroundColor': backgroundColor.value.toRadixString(16),
+      'backgroundSubColor': backgroundSubColor.value.toRadixString(16),
       'textMainColor': textMainColor.value.toRadixString(16),
       'textSubColor': textSubColor.value.toRadixString(16),
     };

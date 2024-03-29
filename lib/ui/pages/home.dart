@@ -14,6 +14,7 @@ import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -151,6 +152,7 @@ class _HomeState extends State<Home> {
     setState(() {
       refreshing = false;
     });
+    refreshController.refreshCompleted();
   }
 
   bool popInvoked = false;
@@ -160,6 +162,9 @@ class _HomeState extends State<Home> {
     await Future.delayed(Duration(seconds: 3));
     popInvoked = false;
   }
+
+  RefreshController refreshController =
+      RefreshController(initialRefresh: false);
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
@@ -183,11 +188,14 @@ class _HomeState extends State<Home> {
           activeIndex: activeIndex,
           loggedIn: userProfile != null ? true : false,
         ),
-        body: RefreshIndicator(
+        body: SmartRefresher(
           onRefresh: refresh,
-          color: accentColor,
+          controller: refreshController,
+          header: MaterialClassicHeader(color: accentColor,backgroundColor: backgroundSubColor,),
+          physics:
+              ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
           child: SingleChildScrollView(
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: NeverScrollableScrollPhysics(),
             child: Padding(
               padding: EdgeInsets.only(
                   top: MediaQuery.of(context).padding.top,

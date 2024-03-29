@@ -45,14 +45,16 @@ class _MyAppState extends State<MyApp> {
           accentColor = theme.accentColor,
           textMainColor = theme.textMainColor,
           textSubColor = theme.textSubColor,
-          backgroundColor = theme.backgroundColor
+          backgroundColor = theme.backgroundColor,
+          backgroundSubColor = theme.backgroundSubColor,
         });
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
       systemNavigationBarColor: Colors.black.withOpacity(0.002),
     ));
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
+        overlays: [SystemUiOverlay.top]);
 
     super.initState();
   }

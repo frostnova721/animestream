@@ -8,7 +8,7 @@ class Anilist {
     final gquery = '''
             query {
                 Page(perPage: 10) {
-                    media(search: "$query", type: ANIME) {
+                    media(search: "$query", type: ANIME, isAdult: false) {
                         id
                         idMal
                         title {

@@ -1,11 +1,13 @@
 import "dart:io";
 import "dart:typed_data";
+import "package:animestream/core/anime/downloader/types.dart";
 import "package:animestream/ui/models/notification.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "../../commons/utils.dart";
 
-bool downloading = false;
+// bool downloading = false;
+List<DownloadingItem> downloadQueue = [];
 
 class Downloader {
   String _makeBaseLink(String uri) {
@@ -14,15 +16,23 @@ class Downloader {
     return split.join('/');
   }
 
-  void cancelDownload() {
-    downloading = false;
+  void cancelDownload(int id) {
+    downloadQueue.removeWhere((item) => item.id == id);
+  }
+
+  int generateId() {
+    int maxId = downloadQueue.isNotEmpty
+        ? downloadQueue.map((item) => item.id).reduce((a, b) => a > b ? a : b)
+        : 0;
+    return maxId + 1;
   }
 
   Future<void> download(String streamLink, String fileName) async {
     final downPath = await Directory('/storage/emulated/0/Download');
     String finalPath;
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-    downloading = true;
+    // downloading = true;
+
     if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/animestream/");
       if (!(await directory.exists())) {
@@ -37,10 +47,16 @@ class Downloader {
       }
       finalPath = "${externalStorage?.path}/animestream/${fileName}.mp4";
     }
+
     final output = File(finalPath);
     final List<Uint8List> buffers = [];
+
+    //generate an id for the downloading item and add it to the queue(list)
+    final downloadId = generateId();
+    downloadQueue.add(DownloadingItem(id: downloadId, downloading: true));
     // var out = output.openWrite();
     final streamBaseLink = _makeBaseLink(streamLink);
+
     try {
       final List<String> segments = await _getSegments(streamLink);
       List<String> segmentsFiltered = [];
@@ -49,11 +65,17 @@ class Downloader {
           if (element.length != 0) segmentsFiltered.add(element);
         },
       );
+
       for (final segment in segmentsFiltered) {
-        if (!downloading) {
+        final downloading =
+            downloadQueue.where((item) => item.id == downloadId).firstOrNull;
+        if (downloading == null) {
           await NotificationService().pushBasicNotification(
-              "Download Cancelled", "The download has been cancelled.");
-          downloading = false;
+            downloadId,
+            "Download Cancelled",
+            "The download ($fileName) has been cancelled.",
+          );
+          // downloading = false;
           buffers.clear();
           // await out.close();
           // await output.delete();
@@ -67,7 +89,7 @@ class Downloader {
           print("fetching segment [$segmentNumber/${segments.length}]");
 
           NotificationService().updateNotificationProgressBar(
-            id: 69,
+            id: downloadId,
             currentStep: segmentNumber,
             maxStep: segments.length - 1,
             fileName: "$fileName.mp4",
@@ -80,27 +102,31 @@ class Downloader {
             throw new Exception("ERR_REQ_FAILED");
         }
       }
+
       //write the data after full download. (idk why)
       //un comment the commented lines to make it write the data to file as soon as it is downloaded
       final out = await output.openWrite();
       for (final buffer in buffers) {
         out.add(buffer);
       }
+
       await out.close();
     } catch (err) {
       print(err);
 
       //send download failed notification
       await NotificationService().pushBasicNotification(
-          "Download failed", "The download has been cancelled.");
-      downloading = false;
+        downloadId,
+        "Download failed",
+        "The download has been cancelled.",
+      );
+      cancelDownload(downloadId);
       buffers.clear();
       if (await output.exists()) output.delete();
       // await out.close();
       // await output.delete();
     }
   }
-
 
   //download the segment
   Future<Response> downloadSegment(String url) async {

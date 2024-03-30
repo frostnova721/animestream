@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/pages/home.dart';
@@ -41,7 +43,20 @@ class _MyAppState extends State<MyApp> {
         onDismissActionReceivedMethod:
             NotificationController.onDismissActionReceivedMethod);
 
-    getTheme().then((theme) => {
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.black.withOpacity(0.002),
+    ));
+
+    loadAndAssignSettings();
+
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
+        overlays: [SystemUiOverlay.top]);
+
+    super.initState();
+  }
+
+  Future<void> loadAndAssignSettings() async {
+     await getTheme().then((theme) => {
           accentColor = theme.accentColor,
           textMainColor = theme.textMainColor,
           textSubColor = theme.textSubColor,
@@ -49,14 +64,7 @@ class _MyAppState extends State<MyApp> {
           backgroundSubColor = theme.backgroundSubColor,
         });
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.black.withOpacity(0.002),
-    ));
-
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
-        overlays: [SystemUiOverlay.top]);
-
-    super.initState();
+    await Settings().getSettings().then((settings) => currentUserSettings = settings);
   }
 
   // This widget is the root of your application.

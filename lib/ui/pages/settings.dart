@@ -1,4 +1,5 @@
 import 'package:animestream/ui/pages/settingPages/account.dart';
+import 'package:animestream/ui/pages/settingPages/general.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/pages/settingPages/theme.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -15,6 +16,7 @@ class _SettingsState extends State<SettingsPage> {
   final List<SettingItem> items = [
     SettingItem(label: "Account", page: AccountSetting()),
     SettingItem(label: "Theme", page: ThemeSetting()),
+    SettingItem(label: "General", page: GeneralSetting()),
     SettingItem(label: "Player", page: PlayerSetting()),
   ];
 
@@ -63,9 +65,28 @@ class _SettingsState extends State<SettingsPage> {
                     onTap: () {
                       Navigator.push(
                           context,
-                          MaterialPageRoute(
-                            builder: (context) => items[index].page,
+                          PageRouteBuilder(
+                            pageBuilder:
+                                (context, animation, secondaryAnimation) =>
+                                    items[index].page,
+                            transitionsBuilder: (context, animation,
+                                secondaryAnimation, child) {
+                              final tween = Tween(
+                                  begin: Offset(1.0, 0.0), end: Offset.zero);
+                              final curvedAnimation = CurvedAnimation(
+                                parent: animation,
+                                curve: Curves.ease,
+                              );
+
+                              return SlideTransition(
+                                position: tween.animate(curvedAnimation),
+                                child: child,
+                              );
+                            },
                           ));
+                      // MaterialPageRoute(
+                      //   builder: (context) => items[index].page,
+                      // ));
                     },
                     child: Container(
                       height: 70,

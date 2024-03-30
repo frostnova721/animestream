@@ -127,18 +127,6 @@ class _DiscoverState extends State<Discover> {
                             children: [
                               Container(
                                 width: double.infinity,
-                                //add for fade in at bottom
-                                // child:
-                                // ShaderMask(
-                                //   shaderCallback: (rect) {
-                                //     return LinearGradient(
-                                //       begin: Alignment.topCenter,
-                                //       end: Alignment.bottomCenter,
-                                //       colors: [backgroundColor, Color.fromARGB(54, 0, 0, 0)],
-                                //     ).createShader(
-                                //         Rect.fromLTRB(0, 0, rect.width, rect.height+10));
-                                //   },
-                                //   blendMode: BlendMode.dstIn,
                                 child: ClipRRect(
                                   child: ImageFiltered(
                                     imageFilter:

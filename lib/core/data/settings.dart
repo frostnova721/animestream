@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:hive/hive.dart';
 
@@ -24,7 +25,7 @@ class Settings {
         currentSettings[key] = updatedSettings[key];
       }
     });
-
+    currentUserSettings = SettingsModal.fromMap(currentSettings);
     await box.put('settings', currentSettings);
     if (box.isOpen) await box.close;
   }

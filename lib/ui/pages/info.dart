@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -49,14 +50,13 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
 
   Future<void> getWatched() async {
-    if(mediaListStatus == null) {
+    if (mediaListStatus == null) {
       return setState(() {
         watched = 0;
         started = false;
       });
     }
-    final item = await getAnimeWatchProgress(
-        widget.id, mediaListStatus!);
+    final item = await getAnimeWatchProgress(widget.id, mediaListStatus!);
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 
@@ -76,14 +76,16 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     try {
-    final info = await AnilistQueries().getAnimeInfo(id);
-    setState(() {
-      dataLoaded = true;
-      data = info;
-      mediaListStatus = assignItemEnum(data.mediaListStatus);
-    }); 
-    } catch(err) {
-      floatingSnackBar(context, err.toString());
+      final info = await AnilistQueries().getAnimeInfo(id);
+      setState(() {
+        dataLoaded = true;
+        data = info;
+        mediaListStatus = assignItemEnum(data.mediaListStatus);
+      });
+    } catch (err) {
+      if (currentUserSettings!.showErrors != null &&
+          currentUserSettings!.showErrors!)
+        floatingSnackBar(context, err.toString());
     }
   }
 
@@ -179,6 +181,9 @@ class _InfoState extends State<Info> {
         setState(() {
           _epSearcherror = true;
         });
+        if (currentUserSettings!.showErrors != null &&
+          currentUserSettings!.showErrors!)
+        floatingSnackBar(context, err.toString());
       }
     }
   }
@@ -338,7 +343,7 @@ class _InfoState extends State<Info> {
                                       ),
                                       contentPadding:
                                           EdgeInsets.only(left: 20, right: 20),
-                                          enabledBorder: OutlineInputBorder(
+                                      enabledBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
                                           width: 1,
                                           color: Colors.white,

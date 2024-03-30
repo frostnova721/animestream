@@ -116,7 +116,9 @@ class _HomeState extends State<Home> {
         });
     } catch (err) {
       print(err);
-      floatingSnackBar(context, err.toString());
+      if (currentUserSettings!.showErrors != null &&
+          currentUserSettings!.showErrors!)
+        floatingSnackBar(context, err.toString());
       if (mounted)
         setState(() {
           error = true;
@@ -191,7 +193,10 @@ class _HomeState extends State<Home> {
         body: SmartRefresher(
           onRefresh: refresh,
           controller: refreshController,
-          header: MaterialClassicHeader(color: accentColor,backgroundColor: backgroundSubColor,),
+          header: MaterialClassicHeader(
+            color: accentColor,
+            backgroundColor: backgroundSubColor,
+          ),
           physics:
               ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
           child: SingleChildScrollView(

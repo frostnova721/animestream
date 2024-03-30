@@ -290,11 +290,11 @@ class _MediaListStatusBottomSheetState
                       final int progress =
                           int.parse(textEditingController.value.text);
                       if (selectedValue != null ||
-                          progress != widget.episodesWatched) {
+                          progress != widget.episodesWatched || widget.status == null) {
                         AnilistMutations()
                             .mutateAnimeList(
                           id: widget.id,
-                          status: assignItemEnum(selectedValue!),
+                          status: assignItemEnum(selectedValue ?? initialSelection!),
                           progress: progress,
                         )
                             .then((value) {
@@ -304,7 +304,7 @@ class _MediaListStatusBottomSheetState
                           floatingSnackBar(context, "The list has been updated!");
                         });
                         initialSelection = selectedValue;
-                        widget.refreshListStatus(selectedValue!, progress);
+                        widget.refreshListStatus(selectedValue ?? initialSelection!, progress);
                       }
                     },
                     child: Text(

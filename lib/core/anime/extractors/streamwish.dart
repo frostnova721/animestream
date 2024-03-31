@@ -4,8 +4,6 @@ import '../../commons/types.dart';
 import '../../commons/utils.dart';
 
 class StreamWish {
-// final streamUrl = "https://awish.pro/e/u0k9ocgf4ao0";
-  // final streamUrl = "https://alions.pro/v/3jsdldq3ecz4";
   Future<List<Stream>> extract(String streamUrl) async {
     if (streamUrl.startsWith('https://awish.pro/')) {
       final res = await fetch(streamUrl);
@@ -63,29 +61,4 @@ class StreamWish {
 
     throw new Exception("NO_MATCHING_LINKS_FOUND");
   }
-
-  // final matches = pattern.allMatches(content);
-
-  // final streamInfos = matches.map((match) {
-  //   final resolution = match.group(1);
-  //   final link = match.group(2);
-  //   return {
-  //     'resolution': resolution,
-  //     'link': link,
-  //   };
-  // }).toList();
-
-  //   final List<Map<String, String>> streamList = [];
-  //   final mainSplit = streamUrl.split('/');
-  //   mainSplit.removeLast();
-  //   final j = mainSplit.join('/');
-  //   for (final info in streamInfos) {
-  //     streamList.add({
-  //       'resolution': info['resolution'] ?? '',
-  //       'link': "$j/${info['link']}"
-  //     });
-  //   }
-  //   return streamList;
-  // }
-//   }
 }

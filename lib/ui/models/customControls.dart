@@ -86,9 +86,9 @@ class _ControlsState extends State<Controls> {
         //change 0 to last selected stream
         calledAutoNext = true;
         if (preloadedSources.isNotEmpty) {
+          widget.refreshPage(currentEpIndex, preloadedSources[0]);
           playVideo(preloadedSources[0].link);
           currentEpIndex = currentEpIndex + 1;
-          widget.refreshPage(currentEpIndex, preloadedSources[0]);
         } else {
           showModalBottomSheet(
             context: context,

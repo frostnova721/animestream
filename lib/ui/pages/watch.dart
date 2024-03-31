@@ -119,9 +119,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   Future getEpisodeSources(
       String epLink, Function(List<dynamic>, bool) cb) async {
-    // final List<dynamic> srcs = [];
     await getStreams(widget.selectedSource, epLink, cb);
-    // return srcs;
   }
 
   Future<void> getQualities() async {
@@ -180,19 +178,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            // GestureDetector(
-            //   onTap: () {
-            //     setState(() {
-            //       _visible = !_visible;
-            //       toggleControls(!_visible);
-            //       hideControlsOnTimeout();
-            //     });
-            //   },
-            //   child:
             BetterPlayer(
               controller: _controller,
             ),
-            // ),
             AnimatedOpacity(
               opacity: _visible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 150),

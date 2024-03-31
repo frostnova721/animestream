@@ -6,7 +6,6 @@ import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "../../commons/utils.dart";
 
-// bool downloading = false;
 List<DownloadingItem> downloadQueue = [];
 
 class Downloader {
@@ -31,8 +30,6 @@ class Downloader {
     final downPath = await Directory('/storage/emulated/0/Download');
     String finalPath;
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-    // downloading = true;
-
     if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/animestream/");
       if (!(await directory.exists())) {
@@ -54,7 +51,6 @@ class Downloader {
     //generate an id for the downloading item and add it to the queue(list)
     final downloadId = generateId();
     downloadQueue.add(DownloadingItem(id: downloadId, downloading: true));
-    // var out = output.openWrite();
     final streamBaseLink = _makeBaseLink(streamLink);
 
     try {
@@ -75,10 +71,7 @@ class Downloader {
             "Download Cancelled",
             "The download ($fileName) has been cancelled.",
           );
-          // downloading = false;
           buffers.clear();
-          // await out.close();
-          // await output.delete();
           return;
         }
         await Future.delayed(Duration(milliseconds: 50));
@@ -103,8 +96,7 @@ class Downloader {
         }
       }
 
-      //write the data after full download. (idk why)
-      //un comment the commented lines to make it write the data to file as soon as it is downloaded
+      //write the data after full download.
       final out = await output.openWrite();
       for (final buffer in buffers) {
         out.add(buffer);
@@ -123,8 +115,6 @@ class Downloader {
       cancelDownload(downloadId);
       buffers.clear();
       if (await output.exists()) output.delete();
-      // await out.close();
-      // await output.delete();
     }
   }
 

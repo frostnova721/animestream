@@ -104,8 +104,8 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   }
 }
 
-Future<int> getAnimeWatchProgress(int id, MediaStatus status) async {
-  if (await AniListLogin().isAnilistLoggedIn()) {
+Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
+  if (await AniListLogin().isAnilistLoggedIn() && status != null) {
     if (storedUserData == null) throw new Exception("ERR_NO_USERDATA");
     final list = await AnilistQueries()
         .getUserAnimeList(storedUserData!.name, status: status);

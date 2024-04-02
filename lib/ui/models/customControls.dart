@@ -40,7 +40,7 @@ class _ControlsState extends State<Controls> {
 
   int currentEpIndex = 0;
   bool preloadStarted = false;
-  bool calledAutoNext = false;
+  bool calledAutoNext = true;
 
   @override
   void initState() {
@@ -56,13 +56,18 @@ class _ControlsState extends State<Controls> {
     assignSettings();
 
     _controller?.addListener(() {
-      if (_controller!.value.position.inSeconds ==
-          _controller!.value.duration?.inSeconds) {
-        if (preloadedSources.isNotEmpty) {
-          _betterPlayerController!.setupDataSource(
-              BetterPlayerDataSource.network(preloadedSources[0].link));
-        }
+      //managing preload and playing the video
+      if(_controller!.value.position.inSeconds == _controller!.value.duration?.inSeconds) {
+        playPreloadedEpisode();
       }
+      final currentByTotal = _controller!.value.position.inSeconds /
+          (_controller!.value.duration?.inSeconds ?? 1);
+      if (currentByTotal * 100 >= 75 && !preloadStarted) {
+        preloadNextEpisode();
+        widget.updateWatchProgress(currentEpIndex);
+      }
+
+      //managing the UI updation
       if (mounted)
         setState(() {
           int duration = _controller?.value.duration?.inSeconds ?? 0;
@@ -74,39 +79,6 @@ class _ControlsState extends State<Controls> {
           currentTime = getFormattedTime(val);
           maxTime = getFormattedTime(duration);
         });
-      final currentByTotal = _controller!.value.position.inSeconds /
-          (_controller!.value.duration?.inSeconds ?? 1);
-      if (currentByTotal * 100 >= 75 && !preloadStarted) {
-        preloadNextEpisode();
-        // if (currentEpIndex< widget.episode['epLinks'].length) {
-          widget.updateWatchProgress(currentEpIndex);
-        // }
-      }
-      if (currentByTotal == 1 && calledAutoNext) {
-        //change 0 to last selected stream
-        calledAutoNext = true;
-        if (preloadedSources.isNotEmpty) {
-          widget.refreshPage(currentEpIndex, preloadedSources[0]);
-          playVideo(preloadedSources[0].link);
-          currentEpIndex = currentEpIndex + 1;
-        } else {
-          showModalBottomSheet(
-            context: context,
-            builder: (context) {
-              return CustomControlsBottomSheet(
-                getEpisodeSources: widget.episode['getEpisodeSources'],
-                currentSources: currentSources,
-                playVideo: playVideo,
-                next: true,
-                epLinks: widget.episode['epLinks'],
-                currentEpIndex: currentEpIndex,
-                refreshPage: widget.refreshPage,
-                updateCurrentEpIndex: updateCurrentEpIndex,
-              );
-            },
-          );
-        }
-      }
     });
   }
 
@@ -133,6 +105,31 @@ class _ControlsState extends State<Controls> {
     });
   }
 
+  Future<void> playPreloadedEpisode() async {
+    calledAutoNext = true;
+    if (preloadedSources.isNotEmpty) {
+      currentEpIndex = currentEpIndex + 1;
+      widget.refreshPage(currentEpIndex, preloadedSources[0]);
+      await playVideo(preloadedSources[0].link);
+    } else {
+      showModalBottomSheet(
+        context: context,
+        builder: (context) {
+          return CustomControlsBottomSheet(
+            getEpisodeSources: widget.episode['getEpisodeSources'],
+            currentSources: currentSources,
+            playVideo: playVideo,
+            next: true,
+            epLinks: widget.episode['epLinks'],
+            currentEpIndex: currentEpIndex,
+            refreshPage: widget.refreshPage,
+            updateCurrentEpIndex: updateCurrentEpIndex,
+          );
+        },
+      );
+    }
+  }
+
   Future preloadNextEpisode() async {
     if (currentEpIndex + 1 > widget.episode['epLinks'].length) {
       preloadStarted =
@@ -148,6 +145,7 @@ class _ControlsState extends State<Controls> {
       srcs = srcs + list;
       if (finished) {
         preloadedSources = srcs;
+        print("PRELOAD FINISHED");
       }
     });
   }

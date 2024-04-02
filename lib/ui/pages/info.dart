@@ -50,13 +50,14 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
 
   Future<void> getWatched() async {
+    if(await AniListLogin().isAnilistLoggedIn())
     if (mediaListStatus == null) {
       return setState(() {
         watched = 0;
         started = false;
       });
     }
-    final item = await getAnimeWatchProgress(widget.id, mediaListStatus!);
+    final item = await getAnimeWatchProgress(widget.id, mediaListStatus);
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 

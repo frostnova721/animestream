@@ -442,6 +442,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       DeviceOrientation.landscapeRight,
       DeviceOrientation.landscapeLeft
     ]);
+    _controller.dispose();
     super.dispose();
   }
 }

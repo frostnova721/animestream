@@ -6,3 +6,4 @@
 - redesign episode selection
 - enable support for multiple notifications
 - fix downloader
+- add preferred quality option for player setting

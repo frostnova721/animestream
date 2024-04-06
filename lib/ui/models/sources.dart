@@ -48,7 +48,7 @@ Future<List<Map<String, String?>>> searchInSource(String source, String query) a
   return searchResults;
 }
 
-getAnimeEpisodes(String source, String link) async {
+Future<List<String>> getAnimeEpisodes(String source, String link) async {
   final info = await getClass(source).getAnimeEpisodeLink(link);
   final int episodes = info['episodes'];
   List<String> episodeLinks = [];

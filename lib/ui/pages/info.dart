@@ -42,7 +42,7 @@ class _InfoState extends State<Info> {
   List<String> epLinks = [];
   List streamSources = [];
   int watched = 1;
-  int watchedPercentage = 0;
+  int watchedPercentage = 1;
   bool started = false;
   List qualities = [];
   bool _epSearcherror = false;
@@ -50,8 +50,7 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
 
   Future<void> getWatched() async {
-    if(await AniListLogin().isAnilistLoggedIn())
-    if (mediaListStatus == null) {
+    if (await AniListLogin().isAnilistLoggedIn()) if (mediaListStatus == null) {
       return setState(() {
         watched = 0;
         started = false;
@@ -183,8 +182,8 @@ class _InfoState extends State<Info> {
           _epSearcherror = true;
         });
         if (currentUserSettings!.showErrors != null &&
-          currentUserSettings!.showErrors!)
-        floatingSnackBar(context, err.toString());
+            currentUserSettings!.showErrors!)
+          floatingSnackBar(context, err.toString());
       }
     }
   }

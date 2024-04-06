@@ -328,7 +328,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
 
   Container itemGrid(BuildContext context, int currentTabIndex) {
     return Container(
-      padding: EdgeInsets.only(left: 10, right: 10),
+      padding: EdgeInsets.only(left: 10, right: 10,),
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount:
@@ -337,7 +337,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                   : 6,
           childAspectRatio: 120 / 220,
         ),
-        padding: EdgeInsets.only(top: 20),
+        padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
         // shrinkWrap: true,
         itemCount: getSelectedTabView(currentTabIndex).length,
         itemBuilder: (context, index) {

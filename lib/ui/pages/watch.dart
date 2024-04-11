@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/customControls.dart';
+import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -77,12 +78,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   Future<dynamic> playVideo(String url) async {
     await _controller.setupDataSource(
-      BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
+      dataSourceConfig(
         info.streamInfo.link,
-        bufferingConfiguration: BetterPlayerBufferingConfiguration(
-          maxBufferMs: 40000,
-        ),
       ),
     );
   }
@@ -96,7 +93,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     info.streamInfo = streamInfo;
     qualities = [];
     bool shouldUpdate = currentEpIndex < episodeIndex;
-     setState(() {
+    setState(() {
       info.episodeNumber = episodeIndex + 1;
       currentEpIndex = episodeIndex;
     });
@@ -134,8 +131,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   void changeQuality(String link, int? currentTime) async {
     if (currentQualityLink != link) {
       await playVideo(link);
-      _controller.videoPlayerController
-          !.seekTo(Duration(seconds: currentTime ?? 0));
+      _controller.videoPlayerController!
+          .seekTo(Duration(seconds: currentTime ?? 0));
       currentQualityLink = link;
     }
   }
@@ -201,6 +198,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                       refreshPage: refreshPage,
                       updateWatchProgress: updateWatchProgress,
                       isControlsLocked: isControlsLocked,
+                      hideControlsOnTimeout: hideControlsOnTimeout
                     ),
                   ),
                 ],

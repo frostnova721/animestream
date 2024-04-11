@@ -1,5 +1,6 @@
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
+import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -16,6 +17,7 @@ class Controls extends StatefulWidget {
   final Future<void> Function(int, dynamic) refreshPage;
   final Future<void> Function(int) updateWatchProgress;
   final bool Function() isControlsLocked;
+  final void Function() hideControlsOnTimeout;
 
   const Controls({
     super.key,
@@ -26,6 +28,7 @@ class Controls extends StatefulWidget {
     required this.refreshPage,
     required this.updateWatchProgress,
     required this.isControlsLocked,
+    required this.hideControlsOnTimeout,
   });
 
   @override
@@ -57,7 +60,8 @@ class _ControlsState extends State<Controls> {
 
     _controller?.addListener(() {
       //managing preload and playing the video
-      if(_controller!.value.position.inSeconds == _controller!.value.duration?.inSeconds) {
+      if (_controller!.value.position.inSeconds ==
+          _controller!.value.duration?.inSeconds) {
         playPreloadedEpisode();
       }
       final currentByTotal = _controller!.value.position.inSeconds /
@@ -155,13 +159,7 @@ class _ControlsState extends State<Controls> {
     preloadStarted = false;
     calledAutoNext = false;
     _betterPlayerController!.setupDataSource(
-      BetterPlayerDataSource(
-        BetterPlayerDataSourceType.network,
-        url,
-        bufferingConfiguration: BetterPlayerBufferingConfiguration(
-          maxBufferMs: 40000,
-        ),
-      ),
+      dataSourceConfig(url)
     );
   }
 

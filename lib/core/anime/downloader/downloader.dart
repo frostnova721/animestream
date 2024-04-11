@@ -124,6 +124,9 @@ class Downloader {
       final res = await get(Uri.parse(url));
       return res;
     } catch (err) {
+      // if (attemptNo == null) attemptNo = 1;
+      // if (attemptNo > 3)    //unsure!
+      // return downloadSegment(url, attemptNo: attemptNo + 1);
       throw Exception("Failed to download segment: $err");
     }
   }

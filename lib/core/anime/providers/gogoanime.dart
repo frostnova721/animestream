@@ -61,8 +61,11 @@ class GogoAnime {
     final src = servers
         .where((element) =>
             element['server']?.toLowerCase() == serverName.toLowerCase())
-        .toList()[0]['src'];
-    return src ?? '';
+        .toList();
+    if (src.isEmpty) {
+      return '';
+    }
+    return src[0]['src'] ?? '';
   }
 
   Future<void> getStreams(
@@ -73,7 +76,7 @@ class GogoAnime {
     //pick the iframe link of given server
     final vsLink = _getServerLink("vidstreaming", servers);
     final swLink = _getServerLink("streamwish", servers);
-    final alLink = _getServerLink("filelions", servers);
+    final alLink = _getServerLink("vidhide", servers);
     // final sources = [];
     int returns = 0;
     int totalStreams = 3; //update this when new source is added for gogo

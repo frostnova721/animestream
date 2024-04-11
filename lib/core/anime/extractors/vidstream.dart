@@ -15,6 +15,9 @@ class Vidstream {
   final baseUrl = "https://gogoanime3.net";
 
   Future<List<Stream>> extractGogo(String streamLink) async {
+    if(streamLink.isEmpty) {
+      throw new Exception("ERR_EMPTY_STREAM_LINK");
+    }
     final epLink = Uri.parse(streamLink);
     final id = epLink.queryParameters['id'] ?? '';
     final encrypedKey = await getEncryptedKey(id);

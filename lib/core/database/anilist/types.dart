@@ -98,7 +98,7 @@ class AnilistInfo {
   final List<String?> studios;
   final List<Object?> synonyms;
   final String? synopsis;
-  final dynamic tags;
+  final List<String> tags;
   final String? mediaListStatus;
 
   AnilistInfo({

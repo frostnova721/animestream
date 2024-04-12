@@ -145,6 +145,7 @@ class _InfoState extends State<Info> {
   }
 
   Future getEpisodes() async {
+    foundName = null;
     try {
       final sr = await searchInSource(
           selectedSource, data.title['english'] ?? data.title['romaji']);
@@ -309,15 +310,17 @@ class _InfoState extends State<Info> {
                                     initialSelection: sources.first,
                                     dropdownMenuEntries:
                                         getSourceDropdownList(),
-                                    menuHeight: 75,
+                                    // menuHeight: 75,
                                     width: 300,
                                     textStyle: TextStyle(
                                       color: textMainColor,
                                       fontFamily: "Poppins",
                                     ),
+                                    trailingIcon: Icon(Icons.arrow_drop_down, color: textMainColor,),
+                                    selectedTrailingIcon: Icon(Icons.arrow_drop_up, color: textMainColor,),
                                     menuStyle: MenuStyle(
                                       surfaceTintColor:
-                                          MaterialStatePropertyAll(accentColor),
+                                          MaterialStatePropertyAll(backgroundSubColor),
                                       backgroundColor: MaterialStatePropertyAll(
                                           Color.fromARGB(255, 0, 0, 0)),
                                       shape: MaterialStatePropertyAll(
@@ -331,7 +334,9 @@ class _InfoState extends State<Info> {
                                     ),
                                     onSelected: (value) {
                                       selectedSource = value;
-                                      getEpisodes();
+                                      setState(() {
+                                        getEpisodes();
+                                      });
                                     },
                                     inputDecorationTheme: InputDecorationTheme(
                                       border: OutlineInputBorder(
@@ -763,12 +768,45 @@ class _InfoState extends State<Info> {
                       padding: EdgeInsets.only(left: 15, right: 15),
                       decoration: BoxDecoration(
                           color: Colors.grey.shade700,
-                          borderRadius: BorderRadius.circular(25)),
+                          borderRadius: BorderRadius.circular(20)),
                       child: Text(
                         data.genres[index],
                         style: TextStyle(
                           color: textMainColor,
                           fontSize: 20,
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        Container(
+          margin: EdgeInsets.only(top: 30),
+          padding: EdgeInsets.only(left: 15, right: 15),
+          child: Column(
+            children: [
+              _categoryTitle('Tags'),
+              SizedBox(
+                height: 45,
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: data.genres.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      alignment: Alignment.center,
+                      margin: EdgeInsets.all(5),
+                      padding: EdgeInsets.only(left: 15, right: 15),
+                      decoration: BoxDecoration(
+                          color: Colors.grey.shade800,
+                          borderRadius: BorderRadius.circular(5)),
+                      child: Text(
+                        data.tags[index],
+                        style: TextStyle(
+                          color: textMainColor,
+                          fontSize: 15,
                         ),
                       ),
                     );

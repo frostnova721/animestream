@@ -235,6 +235,11 @@ class AnilistQueries {
         ));
       });
 
+      List<String> tags = [];
+      info['tags'].forEach((item) {
+        tags.add(item['name'].toString());
+      });
+
       final convertedGuy = AnilistInfo(
         title: {
           'english': info['title']['english'],
@@ -270,7 +275,7 @@ class AnilistQueries {
         synopsis: info['description']
             .replaceAll(RegExp(r'<[^>]*>'), "")
             .replaceAll(RegExp(r'\n+'), '\n'),
-        tags: info['tags'].map((tag) => tag['name']),
+        tags: tags,
         mediaListStatus: info['mediaListEntry']?['status'],
       );
 

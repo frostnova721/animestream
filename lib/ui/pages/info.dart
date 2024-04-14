@@ -48,6 +48,8 @@ class _InfoState extends State<Info> {
   bool _epSearcherror = false;
   bool loggedIn = false;
   MediaStatus? mediaListStatus;
+  List<List<Map<String, dynamic>>> visibleEpList = [];
+  int currentPageIndex = 0;
 
   Future<void> getWatched() async {
     if (await AniListLogin().isAnilistLoggedIn()) if (mediaListStatus == null) {
@@ -159,7 +161,29 @@ class _InfoState extends State<Info> {
       final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
       if (mounted)
         setState(() {
+          visibleEpList = [];
           epLinks = links;
+          if (epLinks.length > 24) {
+            final totalPages = (epLinks.length / 24).ceil();
+            int remainingItems = epLinks.length;
+            for (int h = 0; h < totalPages; h++) {
+              List<Map<String, dynamic>> page = [];
+              for (int i = 0; i < 24 && remainingItems > 0; i++) {
+                page.add({
+                  'realIndex': (h * 24) + i,
+                  'epLink': epLinks[(h * 24) + i]
+                });
+                remainingItems--;
+              }
+              visibleEpList.add(page);
+            }
+          } else {
+            List<Map<String, dynamic>> pageOne = [];
+            for (int i = 0; i < epLinks.length; i++) {
+              pageOne.add({'realIndex': i, 'epLink': epLinks[i]});
+            }
+            visibleEpList.add(pageOne);
+          }
           foundName = match[0]['name'];
         });
     } catch (err) {
@@ -316,11 +340,18 @@ class _InfoState extends State<Info> {
                                       color: textMainColor,
                                       fontFamily: "Poppins",
                                     ),
-                                    trailingIcon: Icon(Icons.arrow_drop_down, color: textMainColor,),
-                                    selectedTrailingIcon: Icon(Icons.arrow_drop_up, color: textMainColor,),
+                                    trailingIcon: Icon(
+                                      Icons.arrow_drop_down,
+                                      color: textMainColor,
+                                    ),
+                                    selectedTrailingIcon: Icon(
+                                      Icons.arrow_drop_up,
+                                      color: textMainColor,
+                                    ),
                                     menuStyle: MenuStyle(
                                       surfaceTintColor:
-                                          MaterialStatePropertyAll(backgroundSubColor),
+                                          MaterialStatePropertyAll(
+                                              backgroundSubColor),
                                       backgroundColor: MaterialStatePropertyAll(
                                           Color.fromARGB(255, 0, 0, 0)),
                                       shape: MaterialStatePropertyAll(
@@ -393,25 +424,111 @@ class _InfoState extends State<Info> {
                                                       scale: 7.5,
                                                     ),
                                                     Text(
-                                                        "Couldnt get any results :(",
-                                                        style: TextStyle(
-                                                            color: Colors.white,
-                                                            fontSize: 16,
-                                                            fontFamily:
-                                                                "NunitoSans"))
+                                                      "Couldnt get any results :(",
+                                                      style: TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 16,
+                                                        fontFamily:
+                                                            "NunitoSans",
+                                                      ),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
                                             )
                                           : foundName != null
-                                              ? _episodes()
+                                              ? Column(
+                                                  children: [
+                                                    Container(
+                                                      height: 35,
+                                                      margin: EdgeInsets.only(
+                                                          bottom: 10, top: 10),
+                                                      child: ListView.builder(
+                                                        itemCount: visibleEpList
+                                                            .length,
+                                                        scrollDirection:
+                                                            Axis.horizontal,
+                                                        shrinkWrap: true,
+                                                        itemBuilder:
+                                                            (context, index) {
+                                                          return Padding(
+                                                            padding:
+                                                                const EdgeInsets
+                                                                    .only(
+                                                                    left: 10),
+                                                            child:
+                                                                AnimatedContainer(
+                                                              duration: Duration(
+                                                                  milliseconds:
+                                                                      200),
+                                                              clipBehavior:
+                                                                  Clip.hardEdge,
+                                                              decoration:
+                                                                  BoxDecoration(
+                                                                color: currentPageIndex ==
+                                                                        index
+                                                                    ? accentColor
+                                                                    : backgroundColor,
+                                                                borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                            10),
+                                                              ),
+                                                              child: Material(
+                                                                color: Colors
+                                                                    .transparent,
+                                                                child: InkWell(
+                                                                  onTap: () {
+                                                                    setState(
+                                                                        () {
+                                                                      currentPageIndex =
+                                                                          index;
+                                                                    });
+                                                                  },
+                                                                  child:
+                                                                      Container(
+                                                                    padding:
+                                                                        EdgeInsets
+                                                                            .only(
+                                                                      left: 10,
+                                                                      right: 10,
+                                                                    ),
+                                                                    alignment:
+                                                                        Alignment
+                                                                            .center,
+                                                                    child: Text(
+                                                                      "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
+                                                                      style:
+                                                                          TextStyle(
+                                                                        color: currentPageIndex ==
+                                                                                index
+                                                                            ? backgroundColor
+                                                                            : textMainColor,
+                                                                        fontFamily:
+                                                                            'NotoSans',
+                                                                        fontWeight:
+                                                                            FontWeight.bold,
+                                                                      ),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                      ),
+                                                    ),
+                                                    _episodes(),
+                                                  ],
+                                                )
                                               : Container(
                                                   width: 350,
                                                   height: 100,
                                                   child: Center(
                                                     child:
                                                         CircularProgressIndicator(
-                                                            color: accentColor),
+                                                      color: accentColor,
+                                                    ),
                                                   ),
                                                 ),
                                       // ),
@@ -579,145 +696,189 @@ class _InfoState extends State<Info> {
 
   ListView _episodes() {
     return ListView.builder(
-        padding: EdgeInsets.only(top: 0, bottom: 15),
-        itemCount: epLinks.length,
-        shrinkWrap: true,
-        physics: NeverScrollableScrollPhysics(),
-        itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () async {
-              showModalBottomSheet(
-                  showDragHandle: true,
-                  context: context,
-                  backgroundColor: Color(0xff121212),
-                  builder: (context) {
-                    return BottomSheetContent(
-                      getStreams: getStreams,
-                      bottomSheetContentData: BottomSheetContentData(
-                          epLinks: epLinks,
-                          episodeIndex: index,
-                          selectedSource: selectedSource,
-                          title: data.title['english'] ?? data.title['romaji'],
-                          id: widget.id,
-                          cover: data.cover),
-                      type: Type.watch,
-                      getWatched: getWatched,
-                    );
-                  });
-            },
-
-            //list style
-            // child: Container(
-            //   padding: EdgeInsets.only(left: 20, right: 20),
-            //   child: Container(
-            //     child: Column(
-            //       mainAxisSize: MainAxisSize.min,
-            //       children: [
-            //         Padding(
-            //           padding: EdgeInsets.only(left: 20, right: 20),
-            //           child: Row(
-            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            //             children: [
-            //               Text("Episode ${index+1}", style: TextStyle(color: textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 17),),
-            //               Icon(Icons.download_rounded, color: textMainColor,)
-            //             ],
-            //           ),
-            //         ),
-            //         Padding(
-            //           padding: const EdgeInsets.only(top:8, left: 40, right: 40),
-            //           child: Divider(),
-            //         )
-            //       ],
-            //     ),
-            //   ),
-            // ),
-
-            //saikou style
-            child: Stack(
-              children: [
-                Container(
-                  height: 110,
-                  margin: EdgeInsets.only(top: 10, left: 10, right: 10),
-                  padding: EdgeInsets.only(left: 10, right: 10),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Colors.black,
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(15),
-                        child: Opacity(
-                          opacity: index + 1 > watched ? 1.0 : 0.6,
-                          child: Image.network(
-                            data.cover,
-                            width: 140,
-                            height: 90,
-                            fit: BoxFit.cover,
+      padding: EdgeInsets.only(top: 0, bottom: 15),
+      itemCount: visibleEpList[currentPageIndex].length,
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) {
+        return GestureDetector(
+          onTap: () async {
+            showModalBottomSheet(
+                showDragHandle: true,
+                context: context,
+                backgroundColor: Color(0xff121212),
+                builder: (context) {
+                  return BottomSheetContent(
+                    getStreams: getStreams,
+                    bottomSheetContentData: BottomSheetContentData(
+                        epLinks: epLinks,
+                        episodeIndex: visibleEpList[currentPageIndex][index]
+                            ['realIndex'],
+                        selectedSource: selectedSource,
+                        title: data.title['english'] ?? data.title['romaji'],
+                        id: widget.id,
+                        cover: data.cover),
+                    type: Type.watch,
+                    getWatched: getWatched,
+                  );
+                });
+          },
+        
+          //list style
+          // child: Container(
+          //   padding: EdgeInsets.only(left: 20, right: 20),
+          //   child: Container(
+          //     child: Column(
+          //       mainAxisSize: MainAxisSize.min,
+          //       children: [
+          //         Padding(
+          //           padding: EdgeInsets.only(left: 20, right: 20),
+          //           child: Row(
+          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //             children: [
+          //               Text("Episode ${index+1}", style: TextStyle(color: textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 17),),
+          //               Icon(Icons.download_rounded, color: textMainColor,)
+          //             ],
+          //           ),
+          //         ),
+          //         Padding(
+          //           padding: const EdgeInsets.only(top:8, left: 40, right: 40),
+          //           child: Divider(),
+          //         )
+          //       ],
+          //     ),
+          //   ),
+          // ),
+        
+          //saikou style
+          child: Stack(
+            children: [
+              Container(
+                clipBehavior: Clip.hardEdge,
+                height: 110,
+                margin: EdgeInsets.only(top: 10, left: 10, right: 10),
+                padding: EdgeInsets.only(right: 10),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(15),
+                  color: Colors.black,
+                ),
+                alignment: Alignment.center,
+                child: Stack(
+                  children: [
+                     Opacity(
+                      opacity: visibleEpList[currentPageIndex][index]
+                                      ['realIndex'] +
+                                  1 >
+                              watched
+                          ? 1.0
+                          : 0.5,
+                      child: ShaderMask(
+                        blendMode: BlendMode.darken,
+                        shaderCallback: (bounds) => LinearGradient(
+                          colors: [
+                            Colors.transparent,
+                            Color.fromARGB(245, 0, 0, 0)
+                          ],
+                          stops: [0.2, 1.0],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ).createShader(bounds),
+                        child: Image.network(
+                          data.cover,
+                          fit: BoxFit.cover,
+                          width: 165,
+                        ),
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          width: 140,
+                        ),
+                        // Image.network(data.cover, fit: BoxFit.fill,),
+                        // ClipRRect(
+                        //   borderRadius: BorderRadius.circular(15),
+                        // child: Opacity(
+                        //   opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.6,
+                        //     child: Image.network(
+                        //       data.cover,
+                        //       width: 140,
+                        //       height: 90,
+                        //       fit: BoxFit.cover,
+                        //     ),
+                        //   ),
+                        // ),
+                        Text(
+                          "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
+                          style: TextStyle(
+                            color: visibleEpList[currentPageIndex][index]
+                                            ['realIndex'] +
+                                        1 >
+                                    watched
+                                ? Colors.white
+                                : Color.fromARGB(155, 255, 255, 255),
+                            fontFamily: "Poppins",
+                            fontSize: 18,
                           ),
                         ),
-                      ),
-                      Text(
-                        "Episode ${index + 1}",
-                        style: TextStyle(
-                          color: index + 1 > watched
-                              ? Colors.white
-                              : Color.fromARGB(155, 255, 255, 255),
-                          fontFamily: "Poppins",
-                          fontSize: 18,
-                        ),
-                      ),
-                      // ),
-                      Container(
-                        child: IconButton(
-                          onPressed: () async {
-                            showModalBottomSheet(
-                              showDragHandle: true,
-                              backgroundColor: Color.fromARGB(255, 19, 19, 19),
-                              context: context,
-                              builder: (BuildContext context) {
-                                return BottomSheetContent(
-                                  getStreams: getStreams,
-                                  bottomSheetContentData:
-                                      BottomSheetContentData(
-                                    epLinks: epLinks,
-                                    episodeIndex: index,
-                                    selectedSource: selectedSource,
-                                    title: data.title['english'] ??
-                                        data.title['romaji'],
-                                    id: widget.id,
-                                    cover: data.cover,
-                                  ),
-                                  type: Type.download,
-                                );
-                              },
-                            );
-                          },
-                          icon: Icon(
-                            Icons.download_rounded,
-                            color: Colors.white,
+                        // ),
+                        Container(
+                          child: IconButton(
+                            onPressed: () async {
+                              showModalBottomSheet(
+                                showDragHandle: true,
+                                backgroundColor:
+                                    Color.fromARGB(255, 19, 19, 19),
+                                context: context,
+                                builder: (BuildContext context) {
+                                  return BottomSheetContent(
+                                    getStreams: getStreams,
+                                    bottomSheetContentData:
+                                        BottomSheetContentData(
+                                      epLinks: epLinks,
+                                      episodeIndex:
+                                          visibleEpList[currentPageIndex][index]
+                                              ['realIndex'],
+                                      selectedSource: selectedSource,
+                                      title: data.title['english'] ??
+                                          data.title['romaji'],
+                                      id: widget.id,
+                                      cover: data.cover,
+                                    ),
+                                    type: Type.download,
+                                  );
+                                },
+                              );
+                            },
+                            icon: Icon(
+                              Icons.download_rounded,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (watched > visibleEpList[currentPageIndex][index]['realIndex'])
+                Align(
+                  alignment: Alignment.topRight,
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20, right: 25),
+                    child: ImageIcon(
+                      AssetImage('lib/assets/images/check.png'),
+                      color: Colors.white,
+                      size: 18,
+                    ),
                   ),
                 ),
-                if (watched > index)
-                  Align(
-                      alignment: Alignment.topRight,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 20, right: 25),
-                        child: ImageIcon(
-                          AssetImage('lib/assets/images/check.png'),
-                          color: Colors.white,
-                          size: 18,
-                        ),
-                      )),
-              ],
-            ),
-          );
-        });
+            ],
+          ),
+        );
+      },
+    );
   }
 
   Column _infoItems(BuildContext context) {

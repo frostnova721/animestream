@@ -95,14 +95,14 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                   )
                 : _list()
             : Container(
-              height: 100,
-              padding: EdgeInsets.only(bottom: 10, top: 20),
-              child: Center(
-                child: CircularProgressIndicator(
-                  color: accentColor,
+                height: 100,
+                padding: EdgeInsets.only(bottom: 10, top: 20),
+                child: Center(
+                  child: CircularProgressIndicator(
+                    color: accentColor,
+                  ),
                 ),
               ),
-            ),
       ),
     );
   }
@@ -209,7 +209,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                 onPressed: () {
                   Downloader().download(qualities[ind]['link'],
                       "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}");
-                      Navigator.of(context).pop();
+                  Navigator.of(context).pop();
                   floatingSnackBar(context,
                       "Downloading the episode to your downloads folder");
                 },
@@ -222,26 +222,28 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                   ),
                 ),
                 child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(top: 5),
-                            child: Text(
-                              "${qualities[ind]['server']} • ${qualities[ind]['quality']}p",
-                              style: TextStyle(
-                                color: accentColor,
-                                fontSize: 18,
-                                fontFamily: "Rubik",
-                              ),
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 5),
+                          child: Text(
+                            "${qualities[ind]['server']} • ${qualities[ind]['quality']}p",
+                            style: TextStyle(
+                              color: accentColor,
+                              fontSize: 18,
+                              fontFamily: "Rubik",
                             ),
                           ),
-                        ],
-                      ),
-                    ]),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
           );

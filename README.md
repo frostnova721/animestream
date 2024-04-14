@@ -2,7 +2,11 @@
 
 A Flutter project made to stream and download Anime.
 
-<img src="lib/assets/icons/logo.png" width="256" height="256" alt="project logo">
+<p align="center">
+    <img src="lib/assets/icons/logo.png" width="256" height="256" alt="project logo">
+</p>
+
+
 
 ## Tech Stack
 
@@ -10,13 +14,18 @@ Built with ❤️ using Flutter
 
 ## Introduction
 
-**animestream** is a project made to stream and download Anime. Inspired from parent project [animestream-electron](https://github.com/frostnova721/animestream-electron) which was limited to desktops. Just wanted to make an app!
+**animestream** is a project made to stream and download Anime. Inspired from parent project [animestream-electron](https://github.com/frostnova721/animestream-electron) which was limited to desktops. Just wanted to make an app! btw, this app is **HEAVILY** inspired from saikou (you know what it means!)
+
+## Installation
+
+You can download the latest apk file from the [releases](https://github.com/frostnova721/animestream/releases) tab. Then install the downloaded apk!
 
 ## Available Sources
 
 Currently, you can enjoy anime content from the following sources:
 
 - **Gogo**
+- **Ryuk**
 
 ## Known Issues
 

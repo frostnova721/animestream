@@ -1,6 +1,8 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/core/data/preferences.dart';
+import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
@@ -27,6 +29,7 @@ class _InfoState extends State<Info> {
   @override
   void initState() {
     super.initState();
+    loadPreferences();
     AniListLogin().isAnilistLoggedIn().then((value) => loggedIn = value);
     getInfo(widget.id).then((value) {
       getEpisodes();
@@ -50,6 +53,12 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
   List<List<Map<String, dynamic>>> visibleEpList = [];
   int currentPageIndex = 0;
+  bool gridMode = false;
+
+  Future<void> loadPreferences() async {
+    final preferences = await UserPreferences().getUserPreferences();
+    gridMode = preferences.episodeGridView ?? false;
+  }
 
   Future<void> getWatched() async {
     if (await AniListLogin().isAnilistLoggedIn()) if (mediaListStatus == null) {
@@ -409,7 +418,46 @@ class _InfoState extends State<Info> {
                                           255, 29, 29, 29)),
                                   child: Column(
                                     children: [
-                                      _categoryTitle("Episodes"),
+                                      Container(
+                                        height: 45,
+                                        child: Stack(
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.center,
+                                              children: [
+                                                _categoryTitle("Episodes"),
+                                              ],
+                                            ),
+                                            if(foundName != null) Row(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.center,
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.end,
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(right: 10),
+                                                  child: IconButton(
+                                                    tooltip: gridMode ? "switch to list view" : "switch to grid view",
+                                                      onPressed: () {
+                                                        setState(() {
+                                                          gridMode = !gridMode;
+                                                          UserPreferences().saveUserPreferences(UserPreferencesModal(episodeGridView: gridMode));
+                                                        });
+                                                      },
+                                                      icon: Icon(
+                                                        gridMode
+                                                            ? Icons
+                                                                .view_list_rounded
+                                                            : Icons
+                                                                .grid_view_rounded,
+                                                      ), color: textMainColor, iconSize: 28,),
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                       _epSearcherror
                                           ? Container(
                                               width: 350,
@@ -439,86 +487,14 @@ class _InfoState extends State<Info> {
                                           : foundName != null
                                               ? Column(
                                                   children: [
-                                                    Container(
-                                                      height: 35,
-                                                      margin: EdgeInsets.only(
-                                                          bottom: 10, top: 10),
-                                                      child: ListView.builder(
-                                                        itemCount: visibleEpList
-                                                            .length,
-                                                        scrollDirection:
-                                                            Axis.horizontal,
-                                                        shrinkWrap: true,
-                                                        itemBuilder:
-                                                            (context, index) {
-                                                          return Padding(
-                                                            padding:
-                                                                const EdgeInsets
-                                                                    .only(
-                                                                    left: 10),
-                                                            child:
-                                                                AnimatedContainer(
-                                                              duration: Duration(
-                                                                  milliseconds:
-                                                                      200),
-                                                              clipBehavior:
-                                                                  Clip.hardEdge,
-                                                              decoration:
-                                                                  BoxDecoration(
-                                                                color: currentPageIndex ==
-                                                                        index
-                                                                    ? accentColor
-                                                                    : backgroundColor,
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            10),
-                                                              ),
-                                                              child: Material(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                child: InkWell(
-                                                                  onTap: () {
-                                                                    setState(
-                                                                        () {
-                                                                      currentPageIndex =
-                                                                          index;
-                                                                    });
-                                                                  },
-                                                                  child:
-                                                                      Container(
-                                                                    padding:
-                                                                        EdgeInsets
-                                                                            .only(
-                                                                      left: 10,
-                                                                      right: 10,
-                                                                    ),
-                                                                    alignment:
-                                                                        Alignment
-                                                                            .center,
-                                                                    child: Text(
-                                                                      "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
-                                                                      style:
-                                                                          TextStyle(
-                                                                        color: currentPageIndex ==
-                                                                                index
-                                                                            ? backgroundColor
-                                                                            : textMainColor,
-                                                                        fontFamily:
-                                                                            'NotoSans',
-                                                                        fontWeight:
-                                                                            FontWeight.bold,
-                                                                      ),
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          );
-                                                        },
-                                                      ),
+                                                    _pages(),
+                                                    AnimatedSwitcher(
+                                                      duration: Duration(
+                                                          milliseconds: 400),
+                                                      child: gridMode
+                                                          ? _episodesGrid()
+                                                          : _episodes(),
                                                     ),
-                                                    _episodes(),
                                                   ],
                                                 )
                                               : Container(
@@ -575,6 +551,59 @@ class _InfoState extends State<Info> {
         ),
       );
     }
+  }
+
+  Container _pages() {
+    return Container(
+      height: 35,
+      margin: EdgeInsets.only(bottom: 10, top: 10),
+      child: ListView.builder(
+        itemCount: visibleEpList.length,
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        itemBuilder: (context, index) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 10),
+            child: AnimatedContainer(
+              duration: Duration(milliseconds: 200),
+              clipBehavior: Clip.hardEdge,
+              decoration: BoxDecoration(
+                color:
+                    currentPageIndex == index ? accentColor : backgroundColor,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    setState(() {
+                      currentPageIndex = index;
+                    });
+                  },
+                  child: Container(
+                    padding: EdgeInsets.only(
+                      left: 10,
+                      right: 10,
+                    ),
+                    alignment: Alignment.center,
+                    child: Text(
+                      "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
+                      style: TextStyle(
+                        color: currentPageIndex == index
+                            ? backgroundColor
+                            : textMainColor,
+                        fontFamily: 'NotoSans',
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          );
+        },
+      ),
+    );
   }
 
   Container _continueButton() {
@@ -694,6 +723,139 @@ class _InfoState extends State<Info> {
     );
   }
 
+  GridView _episodesGrid() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount:
+            MediaQuery.of(context).orientation == Orientation.portrait ? 2 : 5,
+        childAspectRatio:
+            MediaQuery.of(context).orientation == Orientation.portrait
+                ? 1 / 1.3
+                : 1 / 1.4,
+        mainAxisSpacing: 15,
+        crossAxisSpacing: 15,
+      ),
+      itemCount: 12,
+      padding: EdgeInsets.all(15),
+      shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      itemBuilder: (context, index) => GestureDetector(
+        onTap: () {
+          showModalBottomSheet(
+              showDragHandle: true,
+              context: context,
+              backgroundColor: Color(0xff121212),
+              builder: (context) {
+                return BottomSheetContent(
+                  getStreams: getStreams,
+                  bottomSheetContentData: BottomSheetContentData(
+                      epLinks: epLinks,
+                      episodeIndex: visibleEpList[currentPageIndex][index]
+                          ['realIndex'],
+                      selectedSource: selectedSource,
+                      title: data.title['english'] ?? data.title['romaji'],
+                      id: widget.id,
+                      cover: data.cover),
+                  type: Type.watch,
+                  getWatched: getWatched,
+                );
+              });
+        },
+        child: Container(
+          // padding: EdgeInsets.all(10),
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            color: backgroundColor,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Opacity(
+                opacity:
+                    visibleEpList[currentPageIndex][index]['realIndex'] + 1 >
+                            watched
+                        ? 1.0
+                        : 0.5,
+                child: Container(
+                  height: 140,
+                  width: 175,
+                  margin: EdgeInsets.only(bottom: 15),
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                        image: NetworkImage(
+                          data.cover,
+                        ),
+                        fit: BoxFit.cover),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Container(
+                        decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.only(topLeft: Radius.circular(15)),
+                            color: accentColor.withOpacity(0.8)),
+                        child: IconButton(
+                          onPressed: () async {
+                            showModalBottomSheet(
+                              showDragHandle: true,
+                              backgroundColor: Color.fromARGB(255, 19, 19, 19),
+                              context: context,
+                              builder: (BuildContext context) {
+                                return BottomSheetContent(
+                                  getStreams: getStreams,
+                                  bottomSheetContentData:
+                                      BottomSheetContentData(
+                                    epLinks: epLinks,
+                                    episodeIndex:
+                                        visibleEpList[currentPageIndex][index]
+                                            ['realIndex'],
+                                    selectedSource: selectedSource,
+                                    title: data.title['english'] ??
+                                        data.title['romaji'],
+                                    id: widget.id,
+                                    cover: data.cover,
+                                  ),
+                                  type: Type.download,
+                                );
+                              },
+                            );
+                          },
+                          icon: Icon(
+                            Icons.download_rounded,
+                            color: Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10, right: 10),
+                child: Text(
+                  "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
+                  style: TextStyle(
+                    color: visibleEpList[currentPageIndex][index]['realIndex'] +
+                                1 >
+                            watched
+                        ? Colors.white
+                        : Color.fromARGB(155, 255, 255, 255),
+                    fontFamily: 'Poppins',
+                    fontSize: 17,
+                  ),
+                ),
+              )
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   ListView _episodes() {
     return ListView.builder(
       padding: EdgeInsets.only(top: 0, bottom: 15),
@@ -723,7 +885,7 @@ class _InfoState extends State<Info> {
                   );
                 });
           },
-        
+
           //list style
           // child: Container(
           //   padding: EdgeInsets.only(left: 20, right: 20),
@@ -749,7 +911,7 @@ class _InfoState extends State<Info> {
           //     ),
           //   ),
           // ),
-        
+
           //saikou style
           child: Stack(
             children: [
@@ -765,7 +927,7 @@ class _InfoState extends State<Info> {
                 alignment: Alignment.center,
                 child: Stack(
                   children: [
-                     Opacity(
+                    Opacity(
                       opacity: visibleEpList[currentPageIndex][index]
                                       ['realIndex'] +
                                   1 >

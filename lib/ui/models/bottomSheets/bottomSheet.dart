@@ -111,6 +111,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     return widget.type == Type.watch
         ? ListView.builder(
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             itemCount: streamSources.length,
             itemBuilder: (context, index) {
               return Container(
@@ -199,6 +200,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         : ListView.builder(
             itemCount: qualities.length,
             shrinkWrap: true,
+            physics: NeverScrollableScrollPhysics(),
             itemBuilder: (BuildContext context, ind) => Container(
               margin: EdgeInsets.only(top: 15),
               decoration: BoxDecoration(

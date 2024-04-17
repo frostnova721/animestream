@@ -49,7 +49,12 @@ class AniListLogin {
   }
 
   Future<bool> isAnilistLoggedIn() async {
-    final token = await getVal('token');
+    String? token;
+    try {
+    token = await getVal('token');
+    } catch (err) {
+      token = await getVal('token'); //if the box happens to be closed!
+    }
     if (token != null) return true;
     return false;
   }

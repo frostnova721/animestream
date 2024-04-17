@@ -157,6 +157,7 @@ class _InfoState extends State<Info> {
 
   Future getEpisodes() async {
     foundName = null;
+    _epSearcherror = false;
     try {
       final sr = await searchInSource(
           selectedSource, data.title['english'] ?? data.title['romaji']);
@@ -735,7 +736,7 @@ class _InfoState extends State<Info> {
         mainAxisSpacing: 15,
         crossAxisSpacing: 15,
       ),
-      itemCount: 12,
+      itemCount: visibleEpList[currentPageIndex].length,
       padding: EdgeInsets.all(15),
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),

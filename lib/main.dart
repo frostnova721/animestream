@@ -7,8 +7,6 @@ import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:animated_splash_screen/animated_splash_screen.dart';
-import 'package:page_transition/page_transition.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -76,17 +74,7 @@ class _MyAppState extends State<MyApp> {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: accentColor),
       ),
-      home: AnimatedSplashScreen(
-        splash: Image.asset("lib/assets/icons/logo_foreground.png"),
-        nextScreen: const Home(),
-        duration: 1000,
-        backgroundColor: backgroundColor,
-        animationDuration: Durations.long1,
-        splashTransition: SplashTransition.fadeTransition,
-        pageTransitionType: PageTransitionType.rightToLeft,
-        centered: true,
-        splashIconSize: 150,
-      ),
+      home: const Home(),
       debugShowCheckedModeBanner: false,
     );
   }

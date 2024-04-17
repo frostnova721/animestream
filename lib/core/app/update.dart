@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +34,9 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   print("current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
   final String description = releasesRes['body'];
   final bool pre = releasesRes['prerelease'];
+  if(!currentUserSettings!.receivePreReleases! && pre) {
+    return null;
+  }
   if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
     final apkItem = releasesRes['assets']
         .where((item) => item['name'] == "app-release.apk")

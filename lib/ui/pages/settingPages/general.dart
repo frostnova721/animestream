@@ -24,6 +24,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
     final settings = await Settings().getSettings();
     setState(() {
       showErrorsButtonState = settings.showErrors!;
+      receivePreReleases = settings.receivePreReleases!;
     });
   }
 
@@ -36,6 +37,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
 
   bool loaded = false;
   bool showErrorsButtonState = false;
+  bool receivePreReleases = false;
 
   @override
   Widget build(BuildContext context) {
@@ -57,8 +59,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         setState(() {
                           showErrorsButtonState = !showErrorsButtonState;
                         });
-                        writeSettings(
-                            SettingsModal(showErrors: showErrorsButtonState));
+                        // writeSettings(
+                        //     SettingsModal(showErrors: showErrorsButtonState));
                       },
                       child: Container(
                         padding: EdgeInsets.only(
@@ -80,6 +82,51 @@ class _GeneralSettingState extends State<GeneralSetting> {
                                 });
                                 writeSettings(SettingsModal(
                                     showErrors: showErrorsButtonState));
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(
+                    child: InkWell(
+                      onTap: () {
+                        setState(() {
+                          receivePreReleases = !receivePreReleases;
+                        });
+                        // writeSettings(
+                        //     SettingsModal(showErrors: receivePreReleases));
+                      },
+                      child: Container(
+                        padding: EdgeInsets.only(
+                            left: 20, right: 20, top: 10, bottom: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Recieve beta updates",
+                                  style: textStyle(),
+                                ),
+                                Text(
+                                  "*maybe unstable",
+                                  style: TextStyle(color: textSubColor, fontFamily: 'NunitoSans'),
+                                ),
+                              ],
+                            ),
+                            Switch(
+                              value: receivePreReleases,
+                              activeColor: backgroundColor,
+                              activeTrackColor: accentColor,
+                              onChanged: (val) {
+                                setState(() {
+                                  receivePreReleases = val;
+                                });
+                                writeSettings(SettingsModal(
+                                    receivePreReleases: val));
                               },
                             ),
                           ],

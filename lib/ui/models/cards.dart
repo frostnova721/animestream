@@ -155,16 +155,20 @@ Widget animeCard(String title, String imageUrl) {
             },
           ),
         ),
-        Text(
-          title,
-          style: TextStyle(
-            color: textMainColor,
-            fontFamily: 'NotoSans',
-            fontSize: 15,
-            overflow: TextOverflow.ellipsis,
+        Padding(
+          padding: const EdgeInsets.only(right: 5),
+          child: Text(
+            title,
+            style: TextStyle(
+              color: textMainColor,
+              fontFamily: 'NotoSans',
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              overflow: TextOverflow.ellipsis,
+            ),
+            maxLines: 2,
+            textAlign: TextAlign.left,
           ),
-          maxLines: 2,
-          textAlign: TextAlign.left,
         ),
       ],
     ),

@@ -16,8 +16,23 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final Directory dir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(dir.path);
+  await loadAndAssignSettings();
   NotificationService().init();
   runApp(const MyApp());
+}
+
+Future<void> loadAndAssignSettings() async {
+  await getTheme().then((theme) => {
+        accentColor = theme.accentColor,
+        textMainColor = theme.textMainColor,
+        textSubColor = theme.textSubColor,
+        backgroundColor = theme.backgroundColor,
+        backgroundSubColor = theme.backgroundSubColor,
+      });
+
+  await Settings()
+      .getSettings()
+      .then((settings) => currentUserSettings = settings);
 }
 
 class MyApp extends StatefulWidget {
@@ -45,24 +60,10 @@ class _MyAppState extends State<MyApp> {
       systemNavigationBarColor: Colors.black.withOpacity(0.002),
     ));
 
-    loadAndAssignSettings();
-
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
         overlays: [SystemUiOverlay.top]);
 
     super.initState();
-  }
-
-  Future<void> loadAndAssignSettings() async {
-     await getTheme().then((theme) => {
-          accentColor = theme.accentColor,
-          textMainColor = theme.textMainColor,
-          textSubColor = theme.textSubColor,
-          backgroundColor = theme.backgroundColor,
-          backgroundSubColor = theme.backgroundSubColor,
-        });
-
-    await Settings().getSettings().then((settings) => currentUserSettings = settings);
   }
 
   // This widget is the root of your application.

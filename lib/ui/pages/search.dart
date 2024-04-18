@@ -133,8 +133,8 @@ class _SearchState extends State<Search> {
                   crossAxisCount:
                       MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
-                  childAspectRatio: 120 /
-                      225 //set as width and height of each child container
+                  childAspectRatio: 120 / 225, //set as width and height of each child container
+                  mainAxisSpacing: 15
                   ),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),

@@ -253,7 +253,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           alignment: Alignment.center,
                           height: 50,
                           child: Text(
-                            "Watching",
+                            "Watching (${watchingList.length})",
                             style: _textStyle(),
                           ),
                         ),
@@ -261,7 +261,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           alignment: Alignment.center,
                           height: 50,
                           child: Text(
-                            "Planning",
+                            "Planning (${plannedList.length})",
                             style: _textStyle(),
                           ),
                         ),
@@ -269,7 +269,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           alignment: Alignment.center,
                           height: 50,
                           child: Text(
-                            "Dropped",
+                            "Dropped (${droppedList.length})",
                             style: _textStyle(),
                           ),
                         ),
@@ -277,7 +277,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           alignment: Alignment.center,
                           height: 50,
                           child: Text(
-                            "Completed",
+                            "Completed (${completedList.length})",
                             style: _textStyle(),
                           ),
                         ),
@@ -336,6 +336,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                   ? 3
                   : 6,
           childAspectRatio: 120 / 220,
+          mainAxisSpacing: 10
         ),
         padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
         // shrinkWrap: true,
@@ -365,7 +366,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     return TextStyle(
       // color: textMainColor,
       fontFamily: "NotoSans-Bold",
-      fontSize: 18,
+      fontSize: 17,
     );
   }
 

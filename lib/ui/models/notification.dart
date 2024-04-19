@@ -15,6 +15,7 @@ class NotificationService {
           channelName: 'animestream',
           channelDescription: 'animestream notification channel',
           defaultColor: accentColor,
+          playSound: false,
           ledColor: Colors.white,
         ),
       ],

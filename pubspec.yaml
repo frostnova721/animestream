@@ -115,6 +115,7 @@ flutter:
     - lib/assets/images/check.png
     - lib/assets/images/ghost.png
     - lib/assets/icons/logo_foreground.png
+    - lib/assets/icons/logo_monochrome.png
     - lib/assets/images/chisato.jpeg
     - lib/assets/images/mitsuha.jpg
     - lib/assets/images/profile_banner.jpg

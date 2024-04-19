@@ -284,4 +284,42 @@ class AnilistQueries {
 
     return convertToIAnimeDetails();
   }
+
+  Future<List<AnilistRecommendations>> getRecommendedAnimes() async {
+    final String query = '''{
+  Page(perPage: 25) {
+    recommendations(onList: true) {
+      mediaRecommendation {
+        id
+        title {
+          english
+          romaji
+        }
+        coverImage {
+          large
+        }
+        type
+      }
+    }
+  }
+}''';
+    final String? token = await getVal('token');
+    final res = await Anilist().fetchQuery(query, null, token: token);
+    final recommendations = res['Page']['recommendations'];
+    List<AnilistRecommendations> recommendationList = [];
+    for (final item in recommendations) {
+      final rec = item['mediaRecommendation'];
+      recommendationList.add(
+        AnilistRecommendations(
+          cover: rec['coverImage']['large'],
+          id: rec['id'],
+          title: {
+            'english': rec['title']['english'],
+            'romaji': rec['title']['romaji']
+          },
+        ),
+      );
+    }
+    return recommendationList;
+  }
 }

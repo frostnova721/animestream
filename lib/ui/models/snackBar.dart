@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-floatingSnackBar(BuildContext context, String message) {
+floatingSnackBar(BuildContext context, String message, { int? duration }) {
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Center(
@@ -12,7 +12,7 @@ floatingSnackBar(BuildContext context, String message) {
         )
         ),
       ),
-      duration: Duration(seconds: 3),
+      duration: Duration(seconds: duration != null ? duration : 3),
       backgroundColor: Color.fromARGB(235, 29, 29, 29),
       behavior: SnackBarBehavior.floating,
       dismissDirection: DismissDirection.down,

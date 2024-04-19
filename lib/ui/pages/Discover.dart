@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/genres.dart';
@@ -26,15 +27,19 @@ class _DiscoverState extends State<Discover> {
     getLists();
     getTrendingList();
     getRecentlyUpdated();
+    getRecommended();
   }
 
   List thisSeason = [];
   List<TrendingResult> trendingList = [];
   List<ListElement> recentlyUpdatedList = [];
+  List<ListElement> recommendedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
-  bool trendingLoaded = false, recentlyUpdatedLoaded = false;
+  bool trendingLoaded = false,
+      recentlyUpdatedLoaded = false,
+      recommendedLoaded = false;
 
   Future getLists() async {
     thisSeason = widget.currentSeason;
@@ -49,6 +54,23 @@ class _DiscoverState extends State<Discover> {
         trendingList = list.sublist(0, 20);
         trendingLoaded = true;
         pageTimeout();
+      });
+  }
+
+  Future<void> getRecommended() async {
+    final list = await AnilistQueries().getRecommendedAnimes();
+    for (final item in list) {
+      recommendedList.add(
+        ListElement(
+          widget: animeCard(
+              item.title['english'] ?? item.title['romaji'] ?? '', item.cover),
+          info: {'id': item.id},
+        ),
+      );
+    }
+    if (mounted)
+      setState(() {
+        recommendedLoaded = true;
       });
   }
 
@@ -95,18 +117,19 @@ class _DiscoverState extends State<Discover> {
     return Column(
       children: [
         Container(
-            margin: EdgeInsets.only(top: 30),
-            height: 275,
-            // width: double.infinity,
-            child: trendingLoaded
-                ? _trendingAnimesPageView()
-                : Container(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: accentColor,
-                      ),
+          margin: EdgeInsets.only(top: 30),
+          height: 275,
+          // width: double.infinity,
+          child: trendingLoaded
+              ? _trendingAnimesPageView()
+              : Container(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: accentColor,
                     ),
-                  )),
+                  ),
+                ),
+        ),
         if (trendingList.isNotEmpty)
           Container(
             margin: EdgeInsets.only(top: 10),
@@ -206,6 +229,8 @@ class _DiscoverState extends State<Discover> {
         _scrollList(recentlyUpdatedList),
         _itemTitle("This season"),
         _scrollList(thisSeason),
+        _itemTitle("Recommended"),
+        _scrollList(recommendedList),
       ],
     );
   }

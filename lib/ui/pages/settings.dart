@@ -1,4 +1,5 @@
 import 'package:animestream/ui/pages/settingPages/account.dart';
+import 'package:animestream/ui/pages/settingPages/appInfo.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/pages/settingPages/theme.dart';
@@ -18,6 +19,7 @@ class _SettingsState extends State<SettingsPage> {
     SettingItem(label: "Theme", page: ThemeSetting()),
     SettingItem(label: "General", page: GeneralSetting()),
     SettingItem(label: "Player", page: PlayerSetting()),
+    SettingItem(label: "App info", page: AppInfoSetting()),
   ];
 
   @override

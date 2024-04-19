@@ -131,4 +131,12 @@ class AnilistMutationResult {
   AnilistMutationResult({required this.status, required this.progress});
 }
 
+class AnilistRecommendations {
+  final int id;
+  final Map<String, String?> title;
+  final String cover;
+  
+  AnilistRecommendations({required this.cover, required this.id, required this.title});
+}
+
 

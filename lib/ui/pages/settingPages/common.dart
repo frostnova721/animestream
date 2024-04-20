@@ -37,3 +37,8 @@ TextStyle textStyle() {
       fontSize: 20,
     );
   }
+
+  EdgeInsets pagePadding(BuildContext context) {
+    final paddingQuery = MediaQuery.of(context).padding;
+  return EdgeInsets.only(top: paddingQuery.top, left: paddingQuery.left, right: paddingQuery.right);
+  }

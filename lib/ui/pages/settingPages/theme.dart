@@ -14,21 +14,21 @@ class ThemeSetting extends StatefulWidget {
 }
 
 class _ThemeSettingState extends State<ThemeSetting> {
-
   @override
   void initState() {
     super.initState();
     getCurrentTheme();
-    
   }
 
-  getCurrentTheme() async {
-    getTheme().then((value) => currentTheme = value);
+  getCurrentTheme() {
+    getTheme().then((value) => setState(() {
+          currentTheme = value;
+        }));
   }
 
   applyTheme(AnimeStreamTheme theme) async {
     await setTheme(theme);
-    await floatingSnackBar(context, "All set! restart the app to apply the theme");
+    floatingSnackBar(context, "All set! restart the app to apply the theme");
   }
 
   AnimeStreamTheme? currentTheme;
@@ -38,20 +38,22 @@ class _ThemeSettingState extends State<ThemeSetting> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        padding: pagePadding(context),
         child: Column(
           children: [
             topRow(context, "Themes"),
             Container(
               padding: EdgeInsets.only(left: 10, right: 10, top: 30),
-              child: Column(
-                children: [
-                  _themeItem("Dark Ash - Lime", lime),
-                  _themeItem("Monochrome", monochrome),
-                  _themeItem("Hot Pink", hotPink),
-                  _themeItem("Cold Purple", coldPurple)
-                ],
-              ),
+              child: currentTheme != null
+                  ? Column(
+                      children: [
+                        _themeItem("Dark Ash - Lime", lime),
+                        _themeItem("Monochrome", monochrome),
+                        _themeItem("Hot Pink", hotPink),
+                        _themeItem("Cold Purple", coldPurple)
+                      ],
+                    )
+                  : Container(),
             ),
           ],
         ),
@@ -63,10 +65,20 @@ class _ThemeSettingState extends State<ThemeSetting> {
     return InkWell(
       borderRadius: BorderRadius.circular(20),
       onTap: () async {
-        await applyTheme(theme);
+        //check if selected theme is same as current theme
+        if (currentTheme?.accentColor != theme.accentColor) {
+          await applyTheme(theme);
+          setState(() {
+            currentTheme = theme;
+          });
+        }
       },
-      child: Container(
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 200),
         padding: EdgeInsets.only(left: 10, right: 10),
+        color: currentTheme?.accentColor == theme.accentColor
+            ? currentTheme?.backgroundSubColor
+            : Colors.transparent,
         height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -79,6 +91,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
               height: 40,
               width: 40,
               decoration: BoxDecoration(
+                border: Border.all(color: Colors.black, width: 3),
                 borderRadius: BorderRadius.circular(10),
                 color: theme.accentColor,
               ),

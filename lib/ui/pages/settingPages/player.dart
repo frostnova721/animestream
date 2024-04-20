@@ -43,7 +43,7 @@ class PlayerSettingState extends State<PlayerSetting> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        padding: pagePadding(context),
         child: Container(
           child: loaded
               ? Column(

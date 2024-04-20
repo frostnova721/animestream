@@ -4,11 +4,36 @@ import "package:animestream/core/anime/downloader/types.dart";
 import "package:animestream/ui/models/notification.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
+import "package:permission_handler/permission_handler.dart";
 import "../../commons/utils.dart";
 
 List<DownloadingItem> downloadQueue = [];
 
 class Downloader {
+
+  //check for storage permission and request for permission if permission isnt granted
+  Future<bool> checkPermission() async {
+    
+    final access = await Permission.storage;
+
+    final status = await access.status;
+
+    if(status.isPermanentlyDenied) {
+      return false;
+    }
+
+    if(status.isDenied) {
+      final req = await access.request();
+      if(req.isGranted) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      return true;
+    }
+  }
+
   String _makeBaseLink(String uri) {
     final split = uri.split('/');
     split.removeLast();
@@ -27,6 +52,10 @@ class Downloader {
   }
 
   Future<void> download(String streamLink, String fileName) async {
+    final permission = await checkPermission();
+    if(!permission) {
+      throw new Exception("ERR_NO_STORAGE_PERMISSION");
+    }
     final downPath = await Directory('/storage/emulated/0/Download');
     String finalPath;
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');

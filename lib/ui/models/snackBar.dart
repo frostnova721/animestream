@@ -1,6 +1,7 @@
 import "package:flutter/material.dart";
 
 floatingSnackBar(BuildContext context, String message, { int? duration }) {
+  ScaffoldMessenger.of(context).removeCurrentSnackBar();
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Center(

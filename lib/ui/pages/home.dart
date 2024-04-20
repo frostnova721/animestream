@@ -398,46 +398,56 @@ class _HomeState extends State<Home> {
             ],
           ),
         ),
-        Container(
-          margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-          height: 5,
-          decoration: BoxDecoration(
-            color: accentColor.withOpacity(0.4),
-            borderRadius: BorderRadius.circular(
-              50,
-            ),
-          ),
-        ),
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.only(top: 10, left: 20, right: 20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "Currently Airing",
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: textMainColor,
-                  fontFamily: "Rubik",
-                  fontSize: 20,
-                ),
-              ),
-              dataLoaded
-                  ? _cardListMaker(currentlyAiring)
-                  : Container(
-                      height: 250,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: accentColor,
-                        ),
-                      ),
-                    ),
-            ],
-          ),
-        ),
+        _accentedHomeDivider(),
+        _titleAndList("Currently Airing", currentlyAiring),
+
       ],
     );
+  }
+
+  Container _titleAndList(String title, List<ListElement> list) {
+    return Container(
+        width: double.infinity,
+        padding: EdgeInsets.only(top: 10, left: 20, right: 20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: textMainColor,
+                fontFamily: "Rubik",
+                fontSize: 20,
+              ),
+            ),
+            dataLoaded
+                ? _cardListMaker(list)
+                : Container(
+                    height: 250,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: accentColor,
+                      ),
+                    ),
+                  ),
+          ],
+        ),
+      );
+  }
+
+  /** just a division between the items in homescreen */
+  Container _accentedHomeDivider() {
+    return Container(
+        margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+        height: 5,
+        decoration: BoxDecoration(
+          color: accentColor.withOpacity(0.4),
+          borderRadius: BorderRadius.circular(
+            50,
+          ),
+        ),
+      );
   }
 
   Column _cardListMaker(List<ListElement> widgetList) {

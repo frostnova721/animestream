@@ -365,7 +365,7 @@ class _DiscoverState extends State<Discover> {
     return Container(
       height: 230,
       padding: EdgeInsets.only(left: 10, right: 10),
-      child: ListView.builder(
+      child: list.length > 0 ? ListView.builder(
         padding: EdgeInsets.zero,
         itemCount: list.length,
         scrollDirection: Axis.horizontal,
@@ -385,7 +385,7 @@ class _DiscoverState extends State<Discover> {
             child: list[index].widget,
           ),
         ),
-      ),
+      ) : Center(child: CircularProgressIndicator(color: accentColor,),)
     );
   }
 

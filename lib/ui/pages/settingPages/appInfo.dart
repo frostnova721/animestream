@@ -41,7 +41,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+          padding: pagePadding(context),
           child: loaded
               ? Column(
                   children: [

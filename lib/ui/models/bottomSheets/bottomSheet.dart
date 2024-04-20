@@ -146,6 +146,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                       ),
                     ).then((value) {
                       widget.getWatched!();
+                      ScaffoldMessenger.of(context).setState(() {});
                       Navigator.of(context).pop();
                     });
                   },
@@ -210,7 +211,9 @@ class BottomSheetContentState extends State<BottomSheetContent> {
               child: ElevatedButton(
                 onPressed: () {
                   Downloader().download(qualities[ind]['link'],
-                      "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}");
+                      "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}").catchError((err) {
+                        floatingSnackBar(context, "$err");
+                      });
                   Navigator.of(context).pop();
                   floatingSnackBar(context,
                       "Downloading the episode to your downloads folder");

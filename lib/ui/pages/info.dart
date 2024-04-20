@@ -155,7 +155,31 @@ class _InfoState extends State<Info> {
     // });
   }
 
-  Future getEpisodes() async {
+  void paginate(List<String> links) {
+    visibleEpList = [];
+    epLinks = links;
+    if (epLinks.length > 24) {
+      final totalPages = (epLinks.length / 24).ceil();
+      int remainingItems = epLinks.length;
+      for (int h = 0; h < totalPages; h++) {
+        List<Map<String, dynamic>> page = [];
+        for (int i = 0; i < 24 && remainingItems > 0; i++) {
+          page.add(
+              {'realIndex': (h * 24) + i, 'epLink': epLinks[(h * 24) + i]});
+          remainingItems--;
+        }
+        visibleEpList.add(page);
+      }
+    } else {
+      List<Map<String, dynamic>> pageOne = [];
+      for (int i = 0; i < epLinks.length; i++) {
+        pageOne.add({'realIndex': i, 'epLink': epLinks[i]});
+      }
+      visibleEpList.add(pageOne);
+    }
+  }
+
+  Future<void> getEpisodes() async {
     foundName = null;
     _epSearcherror = false;
     try {
@@ -171,29 +195,7 @@ class _InfoState extends State<Info> {
       final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
       if (mounted)
         setState(() {
-          visibleEpList = [];
-          epLinks = links;
-          if (epLinks.length > 24) {
-            final totalPages = (epLinks.length / 24).ceil();
-            int remainingItems = epLinks.length;
-            for (int h = 0; h < totalPages; h++) {
-              List<Map<String, dynamic>> page = [];
-              for (int i = 0; i < 24 && remainingItems > 0; i++) {
-                page.add({
-                  'realIndex': (h * 24) + i,
-                  'epLink': epLinks[(h * 24) + i]
-                });
-                remainingItems--;
-              }
-              visibleEpList.add(page);
-            }
-          } else {
-            List<Map<String, dynamic>> pageOne = [];
-            for (int i = 0; i < epLinks.length; i++) {
-              pageOne.add({'realIndex': i, 'epLink': epLinks[i]});
-            }
-            visibleEpList.add(pageOne);
-          }
+          paginate(links);
           foundName = match[0]['name'];
         });
     } catch (err) {
@@ -209,7 +211,7 @@ class _InfoState extends State<Info> {
         final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
         if (mounted)
           setState(() {
-            epLinks = links;
+            paginate(links);
             foundName = match[0]['name'];
           });
       } catch (err) {
@@ -430,20 +432,29 @@ class _InfoState extends State<Info> {
                                                 _categoryTitle("Episodes"),
                                               ],
                                             ),
-                                            if(foundName != null) Row(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.center,
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.end,
-                                              children: [
-                                                Padding(
-                                                  padding: const EdgeInsets.only(right: 10),
-                                                  child: IconButton(
-                                                    tooltip: gridMode ? "switch to list view" : "switch to grid view",
+                                            if (foundName != null)
+                                              Row(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.center,
+                                                mainAxisAlignment:
+                                                    MainAxisAlignment.end,
+                                                children: [
+                                                  Padding(
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            right: 10),
+                                                    child: IconButton(
+                                                      tooltip: gridMode
+                                                          ? "switch to list view"
+                                                          : "switch to grid view",
                                                       onPressed: () {
                                                         setState(() {
                                                           gridMode = !gridMode;
-                                                          UserPreferences().saveUserPreferences(UserPreferencesModal(episodeGridView: gridMode));
+                                                          UserPreferences()
+                                                              .saveUserPreferences(
+                                                                  UserPreferencesModal(
+                                                                      episodeGridView:
+                                                                          gridMode));
                                                         });
                                                       },
                                                       icon: Icon(
@@ -452,10 +463,13 @@ class _InfoState extends State<Info> {
                                                                 .view_list_rounded
                                                             : Icons
                                                                 .grid_view_rounded,
-                                                      ), color: textMainColor, iconSize: 28,),
-                                                ),
-                                              ],
-                                            ),
+                                                      ),
+                                                      color: textMainColor,
+                                                      iconSize: 28,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
                                           ],
                                         ),
                                       ),

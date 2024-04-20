@@ -44,10 +44,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-          bottom: MediaQuery.of(context).padding.bottom,
-        ),
+        padding: pagePadding(context),
         child: loaded
             ? Column(
                 children: [

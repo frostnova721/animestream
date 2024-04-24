@@ -1,11 +1,11 @@
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
-class ListElement {
+class AnimeWidget {
   Widget widget;
   Map<String, dynamic> info;
 
-  ListElement({required this.widget, required this.info});
+  AnimeWidget({required this.widget, required this.info});
 }
 
 Widget characterCard(String name, String role, String imageUrl) {
@@ -70,7 +70,7 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
           // boxShadow: [BoxShadow(color: Color.fromARGB(82, 92, 92, 92), blurRadius: 10, blurStyle: BlurStyle.normal, offset: Offset(0.0, 3), spreadRadius: 0)],
           color: Colors.transparent),
       height: 200,
-      padding: EdgeInsets.only( right: 10),
+      padding: EdgeInsets.only(right: 10),
       child: Row(
         children: [
           Container(
@@ -124,7 +124,7 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
   );
 }
 
-Widget animeCard(String title, String imageUrl) {
+Widget animeCard(String title, String imageUrl, { bool ongoing= false }) {
   return Card(
     color: backgroundColor,
     shadowColor: null,
@@ -139,21 +139,34 @@ Widget animeCard(String title, String imageUrl) {
         Container(
           margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          clipBehavior: Clip.hardEdge,
+              borderRadius: BorderRadius.circular(20),
+              image: DecorationImage(
+                image: NetworkImage(
+                  imageUrl,
+                ),
+                fit: BoxFit.cover
+              )),
+          // clipBehavior: Clip.hardEdge,
           height: 165,
           width: 110,
-          child: Image.network(
-            fit: BoxFit.cover,
-            imageUrl,
-            height: 165,
-            width: 110,
-            loadingBuilder: (context, child, loadingProgress) {
-              if(loadingProgress == null) return child;
-              return Container(color: const Color.fromARGB(255, 114, 114, 114));
-            },
-          ),
+          child: ongoing ? Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+              Container(
+                width: 20,
+                height: 20,
+                decoration: BoxDecoration(
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(color: Colors.green,spreadRadius: 2)
+                  ],
+                  borderRadius: BorderRadius.circular(100),
+                  color: Color.fromARGB(255, 46, 236, 52),
+                  border: Border.all(color: Colors.black, width: 2)
+                ),
+              ),
+            ],
+          ) : Container(),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 5),

@@ -2,7 +2,6 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_spinkit/flutter_spinkit.dart';
 
 import 'info.dart';
 
@@ -15,8 +14,8 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  List<ListElement> results = [];
-  List<ListElement> exactMatches = [];
+  List<AnimeWidget> results = [];
+  List<AnimeWidget> exactMatches = [];
 
   TextEditingController textEditingController = TextEditingController();
 
@@ -24,16 +23,17 @@ class _SearchState extends State<Search> {
 
   Future addCards(String query) async {
     results = [];
+    exactMatches = [];
     final searchResults = await Anilist().search(query);
     searchResults.forEach((ele) {
       final image =
           ele['coverImage']['large'] ?? ele['coverImage']['extraLarge'];
       final String title = ele['title']['english'] ?? ele['title']['romaji'];
       // final id = ele['id'];
-      results.add(ListElement(widget: animeCard(title, image), info: ele));
+      results.add(AnimeWidget(widget: animeCard(title, image), info: ele));
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches
-            .add(ListElement(widget: animeCard(title, image), info: ele));
+            .add(AnimeWidget(widget: animeCard(title, image), info: ele));
       }
     });
     setState(() {
@@ -71,10 +71,7 @@ class _SearchState extends State<Search> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SpinKitThreeBounce(
-                          color: accentColor,
-                          size: 35,
-                        ),
+                        CircularProgressIndicator(color: accentColor,),
                         Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: Text(
@@ -171,6 +168,9 @@ class _SearchState extends State<Search> {
     return TextField(
       controller: textEditingController,
       onSubmitted: (val) async {
+        if(val.length <= 0) {
+          return;
+        }
         setState(() {
           _searching = true;
         });
@@ -179,6 +179,8 @@ class _SearchState extends State<Search> {
       autocorrect: false,
       cursorColor: accentColor,
       decoration: InputDecoration(
+        labelText: "search",
+        labelStyle: TextStyle(color: textMainColor, fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 17),
         suffixIcon: Padding(
           padding: EdgeInsets.only(right: 10),
           child: Image.asset(

@@ -55,8 +55,8 @@ class _HomeState extends State<Home> {
 
   TextEditingController textEditingController = TextEditingController();
 
-  List<ListElement> recentlyWatched = [];
-  List<ListElement> currentlyAiring = [];
+  List<AnimeWidget> recentlyWatched = [];
+  List<AnimeWidget> currentlyAiring = [];
 
   bool dataLoaded = false;
   bool error = false;
@@ -92,23 +92,23 @@ class _HomeState extends State<Home> {
             item.title['romaji'] ??
             '';
         recentlyWatched.add(
-          ListElement(
+          AnimeWidget(
             widget: animeCard(title, item.coverImage),
             info: {'id': item.id},
           ),
         );
       });
 
-      final List currentlyAiringResponse =
+      final List<CurrentlyAiringResult> currentlyAiringResponse =
           await Anilist().getCurrentlyAiringAnime();
       if (currentlyAiringResponse.length == 0) return;
 
       currentlyAiring = [];
       currentlyAiringResponse.sublist(0, 20).forEach((e) {
-        final title = e['title']['english'] ?? e['title']['romaji'];
-        final image = e['coverImage']['large'] ?? e['coverImage']['extraLarge'];
+        final title = e.title['english'] ?? e.title['romaji'] ?? '';
+        final image = e.cover;
         currentlyAiring
-            .add(ListElement(widget: animeCard(title, image), info: e));
+            .add(AnimeWidget(widget: animeCard(title, image,), info: {'id': e.id}));
       });
       if (mounted)
         setState(() {
@@ -405,7 +405,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Container _titleAndList(String title, List<ListElement> list) {
+  Container _titleAndList(String title, List<AnimeWidget> list) {
     return Container(
         width: double.infinity,
         padding: EdgeInsets.only(top: 10, left: 20, right: 20),
@@ -450,7 +450,7 @@ class _HomeState extends State<Home> {
       );
   }
 
-  Column _cardListMaker(List<ListElement> widgetList) {
+  Column _cardListMaker(List<AnimeWidget> widgetList) {
     return Column(
       children: [
         widgetList.length > 0

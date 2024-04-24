@@ -28,33 +28,39 @@ class Anilist {
     return data;
   }
 
-  getCurrentlyAiringAnime() async {
+  Future<List<CurrentlyAiringResult>> getCurrentlyAiringAnime() async {
     final query = '''{
-            Page(perPage: 100) {
+            Page(perPage: 40) {
               media(sort: [START_DATE_DESC], type: ANIME, format: TV, status: RELEASING) {
                 id
+                status
                 title {
                   romaji
                   english
                 }
-                startDate {
-                  year
-                  month
-                  day
-                }
-                episodes
                 coverImage {
                   large
-                  medium
-                  color
                 }
               }
             }
           }''';
 
-    final data = await fetchQuery(query, RequestType.media);
+    final List<dynamic> data = await fetchQuery(query, RequestType.media);
 
-    return data;
+    final List<CurrentlyAiringResult> airingAnimes = [];
+
+    for(final airingAnime in data) {
+      airingAnimes.add(CurrentlyAiringResult(
+        cover: airingAnime['coverImage']['large'],
+        id: airingAnime['id'],
+        status: airingAnime['status'],
+        title: {
+          'english': airingAnime['title']['english'],
+          'romaji': airingAnime['title']['romaji']
+        }));
+    }
+
+    return airingAnimes;
   }
 
   //maybe latest and not recentlyUpdatedAnime!
@@ -69,6 +75,7 @@ class Anilist {
           english
           romaji
         }
+        status
         id
         type
         bannerImage
@@ -99,6 +106,7 @@ class Anilist {
             'romaji': recentlyUpdatedAnime['media']['title']['romaji']
           },
           id: recentlyUpdatedAnime['media']['id'],
+          releaseStatus: recentlyUpdatedAnime['media']['status'],
           type: recentlyUpdatedAnime['media']['type'],
           banner: recentlyUpdatedAnime['media']['banner'],
           cover: recentlyUpdatedAnime['media']['coverImage']['large'] ?? '',

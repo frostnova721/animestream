@@ -15,6 +15,7 @@ class AnilistQueries {
         progress
         media {
           id
+          status
           title {
             romaji
             english
@@ -44,6 +45,7 @@ class AnilistQueries {
               'english': media['title']['english'],
               'romaji': media['title']['romaji'],
             },
+            // releaseStatus: media['status'],
             coverImage: media['coverImage']['large'],
             watchProgress: e['progress'],
             rating: media['averageScore'] != null

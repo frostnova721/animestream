@@ -6,6 +6,7 @@ class RecentlyUpdatedResult {
   final String? banner;
   final String cover;
   final dynamic genres;
+  final String releaseStatus;
   final int? rating;
 
   RecentlyUpdatedResult({
@@ -16,6 +17,7 @@ class RecentlyUpdatedResult {
     required this.banner,
     required this.cover,
     required this.genres,
+    required this.releaseStatus,
     this.rating = null,
   });
 }
@@ -67,6 +69,7 @@ class UserAnimeList {
 class UserAnimeListItem {
   final int id;
   final Map<String, String?> title;
+  // final String releaseStatus;
   final String coverImage;
   final int? watchProgress;
   final double? rating;
@@ -74,6 +77,7 @@ class UserAnimeListItem {
   UserAnimeListItem({
     required this.id,
     required this.title,
+    // required this.releaseStatus,
     required this.coverImage,
     required this.watchProgress,
     required this.rating,
@@ -139,4 +143,13 @@ class AnilistRecommendations {
   AnilistRecommendations({required this.cover, required this.id, required this.title});
 }
 
+
+class CurrentlyAiringResult {
+  final int id;
+  final Map<String, String?> title;
+  final String cover;
+  final String status;
+
+  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title});
+}
 

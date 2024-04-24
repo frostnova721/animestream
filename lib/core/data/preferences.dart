@@ -3,7 +3,8 @@ import 'package:animestream/core/data/types.dart';
 
 class UserPreferences {
   Future<UserPreferencesModal> getUserPreferences() async {
-    final prefMap = await getVal('userPreferences');
+    Map<dynamic, dynamic>? prefMap = await getVal('userPreferences');
+    if(prefMap == null || prefMap.isEmpty) prefMap = UserPreferencesModal().toMap();
     return UserPreferencesModal.fromMap(prefMap);
   }
 

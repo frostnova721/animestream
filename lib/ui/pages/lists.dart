@@ -22,13 +22,13 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     super.initState();
   }
 
-  List<ListElement> watchingList = [];
-  List<ListElement> plannedList = [];
-  List<ListElement> completedList = [];
-  List<ListElement> droppedList = [];
+  List<AnimeWidget> watchingList = [];
+  List<AnimeWidget> plannedList = [];
+  List<AnimeWidget> completedList = [];
+  List<AnimeWidget> droppedList = [];
   List<UserAnimeList> rawAnimeList = [];
 
-  List<ListElement> getSelectedTabView(int tabIndex) {
+  List<AnimeWidget> getSelectedTabView(int tabIndex) {
     switch (tabIndex) {
       case 0:
         return watchingList;
@@ -54,7 +54,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     list.forEach((element) {
       if (element.name == "Watching") {
         element.list.forEach((item) {
-          watchingList.add(ListElement(
+          watchingList.add(AnimeWidget(
               widget: animeCard(
                 item.title['english'] ?? item.title['romaji'] ?? '',
                 item.coverImage,
@@ -66,7 +66,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       }
       if (element.name == "Planning") {
         element.list.forEach((item) {
-          plannedList.add(ListElement(
+          plannedList.add(AnimeWidget(
               widget: animeCard(
                 item.title['english'] ?? item.title['romaji'] ?? '',
                 item.coverImage,
@@ -78,7 +78,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       }
       if (element.name == "Dropped") {
         element.list.forEach((item) {
-          droppedList.add(ListElement(
+          droppedList.add(AnimeWidget(
               widget: animeCard(
                 item.title['english'] ?? item.title['romaji'] ?? '',
                 item.coverImage,
@@ -90,7 +90,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       }
       if (element.name == "Completed") {
         element.list.forEach((item) {
-          completedList.add(ListElement(
+          completedList.add(AnimeWidget(
               widget: animeCard(
                 item.title['english'] ?? item.title['romaji'] ?? '',
                 item.coverImage,

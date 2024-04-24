@@ -146,7 +146,6 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                       ),
                     ).then((value) {
                       widget.getWatched!();
-                      ScaffoldMessenger.of(context).setState(() {});
                       Navigator.of(context).pop();
                     });
                   },
@@ -212,6 +211,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                 onPressed: () {
                   Downloader().download(qualities[ind]['link'],
                       "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}").catchError((err) {
+                        print(err);
                         floatingSnackBar(context, "$err");
                       });
                   Navigator.of(context).pop();

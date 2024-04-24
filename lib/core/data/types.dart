@@ -29,7 +29,7 @@ class UserPreferencesModal {
   final bool? episodeGridView;
 
   UserPreferencesModal({
-    this.episodeGridView,
+    this.episodeGridView
   });
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {

@@ -572,6 +572,7 @@ class _InfoState extends State<Info> {
     return Container(
       height: 35,
       margin: EdgeInsets.only(bottom: 10, top: 10),
+      padding: EdgeInsets.only(left: 10, right: 10),
       child: ListView.builder(
         itemCount: visibleEpList.length,
         scrollDirection: Axis.horizontal,

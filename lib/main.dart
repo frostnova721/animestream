@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
@@ -13,12 +14,17 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/services.dart';
 
 void main() async {
+  try {
   WidgetsFlutterBinding.ensureInitialized();
   final Directory dir = await getApplicationDocumentsDirectory();
   await Hive.initFlutter(dir.path);
   await loadAndAssignSettings();
   NotificationService().init();
-  runApp(const MyApp());
+  runApp(const AnimeStream());
+  } catch(err) {
+    Logger().writeLog(err.toString());
+    print("logged the error to logs folder");
+  }
 }
 
 Future<void> loadAndAssignSettings() async {
@@ -35,16 +41,16 @@ Future<void> loadAndAssignSettings() async {
       .then((settings) => currentUserSettings = settings);
 }
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class AnimeStream extends StatefulWidget {
+  const AnimeStream({super.key});
 
   static final GlobalKey<NavigatorState> navigatorKey =
       GlobalKey<NavigatorState>();
   @override
-  State<MyApp> createState() => _MyAppState();
+  State<AnimeStream> createState() => _AnimeStreamState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _AnimeStreamState extends State<AnimeStream> {
   @override
   void initState() {
     AwesomeNotifications().setListeners(
@@ -66,7 +72,7 @@ class _MyAppState extends State<MyApp> {
     super.initState();
   }
 
-  // This widget is the root of your application.
+  // This widget is the root of *my* application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(

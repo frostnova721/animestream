@@ -32,8 +32,8 @@ class _DiscoverState extends State<Discover> {
 
   List thisSeason = [];
   List<TrendingResult> trendingList = [];
-  List<ListElement> recentlyUpdatedList = [];
-  List<ListElement> recommendedList = [];
+  List<AnimeWidget> recentlyUpdatedList = [];
+  List<AnimeWidget> recommendedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
@@ -61,7 +61,7 @@ class _DiscoverState extends State<Discover> {
     final list = await AnilistQueries().getRecommendedAnimes();
     for (final item in list) {
       recommendedList.add(
-        ListElement(
+        AnimeWidget(
           widget: animeCard(
               item.title['english'] ?? item.title['romaji'] ?? '', item.cover),
           info: {'id': item.id},
@@ -82,7 +82,7 @@ class _DiscoverState extends State<Discover> {
       if (!ids.contains(elem.id)) {
         ids.add(elem.id);
         recentlyUpdatedList.add(
-          ListElement(
+          AnimeWidget(
             widget: animeCard(
                 elem.title['english'] ?? elem.title['romaji'] ?? '',
                 elem.cover),

@@ -324,4 +324,52 @@ class AnilistQueries {
     }
     return recommendationList;
   }
+
+  Future<AnilistUserStats> getUserStats(String userName) async {
+    final query = '''{
+  User(name: "$userName") {
+    statistics {
+      anime {
+        count
+        minutesWatched
+        episodesWatched
+        genres {
+          genre
+          count
+          minutesWatched
+        }
+      }
+    }
+  }
+}''';
+
+    final Map<String, dynamic> res = await Anilist().fetchQuery(query, null);
+    final Map<String, dynamic> stats = res['User']['statistics']['anime'];
+    List<GenreWatchStats> genres = [];
+    for(final genre in stats['genres']) {
+      genres.add(GenreWatchStats(count: genre['count'], genre: genre['genre'], minutesWatched: genre['minutesWatched']));
+    } 
+    return AnilistUserStats(
+      episodesWatched: stats['episodesWatched'],
+      genres: genres,
+      minutesWatched: stats['minutesWatched'],
+      notInPlanned: stats['count'],
+    );
+  }
+
+  Future<List<String>> getGenreThumbnail(String genre) async {
+    final query = """{ Page(perPage: 10){media(genre:"$genre", sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") {bannerImage} } }""";
+    final res =await Anilist().fetchQuery(query, RequestType.media);
+    List<String> banners = [];
+    for(final item in res) {
+      if(item['bannerImage'] != null) {
+        banners.add(item['bannerImage']);
+      }
+    }
+
+    if(banners.isEmpty) {
+      throw new Exception("ERR COULDNT GET GENRE THUMBNAIL");
+    }
+    return banners;
+  }
 }

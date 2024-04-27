@@ -12,7 +12,7 @@ class Search {
 }
 
 class GogoAnime {
-  final String _baseUrl = "https://gogoanime3.net";
+  final String _baseUrl = "https://ww5.gogoanimes.fi";
   final String _ajaxUrl = "https://ajax.gogocdn.net/ajax";
 
   Future<List<Map<String, String?>>> search(String query) async {

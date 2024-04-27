@@ -153,3 +153,22 @@ class CurrentlyAiringResult {
   CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title});
 }
 
+class GenreWatchStats {
+  final int count;
+  final int minutesWatched;
+  final String genre; 
+
+  GenreWatchStats({required this.count, required this.genre, required this.minutesWatched});
+}
+
+
+class AnilistUserStats {
+  /**the items not in planned but from every other list */
+  final int notInPlanned;
+  final int minutesWatched;
+  final int episodesWatched;
+  final List<GenreWatchStats> genres;
+
+  AnilistUserStats({required this.episodesWatched, required this.genres, required this.minutesWatched, required this.notInPlanned});
+}
+

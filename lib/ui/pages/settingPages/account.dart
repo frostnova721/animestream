@@ -5,6 +5,7 @@ import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/pages/settingPages/stats.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -118,36 +119,41 @@ class _AccountSettingState extends State<AccountSetting> {
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Row(
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                    right: 15),
-                                                child: CircleAvatar(
-                                                  radius: 25,
-                                                  backgroundColor: textSubColor,
-                                                  backgroundImage:
-                                                      user?.avatar != null
-                                                          ? NetworkImage(
-                                                              user!.avatar!)
-                                                          : AssetImage(
-                                                              "lib/assets/images/ghost.png",
-                                                            ) as ImageProvider,
+                                          InkWell(
+                                            onTap: () {
+                                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserStats(userModal: user!,)));
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Padding(
+                                                  padding: const EdgeInsets.only(
+                                                      right: 15),
+                                                  child: CircleAvatar(
+                                                    radius: 25,
+                                                    backgroundColor: textSubColor,
+                                                    backgroundImage:
+                                                        user?.avatar != null
+                                                            ? NetworkImage(
+                                                                user!.avatar!)
+                                                            : AssetImage(
+                                                                "lib/assets/images/ghost.png",
+                                                              ) as ImageProvider,
+                                                  ),
                                                 ),
-                                              ),
-                                              Text(
-                                                user?.name ??
-                                                    "NO_NAME_ERR", //lol
-                                                style: TextStyle(
-                                                    color: textMainColor,
-                                                    fontFamily: "NotoSans",
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 20,
-                                                    overflow:
-                                                        TextOverflow.ellipsis),
-                                                maxLines: 2,
-                                              ),
-                                            ],
+                                                Text(
+                                                  user?.name ??
+                                                      "NO_NAME_ERR", //lol
+                                                  style: TextStyle(
+                                                      color: textMainColor,
+                                                      fontFamily: "NotoSans",
+                                                      fontWeight: FontWeight.bold,
+                                                      fontSize: 20,
+                                                      overflow:
+                                                          TextOverflow.ellipsis),
+                                                  maxLines: 2,
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                           ElevatedButton(
                                             onPressed: () {

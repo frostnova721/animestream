@@ -37,9 +37,7 @@ class _DiscoverState extends State<Discover> {
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
-  bool trendingLoaded = false,
-      recentlyUpdatedLoaded = false,
-      recommendedLoaded = false;
+  bool trendingLoaded = false, recentlyUpdatedLoaded = false, recommendedLoaded = false;
 
   Future getLists() async {
     thisSeason = widget.currentSeason;
@@ -62,8 +60,7 @@ class _DiscoverState extends State<Discover> {
     for (final item in list) {
       recommendedList.add(
         AnimeWidget(
-          widget: animeCard(
-              item.title['english'] ?? item.title['romaji'] ?? '', item.cover),
+          widget: animeCard(item.title['english'] ?? item.title['romaji'] ?? '', item.cover),
           info: {'id': item.id},
         ),
       );
@@ -83,9 +80,7 @@ class _DiscoverState extends State<Discover> {
         ids.add(elem.id);
         recentlyUpdatedList.add(
           AnimeWidget(
-            widget: animeCard(
-                elem.title['english'] ?? elem.title['romaji'] ?? '',
-                elem.cover),
+            widget: animeCard(elem.title['english'] ?? elem.title['romaji'] ?? '', elem.cover),
             info: {'id': elem.id},
           ),
         );
@@ -106,8 +101,7 @@ class _DiscoverState extends State<Discover> {
         currentPage = 0;
       if (mounted)
         setState(() {
-          _pageController.animateToPage(currentPage,
-              duration: Duration(milliseconds: 200), curve: Curves.easeIn);
+          _pageController.animateToPage(currentPage, duration: Duration(milliseconds: 200), curve: Curves.easeIn);
         });
     });
   }
@@ -144,9 +138,7 @@ class _DiscoverState extends State<Discover> {
                 dotWidth: 5,
               ),
               onDotClicked: (index) {
-                _pageController.animateToPage(index,
-                    duration: Duration(milliseconds: 250),
-                    curve: Curves.easeIn);
+                _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeIn);
               },
             ),
           ),
@@ -158,8 +150,7 @@ class _DiscoverState extends State<Discover> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () {
-                  Navigator.of(context)
-                      .push(MaterialPageRoute(builder: (context) => News()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => News()));
                 },
                 child: Container(
                   height: 50,
@@ -193,8 +184,7 @@ class _DiscoverState extends State<Discover> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(20),
                 onTap: () {
-                  Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => GenresPage()));
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => GenresPage()));
                 },
                 child: Container(
                   height: 50,
@@ -270,6 +260,14 @@ class _DiscoverState extends State<Discover> {
                           trendingList[index % trendingList.length].banner ??
                               trendingList[index % trendingList.length].cover,
                           opacity: AlwaysStoppedAnimation(0.5),
+                          frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                            if (wasSynchronouslyLoaded) return child;
+                            return AnimatedOpacity(
+                              opacity: frame == null ? 0 : 1,
+                              duration: Duration(milliseconds: 150),
+                              child: child,
+                            );
+                          },
                           height: 275,
                           fit: BoxFit.cover,
                         ),
@@ -301,10 +299,8 @@ class _DiscoverState extends State<Discover> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10.0),
                                 child: Text(
-                                  trendingList[index % trendingList.length]
-                                          .title['english'] ??
-                                      trendingList[index % trendingList.length]
-                                          .title['romaji'] ??
+                                  trendingList[index % trendingList.length].title['english'] ??
+                                      trendingList[index % trendingList.length].title['romaji'] ??
                                       '',
                                   style: TextStyle(
                                     color: textMainColor,
@@ -317,9 +313,7 @@ class _DiscoverState extends State<Discover> {
                                 ),
                               ),
                               Text(
-                                trendingList[index % trendingList.length]
-                                    .genres
-                                    .join(', '),
+                                trendingList[index % trendingList.length].genres.join(', '),
                                 style: TextStyle(
                                     color: Color.fromARGB(255, 180, 180, 180),
                                     fontFamily: 'NunitoSans',
@@ -340,10 +334,7 @@ class _DiscoverState extends State<Discover> {
                                     ),
                                     Text(
                                       "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
-                                      style: TextStyle(
-                                          color: textMainColor,
-                                          fontFamily: "Rubik",
-                                          fontSize: 17),
+                                      style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 17),
                                     ),
                                   ],
                                 ),
@@ -363,30 +354,35 @@ class _DiscoverState extends State<Discover> {
 
   Container _scrollList(List<dynamic> list) {
     return Container(
-      height: 230,
-      padding: EdgeInsets.only(left: 10, right: 10),
-      child: list.length > 0 ? ListView.builder(
-        padding: EdgeInsets.zero,
-        itemCount: list.length,
-        scrollDirection: Axis.horizontal,
-        itemBuilder: (context, index) => GestureDetector(
-          onTap: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => Info(
-                  id: list[index].info['id'],
+        height: 230,
+        padding: EdgeInsets.only(left: 10, right: 10),
+        child: list.length > 0
+            ? ListView.builder(
+                padding: EdgeInsets.zero,
+                itemCount: list.length,
+                scrollDirection: Axis.horizontal,
+                itemBuilder: (context, index) => GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => Info(
+                          id: list[index].info['id'],
+                        ),
+                      ),
+                    );
+                  },
+                  child: Container(
+                    width: 125,
+                    child: list[index].widget,
+                  ),
                 ),
-              ),
-            );
-          },
-          child: Container(
-            width: 125,
-            child: list[index].widget,
-          ),
-        ),
-      ) : Center(child: CircularProgressIndicator(color: accentColor,),)
-    );
+              )
+            : Center(
+                child: CircularProgressIndicator(
+                  color: accentColor,
+                ),
+              ));
   }
 
   Container _itemTitle(String title) {

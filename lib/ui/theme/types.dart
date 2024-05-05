@@ -14,6 +14,7 @@ class AnimeStreamTheme {
     required this.backgroundSubColor,
     required this.textMainColor,
     required this.textSubColor,
+    // required this.modalSheetBackground
   });
 
   factory AnimeStreamTheme.fromMap(Map<dynamic, dynamic> map) {

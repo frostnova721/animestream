@@ -47,10 +47,11 @@ class GogoAnime {
     List<Map<String, String?>> searchResults = [];
 
     for (int i = 0; i < list.length; i++) {
+      final image = images[list.indexOf(list[i])];
       searchResults.add({
         'name': list[i].trim(),
         'alias': _baseUrl + links[list.indexOf(list[i])],
-        'imageUrl': images[list.indexOf(list[i])]
+        'imageUrl': image.startsWith("https://") ? image : _baseUrl + image,
       });
     }
 

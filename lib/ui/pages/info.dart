@@ -7,6 +7,7 @@ import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/ui/models/bottomSheets/bottomSheet.dart';
+import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -94,8 +95,7 @@ class _InfoState extends State<Info> {
         mediaListStatus = assignItemEnum(data.mediaListStatus);
       });
     } catch (err) {
-      if (currentUserSettings!.showErrors != null &&
-          currentUserSettings!.showErrors!)
+      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
         floatingSnackBar(context, err.toString());
     }
   }
@@ -127,11 +127,9 @@ class _InfoState extends State<Info> {
   Future<void> getQualities() async {
     List<dynamic> mainList = [];
     for (int i = 0; i < streamSources.length; i++) {
-      final List<dynamic> list =
-          await generateQualitiesForMultiQuality(streamSources[i].link);
+      final List<dynamic> list = await generateQualitiesForMultiQuality(streamSources[i].link);
       list.forEach((element) {
-        element['server'] =
-            "${streamSources[i].server} ${streamSources[i].backup ? "• backup" : ""}";
+        element['server'] = "${streamSources[i].server} ${streamSources[i].backup ? "• backup" : ""}";
         mainList.add(element);
       });
     }
@@ -164,8 +162,7 @@ class _InfoState extends State<Info> {
       for (int h = 0; h < totalPages; h++) {
         List<Map<String, dynamic>> page = [];
         for (int i = 0; i < 24 && remainingItems > 0; i++) {
-          page.add(
-              {'realIndex': (h * 24) + i, 'epLink': epLinks[(h * 24) + i]});
+          page.add({'realIndex': (h * 24) + i, 'epLink': epLinks[(h * 24) + i]});
           remainingItems--;
         }
         visibleEpList.add(page);
@@ -183,8 +180,7 @@ class _InfoState extends State<Info> {
     foundName = null;
     _epSearcherror = false;
     try {
-      final sr = await searchInSource(
-          selectedSource, data.title['english'] ?? data.title['romaji']);
+      final sr = await searchInSource(selectedSource, data.title['english'] ?? data.title['romaji']);
       //to find a exact match
       List<dynamic> match = sr
           .where(
@@ -218,8 +214,7 @@ class _InfoState extends State<Info> {
         setState(() {
           _epSearcherror = true;
         });
-        if (currentUserSettings!.showErrors != null &&
-            currentUserSettings!.showErrors!)
+        if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
           floatingSnackBar(context, err.toString());
       }
     }
@@ -238,8 +233,7 @@ class _InfoState extends State<Info> {
         body: dataLoaded
             ? SingleChildScrollView(
                 child: Padding(
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom),
+                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
@@ -253,9 +247,7 @@ class _InfoState extends State<Info> {
                             Container(
                               // width: 120,
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(
-                                    backgroundColor: accentColor,
-                                    fixedSize: Size(135, 55)),
+                                style: ElevatedButton.styleFrom(backgroundColor: accentColor, fixedSize: Size(135, 55)),
                                 onPressed: () {
                                   setState(() {
                                     infoPage = !infoPage;
@@ -265,9 +257,7 @@ class _InfoState extends State<Info> {
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
                                     Icon(
-                                      infoPage
-                                          ? Icons.play_arrow_rounded
-                                          : Icons.info_rounded,
+                                      infoPage ? Icons.play_arrow_rounded : Icons.info_rounded,
                                       color: Colors.black,
                                       size: 28,
                                     ),
@@ -291,8 +281,7 @@ class _InfoState extends State<Info> {
                                       context: context,
                                       backgroundColor: backgroundColor,
                                       showDragHandle: true,
-                                      builder: (context) =>
-                                          MediaListStatusBottomSheet(
+                                      builder: (context) => MediaListStatusBottomSheet(
                                         status: mediaListStatus,
                                         id: widget.id,
                                         refreshListStatus: refreshListStatus,
@@ -344,8 +333,7 @@ class _InfoState extends State<Info> {
                                   margin: EdgeInsets.only(top: 30),
                                   child: DropdownMenu(
                                     initialSelection: sources.first,
-                                    dropdownMenuEntries:
-                                        getSourceDropdownList(),
+                                    dropdownMenuEntries: getSourceDropdownList(),
                                     // menuHeight: 75,
                                     width: 300,
                                     textStyle: TextStyle(
@@ -361,17 +349,12 @@ class _InfoState extends State<Info> {
                                       color: textMainColor,
                                     ),
                                     menuStyle: MenuStyle(
-                                      surfaceTintColor:
-                                          MaterialStatePropertyAll(
-                                              backgroundSubColor),
-                                      backgroundColor: MaterialStatePropertyAll(
-                                          Color.fromARGB(255, 0, 0, 0)),
+                                      surfaceTintColor: MaterialStatePropertyAll(backgroundSubColor),
+                                      backgroundColor: MaterialStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
                                       shape: MaterialStatePropertyAll(
                                         RoundedRectangleBorder(
-                                          side:
-                                              BorderSide(color: textMainColor),
-                                          borderRadius:
-                                              BorderRadius.circular(10),
+                                          side: BorderSide(color: textMainColor),
+                                          borderRadius: BorderRadius.circular(10),
                                         ),
                                       ),
                                     ),
@@ -389,8 +372,7 @@ class _InfoState extends State<Info> {
                                         ),
                                         borderRadius: BorderRadius.circular(10),
                                       ),
-                                      contentPadding:
-                                          EdgeInsets.only(left: 20, right: 20),
+                                      contentPadding: EdgeInsets.only(left: 20, right: 20),
                                       enabledBorder: OutlineInputBorder(
                                         borderSide: BorderSide(
                                           width: 1,
@@ -410,15 +392,14 @@ class _InfoState extends State<Info> {
                                   ),
                                 ),
                                 _searchStatus(),
+                                _manualSearch(context),
                                 if (foundName != null) _continueButton(),
                                 Container(
-                                  margin: EdgeInsets.only(
-                                      top: 25, left: 20, right: 20),
+                                  margin: EdgeInsets.only(top: 25, left: 20, right: 20),
                                   padding: EdgeInsets.only(top: 15, bottom: 20),
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(20),
-                                      color: const Color.fromARGB(
-                                          255, 29, 29, 29)),
+                                      color: const Color.fromARGB(255, 29, 29, 29)),
                                   child: Column(
                                     children: [
                                       Container(
@@ -426,43 +407,29 @@ class _InfoState extends State<Info> {
                                         child: Stack(
                                           children: [
                                             Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.center,
+                                              mainAxisAlignment: MainAxisAlignment.center,
                                               children: [
                                                 _categoryTitle("Episodes"),
                                               ],
                                             ),
                                             if (foundName != null)
                                               Row(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.center,
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.end,
+                                                crossAxisAlignment: CrossAxisAlignment.center,
+                                                mainAxisAlignment: MainAxisAlignment.end,
                                                 children: [
                                                   Padding(
-                                                    padding:
-                                                        const EdgeInsets.only(
-                                                            right: 10),
+                                                    padding: const EdgeInsets.only(right: 10),
                                                     child: IconButton(
-                                                      tooltip: gridMode
-                                                          ? "switch to list view"
-                                                          : "switch to grid view",
+                                                      tooltip: gridMode ? "switch to list view" : "switch to grid view",
                                                       onPressed: () {
                                                         setState(() {
                                                           gridMode = !gridMode;
-                                                          UserPreferences()
-                                                              .saveUserPreferences(
-                                                                  UserPreferencesModal(
-                                                                      episodeGridView:
-                                                                          gridMode));
+                                                          UserPreferences().saveUserPreferences(
+                                                              UserPreferencesModal(episodeGridView: gridMode));
                                                         });
                                                       },
                                                       icon: Icon(
-                                                        gridMode
-                                                            ? Icons
-                                                                .view_list_rounded
-                                                            : Icons
-                                                                .grid_view_rounded,
+                                                        gridMode ? Icons.view_list_rounded : Icons.grid_view_rounded,
                                                       ),
                                                       color: textMainColor,
                                                       iconSize: 28,
@@ -479,8 +446,7 @@ class _InfoState extends State<Info> {
                                               height: 120,
                                               child: Center(
                                                 child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
+                                                  mainAxisAlignment: MainAxisAlignment.center,
                                                   children: [
                                                     Image.asset(
                                                       'lib/assets/images/broken_heart.png',
@@ -491,8 +457,7 @@ class _InfoState extends State<Info> {
                                                       style: TextStyle(
                                                         color: Colors.white,
                                                         fontSize: 16,
-                                                        fontFamily:
-                                                            "NunitoSans",
+                                                        fontFamily: "NunitoSans",
                                                       ),
                                                     ),
                                                   ],
@@ -504,11 +469,8 @@ class _InfoState extends State<Info> {
                                                   children: [
                                                     _pages(),
                                                     AnimatedSwitcher(
-                                                      duration: Duration(
-                                                          milliseconds: 400),
-                                                      child: gridMode
-                                                          ? _episodesGrid()
-                                                          : _episodes(),
+                                                      duration: Duration(milliseconds: 400),
+                                                      child: gridMode ? _episodesGrid() : _episodes(),
                                                     ),
                                                   ],
                                                 )
@@ -516,8 +478,7 @@ class _InfoState extends State<Info> {
                                                   width: 350,
                                                   height: 100,
                                                   child: Center(
-                                                    child:
-                                                        CircularProgressIndicator(
+                                                    child: CircularProgressIndicator(
                                                       color: accentColor,
                                                     ),
                                                   ),
@@ -554,11 +515,8 @@ class _InfoState extends State<Info> {
               padding: const EdgeInsets.only(top: 15, left: 30, right: 30),
               child: const Text(
                 'oops! something went wrong',
-                style: TextStyle(
-                    color: Colors.white,
-                    fontFamily: "NunitoSans",
-                    fontSize: 25,
-                    fontWeight: FontWeight.bold),
+                style:
+                    TextStyle(color: Colors.white, fontFamily: "NunitoSans", fontSize: 25, fontWeight: FontWeight.bold),
                 textAlign: TextAlign.center,
               ),
             ),
@@ -566,6 +524,52 @@ class _InfoState extends State<Info> {
         ),
       );
     }
+  }
+
+  Container _manualSearch(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(right: 20, top: 15),
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () {
+          showModalBottomSheet(
+            context: context,
+            showDragHandle: true,
+            backgroundColor: Color(0xff121212),
+            builder: (context) => ManualSearchSheet(
+              searchString: data.title['english'] ?? data.title['romaji'],
+              source: selectedSource,
+            ),
+          ).then((result) async {
+            if (result == null) return;
+            setState(() {
+              _epSearcherror = false;
+              foundName = null;
+            });
+            final links = await getAnimeEpisodes(selectedSource, result['alias']);
+            print(links);
+            if (mounted)
+              setState(() {
+                paginate(links);
+                foundName = result['name'];
+              });
+          });
+        },
+        child: Text(
+          "Manual Search",
+          style: TextStyle(
+            color: Colors.transparent,
+            decoration: TextDecoration.underline,
+            decorationColor: textMainColor,
+            decorationStyle: TextDecorationStyle.solid,
+            decorationThickness: 2,
+            fontFamily: "NotoSans",
+            fontWeight: FontWeight.bold,
+            shadows: [Shadow(color: textMainColor, offset: Offset(0, -2))],
+          ),
+        ),
+      ),
+    );
   }
 
   Container _pages() {
@@ -584,8 +588,7 @@ class _InfoState extends State<Info> {
               duration: Duration(milliseconds: 200),
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
-                color:
-                    currentPageIndex == index ? accentColor : backgroundColor,
+                color: currentPageIndex == index ? accentColor : backgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Material(
@@ -605,9 +608,7 @@ class _InfoState extends State<Info> {
                     child: Text(
                       "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
                       style: TextStyle(
-                        color: currentPageIndex == index
-                            ? backgroundColor
-                            : textMainColor,
+                        color: currentPageIndex == index ? backgroundColor : textMainColor,
                         fontFamily: 'NotoSans',
                         fontWeight: FontWeight.bold,
                       ),
@@ -633,16 +634,13 @@ class _InfoState extends State<Info> {
         borderRadius: BorderRadius.circular(25),
         border: Border.all(color: accentColor),
         image: DecorationImage(
-          image: data.banner.length > 1
-              ? NetworkImage(data.banner)
-              : NetworkImage(data.cover),
+          image: data.banner.length > 1 ? NetworkImage(data.banner) : NetworkImage(data.cover),
           fit: BoxFit.cover,
           opacity: 0.4,
         ),
       ),
       child: InkWell(
-        customBorder:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         onTap: () async {
           showModalBottomSheet(
             showDragHandle: true,
@@ -715,8 +713,7 @@ class _InfoState extends State<Info> {
   }
 
   Container _searchStatus() {
-    dynamic text =
-        "searching: ${data.title['english'] ?? data.title['romaji']}";
+    dynamic text = "searching: ${data.title['english'] ?? data.title['romaji']}";
     if (foundName != null) {
       text = "found: $foundName";
     } else if (_epSearcherror) {
@@ -742,12 +739,8 @@ class _InfoState extends State<Info> {
   GridView _episodesGrid() {
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount:
-            MediaQuery.of(context).orientation == Orientation.portrait ? 2 : 5,
-        childAspectRatio:
-            MediaQuery.of(context).orientation == Orientation.portrait
-                ? 1 / 1.3
-                : 1 / 1.4,
+        crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 2 : 5,
+        childAspectRatio: MediaQuery.of(context).orientation == Orientation.portrait ? 1 / 1.3 : 1 / 1.4,
         mainAxisSpacing: 15,
         crossAxisSpacing: 15,
       ),
@@ -766,8 +759,7 @@ class _InfoState extends State<Info> {
                   getStreams: getStreams,
                   bottomSheetContentData: BottomSheetContentData(
                       epLinks: epLinks,
-                      episodeIndex: visibleEpList[currentPageIndex][index]
-                          ['realIndex'],
+                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
                       title: data.title['english'] ?? data.title['romaji'],
                       id: widget.id,
@@ -789,11 +781,7 @@ class _InfoState extends State<Info> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Opacity(
-                opacity:
-                    visibleEpList[currentPageIndex][index]['realIndex'] + 1 >
-                            watched
-                        ? 1.0
-                        : 0.5,
+                opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.5,
                 child: Container(
                   height: 140,
                   width: 175,
@@ -811,8 +799,7 @@ class _InfoState extends State<Info> {
                     children: [
                       Container(
                         decoration: BoxDecoration(
-                            borderRadius:
-                                BorderRadius.only(topLeft: Radius.circular(15)),
+                            borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
                             color: accentColor.withOpacity(0.8)),
                         child: IconButton(
                           onPressed: () async {
@@ -823,15 +810,11 @@ class _InfoState extends State<Info> {
                               builder: (BuildContext context) {
                                 return BottomSheetContent(
                                   getStreams: getStreams,
-                                  bottomSheetContentData:
-                                      BottomSheetContentData(
+                                  bottomSheetContentData: BottomSheetContentData(
                                     epLinks: epLinks,
-                                    episodeIndex:
-                                        visibleEpList[currentPageIndex][index]
-                                            ['realIndex'],
+                                    episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                                     selectedSource: selectedSource,
-                                    title: data.title['english'] ??
-                                        data.title['romaji'],
+                                    title: data.title['english'] ?? data.title['romaji'],
                                     id: widget.id,
                                     cover: data.cover,
                                   ),
@@ -855,9 +838,7 @@ class _InfoState extends State<Info> {
                 child: Text(
                   "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                   style: TextStyle(
-                    color: visibleEpList[currentPageIndex][index]['realIndex'] +
-                                1 >
-                            watched
+                    color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
                         ? Colors.white
                         : Color.fromARGB(155, 255, 255, 255),
                     fontFamily: 'Poppins',
@@ -890,8 +871,7 @@ class _InfoState extends State<Info> {
                     getStreams: getStreams,
                     bottomSheetContentData: BottomSheetContentData(
                         epLinks: epLinks,
-                        episodeIndex: visibleEpList[currentPageIndex][index]
-                            ['realIndex'],
+                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                         selectedSource: selectedSource,
                         title: data.title['english'] ?? data.title['romaji'],
                         id: widget.id,
@@ -944,19 +924,11 @@ class _InfoState extends State<Info> {
                 child: Stack(
                   children: [
                     Opacity(
-                      opacity: visibleEpList[currentPageIndex][index]
-                                      ['realIndex'] +
-                                  1 >
-                              watched
-                          ? 1.0
-                          : 0.5,
+                      opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.5,
                       child: ShaderMask(
                         blendMode: BlendMode.darken,
                         shaderCallback: (bounds) => LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            Color.fromARGB(245, 0, 0, 0)
-                          ],
+                          colors: [Colors.transparent, Color.fromARGB(245, 0, 0, 0)],
                           stops: [0.2, 1.0],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -990,10 +962,7 @@ class _InfoState extends State<Info> {
                         Text(
                           "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                           style: TextStyle(
-                            color: visibleEpList[currentPageIndex][index]
-                                            ['realIndex'] +
-                                        1 >
-                                    watched
+                            color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
                                 ? Colors.white
                                 : Color.fromARGB(155, 255, 255, 255),
                             fontFamily: "Poppins",
@@ -1006,21 +975,16 @@ class _InfoState extends State<Info> {
                             onPressed: () async {
                               showModalBottomSheet(
                                 showDragHandle: true,
-                                backgroundColor:
-                                    Color.fromARGB(255, 19, 19, 19),
+                                backgroundColor: Color.fromARGB(255, 19, 19, 19),
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BottomSheetContent(
                                     getStreams: getStreams,
-                                    bottomSheetContentData:
-                                        BottomSheetContentData(
+                                    bottomSheetContentData: BottomSheetContentData(
                                       epLinks: epLinks,
-                                      episodeIndex:
-                                          visibleEpList[currentPageIndex][index]
-                                              ['realIndex'],
+                                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                                       selectedSource: selectedSource,
-                                      title: data.title['english'] ??
-                                          data.title['romaji'],
+                                      title: data.title['english'] ?? data.title['romaji'],
                                       id: widget.id,
                                       cover: data.cover,
                                     ),
@@ -1105,9 +1069,7 @@ class _InfoState extends State<Info> {
                       alignment: Alignment.center,
                       margin: EdgeInsets.all(5),
                       padding: EdgeInsets.only(left: 15, right: 15),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade700,
-                          borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: Colors.grey.shade700, borderRadius: BorderRadius.circular(20)),
                       child: Text(
                         data.genres[index],
                         style: TextStyle(
@@ -1138,9 +1100,7 @@ class _InfoState extends State<Info> {
                       alignment: Alignment.center,
                       margin: EdgeInsets.all(5),
                       padding: EdgeInsets.only(left: 15, right: 15),
-                      decoration: BoxDecoration(
-                          color: Colors.grey.shade800,
-                          borderRadius: BorderRadius.circular(5)),
+                      decoration: BoxDecoration(color: Colors.grey.shade800, borderRadius: BorderRadius.circular(5)),
                       child: Text(
                         data.tags[index],
                         style: TextStyle(
@@ -1259,8 +1219,7 @@ class _InfoState extends State<Info> {
           return GestureDetector(
             onTap: () {
               if (item.type.toLowerCase() != "anime") {
-                return floatingSnackBar(
-                    context, 'Mangas/Novels arent supported');
+                return floatingSnackBar(context, 'Mangas/Novels arent supported');
               }
               Navigator.push(
                 context,
@@ -1364,8 +1323,7 @@ class _InfoState extends State<Info> {
                               await ImageGallerySaver.saveImage(
                                 res.bodyBytes,
                                 quality: 100,
-                                name: data.title['english'] ??
-                                    data.title['romaji'],
+                                name: data.title['english'] ?? data.title['romaji'],
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -1379,10 +1337,7 @@ class _InfoState extends State<Info> {
                             child: Text(
                               "save",
                               style: TextStyle(
-                                  color: accentColor,
-                                  fontFamily: "Poppins",
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 20),
+                                  color: accentColor, fontFamily: "Poppins", fontWeight: FontWeight.bold, fontSize: 20),
                             ),
                           ),
                         ),
@@ -1405,9 +1360,7 @@ class _InfoState extends State<Info> {
                 color: Color.fromARGB(255, 0, 0, 0),
                 image: DecorationImage(
                   opacity: 0.5,
-                  image: data.banner.length > 0
-                      ? NetworkImage(data.banner)
-                      : NetworkImage(data.cover),
+                  image: data.banner.length > 0 ? NetworkImage(data.banner) : NetworkImage(data.cover),
                   fit: BoxFit.cover,
                 ),
               ),
@@ -1437,8 +1390,7 @@ class _InfoState extends State<Info> {
               Icons.arrow_back_rounded,
               color: Colors.white,
             ),
-            style: IconButton.styleFrom(
-                backgroundColor: Color.fromARGB(69, 0, 0, 0)),
+            style: IconButton.styleFrom(backgroundColor: Color.fromARGB(69, 0, 0, 0)),
           ),
         ),
       ],

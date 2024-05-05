@@ -1,12 +1,11 @@
+import 'dart:math';
 import 'dart:ui';
 
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class UserStats extends StatefulWidget {
   final UserModal userModal;
@@ -30,7 +29,7 @@ class _UserStatsState extends State<UserStats> {
         await AnilistQueries().getGenreThumbnail(res.genres[0].genre);
     setState(() {
       stats = res;
-      genreThumbnail = genreRes[0];
+      genreThumbnail = genreRes[Random().nextInt(genreRes.length)];
       timeSpent = convertMinutes(res.minutesWatched);
     });
   }

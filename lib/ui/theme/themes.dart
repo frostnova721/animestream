@@ -9,6 +9,7 @@ final lime = AnimeStreamTheme(
    backgroundSubColor: Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
+  // modalSheetBackground:
 );
 
 /**monochrome theme preset */

@@ -31,6 +31,14 @@ Widget characterCard(String name, String role, String imageUrl) {
             imageUrl,
             height: 175,
             width: 115,
+            frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+              if (wasSynchronouslyLoaded) return child;
+              return AnimatedOpacity(
+                opacity: frame == null ? 0 : 1,
+                duration: Duration(milliseconds: 150),
+                child: child,
+              );
+            },
           ),
         ),
         Padding(
@@ -124,7 +132,7 @@ Widget NewsCard(String title, String imageUrl, String date, String time) {
   );
 }
 
-Widget animeCard(String title, String imageUrl, { bool ongoing= false }) {
+Widget animeCard(String title, String imageUrl, {bool ongoing = false}) {
   return Card(
     color: backgroundColor,
     shadowColor: null,
@@ -139,34 +147,51 @@ Widget animeCard(String title, String imageUrl, { bool ongoing= false }) {
         Container(
           margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                image: NetworkImage(
-                  imageUrl,
-                ),
-                fit: BoxFit.cover
-              )),
-          // clipBehavior: Clip.hardEdge,
+            borderRadius: BorderRadius.circular(20),
+            // image: DecorationImage(
+            //   image: NetworkImage(
+            //     imageUrl,
+            //   ),
+              // fit: BoxFit.cover
+            // )
+          ),
+          clipBehavior: Clip.hardEdge,
           height: 165,
           width: 110,
-          child: ongoing ? Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Container(
-                width: 20,
-                height: 20,
-                decoration: BoxDecoration(
-                  boxShadow: <BoxShadow>[
-                    BoxShadow(color: Colors.green,spreadRadius: 2)
+          child: ongoing
+              ? Stack(
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
+                              borderRadius: BorderRadius.circular(100),
+                              color: Color.fromARGB(255, 46, 236, 52),
+                              border: Border.all(color: Colors.black, width: 2)),
+                        ),
+                      ],
+                    ),
                   ],
-                  borderRadius: BorderRadius.circular(100),
-                  color: Color.fromARGB(255, 46, 236, 52),
-                  border: Border.all(color: Colors.black, width: 2)
+                )
+              : Image.network(
+                  imageUrl,
+                  fit: BoxFit.cover,
+                  height: 165,
+                  width: 110,
+                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                    if (wasSynchronouslyLoaded) return child;
+                    return AnimatedOpacity(
+                      opacity: frame == null ? 0 : 1,
+                      duration: Duration(milliseconds: 150),
+                      child: child,
+                    );
+                  },
                 ),
-              ),
-            ],
-          ) : Container(),
         ),
         Padding(
           padding: const EdgeInsets.only(right: 5),

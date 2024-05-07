@@ -1,8 +1,10 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -24,6 +26,7 @@ class _UserStatsState extends State<UserStats> {
   }
 
   Future<void> fetchUserStats() async {
+    try {
     final res = await AnilistQueries().getUserStats(user.name);
     final genreRes =
         await AnilistQueries().getGenreThumbnail(res.genres[0].genre);
@@ -32,6 +35,11 @@ class _UserStatsState extends State<UserStats> {
       genreThumbnail = genreRes[Random().nextInt(genreRes.length)];
       timeSpent = convertMinutes(res.minutesWatched);
     });
+    } catch(err) {
+      if(currentUserSettings?.showErrors == true) {
+        floatingSnackBar(context, err.toString());
+      }
+    }
   }
 
   late UserModal user;

@@ -141,74 +141,77 @@ Widget animeCard(String title, String imageUrl, {bool ongoing = false}) {
     shape: RoundedRectangleBorder(
       borderRadius: BorderRadius.circular(20),
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Container(
-          margin: EdgeInsets.only(bottom: 10),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            // image: DecorationImage(
-            //   image: NetworkImage(
-            //     imageUrl,
-            //   ),
-              // fit: BoxFit.cover
-            // )
-          ),
-          clipBehavior: Clip.hardEdge,
-          height: 165,
-          width: 110,
-          child: ongoing
-              ? Stack(
-                  children: [
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
-                              borderRadius: BorderRadius.circular(100),
-                              color: Color.fromARGB(255, 46, 236, 52),
-                              border: Border.all(color: Colors.black, width: 2)),
-                        ),
-                      ],
-                    ),
-                  ],
-                )
-              : Image.network(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  height: 165,
-                  width: 110,
-                  frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
-                    if (wasSynchronouslyLoaded) return child;
-                    return AnimatedOpacity(
-                      opacity: frame == null ? 0 : 1,
-                      duration: Duration(milliseconds: 150),
-                      child: child,
-                    );
-                  },
-                ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(right: 5),
-          child: Text(
-            title,
-            style: TextStyle(
-              color: textMainColor,
-              fontFamily: 'NotoSans',
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              overflow: TextOverflow.ellipsis,
+    child: Container(
+      width: 120,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: EdgeInsets.only(bottom: 10),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(20),
+              // image: DecorationImage(
+              //   image: NetworkImage(
+              //     imageUrl,
+              //   ),
+                // fit: BoxFit.cover
+              // )
             ),
-            maxLines: 2,
-            textAlign: TextAlign.left,
+            clipBehavior: Clip.hardEdge,
+            height: 165,
+            width: 110,
+            child: ongoing
+                ? Stack(
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Container(
+                            width: 20,
+                            height: 20,
+                            decoration: BoxDecoration(
+                                boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
+                                borderRadius: BorderRadius.circular(100),
+                                color: Color.fromARGB(255, 46, 236, 52),
+                                border: Border.all(color: Colors.black, width: 2)),
+                          ),
+                        ],
+                      ),
+                    ],
+                  )
+                : Image.network(
+                    imageUrl,
+                    fit: BoxFit.cover,
+                    height: 165,
+                    width: 110,
+                    frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                      if (wasSynchronouslyLoaded) return child;
+                      return AnimatedOpacity(
+                        opacity: frame == null ? 0 : 1,
+                        duration: Duration(milliseconds: 150),
+                        child: child,
+                      );
+                    },
+                  ),
           ),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.only(right: 5),
+            child: Text(
+              title,
+              style: TextStyle(
+                color: textMainColor,
+                fontFamily: 'NotoSans',
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                overflow: TextOverflow.ellipsis,
+              ),
+              maxLines: 2,
+              textAlign: TextAlign.left,
+            ),
+          ),
+        ],
+      ),
     ),
   );
 }

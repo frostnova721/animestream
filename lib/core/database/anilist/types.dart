@@ -143,7 +143,6 @@ class AnilistRecommendations {
   AnilistRecommendations({required this.cover, required this.id, required this.title});
 }
 
-
 class CurrentlyAiringResult {
   final int id;
   final Map<String, String?> title;
@@ -151,6 +150,15 @@ class CurrentlyAiringResult {
   final String status;
 
   CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title});
+}
+
+class AnimeCardData {
+  final int id;
+  final Map<String, String?> title;
+  final String cover;
+  final String status;
+
+  AnimeCardData({required this.cover, required this.id, required this.status, required this.title});
 }
 
 class GenreWatchStats {

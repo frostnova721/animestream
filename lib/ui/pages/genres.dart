@@ -2,6 +2,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -159,20 +160,22 @@ class _GenreItemPageState extends State<GenreItemPage> {
       backgroundColor: backgroundColor,
       body: Container(
         padding: pagePadding(context),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 15),
-              child: topRow(
-                context,
-                widget.genreName,
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 15),
+                child: topRow(
+                  context,
+                  widget.genreName,
+                ),
               ),
-            ),
-            _title("Trending ${widget.genreName}"),
-            _list(genreTrendingList, trendingLoading),
-            _title("Popular ${widget.genreName}"),
-            _list(genrePopularList, popularLoading),
-          ],
+              _title("Trending ${widget.genreName}"),
+              _list(genreTrendingList, trendingLoading),
+              _title("Popular ${widget.genreName}"),
+              _list(genrePopularList, popularLoading),
+            ],
+          ),
         ),
       ),
     );
@@ -217,7 +220,15 @@ class _GenreItemPageState extends State<GenreItemPage> {
               itemBuilder: (context, index) {
                 return Container(
                   width: 120,
-                  child: list[index].widget,
+                  child: GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => Info(id: list[index].info['id']),
+                          ),
+                        );
+                      },
+                      child: list[index].widget),
                 );
               },
             ),

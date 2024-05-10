@@ -56,16 +56,28 @@ class _ControlsState extends State<Controls> {
     _betterPlayerController = widget.controller;
     _controller = widget.controller.videoPlayerController;
 
+    finalEpisodeReached = currentEpIndex+1 >= widget.episode['epLinks'].length;
+
     assignSettings();
 
-    _controller?.addListener(() {
+    _controller?.addListener(() async {
       //managing preload and playing the video
-      if (_controller!.value.position.inSeconds ==
-          _controller!.value.duration?.inSeconds) {
-        playPreloadedEpisode();
+
+      final duration = _controller!.value.duration?.inSeconds;
+      final currentPosition = _controller!.value.position.inSeconds;
+
+      //set player postion to duration if greater than duration
+      if (duration != null && currentPosition > duration) {
+        await _controller!.seekTo(Duration(seconds: duration));
+        await _controller!.pause();
       }
-      final currentByTotal = _controller!.value.position.inSeconds /
-          (_controller!.value.duration?.inSeconds ?? 1);
+
+      //play the loaded episode if equal to duration
+      if (!finalEpisodeReached && (duration != null && currentPosition == duration)) {
+        await playPreloadedEpisode();
+      }
+
+      final currentByTotal = _controller!.value.position.inSeconds / (_controller!.value.duration?.inSeconds ?? 1);
       if (currentByTotal * 100 >= 75 && !preloadStarted) {
         preloadNextEpisode();
         widget.updateWatchProgress(currentEpIndex);
@@ -76,9 +88,7 @@ class _ControlsState extends State<Controls> {
         setState(() {
           int duration = _controller?.value.duration?.inSeconds ?? 0;
           int val = _controller?.value.position.inSeconds ?? 0;
-          playPause = _betterPlayerController?.isPlaying() == true
-              ? Icons.pause_rounded
-              : Icons.play_arrow_rounded;
+          playPause = _betterPlayerController?.isPlaying() == true ? Icons.pause_rounded : Icons.play_arrow_rounded;
           buffering = _controller!.value.isBuffering;
           currentTime = getFormattedTime(val);
           maxTime = getFormattedTime(duration);
@@ -86,16 +96,21 @@ class _ControlsState extends State<Controls> {
     });
   }
 
-  IconData? playPause;
-  String currentTime = "0:00";
-  String maxTime = "0:00";
-  bool buffering = false;
-  bool isVisible = true;
-  int selectedQuality = 0;
   List currentSources = [];
   List preloadedSources = [];
+
+  IconData? playPause;
+
+  String currentTime = "0:00";
+  String maxTime = "0:00";
+
+  int selectedQuality = 0;
   int? skipDuration;
   int? megaSkipDuration;
+
+  bool buffering = false;
+  bool isVisible = true;
+  bool finalEpisodeReached = false;
 
   void updateCurrentEpIndex(int updatedIndex) {
     currentEpIndex = updatedIndex;
@@ -110,7 +125,12 @@ class _ControlsState extends State<Controls> {
   }
 
   Future<void> playPreloadedEpisode() async {
+    if(currentEpIndex+1 >= widget.episode['epLinks'].length) {
+      print("yes");
+      return;
+    }
     calledAutoNext = true;
+    _controller!.seekTo(Duration(seconds: 0));
     if (preloadedSources.isNotEmpty) {
       currentEpIndex = currentEpIndex + 1;
       widget.refreshPage(currentEpIndex, preloadedSources[0]);
@@ -135,17 +155,21 @@ class _ControlsState extends State<Controls> {
   }
 
   Future preloadNextEpisode() async {
-    if (currentEpIndex + 1 > widget.episode['epLinks'].length) {
-      preloadStarted =
-          true; //to make sure this funcion doesnt get called over and over again if the last ep is reached
+    if (currentEpIndex + 1 == widget.episode['epLinks'].length) {
+      print("final ep");
+      finalEpisodeReached = true;
+      preloadStarted = true; //to make sure this funcion doesnt get called over and over again if the last ep is reached
       return;
     }
     preloadStarted = true;
     preloadedSources = [];
-    final index = currentEpIndex + 1;
+    final index = currentEpIndex + 1 == widget.episode['epLinks'].length ? null : currentEpIndex + 1;
+    if(index == null) {
+      print("On the final episode. No preloads available");
+      return;
+    }
     List srcs = [];
-    await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index],
-        (list, finished) {
+    await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index], (list, finished) {
       srcs = srcs + list;
       if (finished) {
         preloadedSources = srcs;
@@ -154,25 +178,21 @@ class _ControlsState extends State<Controls> {
     });
   }
 
-  Future<dynamic> playVideo(String url) async {
+  Future<void> playVideo(String url) async {
     preloadedSources = [];
     preloadStarted = false;
     calledAutoNext = false;
-    _betterPlayerController!.setupDataSource(
-      dataSourceConfig(url)
-    );
+    await _betterPlayerController!.setupDataSource(dataSourceConfig(url));
   }
 
   Future getEpisodeSources(bool nextEpisode) async {
     if ((currentEpIndex == 0 && !nextEpisode) ||
-        (currentEpIndex + 1 > widget.episode['epLinks'].length &&
-            nextEpisode)) {
+        (currentEpIndex + 1 > widget.episode['epLinks'].length && nextEpisode)) {
       throw new Exception("Index too low or too high. Item not found!");
     }
     currentSources = [];
     final index = nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
-    final srcs = await widget
-        .episode['getEpisodeSources'](widget.episode['epLinks'][index]);
+    final srcs = await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index]);
     if (mounted)
       setState(() {
         currentSources = srcs;
@@ -184,9 +204,9 @@ class _ControlsState extends State<Controls> {
       return val.toString().padLeft(2, '0');
     }
 
-    int hours = timeInSeconds ~/ 3650;
-    int minutes = (timeInSeconds % 3650) ~/ 65;
-    int seconds = timeInSeconds % 65;
+    int hours = timeInSeconds ~/ 3600;
+    int minutes = (timeInSeconds % 3600) ~/ 60;
+    int seconds = timeInSeconds % 60;
 
     String formattedHours = hours == 0 ? '' : formatTime(hours);
     String formattedMins = formatTime(minutes);
@@ -196,8 +216,10 @@ class _ControlsState extends State<Controls> {
   }
 
   void fastForward(int seekDuration) {
-    _controller!.seekTo(Duration(
-        seconds: _controller!.value.position.inSeconds + seekDuration));
+    if((_controller!.value.position.inSeconds + seekDuration) > _controller!.value.duration!.inSeconds) {
+       _controller!.seekTo(Duration(seconds: _controller!.value.duration!.inSeconds));
+    }
+    _controller!.seekTo(Duration(seconds: _controller!.value.position.inSeconds + seekDuration));
   }
 
   @override
@@ -214,8 +236,7 @@ class _ControlsState extends State<Controls> {
         double LRpadding = 30;
         if (orientation == Orientation.portrait) LRpadding = 10;
         return Padding(
-          padding: EdgeInsets.only(
-              top: 15, left: LRpadding, right: LRpadding, bottom: 5),
+          padding: EdgeInsets.only(top: 15, left: LRpadding, right: LRpadding, bottom: 5),
           child: Column(
             children: [
               Expanded(
@@ -224,9 +245,7 @@ class _ControlsState extends State<Controls> {
                   children: [
                     widget.topControls,
                     Expanded(
-                      child: widget.isControlsLocked()
-                          ? lockedCenterControls()
-                          : centerControls(context),
+                      child: widget.isControlsLocked() ? lockedCenterControls() : centerControls(context),
                     ),
                     Expanded(
                       child: Column(
@@ -240,28 +259,19 @@ class _ControlsState extends State<Controls> {
                                 children: [
                                   Text(
                                     currentTime,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'NunitoSans'),
+                                    style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
                                   ),
                                   const Text(
                                     " / ",
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'NunitoSans'),
+                                    style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
                                   ),
                                   Text(
                                     maxTime,
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontFamily: 'NunitoSans'),
+                                    style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
                                   ),
                                 ],
                               ),
-                              if (megaSkipDuration != null)
-                                widget.isControlsLocked()
-                                    ? Container()
-                                    : megaSkipButton(),
+                              if (megaSkipDuration != null) widget.isControlsLocked() ? Container() : megaSkipButton(),
                             ],
                           ),
                           Container(
@@ -281,13 +291,9 @@ class _ControlsState extends State<Controls> {
                                   },
                                   colors: BetterPlayerProgressColors(
                                     playedColor: accentColor,
-                                    handleColor: widget.isControlsLocked()
-                                        ? Colors.transparent
-                                        : accentColor,
-                                    bufferedColor: const Color.fromARGB(
-                                        255, 126, 126, 126),
-                                    backgroundColor:
-                                        Color.fromARGB(255, 63, 63, 63),
+                                    handleColor: widget.isControlsLocked() ? Colors.transparent : accentColor,
+                                    bufferedColor: const Color.fromARGB(255, 126, 126, 126),
+                                    backgroundColor: Color.fromARGB(255, 63, 63, 63),
                                   ),
                                 ),
                               ),
@@ -384,17 +390,14 @@ class _ControlsState extends State<Controls> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () async {
-                  if (currentEpIndex == 0)
-                    return floatingSnackBar(
-                        context, "Already on the first episode");
+                  if (currentEpIndex == 0) return floatingSnackBar(context, "Already on the first episode");
                   showModalBottomSheet(
                       showDragHandle: true,
                       backgroundColor: Color(0xff121212),
                       context: context,
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
-                          getEpisodeSources:
-                              widget.episode['getEpisodeSources'],
+                          getEpisodeSources: widget.episode['getEpisodeSources'],
                           currentSources: currentSources,
                           currentEpIndex: currentEpIndex,
                           playVideo: playVideo,
@@ -505,8 +508,7 @@ class _ControlsState extends State<Controls> {
                 onTap: () async {
                   //get next episode sources!
                   if (currentEpIndex + 1 == widget.episode['epLinks'].length)
-                    return floatingSnackBar(
-                        context, "You are already in the final episode!");
+                    return floatingSnackBar(context, "You are already in the final episode!");
                   if (preloadedSources.isNotEmpty) {
                     print("from preload");
                     final source = preloadedSources[0];
@@ -521,8 +523,7 @@ class _ControlsState extends State<Controls> {
                       context: context,
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
-                          getEpisodeSources:
-                              widget.episode['getEpisodeSources'],
+                          getEpisodeSources: widget.episode['getEpisodeSources'],
                           currentSources: currentSources,
                           currentEpIndex: currentEpIndex,
                           playVideo: playVideo,

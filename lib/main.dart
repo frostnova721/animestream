@@ -63,7 +63,8 @@ class _AnimeStreamState extends State<AnimeStream> {
             NotificationController.onDismissActionReceivedMethod);
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      systemNavigationBarColor: Colors.black.withOpacity(0.002),
+      statusBarColor: Colors.black.withOpacity(0.002),
+      systemNavigationBarColor: Colors.black.withOpacity(0.002)
     ));
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,

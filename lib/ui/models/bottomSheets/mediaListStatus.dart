@@ -237,22 +237,19 @@ class _MediaListStatusBottomSheetState
               ],
             ),
             Padding(
-              padding: const EdgeInsets.only(bottom: 20, top: 50),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom+5, top: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.transparent,
+                        // padding: EdgeInsets.zero,
+                        backgroundColor: accentColor,
                         side: BorderSide(
                           color: accentColor,
-                        ),
-                        textStyle: TextStyle(
-                          color: accentColor,
-                          fontFamily: "Rubik",
-                          fontSize: 18,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -261,26 +258,24 @@ class _MediaListStatusBottomSheetState
                       onPressed: () {
                         Navigator.of(context).pop();
                       },
-                      child: Text(
-                        "cancel",
-                        style: TextStyle(
-                          color: accentColor,
-                          fontFamily: "Rubik",
-                          fontSize: 22,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 0),
+                        child: Text(
+                          "cancel",
+                          style: TextStyle(
+                            color: backgroundColor,
+                            fontFamily: "Poppins",
+                            fontSize: 22,
+                          ),
                         ),
                       ),
                     ),
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
+                      backgroundColor: accentColor,
                       side: BorderSide(
                         color: accentColor,
-                      ),
-                      textStyle: TextStyle(
-                        color: accentColor,
-                        fontFamily: "Rubik",
-                        fontSize: 18,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -310,8 +305,8 @@ class _MediaListStatusBottomSheetState
                     child: Text(
                       "save",
                       style: TextStyle(
-                        color: accentColor,
-                        fontFamily: "Rubik",
+                        color: backgroundColor,
+                        fontFamily: "Poppins",
                         fontSize: 22,
                       ),
                     ),

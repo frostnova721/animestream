@@ -38,23 +38,29 @@ class _InfoState extends State<Info> {
     });
   }
 
-  bool dataLoaded = false;
-  bool infoPage = true;
   dynamic data;
+
   String selectedSource = "gogoanime";
   String? foundName;
+
+  MediaStatus? mediaListStatus;
+
   List<String> epLinks = [];
   List streamSources = [];
+  List qualities = [];
+  List<List<Map<String, dynamic>>> visibleEpList = [];
+
+  int currentPageIndex = 0;
   int watched = 1;
   int watchedPercentage = 1;
+
+  bool showBar = false;
+  bool gridMode = false;
   bool started = false;
-  List qualities = [];
   bool _epSearcherror = false;
   bool loggedIn = false;
-  MediaStatus? mediaListStatus;
-  List<List<Map<String, dynamic>>> visibleEpList = [];
-  int currentPageIndex = 0;
-  bool gridMode = false;
+  bool dataLoaded = false;
+  bool infoPage = true;
 
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences().getUserPreferences();
@@ -279,7 +285,7 @@ class _InfoState extends State<Info> {
                                   onPressed: () {
                                     showModalBottomSheet(
                                       context: context,
-                                      backgroundColor: backgroundColor,
+                                      backgroundColor: Color(0xff121212),
                                       showDragHandle: true,
                                       builder: (context) => MediaListStatusBottomSheet(
                                         status: mediaListStatus,
@@ -325,170 +331,10 @@ class _InfoState extends State<Info> {
                           textAlign: TextAlign.center,
                         ),
                       ),
-                      infoPage
-                          ? _infoItems(context)
-                          : Column(
-                              children: [
-                                Container(
-                                  margin: EdgeInsets.only(top: 30),
-                                  child: DropdownMenu(
-                                    initialSelection: sources.first,
-                                    dropdownMenuEntries: getSourceDropdownList(),
-                                    // menuHeight: 75,
-                                    width: 300,
-                                    textStyle: TextStyle(
-                                      color: textMainColor,
-                                      fontFamily: "Poppins",
-                                    ),
-                                    trailingIcon: Icon(
-                                      Icons.arrow_drop_down,
-                                      color: textMainColor,
-                                    ),
-                                    selectedTrailingIcon: Icon(
-                                      Icons.arrow_drop_up,
-                                      color: textMainColor,
-                                    ),
-                                    menuStyle: MenuStyle(
-                                      surfaceTintColor: MaterialStatePropertyAll(backgroundSubColor),
-                                      backgroundColor: MaterialStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
-                                      shape: MaterialStatePropertyAll(
-                                        RoundedRectangleBorder(
-                                          side: BorderSide(color: textMainColor),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                      ),
-                                    ),
-                                    onSelected: (value) {
-                                      selectedSource = value;
-                                      setState(() {
-                                        getEpisodes();
-                                      });
-                                    },
-                                    inputDecorationTheme: InputDecorationTheme(
-                                      border: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          width: 1,
-                                          color: Colors.white,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      contentPadding: EdgeInsets.only(left: 20, right: 20),
-                                      enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          width: 1,
-                                          color: Colors.white,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                    ),
-                                    label: Text(
-                                      "source",
-                                      style: TextStyle(
-                                          color: textMainColor,
-                                          fontSize: 20,
-                                          fontFamily: "Rubik",
-                                          overflow: TextOverflow.ellipsis),
-                                    ),
-                                  ),
-                                ),
-                                _searchStatus(),
-                                _manualSearch(context),
-                                if (foundName != null) _continueButton(),
-                                Container(
-                                  margin: EdgeInsets.only(top: 25, left: 20, right: 20),
-                                  padding: EdgeInsets.only(top: 15, bottom: 20),
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(20),
-                                      color: const Color.fromARGB(255, 29, 29, 29)),
-                                  child: Column(
-                                    children: [
-                                      Container(
-                                        height: 45,
-                                        child: Stack(
-                                          children: [
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.center,
-                                              children: [
-                                                _categoryTitle("Episodes"),
-                                              ],
-                                            ),
-                                            if (foundName != null)
-                                              Row(
-                                                crossAxisAlignment: CrossAxisAlignment.center,
-                                                mainAxisAlignment: MainAxisAlignment.end,
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(right: 10),
-                                                    child: IconButton(
-                                                      tooltip: gridMode ? "switch to list view" : "switch to grid view",
-                                                      onPressed: () {
-                                                        setState(() {
-                                                          gridMode = !gridMode;
-                                                          UserPreferences().saveUserPreferences(
-                                                              UserPreferencesModal(episodeGridView: gridMode));
-                                                        });
-                                                      },
-                                                      icon: Icon(
-                                                        gridMode ? Icons.view_list_rounded : Icons.grid_view_rounded,
-                                                      ),
-                                                      color: textMainColor,
-                                                      iconSize: 28,
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                          ],
-                                        ),
-                                      ),
-                                      _epSearcherror
-                                          ? Container(
-                                              width: 350,
-                                              height: 120,
-                                              child: Center(
-                                                child: Column(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    Image.asset(
-                                                      'lib/assets/images/broken_heart.png',
-                                                      scale: 7.5,
-                                                    ),
-                                                    Text(
-                                                      "Couldnt get any results :(",
-                                                      style: TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 16,
-                                                        fontFamily: "NunitoSans",
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            )
-                                          : foundName != null
-                                              ? Column(
-                                                  children: [
-                                                    _pages(),
-                                                    AnimatedSwitcher(
-                                                      duration: Duration(milliseconds: 400),
-                                                      child: gridMode ? _episodesGrid() : _episodes(),
-                                                    ),
-                                                  ],
-                                                )
-                                              : Container(
-                                                  width: 350,
-                                                  height: 100,
-                                                  child: Center(
-                                                    child: CircularProgressIndicator(
-                                                      color: accentColor,
-                                                    ),
-                                                  ),
-                                                ),
-                                      // ),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 200),
+                        child: infoPage ? _infoItems(context) : _watchItems(context),
+                      ),
                     ],
                   ),
                 ),
@@ -524,6 +370,167 @@ class _InfoState extends State<Info> {
         ),
       );
     }
+  }
+
+  Column _watchItems(BuildContext context) {
+    return Column(
+      children: [
+        Container(
+          margin: EdgeInsets.only(top: 30),
+          child: DropdownMenu(
+            initialSelection: sources.first,
+            dropdownMenuEntries: getSourceDropdownList(),
+            // menuHeight: 75,
+            width: 300,
+            textStyle: TextStyle(
+              color: textMainColor,
+              fontFamily: "Poppins",
+            ),
+            trailingIcon: Icon(
+              Icons.arrow_drop_down,
+              color: textMainColor,
+            ),
+            selectedTrailingIcon: Icon(
+              Icons.arrow_drop_up,
+              color: textMainColor,
+            ),
+            menuStyle: MenuStyle(
+              surfaceTintColor: MaterialStatePropertyAll(backgroundSubColor),
+              backgroundColor: MaterialStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
+              shape: MaterialStatePropertyAll(
+                RoundedRectangleBorder(
+                  side: BorderSide(color: textMainColor),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+            onSelected: (value) {
+              selectedSource = value;
+              setState(() {
+                getEpisodes();
+              });
+            },
+            inputDecorationTheme: InputDecorationTheme(
+              border: OutlineInputBorder(
+                borderSide: BorderSide(
+                  width: 1,
+                  color: Colors.white,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              contentPadding: EdgeInsets.only(left: 20, right: 20),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  width: 1,
+                  color: Colors.white,
+                ),
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            label: Text(
+              "source",
+              style:
+                  TextStyle(color: textMainColor, fontSize: 20, fontFamily: "Rubik", overflow: TextOverflow.ellipsis),
+            ),
+          ),
+        ),
+        _searchStatus(),
+        _manualSearch(context),
+        if (foundName != null) _continueButton(),
+        Container(
+          margin: EdgeInsets.only(top: 25, left: 20, right: 20),
+          padding: EdgeInsets.only(top: 15, bottom: 20),
+          decoration:
+              BoxDecoration(borderRadius: BorderRadius.circular(20), color: const Color.fromARGB(255, 29, 29, 29)),
+          child: Column(
+            children: [
+              Container(
+                height: 45,
+                child: Stack(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _categoryTitle("Episodes"),
+                      ],
+                    ),
+                    if (foundName != null)
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(right: 10),
+                            child: IconButton(
+                              tooltip: gridMode ? "switch to list view" : "switch to grid view",
+                              onPressed: () {
+                                setState(() {
+                                  gridMode = !gridMode;
+                                  UserPreferences()
+                                      .saveUserPreferences(UserPreferencesModal(episodeGridView: gridMode));
+                                });
+                              },
+                              icon: Icon(
+                                gridMode ? Icons.view_list_rounded : Icons.grid_view_rounded,
+                              ),
+                              color: textMainColor,
+                              iconSize: 28,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+              _epSearcherror
+                  ? Container(
+                      width: 350,
+                      height: 120,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset(
+                              'lib/assets/images/broken_heart.png',
+                              scale: 7.5,
+                            ),
+                            Text(
+                              "Couldnt get any results :(",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: "NunitoSans",
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  : foundName != null
+                      ? Column(
+                          children: [
+                            _pages(),
+                            AnimatedSwitcher(
+                              duration: Duration(milliseconds: 400),
+                              child: gridMode ? _episodesGrid() : _episodes(),
+                            ),
+                          ],
+                        )
+                      : Container(
+                          width: 350,
+                          height: 100,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: accentColor,
+                            ),
+                          ),
+                        ),
+              // ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   Container _manualSearch(BuildContext context) {
@@ -1023,160 +1030,162 @@ class _InfoState extends State<Info> {
     );
   }
 
-  Column _infoItems(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          margin: EdgeInsets.only(top: 50),
-          child: Column(
-            children: [
-              _buildInfoItems(
-                _infoLeft('Type'),
-                _infoRight(data.type),
-              ),
-              _buildInfoItems(
-                _infoLeft('Rating'),
-                _infoRight('${data.rating ?? '??'}/10'),
-              ),
-              _buildInfoItems(
-                _infoLeft('Episodes'),
-                _infoRight('${data.episodes ?? '??'}'),
-              ),
-              _buildInfoItems(
-                _infoLeft('Duration'),
-                _infoRight('${data.duration ?? '??'}'),
-              ),
-              _buildInfoItems(
-                _infoLeft('Studios'),
-                _infoRight(data.studios.isEmpty ? '??' : data.studios[0]),
-              ),
-            ],
+  Container _infoItems(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            margin: EdgeInsets.only(top: 50),
+            child: Column(
+              children: [
+                _buildInfoItems(
+                  _infoLeft('Type'),
+                  _infoRight(data.type),
+                ),
+                _buildInfoItems(
+                  _infoLeft('Rating'),
+                  _infoRight('${data.rating ?? '??'}/10'),
+                ),
+                _buildInfoItems(
+                  _infoLeft('Episodes'),
+                  _infoRight('${data.episodes ?? '??'}'),
+                ),
+                _buildInfoItems(
+                  _infoLeft('Duration'),
+                  _infoRight('${data.duration ?? '??'}'),
+                ),
+                _buildInfoItems(
+                  _infoLeft('Studios'),
+                  _infoRight(data.studios.isEmpty ? '??' : data.studios[0]),
+                ),
+              ],
+            ),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 30),
-          padding: EdgeInsets.only(left: 15, right: 15),
-          child: Column(
-            children: [
-              _categoryTitle('Genres'),
-              SizedBox(
-                height: 65,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: data.genres.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.all(5),
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      decoration: BoxDecoration(color: Colors.grey.shade700, borderRadius: BorderRadius.circular(20)),
-                      child: Text(
-                        data.genres[index],
-                        style: TextStyle(
-                          color: textMainColor,
-                          fontSize: 20,
+          Container(
+            margin: EdgeInsets.only(top: 30),
+            padding: EdgeInsets.only(left: 15, right: 15),
+            child: Column(
+              children: [
+                _categoryTitle('Genres'),
+                SizedBox(
+                  height: 65,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: data.genres.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.all(5),
+                        padding: EdgeInsets.only(left: 15, right: 15),
+                        decoration: BoxDecoration(color: Colors.grey.shade700, borderRadius: BorderRadius.circular(20)),
+                        child: Text(
+                          data.genres[index],
+                          style: TextStyle(
+                            color: textMainColor,
+                            fontSize: 20,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 30),
-          padding: EdgeInsets.only(left: 15, right: 15),
-          child: Column(
-            children: [
-              _categoryTitle('Tags'),
-              SizedBox(
-                height: 45,
-                child: ListView.builder(
-                  scrollDirection: Axis.horizontal,
-                  itemCount: data.genres.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      alignment: Alignment.center,
-                      margin: EdgeInsets.all(5),
-                      padding: EdgeInsets.only(left: 15, right: 15),
-                      decoration: BoxDecoration(color: Colors.grey.shade800, borderRadius: BorderRadius.circular(5)),
-                      child: Text(
-                        data.tags[index],
-                        style: TextStyle(
-                          color: textMainColor,
-                          fontSize: 15,
+          Container(
+            margin: EdgeInsets.only(top: 30),
+            padding: EdgeInsets.only(left: 15, right: 15),
+            child: Column(
+              children: [
+                _categoryTitle('Tags'),
+                SizedBox(
+                  height: 45,
+                  child: ListView.builder(
+                    scrollDirection: Axis.horizontal,
+                    itemCount: data.genres.length,
+                    itemBuilder: (context, index) {
+                      return Container(
+                        alignment: Alignment.center,
+                        margin: EdgeInsets.all(5),
+                        padding: EdgeInsets.only(left: 15, right: 15),
+                        decoration: BoxDecoration(color: Colors.grey.shade800, borderRadius: BorderRadius.circular(5)),
+                        child: Text(
+                          data.tags[index],
+                          style: TextStyle(
+                            color: textMainColor,
+                            fontSize: 15,
+                          ),
                         ),
-                      ),
-                    );
-                  },
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 30),
-          padding: EdgeInsets.only(left: 25, right: 25),
-          child: Column(
-            children: [
-              _categoryTitle('Description'),
-              Text(
-                data.synopsis,
-                style: TextStyle(
-                  color: textMainColor,
-                  fontFamily: "NunitoSans",
-                  fontSize: 15,
+          Container(
+            margin: EdgeInsets.only(top: 30),
+            padding: EdgeInsets.only(left: 25, right: 25),
+            child: Column(
+              children: [
+                _categoryTitle('Description'),
+                Text(
+                  data.synopsis,
+                  style: TextStyle(
+                    color: textMainColor,
+                    fontFamily: "NunitoSans",
+                    fontSize: 15,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 30),
-          child: Column(
-            children: [
-              _categoryTitle('Characters'),
-              SizedBox(
-                height: 260,
-                child: ListView.builder(
-                  itemCount: data.characters.length,
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    final character = data.characters[index];
-                    return Container(
-                      width: 130,
-                      child: characterCard(
-                        character['name'],
-                        character['role'],
-                        character['image'],
-                      ),
-                    );
-                  },
+          Container(
+            margin: EdgeInsets.only(top: 30),
+            child: Column(
+              children: [
+                _categoryTitle('Characters'),
+                SizedBox(
+                  height: 260,
+                  child: ListView.builder(
+                    itemCount: data.characters.length,
+                    scrollDirection: Axis.horizontal,
+                    itemBuilder: (context, index) {
+                      final character = data.characters[index];
+                      return Container(
+                        width: 130,
+                        child: characterCard(
+                          character['name'],
+                          character['role'],
+                          character['image'],
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 20),
-          child: Column(
-            children: [
-              _categoryTitle('Related'),
-              _buildRecAndRel(data.related, false),
-            ],
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: Column(
+              children: [
+                _categoryTitle('Related'),
+                _buildRecAndRel(data.related, false),
+              ],
+            ),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(top: 20),
-          child: Column(
-            children: [
-              _categoryTitle('Recommended'),
-              _buildRecAndRel(data.recommended, true),
-            ],
+          Container(
+            margin: EdgeInsets.only(top: 20),
+            child: Column(
+              children: [
+                _categoryTitle('Recommended'),
+                _buildRecAndRel(data.recommended, true),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -1356,15 +1365,22 @@ class _InfoState extends State<Info> {
                 stops: [0.09, 0.23]).createShader(bounds),
             blendMode: BlendMode.darken,
             child: Container(
-              decoration: BoxDecoration(
-                color: Color.fromARGB(255, 0, 0, 0),
-                image: DecorationImage(
-                  opacity: 0.5,
-                  image: data.banner.length > 0 ? NetworkImage(data.banner) : NetworkImage(data.cover),
-                  fit: BoxFit.cover,
-                ),
-              ),
               height: 270,
+              width: double.infinity,
+              child: Image.network(
+                data.banner.length > 0 ? data.banner : data.cover,
+                fit: BoxFit.cover,
+                opacity: AlwaysStoppedAnimation(0.6),
+                frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                  if (wasSynchronouslyLoaded) return child;
+                  return AnimatedOpacity(
+                    opacity: frame == null ? 0 : 1,
+                    duration: Duration(milliseconds: 300),
+                    child: child,
+                    curve: Curves.easeIn,
+                  );
+                },
+              ),
             ),
           ),
         ),

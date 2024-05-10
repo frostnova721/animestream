@@ -43,7 +43,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
 
   Future getSources(bool nextEpisode) async {
     if ((currentEpIndex == 0 && !nextEpisode) ||
-        (currentEpIndex + 1 > widget.epLinks.length && nextEpisode)) {
+        (currentEpIndex + 1 >= widget.epLinks.length && nextEpisode)) {
       throw new Exception("Index too low or too high. Item not found!");
     }
     currentSources = [];

@@ -25,8 +25,7 @@ class UpdateCheckResult {
 }
 
 Future<UpdateCheckResult?> checkForUpdates() async {
-  final releasesUrl =
-      'https://api.github.com/repos/frostnova721/animestream/releases';
+  final releasesUrl = 'https://api.github.com/repos/frostnova721/animestream/releases';
   final packageInfo = await PackageInfo.fromPlatform();
   final releasesRes = json.decode(await fetch(releasesUrl))[0];
   final String currentVersion = packageInfo.version;
@@ -34,13 +33,11 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   print("current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
   final String description = releasesRes['body'];
   final bool pre = releasesRes['prerelease'];
-  if(!currentUserSettings!.receivePreReleases! && pre) {
+  if (!currentUserSettings!.receivePreReleases! && pre) {
     return null;
   }
   if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
-    final apkItem = releasesRes['assets']
-        .where((item) => item['name'] == "app-release.apk")
-        .toList();
+    final apkItem = releasesRes['assets'].where((item) => item['name'] == "app-release.apk").toList();
     final downloadLink = apkItem[0]['browser_download_url'];
     return UpdateCheckResult(
       latestVersion: latestVersion,
@@ -53,109 +50,112 @@ Future<UpdateCheckResult?> checkForUpdates() async {
     return null;
 }
 
-showUpdateSheet(
-    BuildContext context, String markdownText, String downloadLink, bool pre) {
+showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre) {
   showModalBottomSheet(
     showDragHandle: true,
-    backgroundColor: backgroundColor,
+    backgroundColor: Color(0xff121212),
     isScrollControlled: true,
     context: context,
     builder: (context) {
-      return Container(
-        padding: EdgeInsets.only(left: 25, right: 25, bottom: 40),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (pre)
-              Text(
-                "Test Version",
-                style: TextStyle(color: textSubColor, fontFamily: "Poppins"),
-              ),
-            Container(
-              child: ListView(
-                shrinkWrap: true,
-                children: [
-                  MarkdownBody(
-                    data: markdownText,
-                    styleSheet: MarkdownStyleSheet(
-                      h1: style(),
-                      h2: style(),
-                      listBullet: style(),
-                      h3: style(),
-                      h4: style(),
-                      h5: style(),
-                      h6: style(),
-                      p: style(),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final uri = Uri.parse(downloadLink);
-                        if (!(await launchUrl(uri))) {
-                          throw new Exception("Couldnt launch");
-                        }
-                        ;
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: backgroundColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(
-                            color: accentColor,
-                          ),
-                        ),
-                      ),
-                      child: Container(
-                        child: Text(
-                          "download",
-                          style: TextStyle(
-                            color: accentColor,
-                            fontFamily: "Rubik",
-                            fontSize: 20,
-                          ),
-                        ),
+      return Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 15, right: 15, top: 10),
+        child: SingleChildScrollView(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (pre)
+                Text(
+                  "Test Version",
+                  style: TextStyle(color: textSubColor, fontFamily: "Poppins"),
+                ),
+              Container(
+                height: 400,
+                child: ListView(
+                  shrinkWrap: true,
+                  children: [
+                    MarkdownBody(
+                      data: markdownText,
+                      styleSheet: MarkdownStyleSheet(
+                        h1: style(),
+                        h2: style(),
+                        listBullet: style(),
+                        h3: style(),
+                        h4: style(),
+                        h5: style(),
+                        h6: style(),
+                        p: style(),
                       ),
                     ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: backgroundColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(
-                            color: accentColor,
-                          ),
-                        ),
-                      ),
-                      child: Container(
-                        child: Text("maybe later",
-                            style: TextStyle(
+                  ],
+                ),
+              ),
+              Container(
+                margin: EdgeInsets.only(top: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          final uri = Uri.parse(downloadLink);
+                          if (!(await launchUrl(uri))) {
+                            throw new Exception("Couldnt launch");
+                          }
+                          ;
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: BorderSide(
                               color: accentColor,
+                            ),
+                          ),
+                        ),
+                        child: Container(
+                          child: Text(
+                            "download",
+                            style: TextStyle(
+                              color: backgroundColor,
                               fontFamily: "Rubik",
                               fontSize: 20,
-                            )),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentColor,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                            side: BorderSide(
+                              color: accentColor,
+                            ),
+                          ),
+                        ),
+                        child: Container(
+                          child: Text("maybe later",
+                              style: TextStyle(
+                                color: backgroundColor,
+                                fontFamily: "Rubik",
+                                fontSize: 20,
+                              )),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       );
     },

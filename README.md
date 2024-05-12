@@ -2,6 +2,8 @@
 
 A Flutter project made to stream and download Anime.
 
+<a href="https://www.codefactor.io/repository/github/frostnova721/animestream/overview/master"><img src="https://www.codefactor.io/repository/github/frostnova721/animestream/badge/master?style=for-the-badge" alt="CodeFactor" /></a>
+
 <p align="center">
     <img src="lib/assets/icons/logo.png" width="256" height="256" alt="project logo">
 </p>

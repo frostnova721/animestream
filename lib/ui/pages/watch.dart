@@ -309,7 +309,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       decoration: BoxDecoration(
         gradient: LinearGradient(
             colors: [
-              Color.fromARGB(180, 0, 0, 0),
+              Color.fromARGB(220, 0, 0, 0),
               Colors.transparent,
             ],
             begin: Alignment.topCenter,
@@ -320,7 +320,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         decoration: BoxDecoration(
             gradient: LinearGradient(
                 colors: [
-                  Color.fromARGB(180, 0, 0, 0),
+                  Color.fromARGB(220, 0, 0, 0),
                   Colors.transparent,
                 ],
                 begin: Alignment.bottomCenter,

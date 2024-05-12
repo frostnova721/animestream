@@ -1317,13 +1317,14 @@ class _InfoState extends State<Info> {
                 return SingleChildScrollView(
                   child: Container(
                     padding: EdgeInsets.all(20),
-                    child: ListView(
-                      shrinkWrap: true,
-                      physics: NeverScrollableScrollPhysics(),
+                    child: Column(
                       children: [
-                        Image.network(img),
+                        Image.network(
+                          img,
+                          height: 250,
+                        ),
                         Container(
-                          margin: EdgeInsets.only(top: 20),
+                          margin: EdgeInsets.only(top: 20, bottom: 10),
                           alignment: Alignment.center,
                           height: 50,
                           child: ElevatedButton(
@@ -1337,7 +1338,7 @@ class _InfoState extends State<Info> {
                             },
                             style: ElevatedButton.styleFrom(
                               fixedSize: Size(150, 75),
-                              backgroundColor: Colors.black,
+                              backgroundColor: accentColor,
                               shape: RoundedRectangleBorder(
                                 side: BorderSide(color: accentColor),
                                 borderRadius: BorderRadius.circular(15),
@@ -1346,7 +1347,10 @@ class _InfoState extends State<Info> {
                             child: Text(
                               "save",
                               style: TextStyle(
-                                  color: accentColor, fontFamily: "Poppins", fontWeight: FontWeight.bold, fontSize: 20),
+                                  color: backgroundColor,
+                                  fontFamily: "Poppins",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 20),
                             ),
                           ),
                         ),

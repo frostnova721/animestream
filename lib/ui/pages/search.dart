@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -20,6 +22,8 @@ class _SearchState extends State<Search> {
   TextEditingController textEditingController = TextEditingController();
 
   bool _searching = false;
+
+  Timer? debounce;
 
   Future addCards(String query) async {
     results = [];
@@ -167,6 +171,18 @@ class _SearchState extends State<Search> {
   TextField _searchBar() {
     return TextField(
       controller: textEditingController,
+      onChanged: (val) {
+        if(debounce?.isActive ?? false) debounce?.cancel();
+        debounce = Timer(const Duration(milliseconds: 300), () async {
+          if(val.length <= 0) {
+          return;
+        }
+        setState(() {
+          _searching = true;
+        });
+        await addCards(val);
+        });
+      },
       onSubmitted: (val) async {
         if(val.length <= 0) {
           return;
@@ -209,6 +225,7 @@ class _SearchState extends State<Search> {
 
   @override
   void dispose() {
+    debounce?.cancel();
     super.dispose();
   }
 }

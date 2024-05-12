@@ -292,8 +292,8 @@ class _ControlsState extends State<Controls> {
                                   colors: BetterPlayerProgressColors(
                                     playedColor: accentColor,
                                     handleColor: widget.isControlsLocked() ? Colors.transparent : accentColor,
-                                    bufferedColor: const Color.fromARGB(255, 126, 126, 126),
-                                    backgroundColor: Color.fromARGB(255, 63, 63, 63),
+                                    bufferedColor: Color.fromARGB(255, 167, 167, 167),
+                                    backgroundColor: Color.fromARGB(255, 94, 94, 94),
                                   ),
                                 ),
                               ),

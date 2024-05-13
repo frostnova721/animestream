@@ -1,8 +1,9 @@
 import 'package:animestream/core/anime/extractors/ryuk.dart';
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:html/parser.dart';
 
-class Ryuk {
+class Ryuk extends AnimeProvider {
   final baseUrl = "https://ryuk.to";
 
   Future<List<Map<String, String?>>> search(String query) async {
@@ -10,22 +11,15 @@ class Ryuk {
     final doc = await parse(res);
     List<Map<String, String?>> searchResults = [];
     doc.querySelector(".film_list-wrap")!.children.forEach((element) {
-      final title =
-          element.querySelector('.film-poster-ahref')?.attributes['title'];
+      final title = element.querySelector('.film-poster-ahref')?.attributes['title'];
 
       //unused for now!!
       // final romajiTitle =
-          // element.querySelector('.film-poster-ahref')!.attributes['data-jname'];
+      // element.querySelector('.film-poster-ahref')!.attributes['data-jname'];
 
-      final imageUrl =
-          element.querySelector('.film-poster-img')!.attributes['data-src'];
-      final link =
-          element.querySelector('.film-poster-ahref')!.attributes['href'];
-      searchResults.add({
-        'name': title,
-        'alias': link?.replaceAll("/anime/", '') ?? '',
-        'imageUrl': imageUrl
-      });
+      final imageUrl = element.querySelector('.film-poster-img')!.attributes['data-src'];
+      final link = element.querySelector('.film-poster-ahref')!.attributes['href'];
+      searchResults.add({'name': title, 'alias': link?.replaceAll("/anime/", '') ?? '', 'imageUrl': imageUrl});
     });
     return searchResults;
   }
@@ -37,8 +31,7 @@ class Ryuk {
     doc.querySelector('.ps__-list')!.children.forEach((element) {
       final name = element.text.trim();
       final link = element.children[0].attributes['href'];
-      if (link != null)
-        servers.add({'server': name.toLowerCase(), 'src': link});
+      if (link != null) servers.add({'server': name.toLowerCase(), 'src': link});
     });
     return servers;
   }
@@ -50,8 +43,7 @@ class Ryuk {
     doc.querySelector('.anisc-info')!.children.forEach((elem) {
       final textContent = elem.text;
       if (textContent.contains('Episodes:')) {
-        totalEpisodes =
-            int.parse(textContent.replaceAll('Episodes:', '').trim());
+        totalEpisodes = int.parse(textContent.replaceAll('Episodes:', '').trim());
       }
     });
     return {
@@ -60,8 +52,7 @@ class Ryuk {
     };
   }
 
-  Future<void> getStreams(
-      String episodeId, Function(List<dynamic>, bool) update) async {
+  Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {
     //get link of all servers
     final servers = await getAllServerLinks(episodeId);
 
@@ -84,10 +75,7 @@ class Ryuk {
   }
 
   String _getServerLink(String serverName, List<Map<String, String>> servers) {
-    final src = servers
-        .where((element) =>
-            element['server']?.toLowerCase() == serverName.toLowerCase())
-        .toList();
+    final src = servers.where((element) => element['server']?.toLowerCase() == serverName.toLowerCase()).toList();
     if (src.isEmpty) {
       return '';
     }

@@ -13,6 +13,7 @@ import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:animestream/core/commons/enums.dart';
@@ -1392,12 +1393,14 @@ class _InfoState extends State<Info> {
           alignment: Alignment.center,
           margin: EdgeInsets.only(top: 100),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(15),
-            child: Image.network(
-              data.cover,
-              height: 220,
-            ),
-          ),
+              borderRadius: BorderRadius.circular(15),
+              child: CachedNetworkImage(
+                imageUrl: data.cover,
+                height: 220,
+                fadeInDuration: Duration(milliseconds: 200),
+                fadeInCurve: Curves.easeIn,
+                // fit: BoxFit.cover,
+              )),
         ),
         Container(
           margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),

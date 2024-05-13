@@ -1,12 +1,13 @@
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/ryuk.dart';
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 final List sources = ["gogoanime", "ryuk"];
 
-getClass(String source) {
+AnimeProvider getClass(String source) {
   dynamic sourceClass;
   switch (source) {
     case "gogoanime":

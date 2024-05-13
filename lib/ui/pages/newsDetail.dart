@@ -59,6 +59,14 @@ class _NewsDetailsState extends State<NewsDetails> {
                     Container(
                       child: Image.network(
                         news['image'],
+                        frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
+                          if (wasSynchronouslyLoaded) return child;
+                          return AnimatedOpacity(
+                            opacity: frame == null ? 0 : 1,
+                            duration: Duration(milliseconds: 200),
+                            child: child,
+                          );
+                        },
                       ),
                     ),
                   Container(

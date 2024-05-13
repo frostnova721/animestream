@@ -1,6 +1,6 @@
 import "package:flutter/material.dart";
 
-floatingSnackBar(BuildContext context, String message, { int? duration }) {
+dynamic floatingSnackBar(BuildContext context, String message, { int? duration }) {
   ScaffoldMessenger.of(context).removeCurrentSnackBar();
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -14,7 +14,7 @@ floatingSnackBar(BuildContext context, String message, { int? duration }) {
         ),
       ),
       duration: Duration(seconds: duration != null ? duration : 3),
-      backgroundColor: Color.fromARGB(235, 29, 29, 29),
+      backgroundColor: Color.fromARGB(246, 29, 29, 29),
       behavior: SnackBarBehavior.floating,
       dismissDirection: DismissDirection.down,
       margin: EdgeInsets.only(bottom: 40, left: 20, right: 20),

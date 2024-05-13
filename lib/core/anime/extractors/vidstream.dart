@@ -14,7 +14,7 @@ class Vidstream {
 
   final baseUrl = "https://gogoanime3.net";
 
-  Future<List<Stream>> extractGogo(String streamLink) async {
+  Future<List<Stream>> extract(String streamLink) async {
     if(streamLink.isEmpty) {
       throw new Exception("ERR_EMPTY_STREAM_LINK");
     }

@@ -96,25 +96,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
                   ),
                 );
               },
-              // Container(
-              //   child: Row(
-              //     children: [
-              //       Container(
-              //           margin: EdgeInsets.only(right: 15),
-              //           decoration: BoxDecoration(
-              //               borderRadius: BorderRadius.circular(100),
-              //               color: Colors.white),
-              //           child: Icon(
-              //             Icons.start,
-              //             size: 40,
-              //           )),
-              //       Text(
-              //         "star",
-              //         style: TextStyle(color: textMainColor),
-              //       )
-              //     ],
-              //   ),
-              // ),
             ),
             if (widget.loggedIn)
               InkWell(

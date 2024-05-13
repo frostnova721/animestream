@@ -30,14 +30,12 @@ class _SearchState extends State<Search> {
     exactMatches = [];
     final searchResults = await Anilist().search(query);
     searchResults.forEach((ele) {
-      final image =
-          ele['coverImage']['large'] ?? ele['coverImage']['extraLarge'];
-      final String title = ele['title']['english'] ?? ele['title']['romaji'];
+      final image = ele.cover;
+      final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
       // final id = ele['id'];
-      results.add(AnimeWidget(widget: animeCard(title, image), info: ele));
+      results.add(AnimeWidget(widget: animeCard(title, image), info: {'id': ele.id}));
       if (query.toLowerCase() == title.toLowerCase()) {
-        exactMatches
-            .add(AnimeWidget(widget: animeCard(title, image), info: ele));
+        exactMatches.add(AnimeWidget(widget: animeCard(title, image), info: {'id': ele.id}));
       }
     });
     setState(() {
@@ -66,8 +64,7 @@ class _SearchState extends State<Search> {
         child: Column(
           children: [
             Container(
-              padding:
-                  EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
+              padding: EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
               child: _searchBar(),
             ),
             Expanded(
@@ -75,16 +72,15 @@ class _SearchState extends State<Search> {
                   ? Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        CircularProgressIndicator(color: accentColor,),
+                        CircularProgressIndicator(
+                          color: accentColor,
+                        ),
                         Padding(
                           padding: const EdgeInsets.all(10.0),
                           child: Text(
                             "searching...",
                             style: TextStyle(
-                                color: accentColor,
-                                fontFamily: "NotoSans",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16),
+                                color: accentColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 16),
                           ),
                         )
                       ],
@@ -131,12 +127,10 @@ class _SearchState extends State<Search> {
             GridView.builder(
               padding: EdgeInsets.zero,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount:
-                      MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                  crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
                   childAspectRatio: 120 / 225, //set as width and height of each child container
-                  mainAxisSpacing: 15
-                  ),
+                  mainAxisSpacing: 15),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: exactMatch ? exactMatches.length : results.length,
@@ -148,16 +142,12 @@ class _SearchState extends State<Search> {
                         context,
                         MaterialPageRoute(
                           builder: (context) => Info(
-                            id: exactMatch
-                                ? exactMatches[index].info['id']
-                                : results[index].info['id'],
+                            id: exactMatch ? exactMatches[index].info['id'] : results[index].info['id'],
                           ),
                         ),
                       );
                     },
-                    child: exactMatch
-                        ? exactMatches[index].widget
-                        : results[index].widget,
+                    child: exactMatch ? exactMatches[index].widget : results[index].widget,
                   ),
                 );
               },
@@ -172,19 +162,19 @@ class _SearchState extends State<Search> {
     return TextField(
       controller: textEditingController,
       onChanged: (val) {
-        if(debounce?.isActive ?? false) debounce?.cancel();
+        if (debounce?.isActive ?? false) debounce?.cancel();
         debounce = Timer(const Duration(milliseconds: 300), () async {
-          if(val.length <= 0) {
-          return;
-        }
-        setState(() {
-          _searching = true;
-        });
-        await addCards(val);
+          if (val.length <= 0) {
+            return;
+          }
+          setState(() {
+            _searching = true;
+          });
+          await addCards(val);
         });
       },
       onSubmitted: (val) async {
-        if(val.length <= 0) {
+        if (val.length <= 0) {
           return;
         }
         setState(() {
@@ -214,10 +204,8 @@ class _SearchState extends State<Search> {
           borderSide: BorderSide(color: accentColor),
         ),
         hintText: "Search...",
-        hintStyle: TextStyle(
-            fontFamily: "Poppins", color: Color.fromARGB(255, 168, 168, 168)),
-        contentPadding:
-            EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
+        hintStyle: TextStyle(fontFamily: "Poppins", color: Color.fromARGB(255, 168, 168, 168)),
+        contentPadding: EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
       ),
       style: TextStyle(color: Colors.white, fontFamily: "Poppins"),
     );

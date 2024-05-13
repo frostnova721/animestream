@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+//not that i plan to add light mode tho
 bool darkMode = true;
 
 Color accentColor =  Color(0xffCAF979);

@@ -152,6 +152,15 @@ class CurrentlyAiringResult {
   CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title});
 }
 
+class AnilistSearchResult {
+  final int id;
+  final int idMal;
+  final Map<String, String?> title;
+  final String cover;
+
+  AnilistSearchResult({required this.cover, required this.id, required this.idMal, required this.title});
+}
+
 class AnimeCardData {
   final int id;
   final Map<String, String?> title;

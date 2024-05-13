@@ -358,19 +358,22 @@ class _HomeState extends State<Home> {
       children: [
         Container(
           width: double.infinity,
-          padding: EdgeInsets.only(top: 40, left: 20, right: 20),
+          padding: EdgeInsets.only(top: 40, left: 10, right: 10),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 children: [
-                  Text(
-                    "Recently Watched",
-                    textAlign: TextAlign.left,
-                    style: TextStyle(
-                      color: textMainColor,
-                      fontFamily: "Rubik",
-                      fontSize: 20,
+                  Padding(
+                    padding: const EdgeInsets.only(left: 10, right: 10),
+                    child: Text(
+                      "Recently Watched",
+                      textAlign: TextAlign.left,
+                      style: TextStyle(
+                        color: textMainColor,
+                        fontFamily: "Rubik",
+                        fontSize: 20,
+                      ),
                     ),
                   ),
                   if (refreshing)
@@ -408,17 +411,20 @@ class _HomeState extends State<Home> {
   Container _titleAndList(String title, List<AnimeWidget> list) {
     return Container(
         width: double.infinity,
-        padding: EdgeInsets.only(top: 10, left: 20, right: 20),
+        padding: EdgeInsets.only(top: 10, left: 10, right: 10),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              title,
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                color: textMainColor,
-                fontFamily: "Rubik",
-                fontSize: 20,
+            Padding(
+              padding: const EdgeInsets.only(left: 10, right: 10),
+              child: Text(
+                title,
+                textAlign: TextAlign.left,
+                style: TextStyle(
+                  color: textMainColor,
+                  fontFamily: "Rubik",
+                  fontSize: 20,
+                ),
               ),
             ),
             dataLoaded

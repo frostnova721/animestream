@@ -4,7 +4,7 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:graphql/client.dart';
 
 class Anilist {
-  Future search(String query) async {
+  Future<List<AnilistSearchResult>> search(String query) async {
     final gquery = '''
             query {
                 Page(perPage: 10) {
@@ -16,7 +16,6 @@ class Anilist {
                             romaji
                         }
                         coverImage {
-                            extraLarge
                             large
                         }
                     }
@@ -25,7 +24,18 @@ class Anilist {
         ''';
     final data = await fetchQuery(gquery, RequestType.media);
 
-    return data;
+    List<AnilistSearchResult> searchResults = [];
+
+    data.forEach((item) {
+      final classified =
+          AnilistSearchResult(cover: item['coverImage']['large'], id: item['id'], idMal: item['idMal'], title: {
+        'english': item['title']['english'],
+        'romaji': item['title']['romaji'],
+      });
+      searchResults.add(classified);
+    });
+
+    return searchResults;
   }
 
   Future<List<CurrentlyAiringResult>> getCurrentlyAiringAnime() async {
@@ -49,15 +59,12 @@ class Anilist {
 
     final List<CurrentlyAiringResult> airingAnimes = [];
 
-    for(final airingAnime in data) {
+    for (final airingAnime in data) {
       airingAnimes.add(CurrentlyAiringResult(
-        cover: airingAnime['coverImage']['large'],
-        id: airingAnime['id'],
-        status: airingAnime['status'],
-        title: {
-          'english': airingAnime['title']['english'],
-          'romaji': airingAnime['title']['romaji']
-        }));
+          cover: airingAnime['coverImage']['large'],
+          id: airingAnime['id'],
+          status: airingAnime['status'],
+          title: {'english': airingAnime['title']['english'], 'romaji': airingAnime['title']['romaji']}));
     }
 
     return airingAnimes;
@@ -153,10 +160,7 @@ class Anilist {
         cover: trending['coverImage']['large'],
         genres: trending['genres'],
         rating: trending['averageScore'],
-        title: {
-          'english': trending['title']['english'],
-          'romaji': trending['title']['romaji']
-        },
+        title: {'english': trending['title']['english'], 'romaji': trending['title']['romaji']},
       );
       typed.add(data);
     }
@@ -168,8 +172,7 @@ class Anilist {
     GraphQLClient client;
     if (token != null)
       client = GraphQLClient(
-        link: HttpLink("https://graphql.anilist.co",
-            defaultHeaders: {'Authorization': 'Bearer $token'}),
+        link: HttpLink("https://graphql.anilist.co", defaultHeaders: {'Authorization': 'Bearer $token'}),
         cache: GraphQLCache(),
       );
     else

@@ -30,8 +30,8 @@ String getCurrentSeason() {
   }
 }
 
- MonthnumberToMonthName(
-    dynamic monthNumber,
+ Map<String, String>? MonthnumberToMonthName(
+    int? monthNumber,
   ) {
     if (monthNumber == null) return {'short': '', 'full': ''};
     if (monthNumber > 12 || monthNumber < 1) return null;

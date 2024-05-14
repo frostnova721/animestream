@@ -15,13 +15,13 @@ import 'package:flutter/services.dart';
 
 void main() async {
   try {
-  WidgetsFlutterBinding.ensureInitialized();
-  final Directory dir = await getApplicationDocumentsDirectory();
-  await Hive.initFlutter(dir.path);
-  await loadAndAssignSettings();
-  NotificationService().init();
-  runApp(const AnimeStream());
-  } catch(err) {
+    WidgetsFlutterBinding.ensureInitialized();
+    final Directory dir = await getApplicationDocumentsDirectory();
+    await Hive.initFlutter(dir.path);
+    await loadAndAssignSettings();
+    NotificationService().init();
+    runApp(const AnimeStream());
+  } catch (err) {
     Logger().writeLog(err.toString());
     print("logged the error to logs folder");
   }
@@ -36,16 +36,13 @@ Future<void> loadAndAssignSettings() async {
         backgroundSubColor = theme.backgroundSubColor,
       });
 
-  await Settings()
-      .getSettings()
-      .then((settings) => currentUserSettings = settings);
+  await Settings().getSettings().then((settings) => currentUserSettings = settings);
 }
 
 class AnimeStream extends StatefulWidget {
   const AnimeStream({super.key});
 
-  static final GlobalKey<NavigatorState> navigatorKey =
-      GlobalKey<NavigatorState>();
+  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   @override
   State<AnimeStream> createState() => _AnimeStreamState();
 }
@@ -55,20 +52,14 @@ class _AnimeStreamState extends State<AnimeStream> {
   void initState() {
     AwesomeNotifications().setListeners(
         onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-        onNotificationCreatedMethod:
-            NotificationController.onNotificationCreatedMethod,
-        onNotificationDisplayedMethod:
-            NotificationController.onNotificationDisplayedMethod,
-        onDismissActionReceivedMethod:
-            NotificationController.onDismissActionReceivedMethod);
+        onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
+        onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
+        onDismissActionReceivedMethod: NotificationController.onDismissActionReceivedMethod);
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-      statusBarColor: Colors.black.withOpacity(0.002),
-      systemNavigationBarColor: Colors.black.withOpacity(0.002)
-    ));
+        statusBarColor: Colors.black.withOpacity(0.002), systemNavigationBarColor: Colors.black.withOpacity(0.002)));
 
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge,
-        overlays: [SystemUiOverlay.top]);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
 
     super.initState();
   }
@@ -80,7 +71,9 @@ class _AnimeStreamState extends State<AnimeStream> {
       title: 'Animestream',
       theme: ThemeData(
         useMaterial3: true,
-        colorScheme: ColorScheme.fromSeed(seedColor: accentColor),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: accentColor,
+        ),
       ),
       home: const Home(),
       debugShowCheckedModeBanner: false,

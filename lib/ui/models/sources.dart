@@ -30,8 +30,8 @@ List<DropdownMenuEntry> getSourceDropdownList() {
         value: source,
         label: source,
         style: ButtonStyle(
-          foregroundColor: MaterialStatePropertyAll(Colors.white),
-          textStyle: MaterialStatePropertyAll(
+          foregroundColor: WidgetStatePropertyAll(Colors.white),
+          textStyle: WidgetStatePropertyAll(
             TextStyle(
               color:  textMainColor,
               fontFamily: "Rubik",

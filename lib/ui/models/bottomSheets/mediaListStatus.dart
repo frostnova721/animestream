@@ -49,8 +49,8 @@ class _MediaListStatusBottomSheetState
           value: element,
           label: element,
           style: ButtonStyle(
-            foregroundColor: MaterialStatePropertyAll(Colors.white),
-            textStyle: MaterialStatePropertyAll(
+            foregroundColor: WidgetStatePropertyAll(Colors.white),
+            textStyle: WidgetStatePropertyAll(
               TextStyle(
                 color: Colors.white,
                 fontFamily: "Rubik",
@@ -98,8 +98,8 @@ class _MediaListStatusBottomSheetState
                     if (value != initialSelection) selectedValue = value,
                   },
                   menuStyle: MenuStyle(
-                    backgroundColor: MaterialStatePropertyAll(backgroundColor),
-                    shape: MaterialStatePropertyAll(
+                    backgroundColor: WidgetStatePropertyAll(backgroundColor),
+                    shape: WidgetStatePropertyAll(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                         side: BorderSide(

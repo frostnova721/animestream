@@ -396,9 +396,9 @@ class _InfoState extends State<Info> {
               color: textMainColor,
             ),
             menuStyle: MenuStyle(
-              surfaceTintColor: MaterialStatePropertyAll(backgroundSubColor),
-              backgroundColor: MaterialStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
-              shape: MaterialStatePropertyAll(
+              surfaceTintColor: WidgetStatePropertyAll(backgroundSubColor),
+              backgroundColor: WidgetStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
+              shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(
                   side: BorderSide(color: textMainColor),
                   borderRadius: BorderRadius.circular(10),

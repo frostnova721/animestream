@@ -1,7 +1,6 @@
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class HomeDrawer extends StatefulWidget {
   final void Function(int) onItemTapped;

@@ -366,6 +366,37 @@ class AnilistQueries {
     return genrePopular;
   }
 
+  Future<List<AnimeCardData>> getAnimesWithGenresAndTags(List<String> genres, List<String> tags) async {
+    String genreString = "";
+    String tagString = "";
+    if(genres.isNotEmpty) {
+      genreString = "genre_in: " + genres.map((e) => '"$e"').toList().toString();
+    }
+    if(tags.isNotEmpty) {
+      tagString = "tag_in: " + tags.map((e) => '"$e"').toList().toString();
+    }
+
+     final query =
+        """{ Page(perPage: 30){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
+    final res = await Anilist().fetchQuery(query, RequestType.media);
+    List<AnimeCardData> results = [];
+    for (final item in res) {
+      results.add(
+        AnimeCardData(
+          cover: item['coverImage']['large'],
+          id: item['id'],
+          status: item['status'],
+          title: {
+            'english': item['title']['english'],
+            'romaji': item['title']['romaji'],
+          },
+        ),
+      );
+    }
+
+    return results;
+  }
+
   Future<List<AnimeCardData>> getGenreTrending(String genre) async {
     final query =
         """{ Page(perPage: 20){media(genre:"$genre", sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";

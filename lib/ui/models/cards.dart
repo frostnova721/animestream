@@ -151,43 +151,51 @@ Widget animeCard(String title, String imageUrl, {bool ongoing = false}) {
               margin: EdgeInsets.only(bottom: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                // image: DecorationImage(
-                //   image: NetworkImage(
-                //     imageUrl,
-                //   ),
-                // fit: BoxFit.cover
-                // )
               ),
-              clipBehavior: Clip.hardEdge,
+              // clipBehavior: Clip.hardEdge,
               height: 165,
               width: 110,
               child: ongoing
                   ? Stack(
                       children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                  boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
-                                  borderRadius: BorderRadius.circular(100),
-                                  color: Color.fromARGB(255, 46, 236, 52),
-                                  border: Border.all(color: Colors.black, width: 2)),
-                            ),
-                          ],
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          clipBehavior: Clip.hardEdge,
+                          child: CachedNetworkImage(
+                            imageUrl: imageUrl,
+                            fit: BoxFit.cover,
+                            height: 165,
+                            width: 110,
+                            fadeInCurve: Curves.easeIn,
+                            fadeInDuration: Duration(milliseconds: 200),
+                          ),
+                        ),
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
+                              borderRadius: BorderRadius.circular(100),
+                              color: Color.fromARGB(255, 40, 209, 46),
+                              border: Border.all(color: Colors.black, width: 2)),
                         ),
                       ],
                     )
-                  : CachedNetworkImage(
-                      imageUrl: imageUrl,
-                      fit: BoxFit.cover,
-                      height: 165,
-                      width: 110,
-                      fadeInCurve: Curves.easeIn,
-                      fadeInDuration: Duration(milliseconds: 200),
+                  : Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        height: 165,
+                        width: 110,
+                        fadeInCurve: Curves.easeIn,
+                        fadeInDuration: Duration(milliseconds: 200),
+                      ),
                     )
               //  Image.network(
               //     imageUrl,

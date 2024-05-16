@@ -1,16 +1,16 @@
+import 'dart:async';
+
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:better_player/better_player.dart';
-import 'package:better_player/src/video_player/video_player.dart';
-import 'package:better_player/src/controls/better_player_material_progress_bar.dart';
+import 'package:media_kit/media_kit.dart';
+import 'package:media_kit_video/media_kit_video.dart';
 import 'package:wakelock/wakelock.dart';
 
 class Controls extends StatefulWidget {
-  final BetterPlayerController controller;
+  final VideoController controller;
   final Widget bottomControls;
   final Widget topControls;
   final Map<String, dynamic> episode;
@@ -36,8 +36,7 @@ class Controls extends StatefulWidget {
 }
 
 class _ControlsState extends State<Controls> {
-  BetterPlayerController? _betterPlayerController;
-  VideoPlayerController? _controller;
+  late Player _controller;
 
   bool startedLoadingNext = false;
 
@@ -53,46 +52,52 @@ class _ControlsState extends State<Controls> {
 
     currentEpIndex = widget.episode['currentEpIndex'];
 
-    _betterPlayerController = widget.controller;
-    _controller = widget.controller.videoPlayerController;
+    _controller = widget.controller.player;
 
-    finalEpisodeReached = currentEpIndex+1 >= widget.episode['epLinks'].length;
+    finalEpisodeReached = currentEpIndex + 1 >= widget.episode['epLinks'].length;
 
     assignSettings();
 
-    _controller?.addListener(() async {
-      //managing preload and playing the video
+    _controller.stream.buffering.listen(
+      (isBuffering) => setState(() {
+        buffering = isBuffering;
+      }),
+    );
 
-      final duration = _controller!.value.duration?.inSeconds;
-      final currentPosition = _controller!.value.position.inSeconds;
+    _controller.stream.position.listen((data) async {
 
-      //set player postion to duration if greater than duration
-      if (duration != null && currentPosition > duration) {
-        await _controller!.seekTo(Duration(seconds: duration));
-        await _controller!.pause();
-      }
-
-      //play the loaded episode if equal to duration
-      if (!finalEpisodeReached && (duration != null && currentPosition == duration)) {
-        await playPreloadedEpisode();
-      }
-
-      final currentByTotal = _controller!.value.position.inSeconds / (_controller!.value.duration?.inSeconds ?? 1);
-      if (currentByTotal * 100 >= 75 && !preloadStarted) {
-        preloadNextEpisode();
-        widget.updateWatchProgress(currentEpIndex);
-      }
+      if(!initialSkipToStartDone && data.inMilliseconds > 0) skipToStart();
 
       //managing the UI updation
       if (mounted)
         setState(() {
-          int duration = _controller?.value.duration?.inSeconds ?? 0;
-          int val = _controller?.value.position.inSeconds ?? 0;
-          playPause = _betterPlayerController?.isPlaying() == true ? Icons.pause_rounded : Icons.play_arrow_rounded;
-          buffering = _controller!.value.isBuffering;
-          currentTime = getFormattedTime(val);
+          int duration = _controller.state.duration.inSeconds;
+          int val = _controller.state.position.inSeconds;
+          if (linkProgressValueWithPlayer) progressBarValue = _controller.state.position.inMilliseconds / 1000;
+          playPause = _controller.state.playing ? Icons.pause_rounded : Icons.play_arrow_rounded;
+          if (linkProgressValueWithPlayer) currentTime = getFormattedTime(val);
           maxTime = getFormattedTime(duration);
         });
+
+      final duration = _controller.state.duration.inSeconds;
+      final currentPosition = _controller.state.position.inSeconds;
+
+      //set player postion to duration if greater than duration
+      if (duration != 0 && currentPosition > duration) {
+        _controller.seek(Duration(seconds: duration));
+        await _controller.pause();
+      }
+
+      //play the loaded episode if equal to duration
+      if (!finalEpisodeReached && (currentPosition == duration) && duration != 0) {
+        await playPreloadedEpisode();
+      }
+
+      final currentByTotal = _controller.state.position.inSeconds / _controller.state.duration.inSeconds;
+      if (currentByTotal * 100 >= 75 && !preloadStarted) {
+        preloadNextEpisode();
+        widget.updateWatchProgress(currentEpIndex);
+      }
     });
   }
 
@@ -108,9 +113,34 @@ class _ControlsState extends State<Controls> {
   int? skipDuration;
   int? megaSkipDuration;
 
+  double progressBarValue = 0;
+
   bool buffering = false;
   bool isVisible = true;
   bool finalEpisodeReached = false;
+  bool linkProgressValueWithPlayer = true;
+  bool initialSkipToStartDone = false;
+
+  Timer? timer;
+
+  void skipToStart() async {
+    print("skipping...");
+    await _controller.seek(Duration.zero);
+    initialSkipToStartDone = true;
+  }
+
+  void onSliderChange(double val) {
+    setState(() {
+      progressBarValue = val;
+      currentTime = getFormattedTime(progressBarValue.toInt());
+    });
+    if (timer?.isActive ?? false) timer?.cancel();
+    timer = Timer(const Duration(milliseconds: 80), () async {
+      setState(() {
+        _controller.seek(Duration(seconds: val.toInt()));
+      });
+    });
+  }
 
   void updateCurrentEpIndex(int updatedIndex) {
     currentEpIndex = updatedIndex;
@@ -125,12 +155,12 @@ class _ControlsState extends State<Controls> {
   }
 
   Future<void> playPreloadedEpisode() async {
-    if(currentEpIndex+1 >= widget.episode['epLinks'].length) {
+    if (currentEpIndex + 1 >= widget.episode['epLinks'].length) {
       print("yes");
       return;
     }
     calledAutoNext = true;
-    _controller!.seekTo(Duration(seconds: 0));
+    _controller.seek(Duration(seconds: 0));
     if (preloadedSources.isNotEmpty) {
       currentEpIndex = currentEpIndex + 1;
       widget.refreshPage(currentEpIndex, preloadedSources[0]);
@@ -164,7 +194,7 @@ class _ControlsState extends State<Controls> {
     preloadStarted = true;
     preloadedSources = [];
     final index = currentEpIndex + 1 == widget.episode['epLinks'].length ? null : currentEpIndex + 1;
-    if(index == null) {
+    if (index == null) {
       print("On the final episode. No preloads available");
       return;
     }
@@ -182,7 +212,8 @@ class _ControlsState extends State<Controls> {
     preloadedSources = [];
     preloadStarted = false;
     calledAutoNext = false;
-    await _betterPlayerController!.setupDataSource(dataSourceConfig(url));
+    initialSkipToStartDone = false;
+    await _controller.open(Media(url));
   }
 
   Future getEpisodeSources(bool nextEpisode) async {
@@ -216,10 +247,14 @@ class _ControlsState extends State<Controls> {
   }
 
   void fastForward(int seekDuration) {
-    if((_controller!.value.position.inSeconds + seekDuration) > _controller!.value.duration!.inSeconds) {
-       _controller!.seekTo(Duration(seconds: _controller!.value.duration!.inSeconds));
+    if ((_controller.state.position.inSeconds + seekDuration) <= 0) {
+      _controller.seek(Duration(seconds: 0));
+    } else {
+      if ((_controller.state.position.inSeconds + seekDuration) > _controller.state.duration.inSeconds) {
+        _controller.seek(Duration(seconds: _controller.state.duration.inSeconds));
+      }
+      _controller.seek(Duration(seconds: _controller.state.position.inSeconds + seekDuration));
     }
-    _controller!.seekTo(Duration(seconds: _controller!.value.position.inSeconds + seekDuration));
   }
 
   @override
@@ -280,21 +315,33 @@ class _ControlsState extends State<Controls> {
                               height: 20,
                               child: IgnorePointer(
                                 ignoring: widget.isControlsLocked(),
-                                child: BetterPlayerMaterialVideoProgressBar(
-                                  _controller,
-                                  _betterPlayerController,
-                                  onDragStart: () {
-                                    widget.controller.pause();
-                                  },
-                                  onDragEnd: () {
-                                    widget.controller.play();
-                                  },
-                                  colors: BetterPlayerProgressColors(
-                                    playedColor: accentColor,
-                                    handleColor: widget.isControlsLocked() ? Colors.transparent : accentColor,
-                                    bufferedColor: Color.fromARGB(255, 167, 167, 167),
-                                    backgroundColor: Color.fromARGB(255, 94, 94, 94),
+                                child: Container(
+                                  child: SliderTheme(
+                                    data: SliderThemeData(
+                                        trackHeight: 1.3,
+                                        thumbColor: accentColor,
+                                        activeTrackColor: accentColor,
+                                        inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
+                                        secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
+                                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                                        trackShape: EdgeToEdgeTrackShape(),
+                                        overlayShape: SliderComponentShape.noThumb),
+                                    child: Slider(
+                                      value: progressBarValue,
+                                      secondaryTrackValue: _controller.state.buffer.inMilliseconds / 1000,
+                                      onChanged: onSliderChange,
+                                      min: 0,
+                                      max: _controller.state.duration.inMilliseconds / 1000,
+                                      onChangeStart: (value) {
+                                        linkProgressValueWithPlayer = false;
+                                      },
+                                      onChangeEnd: (value) {
+                                        linkProgressValueWithPlayer = true;
+                                      },
+                                    ),
                                   ),
+
+                                  //  Playerprogressbar(controller: _controller,)
                                 ),
                               ),
                             ),
@@ -447,15 +494,16 @@ class _ControlsState extends State<Controls> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
-                          if (widget.controller.isPlaying()!) {
+                          if (_controller.state.playing) {
                             playPause = Icons.play_arrow_rounded;
-                            widget.controller.pause();
+                            _controller.pause();
                             Wakelock.disable();
                           } else {
                             playPause = Icons.pause_rounded;
-                            widget.controller.play();
+                            _controller.play();
                             Wakelock.enable();
                           }
+                          setState(() {});
                         },
                         child: Icon(
                           playPause,
@@ -547,5 +595,22 @@ class _ControlsState extends State<Controls> {
         ],
       ),
     );
+  }
+}
+
+class EdgeToEdgeTrackShape extends RoundedRectSliderTrackShape {
+  // Override getPreferredRect to adjust the track's dimensions
+  @override
+  Rect getPreferredRect({
+    required RenderBox parentBox,
+    Offset offset = Offset.zero,
+    required SliderThemeData sliderTheme,
+    bool isEnabled = false,
+    bool isDiscrete = false,
+  }) {
+    final double trackHeight = sliderTheme.trackHeight ?? 2.0;
+    final double trackWidth = parentBox.size.width;
+    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    return Rect.fromLTWH(offset.dx, trackTop, trackWidth, trackHeight);
   }
 }

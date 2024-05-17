@@ -54,7 +54,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                           GestureDetector(
                             onLongPress: () => setState(() {
                               iconPressed = !iconPressed;
-                              floatingSnackBar(context, "WOOSH!!", duration: 1);
+                              showToast("wooosh!!");
                             }),
                             child: Container(
                               padding: EdgeInsets.only(right: 25),

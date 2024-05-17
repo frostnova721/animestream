@@ -9,7 +9,6 @@ import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:media_kit/media_kit.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/services.dart';
@@ -21,7 +20,6 @@ void main() async {
     await Hive.initFlutter(dir.path);
     await loadAndAssignSettings();
     NotificationService().init();
-    MediaKit.ensureInitialized();
     runApp(const AnimeStream());
   } catch (err) {
     Logger().writeLog(err.toString());

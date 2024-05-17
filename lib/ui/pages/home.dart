@@ -321,7 +321,7 @@ class _HomeState extends State<Home> {
                       Container(
                         padding: EdgeInsets.only(right: 15),
                         child: IconButton(
-                          onPressed: () {
+                          onPressed: () async {
                             Navigator.push(
                               context,
                               MaterialPageRoute(

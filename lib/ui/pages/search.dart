@@ -5,8 +5,6 @@ import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
-import 'info.dart';
-
 class Search extends StatefulWidget {
   final String searchedText;
   const Search({super.key, required this.searchedText});
@@ -16,8 +14,8 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  List<AnimeWidget> results = [];
-  List<AnimeWidget> exactMatches = [];
+  List<Card> results = [];
+  List<Card> exactMatches = [];
 
   TextEditingController textEditingController = TextEditingController();
 
@@ -32,10 +30,14 @@ class _SearchState extends State<Search> {
     searchResults.forEach((ele) {
       final image = ele.cover;
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
-      // final id = ele['id'];
-      results.add(AnimeWidget(widget: animeCard(title, image), info: {'id': ele.id}));
+      final id = ele.id;
+      results.add(
+          Cards(context: context).animeCard(id, title, image), 
+        );
       if (query.toLowerCase() == title.toLowerCase()) {
-        exactMatches.add(AnimeWidget(widget: animeCard(title, image), info: {'id': ele.id}));
+        exactMatches.add(
+         Cards(context: context).animeCard(id, title, image),
+           );
       }
     });
     setState(() {
@@ -136,19 +138,7 @@ class _SearchState extends State<Search> {
               itemCount: exactMatch ? exactMatches.length : results.length,
               itemBuilder: (context, index) {
                 return Container(
-                  child: GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => Info(
-                            id: exactMatch ? exactMatches[index].info['id'] : results[index].info['id'],
-                          ),
-                        ),
-                      );
-                    },
-                    child: exactMatch ? exactMatches[index].widget : results[index].widget,
-                  ),
+                  child: exactMatch ? exactMatches[index] : results[index],
                 );
               },
             ),

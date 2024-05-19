@@ -146,7 +146,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                       ),
                     ).then((value) {
                       widget.getWatched!();
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(true);
                     });
                   },
                   style: ElevatedButton.styleFrom(

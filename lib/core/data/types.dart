@@ -3,15 +3,17 @@ class SettingsModal {
   final int? megaSkipDuration;
   final bool? showErrors;
   final bool? receivePreReleases;
+  final bool? amoledBackground;
 
-  SettingsModal({this.megaSkipDuration, this.skipDuration, this.showErrors, this.receivePreReleases});
+  SettingsModal({this.megaSkipDuration, this.skipDuration, this.showErrors, this.receivePreReleases, this.amoledBackground});
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
     return SettingsModal(
       megaSkipDuration: map['megaSkipDuration'] ?? 85,
       skipDuration: map['skipDuration'] ?? 10,
       showErrors: map['showErrors'] ?? false,
-      receivePreReleases: map['receivePreReleases'] ?? false
+      receivePreReleases: map['receivePreReleases'] ?? false,
+      amoledBackground: map['amoledBackground'] ?? false,
     );
   }
 
@@ -21,6 +23,7 @@ class SettingsModal {
       'megaSkipDuration': megaSkipDuration,
       'showErrors': showErrors,
       'receivePreReleases': receivePreReleases,
+      'amoledBackground': amoledBackground
     };
   }
 }

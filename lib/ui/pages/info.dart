@@ -555,7 +555,6 @@ class _InfoState extends State<Info> {
               foundName = null;
             });
             final links = await getAnimeEpisodes(selectedSource, result['alias']);
-            print(links);
             if (mounted)
               setState(() {
                 paginate(links);
@@ -641,10 +640,11 @@ class _InfoState extends State<Info> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         border: Border.all(color: accentColor),
+        color: Colors.black,
         image: DecorationImage(
           image: data.banner.length > 1 ? NetworkImage(data.banner) : NetworkImage(data.cover),
           fit: BoxFit.cover,
-          opacity: 0.4,
+          opacity: 0.46,
         ),
       ),
       child: InkWell(
@@ -669,7 +669,11 @@ class _InfoState extends State<Info> {
                 getWatched: getWatched,
               );
             },
-          );
+          ).then((val) {
+            if (val == true) {
+              refreshListStatus("CURRENT", watched);
+            }
+          });
         },
         child:
             // Column(
@@ -775,7 +779,11 @@ class _InfoState extends State<Info> {
                   type: Type.watch,
                   getWatched: getWatched,
                 );
-              });
+              }).then((val) {
+            if (val == true) {
+              refreshListStatus("CURRENT", watched);
+            }
+          });
         },
         child: Container(
           // padding: EdgeInsets.all(10),
@@ -1155,7 +1163,7 @@ class _InfoState extends State<Info> {
                       final character = data.characters[index];
                       return Container(
                         width: 130,
-                        child: characterCard(
+                        child: Cards().characterCard(
                           character['name'],
                           character['role'],
                           character['image'],
@@ -1172,7 +1180,7 @@ class _InfoState extends State<Info> {
             child: Column(
               children: [
                 _categoryTitle('Related'),
-                _buildRecAndRel(data.related, false),
+                _buildRecAndRel(data.related, false, context),
               ],
             ),
           ),
@@ -1181,7 +1189,7 @@ class _InfoState extends State<Info> {
             child: Column(
               children: [
                 _categoryTitle('Recommended'),
-                _buildRecAndRel(data.recommended, true),
+                _buildRecAndRel(data.recommended, true, context),
               ],
             ),
           ),
@@ -1204,7 +1212,7 @@ class _InfoState extends State<Info> {
     );
   }
 
-  SizedBox _buildRecAndRel(List data, bool recommended) {
+  SizedBox _buildRecAndRel(List data, bool recommended, BuildContext context) {
     if (data.length == 0)
       return SizedBox(
         height: 240,
@@ -1231,23 +1239,16 @@ class _InfoState extends State<Info> {
               if (item.type.toLowerCase() != "anime") {
                 return floatingSnackBar(context, 'Mangas/Novels arent supported');
               }
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Info(
-                    id: item.id,
-                  ),
-                ),
-              );
             },
             child: Container(
                 width: 130,
                 child: recommended
-                    ? animeCard(
+                    ? Cards(context: context).animeCard(
+                        item.id,
                         item.title['english'] ?? item.title['romaji'],
                         item.cover,
                       )
-                    : characterCard(
+                    : Cards().characterCard(
                         item.title['english'] ?? item.title['romaji'],
                         recommended ? item.type : item.relationType,
                         item.cover,

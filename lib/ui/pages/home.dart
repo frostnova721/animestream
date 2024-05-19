@@ -8,7 +8,6 @@ import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/drawer.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/Discover.dart';
-import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -42,8 +41,7 @@ class _HomeState extends State<Home> {
     checkForUpdates().then(
       (value) {
         if (value != null) {
-          showUpdateSheet(
-              context, value.description, value.downloadLink, value.preRelease);
+          showUpdateSheet(context, value.description, value.downloadLink, value.preRelease);
         }
       },
     );
@@ -55,8 +53,8 @@ class _HomeState extends State<Home> {
 
   TextEditingController textEditingController = TextEditingController();
 
-  List<AnimeWidget> recentlyWatched = [];
-  List<AnimeWidget> currentlyAiring = [];
+  List<Card> recentlyWatched = [];
+  List<Card> currentlyAiring = [];
 
   bool dataLoaded = false;
   bool error = false;
@@ -83,32 +81,33 @@ class _HomeState extends State<Home> {
   Future<void> getLists({String? userName}) async {
     try {
       recentlyWatched = [];
-      List<UserAnimeListItem> watched =
-          await getWatchedList(userName: userName);
+      List<UserAnimeListItem> watched = await getWatchedList(userName: userName);
       if (watched.length > 40) watched = watched.sublist(0, 40);
       watched.forEach((item) {
-        final title = item.title['title'] ??
-            item.title['english'] ??
-            item.title['romaji'] ??
-            '';
+        final title = item.title['title'] ?? item.title['english'] ?? item.title['romaji'] ?? '';
         recentlyWatched.add(
-          AnimeWidget(
-            widget: animeCard(title, item.coverImage),
-            info: {'id': item.id},
+          Cards(context: context).animeCard(
+            item.id,
+            title,
+            item.coverImage,
           ),
         );
       });
 
-      final List<CurrentlyAiringResult> currentlyAiringResponse =
-          await Anilist().getCurrentlyAiringAnime();
+      final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
       if (currentlyAiringResponse.length == 0) return;
 
       currentlyAiring = [];
       currentlyAiringResponse.sublist(0, 20).forEach((e) {
         final title = e.title['english'] ?? e.title['romaji'] ?? '';
         final image = e.cover;
-        currentlyAiring
-            .add(AnimeWidget(widget: animeCard(title, image,), info: {'id': e.id}));
+        currentlyAiring.add(
+          Cards(context: context).animeCard(
+            e.id,
+            title,
+            image,
+          ),
+        );
       });
       if (mounted)
         setState(() {
@@ -116,8 +115,7 @@ class _HomeState extends State<Home> {
         });
     } catch (err) {
       print(err);
-      if (currentUserSettings!.showErrors != null &&
-          currentUserSettings!.showErrors!)
+      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
         floatingSnackBar(context, err.toString());
       if (mounted)
         setState(() {
@@ -165,8 +163,7 @@ class _HomeState extends State<Home> {
     popInvoked = false;
   }
 
-  RefreshController refreshController =
-      RefreshController(initialRefresh: false);
+  RefreshController refreshController = RefreshController(initialRefresh: false);
 
   final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
@@ -197,8 +194,7 @@ class _HomeState extends State<Home> {
             color: accentColor,
             backgroundColor: backgroundSubColor,
           ),
-          physics:
-              ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
+          physics: ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
           child: SingleChildScrollView(
             physics: NeverScrollableScrollPhysics(),
             child: Padding(
@@ -244,29 +240,25 @@ class _HomeState extends State<Home> {
                               ],
                             ),
                             Container(
-                              padding:
-                                  EdgeInsets.only(left: 10, right: 0, top: 10),
+                              padding: EdgeInsets.only(left: 10, right: 0, top: 10),
                               width: 300,
                               child: TextField(
                                 controller: textEditingController,
                                 autocorrect: false,
                                 maxLines: 1,
                                 onSubmitted: (String input) {
-                                  textEditingController.value =
-                                      TextEditingValue.empty;
+                                  textEditingController.value = TextEditingValue.empty;
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) =>
-                                          Search(searchedText: input),
+                                      builder: (context) => Search(searchedText: input),
                                     ),
                                   ).then(
                                     (value) async {
                                       setState(() {
                                         refreshing = true;
                                       });
-                                      await getLists(
-                                          userName: userProfile?.name ?? null);
+                                      await getLists(userName: userProfile?.name ?? null);
                                       if (mounted)
                                         setState(() {
                                           refreshing = false;
@@ -291,8 +283,7 @@ class _HomeState extends State<Home> {
                                     fontSize: 16,
                                   ),
                                   focusColor: accentColor,
-                                  contentPadding: EdgeInsets.only(
-                                      top: 5, bottom: 5, left: 20, right: 20),
+                                  contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
                                   focusedBorder: OutlineInputBorder(
                                     borderSide: BorderSide(
                                       color: accentColor,
@@ -403,60 +394,59 @@ class _HomeState extends State<Home> {
         ),
         _accentedHomeDivider(),
         _titleAndList("Currently Airing", currentlyAiring),
-
       ],
     );
   }
 
-  Container _titleAndList(String title, List<AnimeWidget> list) {
+  Container _titleAndList(String title, List<Card> list) {
     return Container(
-        width: double.infinity,
-        padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(left: 10, right: 10),
-              child: Text(
-                title,
-                textAlign: TextAlign.left,
-                style: TextStyle(
-                  color: textMainColor,
-                  fontFamily: "Rubik",
-                  fontSize: 20,
-                ),
+      width: double.infinity,
+      padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Text(
+              title,
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: textMainColor,
+                fontFamily: "Rubik",
+                fontSize: 20,
               ),
             ),
-            dataLoaded
-                ? _cardListMaker(list)
-                : Container(
-                    height: 250,
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: accentColor,
-                      ),
+          ),
+          dataLoaded
+              ? _cardListMaker(list)
+              : Container(
+                  height: 250,
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: accentColor,
                     ),
                   ),
-          ],
-        ),
-      );
+                ),
+        ],
+      ),
+    );
   }
 
   /** just a division between the items in homescreen */
   Container _accentedHomeDivider() {
     return Container(
-        margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-        height: 5,
-        decoration: BoxDecoration(
-          color: accentColor.withOpacity(0.4),
-          borderRadius: BorderRadius.circular(
-            50,
-          ),
+      margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
+      height: 5,
+      decoration: BoxDecoration(
+        color: accentColor.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(
+          50,
         ),
-      );
+      ),
+    );
   }
 
-  Column _cardListMaker(List<AnimeWidget> widgetList) {
+  Column _cardListMaker(List<Card> widgetList) {
     return Column(
       children: [
         widgetList.length > 0
@@ -471,30 +461,30 @@ class _HomeState extends State<Home> {
                     return Container(
                       alignment: Alignment.centerLeft,
                       width: 120,
-                      child: GestureDetector(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  Info(id: widgetList[index].info['id']),
-                            ),
-                          ).then(
-                            (value) async {
-                              setState(() {
-                                refreshing = true;
-                              });
-                              await getLists(
-                                  userName: userProfile?.name ?? null);
-                              if (mounted)
-                                setState(() {
-                                  refreshing = false;
-                                });
-                            },
-                          );
-                        },
-                        child: widgetList[index].widget,
-                      ),
+                      // child: GestureDetector(
+                      //   onTap: () {
+                      //     Navigator.push(
+                      //       context,
+                      //       MaterialPageRoute(
+                      //         builder: (context) =>
+                      //             Info(id: widgetList[index].info['id']),
+                      //       ),
+                      //     ).then(
+                      //       (value) async {
+                      //         setState(() {
+                      //           refreshing = true;
+                      //         });
+                      //         await getLists(
+                      //             userName: userProfile?.name ?? null);
+                      //         if (mounted)
+                      //           setState(() {
+                      //             refreshing = false;
+                      //           });
+                      //       },
+                      //     );
+                      //   },
+                      child: widgetList[index],
+                      // ),
                     );
                   },
                 ),

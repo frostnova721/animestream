@@ -3,7 +3,6 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -22,13 +21,13 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     super.initState();
   }
 
-  List<AnimeWidget> watchingList = [];
-  List<AnimeWidget> plannedList = [];
-  List<AnimeWidget> completedList = [];
-  List<AnimeWidget> droppedList = [];
+  List<Card> watchingList = [];
+  List<Card> plannedList = [];
+  List<Card> completedList = [];
+  List<Card> droppedList = [];
   List<UserAnimeList> rawAnimeList = [];
 
-  List<AnimeWidget> getSelectedTabView(int tabIndex) {
+  List<Card> getSelectedTabView(int tabIndex) {
     switch (tabIndex) {
       case 0:
         return watchingList;
@@ -54,50 +53,46 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     list.forEach((element) {
       if (element.name == "Watching") {
         element.list.forEach((item) {
-          watchingList.add(AnimeWidget(
-              widget: animeCard(
-                item.title['english'] ?? item.title['romaji'] ?? '',
-                item.coverImage,
-              ),
-              info: {
-                'id': item.id,
-              }));
+          watchingList.add(
+            Cards(context: context).animeCard(
+              item.id,
+              item.title['english'] ?? item.title['romaji'] ?? '',
+              item.coverImage,
+            ),
+          );
         });
       }
       if (element.name == "Planning") {
         element.list.forEach((item) {
-          plannedList.add(AnimeWidget(
-              widget: animeCard(
-                item.title['english'] ?? item.title['romaji'] ?? '',
-                item.coverImage,
-              ),
-              info: {
-                'id': item.id,
-              }));
+          plannedList.add(
+            Cards(context: context).animeCard(
+              item.id,
+              item.title['english'] ?? item.title['romaji'] ?? '',
+              item.coverImage,
+            ),
+          );
         });
       }
       if (element.name == "Dropped") {
         element.list.forEach((item) {
-          droppedList.add(AnimeWidget(
-              widget: animeCard(
-                item.title['english'] ?? item.title['romaji'] ?? '',
-                item.coverImage,
-              ),
-              info: {
-                'id': item.id,
-              }));
+          droppedList.add(
+            Cards(context: context).animeCard(
+              item.id,
+              item.title['english'] ?? item.title['romaji'] ?? '',
+              item.coverImage,
+            ),
+          );
         });
       }
       if (element.name == "Completed") {
         element.list.forEach((item) {
-          completedList.add(AnimeWidget(
-              widget: animeCard(
-                item.title['english'] ?? item.title['romaji'] ?? '',
-                item.coverImage,
-              ),
-              info: {
-                'id': item.id,
-              }));
+          completedList.add(
+            Cards(context: context).animeCard(
+              item.id,
+              item.title['english'] ?? item.title['romaji'] ?? '',
+              item.coverImage,
+            ),
+          );
         });
       }
     });
@@ -122,10 +117,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
             (element) {
               element.list.sort(
                 (a, b) => a.title['english'] != null
-                    ? a.title['english']!
-                        .compareTo(b.title['english'] ?? b.title['romaji']!)
-                    : a.title['romaji']!
-                        .compareTo(b.title['english'] ?? b.title['romaji']!),
+                    ? a.title['english']!.compareTo(b.title['english'] ?? b.title['romaji']!)
+                    : a.title['romaji']!.compareTo(b.title['english'] ?? b.title['romaji']!),
               );
             },
           );
@@ -178,9 +171,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: EdgeInsets.only(
-            top: MediaQuery.of(context).padding.top,
-            left: MediaQuery.of(context).padding.left),
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: MediaQuery.of(context).padding.left),
         child: dataLoaded
             ? Column(
                 children: [
@@ -240,8 +231,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       isScrollable: true,
                       controller: tabController,
                       indicatorColor: accentColor,
-                      overlayColor: WidgetStatePropertyAll(
-                          accentColor.withOpacity(0.3)),
+                      overlayColor: WidgetStatePropertyAll(accentColor.withOpacity(0.3)),
                       labelColor: textMainColor,
                       unselectedLabelColor: textSubColor,
                       labelStyle: TextStyle(
@@ -298,8 +288,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           )
                         : TabBarView(
                             controller: tabController,
-                            children: List.generate(tabController.length,
-                                (index) => itemGrid(context, index))),
+                            children: List.generate(tabController.length, (index) => itemGrid(context, index))),
                   ),
                   // )
                 ],
@@ -320,42 +309,28 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       onTap: () => sort(sortType),
       child: Text(
         label,
-        style: TextStyle(
-            color: textMainColor, fontFamily: "NotoSans-Bold", fontSize: 16),
+        style: TextStyle(color: textMainColor, fontFamily: "NotoSans-Bold", fontSize: 16),
       ),
     );
   }
 
   Container itemGrid(BuildContext context, int currentTabIndex) {
     return Container(
-      padding: EdgeInsets.only(left: 10, right: 10,),
+      padding: EdgeInsets.only(
+        left: 10,
+        right: 10,
+      ),
       child: GridView.builder(
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount:
-              MediaQuery.of(context).orientation == Orientation.portrait
-                  ? 3
-                  : 6,
-          childAspectRatio: 120 / 220,
-          mainAxisSpacing: 10
-        ),
+            crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+            childAspectRatio: 120 / 220,
+            mainAxisSpacing: 10),
         padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
         // shrinkWrap: true,
         itemCount: getSelectedTabView(currentTabIndex).length,
         itemBuilder: (context, index) {
-          return GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => Info(
-                    id: getSelectedTabView(currentTabIndex)[index].info['id'],
-                  ),
-                ),
-              ).then((value) => getAnimeList());
-            },
-            child: Container(
-              child: getSelectedTabView(currentTabIndex)[index].widget,
-            ),
+          return Container(
+            child: getSelectedTabView(currentTabIndex)[index],
           );
         },
       ),

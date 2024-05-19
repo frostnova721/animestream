@@ -13,7 +13,7 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class Discover extends StatefulWidget {
-  final List currentSeason;
+  final List<Card> currentSeason;
   const Discover({super.key, required this.currentSeason});
 
   @override
@@ -30,10 +30,10 @@ class _DiscoverState extends State<Discover> {
     getRecommended();
   }
 
-  List thisSeason = [];
+  List<Card> thisSeason = [];
   List<TrendingResult> trendingList = [];
-  List<AnimeWidget> recentlyUpdatedList = [];
-  List<AnimeWidget> recommendedList = [];
+  List<Card> recentlyUpdatedList = [];
+  List<Card> recommendedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
@@ -59,9 +59,10 @@ class _DiscoverState extends State<Discover> {
     final list = await AnilistQueries().getRecommendedAnimes();
     for (final item in list) {
       recommendedList.add(
-        AnimeWidget(
-          widget: animeCard(item.title['english'] ?? item.title['romaji'] ?? '', item.cover),
-          info: {'id': item.id},
+        Cards(context: context).animeCard(
+          item.id,
+          item.title['english'] ?? item.title['romaji'] ?? '',
+          item.cover,
         ),
       );
     }
@@ -79,9 +80,10 @@ class _DiscoverState extends State<Discover> {
       if (!ids.contains(elem.id)) {
         ids.add(elem.id);
         recentlyUpdatedList.add(
-          AnimeWidget(
-            widget: animeCard(elem.title['english'] ?? elem.title['romaji'] ?? '', elem.cover),
-            info: {'id': elem.id},
+          Cards(context: context).animeCard(
+            elem.id,
+            elem.title['english'] ?? elem.title['romaji'] ?? '',
+            elem.cover,
           ),
         );
       }
@@ -352,37 +354,26 @@ class _DiscoverState extends State<Discover> {
         });
   }
 
-  Container _scrollList(List<dynamic> list) {
+  Container _scrollList(List<Card> list) {
     return Container(
-        height: 230,
-        padding: EdgeInsets.only(left: 10, right: 10),
-        child: list.length > 0
-            ? ListView.builder(
-                padding: EdgeInsets.zero,
-                itemCount: list.length,
-                scrollDirection: Axis.horizontal,
-                itemBuilder: (context, index) => GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => Info(
-                          id: list[index].info['id'],
-                        ),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    width: 125,
-                    child: list[index].widget,
-                  ),
-                ),
-              )
-            : Center(
-                child: CircularProgressIndicator(
-                  color: accentColor,
-                ),
-              ));
+      height: 230,
+      padding: EdgeInsets.only(left: 10, right: 10),
+      child: list.length > 0
+          ? ListView.builder(
+              padding: EdgeInsets.zero,
+              itemCount: list.length,
+              scrollDirection: Axis.horizontal,
+              itemBuilder: (context, index) => Container(
+                width: 125,
+                child: list[index],
+              ),
+            )
+          : Center(
+              child: CircularProgressIndicator(
+                color: accentColor,
+              ),
+            ),
+    );
   }
 
   Container _itemTitle(String title) {

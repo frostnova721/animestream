@@ -26,7 +26,7 @@ final monochrome = AnimeStreamTheme(
 
 final hotPink = AnimeStreamTheme(
   accentColor: Color(0xffFF69B4),
-  backgroundColor: Colors.black,
+  backgroundColor: Color.fromARGB(255, 24, 24, 24),
   backgroundSubColor: Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
@@ -43,7 +43,7 @@ final hotPink = AnimeStreamTheme(
 /**Cold Purple accent */
 final coldPurple = AnimeStreamTheme(
   accentColor: Color(0xff9D8ABF),
-  backgroundColor: Colors.black,
+  backgroundColor: Color.fromARGB(255, 24, 24, 24),
    backgroundSubColor: const Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),

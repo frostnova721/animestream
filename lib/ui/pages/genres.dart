@@ -2,7 +2,6 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -27,9 +26,14 @@ class _GenresPageState extends State<GenresPage> {
       }
       final res = await AnilistQueries().getAnimesWithGenresAndTags(selectedGenres, selectedTags);
       res.forEach((e) {
-        searchResultsAsWidgets.add(AnimeWidget(
-            widget: animeCard(e.title['english'] ?? e.title['romaji'] ?? '', e.cover, ongoing: e.status == "RELEASING"),
-            info: {'id': e.id}));
+        searchResultsAsWidgets.add(
+          Cards(context: context).animeCard(
+            e.id,
+            e.title['english'] ?? e.title['romaji'] ?? '',
+            e.cover,
+            ongoing: e.status == "RELEASING",
+          ),
+        );
       });
       setState(() {
         _searching = false;
@@ -46,7 +50,7 @@ class _GenresPageState extends State<GenresPage> {
   List<String> selectedGenres = [];
   List<String> selectedTags = [];
 
-  List<AnimeWidget> searchResultsAsWidgets = [];
+  List<Card> searchResultsAsWidgets = [];
 
   bool _searching = false;
 
@@ -195,17 +199,8 @@ class _GenresPageState extends State<GenresPage> {
                                 mainAxisSpacing: 10),
                             shrinkWrap: true,
                             itemCount: searchResultsAsWidgets.length,
-                            itemBuilder: (context, index) => GestureDetector(
-                              onTap: () => Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => Info(
-                                    id: searchResultsAsWidgets[index].info['id'],
-                                  ),
-                                ),
-                              ),
-                              child: Container(
-                                child: searchResultsAsWidgets[index].widget,
-                              ),
+                            itemBuilder: (context, index) => Container(
+                              child: searchResultsAsWidgets[index],
                             ),
                           ),
               ),

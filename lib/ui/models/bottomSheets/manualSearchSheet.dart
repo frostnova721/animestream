@@ -1,4 +1,3 @@
-import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -23,7 +22,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
   TextEditingController searchBarController = TextEditingController();
   FocusNode searchBarFocusNode = FocusNode();
   bool searching = false;
-  List<AnimeWidget> searchResults = [];
+  List<Widget> searchResults = [];
 
   Future<void> search(String searchTerm) async {
     if (mounted)
@@ -35,40 +34,40 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
       final res = await searchInSource(widget.source, searchTerm);
       for (final item in res) {
         searchResults.add(
-          AnimeWidget(
-            widget: Container(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    height: 140,
-                    width: 100,
-                    margin: EdgeInsets.only(bottom: 5),
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                    child: Image.network(
-                      item['imageUrl'] ?? '',
-                      fit: BoxFit.cover,
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(item),
+            child: Container(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
                       height: 140,
                       width: 100,
+                      margin: EdgeInsets.only(bottom: 5),
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                      child: Image.network(
+                        item['imageUrl'] ?? '',
+                        fit: BoxFit.cover,
+                        height: 140,
+                        width: 100,
+                      ),
                     ),
-                  ),
-                  Text(
-                    item['name'] ?? item['alias'] ?? '',
-                    style: TextStyle(
-                      color: textMainColor,
-                      fontFamily: 'NotoSans',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    maxLines: 2,
-                    textAlign: TextAlign.left,
-                  )
-                ],
+                    Text(
+                      item['name'] ?? item['alias'] ?? '',
+                      style: TextStyle(
+                        color: textMainColor,
+                        fontFamily: 'NotoSans',
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      maxLines: 2,
+                      textAlign: TextAlign.left,
+                    )
+                  ],
+                ),
               ),
-            ),
-            info: item,
           ),
         );
       }
@@ -146,12 +145,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                         shrinkWrap: true,
                         padding: EdgeInsets.only(left: 5, right: 5, top: 10),
                         itemBuilder: (context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).pop(searchResults[index].info);
-                            },
-                            child: searchResults[index].widget,
-                          );
+                          return searchResults[index];
                         },
                       ),
           )

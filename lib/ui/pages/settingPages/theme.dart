@@ -1,4 +1,7 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
+import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -24,6 +27,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
     getTheme().then((value) => setState(() {
           currentTheme = value;
         }));
+    AMOLEDBackgroundEnabled = currentUserSettings?.amoledBackground ?? false;
   }
 
   applyTheme(AnimeStreamTheme theme) async {
@@ -32,6 +36,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
   }
 
   AnimeStreamTheme? currentTheme;
+
+  late bool AMOLEDBackgroundEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -50,11 +56,57 @@ class _ThemeSettingState extends State<ThemeSetting> {
                         _themeItem("Dark Ash - Lime", lime),
                         _themeItem("Monochrome", monochrome),
                         _themeItem("Hot Pink", hotPink),
-                        _themeItem("Cold Purple", coldPurple)
+                        _themeItem("Cold Purple", coldPurple),
+                        SizedBox(
+                          height: 50,
+                        ),
+                        _toggleItem("AMOLED Background", AMOLEDBackgroundEnabled, () {
+                          setState(() {
+                            AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
+                            Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
+                            floatingSnackBar(context, "All set! restart the app to apply the theme");
+                          });
+                        }, description: "full black background"),
                       ],
                     )
                   : Container(),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  InkWell _toggleItem(String label, bool value, void Function() onTapFunction, {String? description = null}) {
+    return InkWell(
+      onTap: onTapFunction,
+      child: Container(
+        padding: EdgeInsets.only(left: 10, right: 10, top: 5, bottom: 5),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: textStyle(),
+                ),
+                if (description != null)
+                  Text(
+                    description,
+                    style: textStyle().copyWith(color: textSubColor, fontSize: 12),
+                  ),
+              ],
+            ),
+            Switch(
+              value: value,
+              onChanged: (val) {
+                onTapFunction();
+              },
+              activeColor: backgroundColor,
+              activeTrackColor: accentColor,
+            )
           ],
         ),
       ),
@@ -76,9 +128,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
       child: AnimatedContainer(
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.only(left: 10, right: 10),
-        color: currentTheme?.accentColor == theme.accentColor
-            ? currentTheme?.backgroundSubColor
-            : Colors.transparent,
+        color: currentTheme?.accentColor == theme.accentColor ? currentTheme?.backgroundSubColor : Colors.transparent,
         height: 60,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,

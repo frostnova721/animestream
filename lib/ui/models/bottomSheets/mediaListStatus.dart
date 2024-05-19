@@ -291,12 +291,11 @@ class _MediaListStatusBottomSheetState
                           id: widget.id,
                           status: assignItemEnum(selectedValue ?? initialSelection!),
                           progress: progress,
-                        )
-                            .then((value) {
+                        ).then((value) {
+                              floatingSnackBar(context, "The list has been updated!");
                           if (mounted) {
                             Navigator.of(context).pop();
                           }
-                          floatingSnackBar(context, "The list has been updated!");
                         });
                         initialSelection = selectedValue;
                         widget.refreshListStatus(selectedValue ?? initialSelection!, progress);

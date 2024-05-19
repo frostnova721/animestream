@@ -28,15 +28,16 @@ void main() async {
 }
 
 Future<void> loadAndAssignSettings() async {
+
+  await Settings().getSettings().then((settings) => currentUserSettings = settings);
+
   await getTheme().then((theme) => {
         accentColor = theme.accentColor,
         textMainColor = theme.textMainColor,
         textSubColor = theme.textSubColor,
-        backgroundColor = theme.backgroundColor,
+        backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.backgroundColor,
         backgroundSubColor = theme.backgroundSubColor,
       });
-
-  await Settings().getSettings().then((settings) => currentUserSettings = settings);
 }
 
 class AnimeStream extends StatefulWidget {

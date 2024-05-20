@@ -52,6 +52,8 @@ class _ControlsState extends State<Controls> {
     super.initState();
 
     Wakelock.enable();
+    wakelockEnabled = true;
+    debugPrint("wakelock enabled");
 
     currentEpIndex = widget.episode['currentEpIndex'];
 
@@ -63,15 +65,31 @@ class _ControlsState extends State<Controls> {
 
     _controller.addListener(() async {
 
+      if(isVisible) {
+        widget.hideControlsOnTimeout();
+        isVisible = false;
+      }
+
       //managing the UI updation
       if (mounted)
         setState(() {
-          int duration = _controller.value.duration!.inSeconds;
+          int duration = _controller.value.duration?.inSeconds ?? 0;
           int val = _controller.value.position.inSeconds;
           playPause = _controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded;
           currentTime = getFormattedTime(val);
           maxTime = getFormattedTime(duration);
+          buffering = _controller.value.isBuffering;
         });
+
+        if(_controller.value.isPlaying && !wakelockEnabled) {
+          Wakelock.enable();
+          wakelockEnabled = true;
+          debugPrint("wakelock enabled");
+        } else if(!_controller.value.isPlaying && wakelockEnabled) {
+          Wakelock.disable();
+          wakelockEnabled = false;
+          debugPrint("wakelock disabled");
+        }
 
       final duration = _controller.value.duration?.inSeconds;
       final currentPosition = _controller.value.position.inSeconds;
@@ -87,7 +105,7 @@ class _ControlsState extends State<Controls> {
         await playPreloadedEpisode();
       }
 
-      final currentByTotal = _controller.value.position.inSeconds / _controller.value.duration!.inSeconds;
+      final currentByTotal = _controller.value.position.inSeconds / (_controller.value.duration?.inSeconds ?? 0);
       if (currentByTotal * 100 >= 75 && !preloadStarted) {
         preloadNextEpisode();
         widget.updateWatchProgress(currentEpIndex);
@@ -110,6 +128,7 @@ class _ControlsState extends State<Controls> {
   bool buffering = false;
   bool isVisible = true;
   bool finalEpisodeReached = false;
+  bool wakelockEnabled = false;
   // bool linkProgressValueWithPlayer = true;
 
   Timer? timer;
@@ -473,11 +492,9 @@ class _ControlsState extends State<Controls> {
                           if (_controller.value.isPlaying) {
                             playPause = Icons.play_arrow_rounded;
                             _controller.pause();
-                            Wakelock.disable();
                           } else {
                             playPause = Icons.pause_rounded;
                             _controller.play();
-                            Wakelock.enable();
                           }
                           setState(() {});
                         },

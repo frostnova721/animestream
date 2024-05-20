@@ -26,6 +26,10 @@ class Anilist {
 
     List<AnilistSearchResult> searchResults = [];
 
+    if(data.length == 0) {
+      return [];
+    }
+
     data.forEach((item) {
       final classified =
           AnilistSearchResult(cover: item['coverImage']['large'], id: item['id'], idMal: item['idMal'], title: {

@@ -4,8 +4,9 @@ class SettingsModal {
   final bool? showErrors;
   final bool? receivePreReleases;
   final bool? amoledBackground;
+  final String? preferredQuality; 
 
-  SettingsModal({this.megaSkipDuration, this.skipDuration, this.showErrors, this.receivePreReleases, this.amoledBackground});
+  SettingsModal({this.megaSkipDuration, this.skipDuration, this.showErrors, this.receivePreReleases, this.amoledBackground, this.preferredQuality});
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
     return SettingsModal(
@@ -14,6 +15,7 @@ class SettingsModal {
       showErrors: map['showErrors'] ?? false,
       receivePreReleases: map['receivePreReleases'] ?? false,
       amoledBackground: map['amoledBackground'] ?? false,
+      preferredQuality: map['preferredQuality'] ?? "720p"
     );
   }
 
@@ -23,7 +25,8 @@ class SettingsModal {
       'megaSkipDuration': megaSkipDuration,
       'showErrors': showErrors,
       'receivePreReleases': receivePreReleases,
-      'amoledBackground': amoledBackground
+      'amoledBackground': amoledBackground,
+      'preferredQuality': preferredQuality,
     };
   }
 }

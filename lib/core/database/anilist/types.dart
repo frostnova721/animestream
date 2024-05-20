@@ -154,7 +154,7 @@ class CurrentlyAiringResult {
 
 class AnilistSearchResult {
   final int id;
-  final int idMal;
+  final int? idMal;
   final Map<String, String?> title;
   final String cover;
 

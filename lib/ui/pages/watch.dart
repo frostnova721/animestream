@@ -73,7 +73,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
     //try to get the qualities. play with the default link if qualities arent available
     try {
-      getQualities().then((val) => changeQuality(qualities[0]['link'], null));
+      getQualities().then((val) {
+        print(qualities);
+        final preferredOne = qualities.where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720")).toList();
+        changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
+    });
     } catch (err) {
       print(err.toString());
       if (currentUserSettings?.showErrors ?? false) {
@@ -201,7 +205,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             refreshPage: refreshPage,
                             updateWatchProgress: updateWatchProgress,
                             isControlsLocked: isControlsLocked,
-                            hideControlsOnTimeout: hideControlsOnTimeout)
+                            hideControlsOnTimeout: hideControlsOnTimeout,
+                            )
                         : Container(),
                   ),
                 ],

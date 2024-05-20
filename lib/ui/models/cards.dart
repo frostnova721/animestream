@@ -5,8 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class Cards {
-
- /**only pass the context if using the animeCard method! */
+  /**only pass the context if using the animeCard method! */
   final BuildContext? context;
 
   Cards({this.context});
@@ -139,7 +138,11 @@ class Cards {
 
   /**Builds a card for anime (optional navigation) */
   Card animeCard(int id, String title, String imageUrl,
-      {bool ongoing = false, bool shouldNavigate = true, bool isAnime = true, String? subText = null}) {
+      {bool ongoing = false,
+      bool shouldNavigate = true,
+      bool isAnime = true,
+      String? subText = null,
+      void Function()? afterNavigation}) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
     return Card(
       color: backgroundColor,
@@ -153,13 +156,17 @@ class Cards {
         onTap: () {
           if (!isAnime) return floatingSnackBar(context!, "Mangas/Novels arent supported");
           if (shouldNavigate)
-            Navigator.of(context!).push(
+            Navigator.of(context!)
+                .push(
               MaterialPageRoute(
                 builder: (context) => Info(
                   id: id,
                 ),
               ),
-            );
+            )
+                .then((val) {
+              if (afterNavigation != null) afterNavigation();
+            });
         },
         child: Container(
           width: 120,

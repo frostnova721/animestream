@@ -90,6 +90,16 @@ class _HomeState extends State<Home> {
             item.id,
             title,
             item.coverImage,
+            afterNavigation: () async {
+              setState(() {
+                refreshing = true;
+              });
+              await getLists(userName: userProfile?.name ?? null);
+              if (mounted)
+                setState(() {
+                  refreshing = false;
+                });
+            },
           ),
         );
       });
@@ -106,6 +116,16 @@ class _HomeState extends State<Home> {
             e.id,
             title,
             image,
+            afterNavigation: () async {
+              setState(() {
+                refreshing = true;
+              });
+              await getLists(userName: userProfile?.name ?? null);
+              if (mounted)
+                setState(() {
+                  refreshing = false;
+                });
+            },
           ),
         );
       });

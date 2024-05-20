@@ -22,12 +22,15 @@ class PlayerSettingState extends State<PlayerSetting> {
   int? megaSkipDuration;
   bool loaded = false;
 
+  String? preferredQuality;
+
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
     loaded = true;
     setState(() {
       skipDuration = settings.skipDuration;
       megaSkipDuration = settings.megaSkipDuration;
+      preferredQuality = settings.preferredQuality;
     });
   }
 
@@ -68,8 +71,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       onPressed: () {
                                         setState(() {
                                           if (skipDuration! > 5)
-                                            writeSettings(SettingsModal(
-                                                skipDuration: skipDuration! - 5));
+                                            writeSettings(SettingsModal(skipDuration: skipDuration! - 5));
                                         });
                                       },
                                       icon: Icon(
@@ -89,8 +91,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       onPressed: () {
                                         setState(() {
                                           if (skipDuration! < 50)
-                                            writeSettings(SettingsModal(
-                                                skipDuration: skipDuration! + 5));
+                                            writeSettings(SettingsModal(skipDuration: skipDuration! + 5));
                                         });
                                       },
                                       icon: Icon(
@@ -118,8 +119,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       onPressed: () {
                                         setState(() {
                                           if (megaSkipDuration! > 20)
-                                            writeSettings(SettingsModal(
-                                                megaSkipDuration: megaSkipDuration! - 5));
+                                            writeSettings(SettingsModal(megaSkipDuration: megaSkipDuration! - 5));
                                         });
                                       },
                                       icon: Icon(
@@ -139,8 +139,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       onPressed: () {
                                         setState(() {
                                           if (megaSkipDuration! < 150)
-                                            writeSettings(SettingsModal(
-                                                megaSkipDuration: megaSkipDuration! + 5));
+                                            writeSettings(SettingsModal(megaSkipDuration: megaSkipDuration! + 5));
                                         });
                                       },
                                       icon: Icon(
@@ -150,6 +149,58 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     ),
                                   ],
                                 ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            height: 60,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Preferred quality",
+                                  style: textStyle(),
+                                ),
+                                DropdownButton(
+                                  onChanged: (val) {
+                                    setState(() {
+                                      preferredQuality = val;
+                                      writeSettings(SettingsModal(preferredQuality: val!));
+                                    });
+                                  },
+                                  value: preferredQuality!,
+                                  style: textStyle(),
+                                  dropdownColor: backgroundSubColor,
+                                  items: [
+                                    DropdownMenuItem(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: Text("360p"),
+                                      ),
+                                      value: "360p",
+                                    ),
+                                    DropdownMenuItem(
+                                        child: Padding(
+                                          padding: const EdgeInsets.only(left: 5),
+                                          child: Text("480p"),
+                                        ),
+                                        value: "480p"),
+                                    DropdownMenuItem(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: Text("720p"),
+                                      ),
+                                      value: "720p",
+                                    ),
+                                    DropdownMenuItem(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 5),
+                                        child: Text("1080p"),
+                                      ),
+                                      value: "1080p",
+                                    ),
+                                  ],
+                                )
                               ],
                             ),
                           ),

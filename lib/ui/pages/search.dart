@@ -27,17 +27,21 @@ class _SearchState extends State<Search> {
     results = [];
     exactMatches = [];
     final searchResults = await Anilist().search(query);
+    if (searchResults.length == 0)
+      return setState(() {
+        _searching = false;
+      });
     searchResults.forEach((ele) {
       final image = ele.cover;
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
       final id = ele.id;
       results.add(
-          Cards(context: context).animeCard(id, title, image), 
-        );
+        Cards(context: context).animeCard(id, title, image),
+      );
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches.add(
-         Cards(context: context).animeCard(id, title, image),
-           );
+          Cards(context: context).animeCard(id, title, image),
+        );
       }
     });
     setState(() {

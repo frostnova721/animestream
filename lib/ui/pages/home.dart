@@ -80,9 +80,9 @@ class _HomeState extends State<Home> {
 
   Future<void> getLists({String? userName}) async {
     try {
-      recentlyWatched = [];
       List<UserAnimeListItem> watched = await getWatchedList(userName: userName);
       if (watched.length > 40) watched = watched.sublist(0, 40);
+      recentlyWatched = [];
       watched.forEach((item) {
         final title = item.title['title'] ?? item.title['english'] ?? item.title['romaji'] ?? '';
         recentlyWatched.add(
@@ -91,14 +91,15 @@ class _HomeState extends State<Home> {
             title,
             item.coverImage,
             afterNavigation: () async {
-              setState(() {
-                refreshing = true;
-              });
-              await getLists(userName: userProfile?.name ?? null);
-              if (mounted)
-                setState(() {
-                  refreshing = false;
-                });
+              await refresh();
+              // setState(() {
+              //   refreshing = true;
+              // });
+              // await getLists(userName: userProfile?.name ?? null);
+              // if (mounted)
+              //   setState(() {
+              //     refreshing = false;
+              //   });
             },
           ),
         );
@@ -117,14 +118,15 @@ class _HomeState extends State<Home> {
             title,
             image,
             afterNavigation: () async {
-              setState(() {
-                refreshing = true;
-              });
-              await getLists(userName: userProfile?.name ?? null);
-              if (mounted)
-                setState(() {
-                  refreshing = false;
-                });
+              await refresh();
+              // setState(() {
+              //   refreshing = true;
+              // });
+              // await getLists(userName: userProfile?.name ?? null);
+              // if (mounted)
+              //   setState(() {
+              //     refreshing = false;
+              //   });
             },
           ),
         );
@@ -157,6 +159,7 @@ class _HomeState extends State<Home> {
       print(storedUserData?.name);
       await getLists(userName: user.name);
     } else if (loggedIn && userProfile != null) {
+
       //just load the list if the user was already signed in.
       //also dont refrest the list if user just visited the settings page and were already logged in
       if (fromSettings)

@@ -821,7 +821,6 @@ class _InfoState extends State<Info> {
                           onPressed: () async {
                             showModalBottomSheet(
                               showDragHandle: true,
-                              backgroundColor: Color.fromARGB(255, 19, 19, 19),
                               context: context,
                               builder: (BuildContext context) {
                                 return BottomSheetContent(
@@ -881,7 +880,6 @@ class _InfoState extends State<Info> {
             showModalBottomSheet(
                 showDragHandle: true,
                 context: context,
-                backgroundColor: Color(0xff121212),
                 builder: (context) {
                   return BottomSheetContent(
                     getStreams: getStreams,
@@ -991,7 +989,6 @@ class _InfoState extends State<Info> {
                             onPressed: () async {
                               showModalBottomSheet(
                                 showDragHandle: true,
-                                backgroundColor: Color.fromARGB(255, 19, 19, 19),
                                 context: context,
                                 builder: (BuildContext context) {
                                   return BottomSheetContent(
@@ -1239,6 +1236,17 @@ class _InfoState extends State<Info> {
               if (item.type.toLowerCase() != "anime") {
                 return floatingSnackBar(context, 'Mangas/Novels arent supported');
               }
+
+              //only navigate if the list is being built by characterCard method. 
+              //since the animeCard has inbuilt navigation
+              if (!recommended)
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => Info(
+                      id: item.id,
+                    ),
+                  ),
+                );
             },
             child: Container(
                 width: 130,

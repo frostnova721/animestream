@@ -7,6 +7,7 @@ class AnimeStreamTheme {
   Color textMainColor;
   Color textSubColor;
   Color backgroundSubColor;
+  Color modalSheetBackgroundColor;
 
   AnimeStreamTheme({
     required this.accentColor,
@@ -14,24 +15,26 @@ class AnimeStreamTheme {
     required this.backgroundSubColor,
     required this.textMainColor,
     required this.textSubColor,
-    // required this.modalSheetBackground
+    required this.modalSheetBackgroundColor,
   });
 
+  //convert map to class
   factory AnimeStreamTheme.fromMap(Map<dynamic, dynamic> map) {
     return AnimeStreamTheme(
-      accentColor: Color(int.tryParse(map['accentColor'], radix: 16) ??
-          int.parse(lime.accentColor.value.toRadixString(16))),
-      textMainColor: Color(int.tryParse(map['textMainColor'], radix: 16) ??
-          int.parse(lime.textMainColor.value.toRadixString(16))),
-      textSubColor: Color(int.tryParse(map['textSubColor'], radix: 16) ??
-          int.parse(lime.textSubColor.value.toRadixString(16))),
-      backgroundColor: Color(int.tryParse(map['backgroundColor'], radix: 16) ??
-          int.parse(lime.backgroundColor.value.toRadixString(16))),
-          backgroundSubColor: Color(int.tryParse(map['backgroundSubColor'], radix: 16) ??
-          int.parse(lime.backgroundSubColor.value.toRadixString(16))),
+      accentColor: Color(int.parse(map['accentColor'] ?? lime.accentColor.value.toRadixString(16), radix: 16)),
+      textMainColor: Color(int.parse(map['textMainColor'] ?? lime.textMainColor.value.toRadixString(16), radix: 16)),
+      textSubColor: Color(int.parse(map['textSubColor'] ?? lime.textSubColor.value.toRadixString(16), radix: 16)),
+      backgroundColor:
+          Color(int.parse(map['backgroundColor'] ?? lime.backgroundColor.value.toRadixString(16), radix: 16)),
+      backgroundSubColor:
+          Color(int.parse(map['backgroundSubColor'] ?? lime.backgroundSubColor.value.toRadixString(16), radix: 16)),
+      modalSheetBackgroundColor: Color(int.parse(
+          map['modalSheetBackgroundColor'] ?? lime.modalSheetBackgroundColor.value.toRadixString(16),
+          radix: 16)),
     );
   }
 
+  //convert class to map
   Map<String, String> toMap() {
     return {
       'accentColor': accentColor.value.toRadixString(16),
@@ -39,6 +42,7 @@ class AnimeStreamTheme {
       'backgroundSubColor': backgroundSubColor.value.toRadixString(16),
       'textMainColor': textMainColor.value.toRadixString(16),
       'textSubColor': textSubColor.value.toRadixString(16),
+      'modalSheetBackgroundColor': modalSheetBackgroundColor.value.toRadixString(16),
     };
   }
 }

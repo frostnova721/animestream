@@ -137,12 +137,16 @@ class Cards {
   }
 
   /**Builds a card for anime (optional navigation) */
-  Card animeCard(int id, String title, String imageUrl,
-      {bool ongoing = false,
-      bool shouldNavigate = true,
-      bool isAnime = true,
-      String? subText = null,
-      void Function()? afterNavigation}) {
+  Card animeCard(
+    int id,
+    String title,
+    String imageUrl, {
+    bool ongoing = false,
+    bool shouldNavigate = true,
+    bool isAnime = true,
+    String? subText = null,
+    void Function()? afterNavigation,
+  }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
     return Card(
       color: backgroundColor,

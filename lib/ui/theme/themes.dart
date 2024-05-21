@@ -9,7 +9,7 @@ final lime = AnimeStreamTheme(
    backgroundSubColor: Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
-  // modalSheetBackground:
+  modalSheetBackgroundColor :Color(0xff121212),
 );
 
 /**monochrome theme preset */
@@ -20,6 +20,7 @@ final monochrome = AnimeStreamTheme(
    backgroundSubColor: Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
+  modalSheetBackgroundColor :Color(0xff121212),
 );
 
 /**hotpink accent */
@@ -30,6 +31,7 @@ final hotPink = AnimeStreamTheme(
   backgroundSubColor: Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
+  modalSheetBackgroundColor :Color(0xff121212),
 );
 
 //NO! JUST NO
@@ -47,4 +49,5 @@ final coldPurple = AnimeStreamTheme(
    backgroundSubColor: const Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
+  modalSheetBackgroundColor :Color(0xff121212),
 );

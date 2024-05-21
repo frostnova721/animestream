@@ -22,13 +22,13 @@ void main() async {
     NotificationService().init();
     runApp(const AnimeStream());
   } catch (err) {
+    debugPrint(err.toString());
     Logger().writeLog(err.toString());
     print("logged the error to logs folder");
   }
 }
 
 Future<void> loadAndAssignSettings() async {
-
   await Settings().getSettings().then((settings) => currentUserSettings = settings);
 
   await getTheme().then((theme) => {
@@ -37,6 +37,7 @@ Future<void> loadAndAssignSettings() async {
         textSubColor = theme.textSubColor,
         backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.backgroundColor,
         backgroundSubColor = theme.backgroundSubColor,
+        modalSheetBackgroundColor = theme.modalSheetBackgroundColor,
       });
 }
 
@@ -52,10 +53,11 @@ class _AnimeStreamState extends State<AnimeStream> {
   @override
   void initState() {
     AwesomeNotifications().setListeners(
-        onActionReceivedMethod: NotificationController.onActionReceivedMethod,
-        onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
-        onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
-        onDismissActionReceivedMethod: NotificationController.onDismissActionReceivedMethod);
+      onActionReceivedMethod: NotificationController.onActionReceivedMethod,
+      onNotificationCreatedMethod: NotificationController.onNotificationCreatedMethod,
+      onNotificationDisplayedMethod: NotificationController.onNotificationDisplayedMethod,
+      onDismissActionReceivedMethod: NotificationController.onDismissActionReceivedMethod,
+    );
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.black.withOpacity(0.002), systemNavigationBarColor: Colors.black.withOpacity(0.002)));
@@ -72,6 +74,8 @@ class _AnimeStreamState extends State<AnimeStream> {
       title: 'Animestream',
       theme: ThemeData(
         useMaterial3: true,
+        scaffoldBackgroundColor: backgroundColor,
+        bottomSheetTheme: BottomSheetThemeData(backgroundColor: modalSheetBackgroundColor),
         colorScheme: ColorScheme.fromSeed(
           seedColor: accentColor,
         ),

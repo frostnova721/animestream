@@ -61,13 +61,12 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     epLinks = widget.episodes;
 
     final config = BetterPlayerConfiguration(
-      aspectRatio: 16 / 9,
-      fit: BoxFit.contain,
-      expandToFill: true,
-      autoPlay: true,
-      autoDispose: true,
-      controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false)
-    );
+        aspectRatio: 16 / 9,
+        fit: BoxFit.contain,
+        expandToFill: true,
+        autoPlay: true,
+        autoDispose: true,
+        controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false));
 
     controller = BetterPlayerController(config);
 
@@ -75,9 +74,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     try {
       getQualities().then((val) {
         print(qualities);
-        final preferredOne = qualities.where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720")).toList();
+        final preferredOne = qualities
+            .where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720"))
+            .toList();
         changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
-    });
+      });
     } catch (err) {
       print(err.toString());
       if (currentUserSettings?.showErrors ?? false) {
@@ -206,7 +207,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             updateWatchProgress: updateWatchProgress,
                             isControlsLocked: isControlsLocked,
                             hideControlsOnTimeout: hideControlsOnTimeout,
-                            )
+                          )
                         : Container(),
                   ),
                 ],
@@ -387,7 +388,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                       : Color.fromARGB(78, 7, 7, 7),
                                 ),
                                 child: Text(
-                                  "${qualities[index]['quality']}p",
+                                  "${qualities[index]['quality']}${qualities[index]['quality'] == 'default' ? "" : 'p'}",
                                   style: TextStyle(
                                     color: qualities[index]['link'] == currentQualityLink ? Colors.black : accentColor,
                                     fontFamily: "Poppins",

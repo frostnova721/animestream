@@ -36,7 +36,7 @@ class Ryuk extends AnimeProvider {
     return servers;
   }
 
-  Future<Map<String, dynamic>> getAnimeEpisodeLink(String alias) async {
+  Future<List<String>> getAnimeEpisodeLink(String alias) async {
     final res = await fetch("$baseUrl/anime/$alias");
     final doc = parse(res);
     int totalEpisodes = 0;
@@ -46,10 +46,17 @@ class Ryuk extends AnimeProvider {
         totalEpisodes = int.parse(textContent.replaceAll('Episodes:', '').trim());
       }
     });
-    return {
-      'link': "$baseUrl/watch/$alias-episode-",
-      'episodes': totalEpisodes,
-    };
+
+    final baseEpLink = "$baseUrl/watch/$alias-episode-";
+    final List<String> episodes = [];
+    for(int i=1; i<=totalEpisodes; i++) {
+      episodes.add("${baseEpLink}$i");
+    }
+    return episodes;
+    // return {
+    //   'link': "$baseUrl/watch/$alias-episode-",
+    //   'episodes': totalEpisodes,
+    // };
   }
 
   Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {

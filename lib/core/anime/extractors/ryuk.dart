@@ -1,8 +1,9 @@
+import 'package:animestream/core/anime/extractors/type.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:html/parser.dart';
 
-class RyukExtractor {
+class RyukExtractor extends AnimeExtractor {
   Future<List<Stream>> extract(String streamUrl) async {
     final res = await fetch(streamUrl);
     String streamLink = '';

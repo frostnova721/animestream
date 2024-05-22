@@ -4,14 +4,6 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import '../extractors/vidstream.dart';
 
-class Search {
-  String name;
-  String alias;
-  String imageUrl;
-
-  Search({required this.name, required this.alias, required this.imageUrl});
-}
-
 class GogoAnime extends AnimeProvider {
   final String _baseUrl = "https://ww5.gogoanimes.fi";
   final String _ajaxUrl = "https://ajax.gogocdn.net/ajax";
@@ -112,7 +104,7 @@ class GogoAnime extends AnimeProvider {
     // return sources.expand((element) => element).toList();
   }
 
-  Future<Map<String, dynamic>> getAnimeEpisodeLink(String aliasId) async {
+  Future<List<String>> getAnimeEpisodeLink(String aliasId) async {
     dynamic url = aliasId;
     if (!url.startsWith("http")) url = '$_baseUrl/category/$aliasId';
     final res = await get(url);
@@ -136,7 +128,14 @@ class GogoAnime extends AnimeProvider {
     }
 
     final split = link.split('-');
-    return {'link': _baseUrl + '${split.sublist(0, split.length - 1).join('-')}-'.trim(), 'episodes': int.parse(epEnd)};
+    final totalEps = int.parse(epEnd);
+    final baseEpLink = _baseUrl + '${split.sublist(0, split.length - 1).join('-')}-'.trim();
+    final List<String> episodes = [];
+    for(int i=1; i<=totalEps; i++) {
+      episodes.add("${baseEpLink}$i");
+    }
+    return episodes;
+    // return {'link': _baseUrl + '${split.sublist(0, split.length - 1).join('-')}-'.trim(), 'episodes': };
   }
 
   Future<List<Map<String, String>>> getAllServerLinks(String epUrl) async {

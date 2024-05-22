@@ -1,9 +1,10 @@
+import 'package:animestream/core/anime/extractors/type.dart';
 import 'package:html/parser.dart' as html;
 import 'package:js_unpack/js_unpack.dart';
 import '../../commons/types.dart';
 import '../../commons/utils.dart';
 
-class StreamWish {
+class StreamWish extends AnimeExtractor {
   Future<List<Stream>> extract(String streamUrl) async {
     if (streamUrl.isEmpty) {
       throw new Exception("ERR_EMPTY_STREAM_LINK");

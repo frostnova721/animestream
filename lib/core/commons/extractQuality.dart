@@ -7,6 +7,7 @@ String _makeBaseLink(String uri) {
 }
 
 Future<List<Map<String, String>>> getQualityStreams(String streamUrl) async {
+  try {
   final content = await fetch(streamUrl);
 
   List<String> links = [];
@@ -41,4 +42,12 @@ Future<List<Map<String, String>>> getQualityStreams(String streamUrl) async {
   }
 
   return grouped;
+  } catch(err) {
+    return [{
+      'link' : streamUrl,
+      'resolution': "",
+      'quality': 'default'
+    }];
+
+  }
 }

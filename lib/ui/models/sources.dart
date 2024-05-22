@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/ryuk.dart';
 import 'package:animestream/core/anime/providers/types.dart';
@@ -5,20 +6,19 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
-final List sources = ["gogoanime", "ryuk"];
+final List sources = ["gogoanime", "ryuk", "animepahe"];
 
 AnimeProvider getClass(String source) {
-  dynamic sourceClass;
   switch (source) {
     case "gogoanime":
-      sourceClass = GogoAnime();
+      return GogoAnime();
     case "ryuk": 
-      sourceClass = Ryuk();
+      return Ryuk();
+    case "animepahe":
+      return AnimePahe();
     default:
       throw new Exception("Invalid source");
   }
-
-  return sourceClass;
 }
 
 List<DropdownMenuEntry> getSourceDropdownList() {
@@ -54,12 +54,15 @@ Future<List<Map<String, String?>>> searchInSource(String source, String query) a
 
 Future<List<String>> getAnimeEpisodes(String source, String link) async {
   final info = await getClass(source).getAnimeEpisodeLink(link);
-  final int episodes = info['episodes'];
-  List<String> episodeLinks = [];
-  for (int i = 1; i <= episodes; i++) {
-    episodeLinks.add("${info['link']}$i");
-  }
-  return episodeLinks;
+
+  //should be list of strings
+  return info;
+  // final int episodes = info['episodes'];
+  // List<String> episodeLinks = [];
+  // for (int i = 1; i <= episodes; i++) {
+  //   episodeLinks.add("${info['link']}$i");
+  // }
+  // return episodeLinks;
 }
 
 generateQualitiesForMultiQuality(String link) async {

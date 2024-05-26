@@ -92,14 +92,6 @@ class _HomeState extends State<Home> {
             item.coverImage,
             afterNavigation: () async {
               await refresh();
-              // setState(() {
-              //   refreshing = true;
-              // });
-              // await getLists(userName: userProfile?.name ?? null);
-              // if (mounted)
-              //   setState(() {
-              //     refreshing = false;
-              //   });
             },
           ),
         );
@@ -119,14 +111,6 @@ class _HomeState extends State<Home> {
             image,
             afterNavigation: () async {
               await refresh();
-              // setState(() {
-              //   refreshing = true;
-              // });
-              // await getLists(userName: userProfile?.name ?? null);
-              // if (mounted)
-              //   setState(() {
-              //     refreshing = false;
-              //   });
             },
           ),
         );
@@ -221,7 +205,7 @@ class _HomeState extends State<Home> {
             physics: NeverScrollableScrollPhysics(),
             child: Padding(
               padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top,
+                  top: MediaQuery.of(context).padding.top + 5,
                   bottom: MediaQuery.of(context).padding.bottom,
                   left: MediaQuery.of(context).padding.left),
               child: Column(
@@ -391,7 +375,7 @@ class _HomeState extends State<Home> {
                   ),
                   if (refreshing)
                     Container(
-                      margin: EdgeInsets.only(left: 15),
+                      margin: EdgeInsets.only(left: 5),
                       height: 15,
                       width: 15,
                       child: CircularProgressIndicator(

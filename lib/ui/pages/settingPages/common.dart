@@ -30,15 +30,20 @@ Widget topRow(BuildContext context, String title) {
 }
 
 TextStyle textStyle() {
-    return TextStyle(
-      color: textMainColor,
-      fontFamily: "NotoSans",
-      fontWeight: FontWeight.bold,
-      fontSize: 20,
-    );
-  }
+  return TextStyle(
+    color: textMainColor,
+    fontFamily: "NotoSans",
+    fontWeight: FontWeight.bold,
+    fontSize: 20,
+  );
+}
 
-  EdgeInsets pagePadding(BuildContext context) {
-    final paddingQuery = MediaQuery.of(context).padding;
-  return EdgeInsets.only(top: paddingQuery.top, left: paddingQuery.left, right: paddingQuery.right);
-  }
+EdgeInsets pagePadding(BuildContext context, {bool bottom = false}) {
+  final paddingQuery = MediaQuery.of(context).padding;
+  return EdgeInsets.only(
+    top: paddingQuery.top + 10,
+    left: paddingQuery.left,
+    right: paddingQuery.right,
+    bottom: bottom ? paddingQuery.bottom : 0,
+  );
+}

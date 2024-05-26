@@ -35,7 +35,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
       backgroundColor: backgroundColor,
       surfaceTintColor: Colors.transparent,
       child: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10),
         child: Column(
           children: [
             if (widget.loggedIn)

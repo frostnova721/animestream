@@ -1,5 +1,6 @@
 import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:animestream/ui/pages/settingPages/appInfo.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/pages/settingPages/theme.dart';
@@ -27,11 +28,7 @@ class _SettingsState extends State<SettingsPage> {
     return Scaffold(
       backgroundColor: backgroundColor,
       body: Padding(
-        padding: EdgeInsets.only(
-          top: MediaQuery.of(context).padding.top,
-          left: MediaQuery.of(context).padding.left,
-          right: MediaQuery.of(context).padding.right
-        ),
+        padding: pagePadding(context),
         child: SingleChildScrollView(
           child: Column(
             children: [

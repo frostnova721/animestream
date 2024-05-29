@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
+import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -91,7 +92,6 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Future<void> playVideo(String url) async {
     await controller.setupDataSource(dataSourceConfig(url));
     setState(() {
-      print('done!');
       initialised = true;
     });
   }
@@ -130,18 +130,34 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     await getStreams(widget.selectedSource, epLink, cb);
   }
 
-  Future<void> getQualities() async {
-    final List list = await generateQualitiesForMultiQuality(info.streamInfo.link);
+  Future<void> getQualities({String? link}) async {
+    final List list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link);
     if (mounted)
       setState(() {
         qualities = list;
       });
   }
 
-  void changeQuality(String link, int? currentTime) async {
+  /** to play the next or prev episode */
+  Future<void> playAnotherEpisode(String link, {bool preserveProgress = false}) async {
+    try {
+      await getQualities(link: link);
+      final preferredQuality = qualities
+          .where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", '') ?? "720"))
+          .toList();
+      print(preferredQuality[0]['link']);
+      await changeQuality(preferredQuality[0]['link'],
+          preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null);
+    } catch (err) {
+      print(err);
+      await playVideo(link);
+    }
+  }
+
+  Future<void> changeQuality(String link, int? currentTime) async {
     if (currentQualityLink != link) {
       await playVideo(link);
-      controller.seekTo(Duration(seconds: currentTime ?? 0));
+      if (currentTime != null) controller.seekTo(Duration(seconds: currentTime));
       currentQualityLink = link;
     }
   }
@@ -161,7 +177,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         _controlsTimer!.cancel();
       }
       _controlsTimer = Timer(Duration(seconds: 5), () {
-        if (mounted)
+        if (mounted && (controller.isPlaying() ?? false))
           setState(() {
             _visible = false;
             toggleControls(true);
@@ -207,6 +223,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             updateWatchProgress: updateWatchProgress,
                             isControlsLocked: isControlsLocked,
                             hideControlsOnTimeout: hideControlsOnTimeout,
+                            playAnotherEpisode: playAnotherEpisode,
+                            preferredServer: info.streamInfo.server,
+                            isControlsVisible: _controlsDisabled,
                           )
                         : Container(),
                   ),
@@ -343,71 +362,99 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          IconButton(
-            onPressed: () {
-              showModalBottomSheet(
-                isScrollControlled: true,
-                context: context,
-                backgroundColor: Colors.black,
-                showDragHandle: false,
-                barrierColor: Color.fromARGB(17, 255, 255, 255),
-                builder: (BuildContext context) {
-                  return Container(
-                    width: 400,
-                    padding: EdgeInsets.all(20),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
-                          child: Text(
-                            "Choose Quality",
-                            style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 20),
-                          ),
-                        ),
-                        ListView.builder(
-                          itemCount: qualities.length,
-                          shrinkWrap: true,
-                          physics: NeverScrollableScrollPhysics(),
-                          itemBuilder: (BuildContext context, index) {
-                            return Container(
-                              padding: EdgeInsets.only(left: 25, right: 25),
-                              child: ElevatedButton(
-                                onPressed: () async {
-                                  final src = qualities[index]['link'];
-                                  changeQuality(src, controller.videoPlayerController!.value.position.inSeconds);
-                                  Navigator.pop(context);
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                    // side: BorderSide(color: Colors.white)
-                                  ),
-                                  backgroundColor: qualities[index]['link'] == currentQualityLink
-                                      ? accentColor
-                                      : Color.fromARGB(78, 7, 7, 7),
-                                ),
-                                child: Text(
-                                  "${qualities[index]['quality']}${qualities[index]['quality'] == 'default' ? "" : 'p'}",
-                                  style: TextStyle(
-                                    color: qualities[index]['link'] == currentQualityLink ? Colors.black : accentColor,
-                                    fontFamily: "Poppins",
-                                  ),
-                                ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    backgroundColor: Colors.black,
+                    showDragHandle: false,
+                    barrierColor: Color.fromARGB(17, 255, 255, 255),
+                    builder: (BuildContext context) {
+                      return Container(
+                        width: 400,
+                        padding: EdgeInsets.all(20),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 10),
+                              child: Text(
+                                "Choose Quality",
+                                style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 20),
                               ),
-                            );
-                          },
+                            ),
+                            ListView.builder(
+                              itemCount: qualities.length,
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemBuilder: (BuildContext context, index) {
+                                return Container(
+                                  padding: EdgeInsets.only(left: 25, right: 25),
+                                  child: ElevatedButton(
+                                    onPressed: () async {
+                                      final src = qualities[index]['link'];
+                                      changeQuality(src, controller.videoPlayerController!.value.position.inSeconds);
+                                      Navigator.pop(context);
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
+                                        // side: BorderSide(color: Colors.white)
+                                      ),
+                                      backgroundColor: qualities[index]['link'] == currentQualityLink
+                                          ? accentColor
+                                          : Color.fromARGB(78, 7, 7, 7),
+                                    ),
+                                    child: Text(
+                                      "${qualities[index]['quality']}${qualities[index]['quality'] == 'default' ? "" : 'p'}",
+                                      style: TextStyle(
+                                        color:
+                                            qualities[index]['link'] == currentQualityLink ? Colors.black : accentColor,
+                                        fontFamily: "Poppins",
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      );
+                    },
                   );
                 },
-              );
-            },
-            icon: Icon(
-              Icons.high_quality_rounded,
-              color: Colors.white,
-            ),
+                tooltip: "qualities",
+                icon: Icon(
+                  Icons.high_quality_rounded,
+                  color: Colors.white,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    builder: (context) => CustomControlsBottomSheet(
+                        getEpisodeSources: getEpisodeSources,
+                        currentSources: [],
+                        playVideo: playAnotherEpisode,
+                        next: true,
+                        epLinks: epLinks,
+                        currentEpIndex: currentEpIndex - 1,
+                        refreshPage: refreshPage,
+                        preserveProgress: true,
+                        updateCurrentEpIndex: (int) {}),
+                  );
+                },
+                tooltip: "servers",
+                icon: Icon(
+                  Icons.source_rounded,
+                  color: Colors.white,
+                ),
+              ),
+            ],
           ),
           Row(
             children: [

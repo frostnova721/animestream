@@ -35,7 +35,7 @@ class BottomSheetContentData {
 class WatchPageInfo {
   int episodeNumber;
   final String animeTitle;
-  dynamic streamInfo;
+  Stream streamInfo;
   int id;
 
   WatchPageInfo({

@@ -1,15 +1,18 @@
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
+import 'package:animestream/core/commons/types.dart';
 
 class CustomControlsBottomSheet extends StatefulWidget {
   final Function(String, Function(List<dynamic>, bool)) getEpisodeSources;
-  final List<dynamic> currentSources;
-  final Function playVideo;
+  final List<Stream> currentSources;
+  final Future<void> Function(String, {bool preserveProgress}) playVideo;
   final bool next;
   final int currentEpIndex;
   final List<String> epLinks;
   final Function refreshPage;
   final Function(int) updateCurrentEpIndex;
+  final bool preserveProgress;
+
   const CustomControlsBottomSheet({
     super.key,
     required this.getEpisodeSources,
@@ -20,11 +23,11 @@ class CustomControlsBottomSheet extends StatefulWidget {
     required this.currentEpIndex,
     required this.refreshPage,
     required this.updateCurrentEpIndex, //this updation is just for custom controls. i think this whole file needs a redesign (its really confusing than other files)
+    this.preserveProgress = false
   });
 
   @override
-  State<CustomControlsBottomSheet> createState() =>
-      CustomControls_BottomSheetState();
+  State<CustomControlsBottomSheet> createState() => CustomControls_BottomSheetState();
 }
 
 class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
@@ -37,19 +40,19 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
   void initState() {
     super.initState();
     currentEpIndex = widget.currentEpIndex;
+
+    //I think this line is useless
     currentSources = widget.currentSources;
     getSources(widget.next);
   }
 
   Future getSources(bool nextEpisode) async {
-    if ((currentEpIndex == 0 && !nextEpisode) ||
-        (currentEpIndex + 1 >= widget.epLinks.length && nextEpisode)) {
+    if ((currentEpIndex == 0 && !nextEpisode) || (currentEpIndex + 1 >= widget.epLinks.length && nextEpisode)) {
       throw new Exception("Index too low or too high. Item not found!");
     }
     currentSources = [];
     final index = nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
-    final srcs =
-        await widget.getEpisodeSources(widget.epLinks[index], (list, finished) {
+    final srcs = await widget.getEpisodeSources(widget.epLinks[index], (list, finished) {
       if (mounted)
         setState(() {
           if (finished) _isLoading = false;
@@ -58,7 +61,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
     });
     if (mounted)
       setState(() {
-        currentSources = srcs;
+        currentSources = srcs ?? [];
       });
   }
 
@@ -112,9 +115,8 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
           ),
           child: ElevatedButton(
             onPressed: () async {
-              await widget.playVideo(currentSources[index].link);
-              currentEpIndex =
-                  widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
+              widget.playVideo(currentSources[index].link, preserveProgress: widget.preserveProgress);
+              currentEpIndex = widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
               widget.refreshPage(currentEpIndex, currentSources[index]);
               widget.updateCurrentEpIndex(currentEpIndex);
               Navigator.pop(context);

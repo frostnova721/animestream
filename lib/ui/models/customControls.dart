@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +9,7 @@ import 'package:better_player/better_player.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:better_player/src/controls/better_player_material_progress_bar.dart';
 import 'package:wakelock/wakelock.dart';
+import 'package:animestream/core/commons/types.dart';
 
 class Controls extends StatefulWidget {
   final BetterPlayerController controller;
@@ -20,6 +20,9 @@ class Controls extends StatefulWidget {
   final Future<void> Function(int) updateWatchProgress;
   final bool Function() isControlsLocked;
   final void Function() hideControlsOnTimeout;
+  final Future<void> Function(String) playAnotherEpisode;
+  final String preferredServer;
+  final bool isControlsVisible;
 
   const Controls({
     super.key,
@@ -31,6 +34,9 @@ class Controls extends StatefulWidget {
     required this.updateWatchProgress,
     required this.isControlsLocked,
     required this.hideControlsOnTimeout,
+    required this.playAnotherEpisode,
+    required this.preferredServer,
+    required this.isControlsVisible,
   });
 
   @override
@@ -63,11 +69,14 @@ class _ControlsState extends State<Controls> {
 
     assignSettings();
 
+    //this widget will only be open when the video is initialised. so to hide the controls, call it first
+    widget.hideControlsOnTimeout();
+
     _controller.addListener(() async {
 
-      if(isVisible) {
+      if(widget.isControlsVisible) {
         widget.hideControlsOnTimeout();
-        isVisible = false;
+        // isVisible = false;
       }
 
       //managing the UI updation
@@ -113,8 +122,8 @@ class _ControlsState extends State<Controls> {
     });
   }
 
-  List currentSources = [];
-  List preloadedSources = [];
+  List<Stream> currentSources = [];
+  List<Stream> preloadedSources = [];
 
   IconData? playPause;
 
@@ -126,7 +135,7 @@ class _ControlsState extends State<Controls> {
   int? megaSkipDuration;
 
   bool buffering = false;
-  bool isVisible = true;
+  // bool isVisible = true;
   bool finalEpisodeReached = false;
   bool wakelockEnabled = false;
   // bool linkProgressValueWithPlayer = true;
@@ -159,7 +168,8 @@ class _ControlsState extends State<Controls> {
     if (preloadedSources.isNotEmpty) {
       currentEpIndex = currentEpIndex + 1;
       widget.refreshPage(currentEpIndex, preloadedSources[0]);
-      await playVideo(preloadedSources[0].link);
+      final preferredServerLink = preloadedSources.where((source) => source.server == widget.preferredServer).toList();
+      await playVideo(preferredServerLink.length != 0 ? preferredServerLink[0].link : preloadedSources[0].link);
     } else {
       showModalBottomSheet(
         context: context,
@@ -193,7 +203,7 @@ class _ControlsState extends State<Controls> {
       print("On the final episode. No preloads available");
       return;
     }
-    List srcs = [];
+    List<Stream> srcs = [];
     await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index], (list, finished) {
       srcs = srcs + list;
       if (finished) {
@@ -203,11 +213,12 @@ class _ControlsState extends State<Controls> {
     });
   }
 
-  Future<void> playVideo(String url) async {
+  /**Play the video */
+  Future<void> playVideo(String url, {bool preserveProgress = false}) async {
     preloadedSources = [];
     preloadStarted = false;
     calledAutoNext = false;
-    await widget.controller.setupDataSource(dataSourceConfig(url));
+    await widget.playAnotherEpisode(url);
   }
 
   Future getEpisodeSources(bool nextEpisode) async {

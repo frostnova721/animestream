@@ -1,6 +1,7 @@
 import 'package:animestream/core/anime/extractors/ryuk.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/core/commons/types.dart';
 import 'package:html/parser.dart';
 
 class Ryuk extends AnimeProvider {
@@ -59,7 +60,7 @@ class Ryuk extends AnimeProvider {
     // };
   }
 
-  Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {
+  Future<void> getStreams(String episodeId, Function(List<Stream>, bool) update) async {
     //get link of all servers
     final servers = await getAllServerLinks(episodeId);
 

@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:animestream/core/anime/extractors/kwik.dart';
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/commons/types.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 
@@ -53,7 +54,7 @@ class AnimePahe extends AnimeProvider {
     return episodeLinks.reversed.toList();
   }
 
-  Future<void> getStreams(String episodeUrl, Function(List<dynamic> list, bool) update) async {
+  Future<void> getStreams(String episodeUrl, Function(List<Stream> list, bool) update) async {
     final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
     final document = html.parse(data.body);
     final streams = document.querySelectorAll('div#resolutionMenu > button');

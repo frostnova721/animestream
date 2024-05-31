@@ -12,6 +12,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
   final Function refreshPage;
   final Function(int) updateCurrentEpIndex;
   final bool preserveProgress;
+  final int? customIndex;
 
   const CustomControlsBottomSheet({
     super.key,
@@ -22,8 +23,9 @@ class CustomControlsBottomSheet extends StatefulWidget {
     required this.epLinks,
     required this.currentEpIndex,
     required this.refreshPage,
-    required this.updateCurrentEpIndex, //this updation is just for custom controls. i think this whole file needs a redesign (its really confusing than other files)
-    this.preserveProgress = false
+    required this.updateCurrentEpIndex,
+    this.preserveProgress = false,
+    this.customIndex,
   });
 
   @override
@@ -43,6 +45,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
 
     //I think this line is useless
     currentSources = widget.currentSources;
+
     getSources(widget.next);
   }
 
@@ -51,8 +54,8 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       throw new Exception("Index too low or too high. Item not found!");
     }
     currentSources = [];
-    final index = nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
-    final srcs = await widget.getEpisodeSources(widget.epLinks[index], (list, finished) {
+    final index = widget.customIndex != null ? widget.customIndex : nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
+    final srcs = await widget.getEpisodeSources(widget.epLinks[index!], (list, finished) {
       if (mounted)
         setState(() {
           if (finished) _isLoading = false;
@@ -114,9 +117,9 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
             borderRadius: BorderRadius.circular(20),
           ),
           child: ElevatedButton(
-            onPressed: () async {
+            onPressed: () {
               widget.playVideo(currentSources[index].link, preserveProgress: widget.preserveProgress);
-              currentEpIndex = widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
+              currentEpIndex = widget.customIndex != null ? widget.customIndex! : widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
               widget.refreshPage(currentEpIndex, currentSources[index]);
               widget.updateCurrentEpIndex(currentEpIndex);
               Navigator.pop(context);

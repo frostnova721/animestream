@@ -5,6 +5,7 @@ import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
+import 'package:animestream/core/commons/types.dart';
 
 final List sources = ["gogoanime", "ryuk", "animepahe"];
 
@@ -71,7 +72,7 @@ generateQualitiesForMultiQuality(String link) async {
   return qualities;
 }
 
-getStreams(String source, String episodeId, Function(List<dynamic>, bool) updateFunction) async {
+getStreams(String source, String episodeId, Function(List<Stream>, bool) updateFunction) async {
   final streams = await getClass(source).getStreams(episodeId,  updateFunction);
   return streams;
 }

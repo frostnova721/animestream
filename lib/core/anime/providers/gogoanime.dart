@@ -1,5 +1,6 @@
 import 'package:animestream/core/anime/extractors/streamwish.dart';
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/commons/types.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 import '../extractors/vidstream.dart';
@@ -58,7 +59,7 @@ class GogoAnime extends AnimeProvider {
     return src[0]['src'] ?? '';
   }
 
-  Future<void> getStreams(String episodeId, Function(List<dynamic>, bool) update) async {
+  Future<void> getStreams(String episodeId, Function(List<Stream>, bool) update) async {
     //get link of all listed servers from gogoanime
     final servers = await getAllServerLinks(episodeId);
 

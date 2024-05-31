@@ -8,6 +8,7 @@ import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -126,7 +127,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     );
   }
 
-  Future getEpisodeSources(String epLink, Function(List<dynamic>, bool) cb) async {
+  Future getEpisodeSources(String epLink, Function(List<Stream>, bool) cb) async {
     await getStreams(widget.selectedSource, epLink, cb);
   }
 
@@ -141,6 +142,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   /** to play the next or prev episode */
   Future<void> playAnotherEpisode(String link, {bool preserveProgress = false}) async {
     try {
+      await controller.pause();
       await getQualities(link: link);
       final preferredQuality = qualities
           .where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", '') ?? "720"))
@@ -369,7 +371,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   showModalBottomSheet(
                     isScrollControlled: true,
                     context: context,
-                    backgroundColor: Colors.black,
+                    // backgroundColor: Colors.black,
                     showDragHandle: false,
                     barrierColor: Color.fromARGB(17, 255, 255, 255),
                     builder: (BuildContext context) {
@@ -406,7 +408,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                       ),
                                       backgroundColor: qualities[index]['link'] == currentQualityLink
                                           ? accentColor
-                                          : Color.fromARGB(78, 7, 7, 7),
+                                          : backgroundSubColor,
                                     ),
                                     child: Text(
                                       "${qualities[index]['quality']}${qualities[index]['quality'] == 'default' ? "" : 'p'}",
@@ -454,6 +456,66 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   color: Colors.white,
                 ),
               ),
+              IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (context) => Container(
+                      padding: EdgeInsets.only(left: 20, right: 20, top: 15),
+                      height: MediaQuery.of(context).size.height - 80,
+                      child: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 10),
+                            child: Text(
+                              "Select Episode",
+                              style: textStyle().copyWith(fontSize: 23),
+                            ),
+                          ),
+                          Container(
+                            height: MediaQuery.of(context).size.height - 150,
+                            child: ListView.builder(
+                              itemCount: epLinks.length,
+                              shrinkWrap: true,
+                              itemBuilder: (context, index) {
+                                return GestureDetector(
+                                  onTap: () {
+                                    Navigator.pop(context);
+                                    if (index == currentEpIndex) return;
+                                    sheet2(index, index > currentEpIndex);
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
+                                    padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+                                    height: 50,
+                                    decoration: BoxDecoration(
+                                        color: index == currentEpIndex ? accentColor : backgroundSubColor, borderRadius: BorderRadius.circular(12)),
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      "Episode ${index + 1}",
+                                      style: TextStyle(
+                                        color: index == currentEpIndex ? backgroundColor : textMainColor,
+                                        fontFamily: "Rubik",
+                                        fontSize: 20,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+                tooltip: "Episode list",
+                icon: Icon(
+                  Icons.view_list_rounded,
+                  color: Colors.white,
+                ),
+              ),
             ],
           ),
           Row(
@@ -470,6 +532,29 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
             ],
           )
         ],
+      ),
+    );
+  }
+
+  //ignore the random name
+  void sheet2(
+    int index,
+    bool next,
+  ) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => CustomControlsBottomSheet(
+        getEpisodeSources: getEpisodeSources,
+        currentSources: [],
+        playVideo: playAnotherEpisode,
+        next: next,
+        customIndex: index,
+        epLinks: epLinks,
+        currentEpIndex: currentEpIndex,
+        refreshPage: refreshPage,
+        updateCurrentEpIndex: (int updatedIndex) {
+          currentEpIndex = updatedIndex;
+        },
       ),
     );
   }

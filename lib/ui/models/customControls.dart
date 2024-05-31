@@ -74,6 +74,13 @@ class _ControlsState extends State<Controls> {
 
     _controller.addListener(() async {
 
+      //manage currentEpIndex and clear preloads if the index changed
+      if(currentEpIndex != widget.episode['currentEpIndex']) {
+        preloadedSources = [];
+        preloadStarted = false;
+        currentEpIndex = widget.episode['currentEpIndex'];
+      }
+
       if(widget.isControlsVisible) {
         widget.hideControlsOnTimeout();
         // isVisible = false;
@@ -147,6 +154,7 @@ class _ControlsState extends State<Controls> {
     await _controller.seekTo(Duration.zero);
   }
 
+  //probably redundant function. might remove later
   void updateCurrentEpIndex(int updatedIndex) {
     currentEpIndex = updatedIndex;
   }
@@ -167,9 +175,10 @@ class _ControlsState extends State<Controls> {
     calledAutoNext = true;
     if (preloadedSources.isNotEmpty) {
       currentEpIndex = currentEpIndex + 1;
-      widget.refreshPage(currentEpIndex, preloadedSources[0]);
       final preferredServerLink = preloadedSources.where((source) => source.server == widget.preferredServer).toList();
-      await playVideo(preferredServerLink.length != 0 ? preferredServerLink[0].link : preloadedSources[0].link);
+      final src = preferredServerLink.length != 0 ? preferredServerLink[0] : preloadedSources[0];
+      widget.refreshPage(currentEpIndex, src);
+      await playVideo(src.link);
     } else {
       showModalBottomSheet(
         context: context,
@@ -216,9 +225,9 @@ class _ControlsState extends State<Controls> {
   /**Play the video */
   Future<void> playVideo(String url, {bool preserveProgress = false}) async {
     preloadedSources = [];
+    await widget.playAnotherEpisode(url);
     preloadStarted = false;
     calledAutoNext = false;
-    await widget.playAnotherEpisode(url);
   }
 
   Future getEpisodeSources(bool nextEpisode) async {

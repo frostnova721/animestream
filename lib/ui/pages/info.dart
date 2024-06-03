@@ -1,11 +1,13 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/core/data/manualSearches.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/bottomSheets/bottomSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
@@ -39,7 +41,7 @@ class _InfoState extends State<Info> {
     });
   }
 
-  dynamic data;
+  late AnilistInfo data;
 
   String selectedSource = "gogoanime";
   String? foundName;
@@ -53,7 +55,6 @@ class _InfoState extends State<Info> {
 
   int currentPageIndex = 0;
   int watched = 1;
-  int watchedPercentage = 1;
 
   bool showBar = false;
   bool gridMode = false;
@@ -81,17 +82,6 @@ class _InfoState extends State<Info> {
 
     if (mounted) setState(() {});
   }
-
-  //incase the results need to be stored!
-  // Future<void> storeEpisodeLinks(List epLinks) async {
-  //   final box = await Hive.openBox('animestream');
-  //   if(epLinks.length != 0) {
-  //     box.clear();
-  //     box.put('episodes', epLinks);
-  //     return box.close();
-  //   }
-  //   box.close();
-  // }
 
   Future getInfo(int id) async {
     try {
@@ -183,44 +173,39 @@ class _InfoState extends State<Info> {
     }
   }
 
+  Future<void> search(String query) async {
+    final sr = await searchInSource(selectedSource, query);
+    //to find a exact match
+    List<dynamic> match = sr
+        .where(
+          (e) => e['name'] == query,
+        )
+        .toList();
+    if (match.isEmpty) match = sr;
+    final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
+    if (mounted)
+      setState(() {
+        paginate(links);
+        foundName = match[0]['name'];
+      });
+  }
+
   Future<void> getEpisodes() async {
     foundName = null;
     _epSearcherror = false;
     try {
-      final sr = await searchInSource(selectedSource, data.title['english'] ?? data.title['romaji']);
-      //to find a exact match
-      List<dynamic> match = sr
-          .where(
-            (e) => e['name'] == (data.title['english'] ?? data.title['romaji']),
-          )
-          .toList();
-      if (match.isEmpty) match = sr;
-      final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
-      if (mounted)
-        setState(() {
-          paginate(links);
-          foundName = match[0]['name'];
-        });
+      final manualSearchQuery = await getManualSearchQuery('${widget.id}');
+      String searchTitle = data.title['english'] ?? data.title['romaji'] ?? '';
+      if (manualSearchQuery != null) searchTitle = manualSearchQuery;
+      await search(searchTitle);
     } catch (err) {
       try {
-        final sr = await searchInSource(selectedSource, data.title['romaji']);
-        //find em match boi
-        List<dynamic> match = sr
-            .where(
-              (e) => e['name'] == data.title['romaji'],
-            )
-            .toList();
-        if (match.isEmpty) match = sr;
-        final links = await getAnimeEpisodes(selectedSource, match[0]['alias']);
+        await search(data.title['romaji'] ?? '');
+      } catch (err) {
         if (mounted)
           setState(() {
-            paginate(links);
-            foundName = match[0]['name'];
+            _epSearcherror = true;
           });
-      } catch (err) {
-        setState(() {
-          _epSearcherror = true;
-        });
         if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
           floatingSnackBar(context, err.toString());
       }
@@ -323,7 +308,7 @@ class _InfoState extends State<Info> {
                         alignment: Alignment.center,
                         // padding: EdgeInsets.only(left: 40, right: 25),
                         child: Text(
-                          data.title['english'] ?? data.title['romaji'],
+                          data.title['english'] ?? data.title['romaji'] ?? '',
                           style: TextStyle(
                             color: textMainColor,
                             fontFamily: "NunitoSans",
@@ -545,8 +530,9 @@ class _InfoState extends State<Info> {
             showDragHandle: true,
             backgroundColor: Color(0xff121212),
             builder: (context) => ManualSearchSheet(
-              searchString: data.title['english'] ?? data.title['romaji'],
+              searchString: data.title['english'] ?? data.title['romaji'] ?? '',
               source: selectedSource,
+              anilistId: widget.id.toString(),
             ),
           ).then((result) async {
             if (result == null) return;
@@ -642,7 +628,7 @@ class _InfoState extends State<Info> {
         border: Border.all(color: accentColor),
         color: Colors.black,
         image: DecorationImage(
-          image: data.banner.length > 1 ? NetworkImage(data.banner) : NetworkImage(data.cover),
+          image: data.banner != null ? NetworkImage(data.banner!) : NetworkImage(data.cover),
           fit: BoxFit.cover,
           opacity: 0.46,
         ),
@@ -661,7 +647,7 @@ class _InfoState extends State<Info> {
                   epLinks: epLinks,
                   episodeIndex: watched,
                   selectedSource: selectedSource,
-                  title: data.title['english'] ?? data.title['romaji'],
+                  title: data.title['english'] ?? data.title['romaji'] ?? '',
                   id: widget.id,
                   cover: data.cover,
                 ),
@@ -710,7 +696,7 @@ class _InfoState extends State<Info> {
 
         //needs to store progress :(
         // Container(
-        //   width: 325 * (watchedPercentage / 100),
+        //   width: 325 * ((timeProgress[watched < epLinks.length ? watched + 1 : watched]) ?? 1 / 100),
         //   margin: EdgeInsets.only(left: 15),
         //   height: 2,
         //   decoration: BoxDecoration(
@@ -725,7 +711,7 @@ class _InfoState extends State<Info> {
   }
 
   Container _searchStatus() {
-    dynamic text = "searching: ${data.title['english'] ?? data.title['romaji']}";
+    dynamic text = "searching: ${data.title['english'] ?? data.title['romaji'] ?? ''}";
     if (foundName != null) {
       text = "found: $foundName";
     } else if (_epSearcherror) {
@@ -773,7 +759,7 @@ class _InfoState extends State<Info> {
                       epLinks: epLinks,
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
-                      title: data.title['english'] ?? data.title['romaji'],
+                      title: data.title['english'] ?? data.title['romaji'] ?? '',
                       id: widget.id,
                       cover: data.cover),
                   type: Type.watch,
@@ -829,7 +815,7 @@ class _InfoState extends State<Info> {
                                     epLinks: epLinks,
                                     episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                                     selectedSource: selectedSource,
-                                    title: data.title['english'] ?? data.title['romaji'],
+                                    title: data.title['english'] ?? data.title['romaji'] ?? '',
                                     id: widget.id,
                                     cover: data.cover,
                                   ),
@@ -884,12 +870,13 @@ class _InfoState extends State<Info> {
                   return BottomSheetContent(
                     getStreams: getStreams,
                     bottomSheetContentData: BottomSheetContentData(
-                        epLinks: epLinks,
-                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                        selectedSource: selectedSource,
-                        title: data.title['english'] ?? data.title['romaji'],
-                        id: widget.id,
-                        cover: data.cover),
+                      epLinks: epLinks,
+                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                      selectedSource: selectedSource,
+                      title: data.title['english'] ?? data.title['romaji'] ?? '',
+                      id: widget.id,
+                      cover: data.cover,
+                    ),
                     type: Type.watch,
                     getWatched: getWatched,
                   );
@@ -997,7 +984,7 @@ class _InfoState extends State<Info> {
                                       epLinks: epLinks,
                                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                                       selectedSource: selectedSource,
-                                      title: data.title['english'] ?? data.title['romaji'],
+                                      title: data.title['english'] ?? data.title['romaji'] ?? '',
                                       id: widget.id,
                                       cover: data.cover,
                                     ),
@@ -1058,11 +1045,11 @@ class _InfoState extends State<Info> {
                 ),
                 _buildInfoItems(
                   _infoLeft('Duration'),
-                  _infoRight('${data.duration ?? '??'}'),
+                  _infoRight('${data.duration}'),
                 ),
                 _buildInfoItems(
                   _infoLeft('Studios'),
-                  _infoRight(data.studios.isEmpty ? '??' : data.studios[0]),
+                  _infoRight(data.studios.isEmpty ? '??' : data.studios[0] ?? '??'),
                 ),
               ],
             ),
@@ -1136,7 +1123,7 @@ class _InfoState extends State<Info> {
               children: [
                 _categoryTitle('Description'),
                 Text(
-                  data.synopsis,
+                  data.synopsis ?? '',
                   style: TextStyle(
                     color: textMainColor,
                     fontFamily: "NunitoSans",
@@ -1237,7 +1224,7 @@ class _InfoState extends State<Info> {
                 return floatingSnackBar(context, 'Mangas/Novels arent supported');
               }
 
-              //only navigate if the list is being built by characterCard method. 
+              //only navigate if the list is being built by characterCard method.
               //since the animeCard has inbuilt navigation
               if (!recommended)
                 Navigator.of(context).push(
@@ -1318,7 +1305,7 @@ class _InfoState extends State<Info> {
       children: [
         GestureDetector(
           onLongPress: () {
-            final img = data.banner.length > 0 ? data.banner : data.cover;
+            final img = data.banner != null ? data.banner! : data.cover;
             showModalBottomSheet(
               context: context,
               showDragHandle: true,
@@ -1343,7 +1330,7 @@ class _InfoState extends State<Info> {
                               await ImageGallerySaver.saveImage(
                                 res.bodyBytes,
                                 quality: 100,
-                                name: data.title['english'] ?? data.title['romaji'],
+                                name: data.title['english'] ?? data.title['romaji'] ?? '',
                               );
                             },
                             style: ElevatedButton.styleFrom(
@@ -1382,7 +1369,7 @@ class _InfoState extends State<Info> {
               height: 270,
               width: double.infinity,
               child: Image.network(
-                data.banner.length > 0 ? data.banner : data.cover,
+                data.banner != null ? data.banner! : data.cover,
                 fit: BoxFit.cover,
                 opacity: AlwaysStoppedAnimation(0.6),
                 frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {

@@ -28,7 +28,7 @@ class BottomSheetContentData {
     required this.selectedSource,
     required this.title,
     required this.id,
-    required this.cover
+    required this.cover,
   });
 }
 

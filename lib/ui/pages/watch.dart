@@ -490,7 +490,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                                     height: 50,
                                     decoration: BoxDecoration(
-                                        color: index == currentEpIndex ? accentColor : backgroundSubColor, borderRadius: BorderRadius.circular(12)),
+                                        color: index == currentEpIndex ? accentColor : backgroundSubColor,
+                                        borderRadius: BorderRadius.circular(12)),
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       "Episode ${index + 1}",
@@ -565,6 +566,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     controller.dispose();
+    _controlsTimer?.cancel();
     super.dispose();
   }
 }

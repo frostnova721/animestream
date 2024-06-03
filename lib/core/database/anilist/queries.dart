@@ -247,7 +247,7 @@ class AnilistQueries {
           'end':
               '${info['endDate']['day'] ?? ''} ${MonthnumberToMonthName(info['endDate']['month'])?['short'] ?? ''} ${info['endDate']['year'] ?? ''}',
         },
-        banner: info['bannerImage'] ?? '',
+        banner: info['bannerImage'] ?? null,
         cover: info['coverImage']['large'] ?? info['coverImage']['medium'],
         duration: '${info['duration'] ?? ''} minutes',
         episodes: info['episodes'],

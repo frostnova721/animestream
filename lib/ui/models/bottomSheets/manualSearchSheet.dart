@@ -1,3 +1,4 @@
+import 'package:animestream/core/data/manualSearches.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -5,7 +6,8 @@ import 'package:flutter/material.dart';
 class ManualSearchSheet extends StatefulWidget {
   final String searchString;
   final String source;
-  const ManualSearchSheet({super.key, required this.searchString, required this.source});
+  final String anilistId;
+  const ManualSearchSheet({super.key, required this.searchString, required this.source, required this.anilistId});
 
   @override
   State<ManualSearchSheet> createState() => _ManualSearchSheetState();
@@ -35,7 +37,10 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
       for (final item in res) {
         searchResults.add(
           GestureDetector(
-            onTap: () => Navigator.of(context).pop(item),
+            onTap: () {
+              addManualSearchQuery(widget.anilistId, item['name'] ?? searchTerm);
+              Navigator.of(context).pop(item);
+            },
             child: Container(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,

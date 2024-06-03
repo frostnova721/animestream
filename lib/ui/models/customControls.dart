@@ -44,7 +44,6 @@ class Controls extends StatefulWidget {
 }
 
 class _ControlsState extends State<Controls> {
-  
   late VideoPlayerController _controller;
 
   bool startedLoadingNext = false;
@@ -73,15 +72,14 @@ class _ControlsState extends State<Controls> {
     widget.hideControlsOnTimeout();
 
     _controller.addListener(() async {
-
       //manage currentEpIndex and clear preloads if the index changed
-      if(currentEpIndex != widget.episode['currentEpIndex']) {
+      if (currentEpIndex != widget.episode['currentEpIndex']) {
         preloadedSources = [];
         preloadStarted = false;
         currentEpIndex = widget.episode['currentEpIndex'];
       }
 
-      if(widget.isControlsVisible) {
+      if (widget.isControlsVisible) {
         widget.hideControlsOnTimeout();
         // isVisible = false;
       }
@@ -97,15 +95,15 @@ class _ControlsState extends State<Controls> {
           buffering = _controller.value.isBuffering;
         });
 
-        if(_controller.value.isPlaying && !wakelockEnabled) {
-          Wakelock.enable();
-          wakelockEnabled = true;
-          debugPrint("wakelock enabled");
-        } else if(!_controller.value.isPlaying && wakelockEnabled) {
-          Wakelock.disable();
-          wakelockEnabled = false;
-          debugPrint("wakelock disabled");
-        }
+      if (_controller.value.isPlaying && !wakelockEnabled) {
+        Wakelock.enable();
+        wakelockEnabled = true;
+        debugPrint("wakelock enabled");
+      } else if (!_controller.value.isPlaying && wakelockEnabled) {
+        Wakelock.disable();
+        wakelockEnabled = false;
+        debugPrint("wakelock disabled");
+      }
 
       final duration = _controller.value.duration?.inSeconds;
       final currentPosition = _controller.value.position.inSeconds;
@@ -146,8 +144,6 @@ class _ControlsState extends State<Controls> {
   bool finalEpisodeReached = false;
   bool wakelockEnabled = false;
   // bool linkProgressValueWithPlayer = true;
-
-  Timer? timer;
 
   void skipToStart() async {
     print("skipping...");

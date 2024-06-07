@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -253,6 +255,131 @@ class Cards {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Card animeCardExtended(
+    int id,
+    String title,
+    String imageUrl,
+    double rating, {
+    bool ongoing = false,
+    bool shouldNavigate = true,
+    bool isAnime = true,
+    String? subText = null,
+    void Function()? afterNavigation,
+    String? bannerImageUrl,
+  }) {
+    if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
+    return Card(
+      color: backgroundSubColor,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      clipBehavior: Clip.hardEdge,
+      elevation: 0,
+      child: GestureDetector(
+        onTap: () {
+          if (!isAnime) return floatingSnackBar(context!, "Mangas/Novels arent supported");
+          if (shouldNavigate)
+            Navigator.of(context!)
+                .push(
+              MaterialPageRoute(
+                builder: (context) => Info(
+                  id: id,
+                ),
+              ),
+            )
+                .then((val) {
+              if (afterNavigation != null) afterNavigation();
+            });
+        },
+        child: Container(
+          width: 300,
+          height: 150,
+          child: Stack(
+            children: [
+              if (bannerImageUrl != null)
+                ImageFiltered(
+                  imageFilter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                  child: Opacity(
+                    opacity: 0.5,
+                    child: CachedNetworkImage(
+                      imageUrl: bannerImageUrl,
+                      fit: BoxFit.cover,
+                      width: double.infinity,
+                    ),
+                  ),
+                ),
+              Container(
+                padding: EdgeInsets.all(10),
+                child: Row(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        fadeInDuration: Duration(milliseconds: 200),
+                        fadeInCurve: Curves.easeIn,
+                        width: 100,
+                        height: 130,
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(left: 15, top: 10),
+                      width: 175,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: TextStyle(
+                              color: textMainColor,
+                              fontFamily: "NotoSans",
+                              fontWeight: FontWeight.w600,
+                              fontSize: 16,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 2,
+                          ),
+                          Container(
+                            width: 50,
+                            margin: EdgeInsets.only(top: 20),
+                            color: accentColor,
+                            padding: EdgeInsets.all(5),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.star,
+                                  color: backgroundColor,
+                                  size: 18,
+                                ),
+                                Text(
+                                 "$rating",
+                                  style: TextStyle(
+                                    color: backgroundColor,
+                                    fontFamily: "NotoSans",
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
+                                  ),
+                                  maxLines: 2,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+              ),
             ],
           ),
         ),

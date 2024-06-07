@@ -19,9 +19,9 @@ class Downloader {
     Permission access;
 
     if (sdkVer > 32) {
-        access = await Permission.videos;
+      access = await Permission.videos;
     } else {
-       access = await Permission.storage;
+      access = await Permission.storage;
     }
 
     final status = await access.status;
@@ -53,13 +53,11 @@ class Downloader {
   }
 
   int generateId() {
-    int maxId = downloadQueue.isNotEmpty
-        ? downloadQueue.map((item) => item.id).reduce((a, b) => a > b ? a : b)
-        : 0;
+    int maxId = downloadQueue.isNotEmpty ? downloadQueue.map((item) => item.id).reduce((a, b) => a > b ? a : b) : 0;
     return maxId + 1;
   }
 
-  Future<void> download(String streamLink, String fileName) async {
+  Future<void> download(String streamLink, String fileName, {int retryAttempts = 3}) async {
     final permission = await checkPermission();
     if (!permission) {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
@@ -100,8 +98,7 @@ class Downloader {
       );
 
       for (final segment in segmentsFiltered) {
-        final downloading =
-            downloadQueue.where((item) => item.id == downloadId).firstOrNull;
+        final downloading = downloadQueue.where((item) => item.id == downloadId).firstOrNull;
         if (downloading == null) {
           await NotificationService().pushBasicNotification(
             downloadId,
@@ -113,8 +110,7 @@ class Downloader {
         }
         await Future.delayed(Duration(milliseconds: 50));
         if (segment.length != 0) {
-          final uri =
-              segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
+          final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
           print("fetching segment [$segmentNumber/${segments.length}]");
 
@@ -125,7 +121,7 @@ class Downloader {
             fileName: "$fileName.mp4",
             path: finalPath,
           );
-          final res = await downloadSegment(uri);
+          final res = await downloadSegmentWithRetries(uri, retryAttempts);
           if (res.statusCode == 200) {
             buffers.add(res.bodyBytes);
           } else
@@ -161,11 +157,25 @@ class Downloader {
       final res = await get(Uri.parse(url));
       return res;
     } catch (err) {
-      // if (attemptNo == null) attemptNo = 1;
-      // if (attemptNo > 3)    //unsure!
-      // return downloadSegment(url, attemptNo: attemptNo + 1);
       throw Exception("Failed to download segment: $err");
     }
+  }
+
+  Future<Response> downloadSegmentWithRetries(String url, int totalAttempts) async {
+    int currentAttempt = 0;
+    while (currentAttempt < totalAttempts) {
+      try {
+        currentAttempt++;
+        final res = await downloadSegment(url)
+            .timeout(Duration(seconds: 30), onTimeout: () => throw Exception("FAILED DOWNLOAD ATTEMPT"));
+        return res;
+      } catch (err) {
+        if (currentAttempt >= totalAttempts) {
+          throw Exception("NUMBER OF DOWNLOAD ATTEMPTS EXCEEDED");
+        }
+      }
+    }
+    throw Exception("THIS SHOULD'NT BE THROWN");
   }
 
   Future<List<String>> _getSegments(String url) async {

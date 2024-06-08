@@ -113,7 +113,7 @@ class _DiscoverState extends State<Discover> {
     return Column(
       children: [
         Container(
-          margin: EdgeInsets.only(top: 30),
+          // margin: EdgeInsets.only(top: 30),
           height: 275,
           // width: double.infinity,
           child: trendingLoaded
@@ -231,6 +231,7 @@ class _DiscoverState extends State<Discover> {
     return PageView.builder(
         pageSnapping: true,
         controller: _pageController,
+        allowImplicitScrolling: true,
         // itemCount: trendingList.length,
         onPageChanged: (page) async {
           currentPage = page;

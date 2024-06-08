@@ -52,11 +52,13 @@ class _SearchState extends State<Search> {
   @override
   void initState() {
     super.initState();
-    textEditingController.value = TextEditingValue(text: widget.searchedText);
-    setState(() {
-      _searching = true;
-    });
-    addCards(widget.searchedText);
+    if (widget.searchedText.length > 0) {
+      textEditingController.value = TextEditingValue(text: widget.searchedText);
+      setState(() {
+        _searching = true;
+      });
+      addCards(widget.searchedText);
+    }
   }
 
   bool exactMatch = false;

@@ -53,6 +53,7 @@ dependencies:
   permission_handler: ^11.3.1
   flutter_native_splash: ^2.4.0
   device_info_plus: ^10.1.0
+  flutter_floating_bottom_bar: ^1.2.0
   better_player:
     git: 
       url: https://github.com/frostnova721/betterplayer.git

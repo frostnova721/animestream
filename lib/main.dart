@@ -6,6 +6,7 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/pages/home.dart';
+import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -80,7 +81,7 @@ class _AnimeStreamState extends State<AnimeStream> {
           seedColor: accentColor,
         ),
       ),
-      home: const Home(),
+      home: const MainNavigator(),
       debugShowCheckedModeBanner: false,
     );
   }

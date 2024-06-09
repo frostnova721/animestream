@@ -11,11 +11,15 @@ import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class NewHome extends StatefulWidget {
-  final UserModal? user;
+
+  final List<HomePageList> recentlyWatched;
+  final List<HomePageList> currentlyAiring;
+  final bool dataLoaded;
+  final bool error;
 
   const NewHome({
     super.key,
-    required this.user,
+    required this.currentlyAiring, required this.recentlyWatched, required this.dataLoaded, required this.error,
   });
 
   @override
@@ -26,16 +30,15 @@ class _NewHomeState extends State<NewHome> {
   @override
   void initState() {
     super.initState();
-    if (widget.user != null) {
-      userProfile = widget.user;
-      getLists(userName: userProfile!.name);
-    } else {
-      getLists();
-    }
+    recentlyWatched = widget.recentlyWatched;
+    currentlyAiring = widget.currentlyAiring;
+    // if (storedUserData != null) {
+    //   userProfile = storedUserData!;
+    //   getLists(userName: storedUserData!.name);
+    // } else {
+    //   getLists();
+    // }
   }
-
-  bool error = false;
-  bool dataLoaded = false;
 
   UserModal? userProfile;
 
@@ -59,7 +62,7 @@ class _NewHomeState extends State<NewHome> {
       ;
       if (mounted)
         setState(() {
-          dataLoaded = true;
+          // dataLoaded = true;
         });
     } catch (err) {
       print(err);
@@ -67,7 +70,7 @@ class _NewHomeState extends State<NewHome> {
         floatingSnackBar(context, err.toString());
       if (mounted)
         setState(() {
-          error = true;
+          // error = true;
         });
     }
   }
@@ -110,10 +113,10 @@ class _NewHomeState extends State<NewHome> {
                   ],
                 ),
               ),
-              if (userProfile != null) _accountCard(),
-              _titleAndList("Continue Watching", recentlyWatched),
+              if (storedUserData != null) _accountCard(),
+              _titleAndList("Continue Watching", widget.recentlyWatched),
               divider(),
-              _titleAndList("Aired This Season", currentlyAiring),
+              _titleAndList("Aired This Season", widget.currentlyAiring),
               footSpace(),
             ],
           ),
@@ -138,12 +141,12 @@ class _NewHomeState extends State<NewHome> {
         mainAxisSize: MainAxisSize.min,
         children: [
           CircleAvatar(
-            backgroundImage: NetworkImage(userProfile!.avatar!),
+            backgroundImage: NetworkImage(storedUserData!.avatar!),
           ),
           Padding(
             padding: EdgeInsets.only(left: 10),
             child: Text(
-              userProfile!.name,
+              storedUserData!.name,
               style: TextStyle(
                 fontFamily: "Poppins",
                 fontSize: 16,
@@ -185,8 +188,8 @@ class _NewHomeState extends State<NewHome> {
         ),
         Container(
           height: 160,
-          child: dataLoaded
-              ? ListView.builder(
+          child: widget.dataLoaded
+              ? list.length > 0 ? ListView.builder(
                   padding: EdgeInsets.zero,
                   scrollDirection: Axis.horizontal,
                   itemCount: list.length,
@@ -198,7 +201,33 @@ class _NewHomeState extends State<NewHome> {
                           item.title['english'] ?? item.title['romaji'] ?? '', item.coverImage, item.rating ?? 0.0,
                           bannerImageUrl: item.coverImage),
                     );
-                  })
+                  }) : Center(
+                child: Container(
+                  alignment: Alignment.center,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Image.asset(
+                        "lib/assets/images/ghost.png",
+                        color: Color.fromARGB(255, 80, 80, 80),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Text(
+                          "Boo! Nothing's here!",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            fontFamily: "NunitoSans",
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromARGB(255, 80, 80, 80),
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              )
               : Center(
                   child: CircularProgressIndicator(),
                 ),

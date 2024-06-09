@@ -1,6 +1,10 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/data/watching.dart';
+import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/newHome.dart';
@@ -22,12 +26,16 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     super.initState();
 
     AniListLogin().isAnilistLoggedIn().then((loggedIn) {
-      if (loggedIn)
+      if (loggedIn) {
         AniListLogin().getUserProfile().then((user) => {
               userProfile = user,
               storedUserData = user,
               print(storedUserData?.name),
+              loadListsForHome(userName: user.name)
             });
+      } else {
+        loadListsForHome();
+      }
     });
 
     tabController = TabController(length: 4, vsync: this);
@@ -36,6 +44,42 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   UserModal? userProfile;
 
   late TabController tabController;
+
+  List<HomePageList> currentlyAiring = [];
+  List<HomePageList> recentlyWatched = [];
+
+  bool homePageError = false;
+  bool homeDataLoaded = false;
+
+  Future<void> loadListsForHome({String? userName}) async {
+    try {
+      List<UserAnimeListItem> watched = await getWatchedList(userName: userName);
+      if (watched.length > 40) watched = watched.sublist(0, 40);
+      recentlyWatched = [];
+      watched.forEach((item) => recentlyWatched
+          .add(HomePageList(coverImage: item.coverImage, id: item.id, rating: item.rating, title: item.title)));
+
+      final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
+      if (currentlyAiringResponse.length == 0) return;
+
+      currentlyAiring = [];
+      currentlyAiringResponse.sublist(0, 20).forEach((item) => currentlyAiring
+          .add(HomePageList(coverImage: item.cover, id: item.id, rating: item.rating, title: item.title)));
+      ;
+      if (mounted)
+        setState(() {
+          homeDataLoaded = true;
+        });
+    } catch (err) {
+      print(err);
+      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
+        floatingSnackBar(context, err.toString());
+      if (mounted)
+        setState(() {
+          homePageError = true;
+        });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,7 +103,11 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             indicatorColor: accentColor,
             labelPadding: EdgeInsets.only(bottom: 5),
             tabs: [
-              TabIcon(icon: Icons.home_rounded, label: "Home", animate: tabController.index == 0,),
+              TabIcon(
+                icon: Icons.home_rounded,
+                label: "Home",
+                animate: tabController.index == 0,
+              ),
               TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
               TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
               TabIcon(icon: Icons.featured_play_list_rounded, label: "Lists", animate: tabController.index == 3)
@@ -70,8 +118,15 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           controller: tabController,
           physics: NeverScrollableScrollPhysics(),
           children: [
-            NewHome(user: userProfile),
-            Discover(currentSeason: [],),
+            NewHome(
+              recentlyWatched: recentlyWatched,
+              currentlyAiring: currentlyAiring,
+              dataLoaded: homeDataLoaded,
+              error: homePageError,
+            ),
+            Discover(
+              currentSeason: [],
+            ),
             Search(searchedText: ""),
             AnimeLists(),
           ],
@@ -79,19 +134,20 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       ),
     );
   }
-
 }
 
 class TabIcon extends StatefulWidget {
-  final IconData? icon; final String label; final bool animate; final bool image;
+  final IconData? icon;
+  final String label;
+  final bool animate;
+  final bool image;
   const TabIcon({super.key, required this.icon, this.image = false, required this.label, required this.animate});
 
   @override
   State<TabIcon> createState() => _TabIconState();
 }
 
-class _TabIconState extends State<TabIcon>  {
-
+class _TabIconState extends State<TabIcon> {
   @override
   void initState() {
     super.initState();
@@ -101,21 +157,25 @@ class _TabIconState extends State<TabIcon>  {
 
   @override
   Widget build(BuildContext context) {
-    if(widget.image == false && widget.icon == null) throw Exception("DIDNT RECIEVE 'IconData'"); 
+    if (widget.image == false && widget.icon == null) throw Exception("DIDNT RECIEVE 'IconData'");
     return Container(
       height: 40,
       child: AnimatedSwitcher(
         duration: Duration(milliseconds: 300),
-        child: 
-        widget.animate
-            ? Text(widget.label, style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.w600, fontSize: 14),)
-            : widget.image ? ImageIcon(
-                  AssetImage("lib/assets/images/shines.png"),
-                  size: iconSize - 4,
-                ) : Icon(
-                widget.icon,
-                size: iconSize,
-              ),
+        child: widget.animate
+            ? Text(
+                widget.label,
+                style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.w600, fontSize: 14),
+              )
+            : widget.image
+                ? ImageIcon(
+                    AssetImage("lib/assets/images/shines.png"),
+                    size: iconSize - 4,
+                  )
+                : Icon(
+                    widget.icon,
+                    size: iconSize,
+                  ),
       ),
     );
   }

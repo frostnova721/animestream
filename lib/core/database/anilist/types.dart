@@ -148,8 +148,9 @@ class CurrentlyAiringResult {
   final Map<String, String?> title;
   final String cover;
   final String status;
+  final double? rating;
 
-  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title});
+  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title, required this.rating});
 }
 
 class AnilistSearchResult {

@@ -52,6 +52,7 @@ class Anilist {
                   romaji
                   english
                 }
+                averageScore
                 coverImage {
                   large
                 }
@@ -68,6 +69,7 @@ class Anilist {
           cover: airingAnime['coverImage']['large'],
           id: airingAnime['id'],
           status: airingAnime['status'],
+          rating: (airingAnime['averageScore'] ?? 0)/10,
           title: {'english': airingAnime['title']['english'], 'romaji': airingAnime['title']['romaji']}));
     }
 

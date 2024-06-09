@@ -46,3 +46,16 @@ class WatchPageInfo {
   });
 }
 
+class HomePageList {
+  final String coverImage;
+  final double? rating;
+  final Map<String, String?> title;
+  final int id;
+
+  HomePageList({
+    required this.coverImage,
+    required this.rating,
+    required this.title,
+    required this.id,
+  });
+}

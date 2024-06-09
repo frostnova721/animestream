@@ -7,6 +7,7 @@ import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
+import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
@@ -28,6 +29,8 @@ class _DiscoverState extends State<Discover> {
     getTrendingList();
     getRecentlyUpdated();
     getRecommended();
+
+    _pageController.addListener(onScroll);
   }
 
   List<Card> thisSeason = [];
@@ -38,9 +41,31 @@ class _DiscoverState extends State<Discover> {
   final PageController _pageController = PageController();
   Timer? timer;
   bool trendingLoaded = false, recentlyUpdatedLoaded = false, recommendedLoaded = false;
+  double page = 0;
+
+  void onScroll() {
+    setState(() {
+      page = _pageController.page ?? 0;
+    });
+  }
 
   Future getLists() async {
-    thisSeason = widget.currentSeason;
+    // thisSeason = widget.currentSeason;
+    final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
+      if (currentlyAiringResponse.length == 0) return;
+
+      thisSeason = [];
+      currentlyAiringResponse.forEach((e) {
+        final title = e.title['english'] ?? e.title['romaji'] ?? '';
+        final image = e.cover;
+        thisSeason.add(
+          Cards(context: context).animeCard(
+            e.id,
+            title,
+            image,
+          ),
+        );
+      });
 
     if (mounted) setState(() {});
   }
@@ -103,127 +128,172 @@ class _DiscoverState extends State<Discover> {
         currentPage = 0;
       if (mounted)
         setState(() {
-          _pageController.animateToPage(currentPage, duration: Duration(milliseconds: 200), curve: Curves.easeIn);
+          _pageController.animateToPage(currentPage, duration: Duration(milliseconds: 400), curve: Curves.easeOut);
         });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          // margin: EdgeInsets.only(top: 30),
-          height: 275,
-          // width: double.infinity,
-          child: trendingLoaded
-              ? _trendingAnimesPageView()
-              : Container(
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: accentColor,
-                    ),
-                  ),
-                ),
-        ),
-        if (trendingList.isNotEmpty)
-          Container(
-            margin: EdgeInsets.only(top: 10),
-            child: SmoothPageIndicator(
-              controller: _pageController,
-              count: trendingList.length,
-              axisDirection: Axis.horizontal,
-              effect: ScrollingDotsEffect(
-                activeDotColor: accentColor,
-                dotColor: textMainColor,
-                dotHeight: 5,
-                dotWidth: 5,
-              ),
-              onDotClicked: (index) {
-                _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeIn);
-              },
-            ),
-          ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Column(
           children: [
-            Container(
-              margin: EdgeInsets.only(top: 30, right: 25),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => News()));
-                },
-                child: Container(
-                  height: 50,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(
-                        image: AssetImage(
-                          'lib/assets/images/chisato.jpeg',
+            Stack(
+              children: [
+                Container(
+                  // margin: EdgeInsets.only(top: 30),
+                  height: 320,
+                  // width: double.infinity,
+                  child: trendingLoaded
+                      ? _trendingAnimesPageView()
+                      : Container(
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              color: accentColor,
+                            ),
+                          ),
                         ),
-                        fit: BoxFit.cover,
-                        opacity: 0.35),
-                    border: Border.all(color: accentColor),
+                ),
+                Container(
+                  padding:
+                      EdgeInsets.only(left: 20, top: MediaQuery.of(context).padding.top + 10, right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Discover",
+                        style: TextStyle(
+                          color: textMainColor,
+                          fontFamily: "Rubik",
+                          fontWeight: FontWeight.bold,
+                          fontSize: 30,
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SettingsPage(),
+                          ),
+                        ),
+                        icon: Icon(
+                          Icons.settings_rounded,
+                          color: textMainColor,
+                          size: 32,
+                        ),
+                      ),
+                    ],
                   ),
-                  child: Center(
-                    child: Text(
-                      "News",
-                      style: TextStyle(
-                        color: textMainColor,
-                        fontFamily: "NotoSans",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
+                ),
+              ],
+            ),
+            if (trendingList.isNotEmpty)
+              Container(
+                margin: EdgeInsets.only(top: 10),
+                child: SmoothPageIndicator(
+                  controller: _pageController,
+                  count: trendingList.length,
+                  axisDirection: Axis.horizontal,
+                  effect: ScrollingDotsEffect(
+                    activeDotColor: accentColor,
+                    dotColor: textMainColor,
+                    dotHeight: 5,
+                    dotWidth: 5,
+                  ),
+                  onDotClicked: (index) {
+                    _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeIn);
+                  },
+                ),
+              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  margin: EdgeInsets.only(top: 30, right: 25),
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(20),
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => News()));
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(
+                            image: AssetImage(
+                              'lib/assets/images/chisato.jpeg',
+                            ),
+                            fit: BoxFit.cover,
+                            opacity: 0.35),
+                        border: Border.all(color: accentColor),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "News",
+                          style: TextStyle(
+                            color: textMainColor,
+                            fontFamily: "NotoSans",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ),
-            Container(
-              margin: EdgeInsets.only(top: 30),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(20),
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => GenresPage()));
-                },
-                child: Container(
-                  height: 50,
-                  width: 150,
-                  decoration: BoxDecoration(
+                Container(
+                  margin: EdgeInsets.only(top: 30),
+                  child: InkWell(
                     borderRadius: BorderRadius.circular(20),
-                    image: DecorationImage(
-                        image: AssetImage(
-                          'lib/assets/images/mitsuha.jpg',
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => GenresPage()));
+                    },
+                    child: Container(
+                      height: 50,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        image: DecorationImage(
+                            image: AssetImage(
+                              'lib/assets/images/mitsuha.jpg',
+                            ),
+                            fit: BoxFit.cover,
+                            opacity: 0.35),
+                        border: Border.all(color: accentColor),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Genres",
+                          style: TextStyle(
+                            color: textMainColor,
+                            fontFamily: "NotoSans",
+                            fontWeight: FontWeight.bold,
+                            fontSize: 20,
+                          ),
                         ),
-                        fit: BoxFit.cover,
-                        opacity: 0.35),
-                    border: Border.all(color: accentColor),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Genres",
-                      style: TextStyle(
-                        color: textMainColor,
-                        fontFamily: "NotoSans",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 20,
                       ),
                     ),
                   ),
                 ),
-              ),
+              ],
             ),
+            _itemTitle("Recently updated"),
+            _scrollList(recentlyUpdatedList),
+            _itemTitle("This season"),
+            _scrollList(thisSeason),
+            _itemTitle("Recommended"),
+            _scrollList(recommendedList),
+            footSpace(),
           ],
         ),
-        _itemTitle("Recently updated"),
-        _scrollList(recentlyUpdatedList),
-        _itemTitle("This season"),
-        _scrollList(thisSeason),
-        _itemTitle("Recommended"),
-        _scrollList(recommendedList),
-      ],
+      ),
+    );
+  }
+
+   SizedBox footSpace() {
+    return SizedBox(
+      height: MediaQuery.of(context).padding.bottom + 60,
     );
   }
 
@@ -232,7 +302,6 @@ class _DiscoverState extends State<Discover> {
         pageSnapping: true,
         controller: _pageController,
         allowImplicitScrolling: true,
-        // itemCount: trendingList.length,
         onPageChanged: (page) async {
           currentPage = page;
           await pageTimeout();
@@ -262,6 +331,7 @@ class _DiscoverState extends State<Discover> {
                         child: Image.network(
                           trendingList[index % trendingList.length].banner ??
                               trendingList[index % trendingList.length].cover,
+                          alignment: Alignment((index - page).clamp(-1, 1).toDouble(), 1),
                           opacity: AlwaysStoppedAnimation(0.5),
                           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                             if (wasSynchronouslyLoaded) return child;
@@ -271,7 +341,7 @@ class _DiscoverState extends State<Discover> {
                               child: child,
                             );
                           },
-                          height: 275,
+                          height: 350,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -279,7 +349,7 @@ class _DiscoverState extends State<Discover> {
                     // ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(left: 20.0),
+                    padding: EdgeInsets.only(left: 20.0, top: MediaQuery.of(context).padding.top + 50),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [

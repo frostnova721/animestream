@@ -1,12 +1,10 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/newHome.dart';
 import 'package:animestream/ui/pages/search.dart';
-import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -38,8 +36,6 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   UserModal? userProfile;
 
   late TabController tabController;
-
-  double iconSize = 30;
 
   @override
   Widget build(BuildContext context) {
@@ -74,8 +70,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           controller: tabController,
           physics: NeverScrollableScrollPhysics(),
           children: [
-            NewHome(),
-            SingleChildScrollView(child: Discover(currentSeason: [])),
+            NewHome(user: userProfile),
+            Discover(currentSeason: [],),
             Search(searchedText: ""),
             AnimeLists(),
           ],
@@ -83,6 +79,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       ),
     );
   }
+
 }
 
 class TabIcon extends StatefulWidget {
@@ -105,17 +102,21 @@ class _TabIconState extends State<TabIcon>  {
   @override
   Widget build(BuildContext context) {
     if(widget.image == false && widget.icon == null) throw Exception("DIDNT RECIEVE 'IconData'"); 
-    return AnimatedSwitcher(
-      duration: Duration(milliseconds: 300),
-      child: widget.animate
-          ? Text(widget.label, style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.w600, fontSize: 14),)
-          : widget.image ? ImageIcon(
-                AssetImage("lib/assets/images/shines.png"),
-                size: iconSize - 4,
-              ) : Icon(
-              widget.icon,
-              size: iconSize,
-            ),
+    return Container(
+      height: 40,
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 300),
+        child: 
+        widget.animate
+            ? Text(widget.label, style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.w600, fontSize: 14),)
+            : widget.image ? ImageIcon(
+                  AssetImage("lib/assets/images/shines.png"),
+                  size: iconSize - 4,
+                ) : Icon(
+                widget.icon,
+                size: iconSize,
+              ),
+      ),
     );
   }
 }

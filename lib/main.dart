@@ -5,7 +5,6 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -75,6 +74,10 @@ class _AnimeStreamState extends State<AnimeStream> {
       title: 'Animestream',
       theme: ThemeData(
         useMaterial3: true,
+        textTheme: Theme.of(context).textTheme.apply(
+          bodyColor: textMainColor,
+          fontFamily: "NotoSans"
+        ),
         scaffoldBackgroundColor: backgroundColor,
         bottomSheetTheme: BottomSheetThemeData(backgroundColor: modalSheetBackgroundColor),
         colorScheme: ColorScheme.fromSeed(

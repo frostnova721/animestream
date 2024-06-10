@@ -15,6 +15,7 @@ class AnilistQueries {
         media {
           id
           status
+          episodes
           title {
             romaji
             english
@@ -45,6 +46,7 @@ class AnilistQueries {
               'romaji': media['title']['romaji'],
             },
             // releaseStatus: media['status'],
+            episodes: media['episodes'],
             coverImage: media['coverImage']['large'],
             watchProgress: e['progress'],
             rating: media['averageScore'] != null ? (media['averageScore'] / 10)?.toDouble() : null,

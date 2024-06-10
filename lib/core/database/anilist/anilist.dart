@@ -26,7 +26,7 @@ class Anilist {
 
     List<AnilistSearchResult> searchResults = [];
 
-    if(data.length == 0) {
+    if (data.length == 0) {
       return [];
     }
 
@@ -52,6 +52,7 @@ class Anilist {
                   romaji
                   english
                 }
+                episodes
                 averageScore
                 coverImage {
                   large
@@ -65,12 +66,16 @@ class Anilist {
     final List<CurrentlyAiringResult> airingAnimes = [];
 
     for (final airingAnime in data) {
-      airingAnimes.add(CurrentlyAiringResult(
+      airingAnimes.add(
+        CurrentlyAiringResult(
           cover: airingAnime['coverImage']['large'],
           id: airingAnime['id'],
           status: airingAnime['status'],
-          rating: (airingAnime['averageScore'] ?? 0)/10,
-          title: {'english': airingAnime['title']['english'], 'romaji': airingAnime['title']['romaji']}));
+          rating: (airingAnime['averageScore'] ?? 0) / 10,
+          title: {'english': airingAnime['title']['english'], 'romaji': airingAnime['title']['romaji']},
+          episodes: airingAnime['episodes']
+        ),
+      );
     }
 
     return airingAnimes;

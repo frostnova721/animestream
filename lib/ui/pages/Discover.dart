@@ -1,21 +1,26 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:animestream/core/database/anilist/anilist.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 
 class Discover extends StatefulWidget {
-  final List<Card> currentSeason;
-  const Discover({super.key, required this.currentSeason});
+  final List<Card> thisSeason;
+  final List<TrendingResult> trendingList;
+  final List<Card> recentlyUpdatedList;
+  final List<Card> recommendedList;
+  const Discover({
+    super.key,
+    required this.recentlyUpdatedList,
+    required this.recommendedList,
+    required this.thisSeason,
+    required this.trendingList,
+  });
 
   @override
   State<Discover> createState() => _DiscoverState();
@@ -25,22 +30,22 @@ class _DiscoverState extends State<Discover> {
   @override
   void initState() {
     super.initState();
-    getLists();
-    getTrendingList();
-    getRecentlyUpdated();
-    getRecommended();
+    // getLists();
+    // getTrendingList();
+    // getRecentlyUpdated();
+    // getRecommended();
 
     _pageController.addListener(onScroll);
   }
 
-  List<Card> thisSeason = [];
-  List<TrendingResult> trendingList = [];
-  List<Card> recentlyUpdatedList = [];
-  List<Card> recommendedList = [];
+  // List<Card> thisSeason = [];
+  // List<TrendingResult> trendingList = [];
+  // List<Card> recentlyUpdatedList = [];
+  // List<Card> recommendedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
-  bool trendingLoaded = false, recentlyUpdatedLoaded = false, recommendedLoaded = false;
+  // bool trendingLoaded = false, recentlyUpdatedLoaded = false, recommendedLoaded = false;
   double page = 0;
 
   void onScroll() {
@@ -49,80 +54,80 @@ class _DiscoverState extends State<Discover> {
     });
   }
 
-  Future getLists() async {
-    // thisSeason = widget.currentSeason;
-    final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
-      if (currentlyAiringResponse.length == 0) return;
+  // Future getLists() async {
+  //   // thisSeason = widget.currentSeason;
+  //   final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
+  //   if (currentlyAiringResponse.length == 0) return;
 
-      thisSeason = [];
-      currentlyAiringResponse.forEach((e) {
-        final title = e.title['english'] ?? e.title['romaji'] ?? '';
-        final image = e.cover;
-        thisSeason.add(
-          Cards(context: context).animeCard(
-            e.id,
-            title,
-            image,
-          ),
-        );
-      });
+  //   thisSeason = [];
+  //   currentlyAiringResponse.forEach((e) {
+  //     final title = e.title['english'] ?? e.title['romaji'] ?? '';
+  //     final image = e.cover;
+  //     thisSeason.add(
+  //       Cards(context: context).animeCard(
+  //         e.id,
+  //         title,
+  //         image,
+  //       ),
+  //     );
+  //   });
 
-    if (mounted) setState(() {});
-  }
+  //   if (mounted) setState(() {});
+  // }
 
-  Future<void> getTrendingList() async {
-    final list = await Anilist().getTrending();
-    if (mounted)
-      setState(() {
-        trendingList = list.sublist(0, 20);
-        trendingLoaded = true;
-        pageTimeout();
-      });
-  }
+  // Future<void> getTrendingList() async {
+  //   final list = await Anilist().getTrending();
+  //   if (mounted)
+  //     setState(() {
+  //       trendingList = list.sublist(0, 20);
+  //       trendingLoaded = true;
+  //       pageTimeout();
+  //     });
+  // }
 
-  Future<void> getRecommended() async {
-    final list = await AnilistQueries().getRecommendedAnimes();
-    for (final item in list) {
-      recommendedList.add(
-        Cards(context: context).animeCard(
-          item.id,
-          item.title['english'] ?? item.title['romaji'] ?? '',
-          item.cover,
-        ),
-      );
-    }
-    if (mounted)
-      setState(() {
-        recommendedLoaded = true;
-      });
-  }
+  // Future<void> getRecommended() async {
+  //   final list = await AnilistQueries().getRecommendedAnimes();
+  //   for (final item in list) {
+  //     recommendedList.add(
+  //       Cards(context: context).animeCard(
+  //         item.id,
+  //         item.title['english'] ?? item.title['romaji'] ?? '',
+  //         item.cover,
+  //       ),
+  //     );
+  //   }
+  //   if (mounted)
+  //     setState(() {
+  //       recommendedLoaded = true;
+  //     });
+  // }
 
-  Future<void> getRecentlyUpdated() async {
-    final list = await Anilist().recentlyUpdated();
-    //to filter out the dupes
-    Set<int> ids = {};
-    for (final elem in list) {
-      if (!ids.contains(elem.id)) {
-        ids.add(elem.id);
-        recentlyUpdatedList.add(
-          Cards(context: context).animeCard(
-            elem.id,
-            elem.title['english'] ?? elem.title['romaji'] ?? '',
-            elem.cover,
-          ),
-        );
-      }
-    }
-    if (mounted)
-      setState(() {
-        recentlyUpdatedLoaded = true;
-      });
-  }
+  // Future<void> getRecentlyUpdated() async {
+  //   final list = await Anilist().recentlyUpdated();
+  //   //to filter out the dupes
+  //   Set<int> ids = {};
+  //   for (final elem in list) {
+  //     if (!ids.contains(elem.id)) {
+  //       ids.add(elem.id);
+  //       recentlyUpdatedList.add(
+  //         Cards(context: context).animeCard(
+  //           elem.id,
+  //           elem.title['english'] ?? elem.title['romaji'] ?? '',
+  //           elem.cover,
+  //         ),
+  //       );
+  //     }
+  //   }
+  //   if (mounted)
+  //     setState(() {
+  //       recentlyUpdatedLoaded = true;
+  //     });
+  // }
 
   Future<void> pageTimeout() async {
     if (timer != null && timer!.isActive) timer!.cancel();
     timer = Timer(Duration(seconds: 5), () {
-      if (currentPage < trendingList.length - 1) {
+      if (currentPage < widget.trendingList.length - 1) {
         currentPage++;
       } else
         currentPage = 0;
@@ -133,8 +138,14 @@ class _DiscoverState extends State<Discover> {
     });
   }
 
+  bool initialTimeOutCalled = false;
+
   @override
   Widget build(BuildContext context) {
+    if(!initialTimeOutCalled && widget.trendingList.length > 0) {
+      pageTimeout();
+      initialTimeOutCalled = true;
+    }
     return Scaffold(
       body: SingleChildScrollView(
         child: Column(
@@ -143,9 +154,9 @@ class _DiscoverState extends State<Discover> {
               children: [
                 Container(
                   // margin: EdgeInsets.only(top: 30),
-                  height: 320,
+                  height: 360,
                   // width: double.infinity,
-                  child: trendingLoaded
+                  child: widget.trendingList.length > 0
                       ? _trendingAnimesPageView()
                       : Container(
                           child: Center(
@@ -156,8 +167,7 @@ class _DiscoverState extends State<Discover> {
                         ),
                 ),
                 Container(
-                  padding:
-                      EdgeInsets.only(left: 20, top: MediaQuery.of(context).padding.top + 10, right: 20),
+                  padding: EdgeInsets.only(left: 20, top: MediaQuery.of(context).padding.top + 10, right: 20),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -187,24 +197,6 @@ class _DiscoverState extends State<Discover> {
                 ),
               ],
             ),
-            if (trendingList.isNotEmpty)
-              Container(
-                margin: EdgeInsets.only(top: 10),
-                child: SmoothPageIndicator(
-                  controller: _pageController,
-                  count: trendingList.length,
-                  axisDirection: Axis.horizontal,
-                  effect: ScrollingDotsEffect(
-                    activeDotColor: accentColor,
-                    dotColor: textMainColor,
-                    dotHeight: 5,
-                    dotWidth: 5,
-                  ),
-                  onDotClicked: (index) {
-                    _pageController.animateToPage(index, duration: Duration(milliseconds: 250), curve: Curves.easeIn);
-                  },
-                ),
-              ),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -216,7 +208,7 @@ class _DiscoverState extends State<Discover> {
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) => News()));
                     },
                     child: Container(
-                      height: 50,
+                      height: 75,
                       width: 150,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
@@ -235,7 +227,7 @@ class _DiscoverState extends State<Discover> {
                             color: textMainColor,
                             fontFamily: "NotoSans",
                             fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 24,
                           ),
                         ),
                       ),
@@ -250,7 +242,7 @@ class _DiscoverState extends State<Discover> {
                       Navigator.of(context).push(MaterialPageRoute(builder: (context) => GenresPage()));
                     },
                     child: Container(
-                      height: 50,
+                      height: 75,
                       width: 150,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
@@ -269,7 +261,7 @@ class _DiscoverState extends State<Discover> {
                             color: textMainColor,
                             fontFamily: "NotoSans",
                             fontWeight: FontWeight.bold,
-                            fontSize: 20,
+                            fontSize: 24,
                           ),
                         ),
                       ),
@@ -279,11 +271,11 @@ class _DiscoverState extends State<Discover> {
               ],
             ),
             _itemTitle("Recently updated"),
-            _scrollList(recentlyUpdatedList),
+            _scrollList(widget.recentlyUpdatedList),
             _itemTitle("This season"),
-            _scrollList(thisSeason),
+            _scrollList(widget.thisSeason),
             _itemTitle("Recommended"),
-            _scrollList(recommendedList),
+            _scrollList(widget.recommendedList),
             footSpace(),
           ],
         ),
@@ -291,7 +283,7 @@ class _DiscoverState extends State<Discover> {
     );
   }
 
-   SizedBox footSpace() {
+  SizedBox footSpace() {
     return SizedBox(
       height: MediaQuery.of(context).padding.bottom + 60,
     );
@@ -314,7 +306,7 @@ class _DiscoverState extends State<Discover> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => Info(
-                    id: trendingList[index % trendingList.length].id,
+                    id: widget.trendingList[index % widget.trendingList.length].id,
                   ),
                 ),
               );
@@ -329,8 +321,8 @@ class _DiscoverState extends State<Discover> {
                       child: ImageFiltered(
                         imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                         child: Image.network(
-                          trendingList[index % trendingList.length].banner ??
-                              trendingList[index % trendingList.length].cover,
+                          widget.trendingList[index % widget.trendingList.length].banner ??
+                              widget.trendingList[index % widget.trendingList.length].cover,
                           alignment: Alignment((index - page).clamp(-1, 1).toDouble(), 1),
                           opacity: AlwaysStoppedAnimation(0.5),
                           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -341,7 +333,7 @@ class _DiscoverState extends State<Discover> {
                               child: child,
                             );
                           },
-                          height: 350,
+                          height: 360,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -356,7 +348,7 @@ class _DiscoverState extends State<Discover> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.network(
-                            trendingList[index % trendingList.length].cover,
+                            widget.trendingList[index % widget.trendingList.length].cover,
                             height: 170,
                             width: 120,
                           ),
@@ -372,8 +364,8 @@ class _DiscoverState extends State<Discover> {
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10.0),
                                 child: Text(
-                                  trendingList[index % trendingList.length].title['english'] ??
-                                      trendingList[index % trendingList.length].title['romaji'] ??
+                                  widget.trendingList[index % widget.trendingList.length].title['english'] ??
+                                      widget.trendingList[index % widget.trendingList.length].title['romaji'] ??
                                       '',
                                   style: TextStyle(
                                     color: textMainColor,
@@ -386,7 +378,7 @@ class _DiscoverState extends State<Discover> {
                                 ),
                               ),
                               Text(
-                                trendingList[index % trendingList.length].genres.join(', '),
+                                widget.trendingList[index % widget.trendingList.length].genres.join(', '),
                                 style: TextStyle(
                                     color: Color.fromARGB(255, 180, 180, 180),
                                     fontFamily: 'NunitoSans',
@@ -406,7 +398,7 @@ class _DiscoverState extends State<Discover> {
                                       size: 20,
                                     ),
                                     Text(
-                                      "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
+                                      "${widget.trendingList[index % widget.trendingList.length].rating != null ? widget.trendingList[index % widget.trendingList.length].rating! / 10 : '??'}",
                                       style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 17),
                                     ),
                                   ],

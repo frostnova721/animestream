@@ -73,6 +73,7 @@ class UserAnimeListItem {
   final String coverImage;
   final int? watchProgress;
   final double? rating;
+  final int? episodes;
 
   UserAnimeListItem({
     required this.id,
@@ -81,6 +82,7 @@ class UserAnimeListItem {
     required this.coverImage,
     required this.watchProgress,
     required this.rating,
+    this.episodes,
   });
 }
 
@@ -149,8 +151,9 @@ class CurrentlyAiringResult {
   final String cover;
   final String status;
   final double? rating;
+  final int? episodes;
 
-  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title, required this.rating});
+  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title, required this.rating, required this.episodes});
 }
 
 class AnilistSearchResult {

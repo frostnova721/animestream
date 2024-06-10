@@ -272,6 +272,8 @@ class Cards {
     bool isAnime = true,
     String? subText = null,
     void Function()? afterNavigation,
+    int? watchedEpisodeCount,
+    int? totalEpisodes,
     String? bannerImageUrl,
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
@@ -335,7 +337,7 @@ class Cards {
                       padding: EdgeInsets.only(left: 15, top: 10),
                       width: 175,
                       child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
@@ -350,27 +352,62 @@ class Cards {
                             maxLines: 2,
                           ),
                           Container(
-                            width: 50,
-                            margin: EdgeInsets.only(top: 20),
-                            color: accentColor,
-                            padding: EdgeInsets.all(5),
+                            margin: EdgeInsets.only(bottom: 15),
                             child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.star,
-                                  color: backgroundColor,
-                                  size: 18,
-                                ),
-                                Text(
-                                 "$rating",
-                                  style: TextStyle(
-                                    color: backgroundColor,
-                                    fontFamily: "NotoSans",
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
+                                Container(
+                                  width: 50,
+                                  padding: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: accentColor.withOpacity(0.8),
+                                    borderRadius: BorderRadius.circular(10)
                                   ),
-                                  maxLines: 2,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.star,
+                                        color: backgroundColor,
+                                        size: 18,
+                                      ),
+                                      Text(
+                                        "$rating",
+                                        style: TextStyle(
+                                          color: backgroundColor,
+                                          fontFamily: "NotoSans",
+                                          fontWeight: FontWeight.w600,
+                                          fontSize: 14,
+                                        ),
+                                        maxLines: 2,
+                                      ),
+                                    ],
+                                  ),
                                 ),
+                                if (totalEpisodes != null || watchedEpisodeCount != null)
+                                  Container(
+                                    margin: EdgeInsets.only(right: 15),
+                                    child: Row(
+                                      children: [
+                                        Text(
+                                          "${watchedEpisodeCount ?? "-"} ",
+                                          style: TextStyle(
+                                            fontFamily: "NunitoSans",
+                                            fontWeight: FontWeight.bold,
+                                            color: ColorScheme.fromSeed(seedColor: accentColor).primaryFixedDim,
+                                          ),
+                                        ),
+                                        Text(
+                                          "/ ${totalEpisodes ?? "??"}",
+                                          style: TextStyle(
+                                            fontFamily: "NunitoSans",
+                                            fontWeight: FontWeight.bold,
+                                            color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  )
                               ],
                             ),
                           ),

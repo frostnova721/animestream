@@ -51,11 +51,15 @@ class HomePageList {
   final double? rating;
   final Map<String, String?> title;
   final int id;
+  final int? totalEpisodes;
+  final int? watchedEpisodeCount;
 
   HomePageList({
     required this.coverImage,
     required this.rating,
     required this.title,
     required this.id,
+    this.totalEpisodes,
+    this.watchedEpisodeCount,
   });
 }

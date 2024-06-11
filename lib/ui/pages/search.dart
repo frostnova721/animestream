@@ -7,8 +7,7 @@ import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class Search extends StatefulWidget {
-  final String searchedText;
-  const Search({super.key, required this.searchedText});
+  const Search({super.key});
 
   @override
   State<Search> createState() => _SearchState();
@@ -53,13 +52,6 @@ class _SearchState extends State<Search> {
   @override
   void initState() {
     super.initState();
-    if (widget.searchedText.length > 0) {
-      textEditingController.value = TextEditingValue(text: widget.searchedText);
-      setState(() {
-        _searching = true;
-      });
-      addCards(widget.searchedText);
-    }
   }
 
   bool exactMatch = false;

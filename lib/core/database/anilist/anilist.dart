@@ -1,4 +1,5 @@
 import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:graphql/client.dart';
@@ -57,11 +58,14 @@ class Anilist {
                 coverImage {
                   large
                 }
+                mediaListEntry {
+                  progress
+                }
               }
             }
           }''';
 
-    final List<dynamic> data = await fetchQuery(query, RequestType.media);
+    final List<dynamic> data = await fetchQuery(query, RequestType.media, token: await getVal('token'));
 
     final List<CurrentlyAiringResult> airingAnimes = [];
 
@@ -73,7 +77,8 @@ class Anilist {
           status: airingAnime['status'],
           rating: (airingAnime['averageScore'] ?? 0) / 10,
           title: {'english': airingAnime['title']['english'], 'romaji': airingAnime['title']['romaji']},
-          episodes: airingAnime['episodes']
+          episodes: airingAnime['episodes'],
+          watchProgress: airingAnime['mediaListEntry']?['progress'],
         ),
       );
     }

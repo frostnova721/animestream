@@ -94,6 +94,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             rating: item.rating,
             title: item.title,
             totalEpisodes: item.episodes,
+            watchedEpisodeCount: item.watchProgress
           ),
         );
 
@@ -251,7 +252,6 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                 ),
                 TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
                 TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
-                // TabIcon(icon: Icons.featured_play_list_rounded, label: "Lists", animate: tabController.index == 3)
               ],
             ),
           ),
@@ -279,8 +279,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   recommendedList: recommendedList,
                   trendingList: trendingList,
                 ),
-                Search(searchedText: ""),
-                // AnimeLists(),
+                Search(),
               ],
             ),
           ),

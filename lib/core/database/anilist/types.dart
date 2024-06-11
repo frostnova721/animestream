@@ -152,8 +152,9 @@ class CurrentlyAiringResult {
   final String status;
   final double? rating;
   final int? episodes;
+  final int? watchProgress;
 
-  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title, required this.rating, required this.episodes});
+  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title, required this.rating, required this.episodes, required this.watchProgress});
 }
 
 class AnilistSearchResult {

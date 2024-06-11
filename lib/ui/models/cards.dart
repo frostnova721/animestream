@@ -384,15 +384,16 @@ class Cards {
                                     ],
                                   ),
                                 ),
-                                if (totalEpisodes != null || watchedEpisodeCount != null)
+                                // if (totalEpisodes != null || watchedEpisodeCount != null)
                                   Container(
                                     margin: EdgeInsets.only(right: 15),
                                     child: Row(
                                       children: [
                                         Text(
-                                          "${watchedEpisodeCount ?? "-"} ",
+                                          "${watchedEpisodeCount ?? "~"} ",
                                           style: TextStyle(
                                             fontFamily: "NunitoSans",
+                                            fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                             color: ColorScheme.fromSeed(seedColor: accentColor).primaryFixedDim,
                                           ),
@@ -401,6 +402,7 @@ class Cards {
                                           "/ ${totalEpisodes ?? "??"}",
                                           style: TextStyle(
                                             fontFamily: "NunitoSans",
+                                            fontSize: 14,
                                             fontWeight: FontWeight.bold,
                                             color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer
                                           ),

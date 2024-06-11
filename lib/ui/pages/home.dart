@@ -160,14 +160,14 @@ class _HomeState extends State<Home> {
   Container _listButton() {
     return Container(
       height: 60,
-      width: 150,
+      width: 140,
       margin: EdgeInsets.only(left: 10),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundSubColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AnimeLists())),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AnimeLists())).then((val) => getLists(userName: userProfile?.name)),
         child: Container(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

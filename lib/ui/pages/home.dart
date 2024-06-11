@@ -1,22 +1,30 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/app/update.dart';
+import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
-import 'package:animestream/core/database/anilist/anilist.dart';
-import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/models/drawer.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/pages/Discover.dart';
-import 'package:animestream/ui/pages/search.dart';
+import 'package:animestream/ui/pages/lists.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Home extends StatefulWidget {
-  const Home({super.key});
+  final List<HomePageList> recentlyWatched;
+  final List<HomePageList> currentlyAiring;
+  final bool dataLoaded;
+  final bool error;
+  final void Function(List<HomePageList> recentlyWatched) updateWatchedList;
+
+  const Home({
+    super.key,
+    required this.currentlyAiring,
+    required this.recentlyWatched,
+    required this.dataLoaded,
+    required this.error,
+    required this.updateWatchedList,
+  });
 
   @override
   State<Home> createState() => _HomeState();
@@ -26,98 +34,51 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
-    AniListLogin().isAnilistLoggedIn().then((loggedIn) {
-      if (loggedIn)
-        AniListLogin().getUserProfile().then((user) => {
-              userProfile = user,
-              storedUserData = user,
-              print(storedUserData?.name),
-              getLists(userName: user.name),
-            });
-      else
-        getLists();
-    });
-
-    checkForUpdates().then(
-      (value) {
-        if (value != null) {
-          showUpdateSheet(context, value.description, value.downloadLink, value.preRelease);
-        }
-      },
-    );
   }
-
-  int activeIndex = 0;
 
   UserModal? userProfile;
 
-  TextEditingController textEditingController = TextEditingController();
+  List<HomePageList> recentlyWatched = [];
+  // List<HomePageList> currentlyAiring = [];
 
-  List<Card> recentlyWatched = [];
-  List<Card> currentlyAiring = [];
-
-  bool dataLoaded = false;
-  bool error = false;
   bool refreshing = false;
-
-  onItemTapped(int index) {
-    if (mounted)
-      setState(() {
-        activeIndex = index;
-      });
-  }
-
-  Widget useWidget() {
-    switch (activeIndex) {
-      case 0:
-        return _homeItems();
-      case 1:
-        return Discover(currentSeason: currentlyAiring);
-      default:
-        return _homeItems();
-    }
-  }
 
   Future<void> getLists({String? userName}) async {
     try {
+      setState(() {
+        refreshing = true;
+      });
       List<UserAnimeListItem> watched = await getWatchedList(userName: userName);
       if (watched.length > 40) watched = watched.sublist(0, 40);
       recentlyWatched = [];
-      watched.forEach((item) {
-        final title = item.title['title'] ?? item.title['english'] ?? item.title['romaji'] ?? '';
-        recentlyWatched.add(
-          Cards(context: context).animeCard(
-            item.id,
-            title,
-            item.coverImage,
-            afterNavigation: () async {
-              await refresh();
-            },
+      watched.forEach(
+        (item) => recentlyWatched.add(
+          HomePageList(
+            coverImage: item.coverImage,
+            id: item.id,
+            rating: item.rating,
+            title: item.title,
+            totalEpisodes: item.episodes,
+            watchedEpisodeCount: item.watchProgress,
           ),
-        );
-      });
+        ),
+      );
 
-      final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
-      if (currentlyAiringResponse.length == 0) return;
+      widget.updateWatchedList(recentlyWatched);
 
-      currentlyAiring = [];
-      currentlyAiringResponse.sublist(0, 20).forEach((e) {
-        final title = e.title['english'] ?? e.title['romaji'] ?? '';
-        final image = e.cover;
-        currentlyAiring.add(
-          Cards(context: context).animeCard(
-            e.id,
-            title,
-            image,
-            afterNavigation: () async {
-              await refresh();
-            },
-          ),
-        );
-      });
+      widget.recentlyWatched.forEach((i) => print(i.title['english']));
+
+      // final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
+      // if (currentlyAiringResponse.length == 0) return;
+
+      // currentlyAiring = [];
+      // currentlyAiringResponse.sublist(0, 20).forEach((item) => currentlyAiring
+      //     .add(HomePageList(coverImage: item.cover, id: item.id, rating: item.rating, title: item.title)));
+      // ;
+
       if (mounted)
         setState(() {
-          dataLoaded = true;
+          refreshing = false;
         });
     } catch (err) {
       print(err);
@@ -125,381 +86,236 @@ class _HomeState extends State<Home> {
         floatingSnackBar(context, err.toString());
       if (mounted)
         setState(() {
-          error = true;
-        });
-    }
-  }
-
-  Future<void> refresh({bool fromSettings = false}) async {
-    setState(() {
-      refreshing = true;
-    });
-    final loggedIn = await AniListLogin().isAnilistLoggedIn();
-    if (loggedIn && userProfile == null) {
-      //load the userprofile and list if the user just signed in!
-      final user = await AniListLogin().getUserProfile();
-      userProfile = user;
-      storedUserData = user;
-      print(storedUserData?.name);
-      await getLists(userName: user.name);
-    } else if (loggedIn && userProfile != null) {
-      //just load the list if the user was already signed in.
-      //also dont refrest the list if user just visited the settings page and were already logged in
-      if (fromSettings)
-        return setState(() {
           refreshing = false;
         });
-      ;
-      await getLists(userName: userProfile!.name);
-    } else {
-      await getLists();
-      userProfile = null;
     }
-    setState(() {
-      refreshing = false;
-    });
-    refreshController.refreshCompleted();
   }
-
-  bool popInvoked = false;
-
-  //reset the popInvoke
-  Future<void> popTimeoutWindow() async {
-    await Future.delayed(Duration(seconds: 3));
-    popInvoked = false;
-  }
-
-  RefreshController refreshController = RefreshController(initialRefresh: false);
-
-  final GlobalKey<ScaffoldState> _globalKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvoked: (didPop) async {
-        //exit the app if back is pressed again within 3 sec window
-        if (popInvoked) return await SystemNavigator.pop();
-
-        floatingSnackBar(context, "Hit back once again to exit the app");
-        popInvoked = true;
-        popTimeoutWindow();
-      },
-      child: Scaffold(
-        key: _globalKey,
-        backgroundColor: backgroundColor,
-        drawer: HomeDrawer(
-          onItemTapped: onItemTapped,
-          activeIndex: activeIndex,
-          loggedIn: userProfile != null ? true : false,
-        ),
-        body: SmartRefresher(
-          onRefresh: refresh,
-          controller: refreshController,
-          header: MaterialClassicHeader(
-            color: accentColor,
-            backgroundColor: backgroundSubColor,
-          ),
-          physics: ClampingScrollPhysics(parent: NeverScrollableScrollPhysics()),
-          child: SingleChildScrollView(
-            physics: NeverScrollableScrollPhysics(),
-            child: Padding(
-              padding: EdgeInsets.only(
-                  top: MediaQuery.of(context).padding.top + 5,
-                  bottom: MediaQuery.of(context).padding.bottom,
-                  left: MediaQuery.of(context).padding.left),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+      body: Container(
+        padding: pagePadding(context),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: EdgeInsets.only(left: 20, top: 10, right: 20, bottom: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      "Home",
+                      style: TextStyle(
+                        color: textMainColor,
+                        fontFamily: "Rubik",
+                        fontWeight: FontWeight.bold,
+                        fontSize: 30,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => SettingsPage(),
+                        ),
+                      ),
+                      icon: Icon(
+                        Icons.settings_rounded,
+                        color: textMainColor,
+                        size: 32,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (storedUserData != null)
+                Container(
+                  margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Container(
+                      _accountCard(),
+                      _listButton(),
+                    ],
+                  ),
+                ),
+              _titleAndList("Continue Watching", widget.recentlyWatched, showRefreshIndication: refreshing),
+              divider(),
+              _titleAndList("Aired This Season", widget.currentlyAiring),
+              footSpace(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  SizedBox footSpace() {
+    return SizedBox(
+      height: MediaQuery.of(context).padding.bottom + 60,
+    );
+  }
+
+  Container _listButton() {
+    return Container(
+      height: 60,
+      width: 150,
+      margin: EdgeInsets.only(left: 10),
+      child: ElevatedButton(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: backgroundSubColor,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        ),
+        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AnimeLists())),
+        child: Container(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.folder_rounded,
+                color: textMainColor,
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 10),
+                child: Text(
+                  "Lists",
+                  style: TextStyle(
+                    color: textMainColor,
+                    fontFamily: "Poppins",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Container _accountCard() {
+    return Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: backgroundSubColor),
+      width: 200,
+      height: 60,
+      padding: EdgeInsets.all(10),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          CircleAvatar(
+            backgroundImage: NetworkImage(storedUserData!.avatar!),
+          ),
+          Padding(
+            padding: EdgeInsets.only(left: 10),
+            child: Text(
+              storedUserData!.name,
+              style: TextStyle(
+                fontFamily: "Poppins",
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Center divider() {
+    return Center(
+      child: Container(
+        width: MediaQuery.of(context).size.width / 2,
+        margin: EdgeInsets.only(top: 20, bottom: 20),
+        height: 6,
+        decoration: BoxDecoration(
+          color: accentColor.withOpacity(0.6),
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    );
+  }
+
+  Column _titleAndList(String title, List<HomePageList> list, {bool showRefreshIndication = false}) {
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Container(
+              alignment: Alignment.centerLeft,
+              // margin: EdgeInsets.only(top: 20),
+              padding: EdgeInsets.only(left: 15, right: 15),
+              child: Text(
+                title,
+                style: TextStyle(fontFamily: "Rubik", fontSize: 20),
+              ),
+            ),
+            if (showRefreshIndication)
+              Container(
+                margin: EdgeInsets.only(left: 5),
+                height: 15,
+                width: 15,
+                child: CircularProgressIndicator(
+                  color: accentColor,
+                ),
+              ),
+          ],
+        ),
+        Container(
+          height: 160,
+          child: widget.dataLoaded
+              ? list.length > 0
+                  ? ListView.builder(
+                      padding: EdgeInsets.zero,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: list.length,
+                      itemBuilder: (context, index) {
+                        final item = list[index];
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Cards(context: context).animeCardExtended(item.id,
+                              item.title['english'] ?? item.title['romaji'] ?? '', item.coverImage, item.rating ?? 0.0,
+                              bannerImageUrl: item.coverImage,
+                              watchedEpisodeCount: item.watchedEpisodeCount,
+                              totalEpisodes: item.totalEpisodes,
+                              afterNavigation: () => getLists(userName: storedUserData?.name)),
+                        );
+                      })
+                  : Center(
+                      child: Container(
+                        alignment: Alignment.center,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
-                            Row(
-                              children: [
-                                IconButton(
-                                  onPressed: () {
-                                    _globalKey.currentState!.openDrawer();
-                                  },
-                                  icon: Icon(
-                                    Icons.menu_rounded,
-                                    color: textMainColor,
-                                    size: 30,
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 10),
-                                  child: Text(
-                                    "AnimeStream",
-                                    style: TextStyle(
-                                      color: textMainColor,
-                                      fontSize: 23,
-                                      fontFamily: 'NunitoSans',
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                            Image.asset(
+                              "lib/assets/images/ghost.png",
+                              color: Color.fromARGB(255, 80, 80, 80),
                             ),
-                            Container(
-                              padding: EdgeInsets.only(left: 10, right: 0, top: 10),
-                              width: 300,
-                              child: TextField(
-                                controller: textEditingController,
-                                autocorrect: false,
-                                maxLines: 1,
-                                onSubmitted: (String input) {
-                                  textEditingController.value = TextEditingValue.empty;
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => Search(searchedText: input),
-                                    ),
-                                  ).then(
-                                    (value) async {
-                                      setState(() {
-                                        refreshing = true;
-                                      });
-                                      await getLists(userName: userProfile?.name ?? null);
-                                      if (mounted)
-                                        setState(() {
-                                          refreshing = false;
-                                        });
-                                    },
-                                  );
-                                },
-                                cursorColor: accentColor,
-                                decoration: InputDecoration(
-                                  prefixIcon: Padding(
-                                    padding: const EdgeInsets.only(left: 5),
-                                    child: Image.asset(
-                                      "lib/assets/images/search.png",
-                                      color: textMainColor,
-                                      scale: 1.75,
-                                    ),
-                                  ),
-                                  hintText: "Search...",
-                                  hintStyle: TextStyle(
-                                    color: textSubColor,
-                                    fontFamily: "Poppins",
-                                    fontSize: 16,
-                                  ),
-                                  focusColor: accentColor,
-                                  contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
-                                  focusedBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: accentColor,
-                                    ),
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                  enabledBorder: OutlineInputBorder(
-                                    borderSide: BorderSide(
-                                      color: textMainColor,
-                                      width: 1.5,
-                                    ),
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(
+                                "Boo! Nothing's here!",
+                                textAlign: TextAlign.center,
                                 style: TextStyle(
-                                  backgroundColor: backgroundColor,
-                                  color: textMainColor,
-                                  fontFamily: 'Poppins',
-                                  fontSize: 16,
+                                  fontFamily: "NunitoSans",
+                                  fontWeight: FontWeight.w500,
+                                  color: Color.fromARGB(255, 80, 80, 80),
+                                  fontSize: 18,
                                 ),
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.only(right: 15),
-                        child: IconButton(
-                          onPressed: () async {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => SettingsPage(),
-                              ),
-                            ).then((value) => refresh(fromSettings: true));
-                          },
-                          icon: Icon(
-                            Icons.settings,
-                            color: textMainColor,
-                            size: 45,
-                          ),
-                        ),
-                        // padding: EdgeInsets.only(right: 25),
-                        // child: CircleAvatar(
-                        //   radius: 25,
-                        //   backgroundColor: ,
-                        // ),
-                      )
-                    ],
-                  ),
-                  useWidget()
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Column _homeItems() {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: EdgeInsets.only(top: 40, left: 10, right: 10),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10, right: 10),
-                    child: Text(
-                      "Recently Watched",
-                      textAlign: TextAlign.left,
-                      style: TextStyle(
-                        color: textMainColor,
-                        fontFamily: "Rubik",
-                        fontSize: 20,
-                      ),
-                    ),
-                  ),
-                  if (refreshing)
-                    Container(
-                      margin: EdgeInsets.only(left: 5),
-                      height: 15,
-                      width: 15,
-                      child: CircularProgressIndicator(
-                        color: accentColor,
-                        strokeWidth: 2,
-                      ),
                     )
-                ],
-              ),
-              dataLoaded
-                  ? _cardListMaker(recentlyWatched)
-                  : Container(
-                      height: 250,
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: accentColor,
-                        ),
-                      ),
-                    ),
-            ],
-          ),
-        ),
-        _accentedHomeDivider(),
-        _titleAndList("Currently Airing", currentlyAiring),
-      ],
-    );
-  }
-
-  Container _titleAndList(String title, List<Card> list) {
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            child: Text(
-              title,
-              textAlign: TextAlign.left,
-              style: TextStyle(
-                color: textMainColor,
-                fontFamily: "Rubik",
-                fontSize: 20,
-              ),
-            ),
-          ),
-          dataLoaded
-              ? _cardListMaker(list)
-              : Container(
-                  height: 250,
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: accentColor,
-                    ),
-                  ),
+              : Center(
+                  child: CircularProgressIndicator(),
                 ),
-        ],
-      ),
-    );
-  }
-
-  /** just a division between the items in homescreen */
-  Container _accentedHomeDivider() {
-    return Container(
-      margin: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 10),
-      height: 5,
-      decoration: BoxDecoration(
-        color: accentColor.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(
-          50,
-        ),
-      ),
-    );
-  }
-
-  Column _cardListMaker(List<Card> widgetList) {
-    return Column(
-      children: [
-        widgetList.length > 0
-            ? Container(
-                padding: const EdgeInsets.only(top: 15),
-                height: 250,
-                child: ListView.builder(
-                  itemCount: widgetList.length,
-                  scrollDirection: Axis.horizontal,
-                  padding: EdgeInsets.zero,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      alignment: Alignment.centerLeft,
-                      width: 120,
-                      child: widgetList[index],
-                    );
-                  },
-                ),
-              )
-            : Center(
-                child: Container(
-                  height: 250,
-                  alignment: Alignment.center,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Image.asset(
-                        "lib/assets/images/ghost.png",
-                        color: Color.fromARGB(255, 80, 80, 80),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 10.0),
-                        child: Text(
-                          "Boo! Nothing's here!",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontFamily: "NunitoSans",
-                            fontWeight: FontWeight.w500,
-                            color: Color.fromARGB(255, 80, 80, 80),
-                            fontSize: 18,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+        )
       ],
     );
   }

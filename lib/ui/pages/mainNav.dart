@@ -8,7 +8,7 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/discover.dart';
-import 'package:animestream/ui/pages/newHome.dart';
+import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -266,7 +266,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
               controller: tabController,
               physics: NeverScrollableScrollPhysics(),
               children: [
-                NewHome(
+                Home(
                   recentlyWatched: recentlyWatched,
                   currentlyAiring: currentlyAiring,
                   dataLoaded: homeDataLoaded,

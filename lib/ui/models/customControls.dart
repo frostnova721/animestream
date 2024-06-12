@@ -79,9 +79,9 @@ class _ControlsState extends State<Controls> {
         currentEpIndex = widget.episode['currentEpIndex'];
       }
 
+      //hide the controls on timeout if visible
       if (widget.isControlsVisible) {
         widget.hideControlsOnTimeout();
-        // isVisible = false;
       }
 
       //managing the UI updation
@@ -140,10 +140,8 @@ class _ControlsState extends State<Controls> {
   int? megaSkipDuration;
 
   bool buffering = false;
-  // bool isVisible = true;
   bool finalEpisodeReached = false;
   bool wakelockEnabled = false;
-  // bool linkProgressValueWithPlayer = true;
 
   void skipToStart() async {
     print("skipping...");

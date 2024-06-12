@@ -354,7 +354,7 @@ class Cards {
                           Container(
                             margin: EdgeInsets.only(bottom: 15),
                             child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
@@ -385,6 +385,10 @@ class Cards {
                                   ),
                                 ),
                                 // if (totalEpisodes != null || watchedEpisodeCount != null)
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 15, right: 15),
+                                  child: Text('•', style: TextStyle(fontSize: 16),),
+                                ),
                                   Container(
                                     margin: EdgeInsets.only(right: 15),
                                     child: Row(

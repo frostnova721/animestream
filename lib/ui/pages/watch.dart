@@ -44,9 +44,10 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   int currentEpIndex = 0;
 
+  bool _isTimerActive = false;
   bool controlsLocked = false;
-  bool _visible = true;
-  bool _controlsDisabled = false;
+  bool _visible = true; //inverse of this means that the controls is being ignored
+  // bool _controlsDisabled = false;
   bool initialised = false;
 
   @override
@@ -142,6 +143,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   /** to play the next or prev episode */
   Future<void> playAnotherEpisode(String link, {bool preserveProgress = false}) async {
     try {
+      toggleControls(true); //show the controls ig
       await controller.pause();
       await getQualities(link: link);
       final preferredQuality = qualities
@@ -169,21 +171,22 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       Duration(milliseconds: 100),
     );
     setState(() {
-      _controlsDisabled = value;
+      _visible = value;
     });
   }
 
   void hideControlsOnTimeout() {
-    if (_visible) {
+    if (_visible && !_isTimerActive) {
       if (_controlsTimer != null) {
         _controlsTimer!.cancel();
       }
+      _isTimerActive = true;
+      print("called: $_visible");
       _controlsTimer = Timer(Duration(seconds: 5), () {
-        if (mounted && (controller.isPlaying() ?? false))
-          setState(() {
-            _visible = false;
-            toggleControls(true);
-          });
+        if (mounted && (controller.isPlaying() ?? false)) {
+          toggleControls(false);
+        }
+        _isTimerActive = false;
       });
     }
   }
@@ -192,11 +195,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _visible = !_visible;
           toggleControls(!_visible);
           hideControlsOnTimeout();
-        });
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -210,7 +210,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                 children: [
                   IgnorePointer(ignoring: true, child: overlay()),
                   IgnorePointer(
-                    ignoring: _controlsDisabled,
+                    ignoring: !_visible,
                     child: initialised
                         ? Controls(
                             controller: controller,
@@ -227,7 +227,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             hideControlsOnTimeout: hideControlsOnTimeout,
                             playAnotherEpisode: playAnotherEpisode,
                             preferredServer: info.streamInfo.server,
-                            isControlsVisible: _controlsDisabled,
+                            isControlsVisible: _visible,
                           )
                         : Container(),
                   ),

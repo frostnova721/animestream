@@ -387,7 +387,7 @@ class Cards {
                                 // if (totalEpisodes != null || watchedEpisodeCount != null)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 15, right: 15),
-                                  child: Text('•', style: TextStyle(fontSize: 16),),
+                                  child: Text('•', style: TextStyle(fontSize: 17),),
                                 ),
                                   Container(
                                     margin: EdgeInsets.only(right: 15),

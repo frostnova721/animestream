@@ -142,7 +142,7 @@ class _DiscoverState extends State<Discover> {
 
   @override
   Widget build(BuildContext context) {
-    if(!initialTimeOutCalled && widget.trendingList.length > 0) {
+    if (!initialTimeOutCalled && widget.trendingList.length > 0) {
       pageTimeout();
       initialTimeOutCalled = true;
     }

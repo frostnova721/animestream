@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -227,32 +229,39 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       },
       child: Scaffold(
         body: BottomBar(
-          barColor: backgroundSubColor,
+          barColor: backgroundSubColor.withOpacity(0.4),
           borderRadius: BorderRadius.circular(10),
           barAlignment: Alignment.bottomCenter,
           width: MediaQuery.of(context).size.width/2 + 20,
           offset: MediaQuery.of(context).padding.bottom + 10,
-          child: Container(
-            padding: EdgeInsets.only(top: 5),
-            child: TabBar(
-              onTap: (val) => setState(() {}),
-              overlayColor: WidgetStateColor.transparent,
-              controller: tabController,
-              isScrollable: false,
-              labelColor: accentColor,
-              unselectedLabelColor: textSubColor,
-              dividerHeight: 0,
-              indicatorColor: accentColor,
-              labelPadding: EdgeInsets.only(bottom: 5),
-              tabs: [
-                TabIcon(
-                  icon: Icons.home_rounded,
-                  label: "Home",
-                  animate: tabController.index == 0,
+          child: ClipRRect(
+            clipBehavior: Clip.hardEdge,
+            borderRadius: BorderRadius.circular(10),
+            child: Container(
+              padding: EdgeInsets.only(top: 5),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                child: TabBar(
+                  onTap: (val) => setState(() {}),
+                  overlayColor: WidgetStateColor.transparent,
+                  controller: tabController,
+                  isScrollable: false,
+                  labelColor: accentColor,
+                  unselectedLabelColor: textSubColor,
+                  dividerHeight: 0,
+                  indicatorColor: accentColor,
+                  labelPadding: EdgeInsets.only(bottom: 5),
+                  tabs: [
+                    TabIcon(
+                      icon: Icons.home_rounded,
+                      label: "Home",
+                      animate: tabController.index == 0,
+                    ),
+                    TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
+                    TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
+                  ],
                 ),
-                TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
-                TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
-              ],
+              ),
             ),
           ),
           body: (context, scrollController) => SmartRefresher(

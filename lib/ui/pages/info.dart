@@ -8,7 +8,7 @@ import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:animestream/ui/models/bottomSheets/bottomSheet.dart';
+import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/cards.dart';
@@ -637,13 +637,14 @@ class _InfoState extends State<Info> {
         customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         onTap: () async {
           showModalBottomSheet(
+            isScrollControlled: true,
             showDragHandle: true,
             backgroundColor: Color(0xff121212),
             context: context,
             builder: (BuildContext context) {
-              return BottomSheetContent(
+              return ServerSelectionBottomSheet(
                 getStreams: getStreams,
-                bottomSheetContentData: BottomSheetContentData(
+                bottomSheetContentData: ServerSelectionBottomSheetContentData(
                   epLinks: epLinks,
                   episodeIndex: watched,
                   selectedSource: selectedSource,
@@ -751,11 +752,12 @@ class _InfoState extends State<Info> {
           showModalBottomSheet(
               showDragHandle: true,
               context: context,
+              isScrollControlled: true,
               backgroundColor: Color(0xff121212),
               builder: (context) {
-                return BottomSheetContent(
+                return ServerSelectionBottomSheet(
                   getStreams: getStreams,
-                  bottomSheetContentData: BottomSheetContentData(
+                  bottomSheetContentData: ServerSelectionBottomSheetContentData(
                       epLinks: epLinks,
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
@@ -807,11 +809,12 @@ class _InfoState extends State<Info> {
                           onPressed: () async {
                             showModalBottomSheet(
                               showDragHandle: true,
+                              isScrollControlled: true,
                               context: context,
                               builder: (BuildContext context) {
-                                return BottomSheetContent(
+                                return ServerSelectionBottomSheet(
                                   getStreams: getStreams,
-                                  bottomSheetContentData: BottomSheetContentData(
+                                  bottomSheetContentData: ServerSelectionBottomSheetContentData(
                                     epLinks: epLinks,
                                     episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                                     selectedSource: selectedSource,
@@ -865,11 +868,12 @@ class _InfoState extends State<Info> {
           onTap: () async {
             showModalBottomSheet(
                 showDragHandle: true,
+                isScrollControlled: true,
                 context: context,
                 builder: (context) {
-                  return BottomSheetContent(
+                  return ServerSelectionBottomSheet(
                     getStreams: getStreams,
-                    bottomSheetContentData: BottomSheetContentData(
+                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
                       epLinks: epLinks,
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
@@ -977,10 +981,11 @@ class _InfoState extends State<Info> {
                               showModalBottomSheet(
                                 showDragHandle: true,
                                 context: context,
+                                isScrollControlled: true,
                                 builder: (BuildContext context) {
-                                  return BottomSheetContent(
+                                  return ServerSelectionBottomSheet(
                                     getStreams: getStreams,
-                                    bottomSheetContentData: BottomSheetContentData(
+                                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
                                       epLinks: epLinks,
                                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                                       selectedSource: selectedSource,
@@ -1036,6 +1041,10 @@ class _InfoState extends State<Info> {
                   _infoRight(data.type),
                 ),
                 _buildInfoItems(
+                  _infoLeft('Status'),
+                  _infoRight('${data.status ?? '??'}'),
+                ),
+                _buildInfoItems(
                   _infoLeft('Rating'),
                   _infoRight('${data.rating ?? '??'}/10'),
                 ),
@@ -1054,6 +1063,13 @@ class _InfoState extends State<Info> {
               ],
             ),
           ),
+          // Container(
+          //   child: Column(
+          //     children: [
+          //       _categoryTitle("Alternate Titles"),
+          //     ],
+          //   ),
+          // ),
           Container(
             margin: EdgeInsets.only(top: 30),
             padding: EdgeInsets.only(left: 15, right: 15),

@@ -4,18 +4,17 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
-class BottomSheetContent extends StatefulWidget {
-  final Function(
-          String selectedSource, String epLink, Function(List<dynamic>, bool))
-      getStreams;
-  final BottomSheetContentData bottomSheetContentData;
+class ServerSelectionBottomSheet extends StatefulWidget {
+  final Function(String selectedSource, String epLink, Function(List<dynamic>, bool)) getStreams;
+  final ServerSelectionBottomSheetContentData bottomSheetContentData;
   final Type type;
   final Function? getWatched;
-  const BottomSheetContent({
+  const ServerSelectionBottomSheet({
     super.key,
     required this.getStreams,
     required this.bottomSheetContentData,
@@ -24,23 +23,22 @@ class BottomSheetContent extends StatefulWidget {
   });
 
   @override
-  State<BottomSheetContent> createState() => BottomSheetContentState();
+  State<ServerSelectionBottomSheet> createState() => ServerSelectionBottomSheetState();
 }
 
-class BottomSheetContentState extends State<BottomSheetContent> {
+class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> {
   List streamSources = [];
   List qualities = [];
 
   getStreams() async {
     streamSources = [];
-    await widget.getStreams(
-        widget.bottomSheetContentData.selectedSource,
-        widget.bottomSheetContentData
-            .epLinks[widget.bottomSheetContentData.episodeIndex],
-        (list, finished) {
+    await widget.getStreams(widget.bottomSheetContentData.selectedSource,
+        widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex], (list, finished) {
       if (mounted)
         setState(() {
-          if (finished) _isLoading = false;
+          if (finished) {
+            _isLoading = widget.type == Type.download ? true : false;
+          }
           streamSources = streamSources + list;
           if (widget.type == Type.download)
             list.forEach((element) {
@@ -54,11 +52,12 @@ class BottomSheetContentState extends State<BottomSheetContent> {
     List<dynamic> mainList = [];
     final List<dynamic> list = await getQualityStreams(link);
     list.forEach((element) {
-      element['server'] = "${server} ${backup ? "• backup" : ""}";
+      element['server'] = "${server} ${backup ? "- backup" : ""}";
       mainList.add(element);
     });
     if (mounted)
       setState(() {
+        _isLoading = false;
         qualities = qualities + mainList;
       });
   }
@@ -73,36 +72,53 @@ class BottomSheetContentState extends State<BottomSheetContent> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 30),
-        width: double.infinity,
-        child: streamSources.isNotEmpty
-            ? _isLoading
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _list(),
-                      Container(
-                        padding: EdgeInsets.only(bottom: 10),
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            color: accentColor,
+    return Container(
+      padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: MediaQuery.of(context).padding.bottom),
+      width: double.infinity,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            alignment: Alignment.centerLeft,
+            padding: const EdgeInsets.only(bottom: 10, left: 10),
+            child: Text(
+              "Select Server",
+              style: textStyle().copyWith(fontSize: 23),
+            ),
+          ),
+          streamSources.isNotEmpty
+              ? _isLoading
+                  ? SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          _list(),
+                          Container(
+                            padding: EdgeInsets.only(bottom: 10),
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: accentColor,
+                              ),
+                            ),
                           ),
-                        ),
+                        ],
                       ),
-                    ],
-                  )
-                : _list()
-            : Container(
-                height: 100,
-                padding: EdgeInsets.only(bottom: 10, top: 20),
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: accentColor,
+                    )
+                  : Container(
+                      height: MediaQuery.of(context).orientation == Orientation.landscape
+                          ? MediaQuery.of(context).size.height / 2
+                          : MediaQuery.of(context).size.height / 3,
+                      child: _list())
+              : Container(
+                  height: 100,
+                  padding: EdgeInsets.only(bottom: 10, top: 20),
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: accentColor,
+                    ),
                   ),
                 ),
-              ),
+        ],
       ),
     );
   }
@@ -110,8 +126,9 @@ class BottomSheetContentState extends State<BottomSheetContent> {
   ListView _list() {
     return widget.type == Type.watch
         ? ListView.builder(
+            padding: EdgeInsets.zero,
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            // physics: NeverScrollableScrollPhysics(),
             itemCount: streamSources.length,
             itemBuilder: (context, index) {
               return Container(
@@ -132,13 +149,10 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                       context,
                       MaterialPageRoute(
                         builder: (context) => Watch(
-                          selectedSource:
-                              widget.bottomSheetContentData.selectedSource,
+                          selectedSource: widget.bottomSheetContentData.selectedSource,
                           info: WatchPageInfo(
                               animeTitle: widget.bottomSheetContentData.title,
-                              episodeNumber:
-                                  widget.bottomSheetContentData.episodeIndex +
-                                      1,
+                              episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
                               streamInfo: streamSources[index],
                               id: widget.bottomSheetContentData.id),
                           episodes: widget.bottomSheetContentData.epLinks,
@@ -150,9 +164,9 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                     });
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Color.fromARGB(68, 190, 175, 255),
-                    padding: EdgeInsets.only(
-                        top: 10, bottom: 10, left: 20, right: 20),
+                    elevation: 0,
+                    backgroundColor: backgroundSubColor,
+                    padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
@@ -187,8 +201,7 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                         padding: EdgeInsets.only(top: 5),
                         child: Text(
                           streamSources[index].quality,
-                          style: TextStyle(
-                              color: Colors.white, fontFamily: "Rubik"),
+                          style: TextStyle(color: Colors.white, fontFamily: "Rubik"),
                         ),
                       ),
                     ],
@@ -200,28 +213,28 @@ class BottomSheetContentState extends State<BottomSheetContent> {
         : ListView.builder(
             itemCount: qualities.length,
             shrinkWrap: true,
-            physics: NeverScrollableScrollPhysics(),
+            // physics: NeverScrollableScrollPhysics(),
             itemBuilder: (BuildContext context, ind) => Container(
               margin: EdgeInsets.only(top: 15),
               decoration: BoxDecoration(
-                color: Color.fromARGB(97, 190, 175, 255),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: ElevatedButton(
                 onPressed: () {
-                  Downloader().download(qualities[ind]['link'],
-                      "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}").catchError((err) {
-                        print(err);
-                        floatingSnackBar(context, "$err");
-                      });
+                  Downloader()
+                      .download(qualities[ind]['link'],
+                          "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}")
+                      .catchError((err) {
+                    print(err);
+                    floatingSnackBar(context, "$err");
+                  });
                   Navigator.of(context).pop();
-                  floatingSnackBar(context,
-                      "Downloading the episode to your downloads folder");
+                  floatingSnackBar(context, "Downloading the episode to your downloads folder");
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(68, 190, 175, 255),
-                  padding:
-                      EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+                  elevation: 0,
+                  backgroundColor: backgroundSubColor,
+                  padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -236,13 +249,25 @@ class BottomSheetContentState extends State<BottomSheetContent> {
                       children: [
                         Padding(
                           padding: EdgeInsets.only(top: 5),
-                          child: Text(
-                            "${qualities[ind]['server']} • ${qualities[ind]['quality']}p",
-                            style: TextStyle(
-                              color: accentColor,
-                              fontSize: 18,
-                              fontFamily: "Rubik",
-                            ),
+                          child: Row(
+                            children: [
+                              Text(
+                                "${qualities[ind]['server']}",
+                                style: TextStyle(
+                                  color: accentColor,
+                                  fontSize: 18,
+                                  fontFamily: "Rubik",
+                                ),
+                              ),
+                              Text(
+                                "• ${qualities[ind]['quality']}p",
+                                style: TextStyle(
+                                  color: textMainColor,
+                                  fontSize: 18,
+                                  fontFamily: "Rubik",
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],

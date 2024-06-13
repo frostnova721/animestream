@@ -14,7 +14,7 @@ class Stream {
   });
 }
 
-class BottomSheetContentData {
+class ServerSelectionBottomSheetContentData {
   final int episodeIndex;
   final String title;
   final List<String> epLinks;
@@ -22,7 +22,7 @@ class BottomSheetContentData {
   final int id;
   final String cover;
 
-  BottomSheetContentData({
+  ServerSelectionBottomSheetContentData({
     required this.episodeIndex,
     required this.epLinks,
     required this.selectedSource,

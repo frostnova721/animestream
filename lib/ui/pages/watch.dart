@@ -36,6 +36,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Timer? _controlsTimer;
 
   String currentQualityLink = '';
+   String selectedQuality = (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720");
 
   List<String> epLinks = [];
   List qualities = [];
@@ -43,7 +44,6 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   late WatchPageInfo info;
 
   int currentEpIndex = 0;
-  int selectedQuality = int.parse(currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720");
 
   bool _isTimerActive = false;
   bool controlsLocked = false;
@@ -398,7 +398,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       final src = qualities[index]['link'];
-                                      selectedQuality = (int.tryParse(qualities[index]['quality']) ?? 720);
+                                      selectedQuality = qualities[index]['quality'] ?? 720;
                                       changeQuality(src, controller.videoPlayerController!.value.position.inSeconds);
                                       Navigator.pop(context);
                                     },
@@ -438,6 +438,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
               IconButton(
                 onPressed: () {
                   showModalBottomSheet(
+                    isScrollControlled: true,
                     context: context,
                     builder: (context) => CustomControlsBottomSheet(
                         getEpisodeSources: getEpisodeSources,

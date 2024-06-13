@@ -1,3 +1,4 @@
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
@@ -70,36 +71,47 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(left: 30, right: 30, top: 10, bottom: 20),
-        child: currentSources.length > 0
-            ? _isLoading
-                ? Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _list(),
-                      Center(
-                        child: Container(
-                          height: 100,
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: accentColor,
-                            ),
-                          ),
+    return Container(
+      height: MediaQuery.of(context).size.height - 100,
+      padding: EdgeInsets.only(left: 30, right: 30, top: 20, bottom: 20),
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 20),
+            child: Text("Select Server", style: textStyle().copyWith(fontSize: 23),),
+          ),
+          Expanded(
+            child: currentSources.length > 0
+                ? _isLoading
+                    ? SingleChildScrollView(
+                      child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _list(),
+                            Center(
+                              child: Container(
+                                height: 100,
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: accentColor,
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
-                      )
-                    ],
-                  )
-                : _list()
-            : Container(
-                height: 100,
-                child: Center(
-                  child: CircularProgressIndicator(
-                    color: accentColor,
+                    )
+                    : _list()
+                : Container(
+                    height: 100,
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: accentColor,
+                      ),
+                    ),
                   ),
-                ),
-              ),
+          ),
+        ],
       ),
     );
   }
@@ -108,7 +120,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
     return ListView.builder(
       shrinkWrap: true,
       itemCount: currentSources.length,
-      physics: NeverScrollableScrollPhysics(),
+      // physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
         return Container(
           margin: EdgeInsets.only(top: 15),
@@ -125,7 +137,9 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
               Navigator.pop(context);
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Color.fromARGB(68, 190, 175, 255),
+              elevation: 0,
+              surfaceTintColor: Colors.black,
+              backgroundColor: backgroundSubColor,
               padding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),

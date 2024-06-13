@@ -66,8 +66,6 @@ class _HomeState extends State<Home> {
 
       widget.updateWatchedList(recentlyWatched);
 
-      widget.recentlyWatched.forEach((i) => print(i.title['english']));
-
       // final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
       // if (currentlyAiringResponse.length == 0) return;
 
@@ -261,6 +259,7 @@ class _HomeState extends State<Home> {
                 width: 15,
                 child: CircularProgressIndicator(
                   color: accentColor,
+                  strokeWidth: 2,
                 ),
               ),
           ],

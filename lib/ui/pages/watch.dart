@@ -43,11 +43,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   late WatchPageInfo info;
 
   int currentEpIndex = 0;
+  int selectedQuality = int.parse(currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720");
 
   bool _isTimerActive = false;
   bool controlsLocked = false;
   bool _visible = true; //inverse of this means that the controls is being ignored
-  // bool _controlsDisabled = false;
   bool initialised = false;
 
   @override
@@ -78,7 +78,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       getQualities().then((val) {
         print(qualities);
         final preferredOne = qualities
-            .where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720"))
+            .where((item) => item['quality'] == selectedQuality)
             .toList();
         changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
       });
@@ -147,7 +147,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       await controller.pause();
       await getQualities(link: link);
       final preferredQuality = qualities
-          .where((item) => item['quality'] == (currentUserSettings?.preferredQuality?.replaceAll("p", '') ?? "720"))
+          .where((item) => item['quality'] == selectedQuality)
           .toList();
       print(preferredQuality[0]['link']);
       await changeQuality(preferredQuality[0]['link'],
@@ -398,6 +398,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                   child: ElevatedButton(
                                     onPressed: () async {
                                       final src = qualities[index]['link'];
+                                      selectedQuality = (int.tryParse(qualities[index]['quality']) ?? 720);
                                       changeQuality(src, controller.videoPlayerController!.value.position.inSeconds);
                                       Navigator.pop(context);
                                     },

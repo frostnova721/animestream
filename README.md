@@ -2,11 +2,12 @@
 
 A Flutter project made to stream and download Anime with Anilist tracking.
 
-<div align="center" style="display: flex; justify-content: center">
-<a style="margin-right: 10px" href="https://www.codefactor.io/repository/github/frostnova721/animestream/overview/master"><img src="https://www.codefactor.io/repository/github/frostnova721/animestream/badge/master?style=for-the-badge" alt="CodeFactor" /></a>
-
-[![Total Downloads](https://img.shields.io/github/downloads/frostnova721/animestream/total.svg?style=for-the-badge)]()
-</div>
+<p align="center">
+<a href="https://www.codefactor.io/repository/github/frostnova721/animestream/overview/master"><img src="https://www.codefactor.io/repository/github/frostnova721/animestream/badge/master?style=for-the-badge" alt="CodeFactor" /></a>
+<a href="https://img.shields.io/github/downloads/frostnova721/animestream/total.svg?style=for-the-badge"><img src="https://img.shields.io/github/downloads/frostnova721/animestream/total.svg?style=for-the-badge&color=CAF979"></a>
+<a href="https://img.shields.io/badge/Made_With-Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white"><img src="https://img.shields.io/badge/Made_With-Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white"></a>
+<a href="https://img.shields.io/badge/Made_For-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white"><img src="https://img.shields.io/badge/Made_For-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white"></a>
+</p>
 
 <p align="center">
     <img src="lib/assets/icons/logo.png" width="256" height="256" alt="project logo">
@@ -30,6 +31,7 @@ Currently, you can enjoy anime content from the following sources:
 
 - **Gogo**
 - **Ryuk**
+- **Animepahe**
 
 ## Known Issues
 
@@ -39,7 +41,7 @@ As of now, I haven't encountered any issues while testing. If you are having iss
 
 To build the apk from the source code, simply run the command below:
 
-```
+```cmd
 flutter build apk
 ```
 

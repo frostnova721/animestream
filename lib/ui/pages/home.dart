@@ -6,6 +6,7 @@ import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/pages/settingPages/stats.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -35,8 +36,6 @@ class _HomeState extends State<Home> {
   void initState() {
     super.initState();
   }
-
-  UserModal? userProfile;
 
   List<HomePageList> recentlyWatched = [];
   // List<HomePageList> currentlyAiring = [];
@@ -165,7 +164,9 @@ class _HomeState extends State<Home> {
           backgroundColor: backgroundSubColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
-        onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => AnimeLists())).then((val) => getLists(userName: userProfile?.name)),
+        onPressed: () => Navigator.of(context)
+            .push(MaterialPageRoute(builder: (context) => AnimeLists()))
+            .then((val) => getLists(userName: storedUserData?.name)),
         child: Container(
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -193,32 +194,47 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Container _accountCard() {
-    return Container(
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(10), color: backgroundSubColor),
-      width: 200,
-      height: 60,
-      padding: EdgeInsets.all(10),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          CircleAvatar(
-            backgroundImage: NetworkImage(storedUserData!.avatar!),
+  Widget _accountCard() {
+    return Material(
+      borderRadius: BorderRadius.circular(10),
+      clipBehavior: Clip.hardEdge,
+      color: backgroundSubColor,
+      child: InkWell(
+        overlayColor: WidgetStatePropertyAll(accentColor.withOpacity(0.1)),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => UserStats(userModal: storedUserData!),
           ),
-          Padding(
-            padding: EdgeInsets.only(left: 10),
-            child: Text(
-              storedUserData!.name,
-              style: TextStyle(
-                fontFamily: "Poppins",
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+        ),
+        child: Container(
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+          width: 200,
+          height: 60,
+          padding: EdgeInsets.all(10),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                backgroundImage: storedUserData!.avatar != null
+                    ? NetworkImage(storedUserData!.avatar!)
+                    : AssetImage('lib/assets/images/chisato_AI.png') as ImageProvider,
               ),
-              overflow: TextOverflow.ellipsis,
-              maxLines: 1,
-            ),
+              Padding(
+                padding: EdgeInsets.only(left: 10),
+                child: Text(
+                  storedUserData!.name,
+                  style: TextStyle(
+                    fontFamily: "Poppins",
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

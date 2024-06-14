@@ -1038,11 +1038,11 @@ class _InfoState extends State<Info> {
               children: [
                 _buildInfoItems(
                   _infoLeft('Type'),
-                  _infoRight(data.type),
+                  _infoRight(data.type.toLowerCase()),
                 ),
                 _buildInfoItems(
                   _infoLeft('Status'),
-                  _infoRight('${data.status ?? '??'}'),
+                  _infoRight('${data.status ?? '??'}'.toLowerCase()),
                 ),
                 _buildInfoItems(
                   _infoLeft('Rating'),

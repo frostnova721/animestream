@@ -27,16 +27,15 @@ class _UserStatsState extends State<UserStats> {
 
   Future<void> fetchUserStats() async {
     try {
-    final res = await AnilistQueries().getUserStats(user.name);
-    final genreRes =
-        await AnilistQueries().getGenreThumbnail(res.genres[0].genre);
-    setState(() {
-      stats = res;
-      genreThumbnail = genreRes[Random().nextInt(genreRes.length)];
-      timeSpent = convertMinutes(res.minutesWatched);
-    });
-    } catch(err) {
-      if(currentUserSettings?.showErrors == true) {
+      final res = await AnilistQueries().getUserStats(user.name);
+      final genreRes = await AnilistQueries().getGenreThumbnail(res.genres[0].genre);
+      setState(() {
+        stats = res;
+        genreThumbnail = genreRes.length > 0 ? genreRes[Random().nextInt(genreRes.length)] : null;
+        timeSpent = convertMinutes(res.minutesWatched);
+      });
+    } catch (err) {
+      if (currentUserSettings?.showErrors == true) {
         floatingSnackBar(context, err.toString());
       }
     }
@@ -48,17 +47,14 @@ class _UserStatsState extends State<UserStats> {
 
   ({int minutes, int hours, int days, int months, int years})? timeSpent;
 
-  TextStyle textStyle(double fontSize,
-          {bool bold = false, String fontFamily = "NotoSans-Bold"}) =>
-      TextStyle(
+  TextStyle textStyle(double fontSize, {bool bold = false, String fontFamily = "NotoSans-Bold"}) => TextStyle(
         color: textMainColor,
         fontFamily: fontFamily,
         fontSize: fontSize,
         fontWeight: bold ? FontWeight.bold : null,
       );
 
-  ({int minutes, int hours, int days, int months, int years}) convertMinutes(
-      int minutes) {
+  ({int minutes, int hours, int days, int months, int years}) convertMinutes(int minutes) {
     int minutesInYear = 60 * 24 * 365;
     int minutesInMonth = 60 * 24 * 30;
     int minutesInDay = 60 * 24;
@@ -67,19 +63,10 @@ class _UserStatsState extends State<UserStats> {
     int years = minutes ~/ minutesInYear;
     int months = (minutes % minutesInYear) ~/ minutesInMonth;
     int days = ((minutes % minutesInYear) % minutesInMonth) ~/ minutesInDay;
-    int hours = (((minutes % minutesInYear) % minutesInMonth) % minutesInDay) ~/
-        minutesInHour;
-    int remainingMinutes =
-        (((minutes % minutesInYear) % minutesInMonth) % minutesInDay) %
-            minutesInHour;
+    int hours = (((minutes % minutesInYear) % minutesInMonth) % minutesInDay) ~/ minutesInHour;
+    int remainingMinutes = (((minutes % minutesInYear) % minutesInMonth) % minutesInDay) % minutesInHour;
 
-    return (
-      minutes: remainingMinutes,
-      hours: hours,
-      days: days,
-      months: months,
-      years: years
-    );
+    return (minutes: remainingMinutes, hours: hours, days: days, months: months, years: years);
   }
 
   @override
@@ -102,7 +89,9 @@ class _UserStatsState extends State<UserStats> {
                           Container(
                             alignment: Alignment.center,
                             child: CircleAvatar(
-                              backgroundImage: NetworkImage(user.avatar!),
+                              backgroundImage: user.avatar != null
+                                  ? NetworkImage(user.avatar!)
+                                  : AssetImage('lib/assets/images/chisato_AI.png') as ImageProvider,
                               backgroundColor: Colors.grey,
                               radius: 50,
                             ),
@@ -119,8 +108,7 @@ class _UserStatsState extends State<UserStats> {
                             margin: EdgeInsets.only(top: 30),
                             child: Text(
                               "Stats",
-                              style: textStyle(23,
-                                  bold: true, fontFamily: "Rubik"),
+                              style: textStyle(23, bold: true, fontFamily: "Rubik"),
                             ),
                           ),
                           Container(
@@ -200,8 +188,7 @@ class _UserStatsState extends State<UserStats> {
                             padding: EdgeInsets.only(top: 30),
                             child: Text(
                               "Most Watched Genre",
-                              style: textStyle(23,
-                                  bold: true, fontFamily: "Rubik"),
+                              style: textStyle(23, bold: true, fontFamily: "Rubik"),
                             ),
                           ),
                           Container(
@@ -215,22 +202,21 @@ class _UserStatsState extends State<UserStats> {
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(15),
                                 image: DecorationImage(
-                                    image: NetworkImage(genreThumbnail!),
+                                    image: genreThumbnail != null
+                                        ? NetworkImage(genreThumbnail!)
+                                        : AssetImage('lib/assets/images/chisato.jpeg') as ImageProvider,
                                     fit: BoxFit.cover,
                                     opacity: 0.55),
                               ),
                               child: ClipRRect(
                                 child: BackdropFilter(
-                                  filter:
-                                      ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+                                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
                                   child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         "${stats!.genres[0].genre}",
-                                        style: textStyle(35,
-                                            fontFamily: "Poppins", bold: true),
+                                        style: textStyle(35, fontFamily: "Poppins", bold: true),
                                       ),
                                       Row(
                                         children: [
@@ -269,36 +255,27 @@ class _UserStatsState extends State<UserStats> {
                               children: [
                                 Container(
                                     alignment: Alignment.centerLeft,
-                                    width:
-                                        (MediaQuery.of(context).size.width / 3 +
-                                                10) -
-                                            MediaQuery.of(context).padding.left,
+                                    width: (MediaQuery.of(context).size.width / 3 + 10) -
+                                        MediaQuery.of(context).padding.left,
                                     child: Text(
                                       "Genre",
-                                      style: textStyle(21,
-                                          bold: true, fontFamily: "Rubik"),
+                                      style: textStyle(21, bold: true, fontFamily: "Rubik"),
                                     )),
                                 Container(
                                     alignment: Alignment.center,
-                                    width:
-                                        (MediaQuery.of(context).size.width / 3 -
-                                                20) -
-                                            MediaQuery.of(context).padding.left,
+                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
+                                        MediaQuery.of(context).padding.left,
                                     child: Text(
                                       "Watched",
-                                      style: textStyle(21,
-                                          bold: true, fontFamily: "Rubik"),
+                                      style: textStyle(21, bold: true, fontFamily: "Rubik"),
                                     )),
                                 Container(
                                     alignment: Alignment.centerRight,
-                                    width:
-                                        (MediaQuery.of(context).size.width / 3 -
-                                                20) -
-                                            MediaQuery.of(context).padding.left,
+                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
+                                        MediaQuery.of(context).padding.left,
                                     child: Text(
                                       "Minutes",
-                                      style: textStyle(21,
-                                          bold: true, fontFamily: "Rubik"),
+                                      style: textStyle(21, bold: true, fontFamily: "Rubik"),
                                     ))
                               ],
                             ),
@@ -313,30 +290,24 @@ class _UserStatsState extends State<UserStats> {
                               children: [
                                 Container(
                                     alignment: Alignment.centerLeft,
-                                    width:
-                                        (MediaQuery.of(context).size.width / 3 +
-                                                10) -
-                                            MediaQuery.of(context).padding.left,
+                                    width: (MediaQuery.of(context).size.width / 3 + 10) -
+                                        MediaQuery.of(context).padding.left,
                                     child: Text(
                                       "${stats!.genres[index].genre}",
                                       style: textStyle(18, bold: true),
                                     )),
                                 Container(
                                     alignment: Alignment.center,
-                                    width:
-                                        (MediaQuery.of(context).size.width / 3 -
-                                                20) -
-                                            MediaQuery.of(context).padding.left,
+                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
+                                        MediaQuery.of(context).padding.left,
                                     child: Text(
                                       "${stats!.genres[index].count}",
                                       style: textStyle(18, bold: true),
                                     )),
                                 Container(
                                     alignment: Alignment.centerRight,
-                                    width:
-                                        (MediaQuery.of(context).size.width / 3 -
-                                                20) -
-                                            MediaQuery.of(context).padding.left,
+                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
+                                        MediaQuery.of(context).padding.left,
                                     child: Text(
                                       "${stats!.genres[index].minutesWatched}",
                                       style: textStyle(18, bold: true),

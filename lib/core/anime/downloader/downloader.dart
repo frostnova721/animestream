@@ -108,7 +108,6 @@ class Downloader {
           buffers.clear();
           return;
         }
-        await Future.delayed(Duration(milliseconds: 50));
         if (segment.length != 0) {
           final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;

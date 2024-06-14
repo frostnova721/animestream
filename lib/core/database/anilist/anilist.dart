@@ -211,6 +211,7 @@ class Anilist {
       );
       res = await client.query(options);
     }
+
     if (res.hasException) {
       print(res.exception.toString());
     }

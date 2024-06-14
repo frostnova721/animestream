@@ -29,6 +29,7 @@ class AniListLogin {
     id
     avatar {
       medium
+      large
     }
     name
     bannerImage
@@ -43,7 +44,7 @@ class AniListLogin {
     final data = res['Viewer'];
     return UserModal(
         id: data['id'],
-        avatar: data['avatar']['medium'],
+        avatar: data['avatar']['large'] ?? data['avatar']['medium'],
         name: data['name'],
         banner: data['bannerImage']);
   }

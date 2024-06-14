@@ -423,17 +423,13 @@ class AnilistQueries {
 
   Future<List<String>> getGenreThumbnail(String genre) async {
     final query =
-        """{ Page(perPage: 10){media(genre:"$genre", sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") {bannerImage} } }""";
+        """{ Page(perPage: 10){media(genre:"$genre", status: RELEASING, sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") {bannerImage} } }""";
     final res = await Anilist().fetchQuery(query, RequestType.media);
     List<String> banners = [];
     for (final item in res) {
       if (item['bannerImage'] != null) {
         banners.add(item['bannerImage']);
       }
-    }
-
-    if (banners.isEmpty) {
-      throw new Exception("ERR COULDNT GET GENRE THUMBNAIL");
     }
     return banners;
   }

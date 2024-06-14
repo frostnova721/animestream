@@ -7,7 +7,7 @@ import 'package:animestream/core/commons/enums.dart';
 import "package:hive/hive.dart";
 
 Future<void> storeWatching(
-    String title, String imageUrl, int id, int watched) async {
+    String title, String imageUrl, int id, int watched, { int? totalEpisodes }) async {
   try {
     //add to anilist if the user is logged in
     print("SETTING WATCHED TO $watched");
@@ -29,6 +29,7 @@ Future<void> storeWatching(
         'imageUrl': imageUrl,
         'id': id,
         'watched': watched,
+        'totalEpisodes': totalEpisodes,
       });
       print(watchingList);
       box.put('watching', watchingList);
@@ -96,6 +97,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
           coverImage: e['imageUrl'],
           watchProgress: e['watched'],
           rating: e['rating'] ?? null,
+          episodes: e['totalEpisodes']
         ));
       });
       box.close();

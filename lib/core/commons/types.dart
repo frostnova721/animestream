@@ -21,6 +21,7 @@ class ServerSelectionBottomSheetContentData {
   final String selectedSource;
   final int id;
   final String cover;
+  final int? totalEpisodes;
 
   ServerSelectionBottomSheetContentData({
     required this.episodeIndex,
@@ -29,6 +30,7 @@ class ServerSelectionBottomSheetContentData {
     required this.title,
     required this.id,
     required this.cover,
+    this.totalEpisodes,
   });
 }
 

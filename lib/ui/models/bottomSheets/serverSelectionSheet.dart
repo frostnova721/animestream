@@ -144,6 +144,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                       widget.bottomSheetContentData.cover,
                       widget.bottomSheetContentData.id,
                       widget.bottomSheetContentData.episodeIndex,
+                      totalEpisodes: widget.bottomSheetContentData.totalEpisodes
                     );
                     Navigator.push(
                       context,

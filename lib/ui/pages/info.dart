@@ -645,6 +645,7 @@ class _InfoState extends State<Info> {
               return ServerSelectionBottomSheet(
                 getStreams: getStreams,
                 bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                  totalEpisodes: data.episodes,
                   epLinks: epLinks,
                   episodeIndex: watched,
                   selectedSource: selectedSource,
@@ -758,6 +759,7 @@ class _InfoState extends State<Info> {
                 return ServerSelectionBottomSheet(
                   getStreams: getStreams,
                   bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                    totalEpisodes: data.episodes,
                       epLinks: epLinks,
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
@@ -874,6 +876,7 @@ class _InfoState extends State<Info> {
                   return ServerSelectionBottomSheet(
                     getStreams: getStreams,
                     bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                      totalEpisodes: data.episodes,
                       epLinks: epLinks,
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,

@@ -293,7 +293,7 @@ class _HomeState extends State<Home> {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Cards(context: context).animeCardExtended(item.id,
-                              item.title['english'] ?? item.title['romaji'] ?? '', item.coverImage, item.rating ?? 0.0,
+                              item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '', item.coverImage, item.rating ?? 0.0,
                               bannerImageUrl: item.coverImage,
                               watchedEpisodeCount: item.watchedEpisodeCount,
                               totalEpisodes: item.totalEpisodes,

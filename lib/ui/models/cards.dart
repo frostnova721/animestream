@@ -202,6 +202,7 @@ class Cards {
                               width: 110,
                               fadeInCurve: Curves.easeIn,
                               fadeInDuration: Duration(milliseconds: 200),
+                              placeholder: (context, url) => Container(color: backgroundSubColor,),
                             ),
                           ),
                           Container(
@@ -227,6 +228,7 @@ class Cards {
                           width: 110,
                           fadeInCurve: Curves.easeIn,
                           fadeInDuration: Duration(milliseconds: 200),
+                          placeholder: (context, url) => Container(color: backgroundSubColor,),
                         ),
                       ),
               ),

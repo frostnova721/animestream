@@ -116,6 +116,7 @@ class _ControlsState extends State<Controls> {
 
       //play the loaded episode if equal to duration
       if (!finalEpisodeReached && (currentPosition == duration) && duration != null) {
+        await _controller.pause();
         await playPreloadedEpisode();
       }
 
@@ -162,8 +163,9 @@ class _ControlsState extends State<Controls> {
   }
 
   Future<void> playPreloadedEpisode() async {
-    if (currentEpIndex + 1 >= widget.episode['epLinks'].length) {
-      print("yes");
+
+    //just return if episode ended and next video is being loaded or the episode is the last one
+    if (currentEpIndex + 1 >= widget.episode['epLinks'].length || calledAutoNext) {
       return;
     }
     calledAutoNext = true;

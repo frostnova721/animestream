@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
@@ -62,6 +63,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   List<HomePageList> currentlyAiring = [];
   List<HomePageList> recentlyWatched = [];
+  List<HomePageList> plannedList = [];
 
   bool homePageError = false;
   bool homeDataLoaded = false;
@@ -91,13 +93,12 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       currentlyAiringResponse.forEach((item) {
         currentlyAiring.add(
           HomePageList(
-            coverImage: item.cover,
-            id: item.id,
-            rating: item.rating,
-            title: item.title,
-            totalEpisodes: item.episodes,
-            watchedEpisodeCount: item.watchProgress
-          ),
+              coverImage: item.cover,
+              id: item.id,
+              rating: item.rating,
+              title: item.title,
+              totalEpisodes: item.episodes,
+              watchedEpisodeCount: item.watchProgress),
         );
 
         thisSeason.add(
@@ -108,7 +109,25 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           ),
         );
       });
-      ;
+
+      if (userName != null) {
+        List<UserAnimeList> pl = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING);
+        if (pl.isEmpty) return;
+        plannedList = [];
+        List<UserAnimeListItem> itemList = pl[0].list;
+        if(itemList.length > 25) itemList = itemList.sublist(0, 25);
+        itemList.forEach((item) {
+          plannedList.add(HomePageList(
+            coverImage: item.coverImage,
+            rating: item.rating,
+            title: item.title,
+            id: item.id,
+            totalEpisodes: item.episodes,
+            watchedEpisodeCount: item.watchProgress,
+          ));
+        });
+      }
+
       if (mounted)
         setState(() {
           homeDataLoaded = true;
@@ -229,10 +248,10 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       },
       child: Scaffold(
         body: BottomBar(
-          barColor: backgroundSubColor.withOpacity(0.4),
+          barColor: backgroundSubColor.withOpacity(0.3),
           borderRadius: BorderRadius.circular(10),
           barAlignment: Alignment.bottomCenter,
-          width: MediaQuery.of(context).size.width/2 + 20,
+          width: MediaQuery.of(context).size.width / 2 + 20,
           offset: MediaQuery.of(context).padding.bottom + 10,
           child: ClipRRect(
             clipBehavior: Clip.hardEdge,
@@ -240,7 +259,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             child: Container(
               padding: EdgeInsets.only(top: 5),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                 child: TabBar(
                   onTap: (val) => setState(() {}),
                   overlayColor: WidgetStateColor.transparent,
@@ -281,6 +300,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   dataLoaded: homeDataLoaded,
                   error: homePageError,
                   updateWatchedList: updateWatchedList,
+                  planned: plannedList,
                 ),
                 Discover(
                   thisSeason: thisSeason,

@@ -1,6 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
+import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -14,6 +15,7 @@ import 'package:flutter/material.dart';
 class Home extends StatefulWidget {
   final List<HomePageList> recentlyWatched;
   final List<HomePageList> currentlyAiring;
+  final List<HomePageList> planned;
   final bool dataLoaded;
   final bool error;
   final void Function(List<HomePageList> recentlyWatched) updateWatchedList;
@@ -25,6 +27,7 @@ class Home extends StatefulWidget {
     required this.dataLoaded,
     required this.error,
     required this.updateWatchedList,
+    required this.planned,
   });
 
   @override
@@ -35,12 +38,18 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+    AniListLogin().isAnilistLoggedIn().then(
+          (loggedIn) => setState(() {
+            isLoggedIn = loggedIn;
+          }),
+        );
   }
 
   List<HomePageList> recentlyWatched = [];
   // List<HomePageList> currentlyAiring = [];
 
   bool refreshing = false;
+  bool isLoggedIn = false;
 
   Future<void> getLists({String? userName}) async {
     try {
@@ -91,9 +100,9 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        padding: pagePadding(context),
-        child: SingleChildScrollView(
+      body: SingleChildScrollView(
+        child: Container(
+          padding: pagePadding(context),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -126,20 +135,27 @@ class _HomeState extends State<Home> {
                   ],
                 ),
               ),
-              if (storedUserData != null)
-                Container(
-                  margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _accountCard(),
-                      _listButton(),
-                    ],
-                  ),
+              // if (storedUserData != null)
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: 400),
+                  child:  storedUserData != null ? Container(
+                    margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _accountCard(),
+                        _listButton(),
+                      ],
+                    ),
+                  ) : null,
                 ),
               _titleAndList("Continue Watching", widget.recentlyWatched, showRefreshIndication: refreshing),
               divider(),
               _titleAndList("Aired This Season", widget.currentlyAiring),
+              if (isLoggedIn)
+                Column(
+                  children: [divider(), _titleAndList("From Your Planned", widget.planned)],
+                ),
               footSpace(),
             ],
           ),
@@ -292,8 +308,11 @@ class _HomeState extends State<Home> {
                         final item = list[index];
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: Cards(context: context).animeCardExtended(item.id,
-                              item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '', item.coverImage, item.rating ?? 0.0,
+                          child: Cards(context: context).animeCardExtended(
+                              item.id,
+                              item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '',
+                              item.coverImage,
+                              item.rating ?? 0.0,
                               bannerImageUrl: item.coverImage,
                               watchedEpisodeCount: item.watchedEpisodeCount,
                               totalEpisodes: item.totalEpisodes,

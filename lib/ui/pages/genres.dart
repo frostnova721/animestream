@@ -15,16 +15,35 @@ class GenresPage extends StatefulWidget {
 }
 
 class _GenresPageState extends State<GenresPage> {
-  void getList() async {
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(scrollListener);
+  }
+
+  void scrollListener() async {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+      if (!_isLazyLoading) {
+        print("loading...");
+        getList(lazyLoaded: true);
+      }
+    }
+  }
+
+  void getList({bool lazyLoaded = false}) async {
+    if (lazyLoaded) {
+      _isLazyLoading = true;
+    }
     try {
       setState(() {
-        searchResultsAsWidgets = [];
+        searchResultsAsWidgets = lazyLoaded ? searchResultsAsWidgets : [];
         _searching = true;
       });
       if (selectedGenres.isEmpty && selectedTags.isEmpty) {
         return;
       }
-      final res = await AnilistQueries().getAnimesWithGenresAndTags(selectedGenres, selectedTags);
+      final res =
+          await AnilistQueries().getAnimesWithGenresAndTags(selectedGenres, selectedTags, page: currentLoadedPage);
       res.forEach((e) {
         searchResultsAsWidgets.add(
           Cards(context: context).animeCard(
@@ -37,6 +56,8 @@ class _GenresPageState extends State<GenresPage> {
       });
       setState(() {
         _searching = false;
+        _isLazyLoading = false;
+        currentLoadedPage = lazyLoaded ? currentLoadedPage+1 : 1;
       });
     } catch (err) {
       if (currentUserSettings?.showErrors ?? false) {
@@ -52,7 +73,12 @@ class _GenresPageState extends State<GenresPage> {
 
   List<Card> searchResultsAsWidgets = [];
 
+  int currentLoadedPage = 1;
+
   bool _searching = false;
+  bool _isLazyLoading = false;
+
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +87,7 @@ class _GenresPageState extends State<GenresPage> {
       body: Padding(
         padding: pagePadding(context),
         child: SingleChildScrollView(
+          controller: _scrollController,
           child: Column(
             children: [
               topRow(context, "Genres"),
@@ -161,36 +188,29 @@ class _GenresPageState extends State<GenresPage> {
               ),
               Container(
                 padding: EdgeInsets.only(left: 10, right: 10, top: 20, bottom: MediaQuery.of(context).padding.bottom),
-                child: _searching
+                child: searchResultsAsWidgets.isEmpty && !_searching
                     ? Container(
                         margin: EdgeInsets.only(top: 40),
                         child: Center(
-                          child: CircularProgressIndicator(
-                            color: accentColor,
+                          child: Column(
+                            children: [
+                              Container(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  child: Image.asset(
+                                    'lib/assets/images/ghost.png',
+                                    color: textMainColor,
+                                  )),
+                              Text(
+                                "~~nooo matches~~",
+                                style: TextStyle(color: textMainColor, fontFamily: "NunitoSans", fontSize: 17),
+                              ),
+                            ],
                           ),
                         ),
                       )
-                    : searchResultsAsWidgets.isEmpty
-                        ? Container(
-                            margin: EdgeInsets.only(top: 40),
-                            child: Center(
-                              child: Column(
-                                children: [
-                                  Container(
-                                      padding: EdgeInsets.only(bottom: 10),
-                                      child: Image.asset(
-                                        'lib/assets/images/ghost.png',
-                                        color: textMainColor,
-                                      )),
-                                  Text(
-                                    "~~nooo matches~~",
-                                    style: TextStyle(color: textMainColor, fontFamily: "NunitoSans", fontSize: 17),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : GridView.builder(
+                    : Column(
+                        children: [
+                          GridView.builder(
                             physics: NeverScrollableScrollPhysics(),
                             padding: EdgeInsets.zero,
                             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -203,6 +223,17 @@ class _GenresPageState extends State<GenresPage> {
                               child: searchResultsAsWidgets[index],
                             ),
                           ),
+                          if (_searching)
+                            Container(
+                              margin: EdgeInsets.only(top: 40, bottom: MediaQuery.of(context).padding.bottom + 10),
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  color: accentColor,
+                                ),
+                              ),
+                            )
+                        ],
+                      ),
               ),
             ],
           ),

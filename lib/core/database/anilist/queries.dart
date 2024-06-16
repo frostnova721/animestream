@@ -368,18 +368,18 @@ class AnilistQueries {
     return genrePopular;
   }
 
-  Future<List<AnimeCardData>> getAnimesWithGenresAndTags(List<String> genres, List<String> tags) async {
+  Future<List<AnimeCardData>> getAnimesWithGenresAndTags(List<String> genres, List<String> tags, {int page = 1}) async {
     String genreString = "";
     String tagString = "";
-    if(genres.isNotEmpty) {
+    if (genres.isNotEmpty) {
       genreString = "genre_in: " + genres.map((e) => '"$e"').toList().toString();
     }
-    if(tags.isNotEmpty) {
+    if (tags.isNotEmpty) {
       tagString = "tag_in: " + tags.map((e) => '"$e"').toList().toString();
     }
 
-     final query =
-        """{ Page(perPage: 30){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
+    final query =
+        """{ Page(perPage: 30, page: $page){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
     final res = await Anilist().fetchQuery(query, RequestType.media);
     List<AnimeCardData> results = [];
     for (final item in res) {

@@ -22,18 +22,15 @@ class MediaListStatusBottomSheet extends StatefulWidget {
   });
 
   @override
-  State<MediaListStatusBottomSheet> createState() =>
-      _MediaListStatusBottomSheetState();
+  State<MediaListStatusBottomSheet> createState() => _MediaListStatusBottomSheetState();
 }
 
-class _MediaListStatusBottomSheetState
-    extends State<MediaListStatusBottomSheet> {
+class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet> {
   @override
   void initState() {
     super.initState();
     itemList = makeItemList();
-    textEditingController.value =
-        TextEditingValue(text: "${widget.episodesWatched}");
+    textEditingController.value = TextEditingValue(text: "${widget.episodesWatched}");
   }
 
   final List<String> statuses = ["PLANNING", "CURRENT", "DROPPED", "COMPLETED"];
@@ -67,6 +64,7 @@ class _MediaListStatusBottomSheetState
   String getInitialSelection() {
     if (widget.status == null) {
       initialSelection = itemList[0].value;
+      print("set initial to $initialSelection");
       return itemList[0].value;
     } else {
       initialSelection = widget.status!.name;
@@ -84,8 +82,7 @@ class _MediaListStatusBottomSheetState
   Widget build(BuildContext context) {
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(
-            bottom: MediaQuery.of(context).viewInsets.bottom, left: 20, right: 20),
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 20, right: 20),
         width: double.infinity,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -119,12 +116,12 @@ class _MediaListStatusBottomSheetState
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
-                                        borderSide: BorderSide(
-                                          width: 1,
-                                          color: Colors.white,
-                                        ),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
+                      borderSide: BorderSide(
+                        width: 1,
+                        color: Colors.white,
+                      ),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                     contentPadding: EdgeInsets.only(left: 20, right: 20),
                   ),
                   width: 300,
@@ -152,12 +149,9 @@ class _MediaListStatusBottomSheetState
                     IconButton(
                       onPressed: () {
                         final currentNumber = int.parse(
-                            textEditingController.value.text.isEmpty
-                                ? "0"
-                                : textEditingController.value.text);
+                            textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
                         if (currentNumber < 1) return;
-                        textEditingController.value =
-                            TextEditingValue(text: "${currentNumber - 1}");
+                        textEditingController.value = TextEditingValue(text: "${currentNumber - 1}");
                       },
                       icon: Icon(
                         Icons.remove_circle_outline_rounded,
@@ -174,8 +168,7 @@ class _MediaListStatusBottomSheetState
                           child: TextField(
                             controller: textEditingController,
                             onChanged: (value) => {
-                              if (value.isNotEmpty &&
-                                  int.parse(value) > widget.totalEpisodes)
+                              if (value.isNotEmpty && int.parse(value) > widget.totalEpisodes)
                                 {
                                   textEditingController.value = TextEditingValue(
                                     text: "${widget.totalEpisodes}",
@@ -185,8 +178,7 @@ class _MediaListStatusBottomSheetState
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.end,
                             decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(
-                                  top: 5, bottom: 5, left: 10, right: 10),
+                              contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(
                                   color: textMainColor,
@@ -214,17 +206,13 @@ class _MediaListStatusBottomSheetState
                     IconButton(
                       onPressed: () {
                         final currentNumber = int.parse(
-                            textEditingController.value.text.isEmpty
-                                ? "0"
-                                : textEditingController.value.text);
+                            textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
                         if (currentNumber + 1 >= widget.totalEpisodes) {
-                          menuController.value =
-                              TextEditingValue(text: "COMPLETED");
+                          menuController.value = TextEditingValue(text: "COMPLETED");
                           selectedValue = "COMPLETED";
                         }
                         if (currentNumber + 1 > widget.totalEpisodes) return;
-                        textEditingController.value =
-                            TextEditingValue(text: "${currentNumber + 1}");
+                        textEditingController.value = TextEditingValue(text: "${currentNumber + 1}");
                       },
                       icon: Icon(
                         Icons.add_circle_outline_rounded,
@@ -237,7 +225,7 @@ class _MediaListStatusBottomSheetState
               ],
             ),
             Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom+5, top: 50),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 5, top: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -282,23 +270,22 @@ class _MediaListStatusBottomSheetState
                       ),
                     ),
                     onPressed: () {
-                      final int progress =
-                          int.parse(textEditingController.value.text);
-                      if (selectedValue != null ||
-                          progress != widget.episodesWatched || widget.status == null) {
+                      final int progress = int.parse(textEditingController.value.text);
+                      if (selectedValue != null || progress != widget.episodesWatched || widget.status == null) {
                         AnilistMutations()
                             .mutateAnimeList(
                           id: widget.id,
                           status: assignItemEnum(selectedValue ?? initialSelection!),
                           progress: progress,
-                        ).then((value) {
-                              floatingSnackBar(context, "The list has been updated!");
+                        )
+                            .then((value) {
+                          initialSelection = selectedValue ?? initialSelection;
+                          widget.refreshListStatus(selectedValue ?? initialSelection!, progress);
+                          floatingSnackBar(context, "The list has been updated!");
                           if (mounted) {
                             Navigator.of(context).pop();
                           }
                         });
-                        initialSelection = selectedValue;
-                        widget.refreshListStatus(selectedValue ?? initialSelection!, progress);
                       }
                     },
                     child: Text(

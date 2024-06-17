@@ -38,6 +38,8 @@ class _HomeState extends State<Home> {
   @override
   void initState() {
     super.initState();
+
+    //check login status
     AniListLogin().isAnilistLoggedIn().then(
           (loggedIn) => setState(() {
             isLoggedIn = loggedIn;
@@ -136,25 +138,30 @@ class _HomeState extends State<Home> {
                 ),
               ),
               // if (storedUserData != null)
-                AnimatedSwitcher(
-                  duration: Duration(milliseconds: 400),
-                  child:  storedUserData != null ? Container(
-                    margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _accountCard(),
-                        _listButton(),
-                      ],
-                    ),
-                  ) : null,
-                ),
+              AnimatedSwitcher(
+                duration: Duration(milliseconds: 400),
+                child: storedUserData != null
+                    ? Container(
+                        margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            _accountCard(),
+                            _listButton(),
+                          ],
+                        ),
+                      )
+                    : null,
+              ),
               _titleAndList("Continue Watching", widget.recentlyWatched, showRefreshIndication: refreshing),
               divider(),
               _titleAndList("Aired This Season", widget.currentlyAiring),
               if (isLoggedIn)
                 Column(
-                  children: [divider(), _titleAndList("From Your Planned", widget.planned)],
+                  children: [
+                    divider(),
+                    _titleAndList("From Your Planned", widget.planned),
+                  ],
                 ),
               footSpace(),
             ],
@@ -259,7 +266,7 @@ class _HomeState extends State<Home> {
     return Center(
       child: Container(
         width: MediaQuery.of(context).size.width / 2,
-        margin: EdgeInsets.only(top: 20, bottom: 20),
+        margin: EdgeInsets.only(top: 15, bottom: 15),
         height: 6,
         decoration: BoxDecoration(
           color: accentColor.withOpacity(0.6),

@@ -181,7 +181,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         _controlsTimer!.cancel();
       }
       _isTimerActive = true;
-      print("called: $_visible");
+      print("called hideontimeout: $_visible");
       _controlsTimer = Timer(Duration(seconds: 5), () {
         if (mounted && (controller.isPlaying() ?? false)) {
           toggleControls(false);

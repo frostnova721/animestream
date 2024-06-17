@@ -50,7 +50,7 @@ class _ControlsState extends State<Controls> {
 
   int currentEpIndex = 0;
   bool preloadStarted = false;
-  bool calledAutoNext = true;
+  bool calledAutoNext = false;
 
   @override
   void initState() {
@@ -71,61 +71,8 @@ class _ControlsState extends State<Controls> {
     //this widget will only be open when the video is initialised. so to hide the controls, call it first
     widget.hideControlsOnTimeout();
 
-    _controller.addListener(() async {
-      //manage currentEpIndex and clear preloads if the index changed
-      if (currentEpIndex != widget.episode['currentEpIndex']) {
-        preloadedSources = [];
-        preloadStarted = false;
-        currentEpIndex = widget.episode['currentEpIndex'];
-      }
-
-      //hide the controls on timeout if visible
-      if (widget.isControlsVisible) {
-        widget.hideControlsOnTimeout();
-      }
-
-      //managing the UI updation
-      if (mounted)
-        setState(() {
-          int duration = _controller.value.duration?.inSeconds ?? 0;
-          int val = _controller.value.position.inSeconds;
-          playPause = _controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded;
-          currentTime = getFormattedTime(val);
-          maxTime = getFormattedTime(duration);
-          buffering = _controller.value.isBuffering;
-        });
-
-      if (_controller.value.isPlaying && !wakelockEnabled) {
-        Wakelock.enable();
-        wakelockEnabled = true;
-        debugPrint("wakelock enabled");
-      } else if (!_controller.value.isPlaying && wakelockEnabled) {
-        Wakelock.disable();
-        wakelockEnabled = false;
-        debugPrint("wakelock disabled");
-      }
-
-      final duration = _controller.value.duration?.inSeconds;
-      final currentPosition = _controller.value.position.inSeconds;
-
-      //set player postion to duration if greater than duration
-      if (duration != null && currentPosition > duration) {
-        _controller.seekTo(Duration(seconds: duration));
-        await _controller.pause();
-      }
-
-      //play the loaded episode if equal to duration
-      if (!finalEpisodeReached && (currentPosition == duration) && duration != null) {
-        await _controller.pause();
-        await playPreloadedEpisode();
-      }
-
-      final currentByTotal = _controller.value.position.inSeconds / (_controller.value.duration?.inSeconds ?? 0);
-      if (currentByTotal * 100 >= 75 && !preloadStarted) {
-        preloadNextEpisode();
-        widget.updateWatchProgress(currentEpIndex);
-      }
-    });
+    //writing the function here was a bad idea lol (had to reload the watch page to see its changes)
+    _controller.addListener(playerEventListener);
   }
 
   List<Stream> currentSources = [];
@@ -144,9 +91,69 @@ class _ControlsState extends State<Controls> {
   bool finalEpisodeReached = false;
   bool wakelockEnabled = false;
 
-  void skipToStart() async {
-    print("skipping...");
-    await _controller.seekTo(Duration.zero);
+  //exactly! its the event listener function so that i dont have to reload the whole fkn watch page to see any changes
+  void playerEventListener() async {
+    //manage currentEpIndex and clear preloads if the index changed
+    if (currentEpIndex != widget.episode['currentEpIndex']) {
+      preloadedSources = [];
+      preloadStarted = false;
+      currentEpIndex = widget.episode['currentEpIndex'];
+    }
+
+    //hide the controls on timeout if visible
+    if (widget.isControlsVisible) {
+      widget.hideControlsOnTimeout();
+    }
+
+    //managing the UI updation
+    if (mounted)
+      setState(() {
+        int duration = _controller.value.duration?.inSeconds ?? 0;
+        int val = _controller.value.position.inSeconds;
+        playPause = _controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded;
+        currentTime = getFormattedTime(val);
+        maxTime = getFormattedTime(duration);
+        buffering = _controller.value.isBuffering;
+      });
+
+    if (_controller.value.isPlaying && !wakelockEnabled) {
+      Wakelock.enable();
+      wakelockEnabled = true;
+      debugPrint("wakelock enabled");
+    } else if (!_controller.value.isPlaying && wakelockEnabled) {
+      Wakelock.disable();
+      wakelockEnabled = false;
+      debugPrint("wakelock disabled");
+    }
+
+    // final duration = _controller.value.duration?.inMilliseconds;
+    // final currentPosition = _controller.value.position.inMilliseconds;
+
+    //set player postion to duration if greater than duration
+    // if (duration != null && duration != 0 && currentPosition > duration) {
+    //   print("skipping to end...");
+    //   if (_controller.value.isPlaying) {
+    //     _controller.seekTo(Duration(seconds: duration));
+    //     await _controller.pause();
+    //   }
+    // }
+
+    //play the loaded episode if equal to duration
+    if (!finalEpisodeReached &&  _controller.value.duration != null &&  _controller.value.position.inSeconds ==  _controller.value.duration!.inSeconds) {
+      if (_controller.value.isPlaying) {
+        await _controller.pause();
+      }
+      await playPreloadedEpisode();
+    }
+
+    //calculate the percentage
+    final currentByTotal = _controller.value.position.inSeconds / (_controller.value.duration?.inSeconds ?? 0);
+    if (currentByTotal * 100 >= 75 && !preloadStarted && _controller.value.isPlaying) {
+      print("====================== above 75% ====================");
+      print("when position= ${_controller.value.position.inSeconds}, duration= ${_controller.value.duration?.inSeconds ?? 0} ");
+      preloadNextEpisode();
+      widget.updateWatchProgress(currentEpIndex);
+    }
   }
 
   //probably redundant function. might remove later
@@ -154,6 +161,7 @@ class _ControlsState extends State<Controls> {
     currentEpIndex = updatedIndex;
   }
 
+  //assign player settings
   Future<void> assignSettings() async {
     final settings = await Settings().getSettings();
     setState(() {
@@ -163,7 +171,6 @@ class _ControlsState extends State<Controls> {
   }
 
   Future<void> playPreloadedEpisode() async {
-
     //just return if episode ended and next video is being loaded or the episode is the last one
     if (currentEpIndex + 1 >= widget.episode['epLinks'].length || calledAutoNext) {
       return;
@@ -256,14 +263,17 @@ class _ControlsState extends State<Controls> {
     return "${formattedHours.length > 0 ? "$formattedHours:" : ''}$formattedMins:$formattedSeconds";
   }
 
-  void fastForward(int seekDuration) {
+  void fastForward(int seekDuration) async {
     if ((_controller.value.position.inSeconds + seekDuration) <= 0) {
       _controller.seekTo(Duration(seconds: 0));
+      return;
     } else {
-      if ((_controller.value.position.inSeconds + seekDuration) > _controller.value.duration!.inSeconds) {
-        _controller.seekTo(Duration(seconds: _controller.value.duration!.inSeconds));
+      if ((_controller.value.position.inSeconds + seekDuration) >= _controller.value.duration!.inSeconds) {
+        _controller.seekTo(Duration(milliseconds: _controller.value.duration!.inMilliseconds - 500));
+        return;
       }
       _controller.seekTo(Duration(seconds: _controller.value.position.inSeconds + seekDuration));
+      return;
     }
   }
 

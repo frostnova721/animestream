@@ -33,6 +33,9 @@ class _GenresPageState extends State<GenresPage> {
   void getList({bool lazyLoaded = false}) async {
     if (lazyLoaded) {
       _isLazyLoading = true;
+      currentLoadedPage++;
+    } else {
+      currentLoadedPage = 1;
     }
     try {
       setState(() {
@@ -42,6 +45,7 @@ class _GenresPageState extends State<GenresPage> {
       if (selectedGenres.isEmpty && selectedTags.isEmpty) {
         return;
       }
+      print("loading page $currentLoadedPage");
       final res =
           await AnilistQueries().getAnimesWithGenresAndTags(selectedGenres, selectedTags, page: currentLoadedPage);
       res.forEach((e) {
@@ -57,7 +61,6 @@ class _GenresPageState extends State<GenresPage> {
       setState(() {
         _searching = false;
         _isLazyLoading = false;
-        currentLoadedPage = lazyLoaded ? currentLoadedPage+1 : 1;
       });
     } catch (err) {
       if (currentUserSettings?.showErrors ?? false) {

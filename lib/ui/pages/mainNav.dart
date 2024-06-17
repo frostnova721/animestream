@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/app/update.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -31,6 +32,14 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   void initState() {
     super.initState();
 
+    //check for app updates
+    checkForUpdates().then((data) => {
+      if(data != null) {
+        showUpdateSheet(context, data.description, data.downloadLink, data.preRelease),
+      }
+    });
+
+    //check login status and get userprofile
     AniListLogin().isAnilistLoggedIn().then((loggedIn) {
       if (loggedIn) {
         AniListLogin().getUserProfile().then((user) => {

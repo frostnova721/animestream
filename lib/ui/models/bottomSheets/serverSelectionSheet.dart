@@ -10,7 +10,7 @@ import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class ServerSelectionBottomSheet extends StatefulWidget {
-  final Function(String selectedSource, String epLink, Function(List<dynamic>, bool)) getStreams;
+  final Function(String selectedSource, String epLink, Function(List<Stream>, bool)) getStreams;
   final ServerSelectionBottomSheetContentData bottomSheetContentData;
   final Type type;
   final Function? getWatched;
@@ -27,8 +27,8 @@ class ServerSelectionBottomSheet extends StatefulWidget {
 }
 
 class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> {
-  List streamSources = [];
-  List qualities = [];
+  List<Stream> streamSources = [];
+  List<Map<String, String>> qualities = [];
 
   getStreams() async {
     streamSources = [];
@@ -40,26 +40,41 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
             _isLoading = widget.type == Type.download ? true : false;
           }
           streamSources = streamSources + list;
-          if (widget.type == Type.download)
-            list.forEach((element) {
-              getQualities(element.link, element.server, element.backup);
+          if (widget.type == Type.download) {
+            list.forEach((element) async {
+              if (element.quality == "multi-quality") {
+                await getQualities(element.link, element.server, element.backup);
+              } else {
+                qualities.add({
+                  'link': element.link,
+                  'server': "${element.server}  ${element.backup ? "- backup" : ""}",
+                  'quality': "${element.quality}"
+                });
+              }
             });
+            if (mounted)
+              setState(() {
+                _isLoading = false;
+              });
+          }
         });
     });
   }
 
   Future<void> getQualities(String link, String server, bool backup) async {
-    List<dynamic> mainList = [];
+    List<Map<String, String>> mainList = [];
+
     final List<dynamic> list = await getQualityStreams(link);
     list.forEach((element) {
       element['server'] = "${server} ${backup ? "- backup" : ""}";
+      element['quality'] = "${element['quality']}p";
       mainList.add(element);
     });
-    if (mounted)
-      setState(() {
-        _isLoading = false;
-        qualities = qualities + mainList;
-      });
+    // if (mounted)
+    setState(() {
+      //     _isLoading = false;
+      qualities = qualities + mainList;
+    });
   }
 
   @override
@@ -139,13 +154,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 ),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await storeWatching(
-                      widget.bottomSheetContentData.title,
-                      widget.bottomSheetContentData.cover,
-                      widget.bottomSheetContentData.id,
-                      widget.bottomSheetContentData.episodeIndex,
-                      totalEpisodes: widget.bottomSheetContentData.totalEpisodes
-                    );
+                    await storeWatching(widget.bottomSheetContentData.title, widget.bottomSheetContentData.cover,
+                        widget.bottomSheetContentData.id, widget.bottomSheetContentData.episodeIndex,
+                        totalEpisodes: widget.bottomSheetContentData.totalEpisodes);
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -223,7 +234,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               child: ElevatedButton(
                 onPressed: () {
                   Downloader()
-                      .download(qualities[ind]['link'],
+                      .download(qualities[ind]['link']!,
                           "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}")
                       .catchError((err) {
                     print(err);
@@ -261,7 +272,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                                 ),
                               ),
                               Text(
-                                "• ${qualities[ind]['quality']}p",
+                                "• ${qualities[ind]['quality']}",
                                 style: TextStyle(
                                   color: textMainColor,
                                   fontSize: 18,

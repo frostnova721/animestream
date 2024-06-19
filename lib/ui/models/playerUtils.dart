@@ -6,12 +6,12 @@ BetterPlayerDataSource dataSourceConfig(String url) {
     BetterPlayerDataSourceType.network,
     url,
     bufferingConfiguration: BetterPlayerBufferingConfiguration(
-      maxBufferMs: 60000,
+      maxBufferMs: 120000,
     ),
     cacheConfiguration: BetterPlayerCacheConfiguration(
       useCache: true,
-      maxCacheFileSize: 20 * 1024 * 1024,
-      maxCacheSize: 20 * 1024 * 1024,
+      maxCacheFileSize: 50 * 1024 * 1024,
+      maxCacheSize: 50 * 1024 * 1024,
     ),
     placeholder: Center(
       child: Column(

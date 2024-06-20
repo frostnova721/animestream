@@ -460,7 +460,7 @@ class _ControlsState extends State<Controls> {
                 onTap: () async {
                   if (currentEpIndex == 0) return floatingSnackBar(context, "Already on the first episode");
                   showModalBottomSheet(
-                      showDragHandle: true,
+                      isScrollControlled: true,
                       backgroundColor: Color(0xff121212),
                       context: context,
                       builder: (BuildContext context) {
@@ -585,7 +585,7 @@ class _ControlsState extends State<Controls> {
                     print(currentEpIndex);
                   } else
                     showModalBottomSheet(
-                      showDragHandle: true,
+                      isScrollControlled: true,
                       backgroundColor: Color(0xff121212),
                       context: context,
                       builder: (BuildContext context) {

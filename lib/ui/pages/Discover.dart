@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
-import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -166,35 +166,39 @@ class _DiscoverState extends State<Discover> {
                           ),
                         ),
                 ),
-                Container(
-                  padding: EdgeInsets.only(left: 20, top: MediaQuery.of(context).padding.top + 10, right: 20),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Discover",
-                        style: TextStyle(
-                          color: textMainColor,
-                          fontFamily: "Rubik",
-                          fontWeight: FontWeight.bold,
-                          fontSize: 30,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => SettingsPage(),
-                          ),
-                        ),
-                        icon: Icon(
-                          Icons.settings_rounded,
-                          color: textMainColor,
-                          size: 32,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                Padding(
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, right: 20),
+                  child: buildHeader("Discover", context),
+                )
+                // Container(
+                //   padding: EdgeInsets.only(left: 20, top: MediaQuery.of(context).padding.top + 10, right: 20),
+                //   child: Row(
+                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                //     children: [
+                //       Text(
+                //         "Discover",
+                //         style: TextStyle(
+                //           color: textMainColor,
+                //           fontFamily: "Rubik",
+                //           fontWeight: FontWeight.bold,
+                //           fontSize: 30,
+                //         ),
+                //       ),
+                //       IconButton(
+                //         onPressed: () => Navigator.of(context).push(
+                //           MaterialPageRoute(
+                //             builder: (context) => SettingsPage(),
+                //           ),
+                //         ),
+                //         icon: Icon(
+                //           Icons.settings_rounded,
+                //           color: textMainColor,
+                //           size: 32,
+                //         ),
+                //       ),
+                //     ],
+                //   ),
+                // ),
               ],
             ),
             Row(

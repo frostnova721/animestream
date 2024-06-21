@@ -18,8 +18,8 @@ class Settings {
     if (!box.isOpen) box = await Hive.openBox('animestream');
     var currentSettings = (await getSettings(writing: true)).toMap();
     var updatedSettings = settings.toMap();
-    print(currentSettings);
-    print(updatedSettings);
+    print("before updation: $currentSettings");
+    print("value upation: $updatedSettings");
     currentSettings.forEach((key, value) {
       if (updatedSettings[key] != null) {
         currentSettings[key] = updatedSettings[key];

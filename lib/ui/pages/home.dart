@@ -4,11 +4,11 @@ import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
+import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
-import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -108,35 +108,7 @@ class _HomeState extends State<Home> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                padding: EdgeInsets.only(left: 20, top: 10, right: 20, bottom: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Home",
-                      style: TextStyle(
-                        color: textMainColor,
-                        fontFamily: "Rubik",
-                        fontWeight: FontWeight.bold,
-                        fontSize: 30,
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => SettingsPage(),
-                        ),
-                      ),
-                      icon: Icon(
-                        Icons.settings_rounded,
-                        color: textMainColor,
-                        size: 32,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              buildHeader("Home", context),
               // if (storedUserData != null)
               AnimatedSwitcher(
                 duration: Duration(milliseconds: 400),

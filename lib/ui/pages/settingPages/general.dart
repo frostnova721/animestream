@@ -43,98 +43,101 @@ class _GeneralSettingState extends State<GeneralSetting> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Padding(
-        padding: pagePadding(context),
-        child: loaded
-            ? Column(
-                children: [
-                  topRow(context, "General"),
-                  Container(
-                    margin: EdgeInsets.only(top: 30),
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          showErrorsButtonState = !showErrorsButtonState;
-                        });
-                        // writeSettings(
-                        //     SettingsModal(showErrors: showErrorsButtonState));
-                      },
-                      child: Container(
-                        padding: EdgeInsets.only(
-                            left: 20, right: 20, top: 10, bottom: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Show Errors",
-                              style: textStyle(),
-                            ),
-                            Switch(
-                              value: showErrorsButtonState,
-                              activeColor: backgroundColor,
-                              activeTrackColor: accentColor,
-                              onChanged: (val) {
-                                setState(() {
-                                  showErrorsButtonState = val;
-                                });
-                                writeSettings(SettingsModal(
-                                    showErrors: showErrorsButtonState));
-                              },
-                            ),
-                          ],
+      body: loaded
+          ? SingleChildScrollView(
+            child: Padding(
+              padding: pagePadding(context, bottom: true),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    settingPagesTitleHeader(context, "General"),
+                    Container(
+                      margin: EdgeInsets.only(top: 30),
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            showErrorsButtonState = !showErrorsButtonState;
+                          });
+                          // writeSettings(
+                          //     SettingsModal(showErrors: showErrorsButtonState));
+                        },
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              left: 20, right: 20, top: 10, bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Show Errors",
+                                style: textStyle(),
+                              ),
+                              Switch(
+                                value: showErrorsButtonState,
+                                activeColor: backgroundColor,
+                                activeTrackColor: accentColor,
+                                onChanged: (val) {
+                                  setState(() {
+                                    showErrorsButtonState = val;
+                                  });
+                                  writeSettings(SettingsModal(
+                                      showErrors: showErrorsButtonState));
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Container(
-                    child: InkWell(
-                      onTap: () {
-                        setState(() {
-                          receivePreReleases = !receivePreReleases;
-                        });
-                        // writeSettings(
-                        //     SettingsModal(showErrors: receivePreReleases));
-                      },
-                      child: Container(
-                        padding: EdgeInsets.only(
-                            left: 20, right: 20, top: 10, bottom: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "Recieve beta updates",
-                                  style: textStyle(),
-                                ),
-                                Text(
-                                  "*maybe unstable",
-                                  style: TextStyle(color: textSubColor, fontFamily: 'NunitoSans'),
-                                ),
-                              ],
-                            ),
-                            Switch(
-                              value: receivePreReleases,
-                              activeColor: backgroundColor,
-                              activeTrackColor: accentColor,
-                              onChanged: (val) {
-                                setState(() {
-                                  receivePreReleases = val;
-                                });
-                                writeSettings(SettingsModal(
-                                    receivePreReleases: val));
-                              },
-                            ),
-                          ],
+                    Container(
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            receivePreReleases = !receivePreReleases;
+                          });
+                          // writeSettings(
+                          //     SettingsModal(showErrors: receivePreReleases));
+                        },
+                        child: Container(
+                          padding: EdgeInsets.only(
+                              left: 20, right: 20, top: 10, bottom: 10),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "Recieve beta updates",
+                                    style: textStyle(),
+                                  ),
+                                  Text(
+                                    "*maybe unstable",
+                                    style: TextStyle(color: textSubColor, fontFamily: 'NunitoSans'),
+                                  ),
+                                ],
+                              ),
+                              Switch(
+                                value: receivePreReleases,
+                                activeColor: backgroundColor,
+                                activeTrackColor: accentColor,
+                                onChanged: (val) {
+                                  setState(() {
+                                    receivePreReleases = val;
+                                  });
+                                  writeSettings(SettingsModal(
+                                      receivePreReleases: val));
+                                },
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  )
-                ],
-              )
-            : Container(),
-      ),
+                    )
+                  ],
+                ),
+            ),
+          )
+          : Container(),
     );
   }
 }

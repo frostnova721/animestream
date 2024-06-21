@@ -3,6 +3,7 @@ import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 class PlayerSetting extends StatefulWidget {
   const PlayerSetting({super.key});
@@ -20,6 +21,10 @@ class PlayerSettingState extends State<PlayerSetting> {
 
   int? skipDuration;
   int? megaSkipDuration;
+
+  double skipDurationSliderValue = 15;
+  double megaSkipDurationSliderValue = 85;
+
   bool loaded = false;
 
   String? preferredQuality;
@@ -41,166 +46,156 @@ class PlayerSettingState extends State<PlayerSetting> {
     });
   }
 
+  Set selectedQualitySet = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Padding(
-        padding: pagePadding(context),
+      body: SingleChildScrollView(
         child: Container(
+          padding: pagePadding(context, bottom: true),
           child: loaded
               ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    topRow(context, "Player"),
+                    settingPagesTitleHeader(context, "Player"),
                     Container(
                       padding: EdgeInsets.only(left: 20, right: 20, top: 30),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Container(
-                            height: 60,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          item(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Skip duration",
-                                  style: textStyle(),
+                                Padding(
+                                  padding: EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    "Skip duration",
+                                    style: textStyle(),
+                                  ),
                                 ),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          if (skipDuration! > 5)
-                                            writeSettings(SettingsModal(skipDuration: skipDuration! - 5));
-                                        });
-                                      },
-                                      icon: Icon(
-                                        Icons.remove_rounded,
-                                        color: textMainColor,
-                                      ),
+                                SliderTheme(
+                                  data: SliderThemeData(
+                                    thumbColor: accentColor,
+                                    activeTrackColor: accentColor,
+                                    inactiveTrackColor: textSubColor,
+                                    valueIndicatorShape: RectangularSliderValueIndicatorShape(),
+                                    valueIndicatorTextStyle: TextStyle(
+                                      color: backgroundColor,
+                                      fontFamily: "NotoSans",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
-                                    Container(
-                                      alignment: Alignment.center,
-                                      width: 40,
-                                      child: Text(
-                                        "$skipDuration",
-                                        style: textStyle(),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          if (skipDuration! < 50)
-                                            writeSettings(SettingsModal(skipDuration: skipDuration! + 5));
-                                        });
-                                      },
-                                      icon: Icon(
-                                        Icons.add_rounded,
-                                        color: textMainColor,
-                                      ),
-                                    ),
-                                  ],
+                                    valueIndicatorColor: accentColor,
+                                    trackHeight: 10,
+                                    thumbShape: RoundedRectangularThumbShape(width: 10, radius: 5),
+                                    activeTickMarkColor: backgroundColor,
+                                  ),
+                                  child: Slider(
+                                    onChanged: (val) {
+                                      setState(() {
+                                        skipDurationSliderValue = val;
+                                      });
+                                    },
+                                    value: skipDurationSliderValue,
+                                    divisions: 9,
+                                    label: skipDurationSliderValue.round().toString(),
+                                    max: 50,
+                                    min: 5,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          Container(
-                            height: 60,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          item(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Mega skip duration",
-                                  style: textStyle(),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Text(
+                                    "Mega skip duration",
+                                    style: textStyle(),
+                                  ),
                                 ),
-                                Row(
-                                  children: [
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          if (megaSkipDuration! > 20)
-                                            writeSettings(SettingsModal(megaSkipDuration: megaSkipDuration! - 5));
-                                        });
-                                      },
-                                      icon: Icon(
-                                        Icons.remove_rounded,
-                                        color: textMainColor,
-                                      ),
+                                SliderTheme(
+                                  data: SliderThemeData(
+                                    thumbColor: accentColor,
+                                    activeTrackColor: accentColor,
+                                    inactiveTrackColor: textSubColor,
+                                    valueIndicatorShape: RectangularSliderValueIndicatorShape(),
+                                    valueIndicatorTextStyle: TextStyle(
+                                      color: backgroundColor,
+                                      fontFamily: "NotoSans",
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
                                     ),
-                                    Container(
-                                      alignment: Alignment.center,
-                                      width: 40,
-                                      child: Text(
-                                        "$megaSkipDuration",
-                                        style: textStyle(),
-                                      ),
-                                    ),
-                                    IconButton(
-                                      onPressed: () {
-                                        setState(() {
-                                          if (megaSkipDuration! < 150)
-                                            writeSettings(SettingsModal(megaSkipDuration: megaSkipDuration! + 5));
-                                        });
-                                      },
-                                      icon: Icon(
-                                        Icons.add_rounded,
-                                        color: textMainColor,
-                                      ),
-                                    ),
-                                  ],
+                                    valueIndicatorColor: accentColor,
+                                    trackHeight: 10,
+                                    thumbShape: RoundedRectangularThumbShape(width: 10, radius: 5),
+                                    activeTickMarkColor: backgroundColor,
+                                  ),
+                                  child: Slider(
+                                    onChanged: (val) {
+                                      setState(() {
+                                        megaSkipDurationSliderValue = val;
+                                      });
+                                    },
+                                    onChangeEnd: (val) {
+                                      writeSettings(
+                                          SettingsModal(megaSkipDuration: megaSkipDurationSliderValue.toInt()));
+                                    },
+                                    value: megaSkipDurationSliderValue,
+                                    divisions: 26,
+                                    label: megaSkipDurationSliderValue.round().toString(),
+                                    max: 150,
+                                    min: 20,
+                                  ),
                                 ),
                               ],
                             ),
                           ),
-                          Container(
-                            height: 60,
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          item(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
-                                  "Preferred quality",
-                                  style: textStyle(),
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 20),
+                                  child: Text(
+                                    "Preferred quality",
+                                    style: textStyle(),
+                                  ),
                                 ),
-                                DropdownButton(
-                                  onChanged: (val) {
-                                    setState(() {
-                                      preferredQuality = val;
-                                      writeSettings(SettingsModal(preferredQuality: val!));
-                                    });
-                                  },
-                                  value: preferredQuality!,
-                                  style: textStyle(),
-                                  dropdownColor: backgroundSubColor,
-                                  items: [
-                                    DropdownMenuItem(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 5),
-                                        child: Text("360p"),
+                                Container(
+                                  alignment: Alignment.center,
+                                  child: SegmentedButton(
+                                    style: SegmentedButton.styleFrom(
+                                      backgroundColor: backgroundSubColor,
+                                      selectedBackgroundColor: accentColor,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(10),
                                       ),
-                                      value: "360p",
+                                      side: BorderSide(color: textSubColor)
                                     ),
-                                    DropdownMenuItem(
-                                        child: Padding(
-                                          padding: const EdgeInsets.only(left: 5),
-                                          child: Text("480p"),
-                                        ),
-                                        value: "480p"),
-                                    DropdownMenuItem(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 5),
-                                        child: Text("720p"),
-                                      ),
-                                      value: "720p",
-                                    ),
-                                    DropdownMenuItem(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 5),
-                                        child: Text("1080p"),
-                                      ),
-                                      value: "1080p",
-                                    ),
-                                  ],
-                                )
+                                    multiSelectionEnabled: false,
+                                    showSelectedIcon: false,
+                                    onSelectionChanged: (val) {
+                                      setState(() {
+                                        preferredQuality = val.first;
+                                        writeSettings(SettingsModal(preferredQuality: val.first));
+                                      });
+                                    },
+                                    segments: [
+                                      segment("360p"),
+                                      segment("480p"),
+                                      segment("720p"),
+                                      segment("1080p"),
+                                    ],
+                                    selected: <String>{preferredQuality!},
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -215,8 +210,58 @@ class PlayerSettingState extends State<PlayerSetting> {
     );
   }
 
+  Container item({required Widget child}) {
+    return Container(padding: EdgeInsets.only(top: 15, bottom: 15), child: child,);
+  }
+
+  ButtonSegment segment(String label) {
+    return ButtonSegment(
+      value: label,
+      label: Text(
+        label,
+        style: TextStyle(
+          color: preferredQuality == label ? backgroundColor : accentColor,
+          fontSize: 16,
+          fontFamily: "NotoSans",
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
+  }
+
   @override
   void dispose() {
     super.dispose();
+  }
+}
+
+class RoundedRectangularThumbShape extends SliderComponentShape {
+  final double width;
+  final double radius;
+
+  RoundedRectangularThumbShape({required this.radius, required this.width});
+
+  @override
+  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
+    return Size(width, 10);
+  }
+
+  @override
+  void paint(PaintingContext context, Offset center,
+      {required Animation<double> activationAnimation,
+      required Animation<double> enableAnimation,
+      required bool isDiscrete,
+      required TextPainter labelPainter,
+      required RenderBox parentBox,
+      required SliderThemeData sliderTheme,
+      required TextDirection textDirection,
+      required double value,
+      required double textScaleFactor,
+      required Size sizeWithOverflow}) {
+    final rect = Rect.fromCenter(center: center, width: width, height: 20);
+    context.canvas.drawRRect(
+      RRect.fromRectAndRadius(rect, Radius.circular(radius)),
+      Paint()..color = accentColor,
+    );
   }
 }

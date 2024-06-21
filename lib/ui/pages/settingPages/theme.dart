@@ -43,35 +43,37 @@ class _ThemeSettingState extends State<ThemeSetting> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Padding(
-        padding: pagePadding(context),
-        child: Column(
-          children: [
-            topRow(context, "Themes"),
-            Container(
-              padding: EdgeInsets.only(left: 10, right: 10, top: 30),
-              child: currentTheme != null
-                  ? Column(
-                      children: [
-                        _themeItem("Dark Ash - Lime", lime),
-                        _themeItem("Monochrome", monochrome),
-                        _themeItem("Hot Pink", hotPink),
-                        _themeItem("Cold Purple", coldPurple),
-                        SizedBox(
-                          height: 50,
-                        ),
-                        _toggleItem("AMOLED Background", AMOLEDBackgroundEnabled, () {
-                          setState(() {
-                            AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
-                            Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
-                            floatingSnackBar(context, "All set! restart the app to apply the theme");
-                          });
-                        }, description: "full black background"),
-                      ],
-                    )
-                  : Container(),
-            ),
-          ],
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: pagePadding(context, bottom: true),
+          child: Column(
+            children: [
+              settingPagesTitleHeader(context, "UI"),
+              Container(
+                padding: EdgeInsets.only(left: 10, right: 10, top: 30),
+                child: currentTheme != null
+                    ? Column(
+                        children: [
+                          _themeItem("Dark Ash - Lime", lime),
+                          _themeItem("Monochrome", monochrome),
+                          _themeItem("Hot Pink", hotPink),
+                          _themeItem("Cold Purple", coldPurple),
+                          SizedBox(
+                            height: 50,
+                          ),
+                          _toggleItem("AMOLED Background", AMOLEDBackgroundEnabled, () {
+                            setState(() {
+                              AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
+                              Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
+                              floatingSnackBar(context, "All set! restart the app to apply the theme");
+                            });
+                          }, description: "full black background"),
+                        ],
+                      )
+                    : Container(),
+              ),
+            ],
+          ),
         ),
       ),
     );

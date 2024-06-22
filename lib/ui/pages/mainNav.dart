@@ -34,10 +34,11 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     //check for app updates
     checkForUpdates().then((data) => {
-      if(data != null) {
-        showUpdateSheet(context, data.description, data.downloadLink, data.preRelease),
-      }
-    });
+          if (data != null)
+            {
+              showUpdateSheet(context, data.description, data.downloadLink, data.preRelease),
+            }
+        });
 
     //check login status and get userprofile
     AniListLogin().isAnilistLoggedIn().then((loggedIn) {
@@ -124,7 +125,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         if (pl.isEmpty) return;
         plannedList = [];
         List<UserAnimeListItem> itemList = pl[0].list;
-        if(itemList.length > 25) itemList = itemList.sublist(0, 25);
+        if (itemList.length > 25) itemList = itemList.sublist(0, 25);
         itemList.forEach((item) {
           plannedList.add(HomePageList(
             coverImage: item.coverImage,
@@ -245,6 +246,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
+    final double blurSigmaValue = currentUserSettings!.translucentNavbar ?? true ? 5 : 0; 
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -257,7 +259,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       },
       child: Scaffold(
         body: BottomBar(
-          barColor: backgroundSubColor.withOpacity(0.3),
+          barColor: backgroundSubColor.withOpacity(currentUserSettings!.translucentNavbar ?? true ? 0.3 : 1),
           borderRadius: BorderRadius.circular(10),
           barAlignment: Alignment.bottomCenter,
           width: MediaQuery.of(context).size.width / 2 + 20,
@@ -268,7 +270,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             child: Container(
               padding: EdgeInsets.only(top: 5),
               child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                filter: ImageFilter.blur(sigmaX: blurSigmaValue, sigmaY: blurSigmaValue),
                 child: TabBar(
                   onTap: (val) => setState(() {}),
                   overlayColor: WidgetStateColor.transparent,

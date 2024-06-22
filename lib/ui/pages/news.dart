@@ -35,45 +35,61 @@ class _NewsState extends State<News> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back_rounded,
+          color: textMainColor,),
+        ),
+        backgroundColor: backgroundColor,
+        title: Text(
+          "News",
+          style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
+        ),
+      ),
       body: !loaded
           ? Center(
-            child: CircularProgressIndicator(
+              child: CircularProgressIndicator(
                 color: accentColor,
               ),
-          )
+            )
           : SingleChildScrollView(
-              child: Column(
-                children: [
-                  Container(
-                    padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, bottom: MediaQuery.of(context).padding.bottom),
-                    child: Text(
-                      "News",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: "Poppins",
-                          fontSize: 22),
-                    ),
-                  ),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: newses.length,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemBuilder: (context, index) => GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => NewsDetails(url: newses[index]['url'],)));
-                      },
-                      child: Container(
-                        decoration: BoxDecoration(color: Colors.transparent),
-                        padding: EdgeInsets.only(top: 5, left: 10, right: 10),
-                        child: Cards().NewsCard(
-                            newses[index]['title'],
-                            newses[index]['image'],
-                            newses[index]['date'],
-                            newses[index]['time']),
+              child: Padding(
+                padding: EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top, bottom: MediaQuery.of(context).padding.bottom),
+                child: Column(
+                  children: [
+                    // Container(
+                    //   padding: EdgeInsets.only(top: 10, bottom: MediaQuery.of(context).padding.bottom),
+                    //   child: Text(
+                    //     "News",
+                    //     style: TextStyle(
+                    //         color: Colors.white,
+                    //         fontFamily: "Poppins",
+                    //         fontSize: 30),
+                    // ),
+                    // ),
+                    ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: newses.length,
+                      physics: NeverScrollableScrollPhysics(),
+                      itemBuilder: (context, index) => GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => NewsDetails(
+                                    url: newses[index]['url'],
+                                  )));
+                        },
+                        child: Container(
+                          decoration: BoxDecoration(color: Colors.transparent),
+                          padding: EdgeInsets.only(top: 5, left: 10, right: 10),
+                          child: Cards().NewsCard(newses[index]['title'], newses[index]['image'], newses[index]['date'],
+                              newses[index]['time']),
+                        ),
                       ),
-                    ),
-                  )
-                ],
+                    )
+                  ],
+                ),
               ),
             ),
     );

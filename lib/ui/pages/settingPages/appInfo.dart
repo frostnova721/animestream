@@ -44,7 +44,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
           child: loaded
               ? Column(
                   children: [
-                    topRow(context, "App info"),
+                    settingPagesTitleHeader(context, "App info"),
                     Container(
                       padding: EdgeInsets.only(top: 50),
                       child: Row(

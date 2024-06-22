@@ -66,13 +66,13 @@ Future<List<String>> getAnimeEpisodes(String source, String link) async {
   // return episodeLinks;
 }
 
-generateQualitiesForMultiQuality(String link) async {
+Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link) async {
   // final qualities = await Vidstream().generateQualityStreams(link);
   final qualities = await getQualityStreams(link);
   return qualities;
 }
 
-getStreams(String source, String episodeId, Function(List<Stream>, bool) updateFunction) async {
+Future<void> getStreams(String source, String episodeId, Function(List<Stream>, bool) updateFunction) async {
   final streams = await getClass(source).getStreams(episodeId,  updateFunction);
   return streams;
 }

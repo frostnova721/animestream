@@ -1,4 +1,3 @@
-import 'package:animestream/ui/pages/newSettings.dart';
 import 'package:animestream/ui/pages/settings.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +20,7 @@ Container buildHeader(String title, BuildContext context) {
         IconButton(
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => NewSettingsPage(),
+              builder: (context) => SettingsPage(),
             ),
           ),
           icon: Icon(

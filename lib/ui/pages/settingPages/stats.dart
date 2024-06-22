@@ -77,7 +77,7 @@ class _UserStatsState extends State<UserStats> {
           ? Container(
               padding: pagePadding(context),
               child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(),
+                physics: BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
                 child: Column(
                   children: [
                     topRow(context, "Stats"),

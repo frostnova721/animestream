@@ -52,14 +52,14 @@ class _GeneralSettingState extends State<GeneralSetting> {
                   children: [
                     settingPagesTitleHeader(context, "General"),
                     Container(
-                      margin: EdgeInsets.only(top: 30),
+                      // margin: EdgeInsets.only(top: 30),
                       child: InkWell(
                         onTap: () {
                           setState(() {
                             showErrorsButtonState = !showErrorsButtonState;
                           });
-                          // writeSettings(
-                          //     SettingsModal(showErrors: showErrorsButtonState));
+                          writeSettings(
+                              SettingsModal(showErrors: showErrorsButtonState));
                         },
                         child: Container(
                           padding: EdgeInsets.only(
@@ -94,8 +94,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                           setState(() {
                             receivePreReleases = !receivePreReleases;
                           });
-                          // writeSettings(
-                          //     SettingsModal(showErrors: receivePreReleases));
+                          writeSettings(
+                              SettingsModal(receivePreReleases: receivePreReleases));
                         },
                         child: Container(
                           padding: EdgeInsets.only(
@@ -123,9 +123,9 @@ class _GeneralSettingState extends State<GeneralSetting> {
                                 onChanged: (val) {
                                   setState(() {
                                     receivePreReleases = val;
-                                  });
-                                  writeSettings(SettingsModal(
+                                     writeSettings(SettingsModal(
                                       receivePreReleases: val));
+                                  });
                                 },
                               ),
                             ],

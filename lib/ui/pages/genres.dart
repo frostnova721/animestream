@@ -83,6 +83,8 @@ class _GenresPageState extends State<GenresPage> {
 
   final ScrollController _scrollController = ScrollController();
 
+  final ScrollController _tagsScrollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -284,43 +286,48 @@ class _GenresPageState extends State<GenresPage> {
                             Container(
                               height: 550,
                               width: 500,
-                              child: GridView(
-                                  shrinkWrap: true,
-                                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                    crossAxisCount: 2,
-                                    mainAxisSpacing: 15,
-                                    crossAxisSpacing: 15,
-                                  ),
-                                  children: mainList
-                                      .map(
-                                        (e) => GestureDetector(
-                                          onTap: () {
-                                            if (selectedList.contains(e))
-                                              selectedList.remove(e);
-                                            else
-                                              selectedList.add(e);
-                                            setChildState(() {});
-                                            setDialogState(() {});
-                                          },
-                                          child: AnimatedContainer(
-                                            duration: Duration(milliseconds: 150),
-                                            padding: EdgeInsets.only(left: 10, right: 10),
-                                            height: 40,
-                                            alignment: Alignment.center,
-                                            decoration: BoxDecoration(
-                                                color: selectedList.contains(e) ? accentColor : backgroundSubColor,
-                                                borderRadius: BorderRadius.circular(13)),
-                                            child: Text(
-                                              e,
-                                              style: TextStyle(
-                                                  color: selectedList.contains(e) ? backgroundColor : textMainColor,
-                                                  fontFamily: "NotoSans",
-                                                  fontWeight: FontWeight.bold),
+                              child: Scrollbar(
+                                controller: _tagsScrollController,
+                                interactive: true,
+                                child: GridView(
+                                  controller: _tagsScrollController,
+                                    shrinkWrap: true,
+                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 15,
+                                      crossAxisSpacing: 15,
+                                    ),
+                                    children: mainList
+                                        .map(
+                                          (e) => GestureDetector(
+                                            onTap: () {
+                                              if (selectedList.contains(e))
+                                                selectedList.remove(e);
+                                              else
+                                                selectedList.add(e);
+                                              setChildState(() {});
+                                              setDialogState(() {});
+                                            },
+                                            child: AnimatedContainer(
+                                              duration: Duration(milliseconds: 150),
+                                              padding: EdgeInsets.only(left: 10, right: 10),
+                                              height: 40,
+                                              alignment: Alignment.center,
+                                              decoration: BoxDecoration(
+                                                  color: selectedList.contains(e) ? accentColor : backgroundSubColor,
+                                                  borderRadius: BorderRadius.circular(13)),
+                                              child: Text(
+                                                e,
+                                                style: TextStyle(
+                                                    color: selectedList.contains(e) ? backgroundColor : textMainColor,
+                                                    fontFamily: "NotoSans",
+                                                    fontWeight: FontWeight.bold),
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                      )
-                                      .toList()),
+                                        )
+                                        .toList()),
+                              ),
                             ),
                             Container(
                               margin: EdgeInsets.only(top: 10),

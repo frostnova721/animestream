@@ -51,6 +51,10 @@ Future<UpdateCheckResult?> checkForUpdates() async {
 }
 
 showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre) {
+  //dont show the sheet if recievePreRelease if off and release is a pre release
+  if(pre && pre != (currentUserSettings?.receivePreReleases! ?? false)) {
+    return;
+  } 
   showModalBottomSheet(
     showDragHandle: true,
     backgroundColor: Color(0xff121212),

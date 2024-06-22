@@ -4,9 +4,18 @@ class SettingsModal {
   final bool? showErrors;
   final bool? receivePreReleases;
   final bool? amoledBackground;
-  final String? preferredQuality; 
+  final String? preferredQuality;
+  final bool? translucentNavbar;
 
-  SettingsModal({this.megaSkipDuration, this.skipDuration, this.showErrors, this.receivePreReleases, this.amoledBackground, this.preferredQuality});
+  SettingsModal({
+    this.megaSkipDuration,
+    this.skipDuration,
+    this.showErrors,
+    this.receivePreReleases,
+    this.amoledBackground,
+    this.preferredQuality,
+    this.translucentNavbar,
+  });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
     return SettingsModal(
@@ -15,7 +24,8 @@ class SettingsModal {
       showErrors: map['showErrors'] ?? false,
       receivePreReleases: map['receivePreReleases'] ?? false,
       amoledBackground: map['amoledBackground'] ?? false,
-      preferredQuality: map['preferredQuality'] ?? "720p"
+      preferredQuality: map['preferredQuality'] ?? "720p",
+      translucentNavbar: map['translucentNavbar'] ?? true,
     );
   }
 
@@ -27,6 +37,7 @@ class SettingsModal {
       'receivePreReleases': receivePreReleases,
       'amoledBackground': amoledBackground,
       'preferredQuality': preferredQuality,
+      'translucentNavbar': translucentNavbar,
     };
   }
 }
@@ -34,9 +45,7 @@ class SettingsModal {
 class UserPreferencesModal {
   final bool? episodeGridView;
 
-  UserPreferencesModal({
-    this.episodeGridView
-  });
+  UserPreferencesModal({this.episodeGridView});
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(episodeGridView: map['episodeGridView'] ?? false);

@@ -1,6 +1,13 @@
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:flutter/material.dart';
 
+class ThemeItem {
+  final String name;
+  final AnimeStreamTheme theme;
+
+  ThemeItem({required this.name, required this.theme});
+}
+
 class AnimeStreamTheme {
   Color backgroundColor;
   Color accentColor;

@@ -3,7 +3,6 @@ import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class PlayerSetting extends StatefulWidget {
   const PlayerSetting({super.key});
@@ -61,7 +60,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                   children: [
                     settingPagesTitleHeader(context, "Player"),
                     Container(
-                      padding: EdgeInsets.only(left: 20, right: 20, top: 30),
+                      padding: EdgeInsets.only(left: 20, right: 20, top: 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

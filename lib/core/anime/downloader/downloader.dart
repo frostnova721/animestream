@@ -2,10 +2,11 @@ import "dart:io";
 import "dart:typed_data";
 import "package:animestream/core/anime/downloader/types.dart";
 import "package:animestream/ui/models/notification.dart";
+import "package:flutter/services.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "package:permission_handler/permission_handler.dart";
-import "../../commons/utils.dart";
+import "package:animestream/core/commons/utils.dart";
 import 'package:device_info_plus/device_info_plus.dart';
 
 List<DownloadingItem> downloadQueue = [];
@@ -56,6 +57,7 @@ class Downloader {
     int maxId = downloadQueue.isNotEmpty ? downloadQueue.map((item) => item.id).reduce((a, b) => a > b ? a : b) : 0;
     return maxId + 1;
   }
+
 
   Future<void> download(String streamLink, String fileName, {int retryAttempts = 3}) async {
     final permission = await checkPermission();

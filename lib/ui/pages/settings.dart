@@ -3,7 +3,7 @@ import 'package:animestream/ui/pages/settingPages/appInfo.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
-import 'package:animestream/ui/pages/settingPages/theme.dart';
+import 'package:animestream/ui/pages/settingPages/ui.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -11,129 +11,137 @@ class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsState();
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class _SettingsState extends State<SettingsPage> {
-  final List<SettingItem> items = [
-    SettingItem(label: "Account", page: AccountSetting()),
-    SettingItem(label: "Theme", page: ThemeSetting()),
-    SettingItem(label: "General", page: GeneralSetting()),
-    SettingItem(label: "Player", page: PlayerSetting()),
-    SettingItem(label: "App info", page: AppInfoSetting()),
+class SettingItem {
+  final IconData icon;
+  final String label;
+  final Widget navigateTo;
+  final String description;
+
+  SettingItem({
+    required this.icon,
+    required this.label,
+    required this.navigateTo,
+    required this.description,
+  });
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  final List<SettingItem> settingItems = [
+    SettingItem(
+        icon: Icons.account_circle, label: "Account", description: "Personal stuff", navigateTo: AccountSetting()),
+    SettingItem(icon: Icons.brush_rounded, label: "UI", description: "Colors n Visuals", navigateTo: ThemeSetting()),
+    SettingItem(
+        icon: Icons.play_circle_fill_rounded,
+        label: "Player",
+        description: "Tailor your playback",
+        navigateTo: PlayerSetting()),
+    SettingItem(icon: Icons.tune_rounded, label: "General", description: "Basic tweaks", navigateTo: GeneralSetting()),
+    SettingItem(
+        icon: Icons.info_outline_rounded, label: "App Info", description: "The App stuff", navigateTo: AppInfoSetting())
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
-      body: Padding(
-        padding: pagePadding(context),
-        child: SingleChildScrollView(
+      appBar: settingPagesAppBar(context),
+      body: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.only( left: MediaQuery.of(context).padding.left),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
-                children: [
-                  IconButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    icon: Icon(
-                      Icons.arrow_back_rounded,
-                      color: textMainColor,
-                      size: 32,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10),
-                    child: Text(
-                      "Settings",
-                      style: TextStyle(
-                        fontFamily: "Rubik",
-                        fontSize: 23,
-                        color: textMainColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+              
               Container(
-                // padding: EdgeInsets.only(left: 20, right: 20),
-                child: ListView.builder(
-                  itemCount: items.length,
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            PageRouteBuilder(
-                              pageBuilder:
-                                  (context, animation, secondaryAnimation) =>
-                                      items[index].page,
-                              transitionsBuilder: (context, animation,
-                                  secondaryAnimation, child) {
-                                final tween = Tween(
-                                    begin: Offset(1.0, 0.0), end: Offset.zero);
-                                final curvedAnimation = CurvedAnimation(
-                                  parent: animation,
-                                  curve: Curves.ease,
-                                );
-          
-                                return SlideTransition(
-                                  position: tween.animate(curvedAnimation),
-                                  child: child,
-                                );
-                              },
-                            ));
-                        // MaterialPageRoute(
-                        //   builder: (context) => items[index].page,
-                        // ));
-                      },
-                      child: Container(
-                        height: 70,
-                        padding: EdgeInsets.only(left: 20, right: 20),
-                        alignment: Alignment.center,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          // mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              items[index].label,
-                              style: TextStyle(
-                                color: textMainColor,
-                                fontFamily: "NotoSans",
-                                fontWeight: FontWeight.bold,
-                                fontSize: 20,
-                              ),
-                            ),
-                            Icon(
-                              Icons.play_arrow_rounded,
-                              color: textMainColor,
-                              size: 25,
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+                padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
+                child: Text(
+                  "Settings",
+                  style: TextStyle(fontFamily: "Rubik", fontSize: 40),
                 ),
               ),
+              ListView.builder(
+                itemCount: settingItems.length,
+                shrinkWrap: true,
+                physics: NeverScrollableScrollPhysics(),
+                itemBuilder: (context, index) => Container(
+                  child: InkWell(
+                    onTap: () {
+                      Navigator.of(context).push(
+                        PageRouteBuilder(
+                          pageBuilder: (context, anim, anim2) {
+                            return settingItems[index].navigateTo;
+                          },
+                          transitionDuration: Duration(milliseconds: 100),
+                          reverseTransitionDuration: Duration(milliseconds: 100),
+                          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                            // final tween = Tween(begin: Offset(1.0, 0.0), end: Offset.zero);
+                            // final curvedAnimation = CurvedAnimation(
+                            //   parent: animation,
+                            //   curve: Curves.ease,
+                            // );
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                            // return SlideTransition(
+                            //   position: tween.animate(curvedAnimation),
+                            //   child: child,
+                            // );
+                          },
+                        ),
+                      );
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                settingItems[index].icon,
+                                color: textMainColor,
+                                size: 35,
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.only(left: 20),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      settingItems[index].label,
+                                      style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 20),
+                                    ),
+                                    Text(
+                                      settingItems[index].description,
+                                      style: TextStyle(
+                                        fontFamily: "NunitoSans",
+                                        color: textSubColor,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          Icon(
+                            Icons.keyboard_arrow_right_rounded,
+                            color: textMainColor,
+                            size: 30,
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              )
             ],
           ),
         ),
       ),
     );
   }
-}
-
-class SettingItem {
-  final String label;
-  final Widget page;
-
-  SettingItem({
-    required this.label,
-    required this.page,
-  });
 }

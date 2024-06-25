@@ -246,7 +246,10 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
-    final double blurSigmaValue = currentUserSettings!.translucentNavbar ?? true ? 5 : 0; 
+    double blurSigmaValue = currentUserSettings!.navbarTranslucency ?? 5; 
+    if(blurSigmaValue <= 1) {
+      blurSigmaValue = blurSigmaValue * 10;
+    }
     return PopScope(
       canPop: false,
       onPopInvoked: (didPop) async {
@@ -259,7 +262,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       },
       child: Scaffold(
         body: BottomBar(
-          barColor: backgroundSubColor.withOpacity(currentUserSettings!.translucentNavbar ?? true ? 0.3 : 1),
+          barColor: backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6 ),
           borderRadius: BorderRadius.circular(10),
           barAlignment: Alignment.bottomCenter,
           width: MediaQuery.of(context).size.width / 2 + 20,

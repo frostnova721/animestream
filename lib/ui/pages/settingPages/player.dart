@@ -80,7 +80,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     thumbColor: accentColor,
                                     activeTrackColor: accentColor,
                                     inactiveTrackColor: textSubColor,
-                                    valueIndicatorShape: RectangularSliderValueIndicatorShape(),
+                                    valueIndicatorShape: RoundedSliderValueIndicator(height: 30, width: 35, radius: 5),
                                     valueIndicatorTextStyle: TextStyle(
                                       color: backgroundColor,
                                       fontFamily: "NotoSans",
@@ -88,7 +88,8 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       fontSize: 14,
                                     ),
                                     valueIndicatorColor: accentColor,
-                                    trackHeight: 10,
+                                    trackHeight: 13,
+                                    trackShape: MarginedTrack(),
                                     thumbShape: RoundedRectangularThumbShape(width: 10, radius: 5),
                                     activeTickMarkColor: backgroundColor,
                                   ),
@@ -124,7 +125,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     thumbColor: accentColor,
                                     activeTrackColor: accentColor,
                                     inactiveTrackColor: textSubColor,
-                                    valueIndicatorShape: RectangularSliderValueIndicatorShape(),
+                                    valueIndicatorShape: RoundedSliderValueIndicator(height: 30, width: 40, radius: 5),
                                     valueIndicatorTextStyle: TextStyle(
                                       color: backgroundColor,
                                       fontFamily: "NotoSans",
@@ -132,8 +133,9 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       fontSize: 14,
                                     ),
                                     valueIndicatorColor: accentColor,
-                                    trackHeight: 10,
+                                    trackHeight: 13,
                                     thumbShape: RoundedRectangularThumbShape(width: 10, radius: 5),
+                                    trackShape: MarginedTrack(),
                                     activeTickMarkColor: backgroundColor,
                                   ),
                                   child: Slider(
@@ -231,36 +233,5 @@ class PlayerSettingState extends State<PlayerSetting> {
   @override
   void dispose() {
     super.dispose();
-  }
-}
-
-class RoundedRectangularThumbShape extends SliderComponentShape {
-  final double width;
-  final double radius;
-
-  RoundedRectangularThumbShape({required this.radius, required this.width});
-
-  @override
-  Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size(width, 10);
-  }
-
-  @override
-  void paint(PaintingContext context, Offset center,
-      {required Animation<double> activationAnimation,
-      required Animation<double> enableAnimation,
-      required bool isDiscrete,
-      required TextPainter labelPainter,
-      required RenderBox parentBox,
-      required SliderThemeData sliderTheme,
-      required TextDirection textDirection,
-      required double value,
-      required double textScaleFactor,
-      required Size sizeWithOverflow}) {
-    final rect = Rect.fromCenter(center: center, width: width, height: 20);
-    context.canvas.drawRRect(
-      RRect.fromRectAndRadius(rect, Radius.circular(radius)),
-      Paint()..color = accentColor,
-    );
   }
 }

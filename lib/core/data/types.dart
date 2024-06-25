@@ -4,8 +4,8 @@ class SettingsModal {
   final bool? showErrors;
   final bool? receivePreReleases;
   final bool? amoledBackground;
-  final String? preferredQuality;
-  final bool? translucentNavbar;
+  final String? preferredQuality; // 1080p | 720p |480p | 360p as string
+  final double? navbarTranslucency; //value from 0 to 1
 
   SettingsModal({
     this.megaSkipDuration,
@@ -14,7 +14,7 @@ class SettingsModal {
     this.receivePreReleases,
     this.amoledBackground,
     this.preferredQuality,
-    this.translucentNavbar,
+    this.navbarTranslucency,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -25,7 +25,7 @@ class SettingsModal {
       receivePreReleases: map['receivePreReleases'] ?? false,
       amoledBackground: map['amoledBackground'] ?? false,
       preferredQuality: map['preferredQuality'] ?? "720p",
-      translucentNavbar: map['translucentNavbar'] ?? true,
+      navbarTranslucency: map['navbarTranslucency'] ?? 0.5,
     );
   }
 
@@ -37,7 +37,7 @@ class SettingsModal {
       'receivePreReleases': receivePreReleases,
       'amoledBackground': amoledBackground,
       'preferredQuality': preferredQuality,
-      'translucentNavbar': translucentNavbar,
+      'navbarTranslucency': navbarTranslucency,
     };
   }
 }

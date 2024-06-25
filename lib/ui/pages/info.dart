@@ -1045,7 +1045,7 @@ class _InfoState extends State<Info> {
                 ),
                 _buildInfoItems(
                   _infoLeft('Status'),
-                  _infoRight('${data.status ?? '??'}'.toLowerCase()),
+                  _infoRight('${data.status ?? '??'}'.toLowerCase().replaceAll("_", ' ')),
                 ),
                 _buildInfoItems(
                   _infoLeft('Rating'),

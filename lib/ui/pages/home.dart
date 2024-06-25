@@ -326,7 +326,9 @@ class _HomeState extends State<Home> {
                       ),
                     )
               : Center(
-                  child: CircularProgressIndicator(),
+                  child: CircularProgressIndicator(
+                    color: accentColor,
+                  ),
                 ),
         )
       ],

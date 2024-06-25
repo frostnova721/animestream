@@ -28,8 +28,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
           currentTheme = value;
         }));
     AMOLEDBackgroundEnabled = currentUserSettings?.amoledBackground ?? false;
-    translucentNavbar = currentUserSettings?.translucentNavbar ?? true;
-  
+    navbarTranslucency = currentUserSettings?.navbarTranslucency ?? 0.6;
   }
 
   applyTheme(AnimeStreamTheme theme) async {
@@ -39,7 +38,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
 
   AnimeStreamTheme? currentTheme;
 
-  late bool translucentNavbar;
+  late double navbarTranslucency;
   late bool AMOLEDBackgroundEnabled;
 
   @override
@@ -56,6 +55,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                 padding: EdgeInsets.only(left: 15, right: 15, top: 0),
                 child: currentTheme != null
                     ? Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           // _themeItem("Dark Ash - Lime", lime),
                           // _themeItem("Monochrome", monochrome),
@@ -74,19 +74,101 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             },
                             description: "Full black background",
                           ),
-                          _toggleItem("Translucent navbar", translucentNavbar, description: "Translucent effect of navigation bar" ,() {
-                            setState(() {
-                              translucentNavbar = !translucentNavbar;
-                               Settings().writeSettings(SettingsModal(translucentNavbar: translucentNavbar));
-                               showToast("done!");
-                            });
-                          })
+                          _sliderItem("Navbar Translucency", navbarTranslucency,
+                          min: 0,
+                          max: 1,
+                              description: "transparency and blur of the navbar",
+                              onChangedFunction: (val) {
+                                setState(() {
+                                  navbarTranslucency = val;
+                                });
+                              },
+                              divisions: 10,
+                              onDragEnd: (val) {
+                                Settings().writeSettings(
+                                  SettingsModal(navbarTranslucency: navbarTranslucency),
+                                );
+                              })
+                          // _toggleItem("Translucent navbar", translucentNavbar, description: "Translucent effect of navigation bar" ,() {
+                          //   setState(() {
+                          //     translucentNavbar = !translucentNavbar;
+                          //      Settings().writeSettings(SettingsModal(translucentNavbar: translucentNavbar));
+                          //      showToast("done!");
+                          //   });
+                          // })
                         ],
                       )
                     : Container(),
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sliderItem(
+    String label,
+    double variable, {
+      required void Function(double)? onChangedFunction,
+      required double min,
+      required double max,
+    String? description,
+    int divisions = 10,
+    void Function(double)? onDragStart,
+    void Function(double)? onDragEnd,
+  }) {
+    return item(
+      child: Container(
+        padding: EdgeInsets.only(left: 10, right: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: textStyle(),
+            ),
+            if (description != null)
+              Text(
+                description,
+                style: textStyle().copyWith(color: textSubColor, fontSize: 12),
+              ),
+            Padding(
+              padding: const EdgeInsets.only(top: 30),
+              child: SliderTheme(
+                data: SliderThemeData(
+                  thumbColor: accentColor,
+                  activeTrackColor: accentColor,
+                  inactiveTrackColor: textSubColor,
+                  valueIndicatorShape: RoundedSliderValueIndicator(width: 35, height: 30, radius: 10),
+                  trackShape: MarginedTrack(),
+                  valueIndicatorTextStyle: TextStyle(
+                    color: backgroundColor,
+                    fontFamily: "NotoSans",
+                    fontWeight: FontWeight.bold,
+                    fontSize: 14,
+                  ),
+                  showValueIndicator: ShowValueIndicator.always,
+                  valueIndicatorColor: accentColor,
+                  trackHeight: 13,
+                  thumbShape: RoundedRectangularThumbShape(width: 10, radius: 4),
+                  overlayColor: Colors.white,
+                  overlayShape: RoundedRectangularThumbShape(width: 15, radius: 5, height: 30),
+                  activeTickMarkColor: backgroundColor,
+                ),
+                child: Slider(
+                  min: min,
+                  max: max,
+                  onChanged: onChangedFunction,
+                  onChangeStart: onDragStart,
+                  onChangeEnd: onDragEnd,
+                  divisions: divisions,
+                  value: variable,
+                  label: "$variable",
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -232,9 +314,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
     );
   }
 
-  InkWell _themeItem(String name, AnimeStreamTheme theme, context) {
-    return InkWell(
-      borderRadius: BorderRadius.circular(20),
+  GestureDetector _themeItem(String name, AnimeStreamTheme theme, context) {
+    return GestureDetector(
       onTap: () async {
         //check if selected theme is same as current theme
         if (currentTheme?.accentColor != theme.accentColor) {

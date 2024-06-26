@@ -35,12 +35,14 @@ final hotPink = AnimeStreamTheme(
 );
 
 //NO! JUST NO
-// final lightcaf = AnimeStreamTheme(
-//   accentColor: Color(0xffcaf979),
-//   backgroundColor: Colors.white,
-//   textMainColor: Colors.black,
-//   textSubColor: Color.fromARGB(255, 143, 143, 143),
-// );
+final lightcaf = AnimeStreamTheme(
+  accentColor: Color(0xffcaf979),
+  backgroundColor: Colors.white,
+  textMainColor: Colors.black,
+  textSubColor: Color.fromARGB(255, 82, 82, 82),
+  modalSheetBackgroundColor: Colors.white,
+  backgroundSubColor: Colors.grey,
+);
 
 /**Cold Purple accent */
 final coldPurple = AnimeStreamTheme(
@@ -53,8 +55,8 @@ final coldPurple = AnimeStreamTheme(
 );
 
 List<ThemeItem> availableThemes = [
-  ThemeItem(name: "Lime", theme: lime),
-  ThemeItem(name: "Monochrome", theme: monochrome),
-  ThemeItem(name: "Cold Purple", theme: coldPurple),
-  ThemeItem(name: "Hot Pink", theme: hotPink),
+  ThemeItem(id: 01, name: "Lime", theme: lime),
+  ThemeItem(id: 02, name: "Monochrome", theme: monochrome),
+  ThemeItem(id: 03, name: "Cold Purple", theme: coldPurple),
+  ThemeItem(id: 04, name: "Hot Pink", theme: hotPink),
 ];

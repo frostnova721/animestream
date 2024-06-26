@@ -57,19 +57,26 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                               showToast("wooosh!!");
                             }),
                             child: Container(
-                              padding: EdgeInsets.only(right: 25),
+                                padding: EdgeInsets.only(right: 25),
                                 child: Image.asset(
-                              iconPressed ? 'lib/assets/icons/logo_monochrome.png' :'lib/assets/icons/logo_foreground.png',
-                              height: 100,
-                              width: 100,
-                            )),
+                                  iconPressed
+                                      ? 'lib/assets/icons/logo_monochrome.png'
+                                      : 'lib/assets/icons/logo_foreground.png',
+                                  height: 100,
+                                  width: 100,
+                                )),
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10),
-                                child: Text("animestream", style: TextStyle(color: textMainColor, fontFamily: "Poppins", fontSize: 22, fontWeight: FontWeight.bold)),
+                                child: Text("animestream",
+                                    style: TextStyle(
+                                        color: textMainColor,
+                                        fontFamily: "Poppins",
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold)),
                               ),
                               Text("package: $appName", style: textStyle),
                               Text(
@@ -85,14 +92,11 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                   ),
                                   InkWell(
                                     onLongPress: () async {
-                                      await Clipboard.setData(ClipboardData(
-                                          text:
-                                              "https://github.com/frostnova721/animestream"));
-                                      floatingSnackBar(context,
-                                          "link has been copied to clipboard");
+                                      await Clipboard.setData(
+                                          ClipboardData(text: "https://github.com/frostnova721/animestream"));
+                                      floatingSnackBar(context, "link has been copied to clipboard");
                                     },
-                                    onTap: () => launchUrl(Uri.parse(
-                                        "https://github.com/frostnova721/animestream")),
+                                    onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream")),
                                     child: Text(
                                       "animestream",
                                       style: TextStyle(
@@ -110,7 +114,13 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                         ],
                       ),
                     ),
-                    Container(margin: EdgeInsets.only(top: 100) ,child: Text("Thanks For Downloading!! ❤️", style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 16),),)
+                    Container(
+                      margin: EdgeInsets.only(top: 100),
+                      child: Text(
+                        "Thanks For Downloading!! ❤️",
+                        style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 16),
+                      ),
+                    )
                   ],
                 )
               : Center(
@@ -121,9 +131,6 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
     );
   }
 
-  TextStyle textStyle = TextStyle(
-      color: textMainColor,
-      fontFamily: 'NotoSans',
-      fontWeight: FontWeight.bold,
-      fontSize: 15);
+  TextStyle textStyle =
+      TextStyle(color: textMainColor, fontFamily: 'NotoSans', fontWeight: FontWeight.bold, fontSize: 15);
 }

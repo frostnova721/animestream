@@ -5,8 +5,10 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
+import 'package:animestream/ui/theme/themes.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -24,21 +26,45 @@ void main() async {
   } catch (err) {
     debugPrint(err.toString());
     Logger().writeLog(err.toString());
-    print("logged the error to logs folder");
+    print("[CRASH] logged the error to logs folder");
   }
 }
 
 Future<void> loadAndAssignSettings() async {
-  await Settings().getSettings().then((settings) => currentUserSettings = settings);
+  await Settings().getSettings().then((settings) => {
+    currentUserSettings = settings,
+    print("[STARTUP] Loaded user settings"),
+    });
 
-  await getTheme().then((theme) => {
-        accentColor = theme.accentColor,
-        textMainColor = theme.textMainColor,
-        textSubColor = theme.textSubColor,
-        backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.backgroundColor,
-        backgroundSubColor = theme.backgroundSubColor,
-        modalSheetBackgroundColor = theme.modalSheetBackgroundColor,
-      });
+  await getTheme().then((themeId) {
+    if(themeId > availableThemes.length) {
+      print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
+      showToast("Failed to apply theme. Using default theme");
+      setTheme(01);
+      themeId = 01;
+    }
+    final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
+    accentColor = theme.theme.accentColor;
+    textMainColor = theme.theme.textMainColor;
+    textSubColor = theme.theme.textSubColor;
+    backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor;
+    backgroundSubColor = theme.theme.backgroundSubColor;
+    modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
+
+    print("[STARTUP] Loaded theme of ID $themeId");
+  });
+}
+
+class RefreshNotifier extends ChangeNotifier {
+   // Any state variables you need to manage
+  bool _isAppRefreshed = false;
+
+  bool get isAppRefreshed => _isAppRefreshed;
+
+  void refreshApp() {
+    _isAppRefreshed = !_isAppRefreshed;
+    notifyListeners();
+  }
 }
 
 class AnimeStream extends StatefulWidget {
@@ -74,10 +100,7 @@ class _AnimeStreamState extends State<AnimeStream> {
       title: 'Animestream',
       theme: ThemeData(
         useMaterial3: true,
-        textTheme: Theme.of(context).textTheme.apply(
-          bodyColor: textMainColor,
-          fontFamily: "NotoSans"
-        ),
+        textTheme: Theme.of(context).textTheme.apply(bodyColor: textMainColor, fontFamily: "NotoSans"),
         scaffoldBackgroundColor: backgroundColor,
         bottomSheetTheme: BottomSheetThemeData(backgroundColor: modalSheetBackgroundColor),
         colorScheme: ColorScheme.fromSeed(

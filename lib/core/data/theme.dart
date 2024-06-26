@@ -1,26 +1,24 @@
-import 'package:animestream/ui/theme/themes.dart';
-import 'package:animestream/ui/theme/types.dart';
 import 'package:hive/hive.dart';
 
-Future<AnimeStreamTheme> getTheme() async {
+Future<int> getTheme() async {
   var box = await Hive.openBox("animestream");
   if(!box.isOpen) {
     box = await Hive.openBox("animestream");
   }
-  Map<dynamic, dynamic> selectedTheme = box.get('theme') ?? {};
-  if(selectedTheme.isEmpty) selectedTheme = lime.toMap();
-  final classed = AnimeStreamTheme.fromMap(selectedTheme);
+  dynamic selectedThemeId = box.get('theme', defaultValue: 01) ?? 01;
+  if(selectedThemeId == null || !(selectedThemeId is int)) selectedThemeId = 01;
+  // final classed = AnimeStreamTheme.fromMap(selectedTheme);
   await box.close();
-  return classed;
+  return selectedThemeId;
 }
 
-Future<void> setTheme(AnimeStreamTheme theme) async {
+Future<void> setTheme(int themeId) async {
    var box = await Hive.openBox("animestream");
   if(!box.isOpen) {
     box = await Hive.openBox("animestream");
   }
-  final classifiedInfo = theme.toMap();
-  await box.put('theme', classifiedInfo);
+  // final classifiedInfo = theme.toMap();
+  await box.put('theme', themeId);
   await box.close();
   return;
 }

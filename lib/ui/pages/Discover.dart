@@ -456,7 +456,7 @@ class _DiscoverState extends State<Discover> {
 
   TextStyle basicTextStyle(String? family, double? size) {
     return TextStyle(
-      color: Colors.white,
+      color: textMainColor,
       fontFamily: family ?? 'NotoSans',
       fontSize: size ?? 15,
     );

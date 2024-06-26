@@ -30,13 +30,14 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   final releasesRes = json.decode(await fetch(releasesUrl))[0];
   final String currentVersion = packageInfo.version;
   final String latestVersion = releasesRes['tag_name'];
-  print("current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
+  print("[UPDATE-CHECK] current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
   final String description = releasesRes['body'];
   final bool pre = releasesRes['prerelease'];
   if (!currentUserSettings!.receivePreReleases! && pre) {
     return null;
   }
   if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
+    print("[UPDATE-CHECK] UPDATE AVAILABLE!!!");
     final apkItem = releasesRes['assets'].where((item) => item['name'] == "app-release.apk").toList();
     final downloadLink = apkItem[0]['browser_download_url'];
     return UpdateCheckResult(
@@ -57,7 +58,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
   } 
   showModalBottomSheet(
     showDragHandle: true,
-    backgroundColor: Color(0xff121212),
+    // backgroundColor: Color(0xff121212),
     isScrollControlled: true,
     context: context,
     builder: (context) {

@@ -45,98 +45,37 @@ class _GeneralSettingState extends State<GeneralSetting> {
       backgroundColor: backgroundColor,
       body: loaded
           ? SingleChildScrollView(
-            child: Padding(
-              padding: pagePadding(context, bottom: true),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Padding(
+                padding: pagePadding(context, bottom: true),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     settingPagesTitleHeader(context, "General"),
-                    Container(
-                      // margin: EdgeInsets.only(top: 30),
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            showErrorsButtonState = !showErrorsButtonState;
-                          });
-                          writeSettings(
-                              SettingsModal(showErrors: showErrorsButtonState));
-                        },
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              left: 20, right: 20, top: 10, bottom: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Show Errors",
-                                style: textStyle(),
-                              ),
-                              Switch(
-                                value: showErrorsButtonState,
-                                activeColor: backgroundColor,
-                                activeTrackColor: accentColor,
-                                onChanged: (val) {
-                                  setState(() {
-                                    showErrorsButtonState = val;
-                                  });
-                                  writeSettings(SettingsModal(
-                                      showErrors: showErrorsButtonState));
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    toggleItem(
+                      "Show errors",
+                      showErrorsButtonState,
+                      () {
+                        setState(() {
+                          showErrorsButtonState = !showErrorsButtonState;
+                        });
+                        writeSettings(SettingsModal(showErrors: showErrorsButtonState));
+                      },
                     ),
-                    Container(
-                      child: InkWell(
-                        onTap: () {
-                          setState(() {
-                            receivePreReleases = !receivePreReleases;
-                          });
-                          writeSettings(
-                              SettingsModal(receivePreReleases: receivePreReleases));
-                        },
-                        child: Container(
-                          padding: EdgeInsets.only(
-                              left: 20, right: 20, top: 10, bottom: 10),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    "Recieve beta updates",
-                                    style: textStyle(),
-                                  ),
-                                  Text(
-                                    "*maybe unstable",
-                                    style: TextStyle(color: textSubColor, fontFamily: 'NunitoSans'),
-                                  ),
-                                ],
-                              ),
-                              Switch(
-                                value: receivePreReleases,
-                                activeColor: backgroundColor,
-                                activeTrackColor: accentColor,
-                                onChanged: (val) {
-                                  setState(() {
-                                    receivePreReleases = val;
-                                     writeSettings(SettingsModal(
-                                      receivePreReleases: val));
-                                  });
-                                },
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                    toggleItem(
+                      "Receive beta updates",
+                      receivePreReleases,
+                      () {
+                        setState(() {
+                          receivePreReleases = !receivePreReleases;
+                        });
+                        writeSettings(SettingsModal(receivePreReleases: receivePreReleases));
+                      },
+                      description: "*maybe unstable",
                     )
                   ],
                 ),
-            ),
-          )
+              ),
+            )
           : Container(),
     );
   }

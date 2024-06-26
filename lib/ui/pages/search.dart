@@ -61,36 +61,39 @@ class _SearchState extends State<Search> {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: backgroundColor,
-      body: Padding(
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: MediaQuery.of(context).padding.left),
-        child: Column(
-          children: [
-            buildHeader("Search", context),
-            Container(
-              padding: EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
-              child: _searchBar(),
-            ),
-            Expanded(
-              child: _searching
-                  ? Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CircularProgressIndicator(
-                          color: accentColor,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.all(10.0),
-                          child: Text(
-                            "searching...",
-                            style: TextStyle(
-                                color: accentColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 16),
+      body: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: Padding(
+          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: MediaQuery.of(context).padding.left),
+          child: Column(
+            children: [
+              buildHeader("Search", context),
+              Container(
+                padding: EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
+                child: _searchBar(),
+              ),
+              Expanded(
+                child: _searching
+                    ? Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          CircularProgressIndicator(
+                            color: accentColor,
                           ),
-                        )
-                      ],
-                    )
-                  : _searchResults(),
-            ),
-          ],
+                          Padding(
+                            padding: const EdgeInsets.all(10.0),
+                            child: Text(
+                              "searching...",
+                              style: TextStyle(
+                                  color: accentColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 16),
+                            ),
+                          )
+                        ],
+                      )
+                    : _searchResults(),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -189,13 +192,13 @@ class _SearchState extends State<Search> {
           padding: EdgeInsets.only(right: 10),
           child: Image.asset(
             'lib/assets/images/search.png',
-            color: Colors.white,
+            color: textMainColor,
             scale: 1.75,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
-          borderSide: BorderSide(width: 1.5, color: Colors.white),
+          borderSide: BorderSide(width: 1.5, color: textMainColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
@@ -205,7 +208,7 @@ class _SearchState extends State<Search> {
         hintStyle: TextStyle(fontFamily: "Poppins", color: Color.fromARGB(255, 168, 168, 168)),
         contentPadding: EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
       ),
-      style: TextStyle(color: Colors.white, fontFamily: "Poppins"),
+      style: TextStyle(color: textMainColor, fontFamily: "Poppins"),
     );
   }
 

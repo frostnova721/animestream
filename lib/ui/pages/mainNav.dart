@@ -46,7 +46,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         AniListLogin().getUserProfile().then((user) => {
               userProfile = user,
               storedUserData = user,
-              print(storedUserData?.name),
+              print("[AUTHENTICATION] ${storedUserData?.name} Login Successful"),
               loadListsForHome(userName: user.name),
               loadDiscoverItems(),
             });
@@ -229,7 +229,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       final user = await AniListLogin().getUserProfile();
       userProfile = user;
       storedUserData = user;
-      print(storedUserData?.name);
+      print("[AUTHENTICATION] ${storedUserData?.name} Login Successful");
       await loadListsForHome(userName: user.name);
     } else if (loggedIn && userProfile != null) {
       //just load the list if the user was already signed in.
@@ -367,10 +367,12 @@ class _TabIconState extends State<TabIcon> {
                 ? ImageIcon(
                     AssetImage("lib/assets/images/shines.png"),
                     size: iconSize - 4,
+                    color: textMainColor,
                   )
                 : Icon(
                     widget.icon,
                     size: iconSize,
+                    color: textMainColor,
                   ),
       ),
     );

@@ -1,5 +1,6 @@
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -98,6 +99,10 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       setState(() {
                                         skipDurationSliderValue = val;
                                       });
+                                    },
+                                    onChangeEnd:  (val) {
+                                      writeSettings(
+                                          SettingsModal(skipDuration: skipDurationSliderValue.toInt()));
                                     },
                                     value: skipDurationSliderValue,
                                     divisions: 9,

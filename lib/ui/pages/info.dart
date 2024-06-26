@@ -426,8 +426,7 @@ class _InfoState extends State<Info> {
         Container(
           margin: EdgeInsets.only(top: 25, left: 20, right: 20),
           padding: EdgeInsets.only(top: 15, bottom: 20),
-          decoration:
-              BoxDecoration(borderRadius: BorderRadius.circular(20), color: const Color.fromARGB(255, 29, 29, 29)),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: backgroundSubColor),
           child: Column(
             children: [
               Container(
@@ -759,7 +758,7 @@ class _InfoState extends State<Info> {
                 return ServerSelectionBottomSheet(
                   getStreams: getStreams,
                   bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                    totalEpisodes: data.episodes,
+                      totalEpisodes: data.episodes,
                       epLinks: epLinks,
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
@@ -845,7 +844,7 @@ class _InfoState extends State<Info> {
                   "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                   style: TextStyle(
                     color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
-                        ? Colors.white
+                        ? textMainColor
                         : Color.fromARGB(155, 255, 255, 255),
                     fontFamily: 'Poppins',
                     fontSize: 17,
@@ -926,7 +925,7 @@ class _InfoState extends State<Info> {
                 padding: EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: Colors.black,
+                  color: backgroundColor,
                 ),
                 alignment: Alignment.center,
                 child: Stack(
@@ -936,8 +935,8 @@ class _InfoState extends State<Info> {
                       child: ShaderMask(
                         blendMode: BlendMode.darken,
                         shaderCallback: (bounds) => LinearGradient(
-                          colors: [Colors.transparent, Color.fromARGB(245, 0, 0, 0)],
-                          stops: [0.2, 1.0],
+                          colors: [Colors.transparent,  backgroundColor],
+                          stops: [0.2, 0.9],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ).createShader(bounds),
@@ -971,7 +970,7 @@ class _InfoState extends State<Info> {
                           "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                           style: TextStyle(
                             color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
-                                ? Colors.white
+                                ? textMainColor
                                 : Color.fromARGB(155, 255, 255, 255),
                             fontFamily: "Poppins",
                             fontSize: 18,
@@ -1114,7 +1113,7 @@ class _InfoState extends State<Info> {
                   height: 45,
                   child: ListView.builder(
                     scrollDirection: Axis.horizontal,
-                    itemCount: data.genres.length,
+                    itemCount: data.tags.length,
                     itemBuilder: (context, index) {
                       return Container(
                         alignment: Alignment.center,

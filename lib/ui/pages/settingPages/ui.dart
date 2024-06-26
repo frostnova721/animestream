@@ -2,6 +2,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -25,18 +26,18 @@ class _ThemeSettingState extends State<ThemeSetting> {
 
   void readSettings() {
     getTheme().then((value) => setState(() {
-          currentTheme = value;
+          currentThemeId = value;
         }));
     AMOLEDBackgroundEnabled = currentUserSettings?.amoledBackground ?? false;
     navbarTranslucency = currentUserSettings?.navbarTranslucency ?? 0.6;
   }
 
-  applyTheme(AnimeStreamTheme theme) async {
-    await setTheme(theme);
+  applyTheme(int id) async {
+    await setTheme(id);
     floatingSnackBar(context, "All set! restart the app to apply the theme");
   }
 
-  AnimeStreamTheme? currentTheme;
+  int? currentThemeId;
 
   late double navbarTranslucency;
   late bool AMOLEDBackgroundEnabled;
@@ -53,7 +54,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
               settingPagesTitleHeader(context, "UI"),
               Container(
                 padding: EdgeInsets.only(left: 15, right: 15, top: 0),
-                child: currentTheme != null
+                child: currentThemeId != null
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -110,7 +111,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   Widget _sliderItem(
     String label,
     double variable, {
-      required void Function(double)? onChangedFunction,
+      required void Function(double) onChangedFunction,
       required double min,
       required double max,
     String? description,
@@ -135,38 +136,15 @@ class _ThemeSettingState extends State<ThemeSetting> {
               ),
             Padding(
               padding: const EdgeInsets.only(top: 30),
-              child: SliderTheme(
-                data: SliderThemeData(
-                  thumbColor: accentColor,
-                  activeTrackColor: accentColor,
-                  inactiveTrackColor: textSubColor,
-                  valueIndicatorShape: RoundedSliderValueIndicator(width: 35, height: 30, radius: 10),
-                  trackShape: MarginedTrack(),
-                  valueIndicatorTextStyle: TextStyle(
-                    color: backgroundColor,
-                    fontFamily: "NotoSans",
-                    fontWeight: FontWeight.bold,
-                    fontSize: 14,
-                  ),
-                  showValueIndicator: ShowValueIndicator.always,
-                  valueIndicatorColor: accentColor,
-                  trackHeight: 13,
-                  thumbShape: RoundedRectangularThumbShape(width: 10, radius: 4),
-                  overlayColor: Colors.white,
-                  overlayShape: RoundedRectangularThumbShape(width: 15, radius: 5, height: 30),
-                  activeTickMarkColor: backgroundColor,
-                ),
-                child: Slider(
+              child:CustomSlider(
                   min: min,
                   max: max,
                   onChanged: onChangedFunction,
-                  onChangeStart: onDragStart,
-                  onChangeEnd: onDragEnd,
+                  onDragStart: onDragStart,
+                  onDragEnd: onDragEnd,
                   divisions: divisions,
                   value: variable,
-                  label: "$variable",
                 ),
-              ),
             ),
           ],
         ),
@@ -253,7 +231,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                       // shrinkWrap: true,
                       itemCount: availableThemes.length,
                       itemBuilder: (context, index) {
-                        return _themeItem(availableThemes[index].name, availableThemes[index].theme, context);
+                        return _themeItem(availableThemes[index].name, availableThemes[index], context);
                       },
                     ),
                   ),
@@ -314,14 +292,14 @@ class _ThemeSettingState extends State<ThemeSetting> {
     );
   }
 
-  GestureDetector _themeItem(String name, AnimeStreamTheme theme, context) {
+  GestureDetector _themeItem(String name, ThemeItem theme, context) {
     return GestureDetector(
       onTap: () async {
         //check if selected theme is same as current theme
-        if (currentTheme?.accentColor != theme.accentColor) {
-          await applyTheme(theme);
+        if (currentThemeId != theme.id) {
+          await applyTheme(theme.id);
           setState(() {
-            currentTheme = theme;
+            currentThemeId = theme.id;
           });
           Navigator.of(context).pop();
         }
@@ -331,7 +309,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: currentTheme?.accentColor == theme.accentColor ? theme.accentColor : backgroundSubColor,
+          color: currentThemeId == theme.id ? theme.theme.accentColor : backgroundSubColor,
         ),
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.only(left: 10, right: 10),
@@ -342,7 +320,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
             Text(
               "$name",
               style: textStyle()
-                  .copyWith(color: currentTheme?.accentColor == theme.accentColor ? backgroundColor : textMainColor),
+                  .copyWith(color: currentThemeId == theme.id ? backgroundColor : textMainColor),
             ),
             Container(
               height: 40,
@@ -350,7 +328,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.black, width: 3),
                 borderRadius: BorderRadius.circular(10),
-                color: theme.accentColor,
+                color: theme.theme.accentColor,
               ),
             )
           ],

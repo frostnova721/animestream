@@ -4,8 +4,9 @@ import 'package:flutter/material.dart';
 class ThemeItem {
   final String name;
   final AnimeStreamTheme theme;
+  final int id;
 
-  ThemeItem({required this.name, required this.theme});
+  ThemeItem({required this.name, required this.theme, required this.id});
 }
 
 class AnimeStreamTheme {

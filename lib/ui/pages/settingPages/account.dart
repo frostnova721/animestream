@@ -69,13 +69,13 @@ class _AccountSettingState extends State<AccountSetting> {
               settingPagesTitleHeader(context, "Account"),
               loading
                   ? Container(
-                    padding: EdgeInsets.only(top: 30),
-                    child: Center(
+                      padding: EdgeInsets.only(top: 30),
+                      child: Center(
                         child: CircularProgressIndicator(
                           color: accentColor,
                         ),
                       ),
-                  )
+                    )
                   : Container(
                       padding: EdgeInsets.only(left: 20, right: 20),
                       child: Column(
@@ -85,26 +85,32 @@ class _AccountSettingState extends State<AccountSetting> {
                             margin: EdgeInsets.only(bottom: 25),
                             child: Text(
                               "Anilist",
-                              style: textStyle().copyWith(fontSize: 24,),
+                              style: textStyle().copyWith(
+                                fontSize: 24,
+                              ),
                             ),
                           ),
                           anilistLoggedIn
                               ? GestureDetector(
-                                onTap: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserStats(userModal: user!)));
-                                },
-                                child: ClipRRect(
+                                  onTap: () {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(builder: (context) => UserStats(userModal: user!)));
+                                  },
+                                  child: ClipRRect(
+                                    clipBehavior: Clip.hardEdge,
+                                    borderRadius: BorderRadius.circular(25),
                                     child: Container(
                                       height: 150,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(25),
                                         image: DecorationImage(
-                                            image: user?.banner != null
-                                                ? NetworkImage(user!.banner!)
-                                                : AssetImage('lib/assets/images/profile_banner.jpg') //such a nice image!
-                                                    as ImageProvider,
-                                            fit: BoxFit.cover,
-                                            opacity: 0.65),
+                                          image: user?.banner != null
+                                              ? NetworkImage(user!.banner!)
+                                              : AssetImage('lib/assets/images/profile_banner.jpg') //such a nice image!
+                                                  as ImageProvider,
+                                          fit: BoxFit.cover,
+                                          opacity: 0.65,
+                                        ),
                                       ),
                                       // alignment: Alignment.bottomCenter,
                                       child: BackdropFilter(
@@ -170,16 +176,15 @@ class _AccountSettingState extends State<AccountSetting> {
                                       ),
                                     ),
                                   ),
-                              )
+                                )
                               : Container(
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  color: backgroundSubColor,
-                                  boxShadow: [BoxShadow(color: backgroundSubColor, blurRadius: 5)]
-                                ),
-                                padding: EdgeInsets.only(top: 20, bottom: 20),
-                                height: 150,
-                                alignment: Alignment.center,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: backgroundSubColor,
+                                      boxShadow: [BoxShadow(color: backgroundSubColor, blurRadius: 5)]),
+                                  padding: EdgeInsets.only(top: 20, bottom: 20),
+                                  height: 150,
+                                  alignment: Alignment.center,
                                   child: Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
                                     children: [

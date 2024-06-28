@@ -137,6 +137,7 @@ class AnilistQueries {
           mediaRecommendation {
             id
             type
+            averageScore
             title {
               romaji
               english
@@ -198,21 +199,23 @@ class AnilistQueries {
         }
       });
 
-      final List recommended = [];
+      final List<AnilistAnimeRelatedRecommendation> recommended = [];
 
       info['recommendations']['nodes'].forEach((recommendation) {
         final rec = recommendation['mediaRecommendation'];
         if (rec != null) {
-          recommended.add((
-            id: rec['id'],
-            title: {
-              'english': rec['title']['english'],
-              'romaji': rec['title']['romaji'],
-              'native': rec['title']['native'],
-            },
-            cover: rec['coverImage']['large'] ?? rec['coverImage']['extraLarge'],
-            type: rec['type']
-          ));
+          recommended.add(
+            AnilistAnimeRelatedRecommendation(
+                id: rec['id'],
+                title: {
+                  'english': rec['title']['english'],
+                  'romaji': rec['title']['romaji'],
+                  'native': rec['title']['native'],
+                },
+                cover: rec['coverImage']['large'] ?? rec['coverImage']['extraLarge'],
+                type: rec['type'],
+                rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null),
+          );
         }
       });
 
@@ -288,6 +291,7 @@ class AnilistQueries {
           english
           romaji
         }
+        averageScore
         coverImage {
           large
         }
@@ -306,7 +310,11 @@ class AnilistQueries {
         AnilistRecommendations(
           cover: rec['coverImage']['large'],
           id: rec['id'],
-          title: {'english': rec['title']['english'], 'romaji': rec['title']['romaji']},
+          title: {
+            'english': rec['title']['english'],
+            'romaji': rec['title']['romaji'],
+          },
+          rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null,
         ),
       );
     }
@@ -346,27 +354,27 @@ class AnilistQueries {
     );
   }
 
-  Future<List<AnimeCardData>> getGenrePopular(String genre) async {
-    final query =
-        """{ Page(perPage: 20){media(genre:"$genre", sort: POPULARITY_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
-    final res = await Anilist().fetchQuery(query, RequestType.media);
-    List<AnimeCardData> genrePopular = [];
-    for (final item in res) {
-      genrePopular.add(
-        AnimeCardData(
-          cover: item['coverImage']['large'],
-          id: item['id'],
-          status: item['status'],
-          title: {
-            'english': item['title']['english'],
-            'romaji': item['title']['romaji'],
-          },
-        ),
-      );
-    }
+  // Future<List<AnimeCardData>> getGenrePopular(String genre) async {
+  //   final query =
+  //       """{ Page(perPage: 20){media(genre:"$genre", sort: POPULARITY_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
+  //   final res = await Anilist().fetchQuery(query, RequestType.media);
+  //   List<AnimeCardData> genrePopular = [];
+  //   for (final item in res) {
+  //     genrePopular.add(
+  //       AnimeCardData(
+  //         cover: item['coverImage']['large'],
+  //         id: item['id'],
+  //         status: item['status'],
+  //         title: {
+  //           'english': item['title']['english'],
+  //           'romaji': item['title']['romaji'],
+  //         },
+  //       ),
+  //     );
+  //   }
 
-    return genrePopular;
-  }
+  //   return genrePopular;
+  // }
 
   Future<List<AnimeCardData>> getAnimesWithGenresAndTags(List<String> genres, List<String> tags, {int page = 1}) async {
     String genreString = "";
@@ -379,7 +387,7 @@ class AnilistQueries {
     }
 
     final query =
-        """{ Page(perPage: 30, page: $page){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
+        """{ Page(perPage: 30, page: $page){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status averageScore } } }""";
     final res = await Anilist().fetchQuery(query, RequestType.media);
     List<AnimeCardData> results = [];
     for (final item in res) {
@@ -388,6 +396,7 @@ class AnilistQueries {
           cover: item['coverImage']['large'],
           id: item['id'],
           status: item['status'],
+          rating: item['averageScore'] is int ? item['averageScore']/10 : null,
           title: {
             'english': item['title']['english'],
             'romaji': item['title']['romaji'],
@@ -399,27 +408,28 @@ class AnilistQueries {
     return results;
   }
 
-  Future<List<AnimeCardData>> getGenreTrending(String genre) async {
-    final query =
-        """{ Page(perPage: 20){media(genre:"$genre", sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
-    final res = await Anilist().fetchQuery(query, RequestType.media);
-    List<AnimeCardData> genreTrending = [];
-    for (final item in res) {
-      genreTrending.add(
-        AnimeCardData(
-          cover: item['coverImage']['large'],
-          id: item['id'],
-          status: item['status'],
-          title: {
-            'english': item['title']['english'],
-            'romaji': item['title']['romaji'],
-          },
-        ),
-      );
-    }
+  // Future<List<AnimeCardData>> getGenreTrending(String genre) async {
+  //   final query =
+  //       """{ Page(perPage: 20){media(genre:"$genre", sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") { id coverImage { large } title { english romaji } status } } }""";
+  //   final res = await Anilist().fetchQuery(query, RequestType.media);
+  //   List<AnimeCardData> genreTrending = [];
+  //   for (final item in res) {
+  //     genreTrending.add(
+  //       AnimeCardData(
+  //         cover: item['coverImage']['large'],
+  //         id: item['id'],
+  //         status: item['status'],
+  //         title: {
+  //           'english': item['title']['english'],
+  //           'romaji': item['title']['romaji'],
+  //         },
+  //         rating: item['averageScore'] is int ? item['averageScore']/10 : null,
+  //       ),
+  //     );
+  //   }
 
-    return genreTrending;
-  }
+  //   return genreTrending;
+  // }
 
   Future<List<String>> getGenreThumbnail(String genre) async {
     final query =

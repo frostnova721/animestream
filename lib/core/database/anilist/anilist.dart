@@ -16,6 +16,7 @@ class Anilist {
                             english
                             romaji
                         }
+                        averageScore
                         coverImage {
                             large
                         }
@@ -32,11 +33,16 @@ class Anilist {
     }
 
     data.forEach((item) {
-      final classified =
-          AnilistSearchResult(cover: item['coverImage']['large'], id: item['id'], idMal: item['idMal'], title: {
-        'english': item['title']['english'],
-        'romaji': item['title']['romaji'],
-      });
+      final classified = AnilistSearchResult(
+        cover: item['coverImage']['large'],
+        id: item['id'],
+        idMal: item['idMal'],
+        title: {
+          'english': item['title']['english'],
+          'romaji': item['title']['romaji'],
+        },
+        rating: item['averageScore'] is int ? item['averageScore']/10 : null
+      );
       searchResults.add(classified);
     });
 

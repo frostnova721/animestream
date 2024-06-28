@@ -1214,7 +1214,7 @@ class _InfoState extends State<Info> {
     );
   }
 
-  SizedBox _buildRecAndRel(List data, bool recommended, BuildContext context) {
+  SizedBox _buildRecAndRel(List<dynamic> data, bool recommended, BuildContext context) {
     if (data.length == 0)
       return SizedBox(
         height: 240,
@@ -1260,6 +1260,7 @@ class _InfoState extends State<Info> {
                         item.id,
                         item.title['english'] ?? item.title['romaji'],
                         item.cover,
+                        rating: item.rating
                       )
                     : Cards().characterCard(
                         item.title['english'] ?? item.title['romaji'],

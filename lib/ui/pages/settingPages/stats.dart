@@ -73,16 +73,27 @@ class _UserStatsState extends State<UserStats> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back_rounded,
+          color: textMainColor,),
+        ),
+        backgroundColor: backgroundColor,
+        title: Text(
+          "Stats",
+          style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
+        ),
+      ),
       body: stats != null
           ? Container(
-              padding: pagePadding(context),
+              padding: pagePadding(context).copyWith(top: 0),
               child: SingleChildScrollView(
                 physics: BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
                 child: Column(
                   children: [
-                    topRow(context, "Stats"),
                     Container(
-                      margin: EdgeInsets.only(top: 35, left: 15, right: 15),
+                      margin: EdgeInsets.only(top: 30, left: 15, right: 15),
                       child: Column(
                         // crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -319,7 +330,7 @@ class _UserStatsState extends State<UserStats> {
                       ),
                     ),
                     Container(
-                      height: MediaQuery.of(context).padding.bottom,
+                      height: MediaQuery.of(context).padding.bottom + 10,
                     ),
                   ],
                 ),

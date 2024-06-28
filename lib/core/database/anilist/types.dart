@@ -86,6 +86,22 @@ class UserAnimeListItem {
   });
 }
 
+class AnilistAnimeRelatedRecommendation {
+  final int id;
+  final Map<String, String?> title;
+  final String cover;
+  final String type;
+  final double? rating;
+
+  AnilistAnimeRelatedRecommendation({
+    required this.cover,
+    required this.id,
+    required this.rating,
+    required this.title,
+    required this.type,
+  });
+}
+
 class AnilistInfo {
   final Map<String, String?> title;
   final Map<String, String> aired;
@@ -97,7 +113,7 @@ class AnilistInfo {
   final List<Map<String, dynamic>> characters;
   final Object nextAiringEpisode;
   final double? rating;
-  final List<dynamic> recommended;
+  final List<AnilistAnimeRelatedRecommendation> recommended;
   final List<dynamic> related;
   final String? status;
   final String type;
@@ -141,8 +157,9 @@ class AnilistRecommendations {
   final int id;
   final Map<String, String?> title;
   final String cover;
-  
-  AnilistRecommendations({required this.cover, required this.id, required this.title});
+  final double? rating;
+
+  AnilistRecommendations({required this.cover, required this.id, required this.title, required this.rating});
 }
 
 class CurrentlyAiringResult {
@@ -154,7 +171,14 @@ class CurrentlyAiringResult {
   final int? episodes;
   final int? watchProgress;
 
-  CurrentlyAiringResult({required this.cover, required this.id, required this.status, required this.title, required this.rating, required this.episodes, required this.watchProgress});
+  CurrentlyAiringResult(
+      {required this.cover,
+      required this.id,
+      required this.status,
+      required this.title,
+      required this.rating,
+      required this.episodes,
+      required this.watchProgress});
 }
 
 class AnilistSearchResult {
@@ -162,8 +186,15 @@ class AnilistSearchResult {
   final int? idMal;
   final Map<String, String?> title;
   final String cover;
+  final double? rating;
 
-  AnilistSearchResult({required this.cover, required this.id, required this.idMal, required this.title});
+  AnilistSearchResult({
+    required this.cover,
+    required this.id,
+    required this.idMal,
+    required this.title,
+    required this.rating,
+  });
 }
 
 class AnimeCardData {
@@ -171,18 +202,18 @@ class AnimeCardData {
   final Map<String, String?> title;
   final String cover;
   final String status;
+  final double? rating;
 
-  AnimeCardData({required this.cover, required this.id, required this.status, required this.title});
+  AnimeCardData({required this.cover, required this.id, required this.status, required this.title, required this.rating});
 }
 
 class GenreWatchStats {
   final int count;
   final int minutesWatched;
-  final String genre; 
+  final String genre;
 
   GenreWatchStats({required this.count, required this.genre, required this.minutesWatched});
 }
-
 
 class AnilistUserStats {
   /**the items not in planned but from every other list */
@@ -191,6 +222,6 @@ class AnilistUserStats {
   final int episodesWatched;
   final List<GenreWatchStats> genres;
 
-  AnilistUserStats({required this.episodesWatched, required this.genres, required this.minutesWatched, required this.notInPlanned});
+  AnilistUserStats(
+      {required this.episodesWatched, required this.genres, required this.minutesWatched, required this.notInPlanned});
 }
-

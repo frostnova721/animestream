@@ -88,15 +88,20 @@ class Cards {
         child: Row(
           children: [
             Container(
-              margin: EdgeInsets.only(right: 20),
+              margin: EdgeInsets.only(right: 20,),
               width: 135,
+              height: 175,
+              clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                image: DecorationImage(
-                    image: NetworkImage(
-                      imageUrl,
-                    ),
-                    fit: BoxFit.cover),
+              ),
+              child: Image.network(
+                imageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Padding(
+                  padding: const EdgeInsets.all(40),
+                  child: Image.asset('lib/assets/images/broken_heart.png'),
+                ),
               ),
             ),
             Expanded(
@@ -147,6 +152,7 @@ class Cards {
     bool shouldNavigate = true,
     bool isAnime = true,
     String? subText = null,
+    double? rating = null,
     void Function()? afterNavigation,
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
@@ -187,50 +193,94 @@ class Cards {
                 // clipBehavior: Clip.hardEdge,
                 height: 165,
                 width: 110,
-                child: ongoing
-                    ? Stack(
-                        children: [
-                          Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            clipBehavior: Clip.hardEdge,
-                            child: CachedNetworkImage(
-                              imageUrl: imageUrl,
-                              fit: BoxFit.cover,
-                              height: 165,
-                              width: 110,
-                              fadeInCurve: Curves.easeIn,
-                              fadeInDuration: Duration(milliseconds: 200),
-                              placeholder: (context, url) => Container(color: backgroundSubColor,),
-                            ),
-                          ),
-                          Container(
-                            width: 20,
-                            height: 20,
-                            decoration: BoxDecoration(
-                                boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
-                                borderRadius: BorderRadius.circular(100),
-                                color: Color.fromARGB(255, 40, 209, 46),
-                                border: Border.all(color: Colors.black, width: 2)),
-                          ),
-                        ],
-                      )
-                    : Container(
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        clipBehavior: Clip.hardEdge,
-                        child: CachedNetworkImage(
-                          imageUrl: imageUrl,
-                          fit: BoxFit.cover,
-                          height: 165,
-                          width: 110,
-                          fadeInCurve: Curves.easeIn,
-                          fadeInDuration: Duration(milliseconds: 200),
-                          placeholder: (context, url) => Container(color: backgroundSubColor,),
+                child: Stack(
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      clipBehavior: Clip.hardEdge,
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.cover,
+                        height: 165,
+                        width: 110,
+                        fadeInCurve: Curves.easeIn,
+                        fadeInDuration: Duration(milliseconds: 200),
+                        placeholder: (context, url) => Container(
+                          color: backgroundSubColor,
                         ),
                       ),
+                    ),
+                    Align(
+                      alignment: Alignment.bottomRight,
+                      child: Container(
+                        padding: EdgeInsets.only(left: 5, top: 2, bottom: 2, right: 5),
+                        height: 25,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: accentColor.withOpacity(0.9),
+                          borderRadius: BorderRadius.only(
+                            bottomRight: Radius.circular(10),
+                            topLeft: Radius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 3),
+                              child: Icon(
+                                Icons.star,
+                                size: 16,
+                              ),
+                            ),
+                            Text(
+                              "${rating ?? "??"}",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "NotoSans",
+                                color: backgroundColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (ongoing)
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
+                              borderRadius: BorderRadius.circular(100),
+                              color: Color.fromARGB(255, 40, 209, 46),
+                              border: Border.all(color: Colors.black, width: 2)),
+                        ),
+                      ),
+                  ],
+                  // ),
+                  // : Container(
+                  //     decoration: BoxDecoration(
+                  //       borderRadius: BorderRadius.circular(20),
+                  //     ),
+                  //     clipBehavior: Clip.hardEdge,
+                  //     child: CachedNetworkImage(
+                  //       imageUrl: imageUrl,
+                  //       fit: BoxFit.cover,
+                  //       height: 165,
+                  //       width: 110,
+                  //       fadeInCurve: Curves.easeIn,
+                  //       fadeInDuration: Duration(milliseconds: 200),
+                  //       placeholder: (context, url) => Container(color: backgroundSubColor,),
+                  //     ),
+                  //   ),
+                ),
               ),
               Padding(
                 padding: EdgeInsets.only(right: 5, bottom: subText == null ? 0 : 5),
@@ -363,9 +413,7 @@ class Cards {
                                   width: 50,
                                   padding: EdgeInsets.all(5),
                                   decoration: BoxDecoration(
-                                    color: accentColor.withOpacity(0.8),
-                                    borderRadius: BorderRadius.circular(10)
-                                  ),
+                                      color: accentColor.withOpacity(0.8), borderRadius: BorderRadius.circular(10)),
                                   child: Row(
                                     children: [
                                       Icon(
@@ -389,33 +437,35 @@ class Cards {
                                 // if (totalEpisodes != null || watchedEpisodeCount != null)
                                 Padding(
                                   padding: const EdgeInsets.only(left: 15, right: 15),
-                                  child: Text('•', style: TextStyle(fontSize: 17),),
+                                  child: Text(
+                                    '•',
+                                    style: TextStyle(fontSize: 17),
+                                  ),
                                 ),
-                                  Container(
-                                    margin: EdgeInsets.only(right: 15),
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          "${watchedEpisodeCount ?? "~"} ",
-                                          style: TextStyle(
+                                Container(
+                                  margin: EdgeInsets.only(right: 15),
+                                  child: Row(
+                                    children: [
+                                      Text(
+                                        "${watchedEpisodeCount ?? "~"} ",
+                                        style: TextStyle(
+                                          fontFamily: "NunitoSans",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: ColorScheme.fromSeed(seedColor: accentColor).primaryFixedDim,
+                                        ),
+                                      ),
+                                      Text(
+                                        "/ ${totalEpisodes ?? "??"}",
+                                        style: TextStyle(
                                             fontFamily: "NunitoSans",
                                             fontSize: 14,
                                             fontWeight: FontWeight.bold,
-                                            color: ColorScheme.fromSeed(seedColor: accentColor).primaryFixedDim,
-                                          ),
-                                        ),
-                                        Text(
-                                          "/ ${totalEpisodes ?? "??"}",
-                                          style: TextStyle(
-                                            fontFamily: "NunitoSans",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
+                                            color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer),
+                                      ),
+                                    ],
+                                  ),
+                                )
                               ],
                             ),
                           ),

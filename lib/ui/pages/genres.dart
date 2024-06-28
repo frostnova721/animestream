@@ -55,6 +55,7 @@ class _GenresPageState extends State<GenresPage> {
             e.title['english'] ?? e.title['romaji'] ?? '',
             e.cover,
             ongoing: e.status == "RELEASING",
+            rating: e.rating,
           ),
         );
       });

@@ -58,6 +58,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
+              rating: item.rating,
             ),
           );
         });
@@ -69,6 +70,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
+              rating: item.rating,
             ),
           );
         });
@@ -80,6 +82,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
+              rating: item.rating,
             ),
           );
         });
@@ -91,6 +94,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
+              rating: item.rating,
             ),
           );
         });

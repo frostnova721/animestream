@@ -36,11 +36,11 @@ class _SearchState extends State<Search> {
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
       final id = ele.id;
       results.add(
-        Cards(context: context).animeCard(id, title, image),
+        Cards(context: context).animeCard(id, title, image,rating: ele.rating),
       );
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches.add(
-          Cards(context: context).animeCard(id, title, image),
+          Cards(context: context).animeCard(id, title, image, rating: ele.rating),
         );
       }
     });

@@ -33,6 +33,20 @@ class _NewsDetailsState extends State<NewsDetails> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: textMainColor,
+          ),
+        ),
+        backgroundColor: backgroundColor,
+        title: Text(
+          "News",
+          style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
+        ),
+      ),
       body: !loaded
           ? Center(
               child: CircularProgressIndicator(color: accentColor),
@@ -41,10 +55,7 @@ class _NewsDetailsState extends State<NewsDetails> {
               child: Column(
                 children: [
                   Container(
-                    height: 60,
-                  ),
-                  Container(
-                    padding: EdgeInsets.only(left: 20, right: 20, bottom: 25),
+                    padding: EdgeInsets.only(left: 20, right: 20, bottom: 25, top: 25),
                     child: Text(
                       news['title'],
                       style: TextStyle(

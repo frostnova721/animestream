@@ -116,6 +116,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             item.id,
             item.title['english'] ?? item.title['romaji'] ?? '',
             item.cover,
+            rating: item.rating,
           ),
         );
       });
@@ -182,6 +183,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           item.id,
           item.title['english'] ?? item.title['romaji'] ?? '',
           item.cover,
+          rating: item.rating,
         ),
       );
     }
@@ -200,6 +202,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             elem.id,
             elem.title['english'] ?? elem.title['romaji'] ?? '',
             elem.cover,
+            rating: (elem.rating ?? 0) / 10,
           ),
         );
       }

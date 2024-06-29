@@ -6,6 +6,7 @@ import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -84,7 +85,7 @@ class _DiscoverState extends State<Discover> {
               children: [
                 Container(
                   // margin: EdgeInsets.only(top: 30),
-                  height: 360,
+                  height: 370,
                   // width: double.infinity,
                   child: widget.trendingList.length > 0
                       ? _trendingAnimesPageView()
@@ -97,7 +98,7 @@ class _DiscoverState extends State<Discover> {
                         ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+                  padding: pagePadding(context),
                   child: buildHeader("Discover", context),
                 )
               ],

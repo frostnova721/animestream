@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/header.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -24,9 +25,11 @@ class _SearchState extends State<Search> {
   Timer? debounce;
 
   Future addCards(String query) async {
-    results = [];
+    results = []; //for cleaning the UI
     exactMatches = [];
     final searchResults = await Anilist().search(query);
+    results = []; //for removing the data from previous search invokation due to debouncing
+    exactMatches = [];
     if (searchResults.length == 0)
       return setState(() {
         _searching = false;
@@ -36,7 +39,7 @@ class _SearchState extends State<Search> {
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
       final id = ele.id;
       results.add(
-        Cards(context: context).animeCard(id, title, image,rating: ele.rating),
+        Cards(context: context).animeCard(id, title, image, rating: ele.rating),
       );
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches.add(
@@ -64,7 +67,7 @@ class _SearchState extends State<Search> {
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Padding(
-          padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: MediaQuery.of(context).padding.left),
+          padding: pagePadding(context),
           child: Column(
             children: [
               buildHeader("Search", context),
@@ -85,7 +88,10 @@ class _SearchState extends State<Search> {
                             child: Text(
                               "searching...",
                               style: TextStyle(
-                                  color: accentColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 16),
+                                  color: accentColor,
+                                  fontFamily: "NotoSans",
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16),
                             ),
                           )
                         ],
@@ -99,7 +105,7 @@ class _SearchState extends State<Search> {
     );
   }
 
-   SizedBox footSpace() {
+  SizedBox footSpace() {
     return SizedBox(
       height: MediaQuery.of(context).padding.bottom + 60,
     );

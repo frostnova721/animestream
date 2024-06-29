@@ -54,76 +54,6 @@ class _DiscoverState extends State<Discover> {
     });
   }
 
-  // Future getLists() async {
-  //   // thisSeason = widget.currentSeason;
-  //   final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
-  //   if (currentlyAiringResponse.length == 0) return;
-
-  //   thisSeason = [];
-  //   currentlyAiringResponse.forEach((e) {
-  //     final title = e.title['english'] ?? e.title['romaji'] ?? '';
-  //     final image = e.cover;
-  //     thisSeason.add(
-  //       Cards(context: context).animeCard(
-  //         e.id,
-  //         title,
-  //         image,
-  //       ),
-  //     );
-  //   });
-
-  //   if (mounted) setState(() {});
-  // }
-
-  // Future<void> getTrendingList() async {
-  //   final list = await Anilist().getTrending();
-  //   if (mounted)
-  //     setState(() {
-  //       trendingList = list.sublist(0, 20);
-  //       trendingLoaded = true;
-  //       pageTimeout();
-  //     });
-  // }
-
-  // Future<void> getRecommended() async {
-  //   final list = await AnilistQueries().getRecommendedAnimes();
-  //   for (final item in list) {
-  //     recommendedList.add(
-  //       Cards(context: context).animeCard(
-  //         item.id,
-  //         item.title['english'] ?? item.title['romaji'] ?? '',
-  //         item.cover,
-  //       ),
-  //     );
-  //   }
-  //   if (mounted)
-  //     setState(() {
-  //       recommendedLoaded = true;
-  //     });
-  // }
-
-  // Future<void> getRecentlyUpdated() async {
-  //   final list = await Anilist().recentlyUpdated();
-  //   //to filter out the dupes
-  //   Set<int> ids = {};
-  //   for (final elem in list) {
-  //     if (!ids.contains(elem.id)) {
-  //       ids.add(elem.id);
-  //       recentlyUpdatedList.add(
-  //         Cards(context: context).animeCard(
-  //           elem.id,
-  //           elem.title['english'] ?? elem.title['romaji'] ?? '',
-  //           elem.cover,
-  //         ),
-  //       );
-  //     }
-  //   }
-  //   if (mounted)
-  //     setState(() {
-  //       recentlyUpdatedLoaded = true;
-  //     });
-  // }
-
   Future<void> pageTimeout() async {
     if (timer != null && timer!.isActive) timer!.cancel();
     timer = Timer(Duration(seconds: 5), () {
@@ -167,38 +97,9 @@ class _DiscoverState extends State<Discover> {
                         ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, right: 20),
+                  padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
                   child: buildHeader("Discover", context),
                 )
-                // Container(
-                //   padding: EdgeInsets.only(left: 20, top: MediaQuery.of(context).padding.top + 10, right: 20),
-                //   child: Row(
-                //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                //     children: [
-                //       Text(
-                //         "Discover",
-                //         style: TextStyle(
-                //           color: textMainColor,
-                //           fontFamily: "Rubik",
-                //           fontWeight: FontWeight.bold,
-                //           fontSize: 30,
-                //         ),
-                //       ),
-                //       IconButton(
-                //         onPressed: () => Navigator.of(context).push(
-                //           MaterialPageRoute(
-                //             builder: (context) => SettingsPage(),
-                //           ),
-                //         ),
-                //         icon: Icon(
-                //           Icons.settings_rounded,
-                //           color: textMainColor,
-                //           size: 32,
-                //         ),
-                //       ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
             Row(

@@ -55,18 +55,6 @@ Future<void> loadAndAssignSettings() async {
   });
 }
 
-class RefreshNotifier extends ChangeNotifier {
-   // Any state variables you need to manage
-  bool _isAppRefreshed = false;
-
-  bool get isAppRefreshed => _isAppRefreshed;
-
-  void refreshApp() {
-    _isAppRefreshed = !_isAppRefreshed;
-    notifyListeners();
-  }
-}
-
 class AnimeStream extends StatefulWidget {
   const AnimeStream({super.key});
 

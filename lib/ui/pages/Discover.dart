@@ -220,6 +220,7 @@ class _DiscoverState extends State<Discover> {
             child: Container(
               child: Stack(
                 alignment: Alignment.center,
+                fit: StackFit.expand,
                 children: [
                   Container(
                     width: double.infinity,

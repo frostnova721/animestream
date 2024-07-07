@@ -422,9 +422,9 @@ class _InfoState extends State<Info> {
         ),
         _searchStatus(),
         _manualSearch(context),
-        if (foundName != null) _continueButton(),
+        if (foundName != null && epLinks.length > 0) _continueButton(),
         Container(
-          margin: EdgeInsets.only(top: 25, left: 20, right: 20),
+          margin: EdgeInsets.only(top: 25, left: 20 + MediaQuery.of(context).padding.left, right: 20 + MediaQuery.of(context).padding.right),
           padding: EdgeInsets.only(top: 15, bottom: 20),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: backgroundSubColor),
           child: Column(

@@ -71,7 +71,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         writeSettings(SettingsModal(receivePreReleases: receivePreReleases));
                       },
                       description: "*maybe unstable",
-                    )
+                    ),
                   ],
                 ),
               ),

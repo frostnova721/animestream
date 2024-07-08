@@ -446,9 +446,6 @@ class _ControlsState extends State<Controls> {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // Padding(
-          // padding: EdgeInsets.only(right: 35),
-          // child:
           Material(
             color: Colors.transparent,
             child: Container(
@@ -473,6 +470,7 @@ class _ControlsState extends State<Controls> {
                           refreshPage: widget.refreshPage,
                           epLinks: widget.episode['epLinks'],
                           updateCurrentEpIndex: updateCurrentEpIndex,
+                          preferredServer: widget.preferredServer,
                         );
                       });
                 },
@@ -598,6 +596,7 @@ class _ControlsState extends State<Controls> {
                           refreshPage: widget.refreshPage,
                           epLinks: widget.episode['epLinks'],
                           updateCurrentEpIndex: updateCurrentEpIndex,
+                          preferredServer: widget.preferredServer,
                         );
                       },
                     );

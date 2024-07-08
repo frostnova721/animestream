@@ -49,11 +49,10 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: settingPagesAppBar(context),
       body: SingleChildScrollView(
         child: Container(
-          padding: EdgeInsets.only( left: MediaQuery.of(context).padding.left),
+          padding: EdgeInsets.only(left: MediaQuery.of(context).padding.left),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              
               Container(
                 padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
                 child: Text(
@@ -66,7 +65,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 shrinkWrap: true,
                 physics: NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) => Container(
-                  child: InkWell(
+                  padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+                  child: GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(
                         PageRouteBuilder(
@@ -95,6 +95,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     },
                     child: Container(
                       padding: EdgeInsets.all(20),
+                      // margin: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
+                      decoration: BoxDecoration(color: backgroundSubColor, borderRadius: BorderRadius.circular(20)),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -113,7 +115,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                   children: [
                                     Text(
                                       settingItems[index].label,
-                                      style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 20),
+                                      style:
+                                          TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 20),
                                     ),
                                     Text(
                                       settingItems[index].description,

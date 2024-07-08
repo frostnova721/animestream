@@ -88,7 +88,9 @@ class Cards {
         child: Row(
           children: [
             Container(
-              margin: EdgeInsets.only(right: 20,),
+              margin: EdgeInsets.only(
+                right: 20,
+              ),
               width: 135,
               height: 175,
               clipBehavior: Clip.hardEdge,
@@ -351,7 +353,7 @@ class Cards {
             });
         },
         child: Container(
-          width: 300,
+          width: 305,
           height: 150,
           child: Stack(
             children: [
@@ -368,7 +370,7 @@ class Cards {
                   ),
                 ),
               Container(
-                padding: EdgeInsets.all(10),
+                padding: EdgeInsets.all(8),
                 child: Row(
                   children: [
                     Container(
@@ -436,14 +438,13 @@ class Cards {
                                 ),
                                 // if (totalEpisodes != null || watchedEpisodeCount != null)
                                 Padding(
-                                  padding: const EdgeInsets.only(left: 15, right: 15),
+                                  padding: const EdgeInsets.only(left: 13, right: 13),
                                   child: Text(
                                     '•',
                                     style: TextStyle(fontSize: 17),
                                   ),
                                 ),
                                 Container(
-                                  margin: EdgeInsets.only(right: 15),
                                   child: Row(
                                     children: [
                                       Text(
@@ -458,10 +459,11 @@ class Cards {
                                       Text(
                                         "/ ${totalEpisodes ?? "??"}",
                                         style: TextStyle(
-                                            fontFamily: "NunitoSans",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer),
+                                          fontFamily: "NunitoSans",
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer,
+                                        ),
                                       ),
                                     ],
                                   ),

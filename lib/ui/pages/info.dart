@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
@@ -17,9 +18,7 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
 import 'package:animestream/core/commons/enums.dart';
-import "package:image_gallery_saver/image_gallery_saver.dart";
 
 class Info extends StatefulWidget {
   final int id;
@@ -64,6 +63,7 @@ class _InfoState extends State<Info> {
   bool dataLoaded = false;
   bool infoPage = true;
 
+
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences().getUserPreferences();
     gridMode = preferences.episodeGridView ?? false;
@@ -79,6 +79,8 @@ class _InfoState extends State<Info> {
     final item = await getAnimeWatchProgress(widget.id, mediaListStatus);
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
+
+    currentPageIndex = watched ~/ 24;
 
     if (mounted) setState(() {});
   }
@@ -1345,12 +1347,13 @@ class _InfoState extends State<Info> {
                           height: 50,
                           child: ElevatedButton(
                             onPressed: () async {
-                              final res = await get(Uri.parse(img));
-                              await ImageGallerySaver.saveImage(
-                                res.bodyBytes,
-                                quality: 100,
-                                name: data.title['english'] ?? data.title['romaji'] ?? '',
-                              );
+                              try {
+                              await Downloader().downloadImage(img, (data.title['english'] ?? data.title['romaji'] ?? "anime") + "Banner");
+                              floatingSnackBar(context, "Succesfully saved to your downloads folder!");
+                              Navigator.of(context).pop();
+                              } catch(err) {
+                                floatingSnackBar(context, "Couldnt save the image!");
+                              }
                             },
                             style: ElevatedButton.styleFrom(
                               fixedSize: Size(150, 75),

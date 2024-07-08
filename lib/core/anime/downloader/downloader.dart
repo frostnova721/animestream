@@ -2,6 +2,7 @@ import "dart:io";
 import "dart:typed_data";
 import "package:animestream/core/anime/downloader/types.dart";
 import "package:animestream/ui/models/notification.dart";
+import "package:animestream/ui/models/snackBar.dart";
 import "package:flutter/services.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
@@ -56,6 +57,43 @@ class Downloader {
   int generateId() {
     int maxId = downloadQueue.isNotEmpty ? downloadQueue.map((item) => item.id).reduce((a, b) => a > b ? a : b) : 0;
     return maxId + 1;
+  }
+
+  Future<void> downloadImage(String imageUrl, String fileName) async {
+    final permission = await checkPermission();
+    if(!permission) {
+      showToast("Permission denied! Grant access to storage");
+      throw Exception("Couldnt download image due to lack of permission!");
+    } 
+     final downPath = await Directory('/storage/emulated/0/Download');
+    String finalPath;
+    final fileExtension = imageUrl.split('/').last.split(".").last.trim();
+    fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
+     if (downPath.existsSync()) {
+      final directory = Directory("${downPath.path}/animestream/");
+      if (!(await directory.exists())) {
+        await directory.create(recursive: true);
+      }
+      finalPath = '/storage/emulated/0/Download/animestream/${fileName}.${fileExtension}';
+    } else {
+      final externalStorage = await getExternalStorageDirectory();
+      final directory = Directory("${externalStorage?.path}/animestream/");
+      if (!(await directory.exists())) {
+        await directory.create(recursive: true);
+      }
+      finalPath = "${externalStorage?.path}/animestream/${fileName}.${fileExtension}";
+    }
+     try {
+      final out = File(finalPath);
+      
+      final imageData = (await get(Uri.parse(imageUrl))).bodyBytes;
+
+      await out.writeAsBytes(imageData);
+      print("saved to ${out.path}");
+      return;
+      } catch(err) {
+        throw Exception("Couldnt download image. Reason: Something went wrong!");
+      }
   }
 
 

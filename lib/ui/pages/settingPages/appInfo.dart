@@ -39,95 +39,97 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
-      body: Padding(
-          padding: pagePadding(context),
-          child: loaded
-              ? Column(
-                  children: [
-                    settingPagesTitleHeader(context, "App info"),
-                    Container(
-                      padding: EdgeInsets.only(top: 50),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          GestureDetector(
-                            onLongPress: () => setState(() {
-                              iconPressed = !iconPressed;
-                              showToast("wooosh!!");
-                            }),
-                            child: Container(
-                                padding: EdgeInsets.only(right: 25),
-                                child: Image.asset(
-                                  iconPressed
-                                      ? 'lib/assets/icons/logo_monochrome.png'
-                                      : 'lib/assets/icons/logo_foreground.png',
-                                  height: 100,
-                                  width: 100,
-                                )),
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 10),
-                                child: Text("animestream",
-                                    style: TextStyle(
-                                        color: textMainColor,
-                                        fontFamily: "Poppins",
-                                        fontSize: 22,
-                                        fontWeight: FontWeight.bold)),
-                              ),
-                              Text("package: $appName", style: textStyle),
-                              Text(
-                                "app version: $appVersion",
-                                style: textStyle,
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "github: ",
-                                    style: textStyle,
-                                  ),
-                                  InkWell(
-                                    onLongPress: () async {
-                                      await Clipboard.setData(
-                                          ClipboardData(text: "https://github.com/frostnova721/animestream"));
-                                      floatingSnackBar(context, "link has been copied to clipboard");
-                                    },
-                                    onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream")),
-                                    child: Text(
-                                      "animestream",
+      body: SingleChildScrollView(
+        child: Padding(
+            padding: pagePadding(context),
+            child: loaded
+                ? Column(
+                    children: [
+                      settingPagesTitleHeader(context, "App info"),
+                      Container(
+                        padding: EdgeInsets.only(top: 50),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            GestureDetector(
+                              onLongPress: () => setState(() {
+                                iconPressed = !iconPressed;
+                                showToast("wooosh!!");
+                              }),
+                              child: Container(
+                                  padding: EdgeInsets.only(right: 25),
+                                  child: Image.asset(
+                                    iconPressed
+                                        ? 'lib/assets/icons/logo_monochrome.png'
+                                        : 'lib/assets/icons/logo_foreground.png',
+                                    height: 100,
+                                    width: 100,
+                                  )),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(bottom: 10),
+                                  child: Text("animestream",
                                       style: TextStyle(
-                                        color: accentColor,
-                                        fontFamily: 'NotoSans',
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 15,
-                                      ),
+                                          color: textMainColor,
+                                          fontFamily: "Poppins",
+                                          fontSize: 22,
+                                          fontWeight: FontWeight.bold)),
+                                ),
+                                Text("package: $appName", style: textStyle),
+                                Text(
+                                  "app version: $appVersion",
+                                  style: textStyle,
+                                ),
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      "github: ",
+                                      style: textStyle,
                                     ),
-                                  )
-                                ],
-                              ),
-                            ],
-                          ),
-                        ],
+                                    InkWell(
+                                      onLongPress: () async {
+                                        await Clipboard.setData(
+                                            ClipboardData(text: "https://github.com/frostnova721/animestream"));
+                                        floatingSnackBar(context, "link has been copied to clipboard");
+                                      },
+                                      onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream")),
+                                      child: Text(
+                                        "animestream",
+                                        style: TextStyle(
+                                          color: accentColor,
+                                          fontFamily: 'NotoSans',
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 15,
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
+                      Container(
+                        margin: EdgeInsets.only(top: 100, bottom: MediaQuery.of(context).padding.bottom),
+                        child: Text(
+                          "Thanks For Downloading!! ❤️",
+                          style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 16),
+                        ),
+                      )
+                    ],
+                  )
+                : Center(
+                    child: CircularProgressIndicator(
+                      color: accentColor,
                     ),
-                    Container(
-                      margin: EdgeInsets.only(top: 100),
-                      child: Text(
-                        "Thanks For Downloading!! ❤️",
-                        style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 16),
-                      ),
-                    )
-                  ],
-                )
-              : Center(
-                  child: CircularProgressIndicator(
-                    color: accentColor,
-                  ),
-                )),
+                  )),
+      ),
     );
   }
 

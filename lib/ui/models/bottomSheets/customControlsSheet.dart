@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
 class CustomControlsBottomSheet extends StatefulWidget {
-  final Function(String, Function(List<dynamic>, bool)) getEpisodeSources;
+  final Function(String, Function(List<Stream>, bool)) getEpisodeSources;
   final List<Stream> currentSources;
   final Future<void> Function(String, {bool preserveProgress}) playVideo;
   final bool next;
@@ -14,6 +14,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
   final Function(int) updateCurrentEpIndex;
   final bool preserveProgress;
   final int? customIndex;
+  final String? preferredServer;
 
   const CustomControlsBottomSheet({
     super.key,
@@ -27,6 +28,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
     required this.updateCurrentEpIndex,
     this.preserveProgress = false,
     this.customIndex,
+    this.preferredServer = null,
   });
 
   @override
@@ -55,8 +57,21 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       throw new Exception("Index too low or too high. Item not found!");
     }
     currentSources = [];
-    final index = widget.customIndex != null ? widget.customIndex : nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
+    final index = widget.customIndex != null
+        ? widget.customIndex
+        : nextEpisode
+            ? currentEpIndex + 1
+            : currentEpIndex - 1;
     final srcs = await widget.getEpisodeSources(widget.epLinks[index!], (list, finished) {
+      if (list.length > 0) {
+        if (list[0].server == widget.preferredServer) {
+          widget.playVideo(list[0].link, preserveProgress: widget.preserveProgress);
+          currentEpIndex = index;
+          widget.refreshPage(currentEpIndex, list[0]);
+          widget.updateCurrentEpIndex(currentEpIndex);
+          Navigator.pop(context);
+        }
+      }
       if (mounted)
         setState(() {
           if (finished) _isLoading = false;
@@ -78,13 +93,16 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 20),
-            child: Text("Select Server", style: textStyle().copyWith(fontSize: 23),),
+            child: Text(
+              "Select Server",
+              style: textStyle().copyWith(fontSize: 23),
+            ),
           ),
           Expanded(
             child: currentSources.length > 0
                 ? _isLoading
                     ? SingleChildScrollView(
-                      child: Column(
+                        child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             _list(),
@@ -100,7 +118,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                             )
                           ],
                         ),
-                    )
+                      )
                     : _list()
                 : Container(
                     height: 100,
@@ -131,7 +149,11 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
           child: ElevatedButton(
             onPressed: () {
               widget.playVideo(currentSources[index].link, preserveProgress: widget.preserveProgress);
-              currentEpIndex = widget.customIndex != null ? widget.customIndex! : widget.next ? currentEpIndex + 1 : currentEpIndex - 1;
+              currentEpIndex = widget.customIndex != null
+                  ? widget.customIndex!
+                  : widget.next
+                      ? currentEpIndex + 1
+                      : currentEpIndex - 1;
               widget.refreshPage(currentEpIndex, currentSources[index]);
               widget.updateCurrentEpIndex(currentEpIndex);
               Navigator.pop(context);

@@ -32,7 +32,6 @@ dependencies:
   hive_flutter: ^1.1.0
   
   # Media and player related
-  image_gallery_saver: ^2.0.3
   open_file: ^3.3.2
   wakelock: ^0.6.2
   better_player:

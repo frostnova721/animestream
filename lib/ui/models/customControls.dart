@@ -126,18 +126,6 @@ class _ControlsState extends State<Controls> {
       debugPrint("wakelock disabled");
     }
 
-    // final duration = _controller.value.duration?.inMilliseconds;
-    // final currentPosition = _controller.value.position.inMilliseconds;
-
-    //set player postion to duration if greater than duration
-    // if (duration != null && duration != 0 && currentPosition > duration) {
-    //   print("skipping to end...");
-    //   if (_controller.value.isPlaying) {
-    //     _controller.seekTo(Duration(seconds: duration));
-    //     await _controller.pause();
-    //   }
-    // }
-
     //play the loaded episode if equal to duration
     if (!finalEpisodeReached &&  _controller.value.duration != null &&  _controller.value.position.inSeconds ==  _controller.value.duration!.inSeconds) {
       if (_controller.value.isPlaying) {
@@ -149,7 +137,7 @@ class _ControlsState extends State<Controls> {
     //calculate the percentage
     final currentByTotal = _controller.value.position.inSeconds / (_controller.value.duration?.inSeconds ?? 0);
     if (currentByTotal * 100 >= 75 && !preloadStarted && _controller.value.isPlaying) {
-      print("====================== above 75% ====================");
+      print("====================== above 75% ======================");
       print("when position= ${_controller.value.position.inSeconds}, duration= ${_controller.value.duration?.inSeconds ?? 0} ");
       preloadNextEpisode();
       widget.updateWatchProgress(currentEpIndex);
@@ -178,8 +166,11 @@ class _ControlsState extends State<Controls> {
     calledAutoNext = true;
     if (preloadedSources.isNotEmpty) {
       currentEpIndex = currentEpIndex + 1;
+      
+      //try to get the preferred source otherwise use the first source from the list
       final preferredServerLink = preloadedSources.where((source) => source.server == widget.preferredServer).toList();
       final src = preferredServerLink.length != 0 ? preferredServerLink[0] : preloadedSources[0];
+
       widget.refreshPage(currentEpIndex, src);
       await playVideo(src.link);
     } else {
@@ -216,6 +207,7 @@ class _ControlsState extends State<Controls> {
       return;
     }
     List<Stream> srcs = [];
+    //its actually the getStreams function!
     await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index], (list, finished) {
       srcs = srcs + list;
       if (finished) {
@@ -247,6 +239,7 @@ class _ControlsState extends State<Controls> {
       });
   }
 
+  /**Format seconds to hour:min:sec format */
   String getFormattedTime(int timeInSeconds) {
     String formatTime(int val) {
       return val.toString().padLeft(2, '0');
@@ -285,7 +278,6 @@ class _ControlsState extends State<Controls> {
 
   @override
   Widget build(BuildContext context) {
-    //wrap in orientation builder
     return OrientationBuilder(
       builder: (context, orientation) {
         double LRpadding = 30;

@@ -61,15 +61,15 @@ class Downloader {
 
   Future<void> downloadImage(String imageUrl, String fileName) async {
     final permission = await checkPermission();
-    if(!permission) {
+    if (!permission) {
       showToast("Permission denied! Grant access to storage");
       throw Exception("Couldnt download image due to lack of permission!");
-    } 
-     final downPath = await Directory('/storage/emulated/0/Download');
+    }
+    final downPath = await Directory('/storage/emulated/0/Download');
     String finalPath;
     final fileExtension = imageUrl.split('/').last.split(".").last.trim();
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-     if (downPath.existsSync()) {
+    if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/animestream/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
@@ -83,19 +83,18 @@ class Downloader {
       }
       finalPath = "${externalStorage?.path}/animestream/${fileName}.${fileExtension}";
     }
-     try {
+    try {
       final out = File(finalPath);
-      
+
       final imageData = (await get(Uri.parse(imageUrl))).bodyBytes;
 
       await out.writeAsBytes(imageData);
       print("saved to ${out.path}");
       return;
-      } catch(err) {
-        throw Exception("Couldnt download image. Reason: Something went wrong!");
-      }
+    } catch (err) {
+      throw Exception("Couldnt download image. Reason: Something went wrong!");
+    }
   }
-
 
   Future<void> download(String streamLink, String fileName, {int retryAttempts = 3}) async {
     final permission = await checkPermission();

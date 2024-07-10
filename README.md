@@ -58,7 +58,7 @@ This project is licensed under the **GNU Public License version 3.0**.
 ## Disclaimer
 
 - By using this app, you agree that the developer(s) of animestream is not responsible for any content within the app and won't be legally responsible for any violations.
-- All the contents in animestream are hosted by 3rd parties, and the developer(s) is not accountable for their nature or legality. Users are advised to use the application responsibly and in compliance with relevant laws and regulations.
+- All the contents in animestream are taken from 3rd party websites and API's, and the developer(s) of animestream is not accountable for their nature or legality. Users are advised to use the application responsibly and in compliance with relevant laws and regulations.
 - animestream or its developer(s) are not responsible for the misuse of any content within or outside the app and shall not be responsible for dissemination of any content within the app.
 
 ## Contributors

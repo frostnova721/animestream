@@ -22,8 +22,8 @@ class PlayerSettingState extends State<PlayerSetting> {
   int? skipDuration;
   int? megaSkipDuration;
 
-  double skipDurationSliderValue = 15;
-  double megaSkipDurationSliderValue = 85;
+  late double skipDurationSliderValue;
+  late double megaSkipDurationSliderValue;
 
   bool loaded = false;
 
@@ -33,9 +33,11 @@ class PlayerSettingState extends State<PlayerSetting> {
     final settings = await Settings().getSettings();
     loaded = true;
     setState(() {
-      skipDuration = settings.skipDuration;
-      megaSkipDuration = settings.megaSkipDuration;
+      skipDuration = settings.skipDuration ?? 15;
+      megaSkipDuration = settings.megaSkipDuration ?? 85;
       preferredQuality = settings.preferredQuality;
+      skipDurationSliderValue = skipDuration!.toDouble();
+      megaSkipDurationSliderValue = megaSkipDuration!.toDouble();
     });
   }
 

@@ -169,6 +169,7 @@ class _ControlsState extends State<Controls> {
       
       //try to get the preferred source otherwise use the first source from the list
       final preferredServerLink = preloadedSources.where((source) => source.server == widget.preferredServer).toList();
+      print("${preferredServerLink[0].server}");
       final src = preferredServerLink.length != 0 ? preferredServerLink[0] : preloadedSources[0];
 
       widget.refreshPage(currentEpIndex, src);
@@ -212,7 +213,7 @@ class _ControlsState extends State<Controls> {
       srcs = srcs + list;
       if (finished) {
         preloadedSources = srcs;
-        print("PRELOAD FINISHED");
+        print("[PlAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
       }
     });
   }
@@ -568,11 +569,7 @@ class _ControlsState extends State<Controls> {
                     return floatingSnackBar(context, "You are already in the final episode!");
                   if (preloadedSources.isNotEmpty) {
                     print("from preload");
-                    final source = preloadedSources[0];
-                    await playVideo(preloadedSources[0].link);
-                    currentEpIndex += 1;
-                    widget.refreshPage(currentEpIndex, source);
-                    print(currentEpIndex);
+                    playPreloadedEpisode();
                   } else
                     showModalBottomSheet(
                       isScrollControlled: true,

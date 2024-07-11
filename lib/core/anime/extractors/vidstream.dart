@@ -53,15 +53,15 @@ class Vidstream extends AnimeExtractor {
       ));
     }
 
-    for(final src in parsed['source_bk']) {
-      qualityList.add(Stream(
-        quality: "multi-quality",
-        link: src['file'],
-        isM3u8: src['file'].endsWith(".m3u8"),
-        server: "vidstreaming",
-        backup: true
-      ));
-    }
+    // for(final src in parsed['source_bk']) {
+    //   qualityList.add(Stream(
+    //     quality: "multi-quality",
+    //     link: src['file'],
+    //     isM3u8: src['file'].endsWith(".m3u8"),
+    //     server: "vidstreaming",
+    //     backup: true
+    //   ));
+    // }
 
     return qualityList;
   }

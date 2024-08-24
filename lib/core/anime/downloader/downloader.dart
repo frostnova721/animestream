@@ -1,9 +1,7 @@
 import "dart:io";
-import "dart:typed_data";
 import "package:animestream/core/anime/downloader/types.dart";
 import "package:animestream/ui/models/notification.dart";
 import "package:animestream/ui/models/snackBar.dart";
-import "package:flutter/services.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "package:permission_handler/permission_handler.dart";
@@ -120,7 +118,7 @@ class Downloader {
     }
 
     final output = File(finalPath);
-    final List<Uint8List> buffers = [];
+    final List<BufferItem> buffers = [];
 
     //generate an id for the downloading item and add it to the queue(list)
     final downloadId = generateId();
@@ -136,8 +134,12 @@ class Downloader {
         },
       );
 
-      for (final segment in segmentsFiltered) {
+      final parallelDownloadsBatchSize = 5;
+
+      for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
         final downloading = downloadQueue.where((item) => item.id == downloadId).firstOrNull;
+
+        //send cancelled notification and clear the buffer
         if (downloading == null) {
           await NotificationService().pushBasicNotification(
             downloadId,
@@ -147,7 +149,13 @@ class Downloader {
           buffers.clear();
           return;
         }
-        if (segment.length != 0) {
+
+        final batchEnd = (i + parallelDownloadsBatchSize < segmentsFiltered.length)
+            ? i + parallelDownloadsBatchSize
+            : segmentsFiltered.length;
+        final batches = segmentsFiltered.sublist(i, batchEnd);
+
+        final futures = batches.map((segment) async {
           final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
           print("fetching segment [$segmentNumber/${segments.length}]");
@@ -161,16 +169,42 @@ class Downloader {
           );
           final res = await downloadSegmentWithRetries(uri, retryAttempts);
           if (res.statusCode == 200) {
-            buffers.add(res.bodyBytes);
+            buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
           } else
             throw new Exception("ERR_REQ_FAILED");
-        }
+        });
+
+        //wait till whole batch is downloaded
+        await Future.wait(futures);
+
+        //download the stream
+        // if (segment.length != 0) {
+        // final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
+        // final segmentNumber = segments.indexOf(segment) + 1;
+        // print("fetching segment [$segmentNumber/${segments.length}]");
+
+        // NotificationService().updateNotificationProgressBar(
+        //   id: downloadId,
+        //   currentStep: segmentNumber,
+        //   maxStep: segments.length - 1,
+        //   fileName: "$fileName.mp4",
+        //   path: finalPath,
+        // );
+        // final res = await downloadSegmentWithRetries(uri, retryAttempts);
+        // if (res.statusCode == 200) {
+        //   buffers.add(res.bodyBytes);
+        // } else
+        // throw new Exception("ERR_REQ_FAILED");
+        // }
       }
+
+      //sort the buffers
+      buffers.sort((a,b) => a.index.compareTo(b.index));  
 
       //write the data after full download.
       final out = await output.openWrite();
       for (final buffer in buffers) {
-        out.add(buffer);
+        out.add(buffer.buffer);
       }
 
       await out.close();

@@ -1,4 +1,5 @@
 import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -235,7 +236,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 onPressed: () {
                   Downloader()
                       .download(qualities[ind]['link']!,
-                          "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}")
+                          "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}", parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
                       .catchError((err) {
                     print(err);
                     floatingSnackBar(context, "$err");

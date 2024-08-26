@@ -25,6 +25,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
     setState(() {
       showErrorsButtonState = settings.showErrors!;
       receivePreReleases = settings.receivePreReleases!;
+      fasterDownloads = settings.fasterDownloads!;
     });
   }
 
@@ -38,6 +39,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool loaded = false;
   bool showErrorsButtonState = false;
   bool receivePreReleases = false;
+  bool fasterDownloads = false;
 
   @override
   Widget build(BuildContext context) {
@@ -72,6 +74,12 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       },
                       description: "*maybe unstable",
                     ),
+                    toggleItem("Use faster downloading", fasterDownloads, () {
+                      setState(() {
+                        fasterDownloads = !fasterDownloads;
+                      });
+                      writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
+                    }, description: "*download 2x items per batch")
                   ],
                 ),
               ),

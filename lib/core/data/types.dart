@@ -6,6 +6,7 @@ class SettingsModal {
   final bool? amoledBackground;
   final String? preferredQuality; // 1080p | 720p |480p | 360p as string
   final double? navbarTranslucency; //value from 0 to 1
+  final bool? fasterDownloads;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -15,6 +16,7 @@ class SettingsModal {
     this.amoledBackground,
     this.preferredQuality,
     this.navbarTranslucency,
+    this.fasterDownloads,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -26,6 +28,7 @@ class SettingsModal {
       amoledBackground: map['amoledBackground'] ?? false,
       preferredQuality: map['preferredQuality'] ?? "720p",
       navbarTranslucency: map['navbarTranslucency'] ?? 0.5,
+      fasterDownloads: map['fasterDownloads'] ?? false,
     );
   }
 
@@ -38,6 +41,7 @@ class SettingsModal {
       'amoledBackground': amoledBackground,
       'preferredQuality': preferredQuality,
       'navbarTranslucency': navbarTranslucency,
+      'fasterDownloads': fasterDownloads,
     };
   }
 }

@@ -94,7 +94,7 @@ class Downloader {
     }
   }
 
-  Future<void> download(String streamLink, String fileName, {int retryAttempts = 3}) async {
+  Future<void> download(String streamLink, String fileName, {int retryAttempts = 3, int parallelBatches = 5}) async {
     final permission = await checkPermission();
     if (!permission) {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
@@ -134,7 +134,7 @@ class Downloader {
         },
       );
 
-      final parallelDownloadsBatchSize = 5;
+      final parallelDownloadsBatchSize = parallelBatches;
 
       for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
         final downloading = downloadQueue.where((item) => item.id == downloadId).firstOrNull;
@@ -158,7 +158,7 @@ class Downloader {
         final futures = batches.map((segment) async {
           final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
-          print("fetching segment [$segmentNumber/${segments.length}]");
+          // print("[DOWNLOADER]<${downloadId}> fetching segment [$segmentNumber/${segments.length - 1}]");
 
           NotificationService().updateNotificationProgressBar(
             id: downloadId,
@@ -176,26 +176,6 @@ class Downloader {
 
         //wait till whole batch is downloaded
         await Future.wait(futures);
-
-        //download the stream
-        // if (segment.length != 0) {
-        // final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
-        // final segmentNumber = segments.indexOf(segment) + 1;
-        // print("fetching segment [$segmentNumber/${segments.length}]");
-
-        // NotificationService().updateNotificationProgressBar(
-        //   id: downloadId,
-        //   currentStep: segmentNumber,
-        //   maxStep: segments.length - 1,
-        //   fileName: "$fileName.mp4",
-        //   path: finalPath,
-        // );
-        // final res = await downloadSegmentWithRetries(uri, retryAttempts);
-        // if (res.statusCode == 200) {
-        //   buffers.add(res.bodyBytes);
-        // } else
-        // throw new Exception("ERR_REQ_FAILED");
-        // }
       }
 
       //sort the buffers

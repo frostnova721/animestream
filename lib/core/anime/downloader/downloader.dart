@@ -158,7 +158,7 @@ class Downloader {
         final futures = batches.map((segment) async {
           final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
-          // print("[DOWNLOADER]<${downloadId}> fetching segment [$segmentNumber/${segments.length - 1}]");
+          print("[DOWNLOADER]<${downloadId}> fetching segment [$segmentNumber/${segments.length - 1}]");
 
           NotificationService().updateNotificationProgressBar(
             id: downloadId,

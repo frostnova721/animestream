@@ -32,8 +32,7 @@ class StreamWish extends AnimeExtractor {
             final matched = regex.firstMatch(html);
             if (matched != null) {
               final String data = JsUnpack(html).unpack();
-
-              final dataMatch = RegExp(r'\{sources:\s*\[([\s\S]*?)\]')
+              final dataMatch = RegExp(r'sources:\s*\[([\s\S]*?)\]')
                       .allMatches(data)
                       .firstOrNull?[1] ??
                   '';

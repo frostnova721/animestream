@@ -1,3 +1,5 @@
+import 'package:animestream/ui/models/sources.dart';
+
 class SettingsModal {
   final int? skipDuration;
   final int? megaSkipDuration;
@@ -7,6 +9,8 @@ class SettingsModal {
   final String? preferredQuality; // 1080p | 720p |480p | 360p as string
   final double? navbarTranslucency; //value from 0 to 1
   final bool? fasterDownloads;
+  final String? preferredProvider;
+  final bool? darkMode;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -17,6 +21,8 @@ class SettingsModal {
     this.preferredQuality,
     this.navbarTranslucency,
     this.fasterDownloads,
+    this.preferredProvider,
+    this.darkMode,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -29,6 +35,8 @@ class SettingsModal {
       preferredQuality: map['preferredQuality'] ?? "720p",
       navbarTranslucency: map['navbarTranslucency'] ?? 0.5,
       fasterDownloads: map['fasterDownloads'] ?? false,
+      preferredProvider: map['preferredProvider'] ?? sources[0],
+      darkMode: map['darkMode'] ?? true
     );
   }
 
@@ -42,6 +50,8 @@ class SettingsModal {
       'preferredQuality': preferredQuality,
       'navbarTranslucency': navbarTranslucency,
       'fasterDownloads': fasterDownloads,
+      'preferredProvider': preferredProvider,
+      'darkMode': darkMode
     };
   }
 }

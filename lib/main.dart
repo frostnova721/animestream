@@ -32,24 +32,37 @@ void main() async {
 
 Future<void> loadAndAssignSettings() async {
   await Settings().getSettings().then((settings) => {
-    currentUserSettings = settings,
-    print("[STARTUP] Loaded user settings"),
-    });
+        currentUserSettings = settings,
+        print("[STARTUP] Loaded user settings"),
+      });
 
+  //load and apply theme
   await getTheme().then((themeId) {
-    if(themeId > availableThemes.length) {
+    if (themeId > availableThemes.length) {
       print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
       showToast("Failed to apply theme. Using default theme");
       setTheme(01);
       themeId = 01;
     }
+
+    final darkMode = currentUserSettings!.darkMode!;
+
     final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
-    accentColor = theme.theme.accentColor;
-    textMainColor = theme.theme.textMainColor;
-    textSubColor = theme.theme.textSubColor;
-    backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor;
-    backgroundSubColor = theme.theme.backgroundSubColor;
-    modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
+    if (darkMode) {
+      accentColor = theme.theme.accentColor;
+      textMainColor = theme.theme.textMainColor;
+      textSubColor = theme.theme.textSubColor;
+      backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor;
+      backgroundSubColor = theme.theme.backgroundSubColor;
+      modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
+    } else {
+      accentColor = theme.theme.accentColor;
+      textMainColor = Colors.black;
+      textSubColor = theme.theme.textSubColor;
+      backgroundColor = Colors.white;
+      backgroundSubColor = theme.theme.backgroundSubColor;
+      modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
+    }
 
     print("[STARTUP] Loaded theme of ID $themeId");
   });

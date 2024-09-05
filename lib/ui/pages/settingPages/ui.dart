@@ -41,6 +41,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
 
   late double navbarTranslucency;
   late bool AMOLEDBackgroundEnabled;
+  late bool darkMode;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +64,25 @@ class _ThemeSettingState extends State<ThemeSetting> {
                           // _themeItem("Hot Pink", hotPink),
                           // _themeItem("Cold Purple", coldPurple),
                           _themes(),
+                          Container(
+                            padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text("Mode", style: textStyle(),),
+                                DropdownMenu(
+                                  initialSelection: true,
+                                  onSelected: (val) {
+                                    Settings().writeSettings(SettingsModal(darkMode: val));
+                                  },
+                                  dropdownMenuEntries: [
+                                  // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
+                                  DropdownMenuEntry(value: true, label: "dark"),
+                                  DropdownMenuEntry(value: false, label: "light (alpha)")
+                                ])
+                              ],
+                            ),
+                          ),
                           _toggleItem(
                             "AMOLED Background",
                             AMOLEDBackgroundEnabled,
@@ -76,8 +96,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             description: "Full black background",
                           ),
                           _sliderItem("Navbar Translucency", navbarTranslucency,
-                          min: 0,
-                          max: 1,
+                              min: 0,
+                              max: 1,
                               description: "transparency and blur of the navbar",
                               onChangedFunction: (val) {
                                 setState(() {
@@ -111,9 +131,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
   Widget _sliderItem(
     String label,
     double variable, {
-      required void Function(double) onChangedFunction,
-      required double min,
-      required double max,
+    required void Function(double) onChangedFunction,
+    required double min,
+    required double max,
     String? description,
     int divisions = 10,
     void Function(double)? onDragStart,
@@ -136,15 +156,15 @@ class _ThemeSettingState extends State<ThemeSetting> {
               ),
             Padding(
               padding: const EdgeInsets.only(top: 30),
-              child:CustomSlider(
-                  min: min,
-                  max: max,
-                  onChanged: onChangedFunction,
-                  onDragStart: onDragStart,
-                  onDragEnd: onDragEnd,
-                  divisions: divisions,
-                  value: variable,
-                ),
+              child: CustomSlider(
+                min: min,
+                max: max,
+                onChanged: onChangedFunction,
+                onDragStart: onDragStart,
+                onDragEnd: onDragEnd,
+                divisions: divisions,
+                value: variable,
+              ),
             ),
           ],
         ),
@@ -319,8 +339,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
           children: [
             Text(
               "$name",
-              style: textStyle()
-                  .copyWith(color: currentThemeId == theme.id ? backgroundColor : textMainColor),
+              style: textStyle().copyWith(color: currentThemeId == theme.id ? backgroundColor : textMainColor),
             ),
             Container(
               height: 40,

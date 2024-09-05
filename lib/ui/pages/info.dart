@@ -42,7 +42,7 @@ class _InfoState extends State<Info> {
 
   late AnilistInfo data;
 
-  String selectedSource = "gogoanime";
+  String selectedSource = currentUserSettings?.preferredProvider ?? sources[0];
   String? foundName;
 
   MediaStatus? mediaListStatus;
@@ -366,7 +366,7 @@ class _InfoState extends State<Info> {
         Container(
           margin: EdgeInsets.only(top: 30),
           child: DropdownMenu(
-            initialSelection: sources.first,
+            initialSelection: selectedSource,
             dropdownMenuEntries: getSourceDropdownList(),
             // menuHeight: 75,
             width: 300,

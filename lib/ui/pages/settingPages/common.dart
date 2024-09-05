@@ -86,6 +86,8 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
   );
 }
 
+
+
 InkWell toggleItem(String label, bool value, void Function() onTapFunction, {String? description = null}) {
     return InkWell(
       onTap: onTapFunction,

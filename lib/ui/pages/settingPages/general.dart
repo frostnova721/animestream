@@ -1,5 +1,7 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
@@ -79,7 +81,34 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         fasterDownloads = !fasterDownloads;
                       });
                       writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
-                    }, description: "*download 2x items per batch")
+                    }, description: "*download 2x items per batch"),
+                    Container(
+                      padding: EdgeInsets.only(top: 20, bottom: 10, left: 20, right: 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Default provider",
+                            style: textStyle(),
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            padding: EdgeInsets.only(top: 20),
+                            child: DropdownMenu(
+                              width: MediaQuery.of(context).size.width - 80,
+                              label: Text("providers", style: TextStyle(color: textMainColor, fontSize: 18, fontWeight: FontWeight.bold),),
+                              leadingIcon: Icon(Icons.source_rounded, color: textMainColor,),
+                                initialSelection: currentUserSettings?.preferredProvider ?? sources[0],
+                                onSelected: (val) async {
+                                  writeSettings(SettingsModal(preferredProvider: val));
+                                },
+                                textStyle: TextStyle(fontFamily: "NotoSans", fontSize: 16, fontWeight: FontWeight.bold),
+                                menuStyle: MenuStyle(backgroundColor: WidgetStatePropertyAll(backgroundSubColor), shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))),
+                                dropdownMenuEntries: getSourceDropdownList()),
+                          )
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

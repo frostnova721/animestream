@@ -7,7 +7,7 @@ import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
-final List sources = ["gogoanime", "ryuk", "animepahe"];
+final List<String> sources = ["gogoanime", "ryuk", "animepahe"];
 
 AnimeProvider getClass(String source) {
   switch (source) {

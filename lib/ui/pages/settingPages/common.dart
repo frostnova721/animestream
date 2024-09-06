@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -71,7 +72,7 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
             },
             icon: Icon(
               Icons.arrow_back_rounded,
-              color: textMainColor,
+              color: appTheme?.textMainColor,
               size: 35,
             )),
       ),
@@ -79,7 +80,7 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
         padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
         child: Text(
           title,
-          style: TextStyle(fontFamily: "Rubik", fontSize: 40),
+          style: TextStyle(fontFamily: "Rubik", fontSize: 40,),
         ),
       ),
     ],
@@ -132,7 +133,7 @@ InkWell toggleItem(String label, bool value, void Function() onTapFunction, {Str
 
 TextStyle textStyle() {
   return TextStyle(
-    color: textMainColor,
+    color: appTheme?.textMainColor,
     fontFamily: "NotoSans",
     fontWeight: FontWeight.bold,
     fontSize: 20,

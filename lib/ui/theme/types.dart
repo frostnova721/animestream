@@ -54,3 +54,16 @@ class AnimeStreamTheme {
     };
   }
 }
+
+class ThemeModeValues {
+  Color textMainColor;
+  Color backgroundColor;
+  Color backgroundSubColor;
+  Color modalSheetBackgroundColor;
+
+  ThemeModeValues(
+      {required this.backgroundColor,
+      required this.textMainColor,
+      required this.backgroundSubColor,
+      required this.modalSheetBackgroundColor});
+}

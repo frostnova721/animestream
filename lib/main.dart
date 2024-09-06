@@ -5,10 +5,12 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
+import 'package:animestream/ui/models/parent.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:animestream/ui/theme/themes.dart';
+import 'package:animestream/ui/theme/types.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
@@ -22,7 +24,8 @@ void main() async {
     await Hive.initFlutter(dir.path);
     await loadAndAssignSettings();
     NotificationService().init();
-    runApp(const AnimeStream());
+    runApp(ThemeChangerWidget(
+      child: const AnimeStream()));
   } catch (err) {
     debugPrint(err.toString());
     Logger().writeLog(err.toString());
@@ -49,6 +52,7 @@ Future<void> loadAndAssignSettings() async {
 
     final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
     if (darkMode) {
+      appTheme = theme.theme;
       accentColor = theme.theme.accentColor;
       textMainColor = theme.theme.textMainColor;
       textSubColor = theme.theme.textSubColor;
@@ -56,12 +60,14 @@ Future<void> loadAndAssignSettings() async {
       backgroundSubColor = theme.theme.backgroundSubColor;
       modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
     } else {
-      accentColor = theme.theme.accentColor;
-      textMainColor = Colors.black;
-      textSubColor = theme.theme.textSubColor;
-      backgroundColor = Colors.white;
-      backgroundSubColor = theme.theme.backgroundSubColor;
-      modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
+      appTheme = AnimeStreamTheme(
+        accentColor: theme.theme.accentColor,
+        textMainColor: Colors.black,
+        textSubColor: theme.theme.textSubColor,
+        backgroundColor: Colors.white,
+        backgroundSubColor: Color.fromARGB(255, 179, 179, 179),
+        modalSheetBackgroundColor: theme.theme.modalSheetBackgroundColor,
+      );
     }
 
     print("[STARTUP] Loaded theme of ID $themeId");
@@ -97,15 +103,16 @@ class _AnimeStreamState extends State<AnimeStream> {
   // This widget is the root of *my* application.
   @override
   Widget build(BuildContext context) {
+    backgroundSubColor = Color.fromARGB(255, 196, 196, 196);
     return MaterialApp(
       title: 'Animestream',
       theme: ThemeData(
         useMaterial3: true,
-        textTheme: Theme.of(context).textTheme.apply(bodyColor: textMainColor, fontFamily: "NotoSans"),
-        scaffoldBackgroundColor: backgroundColor,
-        bottomSheetTheme: BottomSheetThemeData(backgroundColor: modalSheetBackgroundColor),
+        textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme?.textMainColor, fontFamily: "NotoSans"),
+        scaffoldBackgroundColor: appTheme?.backgroundColor,
+        bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme?.modalSheetBackgroundColor),
         colorScheme: ColorScheme.fromSeed(
-          seedColor: accentColor,
+          seedColor: appTheme?.accentColor ?? accentColor,
         ),
       ),
       home: const MainNavigator(),

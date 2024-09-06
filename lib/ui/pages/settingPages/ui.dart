@@ -2,6 +2,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/parent.dart';
 import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -46,7 +47,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme?.backgroundColor,
       body: SingleChildScrollView(
         child: Padding(
           padding: pagePadding(context, bottom: true),
@@ -69,17 +70,22 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Text("Mode", style: textStyle(),),
+                                Text(
+                                  "Mode",
+                                  style: textStyle(),
+                                ),
                                 DropdownMenu(
-                                  initialSelection: true,
-                                  onSelected: (val) {
-                                    Settings().writeSettings(SettingsModal(darkMode: val));
-                                  },
-                                  dropdownMenuEntries: [
-                                  // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
-                                  DropdownMenuEntry(value: true, label: "dark"),
-                                  DropdownMenuEntry(value: false, label: "light (alpha)")
-                                ])
+                                    initialSelection: currentUserSettings?.darkMode ?? true,
+                                    onSelected: (val) async {
+                                      await setThemeMode(val ?? true);
+                                      // setState(() {});
+                                      ThemeChanger.of(context).refreshTree();
+                                    },
+                                    dropdownMenuEntries: [
+                                      // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
+                                      DropdownMenuEntry(value: true, label: "dark"),
+                                      DropdownMenuEntry(value: false, label: "light (alpha)")
+                                    ])
                               ],
                             ),
                           ),
@@ -303,7 +309,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                   onTapFunction();
                 },
                 activeColor: backgroundColor,
-                activeTrackColor: accentColor,
+                activeTrackColor: appTheme?.accentColor,
               )
             ],
           ),

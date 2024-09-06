@@ -60,3 +60,19 @@ List<ThemeItem> availableThemes = [
   ThemeItem(id: 03, name: "Cold Purple", theme: coldPurple),
   ThemeItem(id: 04, name: "Hot Pink", theme: hotPink),
 ];
+
+ThemeModeValues lightModeValues = ThemeModeValues(
+  textMainColor: Colors.black,
+  // textSubColor: theme.theme.textSubColor,
+  backgroundColor: Colors.white,
+  backgroundSubColor: Color.fromARGB(255, 179, 179, 179),
+  modalSheetBackgroundColor: Colors.white,
+);
+
+ThemeModeValues darkModeValues = ThemeModeValues(
+  backgroundColor: Color.fromARGB(255, 24, 24, 24),
+  backgroundSubColor: const Color.fromARGB(255, 36, 36, 36),
+  textMainColor: Colors.white,
+  // textSubColor: Color.fromARGB(255, 180, 180, 180),
+  modalSheetBackgroundColor: Color(0xff121212),
+);

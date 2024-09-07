@@ -1,13 +1,13 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class Discover extends StatefulWidget {
@@ -92,14 +92,14 @@ class _DiscoverState extends State<Discover> {
                       : Container(
                           child: Center(
                             child: CircularProgressIndicator(
-                              color: accentColor,
+                              color: appTheme.accentColor,
                             ),
                           ),
                         ),
                 ),
                 Padding(
                   padding: pagePadding(context),
-                  child: buildHeader("Discover", context),
+                  child: buildHeader("Discover", context, afterNavigation: () => setState((){})),
                 )
               ],
             ),
@@ -124,13 +124,13 @@ class _DiscoverState extends State<Discover> {
                             ),
                             fit: BoxFit.cover,
                             opacity: 0.35),
-                        border: Border.all(color: accentColor),
+                        border: Border.all(color: appTheme.accentColor),
                       ),
                       child: Center(
                         child: Text(
                           "News",
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontFamily: "NotoSans",
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
@@ -158,13 +158,13 @@ class _DiscoverState extends State<Discover> {
                             ),
                             fit: BoxFit.cover,
                             opacity: 0.35),
-                        border: Border.all(color: accentColor),
+                        border: Border.all(color: appTheme.accentColor),
                       ),
                       child: Center(
                         child: Text(
                           "Genres",
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontFamily: "NotoSans",
                             fontWeight: FontWeight.bold,
                             fontSize: 24,
@@ -275,7 +275,7 @@ class _DiscoverState extends State<Discover> {
                                       widget.trendingList[index % widget.trendingList.length].title['romaji'] ??
                                       '',
                                   style: TextStyle(
-                                    color: textMainColor,
+                                    color: appTheme.textMainColor,
                                     fontFamily: 'NunitoSans',
                                     fontSize: 17,
                                     fontWeight: FontWeight.bold,
@@ -287,7 +287,7 @@ class _DiscoverState extends State<Discover> {
                               Text(
                                 widget.trendingList[index % widget.trendingList.length].genres.join(', '),
                                 style: TextStyle(
-                                    color: Color.fromARGB(255, 180, 180, 180),
+                                    color: appTheme.textMainColor.withAlpha(145),
                                     fontFamily: 'NunitoSans',
                                     fontSize: 15,
                                     fontWeight: FontWeight.bold,
@@ -301,12 +301,12 @@ class _DiscoverState extends State<Discover> {
                                   children: [
                                     Icon(
                                       Icons.star,
-                                      color: textMainColor,
+                                      color: appTheme.textMainColor,
                                       size: 20,
                                     ),
                                     Text(
                                       "${widget.trendingList[index % widget.trendingList.length].rating != null ? widget.trendingList[index % widget.trendingList.length].rating! / 10 : '??'}",
-                                      style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 17),
+                                      style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 17),
                                     ),
                                   ],
                                 ),
@@ -340,7 +340,7 @@ class _DiscoverState extends State<Discover> {
             )
           : Center(
               child: CircularProgressIndicator(
-                color: accentColor,
+                color: appTheme.accentColor,
               ),
             ),
     );
@@ -359,7 +359,7 @@ class _DiscoverState extends State<Discover> {
 
   TextStyle basicTextStyle(String? family, double? size) {
     return TextStyle(
-      color: textMainColor,
+      color: appTheme.textMainColor,
       fontFamily: family ?? 'NotoSans',
       fontSize: size ?? 15,
     );

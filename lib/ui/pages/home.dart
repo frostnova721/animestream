@@ -108,7 +108,7 @@ class _HomeState extends State<Home> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildHeader("Home", context),
+              buildHeader("Home", context, afterNavigation: () => setState(() {})),
               // if (storedUserData != null)
               AnimatedSwitcher(
                 duration: Duration(milliseconds: 400),
@@ -156,7 +156,7 @@ class _HomeState extends State<Home> {
       margin: EdgeInsets.only(left: 10),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: backgroundSubColor,
+          backgroundColor: appTheme.backgroundSubColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),
         onPressed: () => Navigator.of(context)
@@ -168,14 +168,14 @@ class _HomeState extends State<Home> {
             children: [
               Icon(
                 Icons.folder_rounded,
-                color: textMainColor,
+                color: appTheme.textMainColor,
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 10),
                 child: Text(
                   "Lists",
                   style: TextStyle(
-                    color: textMainColor,
+                    color: appTheme.textMainColor,
                     fontFamily: "Poppins",
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
     return Material(
       borderRadius: BorderRadius.circular(10),
       clipBehavior: Clip.hardEdge,
-      color: backgroundSubColor,
+      color: appTheme.backgroundSubColor,
       child: InkWell(
         overlayColor: WidgetStatePropertyAll(accentColor.withOpacity(0.1)),
         onTap: () => Navigator.of(context).push(
@@ -241,7 +241,7 @@ class _HomeState extends State<Home> {
         margin: EdgeInsets.only(top: 15, bottom: 15),
         height: 6,
         decoration: BoxDecoration(
-          color: accentColor.withOpacity(0.6),
+          color: appTheme.accentColor.withOpacity(0.6),
           borderRadius: BorderRadius.circular(8),
         ),
       ),
@@ -269,7 +269,7 @@ class _HomeState extends State<Home> {
                 height: 15,
                 width: 15,
                 child: CircularProgressIndicator(
-                  color: accentColor,
+                  color: appTheme.accentColor,
                   strokeWidth: 2,
                 ),
               ),
@@ -327,7 +327,7 @@ class _HomeState extends State<Home> {
                     )
               : Center(
                   child: CircularProgressIndicator(
-                    color: accentColor,
+                    color: appTheme.accentColor,
                   ),
                 ),
         )

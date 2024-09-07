@@ -6,4 +6,4 @@ UserModal? storedUserData;
 
 SettingsModal? currentUserSettings;
 
-AnimeStreamTheme? appTheme;
+late AnimeStreamTheme appTheme;

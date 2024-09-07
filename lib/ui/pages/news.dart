@@ -1,7 +1,7 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/news/animenews.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/pages/newsDetail.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class News extends StatefulWidget {
@@ -34,14 +34,14 @@ class _NewsState extends State<News> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(Icons.arrow_back_rounded,
-          color: textMainColor,),
+          color: appTheme.textMainColor,),
         ),
-        backgroundColor: backgroundColor,
+        backgroundColor: appTheme.backgroundColor,
         title: Text(
           "News",
           style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
@@ -50,7 +50,7 @@ class _NewsState extends State<News> {
       body: !loaded
           ? Center(
               child: CircularProgressIndicator(
-                color: accentColor,
+                color: appTheme.accentColor,
               ),
             )
           : SingleChildScrollView(

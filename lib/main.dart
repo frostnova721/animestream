@@ -5,7 +5,6 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/models/parent.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -24,12 +23,18 @@ void main() async {
     await Hive.initFlutter(dir.path);
     await loadAndAssignSettings();
     NotificationService().init();
-    runApp(ThemeChangerWidget(
-      child: const AnimeStream()));
+    runApp(const AnimeStream());
   } catch (err) {
     debugPrint(err.toString());
     Logger().writeLog(err.toString());
     print("[CRASH] logged the error to logs folder");
+  }
+}
+
+class ThemeProvider extends ChangeNotifier {
+  // Method to toggle between light and dark themes
+  void refreshApp() {
+    notifyListeners();
   }
 }
 
@@ -103,20 +108,19 @@ class _AnimeStreamState extends State<AnimeStream> {
   // This widget is the root of *my* application.
   @override
   Widget build(BuildContext context) {
-    backgroundSubColor = Color.fromARGB(255, 196, 196, 196);
     return MaterialApp(
-      title: 'Animestream',
-      theme: ThemeData(
-        useMaterial3: true,
-        textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme?.textMainColor, fontFamily: "NotoSans"),
-        scaffoldBackgroundColor: appTheme?.backgroundColor,
-        bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme?.modalSheetBackgroundColor),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: appTheme?.accentColor ?? accentColor,
-        ),
-      ),
-      home: const MainNavigator(),
-      debugShowCheckedModeBanner: false,
-    );
+          title: 'Animestream',
+          theme: ThemeData(
+            useMaterial3: true,
+            textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
+            scaffoldBackgroundColor: appTheme.backgroundColor,
+            bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: appTheme.accentColor,
+            ),
+          ),
+          home: const MainNavigator(),
+          debugShowCheckedModeBanner: false,
+        );
   }
 }

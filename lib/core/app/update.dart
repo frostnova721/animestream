@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -72,7 +71,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
               if (pre)
                 Text(
                   "Test Version",
-                  style: TextStyle(color: textSubColor, fontFamily: "Poppins"),
+                  style: TextStyle(color: appTheme.textSubColor, fontFamily: "Poppins"),
                 ),
               Container(
                 height: 400,
@@ -111,11 +110,11 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
                           ;
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: accentColor,
+                          backgroundColor: appTheme.accentColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                             side: BorderSide(
-                              color: accentColor,
+                              color: appTheme.accentColor,
                             ),
                           ),
                         ),
@@ -123,7 +122,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
                           child: Text(
                             "download",
                             style: TextStyle(
-                              color: backgroundColor,
+                              color: appTheme.backgroundColor,
                               fontFamily: "Rubik",
                               fontSize: 20,
                             ),
@@ -138,18 +137,18 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
                           Navigator.of(context).pop();
                         },
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: accentColor,
+                          backgroundColor: appTheme.accentColor,
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                             side: BorderSide(
-                              color: accentColor,
+                              color: appTheme.accentColor,
                             ),
                           ),
                         ),
                         child: Container(
                           child: Text("maybe later",
                               style: TextStyle(
-                                color: backgroundColor,
+                                color: appTheme.backgroundColor,
                                 fontFamily: "Rubik",
                                 fontSize: 20,
                               )),
@@ -168,5 +167,5 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
 }
 
 TextStyle style() {
-  return TextStyle(color: textMainColor, fontFamily: "NotoSans");
+  return TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans");
 }

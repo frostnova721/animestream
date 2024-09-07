@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
@@ -43,24 +44,24 @@ class CustomSliderState extends State<CustomSlider> {
   Widget build(BuildContext context) {
     return SliderTheme(
       data: SliderThemeData(
-        thumbColor: accentColor,
-        activeTrackColor: accentColor,
-        inactiveTrackColor: textSubColor,
+        thumbColor: appTheme.accentColor,
+        activeTrackColor: appTheme.accentColor,
+        inactiveTrackColor: appTheme.textSubColor,
         valueIndicatorShape: valueIndicator,
         trackShape: MarginedTrack(),
         valueIndicatorTextStyle: TextStyle(
-          color: backgroundColor,
+          color: appTheme.backgroundColor,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
         showValueIndicator: ShowValueIndicator.always,
-        valueIndicatorColor: accentColor,
+        valueIndicatorColor: appTheme.accentColor,
         trackHeight: 13,
         thumbShape: RoundedRectangularThumbShape(width: 10, radius: 4),
         overlayColor: Colors.white,
         overlayShape: RoundedRectangularThumbShape(width: 15, radius: 5, height: 30),
-        activeTickMarkColor: backgroundColor,
+        activeTickMarkColor: appTheme.backgroundColor,
       ),
       child: Slider(
         min: widget.min,

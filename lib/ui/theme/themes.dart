@@ -63,7 +63,7 @@ List<ThemeItem> availableThemes = [
 
 ThemeModeValues lightModeValues = ThemeModeValues(
   textMainColor: Colors.black,
-  // textSubColor: theme.theme.textSubColor,
+  textSubColor: Color.fromARGB(255, 61, 61, 61),
   backgroundColor: Colors.white,
   backgroundSubColor: Color.fromARGB(255, 179, 179, 179),
   modalSheetBackgroundColor: Colors.white,
@@ -73,6 +73,6 @@ ThemeModeValues darkModeValues = ThemeModeValues(
   backgroundColor: Color.fromARGB(255, 24, 24, 24),
   backgroundSubColor: const Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
-  // textSubColor: Color.fromARGB(255, 180, 180, 180),
+  textSubColor: Color.fromARGB(255, 180, 180, 180),
   modalSheetBackgroundColor: Color(0xff121212),
 );

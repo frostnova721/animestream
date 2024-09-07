@@ -223,7 +223,7 @@ class _InfoState extends State<Info> {
   Widget build(BuildContext context) {
     try {
       return Scaffold(
-        backgroundColor: backgroundColor,
+        backgroundColor: appTheme.backgroundColor,
         body: dataLoaded
             ? SingleChildScrollView(
                 child: Padding(
@@ -241,7 +241,7 @@ class _InfoState extends State<Info> {
                             Container(
                               // width: 120,
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: accentColor, fixedSize: Size(135, 55)),
+                                style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor, fixedSize: Size(135, 55)),
                                 onPressed: () {
                                   setState(() {
                                     infoPage = !infoPage;
@@ -287,16 +287,16 @@ class _InfoState extends State<Info> {
                                   style: ElevatedButton.styleFrom(
                                     shape: CircleBorder(
                                       side: BorderSide(
-                                        color: accentColor,
+                                        color: appTheme.accentColor,
                                       ),
                                     ),
                                     fixedSize: Size(50, 50),
-                                    backgroundColor: backgroundColor,
+                                    backgroundColor: appTheme.backgroundColor,
                                     padding: EdgeInsets.zero,
                                   ),
                                   child: Icon(
                                     getTrackerIcon(),
-                                    color: accentColor,
+                                    color: appTheme.accentColor,
                                     size: 28,
                                   ),
                                 ),
@@ -312,7 +312,7 @@ class _InfoState extends State<Info> {
                         child: Text(
                           data.title['english'] ?? data.title['romaji'] ?? '',
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontFamily: "NunitoSans",
                             fontSize: 25,
                           ),
@@ -329,7 +329,7 @@ class _InfoState extends State<Info> {
               )
             : Center(
                 child: CircularProgressIndicator(
-                  color: accentColor,
+                  color: appTheme.accentColor,
                 ),
               ),
       );
@@ -371,23 +371,23 @@ class _InfoState extends State<Info> {
             // menuHeight: 75,
             width: 300,
             textStyle: TextStyle(
-              color: textMainColor,
+              color: appTheme.textMainColor,
               fontFamily: "Poppins",
             ),
             trailingIcon: Icon(
               Icons.arrow_drop_down,
-              color: textMainColor,
+              color: appTheme.textMainColor,
             ),
             selectedTrailingIcon: Icon(
               Icons.arrow_drop_up,
-              color: textMainColor,
+              color: appTheme.textMainColor,
             ),
             menuStyle: MenuStyle(
               surfaceTintColor: WidgetStatePropertyAll(backgroundSubColor),
               backgroundColor: WidgetStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
               shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(
-                  side: BorderSide(color: textMainColor),
+                  side: BorderSide(color: appTheme.textMainColor),
                   borderRadius: BorderRadius.circular(10),
                 ),
               ),
@@ -418,7 +418,7 @@ class _InfoState extends State<Info> {
             label: Text(
               "source",
               style:
-                  TextStyle(color: textMainColor, fontSize: 20, fontFamily: "Rubik", overflow: TextOverflow.ellipsis),
+                  TextStyle(color: appTheme.textMainColor, fontSize: 20, fontFamily: "Rubik", overflow: TextOverflow.ellipsis),
             ),
           ),
         ),
@@ -428,7 +428,7 @@ class _InfoState extends State<Info> {
         Container(
           margin: EdgeInsets.only(top: 25, left: 20 + MediaQuery.of(context).padding.left, right: 20 + MediaQuery.of(context).padding.right),
           padding: EdgeInsets.only(top: 15, bottom: 20),
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: backgroundSubColor),
+          decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: appTheme.backgroundSubColor),
           child: Column(
             children: [
               Container(
@@ -460,7 +460,7 @@ class _InfoState extends State<Info> {
                               icon: Icon(
                                 gridMode ? Icons.view_list_rounded : Icons.grid_view_rounded,
                               ),
-                              color: textMainColor,
+                              color: appTheme.textMainColor,
                               iconSize: 28,
                             ),
                           ),
@@ -508,7 +508,7 @@ class _InfoState extends State<Info> {
                           height: 100,
                           child: Center(
                             child: CircularProgressIndicator(
-                              color: accentColor,
+                              color: appTheme.accentColor,
                             ),
                           ),
                         ),
@@ -554,12 +554,12 @@ class _InfoState extends State<Info> {
           style: TextStyle(
             color: Colors.transparent,
             decoration: TextDecoration.underline,
-            decorationColor: textMainColor,
+            decorationColor: appTheme.textMainColor,
             decorationStyle: TextDecorationStyle.solid,
             decorationThickness: 2,
             fontFamily: "NotoSans",
             fontWeight: FontWeight.bold,
-            shadows: [Shadow(color: textMainColor, offset: Offset(0, -2))],
+            shadows: [Shadow(color: appTheme.textMainColor, offset: Offset(0, -2))],
           ),
         ),
       ),
@@ -582,7 +582,7 @@ class _InfoState extends State<Info> {
               duration: Duration(milliseconds: 200),
               clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
-                color: currentPageIndex == index ? accentColor : backgroundColor,
+                color: currentPageIndex == index ? appTheme.accentColor : appTheme.backgroundColor,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Material(
@@ -602,7 +602,7 @@ class _InfoState extends State<Info> {
                     child: Text(
                       "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
                       style: TextStyle(
-                        color: currentPageIndex == index ? backgroundColor : textMainColor,
+                        color: currentPageIndex == index ? backgroundColor : appTheme.textMainColor,
                         fontFamily: 'NotoSans',
                         fontWeight: FontWeight.bold,
                       ),
@@ -626,7 +626,7 @@ class _InfoState extends State<Info> {
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
-        border: Border.all(color: accentColor),
+        border: Border.all(color: appTheme.accentColor),
         color: Colors.black,
         image: DecorationImage(
           image: data.banner != null ? NetworkImage(data.banner!) : NetworkImage(data.cover),
@@ -679,7 +679,7 @@ class _InfoState extends State<Info> {
                 Text(
                   '${started ? 'Continue' : 'Start'} from:',
                   style: TextStyle(
-                    color: accentColor,
+                    color: appTheme.accentColor,
                     fontFamily: "Rubik",
                     fontSize: 14,
                   ),
@@ -687,7 +687,7 @@ class _InfoState extends State<Info> {
                 Text(
                   'Episode ${watched < epLinks.length ? watched + 1 : watched}',
                   style: TextStyle(
-                    color: accentColor,
+                    color: appTheme.accentColor,
                     fontFamily: "Rubik",
                     fontSize: 17,
                   ),
@@ -704,7 +704,7 @@ class _InfoState extends State<Info> {
         //   height: 2,
         //   decoration: BoxDecoration(
         //     borderRadius: BorderRadius.circular(10),
-        //     color: textMainColor,
+        //     color: appTheme.textMainColor,
         //   ),
         // ),
         // ],
@@ -781,7 +781,7 @@ class _InfoState extends State<Info> {
           clipBehavior: Clip.hardEdge,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(20),
-            color: backgroundColor,
+            color: appTheme.backgroundColor,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -807,7 +807,7 @@ class _InfoState extends State<Info> {
                       Container(
                         decoration: BoxDecoration(
                             borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
-                            color: accentColor.withOpacity(0.8)),
+                            color: appTheme.accentColor.withOpacity(0.8)),
                         child: IconButton(
                           onPressed: () async {
                             showModalBottomSheet(
@@ -903,8 +903,8 @@ class _InfoState extends State<Info> {
           //           child: Row(
           //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
           //             children: [
-          //               Text("Episode ${index+1}", style: TextStyle(color: textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 17),),
-          //               Icon(Icons.download_rounded, color: textMainColor,)
+          //               Text("Episode ${index+1}", style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 17),),
+          //               Icon(Icons.download_rounded, color: appTheme.textMainColor,)
           //             ],
           //           ),
           //         ),
@@ -927,7 +927,7 @@ class _InfoState extends State<Info> {
                 padding: EdgeInsets.only(right: 10),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(15),
-                  color: backgroundColor,
+                  color: appTheme.backgroundColor,
                 ),
                 alignment: Alignment.center,
                 child: Stack(
@@ -1094,7 +1094,7 @@ class _InfoState extends State<Info> {
                         child: Text(
                           data.genres[index],
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontSize: 20,
                           ),
                         ),
@@ -1125,7 +1125,7 @@ class _InfoState extends State<Info> {
                         child: Text(
                           data.tags[index],
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontSize: 15,
                           ),
                         ),
@@ -1145,7 +1145,7 @@ class _InfoState extends State<Info> {
                 Text(
                   data.synopsis ?? '',
                   style: TextStyle(
-                    color: textMainColor,
+                    color: appTheme.textMainColor,
                     fontFamily: "NunitoSans",
                     fontSize: 15,
                   ),
@@ -1281,7 +1281,7 @@ class _InfoState extends State<Info> {
       child: Text(
         title,
         style: TextStyle(
-          color: textMainColor,
+          color: appTheme.textMainColor,
           fontFamily: "NatoSans",
           fontWeight: FontWeight.bold,
           fontSize: 20,
@@ -1311,7 +1311,7 @@ class _InfoState extends State<Info> {
       child: Text(
         text,
         style: TextStyle(
-          color: textMainColor,
+          color: appTheme.textMainColor,
           fontSize: 17,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,
@@ -1357,16 +1357,16 @@ class _InfoState extends State<Info> {
                             },
                             style: ElevatedButton.styleFrom(
                               fixedSize: Size(150, 75),
-                              backgroundColor: accentColor,
+                              backgroundColor: appTheme.accentColor,
                               shape: RoundedRectangleBorder(
-                                side: BorderSide(color: accentColor),
+                                side: BorderSide(color: appTheme.accentColor),
                                 borderRadius: BorderRadius.circular(15),
                               ),
                             ),
                             child: Text(
                               "save",
                               style: TextStyle(
-                                  color: backgroundColor,
+                                  color: appTheme.backgroundColor,
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20),
@@ -1382,7 +1382,7 @@ class _InfoState extends State<Info> {
           },
           child: ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
-                colors: [backgroundColor, Colors.transparent],
+                colors: [appTheme.backgroundColor, Colors.transparent],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 stops: [0.09, 0.23]).createShader(bounds),

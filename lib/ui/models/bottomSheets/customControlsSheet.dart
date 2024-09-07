@@ -1,5 +1,5 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
@@ -111,7 +111,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                                 height: 100,
                                 child: Center(
                                   child: CircularProgressIndicator(
-                                    color: accentColor,
+                                    color: appTheme.accentColor,
                                   ),
                                 ),
                               ),
@@ -124,7 +124,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                     height: 100,
                     child: Center(
                       child: CircularProgressIndicator(
-                        color: accentColor,
+                        color: appTheme.accentColor,
                       ),
                     ),
                   ),
@@ -161,7 +161,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
             style: ElevatedButton.styleFrom(
               elevation: 0,
               surfaceTintColor: Colors.black,
-              backgroundColor: backgroundSubColor,
+              backgroundColor: appTheme.backgroundSubColor,
               padding: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
@@ -179,7 +179,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
                       style: TextStyle(
                         fontFamily: "NotoSans",
                         fontSize: 17,
-                        color: accentColor,
+                        color: appTheme.accentColor,
                       ),
                     ),
                     if (currentSources[index].backup)

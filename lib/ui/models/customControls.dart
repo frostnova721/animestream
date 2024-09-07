@@ -1,9 +1,9 @@
 import 'dart:async';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:better_player/src/video_player/video_player.dart';
@@ -332,8 +332,8 @@ class _ControlsState extends State<Controls> {
                                   child: SliderTheme(
                                     data: SliderThemeData(
                                         trackHeight: 1.3,
-                                        thumbColor: accentColor,
-                                        activeTrackColor: accentColor,
+                                        thumbColor: appTheme.accentColor,
+                                        activeTrackColor: appTheme.accentColor,
                                         inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
                                         secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
                                         thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
@@ -349,8 +349,8 @@ class _ControlsState extends State<Controls> {
                                         widget.controller.play();
                                       },
                                       colors: BetterPlayerProgressColors(
-                                        playedColor: accentColor,
-                                        handleColor: widget.isControlsLocked() ? Colors.transparent : accentColor,
+                                        playedColor: appTheme.accentColor,
+                                        handleColor: widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
                                         bufferedColor: Color.fromARGB(255, 167, 167, 167),
                                         backgroundColor: Color.fromARGB(255, 94, 94, 94),
                                       ),
@@ -383,7 +383,7 @@ class _ControlsState extends State<Controls> {
         backgroundColor: Color.fromARGB(68, 0, 0, 0),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
-          side: BorderSide(color: accentColor),
+          side: BorderSide(color: appTheme.accentColor),
         ),
       ),
       child: Container(
@@ -395,7 +395,7 @@ class _ControlsState extends State<Controls> {
               child: Text(
                 "+$megaSkipDuration",
                 style: TextStyle(
-                  color: textMainColor,
+                  color: appTheme.textMainColor,
                   fontFamily: "Rubik",
                   fontSize: 17,
                 ),
@@ -403,7 +403,7 @@ class _ControlsState extends State<Controls> {
             ),
             Icon(
               Icons.fast_forward_rounded,
-              color: textMainColor,
+              color: appTheme.textMainColor,
             )
           ],
         ),
@@ -423,7 +423,7 @@ class _ControlsState extends State<Controls> {
               height: 40,
               child: Center(
                 child: CircularProgressIndicator(
-                  color: accentColor,
+                  color: appTheme.accentColor,
                 ),
               ),
             ),
@@ -529,7 +529,7 @@ class _ControlsState extends State<Controls> {
                     margin: EdgeInsets.only(left: 5, right: 5),
                     child: Center(
                       child: CircularProgressIndicator(
-                        color: accentColor,
+                        color: appTheme.accentColor,
                       ),
                     ),
                   ),

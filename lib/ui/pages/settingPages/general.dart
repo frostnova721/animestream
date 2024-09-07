@@ -46,7 +46,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: loaded
           ? SingleChildScrollView(
               child: Padding(
@@ -96,8 +96,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                             padding: EdgeInsets.only(top: 20),
                             child: DropdownMenu(
                               width: MediaQuery.of(context).size.width - 80,
-                              label: Text("providers", style: TextStyle(color: textMainColor, fontSize: 18, fontWeight: FontWeight.bold),),
-                              leadingIcon: Icon(Icons.source_rounded, color: textMainColor,),
+                              label: Text("providers", style: TextStyle(color: appTheme.textMainColor, fontSize: 18, fontWeight: FontWeight.bold),),
+                              leadingIcon: Icon(Icons.source_rounded, color: appTheme.textMainColor,),
                                 initialSelection: currentUserSettings?.preferredProvider ?? sources[0],
                                 onSelected: (val) async {
                                   writeSettings(SettingsModal(preferredProvider: val));

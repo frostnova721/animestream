@@ -2,7 +2,6 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
-import 'package:animestream/ui/models/parent.dart';
 import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -47,7 +46,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appTheme?.backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Padding(
           padding: pagePadding(context, bottom: true),
@@ -78,9 +77,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                     initialSelection: currentUserSettings?.darkMode ?? true,
                                     onSelected: (val) async {
                                       await setThemeMode(val ?? true);
-                                      // setState(() {});
-                                      ThemeChanger.of(context).refreshTree();
+                                      setState(() {});
                                     },
+                                    textStyle: TextStyle(color: appTheme.textMainColor),
                                     dropdownMenuEntries: [
                                       // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
                                       DropdownMenuEntry(value: true, label: "dark"),
@@ -158,7 +157,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
             if (description != null)
               Text(
                 description,
-                style: textStyle().copyWith(color: textSubColor, fontSize: 12),
+                style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
               ),
             Padding(
               padding: const EdgeInsets.only(top: 30),
@@ -199,7 +198,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                     if (description != null)
                       Text(
                         description,
-                        style: textStyle().copyWith(color: textSubColor, fontSize: 12),
+                        style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
                       ),
                   ],
                 ),
@@ -218,7 +217,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
       description: "Change your themes",
       suffixIcon: Icon(
         Icons.keyboard_arrow_down_rounded,
-        color: textMainColor,
+        color: appTheme.textMainColor,
       ),
       onTapFunction: () {
         showModalBottomSheet(
@@ -299,7 +298,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                   if (description != null)
                     Text(
                       description,
-                      style: textStyle().copyWith(color: textSubColor, fontSize: 12),
+                      style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
                     ),
                 ],
               ),
@@ -308,8 +307,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
                 onChanged: (val) {
                   onTapFunction();
                 },
-                activeColor: backgroundColor,
-                activeTrackColor: appTheme?.accentColor,
+                activeColor: appTheme.backgroundColor,
+                activeTrackColor: appTheme.accentColor,
               )
             ],
           ),
@@ -335,7 +334,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: currentThemeId == theme.id ? theme.theme.accentColor : backgroundSubColor,
+          color: currentThemeId == theme.id ? theme.theme.accentColor : appTheme.backgroundSubColor,
         ),
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.only(left: 10, right: 10),
@@ -345,7 +344,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
           children: [
             Text(
               "$name",
-              style: textStyle().copyWith(color: currentThemeId == theme.id ? backgroundColor : textMainColor),
+              style: textStyle().copyWith(color: currentThemeId == theme.id ? backgroundColor : appTheme.textMainColor),
             ),
             Container(
               height: 40,

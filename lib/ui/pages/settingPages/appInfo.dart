@@ -1,6 +1,6 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -38,7 +38,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Padding(
             padding: pagePadding(context),
@@ -74,7 +74,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                   padding: const EdgeInsets.only(bottom: 10),
                                   child: Text("animestream",
                                       style: TextStyle(
-                                          color: textMainColor,
+                                          color: appTheme.textMainColor,
                                           fontFamily: "Poppins",
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold)),
@@ -101,7 +101,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                       child: Text(
                                         "animestream",
                                         style: TextStyle(
-                                          color: accentColor,
+                                          color: appTheme.accentColor,
                                           fontFamily: 'NotoSans',
                                           fontWeight: FontWeight.bold,
                                           fontSize: 15,
@@ -119,14 +119,14 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                         margin: EdgeInsets.only(top: 100, bottom: MediaQuery.of(context).padding.bottom),
                         child: Text(
                           "Thanks For Downloading!! ❤️",
-                          style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 16),
+                          style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 16),
                         ),
                       )
                     ],
                   )
                 : Center(
                     child: CircularProgressIndicator(
-                      color: accentColor,
+                      color: appTheme.accentColor,
                     ),
                   )),
       ),
@@ -134,5 +134,5 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
   }
 
   TextStyle textStyle =
-      TextStyle(color: textMainColor, fontFamily: 'NotoSans', fontWeight: FontWeight.bold, fontSize: 15);
+      TextStyle(color: appTheme.textMainColor, fontFamily: 'NotoSans', fontWeight: FontWeight.bold, fontSize: 15);
 }

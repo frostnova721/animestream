@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/manualSearches.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -61,7 +62,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                     Text(
                       item['name'] ?? item['alias'] ?? '',
                       style: TextStyle(
-                        color: textMainColor,
+                        color: appTheme.textMainColor,
                         fontFamily: 'NotoSans',
                         fontWeight: FontWeight.w600,
                         fontSize: 14,
@@ -98,7 +99,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
               onSubmitted: (val) => search(val),
               controller: searchBarController,
               focusNode: searchBarFocusNode,
-              style: TextStyle(color: textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold),
+              style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold),
               autocorrect: false,
               decoration: InputDecoration(
                 contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 15, right: 20),
@@ -106,17 +107,17 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                 labelStyle: TextStyle(
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.bold,
-                    color: searchBarFocusNode.hasFocus ? accentColor : textMainColor),
+                    color: searchBarFocusNode.hasFocus ? accentColor : appTheme.textMainColor),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide(
-                    color: accentColor,
+                    color: appTheme.accentColor,
                   ),
                 ),
                 enabledBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide(
-                    color: textMainColor,
+                    color: appTheme.textMainColor,
                   ),
                 ),
               ),
@@ -128,7 +129,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
             child: searching
                 ? Center(
                     child: CircularProgressIndicator(
-                      color: accentColor,
+                      color: appTheme.accentColor,
                     ),
                   )
                 : searchResults.isEmpty
@@ -136,7 +137,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                         child: Text(
                           "No Results!",
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontFamily: "NunitoSans",
                             fontWeight: FontWeight.bold,
                             fontSize: 18,

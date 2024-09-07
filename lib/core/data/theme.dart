@@ -21,20 +21,20 @@ Future<void> setThemeMode(bool isDark) async {
   await Settings().writeSettings(SettingsModal(darkMode: isDark));
   if (isDark) {
     appTheme = AnimeStreamTheme(
-      accentColor: appTheme!.accentColor,
+      accentColor: appTheme.accentColor,
       backgroundColor: darkModeValues.backgroundColor,
       backgroundSubColor: darkModeValues.backgroundSubColor,
       textMainColor: darkModeValues.textMainColor,
-      textSubColor: appTheme!.textSubColor,
+      textSubColor: darkModeValues.textSubColor,
       modalSheetBackgroundColor: darkModeValues.modalSheetBackgroundColor,
     );
   } else {
     appTheme = AnimeStreamTheme(
-      accentColor: appTheme!.accentColor,
+      accentColor: appTheme.accentColor,
       backgroundColor: lightModeValues.backgroundColor,
       backgroundSubColor: lightModeValues.backgroundSubColor,
       textMainColor: lightModeValues.textMainColor,
-      textSubColor: appTheme!.textSubColor,
+      textSubColor: lightModeValues.textSubColor,
       modalSheetBackgroundColor: lightModeValues.modalSheetBackgroundColor,
     );
   }
@@ -48,7 +48,16 @@ Future<void> setTheme(int themeId) async {
   }
   // final classifiedInfo = theme.toMap();
   await box.put('theme', themeId);
-  appTheme = availableThemes.where((i) => i.id == themeId).toList()[0].theme;
+  final selectedTheme = availableThemes.where((i) => i.id == themeId).toList()[0].theme;
+  final dark = currentUserSettings?.darkMode ?? true;
+  appTheme = AnimeStreamTheme(
+    accentColor: selectedTheme.accentColor,
+    backgroundColor: dark ? darkModeValues.backgroundColor : lightModeValues.backgroundColor,
+    backgroundSubColor: dark ? darkModeValues.backgroundSubColor : lightModeValues.backgroundSubColor,
+    textMainColor: dark ? darkModeValues.textMainColor : lightModeValues.textMainColor,
+    textSubColor: dark ? darkModeValues.textSubColor : lightModeValues.textSubColor,
+    modalSheetBackgroundColor: dark ? darkModeValues.modalSheetBackgroundColor : lightModeValues.modalSheetBackgroundColor,
+  );
   await box.close();
   return;
 }

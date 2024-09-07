@@ -173,7 +173,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: Padding(
         padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top, left: MediaQuery.of(context).padding.left),
         child: dataLoaded
@@ -191,7 +191,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                             },
                             icon: Icon(
                               Icons.arrow_back,
-                              color: textMainColor,
+                              color: appTheme.textMainColor,
                               size: 28,
                             ),
                           ),
@@ -200,7 +200,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                             child: Text(
                               "${storedUserData?.name}'s List",
                               style: TextStyle(
-                                color: textMainColor,
+                                color: appTheme.textMainColor,
                                 fontFamily: "Rubik",
                                 fontWeight: FontWeight.bold,
                                 fontSize: 20,
@@ -210,7 +210,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                         ],
                       ),
                       PopupMenuButton(
-                        color: backgroundColor,
+                        color: appTheme.backgroundColor,
                         surfaceTintColor: Colors.white,
                         tooltip: "sort",
                         itemBuilder: (context) {
@@ -222,7 +222,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                         },
                         icon: Icon(
                           Icons.sort,
-                          color: textMainColor,
+                          color: appTheme.textMainColor,
                           size: 28,
                         ),
                       ),
@@ -234,10 +234,10 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       tabAlignment: TabAlignment.center,
                       isScrollable: true,
                       controller: tabController,
-                      indicatorColor: accentColor,
+                      indicatorColor: appTheme.accentColor,
                       overlayColor: WidgetStatePropertyAll(accentColor.withOpacity(0.3)),
-                      labelColor: textMainColor,
-                      unselectedLabelColor: textSubColor,
+                      labelColor: appTheme.textMainColor,
+                      unselectedLabelColor: appTheme.textSubColor,
                       labelStyle: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontFamily: "NotoSans",
@@ -284,7 +284,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                             child: Text(
                               "Such a void!",
                               style: TextStyle(
-                                color: textSubColor,
+                                color: appTheme.textSubColor,
                                 fontFamily: "NunitoSans",
                                 fontSize: 14,
                               ),
@@ -300,7 +300,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
             : Center(
                 child: Container(
                   child: CircularProgressIndicator(
-                    color: accentColor,
+                    color: appTheme.accentColor,
                   ),
                 ),
               ),
@@ -313,7 +313,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       onTap: () => sort(sortType),
       child: Text(
         label,
-        style: TextStyle(color: textMainColor, fontFamily: "NotoSans-Bold", fontSize: 16),
+        style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans-Bold", fontSize: 16),
       ),
     );
   }
@@ -343,7 +343,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
 
   TextStyle _textStyle() {
     return TextStyle(
-      // color: textMainColor,
+      // color: appTheme.textMainColor,
       fontFamily: "NotoSans-Bold",
       fontSize: 17,
     );

@@ -1,5 +1,5 @@
 import 'package:animestream/core/anime/downloader/downloader.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:open_file/open_file.dart';
@@ -14,7 +14,7 @@ class NotificationService {
           channelKey: 'animestream',
           channelName: 'animestream',
           channelDescription: 'animestream notification channel',
-          defaultColor: accentColor,
+          defaultColor: appTheme.accentColor,
           playSound: false,
           ledColor: Colors.white,
         ),
@@ -39,7 +39,7 @@ class NotificationService {
           channelKey: "animestream",
           title: title,
           body: content,
-          backgroundColor: accentColor,
+          backgroundColor: appTheme.accentColor,
           // autoDismissible: false
           ),
     );
@@ -72,7 +72,7 @@ class NotificationService {
             notificationLayout: NotificationLayout.ProgressBar,
             progress: progress.toDouble(),
             locked: true,
-            backgroundColor: accentColor,
+            backgroundColor: appTheme.accentColor,
           ),
           actionButtons: [
             NotificationActionButton(key: "cancel", label: "cancel")
@@ -89,7 +89,7 @@ class NotificationService {
               'id': id.toString(),
             },
             locked: false,
-            backgroundColor: accentColor,
+            backgroundColor: appTheme.accentColor,
           ),
           actionButtons: [
             NotificationActionButton(key: "open_file", label: "open")

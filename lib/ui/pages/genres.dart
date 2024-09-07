@@ -89,7 +89,7 @@ class _GenresPageState extends State<GenresPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: Padding(
         padding: pagePadding(context),
         child: SingleChildScrollView(
@@ -106,7 +106,7 @@ class _GenresPageState extends State<GenresPage> {
                       child: Text(
                         "Results",
                         style: TextStyle(
-                            color: textMainColor, fontFamily: "NotoSans", fontSize: 22, fontWeight: FontWeight.bold),
+                            color: appTheme.textMainColor, fontFamily: "NotoSans", fontSize: 22, fontWeight: FontWeight.bold),
                       ),
                     ),
                     ElevatedButton(
@@ -127,7 +127,7 @@ class _GenresPageState extends State<GenresPage> {
                                   Text(
                                     "Filters",
                                     style: TextStyle(
-                                        color: textMainColor,
+                                        color: appTheme.textMainColor,
                                         fontFamily: "Rubik",
                                         fontSize: 20,
                                         fontWeight: FontWeight.bold),
@@ -147,10 +147,10 @@ class _GenresPageState extends State<GenresPage> {
                                             onPressed: () {
                                               Navigator.of(context).pop();
                                             },
-                                            style: ElevatedButton.styleFrom(backgroundColor: accentColor),
+                                            style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
                                             child: Text(
                                               "Cancel",
-                                              style: TextStyle(color: backgroundColor, fontFamily: "Poppins"),
+                                              style: TextStyle(color: appTheme.backgroundColor, fontFamily: "Poppins"),
                                             ),
                                           ),
                                         ),
@@ -159,10 +159,10 @@ class _GenresPageState extends State<GenresPage> {
                                             getList();
                                             Navigator.of(context).pop();
                                           },
-                                          style: ElevatedButton.styleFrom(backgroundColor: accentColor),
+                                          style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
                                           child: Text(
                                             "Apply",
-                                            style: TextStyle(color: backgroundColor, fontFamily: "Poppins"),
+                                            style: TextStyle(color: appTheme.backgroundColor, fontFamily: "Poppins"),
                                           ),
                                         ),
                                       ],
@@ -174,17 +174,17 @@ class _GenresPageState extends State<GenresPage> {
                           ),
                         );
                       },
-                      style: ElevatedButton.styleFrom(backgroundColor: backgroundColor),
+                      style: ElevatedButton.styleFrom(backgroundColor: appTheme.backgroundColor),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Icon(
                             Icons.filter_alt_rounded,
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                           ),
                           Text(
                             "filters",
-                            style: TextStyle(color: textMainColor),
+                            style: TextStyle(color: appTheme.textMainColor),
                           )
                         ],
                       ),
@@ -204,11 +204,11 @@ class _GenresPageState extends State<GenresPage> {
                                   padding: EdgeInsets.only(bottom: 10),
                                   child: Image.asset(
                                     'lib/assets/images/ghost.png',
-                                    color: textMainColor,
+                                    color: appTheme.textMainColor,
                                   )),
                               Text(
                                 "~~nooo matches~~",
-                                style: TextStyle(color: textMainColor, fontFamily: "NunitoSans", fontSize: 17),
+                                style: TextStyle(color: appTheme.textMainColor, fontFamily: "NunitoSans", fontSize: 17),
                               ),
                             ],
                           ),
@@ -234,7 +234,7 @@ class _GenresPageState extends State<GenresPage> {
                               margin: EdgeInsets.only(top: 40, bottom: MediaQuery.of(context).padding.bottom + 10),
                               child: Center(
                                 child: CircularProgressIndicator(
-                                  color: accentColor,
+                                  color: appTheme.accentColor,
                                 ),
                               ),
                             )
@@ -261,7 +261,7 @@ class _GenresPageState extends State<GenresPage> {
               child: Text(
                 title,
                 style: TextStyle(
-                  color: textMainColor,
+                  color: appTheme.textMainColor,
                   fontFamily: "Rubik",
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -282,7 +282,7 @@ class _GenresPageState extends State<GenresPage> {
                                 padding: EdgeInsets.only(bottom: 20),
                                 child: Text(
                                   title,
-                                  style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 23),
+                                  style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 23),
                                 )),
                             Container(
                               height: 550,
@@ -315,12 +315,12 @@ class _GenresPageState extends State<GenresPage> {
                                               height: 40,
                                               alignment: Alignment.center,
                                               decoration: BoxDecoration(
-                                                  color: selectedList.contains(e) ? accentColor : backgroundSubColor,
+                                                  color: selectedList.contains(e) ? accentColor : appTheme.backgroundSubColor,
                                                   borderRadius: BorderRadius.circular(13)),
                                               child: Text(
                                                 e,
                                                 style: TextStyle(
-                                                    color: selectedList.contains(e) ? backgroundColor : textMainColor,
+                                                    color: selectedList.contains(e) ? backgroundColor : appTheme.textMainColor,
                                                     fontFamily: "NotoSans",
                                                     fontWeight: FontWeight.bold),
                                               ),
@@ -336,10 +336,10 @@ class _GenresPageState extends State<GenresPage> {
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                 },
-                                style: ElevatedButton.styleFrom(backgroundColor: accentColor),
+                                style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
                                 child: Text(
                                   "close",
-                                  style: TextStyle(color: backgroundColor, fontFamily: "Poppins"),
+                                  style: TextStyle(color: appTheme.backgroundColor, fontFamily: "Poppins"),
                                 ),
                               ),
                             ),
@@ -351,7 +351,7 @@ class _GenresPageState extends State<GenresPage> {
                 },
                 icon: Icon(
                   Icons.grid_3x3_rounded,
-                  color: textMainColor,
+                  color: appTheme.textMainColor,
                 ))
           ],
         ),
@@ -377,12 +377,12 @@ class _GenresPageState extends State<GenresPage> {
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                            color: selectedList.contains(e) ? accentColor : backgroundSubColor,
+                            color: selectedList.contains(e) ? accentColor : appTheme.backgroundSubColor,
                             borderRadius: BorderRadius.circular(13)),
                         child: Text(
                           e,
                           style: TextStyle(
-                              color: selectedList.contains(e) ? backgroundColor : textMainColor,
+                              color: selectedList.contains(e) ? backgroundColor : appTheme.textMainColor,
                               fontFamily: "NotoSans",
                               fontWeight: FontWeight.bold),
                         ),

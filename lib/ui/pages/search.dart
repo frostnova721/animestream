@@ -1,10 +1,10 @@
 import 'dart:async';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class Search extends StatefulWidget {
@@ -63,14 +63,14 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Padding(
           padding: pagePadding(context),
           child: Column(
             children: [
-              buildHeader("Search", context),
+              buildHeader("Search", context, afterNavigation: () => setState(() {})),
               Container(
                 padding: EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
                 child: _searchBar(),
@@ -81,14 +81,14 @@ class _SearchState extends State<Search> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           CircularProgressIndicator(
-                            color: accentColor,
+                            color: appTheme.accentColor,
                           ),
                           Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text(
                               "searching...",
                               style: TextStyle(
-                                  color: accentColor,
+                                  color: appTheme.accentColor,
                                   fontFamily: "NotoSans",
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16),
@@ -127,14 +127,14 @@ class _SearchState extends State<Search> {
                     onChanged: (val) => setState(() {
                       exactMatch = val!;
                     }),
-                    activeColor: accentColor,
+                    activeColor: appTheme.accentColor,
                     checkColor: Colors.black,
                     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                   ),
                   Text(
                     "exact match",
                     style: TextStyle(
-                      color: textMainColor,
+                      color: appTheme.textMainColor,
                       fontFamily: "NotoSans",
                       fontWeight: FontWeight.bold,
                     ),
@@ -190,31 +190,31 @@ class _SearchState extends State<Search> {
         await addCards(val);
       },
       autocorrect: false,
-      cursorColor: accentColor,
+      cursorColor: appTheme.accentColor,
       decoration: InputDecoration(
         labelText: "search",
-        labelStyle: TextStyle(color: textMainColor, fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 17),
+        labelStyle: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 17),
         suffixIcon: Padding(
           padding: EdgeInsets.only(right: 10),
           child: Image.asset(
             'lib/assets/images/search.png',
-            color: textMainColor,
+            color: appTheme.textMainColor,
             scale: 1.75,
           ),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
-          borderSide: BorderSide(width: 1.5, color: textMainColor),
+          borderSide: BorderSide(width: 1.5, color: appTheme.textMainColor),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(50.0),
-          borderSide: BorderSide(color: accentColor),
+          borderSide: BorderSide(color: appTheme.accentColor),
         ),
         hintText: "Search...",
         hintStyle: TextStyle(fontFamily: "Poppins", color: Color.fromARGB(255, 168, 168, 168)),
         contentPadding: EdgeInsets.only(left: 20, right: 20, top: 15, bottom: 15),
       ),
-      style: TextStyle(color: textMainColor, fontFamily: "Poppins"),
+      style: TextStyle(color: appTheme.textMainColor, fontFamily: "Poppins"),
     );
   }
 

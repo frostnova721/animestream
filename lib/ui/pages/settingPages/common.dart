@@ -1,5 +1,4 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 Widget topRow(BuildContext context, String title) {
@@ -11,7 +10,7 @@ Widget topRow(BuildContext context, String title) {
         },
         icon: Icon(
           Icons.arrow_back_rounded,
-          color: textMainColor,
+          color: appTheme.textMainColor,
           size: 32,
         ),
       ),
@@ -22,7 +21,7 @@ Widget topRow(BuildContext context, String title) {
           style: TextStyle(
             fontFamily: "Rubik",
             fontSize: 23,
-            color: textMainColor,
+            color: appTheme.textMainColor,
           ),
         ),
       ),
@@ -47,7 +46,7 @@ PreferredSizeWidget settingPagesAppBar(BuildContext context) {
           },
           icon: Icon(
             Icons.arrow_back_rounded,
-            color: textMainColor,
+            color: appTheme.textMainColor,
             size: 35,
           )),
     ),
@@ -72,7 +71,7 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
             },
             icon: Icon(
               Icons.arrow_back_rounded,
-              color: appTheme?.textMainColor,
+              color: appTheme.textMainColor,
               size: 35,
             )),
       ),
@@ -112,7 +111,7 @@ InkWell toggleItem(String label, bool value, void Function() onTapFunction, {Str
                   if (description != null)
                     Text(
                       description,
-                      style: textStyle().copyWith(color: textSubColor, fontSize: 12),
+                      style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
                     ),
                 ],
               ),
@@ -121,8 +120,8 @@ InkWell toggleItem(String label, bool value, void Function() onTapFunction, {Str
                 onChanged: (val) {
                   onTapFunction();
                 },
-                activeColor: backgroundColor,
-                activeTrackColor: accentColor,
+                activeColor: appTheme.backgroundColor,
+                activeTrackColor: appTheme.accentColor,
               )
             ],
           ),
@@ -133,7 +132,7 @@ InkWell toggleItem(String label, bool value, void Function() onTapFunction, {Str
 
 TextStyle textStyle() {
   return TextStyle(
-    color: appTheme?.textMainColor,
+    color: appTheme.textMainColor,
     fontFamily: "NotoSans",
     fontWeight: FontWeight.bold,
     fontSize: 20,

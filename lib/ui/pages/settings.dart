@@ -1,10 +1,10 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:animestream/ui/pages/settingPages/appInfo.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/pages/settingPages/ui.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -96,7 +96,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     child: Container(
                       padding: EdgeInsets.all(20),
                       // margin: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-                      decoration: BoxDecoration(color: backgroundSubColor, borderRadius: BorderRadius.circular(20)),
+                      decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -105,7 +105,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             children: [
                               Icon(
                                 settingItems[index].icon,
-                                color: textMainColor,
+                                color: appTheme.textMainColor,
                                 size: 35,
                               ),
                               Padding(
@@ -122,7 +122,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                       settingItems[index].description,
                                       style: TextStyle(
                                         fontFamily: "NunitoSans",
-                                        color: textSubColor,
+                                        color: appTheme.textSubColor,
                                       ),
                                     ),
                                   ],
@@ -132,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage> {
                           ),
                           Icon(
                             Icons.keyboard_arrow_right_rounded,
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             size: 30,
                           )
                         ],

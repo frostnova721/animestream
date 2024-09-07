@@ -57,6 +57,7 @@ class AnimeStreamTheme {
 
 class ThemeModeValues {
   Color textMainColor;
+  Color textSubColor;
   Color backgroundColor;
   Color backgroundSubColor;
   Color modalSheetBackgroundColor;
@@ -64,6 +65,7 @@ class ThemeModeValues {
   ThemeModeValues(
       {required this.backgroundColor,
       required this.textMainColor,
+      required this.textSubColor,
       required this.backgroundSubColor,
       required this.modalSheetBackgroundColor});
 }

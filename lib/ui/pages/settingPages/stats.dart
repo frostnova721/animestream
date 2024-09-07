@@ -6,7 +6,6 @@ import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class UserStats extends StatefulWidget {
@@ -48,7 +47,7 @@ class _UserStatsState extends State<UserStats> {
   ({int minutes, int hours, int days, int months, int years})? timeSpent;
 
   TextStyle textStyle(double fontSize, {bool bold = false, String fontFamily = "NotoSans-Bold"}) => TextStyle(
-        color: textMainColor,
+        color: appTheme.textMainColor,
         fontFamily: fontFamily,
         fontSize: fontSize,
         fontWeight: bold ? FontWeight.bold : null,
@@ -72,14 +71,14 @@ class _UserStatsState extends State<UserStats> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
           icon: Icon(Icons.arrow_back_rounded,
-          color: textMainColor,),
+          color: appTheme.textMainColor,),
         ),
-        backgroundColor: backgroundColor,
+        backgroundColor: appTheme.backgroundColor,
         title: Text(
           "Stats",
           style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
@@ -176,7 +175,7 @@ class _UserStatsState extends State<UserStats> {
                                                   },
                                                   child: Text("aight!"))
                                             ],
-                                            backgroundColor: backgroundSubColor,
+                                            backgroundColor: appTheme.backgroundSubColor,
                                             content: Text(
                                               "Its about ${timeSpent!.years} years, ${timeSpent!.months} months, ${timeSpent!.days} days, ${timeSpent!.hours} hours and ${timeSpent!.minutes} minutes!",
                                               style: textStyle(18),
@@ -186,7 +185,7 @@ class _UserStatsState extends State<UserStats> {
                                       },
                                       child: Icon(
                                         Icons.info_outline_rounded,
-                                        color: textMainColor,
+                                        color: appTheme.textMainColor,
                                         size: 18,
                                       ),
                                     ),
@@ -338,7 +337,7 @@ class _UserStatsState extends State<UserStats> {
             )
           : Center(
               child: CircularProgressIndicator(
-                color: accentColor,
+                color: appTheme.accentColor,
               ),
             ),
     );

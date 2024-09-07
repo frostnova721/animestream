@@ -7,7 +7,6 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class ServerSelectionBottomSheet extends StatefulWidget {
@@ -113,7 +112,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                             padding: EdgeInsets.only(bottom: 10),
                             child: Center(
                               child: CircularProgressIndicator(
-                                color: accentColor,
+                                color: appTheme.accentColor,
                               ),
                             ),
                           ),
@@ -130,7 +129,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   padding: EdgeInsets.only(bottom: 10, top: 20),
                   child: Center(
                     child: CircularProgressIndicator(
-                      color: accentColor,
+                      color: appTheme.accentColor,
                     ),
                   ),
                 ),
@@ -178,7 +177,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 0,
-                    backgroundColor: backgroundSubColor,
+                    backgroundColor: appTheme.backgroundSubColor,
                     padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
@@ -196,7 +195,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                             style: TextStyle(
                               fontFamily: "NotoSans",
                               fontSize: 17,
-                              color: accentColor,
+                              color: appTheme.accentColor,
                             ),
                           ),
                           if (streamSources[index].backup)
@@ -246,7 +245,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,
-                  backgroundColor: backgroundSubColor,
+                  backgroundColor: appTheme.backgroundSubColor,
                   padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
@@ -267,7 +266,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                               Text(
                                 "${qualities[ind]['server']}",
                                 style: TextStyle(
-                                  color: accentColor,
+                                  color: appTheme.accentColor,
                                   fontSize: 18,
                                   fontFamily: "Rubik",
                                 ),
@@ -275,7 +274,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                               Text(
                                 "• ${qualities[ind]['quality']}",
                                 style: TextStyle(
-                                  color: textMainColor,
+                                  color: appTheme.textMainColor,
                                   fontSize: 18,
                                   fontFamily: "Rubik",
                                 ),

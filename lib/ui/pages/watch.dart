@@ -300,7 +300,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                 },
                 icon: Icon(
                   !controlsLocked ? Icons.lock_open_rounded : Icons.lock_rounded,
-                  color: textMainColor,
+                  color: appTheme.textMainColor,
                 ),
               ),
               IconButton(
@@ -310,7 +310,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     builder: (BuildContext context) => AlertDialog(
                       backgroundColor: Colors.black,
                       contentTextStyle: TextStyle(color: Colors.white),
-                      title: Text("Stream info", style: TextStyle(color: accentColor)),
+                      title: Text("Stream info", style: TextStyle(color: appTheme.accentColor)),
                       content: Text(
                         //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
                         "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info.streamInfo.server} ${info.streamInfo.backup ? "\(backup\)" : ''}",
@@ -385,7 +385,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                               padding: const EdgeInsets.only(bottom: 10),
                               child: Text(
                                 "Choose Quality",
-                                style: TextStyle(color: textMainColor, fontFamily: "Rubik", fontSize: 20),
+                                style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 20),
                               ),
                             ),
                             ListView.builder(
@@ -409,13 +409,13 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                       ),
                                       backgroundColor: qualities[index]['link'] == currentQualityLink
                                           ? accentColor
-                                          : backgroundSubColor,
+                                          : appTheme.backgroundSubColor,
                                     ),
                                     child: Text(
                                       "${qualities[index]['quality']}${qualities[index]['quality'] == 'default' ? "" : 'p'}",
                                       style: TextStyle(
                                         color:
-                                            qualities[index]['link'] == currentQualityLink ? Colors.black : accentColor,
+                                            qualities[index]['link'] == currentQualityLink ? Colors.black : appTheme.accentColor,
                                         fontFamily: "Poppins",
                                       ),
                                     ),
@@ -492,13 +492,13 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                                     height: 50,
                                     decoration: BoxDecoration(
-                                        color: index == currentEpIndex ? accentColor : backgroundSubColor,
+                                        color: index == currentEpIndex ? accentColor : appTheme.backgroundSubColor,
                                         borderRadius: BorderRadius.circular(12)),
                                     alignment: Alignment.centerLeft,
                                     child: Text(
                                       "Episode ${index + 1}",
                                       style: TextStyle(
-                                        color: index == currentEpIndex ? backgroundColor : textMainColor,
+                                        color: index == currentEpIndex ? backgroundColor : appTheme.textMainColor,
                                         fontFamily: "Rubik",
                                         fontSize: 20,
                                       ),
@@ -529,7 +529,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                 },
                 icon: Icon(
                   Icons.video_settings_rounded,
-                  color: textMainColor,
+                  color: appTheme.textMainColor,
                 ),
               ),
             ],

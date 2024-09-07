@@ -14,7 +14,6 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/pages/search.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
@@ -265,7 +264,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       },
       child: Scaffold(
         body: BottomBar(
-          barColor: backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6 ),
+          barColor: appTheme.backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6 ),
           borderRadius: BorderRadius.circular(10),
           barAlignment: Alignment.bottomCenter,
           width: MediaQuery.of(context).size.width / 2 + 20,
@@ -282,10 +281,10 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   overlayColor: WidgetStateColor.transparent,
                   controller: tabController,
                   isScrollable: false,
-                  labelColor: accentColor,
-                  unselectedLabelColor: textSubColor,
+                  labelColor: appTheme.accentColor,
+                  unselectedLabelColor: appTheme.textSubColor,
                   dividerHeight: 0,
-                  indicatorColor: accentColor,
+                  indicatorColor: appTheme.accentColor,
                   labelPadding: EdgeInsets.only(bottom: 5),
                   tabs: [
                     TabIcon(
@@ -304,8 +303,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             controller: refreshController,
             onRefresh: refresh,
             header: MaterialClassicHeader(
-              color: accentColor,
-              backgroundColor: backgroundSubColor,
+              color: appTheme.accentColor,
+              backgroundColor: appTheme.backgroundSubColor,
             ),
             child: TabBarView(
               controller: tabController,
@@ -370,12 +369,12 @@ class _TabIconState extends State<TabIcon> {
                 ? ImageIcon(
                     AssetImage("lib/assets/images/shines.png"),
                     size: iconSize - 4,
-                    color: textMainColor,
+                    color: appTheme.textMainColor,
                   )
                 : Icon(
                     widget.icon,
                     size: iconSize,
-                    color: textMainColor,
+                    color: appTheme.textMainColor,
                   ),
       ),
     );

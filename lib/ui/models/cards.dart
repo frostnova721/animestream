@@ -1,8 +1,8 @@
 import 'dart:ui';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/info.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +15,7 @@ class Cards {
   /**Builds a character card (no navigation) */
   Widget characterCard(String name, String role, String imageUrl) {
     return Card(
-      color: backgroundColor,
+      color: appTheme.backgroundColor,
       clipBehavior: Clip.hardEdge,
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -51,7 +51,7 @@ class Cards {
             child: Text(
               name,
               style: TextStyle(
-                color: textMainColor,
+                color: appTheme.textMainColor,
                 fontFamily: 'NotoSans',
                 fontSize: 15,
                 overflow: TextOverflow.ellipsis,
@@ -63,7 +63,7 @@ class Cards {
           Text(
             role,
             style: TextStyle(
-              color: textSubColor,
+              color: appTheme.textSubColor,
               fontFamily: 'NotoSans',
               fontSize: 12,
               overflow: TextOverflow.ellipsis,
@@ -77,8 +77,8 @@ class Cards {
   /**Builds a card for news */
   Widget NewsCard(String title, String imageUrl, String date, String time) {
     return Card(
-      surfaceTintColor: textSubColor,
-      color: backgroundColor,
+      surfaceTintColor: appTheme.textSubColor,
+      color: appTheme.backgroundColor,
       child: Container(
         decoration: BoxDecoration(
             // boxShadow: [BoxShadow(color: Color.fromARGB(82, 92, 92, 92), blurRadius: 10, blurStyle: BlurStyle.normal, offset: Offset(0.0, 3), spreadRadius: 0)],
@@ -117,7 +117,7 @@ class Cards {
                       overflow: TextOverflow.ellipsis,
                       maxLines: 5,
                       style: TextStyle(
-                        color: textMainColor,
+                        color: appTheme.textMainColor,
                         fontSize: 18,
                         fontFamily: "Rubik",
                       ),
@@ -131,7 +131,7 @@ class Cards {
                       style: TextStyle(
                         fontFamily: "NotoSans",
                         fontSize: 13,
-                        color: textSubColor,
+                        color: appTheme.textSubColor,
                       ),
                     ),
                   ),
@@ -159,7 +159,7 @@ class Cards {
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
     return Card(
-      color: backgroundColor,
+      color: appTheme.backgroundColor,
       shadowColor: null,
       borderOnForeground: false,
       elevation: 0,
@@ -210,7 +210,7 @@ class Cards {
                         fadeInCurve: Curves.easeIn,
                         fadeInDuration: Duration(milliseconds: 200),
                         placeholder: (context, url) => Container(
-                          color: backgroundSubColor,
+                          color: appTheme.backgroundSubColor,
                         ),
                       ),
                     ),
@@ -221,7 +221,7 @@ class Cards {
                         height: 25,
                         width: 50,
                         decoration: BoxDecoration(
-                          color: accentColor.withOpacity(0.9),
+                          color: appTheme.accentColor.withOpacity(0.9),
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(10),
                             topLeft: Radius.circular(20),
@@ -245,7 +245,7 @@ class Cards {
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: "NotoSans",
-                                color: backgroundColor,
+                                color: appTheme.textMainColor,
                               ),
                             ),
                           ],
@@ -279,7 +279,7 @@ class Cards {
                   //       width: 110,
                   //       fadeInCurve: Curves.easeIn,
                   //       fadeInDuration: Duration(milliseconds: 200),
-                  //       placeholder: (context, url) => Container(color: backgroundSubColor,),
+                  //       placeholder: (context, url) => Container(color: appTheme.backgroundSubColor,),
                   //     ),
                   //   ),
                 ),
@@ -289,7 +289,7 @@ class Cards {
                 child: Text(
                   title,
                   style: TextStyle(
-                    color: textMainColor,
+                    color: appTheme.textMainColor,
                     fontFamily: 'NotoSans',
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
@@ -303,7 +303,7 @@ class Cards {
                 Text(
                   subText,
                   style: TextStyle(
-                    color: textSubColor,
+                    color: appTheme.textSubColor,
                     fontFamily: 'NotoSans',
                     fontSize: 12,
                     overflow: TextOverflow.ellipsis,
@@ -332,7 +332,7 @@ class Cards {
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
     return Card(
-      color: backgroundSubColor,
+      color: appTheme.backgroundSubColor,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       clipBehavior: Clip.hardEdge,
       elevation: 0,
@@ -397,7 +397,7 @@ class Cards {
                           Text(
                             title,
                             style: TextStyle(
-                              color: textMainColor,
+                              color: appTheme.textMainColor,
                               fontFamily: "NotoSans",
                               fontWeight: FontWeight.w600,
                               fontSize: 16,
@@ -415,18 +415,18 @@ class Cards {
                                   width: 50,
                                   padding: EdgeInsets.all(5),
                                   decoration: BoxDecoration(
-                                      color: accentColor.withOpacity(0.8), borderRadius: BorderRadius.circular(10)),
+                                      color: appTheme.accentColor.withOpacity(0.8), borderRadius: BorderRadius.circular(10)),
                                   child: Row(
                                     children: [
                                       Icon(
                                         Icons.star,
-                                        color: backgroundColor,
+                                        color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
                                         size: 18,
                                       ),
                                       Text(
                                         "$rating",
                                         style: TextStyle(
-                                          color: backgroundColor,
+                                          color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
                                           fontFamily: "NotoSans",
                                           fontWeight: FontWeight.w600,
                                           fontSize: 14,
@@ -453,7 +453,7 @@ class Cards {
                                           fontFamily: "NunitoSans",
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: ColorScheme.fromSeed(seedColor: accentColor).primaryFixedDim,
+                                          color: ColorScheme.fromSeed(seedColor: appTheme.accentColor).primaryFixedDim,
                                         ),
                                       ),
                                       Text(
@@ -462,7 +462,7 @@ class Cards {
                                           fontFamily: "NunitoSans",
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: ColorScheme.fromSeed(seedColor: accentColor).primaryContainer,
+                                          color: ColorScheme.fromSeed(seedColor: appTheme.accentColor).primaryContainer,
                                         ),
                                       ),
                                     ],

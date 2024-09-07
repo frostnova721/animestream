@@ -1,12 +1,12 @@
 import 'dart:ui';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class AccountSetting extends StatefulWidget {
@@ -59,7 +59,7 @@ class _AccountSettingState extends State<AccountSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Padding(
           padding: pagePadding(context),
@@ -72,7 +72,7 @@ class _AccountSettingState extends State<AccountSetting> {
                       padding: EdgeInsets.only(top: 30),
                       child: Center(
                         child: CircularProgressIndicator(
-                          color: accentColor,
+                          color: appTheme.accentColor,
                         ),
                       ),
                     )
@@ -153,7 +153,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                                     style: ElevatedButton.styleFrom(
                                                       backgroundColor: Colors.transparent,
                                                       shape: RoundedRectangleBorder(
-                                                        side: BorderSide(color: accentColor),
+                                                        side: BorderSide(color: appTheme.accentColor),
                                                         borderRadius: BorderRadius.circular(
                                                           10,
                                                         ),
@@ -162,7 +162,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                                     child: Text(
                                                       "Logout",
                                                       style: TextStyle(
-                                                        color: accentColor,
+                                                        color: appTheme.accentColor,
                                                         fontFamily: "NotoSans",
                                                         fontWeight: FontWeight.bold,
                                                       ),
@@ -180,8 +180,8 @@ class _AccountSettingState extends State<AccountSetting> {
                               : Container(
                                   decoration: BoxDecoration(
                                       borderRadius: BorderRadius.circular(10),
-                                      color: backgroundSubColor,
-                                      boxShadow: [BoxShadow(color: backgroundSubColor, blurRadius: 5)]),
+                                      color: appTheme.backgroundSubColor,
+                                      boxShadow: [BoxShadow(color: appTheme.backgroundSubColor, blurRadius: 5)]),
                                   padding: EdgeInsets.only(top: 20, bottom: 20),
                                   height: 150,
                                   alignment: Alignment.center,
@@ -206,16 +206,16 @@ class _AccountSettingState extends State<AccountSetting> {
                                           });
                                         },
                                         style: ElevatedButton.styleFrom(
-                                            backgroundColor: backgroundColor,
+                                            backgroundColor: appTheme.backgroundColor,
                                             fixedSize: Size(150, 50),
                                             shape: RoundedRectangleBorder(
-                                              side: BorderSide(color: accentColor),
+                                              side: BorderSide(color: appTheme.accentColor),
                                               borderRadius: BorderRadius.circular(35),
                                             )),
                                         child: Text(
                                           "Log In",
                                           style: TextStyle(
-                                            color: accentColor,
+                                            color: appTheme.accentColor,
                                             fontFamily: "NotoSans",
                                             fontWeight: FontWeight.bold,
                                           ),
@@ -226,7 +226,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                         child: Text(
                                           "The Animes watched is being saved in local storage.",
                                           style: TextStyle(
-                                            color: textSubColor,
+                                            color: appTheme.textSubColor,
                                             fontFamily: "NunitoSans",
                                             fontSize: 12,
                                           ),

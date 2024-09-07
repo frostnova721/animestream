@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
@@ -127,7 +128,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                   width: 300,
                   label: Text(
                     "status",
-                    style: TextStyle(color: textMainColor, fontFamily: "Poppins"),
+                    style: TextStyle(color: appTheme.textMainColor, fontFamily: "Poppins"),
                   ),
                   initialSelection: getInitialSelection(),
                   dropdownMenuEntries: itemList,
@@ -137,7 +138,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                   child: Text(
                     "Progress",
                     style: TextStyle(
-                      color: textMainColor,
+                      color: appTheme.textMainColor,
                       fontFamily: "Rubik",
                       fontSize: 22,
                     ),
@@ -155,7 +156,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                       },
                       icon: Icon(
                         Icons.remove_circle_outline_rounded,
-                        color: textMainColor,
+                        color: appTheme.textMainColor,
                         size: 35,
                       ),
                     ),
@@ -181,12 +182,12 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                               contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide(
-                                  color: textMainColor,
+                                  color: appTheme.textMainColor,
                                 ),
                               ),
                             ),
                             style: TextStyle(
-                              color: textMainColor,
+                              color: appTheme.textMainColor,
                               fontFamily: "Rubik",
                               fontSize: 20,
                             ),
@@ -196,7 +197,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                         Text(
                           "/ ${widget.totalEpisodes}",
                           style: TextStyle(
-                            color: textMainColor,
+                            color: appTheme.textMainColor,
                             fontFamily: "Rubik",
                             fontSize: 20,
                           ),
@@ -216,7 +217,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                       },
                       icon: Icon(
                         Icons.add_circle_outline_rounded,
-                        color: textMainColor,
+                        color: appTheme.textMainColor,
                         size: 35,
                       ),
                     )
@@ -235,9 +236,9 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         // padding: EdgeInsets.zero,
-                        backgroundColor: accentColor,
+                        backgroundColor: appTheme.accentColor,
                         side: BorderSide(
-                          color: accentColor,
+                          color: appTheme.accentColor,
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(15),
@@ -251,7 +252,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                         child: Text(
                           "cancel",
                           style: TextStyle(
-                            color: backgroundColor,
+                            color: appTheme.backgroundColor,
                             fontFamily: "Poppins",
                             fontSize: 22,
                           ),
@@ -261,9 +262,9 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                   ),
                   ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: accentColor,
+                      backgroundColor: appTheme.accentColor,
                       side: BorderSide(
-                        color: accentColor,
+                        color: appTheme.accentColor,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -291,7 +292,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     child: Text(
                       "save",
                       style: TextStyle(
-                        color: backgroundColor,
+                        color: appTheme.backgroundColor,
                         fontFamily: "Poppins",
                         fontSize: 22,
                       ),

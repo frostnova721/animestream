@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/slider.dart';
@@ -53,7 +54,7 @@ class PlayerSettingState extends State<PlayerSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Container(
           padding: pagePadding(context, bottom: true),
@@ -80,21 +81,21 @@ class PlayerSettingState extends State<PlayerSetting> {
                                 ),
                                 SliderTheme(
                                   data: SliderThemeData(
-                                    thumbColor: accentColor,
-                                    activeTrackColor: accentColor,
-                                    inactiveTrackColor: textSubColor,
+                                    thumbColor: appTheme.accentColor,
+                                    activeTrackColor: appTheme.accentColor,
+                                    inactiveTrackColor: appTheme.textSubColor,
                                     valueIndicatorShape: RoundedSliderValueIndicator(height: 30, width: 35, radius: 5),
                                     valueIndicatorTextStyle: TextStyle(
-                                      color: backgroundColor,
+                                      color: appTheme.backgroundColor,
                                       fontFamily: "NotoSans",
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                     ),
-                                    valueIndicatorColor: accentColor,
+                                    valueIndicatorColor: appTheme.accentColor,
                                     trackHeight: 13,
                                     trackShape: MarginedTrack(),
                                     thumbShape: RoundedRectangularThumbShape(width: 10, radius: 5),
-                                    activeTickMarkColor: backgroundColor,
+                                    activeTickMarkColor: appTheme.backgroundColor,
                                   ),
                                   child: Slider(
                                     onChanged: (val) {
@@ -129,21 +130,21 @@ class PlayerSettingState extends State<PlayerSetting> {
                                 ),
                                 SliderTheme(
                                   data: SliderThemeData(
-                                    thumbColor: accentColor,
-                                    activeTrackColor: accentColor,
-                                    inactiveTrackColor: textSubColor,
+                                    thumbColor: appTheme.accentColor,
+                                    activeTrackColor: appTheme.accentColor,
+                                    inactiveTrackColor: appTheme.textSubColor,
                                     valueIndicatorShape: RoundedSliderValueIndicator(height: 30, width: 40, radius: 5),
                                     valueIndicatorTextStyle: TextStyle(
-                                      color: backgroundColor,
+                                      color: appTheme.backgroundColor,
                                       fontFamily: "NotoSans",
                                       fontWeight: FontWeight.bold,
                                       fontSize: 14,
                                     ),
-                                    valueIndicatorColor: accentColor,
+                                    valueIndicatorColor: appTheme.accentColor,
                                     trackHeight: 13,
                                     thumbShape: RoundedRectangularThumbShape(width: 10, radius: 5),
                                     trackShape: MarginedTrack(),
-                                    activeTickMarkColor: backgroundColor,
+                                    activeTickMarkColor: appTheme.backgroundColor,
                                   ),
                                   child: Slider(
                                     onChanged: (val) {
@@ -180,12 +181,12 @@ class PlayerSettingState extends State<PlayerSetting> {
                                   alignment: Alignment.center,
                                   child: SegmentedButton(
                                     style: SegmentedButton.styleFrom(
-                                      backgroundColor: backgroundSubColor,
-                                      selectedBackgroundColor: accentColor,
+                                      backgroundColor: appTheme.backgroundSubColor,
+                                      selectedBackgroundColor: appTheme.accentColor,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(10),
                                       ),
-                                      side: BorderSide(color: textSubColor)
+                                      side: BorderSide(color: appTheme.textSubColor)
                                     ),
                                     multiSelectionEnabled: false,
                                     showSelectedIcon: false,
@@ -228,7 +229,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       label: Text(
         label,
         style: TextStyle(
-          color: preferredQuality == label ? backgroundColor : accentColor,
+          color: preferredQuality == label ? backgroundColor : appTheme.accentColor,
           fontSize: 16,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,

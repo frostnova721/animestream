@@ -30,6 +30,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
         }));
     AMOLEDBackgroundEnabled = currentUserSettings?.amoledBackground ?? false;
     navbarTranslucency = currentUserSettings?.navbarTranslucency ?? 0.6;
+    darkMode = currentUserSettings?.darkMode ?? true;
   }
 
   applyTheme(int id) async {
@@ -78,6 +79,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                     onSelected: (val) async {
                                       await setThemeMode(val ?? true);
                                       setState(() {});
+                                      floatingSnackBar(context, "All set! restart the app to apply the theme");
                                     },
                                     textStyle: TextStyle(color: appTheme.textMainColor),
                                     dropdownMenuEntries: [
@@ -95,6 +97,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               setState(() {
                                 AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
                                 Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
+                                appTheme.backgroundColor = AMOLEDBackgroundEnabled ? Colors.black : darkMode ? darkModeValues.backgroundColor : lightModeValues.backgroundColor;
                                 floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
                             },
@@ -223,6 +226,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
+          backgroundColor: appTheme.modalSheetBackgroundColor,
           showDragHandle: true,
           builder: (context) {
             return Container(

@@ -234,7 +234,7 @@ class RoundedSliderValueIndicator extends SliderComponentShape {
 
     tp.layout();
 
-    context.canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)), Paint()..color = accentColor);
+    context.canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)), Paint()..color = appTheme.accentColor);
     tp.paint(context.canvas, Offset(center.dx - (tp.width /2) ,centerWithVerticalOffset.dy - (tp.height / 2)));
   }
 }

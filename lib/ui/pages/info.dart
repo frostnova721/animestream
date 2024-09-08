@@ -273,7 +273,7 @@ class _InfoState extends State<Info> {
                                   onPressed: () {
                                     showModalBottomSheet(
                                       context: context,
-                                      backgroundColor: Color(0xff121212),
+                                      backgroundColor: appTheme.modalSheetBackgroundColor,
                                       showDragHandle: true,
                                       builder: (context) => MediaListStatusBottomSheet(
                                         status: mediaListStatus,
@@ -336,7 +336,7 @@ class _InfoState extends State<Info> {
     } catch (err) {
       print(err);
       return Scaffold(
-        backgroundColor: Colors.black,
+        backgroundColor: appTheme.backgroundColor,
         body: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -383,8 +383,8 @@ class _InfoState extends State<Info> {
               color: appTheme.textMainColor,
             ),
             menuStyle: MenuStyle(
-              surfaceTintColor: WidgetStatePropertyAll(backgroundSubColor),
-              backgroundColor: WidgetStatePropertyAll(Color.fromARGB(255, 0, 0, 0)),
+              // surfaceTintColor: WidgetStatePropertyAll(backgroundSubColor),
+              backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
               shape: WidgetStatePropertyAll(
                 RoundedRectangleBorder(
                   side: BorderSide(color: appTheme.textMainColor),
@@ -402,7 +402,7 @@ class _InfoState extends State<Info> {
               border: OutlineInputBorder(
                 borderSide: BorderSide(
                   width: 1,
-                  color: Colors.white,
+                  color: appTheme.textMainColor,
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -410,7 +410,7 @@ class _InfoState extends State<Info> {
               enabledBorder: OutlineInputBorder(
                 borderSide: BorderSide(
                   width: 1,
-                  color: Colors.white,
+                  color: appTheme.textMainColor,
                 ),
                 borderRadius: BorderRadius.circular(10),
               ),
@@ -529,7 +529,7 @@ class _InfoState extends State<Info> {
           showModalBottomSheet(
             context: context,
             showDragHandle: true,
-            backgroundColor: Color(0xff121212),
+            backgroundColor: appTheme.modalSheetBackgroundColor,
             builder: (context) => ManualSearchSheet(
               searchString: data.title['english'] ?? data.title['romaji'] ?? '',
               source: selectedSource,
@@ -640,7 +640,7 @@ class _InfoState extends State<Info> {
           showModalBottomSheet(
             isScrollControlled: true,
             showDragHandle: true,
-            backgroundColor: Color(0xff121212),
+            backgroundColor: appTheme.modalSheetBackgroundColor,
             context: context,
             builder: (BuildContext context) {
               return ServerSelectionBottomSheet(
@@ -755,7 +755,7 @@ class _InfoState extends State<Info> {
               showDragHandle: true,
               context: context,
               isScrollControlled: true,
-              backgroundColor: Color(0xff121212),
+              backgroundColor: appTheme.modalSheetBackgroundColor,
               builder: (context) {
                 return ServerSelectionBottomSheet(
                   getStreams: getStreams,
@@ -814,6 +814,7 @@ class _InfoState extends State<Info> {
                               showDragHandle: true,
                               isScrollControlled: true,
                               context: context,
+                              backgroundColor: appTheme.modalSheetBackgroundColor,
                               builder: (BuildContext context) {
                                 return ServerSelectionBottomSheet(
                                   getStreams: getStreams,
@@ -846,8 +847,8 @@ class _InfoState extends State<Info> {
                   "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                   style: TextStyle(
                     color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
-                        ? textMainColor
-                        : Color.fromARGB(155, 255, 255, 255),
+                        ? appTheme.textMainColor
+                        : appTheme.textSubColor,
                     fontFamily: 'Poppins',
                     fontSize: 17,
                   ),
@@ -873,6 +874,7 @@ class _InfoState extends State<Info> {
                 showDragHandle: true,
                 isScrollControlled: true,
                 context: context,
+                backgroundColor: appTheme.modalSheetBackgroundColor,
                 builder: (context) {
                   return ServerSelectionBottomSheet(
                     getStreams: getStreams,
@@ -937,7 +939,7 @@ class _InfoState extends State<Info> {
                       child: ShaderMask(
                         blendMode: BlendMode.darken,
                         shaderCallback: (bounds) => LinearGradient(
-                          colors: [Colors.transparent,  backgroundColor],
+                          colors: [Colors.transparent,  appTheme.backgroundColor],
                           stops: [0.2, 0.9],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
@@ -972,8 +974,8 @@ class _InfoState extends State<Info> {
                           "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                           style: TextStyle(
                             color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
-                                ? textMainColor
-                                : Color.fromARGB(155, 255, 255, 255),
+                                ? appTheme.textMainColor
+                                : appTheme.textSubColor,
                             fontFamily: "Poppins",
                             fontSize: 18,
                           ),
@@ -985,6 +987,7 @@ class _InfoState extends State<Info> {
                               showModalBottomSheet(
                                 showDragHandle: true,
                                 context: context,
+                                backgroundColor: appTheme.modalSheetBackgroundColor,
                                 isScrollControlled: true,
                                 builder: (BuildContext context) {
                                   return ServerSelectionBottomSheet(
@@ -1004,7 +1007,7 @@ class _InfoState extends State<Info> {
                             },
                             icon: Icon(
                               Icons.download_rounded,
-                              color: Colors.white,
+                              color: appTheme.textMainColor,
                             ),
                           ),
                         ),
@@ -1090,7 +1093,7 @@ class _InfoState extends State<Info> {
                         alignment: Alignment.center,
                         margin: EdgeInsets.all(5),
                         padding: EdgeInsets.only(left: 15, right: 15),
-                        decoration: BoxDecoration(color: Colors.grey.shade700, borderRadius: BorderRadius.circular(20)),
+                        decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
                         child: Text(
                           data.genres[index],
                           style: TextStyle(
@@ -1121,7 +1124,7 @@ class _InfoState extends State<Info> {
                         alignment: Alignment.center,
                         margin: EdgeInsets.all(5),
                         padding: EdgeInsets.only(left: 15, right: 15),
-                        decoration: BoxDecoration(color: Colors.grey.shade800, borderRadius: BorderRadius.circular(5)),
+                        decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(5)),
                         child: Text(
                           data.tags[index],
                           style: TextStyle(
@@ -1330,7 +1333,7 @@ class _InfoState extends State<Info> {
             showModalBottomSheet(
               context: context,
               showDragHandle: true,
-              backgroundColor: Color.fromARGB(255, 19, 19, 19),
+              backgroundColor: appTheme.modalSheetBackgroundColor,
               builder: (BuildContext context) {
                 return SingleChildScrollView(
                   child: Container(

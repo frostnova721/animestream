@@ -3,6 +3,7 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 Future<int> getTheme() async {
@@ -22,7 +23,7 @@ Future<void> setThemeMode(bool isDark) async {
   if (isDark) {
     appTheme = AnimeStreamTheme(
       accentColor: appTheme.accentColor,
-      backgroundColor: darkModeValues.backgroundColor,
+      backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : darkModeValues.backgroundColor,
       backgroundSubColor: darkModeValues.backgroundSubColor,
       textMainColor: darkModeValues.textMainColor,
       textSubColor: darkModeValues.textSubColor,
@@ -52,7 +53,7 @@ Future<void> setTheme(int themeId) async {
   final dark = currentUserSettings?.darkMode ?? true;
   appTheme = AnimeStreamTheme(
     accentColor: selectedTheme.accentColor,
-    backgroundColor: dark ? darkModeValues.backgroundColor : lightModeValues.backgroundColor,
+    backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : (dark ? darkModeValues.backgroundColor : lightModeValues.backgroundColor),
     backgroundSubColor: dark ? darkModeValues.backgroundSubColor : lightModeValues.backgroundSubColor,
     textMainColor: dark ? darkModeValues.textMainColor : lightModeValues.textMainColor,
     textSubColor: dark ? darkModeValues.textSubColor : lightModeValues.textSubColor,

@@ -177,6 +177,7 @@ class _ControlsState extends State<Controls> {
     } else {
       showModalBottomSheet(
         context: context,
+        backgroundColor: appTheme.modalSheetBackgroundColor,
         builder: (context) {
           return CustomControlsBottomSheet(
             getEpisodeSources: widget.episode['getEpisodeSources'],
@@ -395,7 +396,7 @@ class _ControlsState extends State<Controls> {
               child: Text(
                 "+$megaSkipDuration",
                 style: TextStyle(
-                  color: appTheme.textMainColor,
+                  color: Colors.white,
                   fontFamily: "Rubik",
                   fontSize: 17,
                 ),
@@ -451,7 +452,7 @@ class _ControlsState extends State<Controls> {
                   if (currentEpIndex == 0) return floatingSnackBar(context, "Already on the first episode");
                   showModalBottomSheet(
                       isScrollControlled: true,
-                      backgroundColor: Color(0xff121212),
+                      backgroundColor: appTheme.modalSheetBackgroundColor,
                       context: context,
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
@@ -573,7 +574,7 @@ class _ControlsState extends State<Controls> {
                   } else
                     showModalBottomSheet(
                       isScrollControlled: true,
-                      backgroundColor: Color(0xff121212),
+                      backgroundColor: appTheme.modalSheetBackgroundColor,
                       context: context,
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(

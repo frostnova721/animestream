@@ -57,7 +57,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
   } 
   showModalBottomSheet(
     showDragHandle: true,
-    // backgroundColor: Color(0xff121212),
+    backgroundColor: appTheme.modalSheetBackgroundColor,
     isScrollControlled: true,
     context: context,
     builder: (context) {

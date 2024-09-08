@@ -46,6 +46,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appTheme.backgroundColor,
       appBar: settingPagesAppBar(context),
       body: SingleChildScrollView(
         child: Container(
@@ -57,7 +58,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
                 child: Text(
                   "Settings",
-                  style: TextStyle(fontFamily: "Rubik", fontSize: 40),
+                  style: TextStyle(fontFamily: "Rubik", fontSize: 40, color: appTheme.textMainColor),
                 ),
               ),
               ListView.builder(
@@ -91,7 +92,11 @@ class _SettingsPageState extends State<SettingsPage> {
                             // );
                           },
                         ),
-                      );
+                      ).then((val) {
+                        setState(() {
+                          
+                        });
+                      });
                     },
                     child: Container(
                       padding: EdgeInsets.all(20),
@@ -116,7 +121,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                     Text(
                                       settingItems[index].label,
                                       style:
-                                          TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 20),
+                                          TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 20, color: appTheme.textMainColor),
                                     ),
                                     Text(
                                       settingItems[index].description,

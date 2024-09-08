@@ -113,7 +113,7 @@ class _GenresPageState extends State<GenresPage> {
                       onPressed: () {
                         showModalBottomSheet(
                           context: context,
-                          backgroundColor: Color(0xff121212),
+                          backgroundColor: appTheme.modalSheetBackgroundColor,
                           isScrollControlled: true,
                           showDragHandle: true,
                           builder: (context) => StatefulBuilder(

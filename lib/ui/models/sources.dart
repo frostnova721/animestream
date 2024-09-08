@@ -2,8 +2,8 @@ import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/ryuk.dart';
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
@@ -31,10 +31,10 @@ List<DropdownMenuEntry> getSourceDropdownList() {
         value: source,
         label: source,
         style: ButtonStyle(
-          foregroundColor: WidgetStatePropertyAll(Colors.white),
+          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
           textStyle: WidgetStatePropertyAll(
             TextStyle(
-              color:  textMainColor,
+              color:  appTheme.textMainColor,
               fontFamily: "Rubik",
               fontSize: 18,
             )

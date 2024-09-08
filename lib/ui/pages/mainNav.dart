@@ -99,6 +99,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       if (currentlyAiringResponse.length == 0) return;
 
       currentlyAiring = [];
+      thisSeasonData = currentlyAiringResponse;
       currentlyAiringResponse.forEach((item) {
         currentlyAiring.add(
           HomePageList(
@@ -109,7 +110,6 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
               totalEpisodes: item.episodes,
               watchedEpisodeCount: item.watchProgress),
         );
-
         thisSeason.add(
           Cards(context: context).animeCard(
             item.id,
@@ -163,8 +163,49 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   List<TrendingResult> trendingList = [];
   List<Card> recommendedList = [];
+  List<AnilistRecommendations> recommendedListData = [];
   List<Card> recentlyUpdatedList = [];
+  List<RecentlyUpdatedResult> recentlyUpdatedListData = [];
   List<Card> thisSeason = [];
+  List<CurrentlyAiringResult> thisSeasonData = [];
+
+  void rebuildCards() {
+    recentlyUpdatedList.clear();
+
+    recentlyUpdatedListData.forEach((elem) {
+      recentlyUpdatedList.add(
+        Cards(context: context).animeCard(
+          elem.id,
+          elem.title['english'] ?? elem.title['romaji'] ?? '',
+          elem.cover,
+          rating: (elem.rating ?? 0) / 10,
+        ),
+      );
+    });
+
+    recommendedList.clear();
+    recommendedListData.forEach((item) {
+      recommendedList.add(
+      Cards(context: context).animeCard(
+        item.id,
+        item.title['english'] ?? item.title['romaji'] ?? '',
+        item.cover,
+        rating: item.rating,
+      ));
+    });
+
+    thisSeason.clear();
+    thisSeasonData.forEach((item) {
+      thisSeason.add(Cards(context: context).animeCard(
+        item.id,
+        item.title['english'] ?? item.title['romaji'] ?? '',
+        item.cover,
+        rating: item.rating,
+      ));
+    });
+
+    setState(() {});
+  }
 
   Future<void> getTrendingList() async {
     final list = await Anilist().getTrending();
@@ -176,6 +217,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   Future<void> getRecommended() async {
     final list = await AnilistQueries().getRecommendedAnimes();
+    recommendedListData = list;
     for (final item in list) {
       recommendedList.add(
         Cards(context: context).animeCard(
@@ -196,6 +238,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     for (final elem in list) {
       if (!ids.contains(elem.id)) {
         ids.add(elem.id);
+        recentlyUpdatedListData.add(elem);
         recentlyUpdatedList.add(
           Cards(context: context).animeCard(
             elem.id,
@@ -248,13 +291,16 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   @override
   Widget build(BuildContext context) {
-    double blurSigmaValue = currentUserSettings!.navbarTranslucency ?? 5; 
-    if(blurSigmaValue <= 1) {
+    if (recentlyUpdatedList.isNotEmpty && thisSeason.isNotEmpty) {
+      rebuildCards();
+    }
+    double blurSigmaValue = currentUserSettings!.navbarTranslucency ?? 5;
+    if (blurSigmaValue <= 1) {
       blurSigmaValue = blurSigmaValue * 10;
     }
     return PopScope(
       canPop: false,
-      onPopInvoked: (didPop) async {
+      onPopInvokedWithResult: (didPop, res) async {
         //exit the app if back is pressed again within 3 sec window
         if (popInvoked) return await SystemNavigator.pop();
 
@@ -264,7 +310,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       },
       child: Scaffold(
         body: BottomBar(
-          barColor: appTheme.backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6 ),
+          barColor: appTheme.backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6),
           borderRadius: BorderRadius.circular(10),
           barAlignment: Alignment.bottomCenter,
           width: MediaQuery.of(context).size.width / 2 + 20,

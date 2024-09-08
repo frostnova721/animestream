@@ -102,6 +102,7 @@ class _HomeState extends State<Home> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Container(
           padding: pagePadding(context),
@@ -222,6 +223,7 @@ class _HomeState extends State<Home> {
                     fontFamily: "Poppins",
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
+                    color: appTheme.textMainColor
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
@@ -260,7 +262,7 @@ class _HomeState extends State<Home> {
               padding: EdgeInsets.only(left: 15, right: 15),
               child: Text(
                 title,
-                style: TextStyle(fontFamily: "Rubik", fontSize: 20),
+                style: TextStyle(fontFamily: "Rubik", fontSize: 20, color: appTheme.textMainColor),
               ),
             ),
             if (showRefreshIndication)

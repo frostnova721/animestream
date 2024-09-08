@@ -78,6 +78,7 @@ class _DiscoverState extends State<Discover> {
       initialTimeOutCalled = true;
     }
     return Scaffold(
+      backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Column(
           children: [

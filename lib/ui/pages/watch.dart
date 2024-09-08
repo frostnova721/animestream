@@ -300,7 +300,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                 },
                 icon: Icon(
                   !controlsLocked ? Icons.lock_open_rounded : Icons.lock_rounded,
-                  color: appTheme.textMainColor,
+                  color: Colors.white,
                 ),
               ),
               IconButton(
@@ -371,7 +371,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   showModalBottomSheet(
                     isScrollControlled: true,
                     context: context,
-                    // backgroundColor: Colors.black,
+                    backgroundColor: appTheme.modalSheetBackgroundColor,
                     showDragHandle: false,
                     barrierColor: Color.fromARGB(17, 255, 255, 255),
                     builder: (BuildContext context) {
@@ -408,7 +408,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                         // side: BorderSide(color: Colors.white)
                                       ),
                                       backgroundColor: qualities[index]['link'] == currentQualityLink
-                                          ? accentColor
+                                          ? appTheme.accentColor
                                           : appTheme.backgroundSubColor,
                                     ),
                                     child: Text(
@@ -440,6 +440,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   showModalBottomSheet(
                     isScrollControlled: true,
                     context: context,
+                    backgroundColor: appTheme.modalSheetBackgroundColor,
                     builder: (context) => CustomControlsBottomSheet(
                         getEpisodeSources: getEpisodeSources,
                         currentSources: [],
@@ -462,6 +463,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                 onPressed: () {
                   showModalBottomSheet(
                     isScrollControlled: true,
+                    backgroundColor: appTheme.modalSheetBackgroundColor,
                     context: context,
                     builder: (context) => Container(
                       padding: EdgeInsets.only(left: 20, right: 20, top: 15),
@@ -492,7 +494,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                                     height: 50,
                                     decoration: BoxDecoration(
-                                        color: index == currentEpIndex ? accentColor : appTheme.backgroundSubColor,
+                                        color: index == currentEpIndex ? appTheme.accentColor : appTheme.backgroundSubColor,
                                         borderRadius: BorderRadius.circular(12)),
                                     alignment: Alignment.centerLeft,
                                     child: Text(
@@ -546,6 +548,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   ) {
     showModalBottomSheet(
       context: context,
+      backgroundColor: appTheme.modalSheetBackgroundColor,
       builder: (context) => CustomControlsBottomSheet(
         getEpisodeSources: getEpisodeSources,
         currentSources: [],

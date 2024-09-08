@@ -1,7 +1,6 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/manualSearches.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class ManualSearchSheet extends StatefulWidget {
@@ -107,7 +106,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                 labelStyle: TextStyle(
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.bold,
-                    color: searchBarFocusNode.hasFocus ? accentColor : appTheme.textMainColor),
+                    color: searchBarFocusNode.hasFocus ? appTheme.accentColor : appTheme.textMainColor),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(15),
                   borderSide: BorderSide(

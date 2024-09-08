@@ -213,7 +213,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                         padding: EdgeInsets.only(top: 5),
                         child: Text(
                           streamSources[index].quality,
-                          style: TextStyle(color: Colors.white, fontFamily: "Rubik"),
+                          style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik"),
                         ),
                       ),
                     ],

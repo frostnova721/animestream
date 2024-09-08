@@ -3,7 +3,6 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class MediaListStatusBottomSheet extends StatefulWidget {
@@ -47,10 +46,10 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
           value: element,
           label: element,
           style: ButtonStyle(
-            foregroundColor: WidgetStatePropertyAll(Colors.white),
+            foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
             textStyle: WidgetStatePropertyAll(
               TextStyle(
-                color: Colors.white,
+                color: appTheme.textMainColor,
                 fontFamily: "Rubik",
                 fontSize: 16,
               ),
@@ -96,7 +95,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     if (value != initialSelection) selectedValue = value,
                   },
                   menuStyle: MenuStyle(
-                    backgroundColor: WidgetStatePropertyAll(backgroundColor),
+                    backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
                     shape: WidgetStatePropertyAll(
                       RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -108,18 +107,18 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     ),
                   ),
                   textStyle: TextStyle(
-                    color: Colors.white,
+                    color: appTheme.textMainColor,
                     fontFamily: "Poppins",
                   ),
                   inputDecorationTheme: InputDecorationTheme(
                     border: OutlineInputBorder(
-                      borderSide: BorderSide(width: 1, color: Colors.white),
+                      borderSide: BorderSide(width: 1, color: appTheme.textMainColor),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(
                         width: 1,
-                        color: Colors.white,
+                        color: appTheme.textMainColor,
                       ),
                       borderRadius: BorderRadius.circular(10),
                     ),

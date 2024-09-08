@@ -79,7 +79,7 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
         padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
         child: Text(
           title,
-          style: TextStyle(fontFamily: "Rubik", fontSize: 40,),
+          style: TextStyle(fontFamily: "Rubik", fontSize: 40, color: appTheme.textMainColor),
         ),
       ),
     ],

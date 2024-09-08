@@ -3,7 +3,6 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSetting extends StatefulWidget {
@@ -102,8 +101,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                                 onSelected: (val) async {
                                   writeSettings(SettingsModal(preferredProvider: val));
                                 },
-                                textStyle: TextStyle(fontFamily: "NotoSans", fontSize: 16, fontWeight: FontWeight.bold),
-                                menuStyle: MenuStyle(backgroundColor: WidgetStatePropertyAll(backgroundSubColor), shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))),
+                                textStyle: TextStyle(fontFamily: "NotoSans", fontSize: 16, fontWeight: FontWeight.bold, color: appTheme.textMainColor),
+                                menuStyle: MenuStyle(backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor), shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))),
                                 dropdownMenuEntries: getSourceDropdownList()),
                           )
                         ],

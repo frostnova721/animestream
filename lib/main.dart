@@ -58,6 +58,7 @@ Future<void> loadAndAssignSettings() async {
     final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
     if (darkMode) {
       appTheme = theme.theme;
+      appTheme.backgroundColor = (currentUserSettings!.amoledBackground ?? false) ? Colors.black : darkModeValues.backgroundColor;
       accentColor = theme.theme.accentColor;
       textMainColor = theme.theme.textMainColor;
       textSubColor = theme.theme.textSubColor;
@@ -67,11 +68,11 @@ Future<void> loadAndAssignSettings() async {
     } else {
       appTheme = AnimeStreamTheme(
         accentColor: theme.theme.accentColor,
-        textMainColor: Colors.black,
-        textSubColor: theme.theme.textSubColor,
-        backgroundColor: Colors.white,
-        backgroundSubColor: Color.fromARGB(255, 179, 179, 179),
-        modalSheetBackgroundColor: theme.theme.modalSheetBackgroundColor,
+        textMainColor: lightModeValues.textMainColor,
+        textSubColor: lightModeValues.textSubColor,
+        backgroundColor: lightModeValues.backgroundColor,
+        backgroundSubColor: lightModeValues.backgroundSubColor,
+        modalSheetBackgroundColor: lightModeValues.modalSheetBackgroundColor,
       );
     }
 

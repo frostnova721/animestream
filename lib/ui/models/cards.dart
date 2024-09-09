@@ -237,6 +237,7 @@ class Cards {
                               child: Icon(
                                 Icons.star,
                                 size: 16,
+                                color: appTheme.textMainColor,
                               ),
                             ),
                             Text(

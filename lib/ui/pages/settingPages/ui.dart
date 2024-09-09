@@ -85,7 +85,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                     dropdownMenuEntries: [
                                       // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
                                       DropdownMenuEntry(value: true, label: "dark"),
-                                      DropdownMenuEntry(value: false, label: "light (alpha)")
+                                      DropdownMenuEntry(value: false, label: "light (beta)")
                                     ])
                               ],
                             ),

@@ -44,7 +44,7 @@ class _NewsState extends State<News> {
         backgroundColor: appTheme.backgroundColor,
         title: Text(
           "News",
-          style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
+          style: TextStyle(color: appTheme.textMainColor, fontFamily: "Poppins", fontSize: 25),
         ),
       ),
       body: !loaded

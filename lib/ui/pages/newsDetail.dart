@@ -44,7 +44,7 @@ class _NewsDetailsState extends State<NewsDetails> {
         backgroundColor: appTheme.backgroundColor,
         title: Text(
           "News",
-          style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
+          style: TextStyle(color: appTheme.textMainColor, fontFamily: "Poppins", fontSize: 25),
         ),
       ),
       body: !loaded
@@ -59,7 +59,7 @@ class _NewsDetailsState extends State<NewsDetails> {
                     child: Text(
                       news['title'],
                       style: TextStyle(
-                        color: Colors.white,
+                        color: appTheme.textMainColor,
                         fontFamily: "Poppins",
                         fontSize: 25,
                       ),
@@ -102,7 +102,7 @@ class _NewsDetailsState extends State<NewsDetails> {
                     child: Text(
                       "credits: Anime News Network",
                       style: TextStyle(
-                        color: const Color.fromARGB(255, 194, 194, 194),
+                        color: appTheme.textSubColor,
                         fontFamily: 'NunitoSans',
                       ),
                     ),
@@ -120,7 +120,7 @@ class _NewsDetailsState extends State<NewsDetails> {
 
   TextStyle detailStyle(bool bold) {
     return TextStyle(
-        color: Colors.white,
+        color: appTheme.textMainColor,
         fontFamily: 'NotoSans',
         fontSize: 18,
         fontWeight: bold ? FontWeight.bold : FontWeight.normal);

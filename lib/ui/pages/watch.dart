@@ -8,6 +8,7 @@ import 'package:animestream/ui/models/customControls.dart';
 import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
@@ -36,7 +37,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Timer? _controlsTimer;
 
   String currentQualityLink = '';
-   String selectedQuality = (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720");
+  String selectedQuality = (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720");
 
   List<String> epLinks = [];
   List qualities = [];
@@ -77,9 +78,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     try {
       getQualities().then((val) {
         print(qualities);
-        final preferredOne = qualities
-            .where((item) => item['quality'] == selectedQuality)
-            .toList();
+        final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
         changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
       });
     } catch (err) {
@@ -146,9 +145,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       toggleControls(true); //show the controls ig
       await controller.pause();
       await getQualities(link: link);
-      final preferredQuality = qualities
-          .where((item) => item['quality'] == selectedQuality)
-          .toList();
+      final preferredQuality = qualities.where((item) => item['quality'] == selectedQuality).toList();
       print(preferredQuality[0]['link']);
       await changeQuality(preferredQuality[0]['link'],
           preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null);
@@ -195,14 +192,16 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-          toggleControls(!_visible);
-          hideControlsOnTimeout();
+        toggleControls(!_visible);
+        hideControlsOnTimeout();
       },
       child: Scaffold(
         backgroundColor: Colors.black,
         body: Stack(
           children: [
             BetterPlayer(controller: controller),
+            if(info.streamInfo.subtitle != null)
+                    SubViewer(controller: controller.videoPlayerController!, format: SubtitleFormat.ASS, subtitleSource: info.streamInfo.subtitle!),
             AnimatedOpacity(
               opacity: _visible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 150),
@@ -414,8 +413,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     child: Text(
                                       "${qualities[index]['quality']}${qualities[index]['quality'] == 'default' ? "" : 'p'}",
                                       style: TextStyle(
-                                        color:
-                                            qualities[index]['link'] == currentQualityLink ? Colors.black : appTheme.accentColor,
+                                        color: qualities[index]['link'] == currentQualityLink
+                                            ? Colors.black
+                                            : appTheme.accentColor,
                                         fontFamily: "Poppins",
                                       ),
                                     ),
@@ -494,7 +494,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                                     height: 50,
                                     decoration: BoxDecoration(
-                                        color: index == currentEpIndex ? appTheme.accentColor : appTheme.backgroundSubColor,
+                                        color: index == currentEpIndex
+                                            ? appTheme.accentColor
+                                            : appTheme.backgroundSubColor,
                                         borderRadius: BorderRadius.circular(12)),
                                     alignment: Alignment.centerLeft,
                                     child: Text(
@@ -526,12 +528,18 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           Row(
             children: [
               IconButton(
+                  onPressed: () {},
+                  icon: Icon(
+                    Icons.subtitles_rounded,
+                    color: Colors.white,
+                  )),
+              IconButton(
                 onPressed: () {
                   Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting()));
                 },
                 icon: Icon(
                   Icons.video_settings_rounded,
-                  color: appTheme.textMainColor,
+                  color: Colors.white,
                 ),
               ),
             ],

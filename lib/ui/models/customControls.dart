@@ -404,7 +404,7 @@ class _ControlsState extends State<Controls> {
             ),
             Icon(
               Icons.fast_forward_rounded,
-              color: appTheme.textMainColor,
+              color: Colors.white,
             )
           ],
         ),

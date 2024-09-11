@@ -3,7 +3,6 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/slider.dart';
-import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:animestream/ui/theme/themes.dart';
@@ -35,7 +34,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
 
   applyTheme(int id) async {
     await setTheme(id);
-    floatingSnackBar(context, "All set! restart the app to apply the theme");
+    // floatingSnackBar(context, "All set! restart the app to apply the theme");
   }
 
   int? currentThemeId;
@@ -79,7 +78,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                     onSelected: (val) async {
                                       await setThemeMode(val ?? true);
                                       setState(() {});
-                                      floatingSnackBar(context, "All set! restart the app to apply the theme");
+                                      // floatingSnackBar(context, "All set! restart the app to apply the theme");
                                     },
                                     textStyle: TextStyle(color: appTheme.textMainColor),
                                     dropdownMenuEntries: [
@@ -98,7 +97,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                 AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
                                 Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
                                 appTheme.backgroundColor = AMOLEDBackgroundEnabled ? Colors.black : darkMode ? darkModeValues.backgroundColor : lightModeValues.backgroundColor;
-                                floatingSnackBar(context, "All set! restart the app to apply the theme");
+                                // floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
                             },
                             description: "Full black background",

@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/ryuk.dart';
@@ -7,7 +8,7 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
-final List<String> sources = ["gogoanime", "ryuk", "animepahe"];
+final List<String> sources = ["gogoanime", "ryuk", "animepahe", "animeonsen"];
 
 AnimeProvider getClass(String source) {
   switch (source) {
@@ -17,6 +18,8 @@ AnimeProvider getClass(String source) {
       return Ryuk();
     case "animepahe":
       return AnimePahe();
+    case "animeonsen":
+      return AnimeOnsen();
     default:
       throw new Exception("Invalid source");
   }

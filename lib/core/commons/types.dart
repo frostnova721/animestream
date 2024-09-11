@@ -2,16 +2,17 @@ class Stream {
   final String quality;
   final String link;
   final bool isM3u8;
+  final String? subtitle;
   final String server;
   final bool backup;
 
-  Stream({
-    required this.quality,
-    required this.link,
-    required this.isM3u8,
-    required this.server,
-    required this.backup,
-  });
+  Stream(
+      {required this.quality,
+      required this.link,
+      required this.isM3u8,
+      required this.server,
+      required this.backup,
+      this.subtitle = null});
 }
 
 class ServerSelectionBottomSheetContentData {
@@ -63,5 +64,18 @@ class HomePageList {
     required this.id,
     this.totalEpisodes,
     this.watchedEpisodeCount,
+  });
+}
+
+class Subtitle {
+  final Duration start;
+  final Duration end;
+  final String dialogue;
+  // final String
+
+  Subtitle({
+    required this.dialogue,
+    required this.end,
+    required this.start,
   });
 }

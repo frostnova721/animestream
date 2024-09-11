@@ -36,7 +36,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
 }
 
 class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
-  List currentSources = [];
+  List<Stream> currentSources = [];
   int currentEpIndex = 0;
 
   bool _isLoading = true;

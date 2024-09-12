@@ -50,6 +50,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   bool controlsLocked = false;
   bool _visible = true; //inverse of this means that the controls is being ignored
   bool initialised = false;
+  bool showSubs = true;
 
   @override
   void initState() {
@@ -78,6 +79,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     try {
       getQualities().then((val) {
         print(qualities);
+        print("${info.streamInfo.subtitle ?? "no subs!"}");
         final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
         changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
       });
@@ -200,8 +202,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         body: Stack(
           children: [
             BetterPlayer(controller: controller),
-            if(info.streamInfo.subtitle != null)
-                    SubViewer(controller: controller.videoPlayerController!, format: SubtitleFormat.ASS, subtitleSource: info.streamInfo.subtitle!),
+            if (info.streamInfo.subtitle != null && controller.videoPlayerController != null && showSubs)
+              SubViewer(
+                  controller: controller.videoPlayerController!,
+                  format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
+                  subtitleSource: info.streamInfo.subtitle!),
             AnimatedOpacity(
               opacity: _visible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 150),
@@ -528,9 +533,13 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           Row(
             children: [
               IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    setState(() {
+                      showSubs = !showSubs;
+                    });
+                  },
                   icon: Icon(
-                    Icons.subtitles_rounded,
+                    !showSubs ? Icons.subtitles_outlined : Icons.subtitles_rounded,
                     color: Colors.white,
                   )),
               IconButton(

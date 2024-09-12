@@ -35,7 +35,6 @@ class ASSRIPPER {
     final eventLines = rawAss.split('\n').where((line) => line.startsWith('Dialogue:'));
     for (var eventLine in eventLines) {
       final parsed = _parseASSEventLine(_removeASSFormatting(eventLine));
-      print(parsed.dialogue);
       subtitles.add(parsed);
     }
     return subtitles;

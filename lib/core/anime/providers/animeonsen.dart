@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/ui/models/subtitles.dart';
 import 'package:http/http.dart';
 
 class AnimeOnsen extends AnimeProvider {
@@ -33,7 +34,7 @@ class AnimeOnsen extends AnimeProvider {
     final episodeNumber = episodeId.split("+")[0];
      final baseUrl = "https://cdn.animeonsen.xyz/video/mp4-dash/${animeId}/${episodeNumber}/manifest.mpd";
      final subtitleUrl = "https://api.animeonsen.xyz/v4/subtitles/${animeId}/en-US/${episodeNumber}";
-    final result = Stream(quality: "single", link: baseUrl, isM3u8: false, server: "animeonsen", backup: false, subtitle: subtitleUrl);
+    final result = Stream(quality: "single", link: baseUrl, isM3u8: false, server: "animeonsen", backup: false, subtitle: subtitleUrl, subtitleFormat: SubtitleFormat.ASS);
 
     update([result], true);
   }
@@ -61,7 +62,7 @@ class AnimeOnsen extends AnimeProvider {
       searchResults.add({
         'name': item['content_title'],
         'alias': item['content_id'],
-        'image': "https://api.animeonsen.xyz/v4/image/210x300/${item['content_id']}",
+        'imageUrl': "https://api.animeonsen.xyz/v4/image/210x300/${item['content_id']}",
       });
     });
 

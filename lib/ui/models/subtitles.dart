@@ -26,19 +26,27 @@ class _SubViewerState extends State<SubViewer> {
   void initState() {
     super.initState();
     widget.controller.addListener(_updateSubtitle);
+    loadSubs();
     print("inited");
   }
 
   List<Subtitle> subs = [];
 
   String activeLine = "";
+  bool areSubsLoading = true;
 
   void loadSubs() async {
-    switch(widget.format) {
-      case SubtitleFormat.ASS:
-        subs = await Subtitleparsers().parseAss(widget.subtitleSource);
-      default:
-        throw Exception("Not implemented!");
+    try {
+      switch (widget.format) {
+        case SubtitleFormat.ASS:
+          subs = await Subtitleparsers().parseAss(widget.subtitleSource);
+        default:
+          throw Exception("Not implemented!");
+      }
+      areSubsLoading = false;
+    } catch (err) {
+      print(err.toString());
+      areSubsLoading = false;
     }
   }
 
@@ -48,6 +56,7 @@ class _SubViewerState extends State<SubViewer> {
     // Find the subtitle matching the current time
     for (var subtitle in subs) {
       if (currentPosition >= subtitle.start.inMilliseconds && currentPosition <= subtitle.end.inMilliseconds) {
+        if(mounted)
         setState(() {
           activeLine = subtitle.dialogue;
         });
@@ -56,6 +65,7 @@ class _SubViewerState extends State<SubViewer> {
     }
 
     //clear line when nothings there!
+    if(mounted)
     setState(() {
       activeLine = '';
     });
@@ -65,7 +75,39 @@ class _SubViewerState extends State<SubViewer> {
   Widget build(BuildContext context) {
     // print();
     return Container(
-      child: Text(activeLine, style: TextStyle(fontSize: 20, color: Colors.black),),
+      alignment: Alignment.bottomCenter,
+      margin: EdgeInsets.only(bottom: 40),
+      child: Container(
+        width: MediaQuery.of(context).size.width / 2,
+        alignment: Alignment.bottomCenter,
+        child: Stack(children: [
+          //the actual text
+          Text(
+            areSubsLoading ? "Loading subs.." : activeLine,
+            style: TextStyle(
+              fontSize: 25,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        
+          //the stroke of that text since the flutter doesnt have it :(
+          Text(
+            areSubsLoading ? "Loading subs.." : activeLine,
+            style: TextStyle(
+                fontSize: 25,
+                // color: Colors.white,
+                fontWeight: FontWeight.bold,
+                foreground: Paint()
+                  ..style = PaintingStyle.stroke
+                  ..color = Colors.black
+                  ..strokeWidth = 1
+                  ),
+                  textAlign: TextAlign.center,
+          ),
+        ]),
+      ),
     );
   }
 }

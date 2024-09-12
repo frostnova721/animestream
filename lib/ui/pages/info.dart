@@ -937,10 +937,10 @@ class _InfoState extends State<Info> {
                     Opacity(
                       opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.5,
                       child: ShaderMask(
-                        blendMode: BlendMode.darken,
+                        blendMode: BlendMode.dstIn,
                         shaderCallback: (bounds) => LinearGradient(
-                          colors: [Colors.transparent,  appTheme.backgroundColor],
-                          stops: [0.2, 0.9],
+                          colors: [appTheme.backgroundColor, Colors.transparent],
+                          stops: [0.6, 0.99],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ).createShader(bounds),
@@ -1385,11 +1385,11 @@ class _InfoState extends State<Info> {
           },
           child: ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
-                colors: [appTheme.backgroundColor, Colors.transparent],
+                colors: [Colors.transparent,appTheme.backgroundColor],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 stops: [0.09, 0.23]).createShader(bounds),
-            blendMode: BlendMode.darken,
+            blendMode: BlendMode.dstIn,
             child: Container(
               height: 270,
               width: double.infinity,

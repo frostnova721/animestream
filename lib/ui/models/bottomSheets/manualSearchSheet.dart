@@ -122,37 +122,40 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
               ),
             ),
           ),
-          Container(
-            height: 350,
-            padding: EdgeInsets.only(top: 10),
-            child: searching
-                ? Center(
-                    child: CircularProgressIndicator(
-                      color: appTheme.accentColor,
-                    ),
-                  )
-                : searchResults.isEmpty
-                    ? Center(
-                        child: Text(
-                          "No Results!",
-                          style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontFamily: "NunitoSans",
-                            fontWeight: FontWeight.bold,
-                            fontSize: 18,
-                          ),
-                        ),
-                      )
-                    : GridView.builder(
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3, childAspectRatio: 100 / 160, mainAxisSpacing: 15),
-                        itemCount: searchResults.length,
-                        shrinkWrap: true,
-                        padding: EdgeInsets.only(left: 5, right: 5, top: 10),
-                        itemBuilder: (context, index) {
-                          return searchResults[index];
-                        },
+          Expanded(
+            child: Container(
+              // height: 350,
+              // margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+              padding: EdgeInsets.only(top: 10,),
+              child: searching
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: appTheme.accentColor,
                       ),
+                    )
+                  : searchResults.isEmpty
+                      ? Center(
+                          child: Text(
+                            "No Results!",
+                            style: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontFamily: "NunitoSans",
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        )
+                      : GridView.builder(
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3, childAspectRatio: 100 / 160, mainAxisSpacing: 15),
+                          itemCount: searchResults.length,
+                          shrinkWrap: true,
+                          padding: EdgeInsets.only(left: 5, right: 5, top: 10),
+                          itemBuilder: (context, index) {
+                            return searchResults[index];
+                          },
+                        ),
+            ),
           )
         ],
       ),

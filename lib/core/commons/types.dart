@@ -1,8 +1,11 @@
+import 'package:animestream/ui/models/subtitles.dart';
+
 class Stream {
   final String quality;
   final String link;
   final bool isM3u8;
   final String? subtitle;
+  final SubtitleFormat? subtitleFormat;
   final String server;
   final bool backup;
 
@@ -12,6 +15,7 @@ class Stream {
       required this.isM3u8,
       required this.server,
       required this.backup,
+      this.subtitleFormat = null,
       this.subtitle = null});
 }
 

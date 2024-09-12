@@ -77,7 +77,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                     initialSelection: currentUserSettings?.darkMode ?? true,
                                     onSelected: (val) async {
                                       await setThemeMode(val ?? true);
-                                      setState(() {});
+                                      setState(() {
+                                        darkMode = val ?? true;
+                                      });
                                       // floatingSnackBar(context, "All set! restart the app to apply the theme");
                                     },
                                     textStyle: TextStyle(color: appTheme.textMainColor),

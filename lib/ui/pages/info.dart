@@ -727,7 +727,7 @@ class _InfoState extends State<Info> {
       child: Text(
         text,
         style: TextStyle(
-          color: Colors.white,
+          color: appTheme.textMainColor,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,
         ),

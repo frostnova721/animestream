@@ -109,10 +109,14 @@ flutter:
     - family: Rubik
       fonts:
         - asset: lib/assets/fonts/Rubik-Medium.ttf
+        - asset: lib/assets/fonts/Rubik-Bold.ttf
+          weight: 700
     - family: NunitoSans
       fonts:
         - asset: lib/assets/fonts/NunitoSans_10pt-Medium.ttf
           style: normal
+        - asset: lib/assets/fonts/NunitoSans_10pt-Bold.ttf
+          weight: 700
     - family: NotoSans
       fonts:
         - asset: lib/assets/fonts/NotoSans-Regular.ttf

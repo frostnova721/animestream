@@ -1,26 +1,60 @@
 import 'dart:convert';
 
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/ui/models/subtitles.dart';
 import 'package:http/http.dart';
 
 class AnimeOnsen extends AnimeProvider {
-  final _apiHeader = {
-    "Authorization":
-        "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImRlZmF1bHQifQ.eyJpc3MiOiJodHRwczovL2F1dGguYW5pbWVvbnNlbi54eXovIiwiYXVkIjoiaHR0cHM6Ly9hcGkuYW5pbWVvbnNlbi54eXoiLCJpYXQiOjE3MjU5OTM3NzgsImV4cCI6MTcyNjU5ODU3OCwic3ViIjoiMDZkMjJiOTYtNjNlNy00NmE5LTgwZmMtZGM0NDFkNDFjMDM4LmNsaWVudCIsImF6cCI6IjA2ZDIyYjk2LTYzZTctNDZhOS04MGZjLWRjNDQxZDQxYzAzOCIsImd0eSI6ImNsaWVudF9jcmVkZW50aWFscyJ9.x9DJgac4z3-phVAYWGMurFGayH3MW1AQJJm8AGu0IvdAI1DpYsWm-6bc1FebHlb-OuT34GMvTngwYPACvBOhlLjvCh4J1BfYHGQJivHRnNDh_1xymdvf0F7T7h2iHeUuu5NzP4c0o17UQqGx1XZ_gjpFY8LdOt6E64XEQhDd1utpjxDSQUDAlwe6fyZoPC6t2tHFNGjmQealFjTfxUfk4fxFQCGvZf0zXhe08gVXa1tsKtNVN4Fjdymi_AITv8L3boJYSgYQbjVTlf_XsIdbolhshRO9sV3LfQxt-F7C2ARah7FzMVrtieSyco11-sR2Y2alHDBWOf6Lk4Ik4AA5Wg",
-    // "Content-Type": "application/json"
-  };
+  Future<void> checkAndUpdateToken() async {
+    final Map<dynamic, dynamic> currentToken = await getVal("animeOnsenToken", boxName: "misc") ?? {};
+    final currentTime = DateTime.now().millisecondsSinceEpoch / 1000;
+    if ((currentToken.isNotEmpty && (currentToken['expiration'] < (currentTime + 3600))) || currentToken.isEmpty) {
+      print("[PROVIDER] Generating new animeonsen token");
+      final token = await getToken();
+      final modifiedMap = {
+        'token': token['token'],
+        'expiration': token['expiration'] + currentTime,
+      };
+      await storeVal("animeOnsenToken", modifiedMap, boxName: "misc");
+      animeOnsenToken = token['token'];
+      print("[PROVIDER] AO Token Saved!");
+    }
+  }
+
+  Future<Map<String, dynamic>> getToken() async {
+    final url = "https://auth.animeonsen.xyz/oauth/token";
+
+    //thanks aniyomi extensions!
+    final body = {
+        "client_id": "f296be26-28b5-4358-b5a1-6259575e23b7",
+        "client_secret": "349038c4157d0480784753841217270c3c5b35f4281eaee029de21cb04084235",
+        "grant_type": "client_credentials"
+    };
+    final res = await post(Uri.parse(url), body: body);
+
+    if (res.statusCode != 200) {
+      throw new Exception("Exception: couldnt generate AO token");
+    }
+
+    final Map<String, dynamic> jsoned = jsonDecode(res.body);
+    return {'expiration': jsoned['expires_in']!, 'token': jsoned['access_token']!};
+  }
 
   @override
   Future<List<String>> getAnimeEpisodeLink(String aliasId) async {
     final baseUrl = 'https://api.animeonsen.xyz/v4/content/${aliasId}/episodes';
-    final res = await get(Uri.parse(baseUrl), headers: _apiHeader);
+    final apiHeader = {
+      "Authorization": "Bearer $animeOnsenToken",
+    };
+    final res = await get(Uri.parse(baseUrl), headers: apiHeader);
     final Map<String, dynamic> jsoned = jsonDecode(res.body);
 
     List<String> episodes = [];
 
-    for(final item in jsoned.keys) {
+    for (final item in jsoned.keys) {
       //we adding this as combination of alias and ep num
       episodes.add("$item+$aliasId");
     }
@@ -32,35 +66,38 @@ class AnimeOnsen extends AnimeProvider {
   Future<void> getStreams(String episodeId, Function(List<Stream> p1, bool p2) update) async {
     final animeId = episodeId.split("+")[1];
     final episodeNumber = episodeId.split("+")[0];
-     final baseUrl = "https://cdn.animeonsen.xyz/video/mp4-dash/${animeId}/${episodeNumber}/manifest.mpd";
-     final subtitleUrl = "https://api.animeonsen.xyz/v4/subtitles/${animeId}/en-US/${episodeNumber}";
-    final result = Stream(quality: "single", link: baseUrl, isM3u8: false, server: "animeonsen", backup: false, subtitle: subtitleUrl, subtitleFormat: SubtitleFormat.ASS);
+    final baseUrl = "https://cdn.animeonsen.xyz/video/mp4-dash/${animeId}/${episodeNumber}/manifest.mpd";
+    final subtitleUrl = "https://api.animeonsen.xyz/v4/subtitles/${animeId}/en-US/${episodeNumber}";
+    final result = Stream(
+        quality: "single",
+        link: baseUrl,
+        isM3u8: false,
+        server: "animeonsen",
+        backup: false,
+        subtitle: subtitleUrl,
+        subtitleFormat: SubtitleFormat.ASS);
 
     update([result], true);
   }
 
   @override
   Future<List<Map<String, String?>>> search(String query) async {
-    final baseUrl = "https://search.animeonsen.xyz/indexes/content/search";
-    final body = {
-      "q": query,
-      "limit": 5,
-    };
+    final baseUrl = "https://api.animeonsen.xyz/v4/search/$query";
 
     final headers = {
-      "Authorization": "Bearer 0e36d0275d16b40d7cf153634df78bc229320d073f565db2aaf6d027e0c30b13",
-      "Content-Type": "application/json",
+      "Authorization": "Bearer $animeOnsenToken",
+    //   "Content-Type": "application/json",
     };
 
-    final res = await post(Uri.parse(baseUrl), headers: headers, body: jsonEncode(body));
+    final res = await get(Uri.parse(baseUrl), headers: headers);
 
     final List<Map<String, String>> searchResults = [];
 
     final jsoned = jsonDecode(res.body);
 
-    jsoned['hits'].forEach((item) {
+    jsoned['result'].forEach((item) {
       searchResults.add({
-        'name': item['content_title'],
+        'name': item['content_title_en'] ?? item['content_title'],
         'alias': item['content_id'],
         'imageUrl': "https://api.animeonsen.xyz/v4/image/210x300/${item['content_id']}",
       });

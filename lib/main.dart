@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
@@ -22,6 +23,7 @@ void main() async {
     final Directory dir = await getApplicationDocumentsDirectory();
     await Hive.initFlutter(dir.path);
     await loadAndAssignSettings();
+    AnimeOnsen().checkAndUpdateToken();
     NotificationService().init();
     runApp(const AnimeStream());
   } catch (err) {

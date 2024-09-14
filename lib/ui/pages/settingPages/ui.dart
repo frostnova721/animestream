@@ -98,7 +98,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               setState(() {
                                 AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
                                 Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
-                                appTheme.backgroundColor = AMOLEDBackgroundEnabled ? Colors.black : darkMode ? darkModeValues.backgroundColor : lightModeValues.backgroundColor;
+                                appTheme.backgroundColor = AMOLEDBackgroundEnabled && darkMode ? Colors.black : darkMode ? darkModeValues.backgroundColor : lightModeValues.backgroundColor;
                                 // floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
                             },

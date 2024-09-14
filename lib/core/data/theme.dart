@@ -53,7 +53,8 @@ Future<void> setTheme(int themeId) async {
   final dark = currentUserSettings?.darkMode ?? true;
   appTheme = AnimeStreamTheme(
     accentColor: selectedTheme.accentColor,
-    backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : (dark ? darkModeValues.backgroundColor : lightModeValues.backgroundColor),
+    //set background color only if dark theme and amoled bg are true, otherwise set respective theme's default bg
+    backgroundColor: ((currentUserSettings?.amoledBackground ?? false) && dark) ? Colors.black : (dark ? darkModeValues.backgroundColor : lightModeValues.backgroundColor),
     backgroundSubColor: dark ? darkModeValues.backgroundSubColor : lightModeValues.backgroundSubColor,
     textMainColor: dark ? darkModeValues.textMainColor : lightModeValues.textMainColor,
     textSubColor: dark ? darkModeValues.textSubColor : lightModeValues.textSubColor,

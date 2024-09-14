@@ -14,3 +14,5 @@ late AnimeStreamTheme appTheme;
 
 //saved subtitle settings
 late SubtitleSettings subtitleSettings;
+
+late String animeOnsenToken;

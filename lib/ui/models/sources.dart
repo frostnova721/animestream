@@ -1,5 +1,5 @@
 import 'package:animestream/core/anime/providers/animeonsen.dart';
-import 'package:animestream/core/anime/providers/animepahe.dart';
+// import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/ryuk.dart';
 import 'package:animestream/core/anime/providers/types.dart';
@@ -8,16 +8,21 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
-final List<String> sources = ["gogoanime", "ryuk", "animepahe", "animeonsen"];
+final List<String> sources = [
+  "gogoanime",
+  "ryuk",
+  // "animepahe",
+  "animeonsen",
+];
 
 AnimeProvider getClass(String source) {
   switch (source) {
     case "gogoanime":
       return GogoAnime();
-    case "ryuk": 
+    case "ryuk":
       return Ryuk();
-    case "animepahe":
-      return AnimePahe();
+    // case "animepahe":
+    // return AnimePahe();
     case "animeonsen":
       return AnimeOnsen();
     default:
@@ -31,19 +36,15 @@ List<DropdownMenuEntry> getSourceDropdownList() {
   for (String source in sources) {
     widget.add(
       DropdownMenuEntry(
-        value: source,
-        label: source,
-        style: ButtonStyle(
-          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
-          textStyle: WidgetStatePropertyAll(
-            TextStyle(
-              color:  appTheme.textMainColor,
-              fontFamily: "Rubik",
-              fontSize: 18,
-            )
-          )
-        )
-      ),
+          value: source,
+          label: source,
+          style: ButtonStyle(
+              foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
+              textStyle: WidgetStatePropertyAll(TextStyle(
+                color: appTheme.textMainColor,
+                fontFamily: "Rubik",
+                fontSize: 18,
+              )))),
     );
     count = count++;
   }
@@ -51,7 +52,7 @@ List<DropdownMenuEntry> getSourceDropdownList() {
 }
 
 Future<List<Map<String, String?>>> searchInSource(String source, String query) async {
-  if(query.isEmpty) throw new Exception("ERR_EMPTY_QUERY");
+  if (query.isEmpty) throw new Exception("ERR_EMPTY_QUERY");
   final searchResults = await getClass(source).search(query);
   return searchResults;
 }
@@ -76,6 +77,6 @@ Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link) 
 }
 
 Future<void> getStreams(String source, String episodeId, Function(List<Stream>, bool) updateFunction) async {
-  final streams = await getClass(source).getStreams(episodeId,  updateFunction);
+  final streams = await getClass(source).getStreams(episodeId, updateFunction);
   return streams;
 }

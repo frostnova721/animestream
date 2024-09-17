@@ -36,15 +36,19 @@ List<DropdownMenuEntry> getSourceDropdownList() {
   for (String source in sources) {
     widget.add(
       DropdownMenuEntry(
-          value: source,
-          label: source,
-          style: ButtonStyle(
-              foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
-              textStyle: WidgetStatePropertyAll(TextStyle(
-                color: appTheme.textMainColor,
-                fontFamily: "Rubik",
-                fontSize: 18,
-              )))),
+        value: source,
+        label: source,
+        style: ButtonStyle(
+          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
+          textStyle: WidgetStatePropertyAll(
+            TextStyle(
+              color: appTheme.textMainColor,
+              fontFamily: "Rubik",
+              fontSize: 18,
+            ),
+          ),
+        ),
+      ),
     );
     count = count++;
   }

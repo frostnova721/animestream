@@ -3,7 +3,6 @@ import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/genresAndTags.dart';
 
@@ -315,12 +314,12 @@ class _GenresPageState extends State<GenresPage> {
                                               height: 40,
                                               alignment: Alignment.center,
                                               decoration: BoxDecoration(
-                                                  color: selectedList.contains(e) ? accentColor : appTheme.backgroundSubColor,
+                                                  color: selectedList.contains(e) ? appTheme.accentColor : appTheme.backgroundSubColor,
                                                   borderRadius: BorderRadius.circular(13)),
                                               child: Text(
                                                 e,
                                                 style: TextStyle(
-                                                    color: selectedList.contains(e) ? backgroundColor : appTheme.textMainColor,
+                                                    color: selectedList.contains(e) ? appTheme.backgroundColor : appTheme.textMainColor,
                                                     fontFamily: "NotoSans",
                                                     fontWeight: FontWeight.bold),
                                               ),
@@ -377,12 +376,12 @@ class _GenresPageState extends State<GenresPage> {
                         height: 40,
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                            color: selectedList.contains(e) ? accentColor : appTheme.backgroundSubColor,
+                            color: selectedList.contains(e) ? appTheme.accentColor : appTheme.backgroundSubColor,
                             borderRadius: BorderRadius.circular(13)),
                         child: Text(
                           e,
                           style: TextStyle(
-                              color: selectedList.contains(e) ? backgroundColor : appTheme.textMainColor,
+                              color: selectedList.contains(e) ? appTheme.backgroundColor : appTheme.textMainColor,
                               fontFamily: "NotoSans",
                               fontWeight: FontWeight.bold),
                         ),

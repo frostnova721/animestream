@@ -4,10 +4,11 @@ import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
+import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class ThemeSetting extends StatefulWidget {
   const ThemeSetting({super.key});
@@ -30,10 +31,22 @@ class _ThemeSettingState extends State<ThemeSetting> {
     AMOLEDBackgroundEnabled = currentUserSettings?.amoledBackground ?? false;
     navbarTranslucency = currentUserSettings?.navbarTranslucency ?? 0.6;
     darkMode = currentUserSettings?.darkMode ?? true;
+    materialTheme = currentUserSettings?.materialTheme ?? false;
   }
 
-  applyTheme(int id) async {
+  Future<void> setThemeMode(bool isDark) async {
+    Settings().writeSettings(SettingsModal(darkMode: isDark));
+
+    Provider.of<ThemeProvider>(context, listen: false).applyThemeMode(isDark);
+
+    return;
+  }
+
+  Future<void> applyTheme(int id) async {
     await setTheme(id);
+    // print(Theme.of(context).);
+    Provider.of<ThemeProvider>(context, listen: false)
+        .applyTheme(availableThemes.where((themeItem) => themeItem.id == id).toList()[0].theme);
     // floatingSnackBar(context, "All set! restart the app to apply the theme");
   }
 
@@ -42,6 +55,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   late double navbarTranslucency;
   late bool AMOLEDBackgroundEnabled;
   late bool darkMode;
+  late bool materialTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +77,14 @@ class _ThemeSettingState extends State<ThemeSetting> {
                           // _themeItem("Monochrome", monochrome),
                           // _themeItem("Hot Pink", hotPink),
                           // _themeItem("Cold Purple", coldPurple),
+                          _toggleItem("Material Theme", materialTheme, () {
+                            setState(() {
+                              materialTheme = !materialTheme;
+                            });
+                            Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
+                            Provider.of<ThemeProvider>(context, listen: false).applyTheme(
+                                availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0].theme);
+                          }),
                           _themes(),
                           Container(
                             padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
@@ -98,7 +120,11 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               setState(() {
                                 AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
                                 Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
-                                appTheme.backgroundColor = AMOLEDBackgroundEnabled && darkMode ? Colors.black : darkMode ? darkModeValues.backgroundColor : lightModeValues.backgroundColor;
+                                appTheme.backgroundColor = AMOLEDBackgroundEnabled && darkMode
+                                    ? Colors.black
+                                    : darkMode
+                                        ? darkModeValues.backgroundColor
+                                        : lightModeValues.backgroundColor;
                                 // floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
                             },
@@ -339,7 +365,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
         clipBehavior: Clip.hardEdge,
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          color: currentThemeId == theme.id ? theme.theme.accentColor : appTheme.backgroundSubColor,
+          color: currentThemeId == theme.id ? appTheme.accentColor : appTheme.backgroundSubColor,
         ),
         duration: Duration(milliseconds: 200),
         padding: EdgeInsets.only(left: 10, right: 10),
@@ -349,7 +375,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
           children: [
             Text(
               "$name",
-              style: textStyle().copyWith(color: currentThemeId == theme.id ? backgroundColor : appTheme.textMainColor),
+              style: textStyle()
+                  .copyWith(color: currentThemeId == theme.id ? appTheme.backgroundColor : appTheme.textMainColor),
             ),
             Container(
               height: 40,

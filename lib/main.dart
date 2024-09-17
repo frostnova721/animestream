@@ -8,35 +8,41 @@ import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/mainNav.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
+import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 void main() async {
   try {
     WidgetsFlutterBinding.ensureInitialized();
+
     final Directory dir = await getApplicationDocumentsDirectory();
+
     await Hive.initFlutter(dir.path);
+
     await loadAndAssignSettings();
+
     AnimeOnsen().checkAndUpdateToken();
+
     NotificationService().init();
-    runApp(const AnimeStream());
+
+    runApp(
+      ChangeNotifierProvider(
+        create: (context) => ThemeProvider(),
+        child: const AnimeStream(),
+      ),
+    );
   } catch (err) {
     debugPrint(err.toString());
     Logger().writeLog(err.toString());
     print("[CRASH] logged the error to logs folder");
-  }
-}
-
-class ThemeProvider extends ChangeNotifier {
-  // Method to toggle between light and dark themes
-  void refreshApp() {
-    notifyListeners();
   }
 }
 
@@ -60,13 +66,8 @@ Future<void> loadAndAssignSettings() async {
     final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
     if (darkMode) {
       appTheme = theme.theme;
-      appTheme.backgroundColor = (currentUserSettings!.amoledBackground ?? false) ? Colors.black : darkModeValues.backgroundColor;
-      accentColor = theme.theme.accentColor;
-      textMainColor = theme.theme.textMainColor;
-      textSubColor = theme.theme.textSubColor;
-      backgroundColor = (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor;
-      backgroundSubColor = theme.theme.backgroundSubColor;
-      modalSheetBackgroundColor = theme.theme.modalSheetBackgroundColor;
+      appTheme.backgroundColor =
+          (currentUserSettings!.amoledBackground ?? false) ? Colors.black : darkModeValues.backgroundColor;
     } else {
       appTheme = AnimeStreamTheme(
         accentColor: theme.theme.accentColor,
@@ -111,19 +112,52 @@ class _AnimeStreamState extends State<AnimeStream> {
   // This widget is the root of *my* application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return DynamicColorBuilder(
+      builder: (lightScheme, darkScheme) {
+        late AnimeStreamTheme scheme;
+
+        if (currentUserSettings?.darkMode ?? true) {
+          scheme = AnimeStreamTheme(
+            accentColor: darkScheme?.primary ?? appTheme.accentColor,
+            backgroundColor: darkScheme?.surface ?? appTheme.accentColor,
+            backgroundSubColor: darkScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
+            textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
+            textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,
+            modalSheetBackgroundColor: appTheme.modalSheetBackgroundColor,
+          );
+        } else {
+          scheme = AnimeStreamTheme(
+            accentColor: lightScheme?.primary ?? appTheme.accentColor,
+            backgroundColor: lightScheme?.surface ?? appTheme.accentColor,
+            backgroundSubColor: lightScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
+            textMainColor: lightScheme?.onSurface ?? appTheme.textMainColor,
+            textSubColor: lightScheme?.onSurfaceVariant ?? appTheme.textSubColor,
+            modalSheetBackgroundColor: appTheme.modalSheetBackgroundColor,
+          );
+        }
+
+        if(currentUserSettings?.materialTheme ?? false) appTheme = scheme ;
+
+        final themeProvider = Provider.of<ThemeProvider>(context);
+
+        return MaterialApp(
           title: 'Animestream',
           theme: ThemeData(
             useMaterial3: true,
-            textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
-            scaffoldBackgroundColor: appTheme.backgroundColor,
-            bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
+            textTheme: Theme.of(context)
+                .textTheme
+                .apply(bodyColor: themeProvider.theme.textMainColor, fontFamily: "NotoSans"),
+            scaffoldBackgroundColor: themeProvider.theme.backgroundColor,
+            bottomSheetTheme: BottomSheetThemeData(
+                backgroundColor: themeProvider.theme.modalSheetBackgroundColor),
             colorScheme: ColorScheme.fromSeed(
-              seedColor: appTheme.accentColor,
+              seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : themeProvider.theme.accentColor,
             ),
           ),
-          home: const MainNavigator(),
+          home: MainNavigator(),
           debugShowCheckedModeBanner: false,
         );
+      },
+    );
   }
 }

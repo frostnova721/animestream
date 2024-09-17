@@ -9,7 +9,6 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
@@ -196,7 +195,7 @@ class _HomeState extends State<Home> {
       clipBehavior: Clip.hardEdge,
       color: appTheme.backgroundSubColor,
       child: InkWell(
-        overlayColor: WidgetStatePropertyAll(accentColor.withOpacity(0.1)),
+        overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withOpacity(0.1)),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => UserStats(userModal: storedUserData!),

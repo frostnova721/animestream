@@ -3,7 +3,6 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class PlayerSetting extends StatefulWidget {
@@ -229,7 +228,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       label: Text(
         label,
         style: TextStyle(
-          color: preferredQuality == label ? backgroundColor : appTheme.accentColor,
+          color: preferredQuality == label ? appTheme.backgroundColor : appTheme.accentColor,
           fontSize: 16,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,

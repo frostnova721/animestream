@@ -1,5 +1,4 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class CustomSlider extends StatefulWidget {
@@ -107,14 +106,14 @@ class RoundedRectangularThumbShape extends SliderComponentShape {
     final rect = Rect.fromCenter(center: center, width: width, height: height);
     context.canvas.drawRRect(
       RRect.fromRectAndRadius(rect, Radius.circular(radius)),
-      Paint()..color = backgroundSubColor,
+      Paint()..color = appTheme.backgroundSubColor,
     );
 
     final strokeRect = Rect.fromCenter(center: center, width: width, height: height);
     context.canvas.drawRRect(
         RRect.fromRectAndRadius(strokeRect, Radius.circular(radius)),
         Paint()
-          ..color = textMainColor
+          ..color = appTheme.textMainColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3);
   }

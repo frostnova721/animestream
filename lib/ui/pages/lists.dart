@@ -3,7 +3,6 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 
 class AnimeLists extends StatefulWidget {
@@ -235,7 +234,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       isScrollable: true,
                       controller: tabController,
                       indicatorColor: appTheme.accentColor,
-                      overlayColor: WidgetStatePropertyAll(accentColor.withOpacity(0.3)),
+                      overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withOpacity(0.3)),
                       labelColor: appTheme.textMainColor,
                       unselectedLabelColor: appTheme.textSubColor,
                       labelStyle: TextStyle(

@@ -1,5 +1,5 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/hive.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -26,7 +26,7 @@ class _WebViewState extends State<WebView> {
 
   WebViewWidget webview(String url) {
     WebViewController webViewController = WebViewController()
-      ..setBackgroundColor(backgroundColor)
+      ..setBackgroundColor(appTheme.backgroundColor)
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(Uri.parse(url))
       ..setNavigationDelegate(

@@ -81,7 +81,7 @@ class _UserStatsState extends State<UserStats> {
         backgroundColor: appTheme.backgroundColor,
         title: Text(
           "Stats",
-          style: TextStyle(color: Colors.white, fontFamily: "Poppins", fontSize: 25),
+          style: TextStyle(color: appTheme.textMainColor, fontFamily: "Poppins", fontSize: 25),
         ),
       ),
       body: stats != null
@@ -175,7 +175,6 @@ class _UserStatsState extends State<UserStats> {
                                                   },
                                                   child: Text("aight!"))
                                             ],
-                                            backgroundColor: appTheme.backgroundSubColor,
                                             content: Text(
                                               "Its about ${timeSpent!.years} years, ${timeSpent!.months} months, ${timeSpent!.days} days, ${timeSpent!.hours} hours and ${timeSpent!.minutes} minutes!",
                                               style: textStyle(18),

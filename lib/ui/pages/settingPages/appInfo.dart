@@ -60,9 +60,10 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                               child: Container(
                                   padding: EdgeInsets.only(right: 25),
                                   child: Image.asset(
-                                    iconPressed
-                                        ? 'lib/assets/icons/logo_monochrome.png'
-                                        : 'lib/assets/icons/logo_foreground.png',
+                                    // iconPressed
+                                    //     ? 'lib/assets/icons/logo_monochrome.png'
+                                        'lib/assets/icons/logo_foreground.png',
+                                        color: iconPressed ? appTheme.textMainColor : null,
                                     height: 100,
                                     width: 100,
                                   )),

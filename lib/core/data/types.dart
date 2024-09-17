@@ -11,6 +11,7 @@ class SettingsModal {
   final bool? fasterDownloads;
   final String? preferredProvider;
   final bool? darkMode;
+  final bool? materialTheme;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -23,6 +24,7 @@ class SettingsModal {
     this.fasterDownloads,
     this.preferredProvider,
     this.darkMode,
+    this.materialTheme,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -36,7 +38,8 @@ class SettingsModal {
       navbarTranslucency: map['navbarTranslucency'] ?? 0.5,
       fasterDownloads: map['fasterDownloads'] ?? false,
       preferredProvider: map['preferredProvider'] ?? sources[0],
-      darkMode: map['darkMode'] ?? true
+      darkMode: map['darkMode'] ?? true,
+      materialTheme: map['materialTheme'] ?? false,
     );
   }
 
@@ -51,7 +54,8 @@ class SettingsModal {
       'navbarTranslucency': navbarTranslucency,
       'fasterDownloads': fasterDownloads,
       'preferredProvider': preferredProvider,
-      'darkMode': darkMode
+      'darkMode': darkMode,
+      'materialTheme': materialTheme,
     };
   }
 }

@@ -11,7 +11,6 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:better_player/better_player.dart';
@@ -507,7 +506,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     child: Text(
                                       "Episode ${index + 1}",
                                       style: TextStyle(
-                                        color: index == currentEpIndex ? backgroundColor : appTheme.textMainColor,
+                                        color: index == currentEpIndex ? appTheme.backgroundColor : appTheme.textMainColor,
                                         fontFamily: "Rubik",
                                         fontSize: 20,
                                       ),

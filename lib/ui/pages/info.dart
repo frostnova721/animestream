@@ -15,7 +15,6 @@ import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:animestream/ui/theme/mainTheme.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/enums.dart';
@@ -602,7 +601,7 @@ class _InfoState extends State<Info> {
                     child: Text(
                       "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
                       style: TextStyle(
-                        color: currentPageIndex == index ? backgroundColor : appTheme.textMainColor,
+                        color: currentPageIndex == index ? appTheme.backgroundColor : appTheme.textMainColor,
                         fontFamily: 'NotoSans',
                         fontWeight: FontWeight.bold,
                       ),

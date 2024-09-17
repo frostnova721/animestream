@@ -79,56 +79,58 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
         padding: EdgeInsets.only(top: 40, left: 20, bottom: 40),
         child: Text(
           title,
-          style: TextStyle(fontFamily: "Rubik", fontSize: 40, color: appTheme.textMainColor),
+          style: TextStyle(
+            fontFamily: "Rubik",
+            fontSize: 40,
+            color: appTheme.textMainColor,
+          ),
         ),
       ),
     ],
   );
 }
 
-
-
 InkWell toggleItem(String label, bool value, void Function() onTapFunction, {String? description = null}) {
-    return InkWell(
-      onTap: onTapFunction,
+  return InkWell(
+    onTap: onTapFunction,
+    child: Container(
+      padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
       child: Container(
-        padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
-        child: Container(
-          padding: EdgeInsets.only(
-            left: 10,
-            right: 10,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
+        padding: EdgeInsets.only(
+          left: 10,
+          right: 10,
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  label,
+                  style: textStyle(),
+                ),
+                if (description != null)
                   Text(
-                    label,
-                    style: textStyle(),
+                    description,
+                    style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
                   ),
-                  if (description != null)
-                    Text(
-                      description,
-                      style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
-                    ),
-                ],
-              ),
-              Switch(
-                value: value,
-                onChanged: (val) {
-                  onTapFunction();
-                },
-                activeColor: appTheme.backgroundColor,
-                activeTrackColor: appTheme.accentColor,
-              )
-            ],
-          ),
+              ],
+            ),
+            Switch(
+              value: value,
+              onChanged: (val) {
+                onTapFunction();
+              },
+              activeColor: appTheme.backgroundColor,
+              activeTrackColor: appTheme.accentColor,
+            )
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
 TextStyle textStyle() {
   return TextStyle(

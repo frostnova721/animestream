@@ -35,7 +35,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   }
 
   Future<void> setThemeMode(bool isDark) async {
-    Settings().writeSettings(SettingsModal(darkMode: isDark));
+    await Settings().writeSettings(SettingsModal(darkMode: isDark));
 
     Provider.of<ThemeProvider>(context, listen: false).applyThemeMode(isDark);
 
@@ -73,15 +73,14 @@ class _ThemeSettingState extends State<ThemeSetting> {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // _themeItem("Dark Ash - Lime", lime),
-                          // _themeItem("Monochrome", monochrome),
-                          // _themeItem("Hot Pink", hotPink),
-                          // _themeItem("Cold Purple", coldPurple),
-                          _toggleItem("Material Theme", materialTheme, () {
-                            setState(() {
-                              materialTheme = !materialTheme;
-                            });
-                            Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
+                          _toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
+                              () async {
+                            materialTheme = !materialTheme;
+                            await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
+                            setState(() {});
+                            if (materialTheme) {
+                              return Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                            }
                             Provider.of<ThemeProvider>(context, listen: false).applyTheme(
                                 availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0].theme);
                           }),
@@ -104,11 +103,25 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                       });
                                       // floatingSnackBar(context, "All set! restart the app to apply the theme");
                                     },
+                                    menuStyle:
+                                        MenuStyle(backgroundColor: WidgetStatePropertyAll(appTheme.backgroundSubColor)),
                                     textStyle: TextStyle(color: appTheme.textMainColor),
                                     dropdownMenuEntries: [
                                       // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
-                                      DropdownMenuEntry(value: true, label: "dark"),
-                                      DropdownMenuEntry(value: false, label: "light (beta)")
+                                      DropdownMenuEntry(
+                                        value: true,
+                                        label: "dark",
+                                        style: ButtonStyle(
+                                          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
+                                        ),
+                                      ),
+                                      DropdownMenuEntry(
+                                        value: false,
+                                        label: "light (beta)",
+                                        style: ButtonStyle(
+                                          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
+                                        ),
+                                      )
                                     ])
                               ],
                             ),
@@ -127,6 +140,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                         : lightModeValues.backgroundColor;
                                 // floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
+                              return Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                             },
                             description: "Full black background",
                           ),

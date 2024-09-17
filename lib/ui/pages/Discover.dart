@@ -118,13 +118,14 @@ class _DiscoverState extends State<Discover> {
                       height: 75,
                       width: 150,
                       decoration: BoxDecoration(
+                        color: appTheme.backgroundSubColor,
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
                             image: AssetImage(
                               'lib/assets/images/chisato.jpeg',
                             ),
                             fit: BoxFit.cover,
-                            opacity: 0.35),
+                            opacity: 0.4),
                         border: Border.all(color: appTheme.accentColor),
                       ),
                       child: Center(
@@ -152,13 +153,14 @@ class _DiscoverState extends State<Discover> {
                       height: 75,
                       width: 150,
                       decoration: BoxDecoration(
+                        color: appTheme.backgroundSubColor,
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
                             image: AssetImage(
                               'lib/assets/images/mitsuha.jpg',
                             ),
                             fit: BoxFit.cover,
-                            opacity: 0.35),
+                            opacity: 0.4),
                         border: Border.all(color: appTheme.accentColor),
                       ),
                       child: Center(

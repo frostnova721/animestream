@@ -119,11 +119,11 @@ class _AnimeStreamState extends State<AnimeStream> {
         if (currentUserSettings?.darkMode ?? true) {
           scheme = AnimeStreamTheme(
             accentColor: darkScheme?.primary ?? appTheme.accentColor,
-            backgroundColor: darkScheme?.surface ?? appTheme.accentColor,
+            backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : darkScheme?.surface ?? appTheme.accentColor,
             backgroundSubColor: darkScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
             textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
             textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,
-            modalSheetBackgroundColor: appTheme.modalSheetBackgroundColor,
+            modalSheetBackgroundColor: darkScheme?.surface ?? appTheme.modalSheetBackgroundColor,
           );
         } else {
           scheme = AnimeStreamTheme(
@@ -132,11 +132,14 @@ class _AnimeStreamState extends State<AnimeStream> {
             backgroundSubColor: lightScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
             textMainColor: lightScheme?.onSurface ?? appTheme.textMainColor,
             textSubColor: lightScheme?.onSurfaceVariant ?? appTheme.textSubColor,
-            modalSheetBackgroundColor: appTheme.modalSheetBackgroundColor,
+            modalSheetBackgroundColor: lightScheme?.surface ?? appTheme.modalSheetBackgroundColor,
           );
         }
 
-        if(currentUserSettings?.materialTheme ?? false) appTheme = scheme ;
+        if(currentUserSettings?.materialTheme ?? false) {
+          appTheme = scheme;
+          // print("[THEME] Applying Material You Theme");
+        }
 
         final themeProvider = Provider.of<ThemeProvider>(context);
 

@@ -59,12 +59,7 @@ class ThemeProvider with ChangeNotifier {
   }
 
   void applyTheme(AnimeStreamTheme t) {
-    if ((currentUserSettings?.materialTheme ?? false)) {
       theme = t;
-    } else {
-      print("refreshing...");
-      notifyListeners();
-    }
   }
 
   void applyThemeMode(bool dark) {

@@ -11,6 +11,8 @@ class AnimeOnsen extends AnimeProvider {
   Future<void> checkAndUpdateToken() async {
     final Map<dynamic, dynamic> currentToken = await getVal("animeOnsenToken", boxName: "misc") ?? {};
     final currentTime = DateTime.now().millisecondsSinceEpoch / 1000;
+
+    //get the new token if the old one is expired
     if ((currentToken.isNotEmpty && (currentToken['expiration'] < (currentTime + 3600))) || currentToken.isEmpty) {
       print("[PROVIDER] Generating new animeonsen token");
       final token = await getToken();
@@ -21,6 +23,9 @@ class AnimeOnsen extends AnimeProvider {
       await storeVal("animeOnsenToken", modifiedMap, boxName: "misc");
       animeOnsenToken = token['token'];
       print("[PROVIDER] AO Token Saved!");
+    } else {
+      //just save the current token in a variable
+      animeOnsenToken = currentToken['token'];
     }
   }
 

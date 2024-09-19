@@ -1,4 +1,3 @@
-
-void main() async {
+void main() {
   
 }

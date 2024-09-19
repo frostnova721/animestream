@@ -22,7 +22,7 @@ class ThemeProvider with ChangeNotifier {
       //set background color only if dark theme and amoled bg are true, otherwise set respective theme's default bg
       backgroundColor: ((currentUserSettings?.amoledBackground ?? false) && dark)
           ? Colors.black
-          : (dark ? darkModeValues.backgroundColor : lightModeValues.backgroundColor),
+          : (dark ? selectedTheme.backgroundColor : lightModeValues.backgroundColor),
       backgroundSubColor: dark ? darkModeValues.backgroundSubColor : lightModeValues.backgroundSubColor,
       textMainColor: dark ? darkModeValues.textMainColor : lightModeValues.textMainColor,
       textSubColor: dark ? darkModeValues.textSubColor : lightModeValues.textSubColor,

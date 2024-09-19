@@ -63,7 +63,7 @@ class Downloader {
       showToast("Permission denied! Grant access to storage");
       throw Exception("Couldnt download image due to lack of permission!");
     }
-    final downPath = await Directory('/storage/emulated/0/Download');
+    final downPath = await Directory('');
     String finalPath;
     final fileExtension = imageUrl.split('/').last.split(".").last.trim();
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
@@ -72,7 +72,7 @@ class Downloader {
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = '/storage/emulated/0/Download/animestream/${fileName}.${fileExtension}';
+      finalPath = '/animestream/${fileName}.${fileExtension}';
     } else {
       final externalStorage = await getExternalStorageDirectory();
       final directory = Directory("${externalStorage?.path}/animestream/");
@@ -99,7 +99,10 @@ class Downloader {
     if (!permission) {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
     }
-    final downPath = await Directory('/storage/emulated/0/Download');
+
+    final basePath = '/storage/emulated/0/Download';
+
+    final downPath = await Directory(basePath);
     String finalPath;
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
     if (downPath.existsSync()) {
@@ -107,7 +110,7 @@ class Downloader {
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = '/storage/emulated/0/Download/animestream/${fileName}.mp4';
+      finalPath = '$basePath/animestream/${fileName}.mp4';
     } else {
       final externalStorage = await getExternalStorageDirectory();
       final directory = Directory("${externalStorage?.path}/animestream/");

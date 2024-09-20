@@ -166,7 +166,7 @@ class Cards {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(20),
       ),
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           if (!isAnime) return floatingSnackBar(context!, "Mangas/Novels arent supported");
           if (shouldNavigate)
@@ -182,6 +182,7 @@ class Cards {
               if (afterNavigation != null) afterNavigation();
             });
         },
+        focusColor: appTheme.textSubColor,
         child: Container(
           width: 120,
           child: Column(
@@ -337,7 +338,8 @@ class Cards {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       clipBehavior: Clip.hardEdge,
       elevation: 0,
-      child: GestureDetector(
+      child: InkWell(
+        focusColor: appTheme.textSubColor,
         onTap: () {
           if (!isAnime) return floatingSnackBar(context!, "Mangas/Novels arent supported");
           if (shouldNavigate)

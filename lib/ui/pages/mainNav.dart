@@ -185,8 +185,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     recommendedList.clear();
     recommendedListData.forEach((item) {
-      recommendedList.add(
-      Cards(context: context).animeCard(
+      recommendedList.add(Cards(context: context).animeCard(
         item.id,
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
@@ -309,72 +308,132 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         popTimeoutWindow();
       },
       child: Scaffold(
-        body: BottomBar(
-          barColor: appTheme.backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6),
-          borderRadius: BorderRadius.circular(10),
-          barAlignment: Alignment.bottomCenter,
-          width: MediaQuery.of(context).size.width / 2 + 20,
-          offset: MediaQuery.of(context).padding.bottom + 10,
-          child: ClipRRect(
-            clipBehavior: Clip.hardEdge,
-            borderRadius: BorderRadius.circular(10),
-            child: Container(
-              padding: EdgeInsets.only(top: 5),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: blurSigmaValue, sigmaY: blurSigmaValue),
-                child: TabBar(
-                  onTap: (val) => setState(() {}),
-                  overlayColor: WidgetStateColor.transparent,
-                  controller: tabController,
-                  isScrollable: false,
-                  labelColor: appTheme.accentColor,
-                  unselectedLabelColor: appTheme.textSubColor,
-                  dividerHeight: 0,
-                  indicatorColor: appTheme.accentColor,
-                  labelPadding: EdgeInsets.only(bottom: 5),
-                  tabs: [
-                    TabIcon(
-                      icon: Icons.home_rounded,
-                      label: "Home",
-                      animate: tabController.index == 0,
+        body: MediaQuery.of(context).orientation == Orientation.landscape
+            ? Row(
+                children: [
+                  NavigationRail(
+                    onDestinationSelected: (value) {
+                      setState(() {
+                        tabController.animateTo(value);
+                      });
+                    },
+                    backgroundColor: appTheme.backgroundColor,
+                    elevation: 1,
+                    indicatorColor: appTheme.accentColor,
+                    destinations: [
+                      NavigationRailDestination(
+                        icon: Icon(
+                          Icons.home,
+                          color: tabController.index == 0 ? appTheme.backgroundSubColor : appTheme.textMainColor,
+                        ),
+                        label: Text("Home"),
+                      ),
+                      NavigationRailDestination(
+                        icon: ImageIcon(
+                          color: tabController.index == 1 ? appTheme.backgroundSubColor : appTheme.textMainColor,
+                          AssetImage("lib/assets/images/shines.png"),
+                        ),
+                        label: Text("Discover"),
+                      ),
+                      NavigationRailDestination(
+                        icon: Icon(Icons.search_rounded,
+                            color: tabController.index == 2 ? appTheme.backgroundSubColor : appTheme.textMainColor),
+                        label: Text("Search"),
+                      ),
+                    ],
+                    selectedIndex: tabController.index,
+                  ),
+                  Expanded(
+                    child: TabBarView(
+                      controller: tabController,
+                      physics: NeverScrollableScrollPhysics(),
+                      children: [
+                        Home(
+                          recentlyWatched: recentlyWatched,
+                          currentlyAiring: currentlyAiring,
+                          dataLoaded: homeDataLoaded,
+                          error: homePageError,
+                          updateWatchedList: updateWatchedList,
+                          planned: plannedList,
+                        ),
+                        Discover(
+                          thisSeason: thisSeason,
+                          recentlyUpdatedList: recentlyUpdatedList,
+                          recommendedList: recommendedList,
+                          trendingList: trendingList,
+                        ),
+                        Search(),
+                      ],
                     ),
-                    TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
-                    TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
-                  ],
+                  ),
+                ],
+              )
+            : BottomBar(
+                barColor: appTheme.backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6),
+                borderRadius: BorderRadius.circular(10),
+                barAlignment: Alignment.bottomCenter,
+                width: MediaQuery.of(context).size.width / 2 + 20,
+                offset: MediaQuery.of(context).padding.bottom + 10,
+                child: ClipRRect(
+                  clipBehavior: Clip.hardEdge,
+                  borderRadius: BorderRadius.circular(10),
+                  child: Container(
+                    padding: EdgeInsets.only(top: 5),
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(sigmaX: blurSigmaValue, sigmaY: blurSigmaValue),
+                      child: TabBar(
+                        onTap: (val) => setState(() {}),
+                        overlayColor: WidgetStateColor.transparent,
+                        controller: tabController,
+                        isScrollable: false,
+                        labelColor: appTheme.accentColor,
+                        unselectedLabelColor: appTheme.textSubColor,
+                        dividerHeight: 0,
+                        indicatorColor: appTheme.accentColor,
+                        labelPadding: EdgeInsets.only(bottom: 5),
+                        tabs: [
+                          TabIcon(
+                            icon: Icons.home_rounded,
+                            label: "Home",
+                            animate: tabController.index == 0,
+                          ),
+                          TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
+                          TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                body: (context, scrollController) => SmartRefresher(
+                  controller: refreshController,
+                  onRefresh: refresh,
+                  header: MaterialClassicHeader(
+                    color: appTheme.accentColor,
+                    backgroundColor: appTheme.backgroundSubColor,
+                  ),
+                  child: TabBarView(
+                    controller: tabController,
+                    physics: NeverScrollableScrollPhysics(),
+                    children: [
+                      Home(
+                        recentlyWatched: recentlyWatched,
+                        currentlyAiring: currentlyAiring,
+                        dataLoaded: homeDataLoaded,
+                        error: homePageError,
+                        updateWatchedList: updateWatchedList,
+                        planned: plannedList,
+                      ),
+                      Discover(
+                        thisSeason: thisSeason,
+                        recentlyUpdatedList: recentlyUpdatedList,
+                        recommendedList: recommendedList,
+                        trendingList: trendingList,
+                      ),
+                      Search(),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ),
-          body: (context, scrollController) => SmartRefresher(
-            controller: refreshController,
-            onRefresh: refresh,
-            header: MaterialClassicHeader(
-              color: appTheme.accentColor,
-              backgroundColor: appTheme.backgroundSubColor,
-            ),
-            child: TabBarView(
-              controller: tabController,
-              physics: NeverScrollableScrollPhysics(),
-              children: [
-                Home(
-                  recentlyWatched: recentlyWatched,
-                  currentlyAiring: currentlyAiring,
-                  dataLoaded: homeDataLoaded,
-                  error: homePageError,
-                  updateWatchedList: updateWatchedList,
-                  planned: plannedList,
-                ),
-                Discover(
-                  thisSeason: thisSeason,
-                  recentlyUpdatedList: recentlyUpdatedList,
-                  recommendedList: recommendedList,
-                  trendingList: trendingList,
-                ),
-                Search(),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

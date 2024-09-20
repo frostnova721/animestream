@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class ThemeProvider with ChangeNotifier {
   AnimeStreamTheme _theme = appTheme;
 
-  bool _isDark = true;
+  bool _isDark = currentUserSettings?.darkMode ?? false;
 
   AnimeStreamTheme get theme => _theme;
 
@@ -34,6 +34,7 @@ class ThemeProvider with ChangeNotifier {
   }
 
   set isDark(bool dark) {
+   _isDark = dark;
     if (dark) {
       appTheme = AnimeStreamTheme(
         accentColor: appTheme.accentColor,

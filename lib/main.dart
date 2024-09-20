@@ -116,6 +116,7 @@ class _AnimeStreamState extends State<AnimeStream> {
       builder: (lightScheme, darkScheme) {
         late AnimeStreamTheme scheme;
 
+        //just checks for dark mode and sets the appTheme variable with suitable theme
         if (currentUserSettings?.darkMode ?? true) {
           scheme = AnimeStreamTheme(
             accentColor: darkScheme?.primary ?? appTheme.accentColor,
@@ -147,6 +148,7 @@ class _AnimeStreamState extends State<AnimeStream> {
           title: 'Animestream',
           theme: ThemeData(
             useMaterial3: true,
+            brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
             textTheme: Theme.of(context)
                 .textTheme
                 .apply(bodyColor: themeProvider.theme.textMainColor, fontFamily: "NotoSans"),
@@ -154,6 +156,7 @@ class _AnimeStreamState extends State<AnimeStream> {
             bottomSheetTheme: BottomSheetThemeData(
                 backgroundColor: themeProvider.theme.modalSheetBackgroundColor),
             colorScheme: ColorScheme.fromSeed(
+              brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
               seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : themeProvider.theme.accentColor,
             ),
           ),

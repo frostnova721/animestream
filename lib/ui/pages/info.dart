@@ -523,7 +523,7 @@ class _InfoState extends State<Info> {
     return Container(
       margin: EdgeInsets.only(right: 20, top: 15),
       alignment: Alignment.centerRight,
-      child: GestureDetector(
+      child: InkWell(
         onTap: () {
           showModalBottomSheet(
             context: context,
@@ -635,6 +635,7 @@ class _InfoState extends State<Info> {
       ),
       child: InkWell(
         customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+        focusColor: appTheme.textSubColor,
         onTap: () async {
           showModalBottomSheet(
             isScrollControlled: true,

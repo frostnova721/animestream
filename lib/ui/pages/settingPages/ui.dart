@@ -362,8 +362,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
     );
   }
 
-  GestureDetector _themeItem(String name, ThemeItem theme, context) {
-    return GestureDetector(
+  InkWell _themeItem(String name, ThemeItem theme, context) {
+    return InkWell(
       onTap: () async {
         //check if selected theme is same as current theme
         if (currentThemeId != theme.id) {

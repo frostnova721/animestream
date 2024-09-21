@@ -189,55 +189,68 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     }
   }
 
+  final _fn = FocusNode();
+
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        toggleControls(!_visible);
-        hideControlsOnTimeout();
+    return KeyboardListener(
+      focusNode: _fn,
+      onKeyEvent: (event) {
+        if(!(event is KeyDownEvent)) return;
+        if(event.logicalKey == LogicalKeyboardKey.mediaPlayPause) {
+          print("tru");
+          print(controller.isPlaying());
+          (controller.isPlaying() ?? false) ?  controller.pause() : controller.play();
+        }
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            BetterPlayer(controller: controller),
-            if (info.streamInfo.subtitle != null && controller.videoPlayerController != null && showSubs)
-              SubViewer(
-                  controller: controller.videoPlayerController!,
-                  format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
-                  subtitleSource: info.streamInfo.subtitle!),
-            AnimatedOpacity(
-              opacity: _visible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 150),
-              child: Stack(
-                children: [
-                  IgnorePointer(ignoring: true, child: overlay()),
-                  IgnorePointer(
-                    ignoring: !_visible,
-                    child: initialised
-                        ? Controls(
-                            controller: controller,
-                            bottomControls: bottomControls(),
-                            topControls: topControls(),
-                            episode: {
-                              'getEpisodeSources': getEpisodeSources,
-                              'epLinks': epLinks,
-                              'currentEpIndex': currentEpIndex,
-                            },
-                            refreshPage: refreshPage,
-                            updateWatchProgress: updateWatchProgress,
-                            isControlsLocked: isControlsLocked,
-                            hideControlsOnTimeout: hideControlsOnTimeout,
-                            playAnotherEpisode: playAnotherEpisode,
-                            preferredServer: info.streamInfo.server,
-                            isControlsVisible: _visible,
-                          )
-                        : Container(),
-                  ),
-                ],
+      child: GestureDetector(
+        onTap: () {
+          toggleControls(!_visible);
+          hideControlsOnTimeout();
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              BetterPlayer(controller: controller),
+              if (info.streamInfo.subtitle != null && controller.videoPlayerController != null && showSubs)
+                SubViewer(
+                    controller: controller.videoPlayerController!,
+                    format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
+                    subtitleSource: info.streamInfo.subtitle!),
+              AnimatedOpacity(
+                opacity: _visible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 150),
+                child: Stack(
+                  children: [
+                    IgnorePointer(ignoring: true, child: overlay()),
+                    IgnorePointer(
+                      ignoring: !_visible,
+                      child: initialised
+                          ? Controls(
+                              controller: controller,
+                              bottomControls: bottomControls(),
+                              topControls: topControls(),
+                              episode: {
+                                'getEpisodeSources': getEpisodeSources,
+                                'epLinks': epLinks,
+                                'currentEpIndex': currentEpIndex,
+                              },
+                              refreshPage: refreshPage,
+                              updateWatchProgress: updateWatchProgress,
+                              isControlsLocked: isControlsLocked,
+                              hideControlsOnTimeout: hideControlsOnTimeout,
+                              playAnotherEpisode: playAnotherEpisode,
+                              preferredServer: info.streamInfo.server,
+                              isControlsVisible: _visible,
+                            )
+                          : Container(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

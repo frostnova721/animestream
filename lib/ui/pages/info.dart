@@ -62,7 +62,6 @@ class _InfoState extends State<Info> {
   bool dataLoaded = false;
   bool infoPage = true;
 
-
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences().getUserPreferences();
     gridMode = preferences.episodeGridView ?? false;
@@ -218,6 +217,8 @@ class _InfoState extends State<Info> {
     super.dispose();
   }
 
+  final _watchInfoButtonFocusNode = FocusNode();
+
   @override
   Widget build(BuildContext context) {
     try {
@@ -240,7 +241,16 @@ class _InfoState extends State<Info> {
                             Container(
                               // width: 120,
                               child: ElevatedButton(
-                                style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor, fixedSize: Size(135, 55)),
+                                focusNode: _watchInfoButtonFocusNode,
+                                onFocusChange: (val) {
+                                  setState(() {});
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: _watchInfoButtonFocusNode.hasFocus
+                                      ? appTheme.textMainColor
+                                      : appTheme.accentColor,
+                                  fixedSize: Size(135, 55),
+                                ),
                                 onPressed: () {
                                   setState(() {
                                     infoPage = !infoPage;
@@ -416,8 +426,8 @@ class _InfoState extends State<Info> {
             ),
             label: Text(
               "source",
-              style:
-                  TextStyle(color: appTheme.textMainColor, fontSize: 20, fontFamily: "Rubik", overflow: TextOverflow.ellipsis),
+              style: TextStyle(
+                  color: appTheme.textMainColor, fontSize: 20, fontFamily: "Rubik", overflow: TextOverflow.ellipsis),
             ),
           ),
         ),
@@ -425,7 +435,10 @@ class _InfoState extends State<Info> {
         _manualSearch(context),
         if (foundName != null && epLinks.length > 0) _continueButton(),
         Container(
-          margin: EdgeInsets.only(top: 25, left: 20 + MediaQuery.of(context).padding.left, right: 20 + MediaQuery.of(context).padding.right),
+          margin: EdgeInsets.only(
+              top: 25,
+              left: 20 + MediaQuery.of(context).padding.left,
+              right: 20 + MediaQuery.of(context).padding.right),
           padding: EdgeInsets.only(top: 15, bottom: 20),
           decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: appTheme.backgroundSubColor),
           child: Column(
@@ -626,7 +639,6 @@ class _InfoState extends State<Info> {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         border: Border.all(color: appTheme.accentColor),
-        color: Colors.black,
         image: DecorationImage(
           image: data.banner != null ? NetworkImage(data.banner!) : NetworkImage(data.cover),
           fit: BoxFit.cover,
@@ -868,7 +880,7 @@ class _InfoState extends State<Info> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        return GestureDetector(
+        return InkWell(
           onTap: () async {
             showModalBottomSheet(
                 showDragHandle: true,
@@ -1093,7 +1105,8 @@ class _InfoState extends State<Info> {
                         alignment: Alignment.center,
                         margin: EdgeInsets.all(5),
                         padding: EdgeInsets.only(left: 15, right: 15),
-                        decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
+                        decoration:
+                            BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
                         child: Text(
                           data.genres[index],
                           style: TextStyle(
@@ -1124,7 +1137,8 @@ class _InfoState extends State<Info> {
                         alignment: Alignment.center,
                         margin: EdgeInsets.all(5),
                         padding: EdgeInsets.only(left: 15, right: 15),
-                        decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(5)),
+                        decoration:
+                            BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(5)),
                         child: Text(
                           data.tags[index],
                           style: TextStyle(
@@ -1262,11 +1276,8 @@ class _InfoState extends State<Info> {
                 width: 130,
                 child: recommended
                     ? Cards(context: context).animeCard(
-                        item.id,
-                        item.title['english'] ?? item.title['romaji'],
-                        item.cover,
-                        rating: item.rating
-                      )
+                        item.id, item.title['english'] ?? item.title['romaji'], item.cover,
+                        rating: item.rating)
                     : Cards().characterCard(
                         item.title['english'] ?? item.title['romaji'],
                         recommended ? item.type : item.relationType,
@@ -1351,10 +1362,11 @@ class _InfoState extends State<Info> {
                           child: ElevatedButton(
                             onPressed: () async {
                               try {
-                              await Downloader().downloadImage(img, (data.title['english'] ?? data.title['romaji'] ?? "anime") + "Banner");
-                              floatingSnackBar(context, "Succesfully saved to your downloads folder!");
-                              Navigator.of(context).pop();
-                              } catch(err) {
+                                await Downloader().downloadImage(
+                                    img, (data.title['english'] ?? data.title['romaji'] ?? "anime") + "Banner");
+                                floatingSnackBar(context, "Succesfully saved to your downloads folder!");
+                                Navigator.of(context).pop();
+                              } catch (err) {
                                 floatingSnackBar(context, "Couldnt save the image!");
                               }
                             },
@@ -1385,7 +1397,7 @@ class _InfoState extends State<Info> {
           },
           child: ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
-                colors: [Colors.transparent,appTheme.backgroundColor],
+                colors: [Colors.transparent, appTheme.backgroundColor],
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
                 stops: [0.09, 0.23]).createShader(bounds),

@@ -182,11 +182,14 @@ class Cards {
               if (afterNavigation != null) afterNavigation();
             });
         },
+        splashColor: Colors.transparent,
+        highlightColor: Colors.transparent,
         focusColor: appTheme.textSubColor,
         child: Container(
+          alignment: Alignment.center,
           width: 120,
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Container(
                 margin: EdgeInsets.only(bottom: 10),
@@ -288,17 +291,20 @@ class Cards {
               ),
               Padding(
                 padding: EdgeInsets.only(right: 5, bottom: subText == null ? 0 : 5),
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    color: appTheme.textMainColor,
-                    fontFamily: 'NotoSans',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    overflow: TextOverflow.ellipsis,
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    title,
+                    style: TextStyle(
+                      color: appTheme.textMainColor,
+                      fontFamily: 'NotoSans',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 2,
+                    textAlign: TextAlign.left,
                   ),
-                  maxLines: 2,
-                  textAlign: TextAlign.left,
                 ),
               ),
               if (subText != null)

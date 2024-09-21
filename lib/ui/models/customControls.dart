@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:better_player/src/controls/better_player_material_progress_bar.dart';
+import 'package:flutter/services.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:animestream/core/commons/types.dart';
 
@@ -277,6 +278,8 @@ class _ControlsState extends State<Controls> {
     super.dispose();
     Wakelock.disable();
   }
+
+  // final _fn = FocusNode();
 
   @override
   Widget build(BuildContext context) {

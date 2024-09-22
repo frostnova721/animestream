@@ -156,6 +156,8 @@ class _HomeState extends State<Home> {
       margin: EdgeInsets.only(left: 10),
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
+          elevation: 0,
+          shadowColor: Colors.transparent,
           backgroundColor: appTheme.backgroundSubColor,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         ),

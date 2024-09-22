@@ -11,8 +11,13 @@ import 'package:animestream/core/commons/types.dart';
 final List<String> sources = [
   "gogoanime",
   "ryuk",
-  // "animepahe",
+  // "animepahe", // unused because of the stream being stuck in infinite buffers and undownloadable segments
   "animeonsen",
+];
+
+final List<String> unDownloadableSources = [
+  //uses mpd which needs ffmpeg to download (makes the app bulky :( )
+  "animeonsen"
 ];
 
 AnimeProvider getClass(String source) {

@@ -22,9 +22,9 @@ class SubtitleSettings {
     this.backgroundColor = Colors.black,
     this.backgroundTransparency = 0,
     this.bottomMargin = 35,
-    this.fontSize = 25,
+    this.fontSize = 23,
     this.strokeColor = Colors.black,
-    this.strokeWidth = 1,
+    this.strokeWidth = 1.1,
     this.textColor = Colors.white,
     this.fontFamily = null,
   });

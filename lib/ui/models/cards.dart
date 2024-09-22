@@ -182,8 +182,9 @@ class Cards {
               if (afterNavigation != null) afterNavigation();
             });
         },
-        splashColor: Colors.transparent,
         highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
         focusColor: appTheme.textSubColor,
         child: Container(
           alignment: Alignment.center,

@@ -47,8 +47,8 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
 
   List<String> epLinks = [];
-  List streamSources = [];
-  List qualities = [];
+  List<Stream> streamSources = [];
+  List<Map<String, String>> qualities = [];
   List<List<Map<String, dynamic>>> visibleEpList = [];
 
   int currentPageIndex = 0;
@@ -122,9 +122,9 @@ class _InfoState extends State<Info> {
   }
 
   Future<void> getQualities() async {
-    List<dynamic> mainList = [];
+    List<Map<String, String>> mainList = [];
     for (int i = 0; i < streamSources.length; i++) {
-      final List<dynamic> list = await generateQualitiesForMultiQuality(streamSources[i].link);
+      final list = await generateQualitiesForMultiQuality(streamSources[i].link);
       list.forEach((element) {
         element['server'] = "${streamSources[i].server} ${streamSources[i].backup ? "• backup" : ""}";
         mainList.add(element);
@@ -816,39 +816,40 @@ class _InfoState extends State<Info> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      Container(
-                        decoration: BoxDecoration(
-                            borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
-                            color: appTheme.accentColor.withOpacity(0.8)),
-                        child: IconButton(
-                          onPressed: () async {
-                            showModalBottomSheet(
-                              showDragHandle: true,
-                              isScrollControlled: true,
-                              context: context,
-                              backgroundColor: appTheme.modalSheetBackgroundColor,
-                              builder: (BuildContext context) {
-                                return ServerSelectionBottomSheet(
-                                  getStreams: getStreams,
-                                  bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                                    epLinks: epLinks,
-                                    episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                                    selectedSource: selectedSource,
-                                    title: data.title['english'] ?? data.title['romaji'] ?? '',
-                                    id: widget.id,
-                                    cover: data.cover,
-                                  ),
-                                  type: Type.download,
-                                );
-                              },
-                            );
-                          },
-                          icon: Icon(
-                            Icons.download_rounded,
-                            color: Colors.black,
+                      if(!unDownloadableSources.contains(selectedSource))
+                        Container(
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
+                              color: appTheme.accentColor.withOpacity(0.8)),
+                          child: IconButton(
+                            onPressed: () async {
+                              showModalBottomSheet(
+                                showDragHandle: true,
+                                isScrollControlled: true,
+                                context: context,
+                                backgroundColor: appTheme.modalSheetBackgroundColor,
+                                builder: (BuildContext context) {
+                                  return ServerSelectionBottomSheet(
+                                    getStreams: getStreams,
+                                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                                      epLinks: epLinks,
+                                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                      selectedSource: selectedSource,
+                                      title: data.title['english'] ?? data.title['romaji'] ?? '',
+                                      id: widget.id,
+                                      cover: data.cover,
+                                    ),
+                                    type: Type.download,
+                                  );
+                                },
+                              );
+                            },
+                            icon: Icon(
+                              Icons.download_rounded,
+                              color: Colors.black,
+                            ),
                           ),
                         ),
-                      ),
                     ],
                   ),
                 ),
@@ -905,32 +906,6 @@ class _InfoState extends State<Info> {
                 });
           },
 
-          //list style
-          // child: Container(
-          //   padding: EdgeInsets.only(left: 20, right: 20),
-          //   child: Container(
-          //     child: Column(
-          //       mainAxisSize: MainAxisSize.min,
-          //       children: [
-          //         Padding(
-          //           padding: EdgeInsets.only(left: 20, right: 20),
-          //           child: Row(
-          //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //             children: [
-          //               Text("Episode ${index+1}", style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 17),),
-          //               Icon(Icons.download_rounded, color: appTheme.textMainColor,)
-          //             ],
-          //           ),
-          //         ),
-          //         Padding(
-          //           padding: const EdgeInsets.only(top:8, left: 40, right: 40),
-          //           child: Divider(),
-          //         )
-          //       ],
-          //     ),
-          //   ),
-          // ),
-
           //saikou style
           child: Stack(
             children: [
@@ -969,19 +944,6 @@ class _InfoState extends State<Info> {
                         Container(
                           width: 140,
                         ),
-                        // Image.network(data.cover, fit: BoxFit.fill,),
-                        // ClipRRect(
-                        //   borderRadius: BorderRadius.circular(15),
-                        // child: Opacity(
-                        //   opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.6,
-                        //     child: Image.network(
-                        //       data.cover,
-                        //       width: 140,
-                        //       height: 90,
-                        //       fit: BoxFit.cover,
-                        //     ),
-                        //   ),
-                        // ),
                         Text(
                           "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
                           style: TextStyle(
@@ -992,37 +954,37 @@ class _InfoState extends State<Info> {
                             fontSize: 18,
                           ),
                         ),
-                        // ),
-                        Container(
-                          child: IconButton(
-                            onPressed: () async {
-                              showModalBottomSheet(
-                                showDragHandle: true,
-                                context: context,
-                                backgroundColor: appTheme.modalSheetBackgroundColor,
-                                isScrollControlled: true,
-                                builder: (BuildContext context) {
-                                  return ServerSelectionBottomSheet(
-                                    getStreams: getStreams,
-                                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                                      epLinks: epLinks,
-                                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                                      selectedSource: selectedSource,
-                                      title: data.title['english'] ?? data.title['romaji'] ?? '',
-                                      id: widget.id,
-                                      cover: data.cover,
-                                    ),
-                                    type: Type.download,
-                                  );
-                                },
-                              );
-                            },
-                            icon: Icon(
-                              Icons.download_rounded,
-                              color: appTheme.textMainColor,
+                        if(!unDownloadableSources.contains(selectedSource))
+                          Container(
+                            child: IconButton(
+                              onPressed: () async {
+                                showModalBottomSheet(
+                                  showDragHandle: true,
+                                  context: context,
+                                  backgroundColor: appTheme.modalSheetBackgroundColor,
+                                  isScrollControlled: true,
+                                  builder: (BuildContext context) {
+                                    return ServerSelectionBottomSheet(
+                                      getStreams: getStreams,
+                                      bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                                        epLinks: epLinks,
+                                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                        selectedSource: selectedSource,
+                                        title: data.title['english'] ?? data.title['romaji'] ?? '',
+                                        id: widget.id,
+                                        cover: data.cover,
+                                      ),
+                                      type: Type.download,
+                                    );
+                                  },
+                                );
+                              },
+                              icon: Icon(
+                                Icons.download_rounded,
+                                color: appTheme.textMainColor,
+                              ),
                             ),
-                          ),
-                        ),
+                          ) else Container()
                       ],
                     ),
                   ],

@@ -55,8 +55,7 @@ class _NewsState extends State<News> {
             )
           : SingleChildScrollView(
               child: Padding(
-                padding: EdgeInsets.only(
-                    top: MediaQuery.of(context).padding.top, bottom: MediaQuery.of(context).padding.bottom),
+                padding: MediaQuery.of(context).padding.copyWith(top: 10),
                 child: Column(
                   children: [
                     // Container(

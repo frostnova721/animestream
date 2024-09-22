@@ -72,8 +72,13 @@ class _SearchState extends State<Search> {
             children: [
               buildHeader("Search", context, afterNavigation: () => setState(() {})),
               Container(
-                padding: EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 25),
-                child: _searchBar(),
+                padding: EdgeInsets.only(top: 15, left: 25, right: 25, bottom: 10),
+                child: Column(
+                  children: [
+                    _searchBar(),
+                    _searchOptions(),
+                  ],
+                ),
               ),
               Expanded(
                 child: _searching
@@ -111,6 +116,33 @@ class _SearchState extends State<Search> {
     );
   }
 
+  Container _searchOptions() {
+    return Container(
+      padding: EdgeInsets.only(top: 10),
+      child: Row(
+        children: [
+          Checkbox(
+            value: exactMatch,
+            onChanged: (val) => setState(() {
+              exactMatch = val!;
+            }),
+            activeColor: appTheme.accentColor,
+            checkColor: Colors.black,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+          Text(
+            "exact match",
+            style: TextStyle(
+              color: appTheme.textMainColor,
+              fontFamily: "NotoSans",
+              fontWeight: FontWeight.bold,
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   Container _searchResults() {
     return Container(
       padding: EdgeInsets.only(left: 15, right: 15),
@@ -118,36 +150,12 @@ class _SearchState extends State<Search> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              padding: EdgeInsets.only(bottom: 20),
-              child: Row(
-                children: [
-                  Checkbox(
-                    value: exactMatch,
-                    onChanged: (val) => setState(() {
-                      exactMatch = val!;
-                    }),
-                    activeColor: appTheme.accentColor,
-                    checkColor: Colors.black,
-                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  Text(
-                    "exact match",
-                    style: TextStyle(
-                      color: appTheme.textMainColor,
-                      fontFamily: "NotoSans",
-                      fontWeight: FontWeight.bold,
-                    ),
-                  )
-                ],
-              ),
-            ),
             GridView.builder(
               padding: EdgeInsets.zero,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
-                  childAspectRatio: 120 / 225, //set as width and height of each child container
+                  childAspectRatio: 120 / 230, //set as width and height of each child container
                   mainAxisSpacing: 15),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
@@ -193,7 +201,8 @@ class _SearchState extends State<Search> {
       cursorColor: appTheme.accentColor,
       decoration: InputDecoration(
         labelText: "search",
-        labelStyle: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 17),
+        labelStyle:
+            TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 17),
         suffixIcon: Padding(
           padding: EdgeInsets.only(right: 10),
           child: Image.asset(

@@ -51,6 +51,10 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   bool initialised = false;
   bool showSubs = true;
 
+  //1x speed initially
+  double playBackSpeed = 1;
+  List<double> playBackSpeeds = [1, 1.25, 1.5, 1.75, 2];
+
   @override
   void initState() {
     super.initState();
@@ -196,11 +200,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     return KeyboardListener(
       focusNode: _fn,
       onKeyEvent: (event) {
-        if(!(event is KeyDownEvent)) return;
-        if(event.logicalKey == LogicalKeyboardKey.mediaPlayPause) {
+        if (!(event is KeyDownEvent)) return;
+        if (event.logicalKey == LogicalKeyboardKey.mediaPlayPause) {
           print("tru");
           print(controller.isPlaying());
-          (controller.isPlaying() ?? false) ?  controller.pause() : controller.play();
+          (controller.isPlaying() ?? false) ? controller.pause() : controller.play();
         }
       },
       child: GestureDetector(
@@ -519,7 +523,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     child: Text(
                                       "Episode ${index + 1}",
                                       style: TextStyle(
-                                        color: index == currentEpIndex ? appTheme.backgroundColor : appTheme.textMainColor,
+                                        color:
+                                            index == currentEpIndex ? appTheme.backgroundColor : appTheme.textMainColor,
                                         fontFamily: "Rubik",
                                         fontSize: 20,
                                       ),
@@ -542,8 +547,24 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
               ),
             ],
           ),
+
+          //right side
           Row(
             children: [
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return playBackSpeedDialog();
+                    },
+                  );
+                },
+                icon: Icon(
+                  Icons.speed_rounded,
+                  color: Colors.white,
+                ),
+              ),
               IconButton(
                   onPressed: () {
                     setState(() {
@@ -567,6 +588,79 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           )
         ],
       ),
+    );
+  }
+
+  Widget playBackSpeedDialog() {
+    return Container(
+      height: MediaQuery.of(context).size.height / 2,
+      child: AlertDialog(
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Text("Speed", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),),
+          ),
+          StatefulBuilder(
+            builder: (context, setState) => Container(
+              height: 230,
+              width: 250,
+              child: ListView.builder(
+                itemCount: playBackSpeeds.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: EdgeInsets.only(bottom: 5),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: appTheme.backgroundSubColor,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            playBackSpeed = playBackSpeeds[index];
+                          });
+                          controller.videoPlayerController?.setSpeed(playBackSpeed);
+                        },
+                        child: Row(
+                          children: [
+                            Radio<double>(
+                              value: playBackSpeeds[index],
+                              groupValue: playBackSpeed,
+                              onChanged: (val) {
+                                setState(() {
+                                  playBackSpeed = val ?? 1.0;
+                                });
+                                controller.videoPlayerController?.setSpeed(playBackSpeed);
+                              },
+                            ),
+                            Text(playBackSpeeds[index].toString() + "x"),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 5),
+            alignment: Alignment.center,
+            child: TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                "close",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+          )
+        ],
+      )),
     );
   }
 

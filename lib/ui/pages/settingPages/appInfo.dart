@@ -29,6 +29,8 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
     });
   }
 
+  int devTapCounter = 0;
+
   bool loaded = false;
 
   String appVersion = '';
@@ -53,6 +55,17 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             GestureDetector(
+                              onTap: () {
+                                // devTapCounter++;
+                                // if (devTapCounter == 10) {
+                                //   Settings()
+                                //       .writeSettings(SettingsModal(isDev: !(currentUserSettings?.isDev ?? false)));
+                                //   if (currentUserSettings?.isDev ?? false)
+                                //     floatingSnackBar(context, "-+-+-+Leaving dev mode+-+-+-");
+                                //   else
+                                //     floatingSnackBar(context, "-+-+-+Accessing dev mode+-+-+-");
+                                // }
+                              },
                               onLongPress: () => setState(() {
                                 iconPressed = !iconPressed;
                                 showToast("wooosh!!");
@@ -62,8 +75,8 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                   child: Image.asset(
                                     // iconPressed
                                     //     ? 'lib/assets/icons/logo_monochrome.png'
-                                        'lib/assets/icons/logo_foreground.png',
-                                        color: iconPressed ? appTheme.textMainColor : null,
+                                    'lib/assets/icons/logo_foreground.png',
+                                    color: iconPressed ? appTheme.textMainColor : null,
                                     height: 100,
                                     width: 100,
                                   )),

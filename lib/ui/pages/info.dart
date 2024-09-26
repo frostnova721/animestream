@@ -1325,7 +1325,7 @@ class _InfoState extends State<Info> {
                             onPressed: () async {
                               try {
                                 await Downloader().downloadImage(
-                                    img, (data.title['english'] ?? data.title['romaji'] ?? "anime") + "Banner");
+                                    img, (data.title['english'] ?? data.title['romaji'] ?? "anime") + "_Banner");
                                 floatingSnackBar(context, "Succesfully saved to your downloads folder!");
                                 Navigator.of(context).pop();
                               } catch (err) {

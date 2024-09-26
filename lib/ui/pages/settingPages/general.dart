@@ -1,8 +1,10 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSetting extends StatefulWidget {
@@ -81,6 +83,40 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       });
                       writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
                     }, description: "*download 2x items per batch"),
+                    InkWell(
+                      onTap: () async {
+                        final dir = await FilePickerIO().getDirectoryPath();
+                        if(dir == null) return;
+                        print(dir);
+                        await Settings().writeSettings(SettingsModal(downloadPath: dir));
+                        setState(() {});
+                        floatingSnackBar(context, "might need to provide 'allow access to all files' while downloading!");
+                      },
+                      child: Container(
+                        padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Download path",
+                                  style: textStyle(),
+                                ),
+                                Text(
+                                  currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download',
+                                  style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ),
+                            Icon(Icons.navigate_next_rounded)
+                          ],
+                        ),
+                      ),
+                    ),
                     Container(
                       padding: EdgeInsets.only(top: 20, bottom: 10, left: 20, right: 20),
                       child: Column(
@@ -94,15 +130,29 @@ class _GeneralSettingState extends State<GeneralSetting> {
                             alignment: Alignment.center,
                             padding: EdgeInsets.only(top: 20),
                             child: DropdownMenu(
-                              width: MediaQuery.of(context).size.width - 80,
-                              label: Text("providers", style: TextStyle(color: appTheme.textMainColor, fontSize: 18, fontWeight: FontWeight.bold),),
-                              leadingIcon: Icon(Icons.source_rounded, color: appTheme.textMainColor,),
+                                width: MediaQuery.of(context).size.width - 80,
+                                label: Text(
+                                  "providers",
+                                  style: TextStyle(
+                                      color: appTheme.textMainColor, fontSize: 18, fontWeight: FontWeight.bold),
+                                ),
+                                leadingIcon: Icon(
+                                  Icons.source_rounded,
+                                  color: appTheme.textMainColor,
+                                ),
                                 initialSelection: currentUserSettings?.preferredProvider ?? sources[0],
                                 onSelected: (val) async {
                                   writeSettings(SettingsModal(preferredProvider: val));
                                 },
-                                textStyle: TextStyle(fontFamily: "NotoSans", fontSize: 16, fontWeight: FontWeight.bold, color: appTheme.textMainColor),
-                                menuStyle: MenuStyle(backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor), shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))),
+                                textStyle: TextStyle(
+                                    fontFamily: "NotoSans",
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: appTheme.textMainColor),
+                                menuStyle: MenuStyle(
+                                    backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
+                                    shape: WidgetStatePropertyAll(
+                                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))),
                                 dropdownMenuEntries: getSourceDropdownList()),
                           )
                         ],

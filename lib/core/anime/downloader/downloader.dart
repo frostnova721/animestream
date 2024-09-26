@@ -1,5 +1,6 @@
 import "dart:io";
 import "package:animestream/core/anime/downloader/types.dart";
+import "package:animestream/core/app/runtimeDatas.dart";
 import "package:animestream/ui/models/notification.dart";
 import "package:animestream/ui/models/snackBar.dart";
 import "package:http/http.dart";
@@ -19,7 +20,7 @@ class Downloader {
     Permission access;
 
     if (sdkVer > 32) {
-      access = await Permission.videos;
+      access = await Permission.manageExternalStorage;
     } else {
       access = await Permission.storage;
     }
@@ -31,6 +32,7 @@ class Downloader {
     }
 
     if (status.isDenied) {
+      showToast("Provide storage access to perform downloading, unneeded for default path!");
       final req = await access.request();
       if (req.isGranted) {
         return true;
@@ -63,7 +65,8 @@ class Downloader {
       showToast("Permission denied! Grant access to storage");
       throw Exception("Couldnt download image due to lack of permission!");
     }
-    final downPath = await Directory('');
+    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download';
+    final downPath = await Directory(basePath);
     String finalPath;
     final fileExtension = imageUrl.split('/').last.split(".").last.trim();
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
@@ -72,7 +75,7 @@ class Downloader {
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = '/animestream/${fileName}.${fileExtension}';
+      finalPath = '${downPath.path}/animestream/${fileName}.${fileExtension}';
     } else {
       final externalStorage = await getExternalStorageDirectory();
       final directory = Directory("${externalStorage?.path}/animestream/");
@@ -85,7 +88,6 @@ class Downloader {
       final out = File(finalPath);
 
       final imageData = (await get(Uri.parse(imageUrl))).bodyBytes;
-
       await out.writeAsBytes(imageData);
       print("saved to ${out.path}");
       return;
@@ -100,7 +102,7 @@ class Downloader {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
     }
 
-    final basePath = '/storage/emulated/0/Download';
+    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download';
 
     final downPath = await Directory(basePath);
     String finalPath;
@@ -182,7 +184,7 @@ class Downloader {
       }
 
       //sort the buffers
-      buffers.sort((a,b) => a.index.compareTo(b.index));  
+      buffers.sort((a, b) => a.index.compareTo(b.index));
 
       //write the data after full download.
       final out = await output.openWrite();

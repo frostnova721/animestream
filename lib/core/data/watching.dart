@@ -6,14 +6,12 @@ import "package:animestream/core/database/anilist/types.dart";
 import 'package:animestream/core/commons/enums.dart';
 import "package:hive/hive.dart";
 
-Future<void> storeWatching(
-    String title, String imageUrl, int id, int watched, { int? totalEpisodes }) async {
+Future<void> storeWatching(String title, String imageUrl, int id, int watched, {int? totalEpisodes}) async {
   try {
     //add to anilist if the user is logged in
     print("SETTING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
-      AnilistMutations().mutateAnimeList(
-          id: id, status: MediaStatus.CURRENT, progress: watched);
+      AnilistMutations().mutateAnimeList(id: id, status: MediaStatus.CURRENT, progress: watched);
     } else {
       var box = await Hive.openBox('animestream');
       if (!box.isOpen) {
@@ -74,8 +72,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   final List<UserAnimeListItem> recentlyWatched = [];
   if (await AniListLogin().isAnilistLoggedIn()) {
     if (userName != null) {
-      List<UserAnimeList> watchedList = await AnilistQueries()
-          .getUserAnimeList(userName, status: MediaStatus.CURRENT);
+      List<UserAnimeList> watchedList = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.CURRENT);
       final list = watchedList[0].list.reversed.toList();
       if (list.length != 0) {
         return list;
@@ -91,14 +88,13 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
     if (watching.length != 0) {
       watching.reversed.toList().forEach((e) {
         recentlyWatched.add(UserAnimeListItem(
-          id: e['id'],
-          //just give the key as title since its just one
-          title: {'title': e['title']},
-          coverImage: e['imageUrl'],
-          watchProgress: e['watched'],
-          rating: e['rating'] ?? null,
-          episodes: e['totalEpisodes']
-        ));
+            id: e['id'],
+            //just give the key as title since its just one
+            title: {'title': e['title']},
+            coverImage: e['imageUrl'],
+            watchProgress: e['watched'],
+            rating: e['rating'] ?? null,
+            episodes: e['totalEpisodes']));
       });
       box.close();
     }
@@ -109,8 +105,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
 Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
   if (await AniListLogin().isAnilistLoggedIn() && status != null) {
     if (storedUserData == null) throw new Exception("ERR_NO_USERDATA");
-    final list = await AnilistQueries()
-        .getUserAnimeList(storedUserData!.name, status: status);
+    final list = await AnilistQueries().getUserAnimeList(storedUserData!.name, status: status);
     if (list.isEmpty)
       throw new Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
     else {

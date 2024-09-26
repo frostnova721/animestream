@@ -12,6 +12,8 @@ class SettingsModal {
   final String? preferredProvider;
   final bool? darkMode;
   final bool? materialTheme;
+  final bool? isDev;
+  final String? downloadPath;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -25,6 +27,8 @@ class SettingsModal {
     this.preferredProvider,
     this.darkMode,
     this.materialTheme,
+    this.isDev,
+    this.downloadPath,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -40,6 +44,8 @@ class SettingsModal {
       preferredProvider: map['preferredProvider'] ?? sources[0],
       darkMode: map['darkMode'] ?? true,
       materialTheme: map['materialTheme'] ?? false,
+      isDev: map['isDev'] ?? false,
+      downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download',
     );
   }
 
@@ -56,6 +62,8 @@ class SettingsModal {
       'preferredProvider': preferredProvider,
       'darkMode': darkMode,
       'materialTheme': materialTheme,
+      'isDev': isDev,
+      'downloadPath': downloadPath,
     };
   }
 }

@@ -75,14 +75,6 @@ class _HomeState extends State<Home> {
 
       widget.updateWatchedList(recentlyWatched);
 
-      // final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
-      // if (currentlyAiringResponse.length == 0) return;
-
-      // currentlyAiring = [];
-      // currentlyAiringResponse.sublist(0, 20).forEach((item) => currentlyAiring
-      //     .add(HomePageList(coverImage: item.cover, id: item.id, rating: item.rating, title: item.title)));
-      // ;
-
       if (mounted)
         setState(() {
           refreshing = false;

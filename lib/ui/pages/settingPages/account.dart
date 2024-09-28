@@ -7,7 +7,9 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
+import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class AccountSetting extends StatefulWidget {
   const AccountSetting({super.key});
@@ -194,6 +196,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                             AniListLogin().launchWebView(context).then((logged) {
                                               if (logged) {
                                                 floatingSnackBar(context, "Login successful!");
+                                                Provider.of<ThemeProvider>(context).justRefresh();
                                               }
                                               //replace the page with itself to avoid recalling the functions in initState to update the user data
                                               Navigator.pushReplacement(

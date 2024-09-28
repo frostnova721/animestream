@@ -279,6 +279,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                   ),
                   Expanded(
                     child: getSelectedTabView(tabController.index).length == 0
+                        //this wouldnt be shown! ik
                         ? Center(
                             child: Text(
                               "Such a void!",
@@ -317,25 +318,31 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     );
   }
 
-  Container itemGrid(BuildContext context, int currentTabIndex) {
-    return Container(
-      padding: EdgeInsets.only(
-        left: 10,
-        right: 10,
-      ),
-      child: GridView.builder(
-        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
-            childAspectRatio: 120 / 220,
-            mainAxisSpacing: 10),
-        padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
-        // shrinkWrap: true,
-        itemCount: getSelectedTabView(currentTabIndex).length,
-        itemBuilder: (context, index) {
-          return Container(
-            child: getSelectedTabView(currentTabIndex)[index],
-          );
-        },
+  Widget itemGrid(BuildContext context, int currentTabIndex) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        await getAnimeList();
+        print("refreshed lists!");
+      },
+      child: Container(
+        padding: EdgeInsets.only(
+          left: 10,
+          right: 10,
+        ),
+        child: GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+              childAspectRatio: 120 / 220,
+              mainAxisSpacing: 10),
+          padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
+          // shrinkWrap: true,
+          itemCount: getSelectedTabView(currentTabIndex).length,
+          itemBuilder: (context, index) {
+            return Container(
+              child: getSelectedTabView(currentTabIndex)[index],
+            );
+          },
+        ),
       ),
     );
   }

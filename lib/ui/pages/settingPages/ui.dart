@@ -365,6 +365,11 @@ class _ThemeSettingState extends State<ThemeSetting> {
   InkWell _themeItem(String name, ThemeItem theme, context) {
     return InkWell(
       onTap: () async {
+        // if (theme.name == "Monochrome" && !darkMode) {
+        //   Navigator.of(context).pop();
+        //   floatingSnackBar(context, "No, Dont do it!");
+        //   return;
+        // }
         //check if selected theme is same as current theme
         if (currentThemeId != theme.id) {
           await applyTheme(theme.id);

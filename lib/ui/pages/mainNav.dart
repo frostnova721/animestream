@@ -122,7 +122,12 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
       if (userName != null) {
         List<UserAnimeList> pl = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING);
-        if (pl.isEmpty) return;
+        if (pl.isEmpty) {
+          setState(() {
+            homeDataLoaded = true;
+          });
+          return;
+        };
         plannedList = [];
         List<UserAnimeListItem> itemList = pl[0].list;
         if (itemList.length > 25) itemList = itemList.sublist(0, 25);

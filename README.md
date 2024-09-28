@@ -31,7 +31,7 @@ Currently, you can enjoy anime content from the following sources:
 
 - **Gogo**
 - **Ryuk**
-- **Animepahe**
+- **AnimeOnsen**  
 
 ## Known Issues
 

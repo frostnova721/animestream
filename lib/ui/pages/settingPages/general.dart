@@ -130,6 +130,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                             alignment: Alignment.center,
                             padding: EdgeInsets.only(top: 20),
                             child: DropdownMenu(
+                              enableSearch: false,                     
                                 width: MediaQuery.of(context).size.width - 80,
                                 label: Text(
                                   "providers",

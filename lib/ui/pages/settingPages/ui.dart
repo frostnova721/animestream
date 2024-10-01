@@ -94,35 +94,66 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   "Mode",
                                   style: textStyle(),
                                 ),
-                                DropdownMenu(
-                                    initialSelection: currentUserSettings?.darkMode ?? true,
-                                    onSelected: (val) async {
-                                      await setThemeMode(val ?? true);
-                                      setState(() {
-                                        darkMode = val ?? true;
-                                      });
-                                      // floatingSnackBar(context, "All set! restart the app to apply the theme");
-                                    },
-                                    menuStyle:
-                                        MenuStyle(backgroundColor: WidgetStatePropertyAll(appTheme.backgroundSubColor)),
-                                    textStyle: TextStyle(color: appTheme.textMainColor),
-                                    dropdownMenuEntries: [
-                                      // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
-                                      DropdownMenuEntry(
-                                        value: true,
-                                        label: "dark",
-                                        style: ButtonStyle(
-                                          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
-                                        ),
+                                DropdownButton(
+                                  value: darkMode,
+                                  style: TextStyle(color: appTheme.textMainColor, fontSize: 18, fontFamily: "NotoSans"),
+                                  padding: EdgeInsets.only(left: 10, right: 10),
+                                  icon: Padding(
+                                    padding: const EdgeInsets.only(left: 10),
+                                    child: Icon(Icons.arrow_drop_down),
+                                  ),
+                                  items: [
+                                    DropdownMenuItem(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        child: Text("dark"),
                                       ),
-                                      DropdownMenuEntry(
-                                        value: false,
-                                        label: "light (beta)",
-                                        style: ButtonStyle(
-                                          foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
-                                        ),
-                                      )
-                                    ])
+                                      value: true,
+                                    ),
+                                    DropdownMenuItem(
+                                      child: Padding(
+                                        padding: const EdgeInsets.only(left: 10),
+                                        child: Text("light"),
+                                      ),
+                                      value: false,
+                                    )
+                                  ],
+                                  onChanged: (val) async {
+                                    await setThemeMode(val ?? true);
+                                    setState(() {
+                                      darkMode = val ?? true;
+                                    });
+                                    // floatingSnackBar(context, "All set! restart the app to apply the theme");
+                                  },
+                                )
+                                // initialSelection: currentUserSettings?.darkMode ?? true,
+                                // onSelected: (val) async {
+                                //   await setThemeMode(val ?? true);
+                                //   setState(() {
+                                //     darkMode = val ?? true;
+                                //   });
+                                //   // floatingSnackBar(context, "All set! restart the app to apply the theme");
+                                // },
+                                // menuStyle:
+                                //     MenuStyle(backgroundColor: WidgetStatePropertyAll(appTheme.backgroundSubColor)),
+                                // textStyle: TextStyle(color: appTheme.textMainColor),
+                                // dropdownMenuEntries: [
+                                //   // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
+                                //   DropdownMenuEntry(
+                                //     value: true,
+                                //     label: "dark",
+                                //     style: ButtonStyle(
+                                //       foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
+                                //     ),
+                                //   ),
+                                //   DropdownMenuEntry(
+                                //     value: false,
+                                //     label: "light (beta)",
+                                //     style: ButtonStyle(
+                                //       foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
+                                //     ),
+                                //   )
+                                // ])
                               ],
                             ),
                           ),

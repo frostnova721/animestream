@@ -816,7 +816,7 @@ class _InfoState extends State<Info> {
                     crossAxisAlignment: CrossAxisAlignment.end,
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
-                      if(!unDownloadableSources.contains(selectedSource))
+                      if (!unDownloadableSources.contains(selectedSource))
                         Container(
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
@@ -881,129 +881,134 @@ class _InfoState extends State<Info> {
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       itemBuilder: (context, index) {
-        return InkWell(
-          onTap: () async {
-            showModalBottomSheet(
-                showDragHandle: true,
-                isScrollControlled: true,
-                context: context,
-                backgroundColor: appTheme.modalSheetBackgroundColor,
-                builder: (context) {
-                  return ServerSelectionBottomSheet(
-                    getStreams: getStreams,
-                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                      totalEpisodes: data.episodes,
-                      epLinks: epLinks,
-                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                      selectedSource: selectedSource,
-                      title: data.title['english'] ?? data.title['romaji'] ?? '',
-                      id: widget.id,
-                      cover: data.cover,
-                    ),
-                    type: Type.watch,
-                    getWatched: getWatched,
-                  );
-                });
-          },
-
-          //saikou style
-          child: Stack(
-            children: [
-              Container(
-                clipBehavior: Clip.hardEdge,
-                height: 110,
-                margin: EdgeInsets.only(top: 10, left: 10, right: 10),
-                padding: EdgeInsets.only(right: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(15),
-                  color: appTheme.backgroundColor,
-                ),
-                alignment: Alignment.center,
-                child: Stack(
-                  children: [
-                    Opacity(
-                      opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.5,
-                      child: ShaderMask(
-                        blendMode: BlendMode.dstIn,
-                        shaderCallback: (bounds) => LinearGradient(
-                          colors: [appTheme.backgroundColor, Colors.transparent],
-                          stops: [0.6, 0.99],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ).createShader(bounds),
-                        child: Image.network(
-                          data.cover,
-                          fit: BoxFit.cover,
-                          width: 165,
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        return Stack(
+          children: [
+            Container(
+              clipBehavior: Clip.hardEdge,
+              height: 110,
+              margin: EdgeInsets.only(top: 10, left: 10, right: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(15),
+                color: appTheme.backgroundColor,
+              ),
+              alignment: Alignment.center,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    showModalBottomSheet(
+                        showDragHandle: true,
+                        isScrollControlled: true,
+                        context: context,
+                        backgroundColor: appTheme.modalSheetBackgroundColor,
+                        builder: (context) {
+                          return ServerSelectionBottomSheet(
+                            getStreams: getStreams,
+                            bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                              totalEpisodes: data.episodes,
+                              epLinks: epLinks,
+                              episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                              selectedSource: selectedSource,
+                              title: data.title['english'] ?? data.title['romaji'] ?? '',
+                              id: widget.id,
+                              cover: data.cover,
+                            ),
+                            type: Type.watch,
+                            getWatched: getWatched,
+                          );
+                        });
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: Stack(
                       children: [
-                        Container(
-                          width: 140,
-                        ),
-                        Text(
-                          "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
-                          style: TextStyle(
-                            color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
-                                ? appTheme.textMainColor
-                                : appTheme.textSubColor,
-                            fontFamily: "Poppins",
-                            fontSize: 18,
+                        Opacity(
+                          opacity: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched ? 1.0 : 0.5,
+                          child: ShaderMask(
+                            blendMode: BlendMode.dstIn,
+                            shaderCallback: (bounds) => LinearGradient(
+                              colors: [appTheme.backgroundColor, Colors.transparent],
+                              stops: [0.6, 0.99],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ).createShader(bounds),
+                            child: Image.network(
+                              data.cover,
+                              fit: BoxFit.cover,
+                              width: 165,
+                            ),
                           ),
                         ),
-                        if(!unDownloadableSources.contains(selectedSource))
-                          Container(
-                            child: IconButton(
-                              onPressed: () async {
-                                showModalBottomSheet(
-                                  showDragHandle: true,
-                                  context: context,
-                                  backgroundColor: appTheme.modalSheetBackgroundColor,
-                                  isScrollControlled: true,
-                                  builder: (BuildContext context) {
-                                    return ServerSelectionBottomSheet(
-                                      getStreams: getStreams,
-                                      bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                                        epLinks: epLinks,
-                                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                                        selectedSource: selectedSource,
-                                        title: data.title['english'] ?? data.title['romaji'] ?? '',
-                                        id: widget.id,
-                                        cover: data.cover,
-                                      ),
-                                      type: Type.download,
-                                    );
-                                  },
-                                );
-                              },
-                              icon: Icon(
-                                Icons.download_rounded,
-                                color: appTheme.textMainColor,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Container(
+                              width: 140,
+                            ),
+                            Text(
+                              "Episode ${visibleEpList[currentPageIndex][index]['realIndex'] + 1}",
+                              style: TextStyle(
+                                color: visibleEpList[currentPageIndex][index]['realIndex'] + 1 > watched
+                                    ? appTheme.textMainColor
+                                    : appTheme.textSubColor,
+                                fontFamily: "Poppins",
+                                fontSize: 18,
                               ),
                             ),
-                          ) else Container()
+                            if (!unDownloadableSources.contains(selectedSource))
+                              Container(
+                                child: IconButton(
+                                  onPressed: () async {
+                                    showModalBottomSheet(
+                                      showDragHandle: true,
+                                      context: context,
+                                      backgroundColor: appTheme.modalSheetBackgroundColor,
+                                      isScrollControlled: true,
+                                      builder: (BuildContext context) {
+                                        return ServerSelectionBottomSheet(
+                                          getStreams: getStreams,
+                                          bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                                            epLinks: epLinks,
+                                            episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                            selectedSource: selectedSource,
+                                            title: data.title['english'] ?? data.title['romaji'] ?? '',
+                                            id: widget.id,
+                                            cover: data.cover,
+                                          ),
+                                          type: Type.download,
+                                        );
+                                      },
+                                    );
+                                  },
+                                  icon: Icon(
+                                    Icons.download_rounded,
+                                    color: appTheme.textMainColor,
+                                  ),
+                                ),
+                              )
+                            else
+                              Container()
+                          ],
+                        ),
                       ],
-                    ),
-                  ],
-                ),
-              ),
-              if (watched > visibleEpList[currentPageIndex][index]['realIndex'])
-                Align(
-                  alignment: Alignment.topRight,
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20, right: 25),
-                    child: ImageIcon(
-                      AssetImage('lib/assets/images/check.png'),
-                      color: Colors.white,
-                      size: 18,
                     ),
                   ),
                 ),
-            ],
-          ),
+              ),
+            ),
+            if (watched > visibleEpList[currentPageIndex][index]['realIndex'])
+              Align(
+                alignment: Alignment.topRight,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20, right: 25),
+                  child: ImageIcon(
+                    AssetImage('lib/assets/images/check.png'),
+                    color: Colors.white,
+                    size: 18,
+                  ),
+                ),
+              ),
+          ],
         );
       },
     );

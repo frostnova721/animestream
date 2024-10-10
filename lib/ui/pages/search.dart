@@ -62,7 +62,6 @@ class _SearchState extends State<Search> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false,
       backgroundColor: appTheme.backgroundColor,
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),

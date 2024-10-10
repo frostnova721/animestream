@@ -65,24 +65,24 @@ class Downloader {
       showToast("Permission denied! Grant access to storage");
       throw Exception("Couldnt download image due to lack of permission!");
     }
-    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download';
+    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream';
     final downPath = await Directory(basePath);
     String finalPath;
     final fileExtension = imageUrl.split('/').last.split(".").last.trim();
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
     if (downPath.existsSync()) {
-      final directory = Directory("${downPath.path}/animestream/");
+      final directory = Directory("${downPath.path}/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = '${downPath.path}/animestream/${fileName}.${fileExtension}';
+      finalPath = '${downPath.path}/${fileName}.${fileExtension}';
     } else {
       final externalStorage = await getExternalStorageDirectory();
-      final directory = Directory("${externalStorage?.path}/animestream/");
+      final directory = Directory("${externalStorage?.path}/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = "${externalStorage?.path}/animestream/${fileName}.${fileExtension}";
+      finalPath = "${externalStorage?.path}/${fileName}.${fileExtension}";
     }
     try {
       final out = File(finalPath);
@@ -102,24 +102,24 @@ class Downloader {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
     }
 
-    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download';
+    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream';
 
     final downPath = await Directory(basePath);
     String finalPath;
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
     if (downPath.existsSync()) {
-      final directory = Directory("${downPath.path}/animestream/");
+      final directory = Directory("${downPath.path}/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = '$basePath/animestream/${fileName}.mp4';
+      finalPath = '$basePath/${fileName}.mp4';
     } else {
       final externalStorage = await getExternalStorageDirectory();
-      final directory = Directory("${externalStorage?.path}/animestream/");
+      final directory = Directory("${externalStorage?.path}/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
-      finalPath = "${externalStorage?.path}/animestream/${fileName}.mp4";
+      finalPath = "${externalStorage?.path}/${fileName}.mp4";
     }
 
     final output = File(finalPath);

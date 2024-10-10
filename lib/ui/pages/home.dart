@@ -96,7 +96,7 @@ class _HomeState extends State<Home> {
       backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Container(
-          padding: pagePadding(context),
+          padding: pagePadding(context).copyWith(left: 0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

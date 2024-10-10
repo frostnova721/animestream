@@ -69,42 +69,43 @@ class _SettingsPageState extends State<SettingsPage> {
                   padding: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
                   child: Container(
                     // margin: EdgeInsets.only(left: 15, right: 15, top: 5, bottom: 5),
-                    decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
+                    decoration:
+                        BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(20)),
                     clipBehavior: Clip.hardEdge,
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                         onTap: () {
-                        Navigator.of(context).push(
-                          PageRouteBuilder(
-                            pageBuilder: (context, anim, anim2) {
-                              return settingItems[index].navigateTo;
-                            },
-                            transitionDuration: Duration(milliseconds: 100),
-                            reverseTransitionDuration: Duration(milliseconds: 100),
-                            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                              // final tween = Tween(begin: Offset(1.0, 0.0), end: Offset.zero);
-                              // final curvedAnimation = CurvedAnimation(
-                              //   parent: animation,
-                              //   curve: Curves.ease,
-                              // );
-                              return FadeTransition(
-                                opacity: animation,
-                                child: child,
-                              );
-                              // return SlideTransition(
-                              //   position: tween.animate(curvedAnimation),
-                              //   child: child,
-                              // );
-                            },
-                          ),
-                        ).then((val) {
-                          setState(() {
-                            
+                        onTap: () {
+                          Navigator.of(context)
+                              .push(
+                            PageRouteBuilder(
+                              pageBuilder: (context, anim, anim2) {
+                                return settingItems[index].navigateTo;
+                              },
+                              transitionDuration: Duration(milliseconds: 100),
+                              reverseTransitionDuration: Duration(milliseconds: 100),
+                              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+                                // final tween = Tween(begin: Offset(1.0, 0.0), end: Offset.zero);
+                                // final curvedAnimation = CurvedAnimation(
+                                //   parent: animation,
+                                //   curve: Curves.ease,
+                                // );
+                                return FadeTransition(
+                                  opacity: animation,
+                                  child: child,
+                                );
+                                // return SlideTransition(
+                                //   position: tween.animate(curvedAnimation),
+                                //   child: child,
+                                // );
+                              },
+                            ),
+                          )
+                              .then((val) {
+                            if (mounted) setState(() {});
                           });
-                        });
-                      },
-                      focusColor: appTheme.textSubColor,
+                        },
+                        focusColor: appTheme.textSubColor,
                         child: Padding(
                           padding: EdgeInsets.all(20),
                           child: Row(
@@ -125,8 +126,11 @@ class _SettingsPageState extends State<SettingsPage> {
                                       children: [
                                         Text(
                                           settingItems[index].label,
-                                          style:
-                                              TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 20, color: appTheme.textMainColor),
+                                          style: TextStyle(
+                                              fontFamily: "NotoSans",
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 20,
+                                              color: appTheme.textMainColor),
                                         ),
                                         Text(
                                           settingItems[index].description,

@@ -87,7 +87,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       onTap: () async {
                         final dir = await FilePickerIO().getDirectoryPath();
                         if(dir == null) return;
-                        print(dir);
+                        print("Path set to: $dir");
                         await Settings().writeSettings(SettingsModal(downloadPath: dir));
                         setState(() {});
                         floatingSnackBar(context, "might need to provide 'allow access to all files' while downloading!");

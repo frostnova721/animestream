@@ -1,4 +1,5 @@
 import 'package:animestream/core/commons/enums.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart';
 
 Future<String> fetch(String uri) async {
@@ -30,43 +31,50 @@ String getCurrentSeason() {
   }
 }
 
- Map<String, String>? MonthnumberToMonthName(
-    int? monthNumber,
-  ) {
-    if (monthNumber == null) return {'short': '', 'full': ''};
-    if (monthNumber > 12 || monthNumber < 1) return null;
-    const monthName = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return {
-      'full': monthName[monthNumber - 1],
-      'short': monthName[monthNumber - 1].substring(0, 3),
-    };
-  }
+Map<String, String>? MonthnumberToMonthName(
+  int? monthNumber,
+) {
+  if (monthNumber == null) return {'short': '', 'full': ''};
+  if (monthNumber > 12 || monthNumber < 1) return null;
+  const monthName = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+  ];
+  return {
+    'full': monthName[monthNumber - 1],
+    'short': monthName[monthNumber - 1].substring(0, 3),
+  };
+}
 
 MediaStatus? assignItemEnum(String? valueInString) {
-  if(valueInString == null) return null;
-    switch (valueInString) {
-      case "CURRENT":
-        return MediaStatus.CURRENT;
-      case "PLANNING":
-        return MediaStatus.PLANNING;
-      case "DROPPED":
-        return MediaStatus.DROPPED;
-      case "COMPLETED":
-        return MediaStatus.COMPLETED;
-      default:
-        throw new Exception("ERR_BAD_STRING");
-    }
+  if (valueInString == null) return null;
+  switch (valueInString) {
+    case "CURRENT":
+      return MediaStatus.CURRENT;
+    case "PLANNING":
+      return MediaStatus.PLANNING;
+    case "DROPPED":
+      return MediaStatus.DROPPED;
+    case "COMPLETED":
+      return MediaStatus.COMPLETED;
+    default:
+      throw new Exception("ERR_BAD_STRING");
   }
+}
+
+Future<bool> isTv() async {
+  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+  AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+  bool isTV = androidInfo.systemFeatures.contains('android.software.leanback');
+  return isTV;
+}

@@ -65,6 +65,11 @@ class _InfoState extends State<Info> {
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences().getUserPreferences();
     gridMode = preferences.episodeGridView ?? false;
+
+    //load TV stuff
+    if(await isTv()) {
+      _watchInfoButtonFocusNode.requestFocus();
+    }
   }
 
   Future<void> getWatched() async {
@@ -226,116 +231,116 @@ class _InfoState extends State<Info> {
         backgroundColor: appTheme.backgroundColor,
         body: dataLoaded
             ? SingleChildScrollView(
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      _stack(),
-                      Container(
-                        margin: EdgeInsets.only(top: 30),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          children: [
-                            Container(
-                              // width: 120,
-                              child: ElevatedButton(
-                                focusNode: _watchInfoButtonFocusNode,
-                                onFocusChange: (val) {
-                                  setState(() {});
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: _watchInfoButtonFocusNode.hasFocus
-                                      ? appTheme.textMainColor
-                                      : appTheme.accentColor,
-                                  fixedSize: Size(135, 55),
-                                ),
-                                onPressed: () {
-                                  setState(() {
-                                    infoPage = !infoPage;
-                                  });
-                                },
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(
-                                      infoPage ? Icons.play_arrow_rounded : Icons.info_rounded,
-                                      color: Colors.black,
-                                      size: 28,
-                                    ),
-                                    Text(
-                                      infoPage ? "watch" : "info",
-                                      style: TextStyle(
-                                        color: Colors.black,
-                                        fontFamily: "Poppins",
-                                        fontSize: 18,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+              child: Padding(
+                padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    _stack(),
+                    Container(
+                      margin: EdgeInsets.only(top: 30),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            // width: 120,
+                            child: ElevatedButton(
+                              focusNode: _watchInfoButtonFocusNode,
+                              onFocusChange: (val) {
+                                setState(() {});
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: _watchInfoButtonFocusNode.hasFocus
+                                    ? appTheme.textMainColor
+                                    : appTheme.accentColor,
+                                fixedSize: Size(135, 55),
                               ),
-                            ),
-                            if (loggedIn)
-                              Container(
-                                child: ElevatedButton(
-                                  onPressed: () {
-                                    showModalBottomSheet(
-                                      context: context,
-                                      backgroundColor: appTheme.modalSheetBackgroundColor,
-                                      showDragHandle: true,
-                                      builder: (context) => MediaListStatusBottomSheet(
-                                        status: mediaListStatus,
-                                        id: widget.id,
-                                        refreshListStatus: refreshListStatus,
-                                        totalEpisodes: data.episodes ?? 0,
-                                        episodesWatched: watched,
-                                      ),
-                                    );
-                                  },
-                                  style: ElevatedButton.styleFrom(
-                                    shape: CircleBorder(
-                                      side: BorderSide(
-                                        color: appTheme.accentColor,
-                                      ),
-                                    ),
-                                    fixedSize: Size(50, 50),
-                                    backgroundColor: appTheme.backgroundColor,
-                                    padding: EdgeInsets.zero,
-                                  ),
-                                  child: Icon(
-                                    getTrackerIcon(),
-                                    color: appTheme.accentColor,
+                              onPressed: () {
+                                setState(() {
+                                  infoPage = !infoPage;
+                                });
+                              },
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    infoPage ? Icons.play_arrow_rounded : Icons.info_rounded,
+                                    color: Colors.black,
                                     size: 28,
                                   ),
-                                ),
-                              )
-                          ],
-                        ),
-                      ),
-                      Container(
-                        margin: EdgeInsets.only(top: 45),
-                        padding: EdgeInsets.only(left: 20, right: 20),
-                        alignment: Alignment.center,
-                        // padding: EdgeInsets.only(left: 40, right: 25),
-                        child: Text(
-                          data.title['english'] ?? data.title['romaji'] ?? '',
-                          style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontFamily: "NunitoSans",
-                            fontSize: 25,
+                                  Text(
+                                    infoPage ? "watch" : "info",
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontFamily: "Poppins",
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
-                          textAlign: TextAlign.center,
+                          if (loggedIn)
+                            Container(
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  showModalBottomSheet(
+                                    context: context,
+                                    backgroundColor: appTheme.modalSheetBackgroundColor,
+                                    showDragHandle: true,
+                                    builder: (context) => MediaListStatusBottomSheet(
+                                      status: mediaListStatus,
+                                      id: widget.id,
+                                      refreshListStatus: refreshListStatus,
+                                      totalEpisodes: data.episodes ?? 0,
+                                      episodesWatched: watched,
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  shape: CircleBorder(
+                                    side: BorderSide(
+                                      color: appTheme.accentColor,
+                                    ),
+                                  ),
+                                  fixedSize: Size(50, 50),
+                                  backgroundColor: appTheme.backgroundColor,
+                                  padding: EdgeInsets.zero,
+                                ),
+                                child: Icon(
+                                  getTrackerIcon(),
+                                  color: appTheme.accentColor,
+                                  size: 28,
+                                ),
+                              ),
+                            )
+                        ],
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(top: 45),
+                      padding: EdgeInsets.only(left: 20, right: 20),
+                      alignment: Alignment.center,
+                      // padding: EdgeInsets.only(left: 40, right: 25),
+                      child: Text(
+                        data.title['english'] ?? data.title['romaji'] ?? '',
+                        style: TextStyle(
+                          color: appTheme.textMainColor,
+                          fontFamily: "NunitoSans",
+                          fontSize: 25,
                         ),
+                        textAlign: TextAlign.center,
                       ),
-                      AnimatedSwitcher(
-                        duration: Duration(milliseconds: 200),
-                        child: infoPage ? _infoItems(context) : _watchItems(context),
-                      ),
-                    ],
-                  ),
+                    ),
+                    AnimatedSwitcher(
+                      duration: Duration(milliseconds: 200),
+                      child: infoPage ? _infoItems(context) : _watchItems(context),
+                    ),
+                  ],
                 ),
-              )
+              ),
+            )
             : Center(
                 child: CircularProgressIndicator(
                   color: appTheme.accentColor,

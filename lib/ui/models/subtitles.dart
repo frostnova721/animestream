@@ -22,7 +22,7 @@ class SubtitleSettings {
     this.backgroundColor = Colors.black,
     this.backgroundTransparency = 0,
     this.bottomMargin = 35,
-    this.fontSize = 23,
+    this.fontSize = 25,
     this.strokeColor = Colors.black,
     this.strokeWidth = 1.1,
     this.textColor = Colors.white,
@@ -74,7 +74,7 @@ class _SubViewerState extends State<SubViewer> {
     super.initState();
     widget.controller.addListener(_updateSubtitle);
     loadSubs();
-    print("inited");
+    print("subs initialized");
   }
 
   List<Subtitle> subs = [];
@@ -110,60 +110,69 @@ class _SubViewerState extends State<SubViewer> {
     // Find the subtitle matching the current time
     for (var subtitle in subs) {
       if (currentPosition >= subtitle.start.inMilliseconds && currentPosition <= subtitle.end.inMilliseconds) {
-        if(mounted)
-        setState(() {
-          activeLine = subtitle.dialogue;
-        });
+        if (mounted)
+          setState(() {
+            activeLine = subtitle.dialogue;
+          });
         return;
       }
     }
 
     //clear line when nothings there!
-    if(mounted)
-    setState(() {
-      activeLine = '';
-    });
+    if (mounted)
+      setState(() {
+        activeLine = '';
+      });
+  }
+
+  //i tried to make it beautiful! okay???
+  TextStyle subTextStyle() {
+    return TextStyle(
+      fontSize: settings.fontSize,
+      fontFamily: "Rubik",
+      color: settings.textColor,
+      fontWeight: FontWeight.w700,
+      letterSpacing: -0.4,
+      // wordSpacing: 1,
+      fontFamilyFallback: ["Poppins"],
+      backgroundColor: settings.backgroundColor.withOpacity(settings.backgroundTransparency),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    // print();
+    ///uncomment the bottom line to reflect changes on refresh while tryin to edit the [SubtitleSettings]
+    // settings = SubtitleSettings();
     return Container(
       alignment: Alignment.bottomCenter,
       margin: EdgeInsets.only(bottom: settings.bottomMargin),
       child: Container(
         width: MediaQuery.of(context).size.width / 1.6,
         alignment: Alignment.bottomCenter,
-        child: Stack(children: [
-          //the actual text
-          Text(
-            areSubsLoading ? "Loading subs.." : activeLine,
-            style: TextStyle(
-              fontSize: settings.fontSize,
-              fontFamily: settings.fontFamily,
-              color: settings.textColor,
-              fontWeight: FontWeight.bold,
-              backgroundColor: settings.backgroundColor.withOpacity(settings.backgroundTransparency)
+        child: Stack(
+          children: [
+            //the actual text
+            Text(
+              areSubsLoading ? "Loading subs.." : activeLine,
+              style: subTextStyle().copyWith(shadows: [
+                Shadow(color: Colors.black, blurRadius: 4.5),
+              ]),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
-          ),
-        
-          //the stroke of that text since the flutter doesnt have it :(
-          Text(
-            areSubsLoading ? "Loading subs.." : activeLine,
-            style: TextStyle(
-                fontSize: settings.fontSize,
-                fontFamily: settings.fontFamily,
-                // color: Colors.white,
-                fontWeight: FontWeight.bold,
+
+            //the stroke of that text since the flutter doesnt have it :(
+            Text(
+              areSubsLoading ? "Loading subs.." : activeLine,
+              style: subTextStyle().copyWith(
                 foreground: Paint()
                   ..style = PaintingStyle.stroke
                   ..color = settings.strokeColor
-                  ..strokeWidth = settings.strokeWidth
-                  ),
-                  textAlign: TextAlign.center,
-          ),
-        ]),
+                  ..strokeWidth = settings.strokeWidth,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

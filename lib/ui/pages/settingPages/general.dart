@@ -106,7 +106,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                                   style: textStyle(),
                                 ),
                                 Text(
-                                  currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download',
+                                  currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream',
                                   style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
                                   overflow: TextOverflow.ellipsis,
                                 ),

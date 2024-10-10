@@ -45,7 +45,7 @@ class SettingsModal {
       darkMode: map['darkMode'] ?? true,
       materialTheme: map['materialTheme'] ?? false,
       isDev: map['isDev'] ?? false,
-      downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download',
+      downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download/animestream',
     );
   }
 

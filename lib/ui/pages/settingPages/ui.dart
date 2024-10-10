@@ -3,10 +3,12 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/slider.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -22,6 +24,11 @@ class _ThemeSettingState extends State<ThemeSetting> {
   void initState() {
     super.initState();
     readSettings();
+    getAPILevel();
+  }
+
+  void getAPILevel() {
+    DeviceInfoPlugin().androidInfo.then((val) => isAboveAndroid12 = (val.version.sdkInt >= 31));
   }
 
   void readSettings() {
@@ -55,6 +62,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   late double navbarTranslucency;
   late bool AMOLEDBackgroundEnabled;
   late bool darkMode;
+  late bool isAboveAndroid12;
   late bool materialTheme;
 
   @override
@@ -75,6 +83,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                         children: [
                           _toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
                               () async {
+                                if(!isAboveAndroid12) return floatingSnackBar(context, "Android 12 or greater is required");
                             materialTheme = !materialTheme;
                             await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
                             setState(() {});

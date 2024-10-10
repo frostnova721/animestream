@@ -120,7 +120,7 @@ class _AnimeStreamState extends State<AnimeStream> {
         if (currentUserSettings?.darkMode ?? true) {
           scheme = AnimeStreamTheme(
             accentColor: darkScheme?.primary ?? appTheme.accentColor,
-            backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : darkScheme?.surface ?? appTheme.accentColor,
+            backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : darkScheme?.surface ?? appTheme.backgroundColor,
             backgroundSubColor: darkScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
             textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
             textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,

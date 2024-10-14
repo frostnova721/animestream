@@ -83,6 +83,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                         children: [
                           _toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
                               () async {
+                                //the package just wont work if <android 12!!!
                                 if(!isAboveAndroid12) return floatingSnackBar(context, "Android 12 or greater is required");
                             materialTheme = !materialTheme;
                             await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));

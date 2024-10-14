@@ -24,6 +24,19 @@ class _WebViewState extends State<WebView> {
     }
   }
 
+  //if using flutter_inappwebview package!!!, for windows | currently no plan on doin it cus we'd have to rewrite many widgets
+  // InAppWebView webview(String url) {
+  //   return InAppWebView(
+  //     initialUrlRequest: URLRequest(url: WebUri(url)),
+  //     onLoadStart: (controller, url) {
+  //         if (url!.rawValue.contains("access_token")) {
+  //             storeVal("token", _extractToken(url.rawValue))
+  //                 .then((value) => Navigator.of(context).pop(true));
+  //           }
+  //     },
+  //   );
+  // }
+
   WebViewWidget webview(String url) {
     WebViewController webViewController = WebViewController()
       ..setBackgroundColor(appTheme.backgroundColor)

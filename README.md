@@ -30,7 +30,7 @@ You can download the latest apk file from the [releases](https://github.com/fros
 Currently, you can enjoy anime content from the following sources:
 
 - **Gogo**
-- **Ryuk**
+- **Ryuk** [Unresponsive, will be replaced next patch]
 - **AnimeOnsen**  
 
 ## Known Issues

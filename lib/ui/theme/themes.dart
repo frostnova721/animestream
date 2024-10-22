@@ -54,6 +54,8 @@ final coldPurple = AnimeStreamTheme(
   modalSheetBackgroundColor: Color(0xff121212),
 );
 
+//try this pink color! #bc0150, sub color: 18181d
+
 List<ThemeItem> availableThemes = [
   ThemeItem(id: 01, name: "Lime", theme: lime),
   ThemeItem(id: 02, name: "Monochrome", theme: monochrome),

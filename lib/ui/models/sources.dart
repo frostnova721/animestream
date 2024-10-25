@@ -1,4 +1,5 @@
 import 'package:animestream/core/anime/providers/animeonsen.dart';
+import 'package:animestream/core/anime/providers/aniplay.dart';
 import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/ryuk.dart';
 import 'package:animestream/core/anime/providers/types.dart';
@@ -9,8 +10,9 @@ import 'package:animestream/core/commons/types.dart';
 
 final List<String> sources = [
   "gogoanime",
-  "ryuk"
+  "ryuk",
   "animeonsen",
+  "aniplay",
 ];
 
 final List<String> unDownloadableSources = [
@@ -26,6 +28,8 @@ AnimeProvider getClass(String source) {
       return Ryuk();
     case "animeonsen":
       return AnimeOnsen();
+    case "aniplay":
+      return AniPlay();
     default:
       throw new Exception("Invalid source");
   }

@@ -120,7 +120,9 @@ class _AnimeStreamState extends State<AnimeStream> {
         if (currentUserSettings?.darkMode ?? true) {
           scheme = AnimeStreamTheme(
             accentColor: darkScheme?.primary ?? appTheme.accentColor,
-            backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : darkScheme?.surface ?? appTheme.backgroundColor,
+            backgroundColor: (currentUserSettings?.amoledBackground ?? false)
+                ? Colors.black
+                : darkScheme?.surface ?? appTheme.backgroundColor,
             backgroundSubColor: darkScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
             textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
             textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,
@@ -137,27 +139,36 @@ class _AnimeStreamState extends State<AnimeStream> {
           );
         }
 
-        if(currentUserSettings?.materialTheme ?? false) {
+        if (currentUserSettings?.materialTheme ?? false) {
           appTheme = scheme;
           // print("[THEME] Applying Material You Theme");
         }
 
         final themeProvider = Provider.of<ThemeProvider>(context);
 
+        //set status bar icon brightness (some devices do this automatically, some dont!
+        //so here it is for all of em!)
+        SystemChrome.setSystemUIOverlayStyle(
+          SystemUiOverlayStyle(
+            statusBarIconBrightness: themeProvider.isDark ? Brightness.light : Brightness.dark,
+            statusBarColor: Colors.black.withOpacity(0.002),
+            systemNavigationBarColor: Colors.black.withOpacity(0.002),
+          ),
+        );
+
         return MaterialApp(
           title: 'Animestream',
           theme: ThemeData(
             useMaterial3: true,
             brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-            textTheme: Theme.of(context)
-                .textTheme
-                .apply(bodyColor: themeProvider.theme.textMainColor, fontFamily: "NotoSans"),
+            textTheme:
+                Theme.of(context).textTheme.apply(bodyColor: themeProvider.theme.textMainColor, fontFamily: "NotoSans"),
             scaffoldBackgroundColor: themeProvider.theme.backgroundColor,
-            bottomSheetTheme: BottomSheetThemeData(
-                backgroundColor: themeProvider.theme.modalSheetBackgroundColor),
+            bottomSheetTheme: BottomSheetThemeData(backgroundColor: themeProvider.theme.modalSheetBackgroundColor),
             colorScheme: ColorScheme.fromSeed(
               brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-              seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : themeProvider.theme.accentColor,
+              seedColor:
+                  (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : themeProvider.theme.accentColor,
             ),
           ),
           home: MainNavigator(),

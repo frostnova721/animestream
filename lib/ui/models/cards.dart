@@ -451,7 +451,8 @@ class Cards {
                                   padding: const EdgeInsets.only(left: 13, right: 13),
                                   child: Text(
                                     '•',
-                                    style: TextStyle(fontSize: 17),
+                                    style: TextStyle(fontSize: 17,
+                                    color: Theme.of(context!).colorScheme.secondary),
                                   ),
                                 ),
                                 Container(
@@ -463,7 +464,7 @@ class Cards {
                                           fontFamily: "NunitoSans",
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: ColorScheme.fromSeed(seedColor: appTheme.accentColor).primaryFixedDim,
+                                          color: Theme.of(context!).colorScheme.primary,
                                         ),
                                       ),
                                       Text(
@@ -472,7 +473,7 @@ class Cards {
                                           fontFamily: "NunitoSans",
                                           fontSize: 14,
                                           fontWeight: FontWeight.bold,
-                                          color: ColorScheme.fromSeed(seedColor: appTheme.accentColor).primaryContainer,
+                                          color: Theme.of(context!).colorScheme.onSecondaryContainer,
                                         ),
                                       ),
                                     ],

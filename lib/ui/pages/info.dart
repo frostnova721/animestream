@@ -204,9 +204,11 @@ class _InfoState extends State<Info> {
       if (manualSearchQuery != null) searchTitle = manualSearchQuery;
       await search(searchTitle);
     } catch (err) {
+      print("Exception: " + err.toString());
       try {
         await search(data.title['romaji'] ?? '');
       } catch (err) {
+        print("Exception: " + err.toString());
         if (mounted)
           setState(() {
             _epSearcherror = true;

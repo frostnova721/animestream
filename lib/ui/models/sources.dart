@@ -1,7 +1,6 @@
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/aniplay.dart';
 import 'package:animestream/core/anime/providers/gogoanime.dart';
-import 'package:animestream/core/anime/providers/ryuk.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
@@ -10,7 +9,7 @@ import 'package:animestream/core/commons/types.dart';
 
 final List<String> sources = [
   "gogoanime",
-  "ryuk",
+  // "ryuk",
   "animeonsen",
   "aniplay",
 ];
@@ -24,8 +23,8 @@ AnimeProvider getClass(String source) {
   switch (source) {
     case "gogoanime":
       return GogoAnime();
-    case "ryuk":
-      return Ryuk();
+    // case "ryuk":
+      // return Ryuk();
     case "animeonsen":
       return AnimeOnsen();
     case "aniplay":

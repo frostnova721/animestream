@@ -129,7 +129,7 @@ class _SubViewerState extends State<SubViewer> {
   TextStyle subTextStyle() {
     return TextStyle(
       fontSize: settings.fontSize,
-      fontFamily: "Rubik",
+      fontFamily: settings.fontFamily ?? "Rubik",
       color: settings.textColor,
       fontWeight: FontWeight.w700,
       letterSpacing: -0.4,

@@ -3,6 +3,7 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/slider.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/pages/settingPages/subtitle.dart';
 import 'package:flutter/material.dart';
 
 class PlayerSetting extends StatefulWidget {
@@ -102,9 +103,8 @@ class PlayerSettingState extends State<PlayerSetting> {
                                         skipDurationSliderValue = val;
                                       });
                                     },
-                                    onChangeEnd:  (val) {
-                                      writeSettings(
-                                          SettingsModal(skipDuration: skipDurationSliderValue.toInt()));
+                                    onChangeEnd: (val) {
+                                      writeSettings(SettingsModal(skipDuration: skipDurationSliderValue.toInt()));
                                     },
                                     value: skipDurationSliderValue,
                                     divisions: 9,
@@ -180,13 +180,12 @@ class PlayerSettingState extends State<PlayerSetting> {
                                   alignment: Alignment.center,
                                   child: SegmentedButton(
                                     style: SegmentedButton.styleFrom(
-                                      backgroundColor: appTheme.backgroundSubColor,
-                                      selectedBackgroundColor: appTheme.accentColor,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                                      side: BorderSide(color: appTheme.textSubColor)
-                                    ),
+                                        backgroundColor: appTheme.backgroundSubColor,
+                                        selectedBackgroundColor: appTheme.accentColor,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        side: BorderSide(color: appTheme.textSubColor)),
                                     multiSelectionEnabled: false,
                                     showSelectedIcon: false,
                                     onSelectionChanged: (val) {
@@ -207,6 +206,33 @@ class PlayerSettingState extends State<PlayerSetting> {
                               ],
                             ),
                           ),
+                          InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => SubtitleSettingPage()));
+                            },
+                            child: item(
+                              // padding: EdgeInsets.only(top: 10, bottom: 10),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "Subtitle settings",
+                                        style: textStyle(),
+                                      ),
+                                      Text(
+                                        "customize the subtitles",
+                                        style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
+                                      ),
+                                    ],
+                                  ),
+                                  Icon(Icons.arrow_forward_ios_rounded)
+                                ],
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     )
@@ -219,7 +245,10 @@ class PlayerSettingState extends State<PlayerSetting> {
   }
 
   Container item({required Widget child}) {
-    return Container(padding: EdgeInsets.only(top: 15, bottom: 15), child: child,);
+    return Container(
+      padding: EdgeInsets.only(top: 15, bottom: 15),
+      child: child,
+    );
   }
 
   ButtonSegment segment(String label) {

@@ -37,7 +37,8 @@ class AniPlay extends AnimeProvider {
     final epIdSplit = episodeId.split("+");
     final epId = epIdSplit[0].split(",");
     final servers = epIdSplit[1].split(",");
-    final anilistId = epIdSplit[2];
+    final anilistId = epIdSplit[2].split("\$")[0];
+    final malId = epIdSplit[2].split("\$")[1];
     final epNum = epIdSplit[3];
 
     int serversFetched = 0;
@@ -51,7 +52,7 @@ class AniPlay extends AnimeProvider {
             "Content-Type": "application/json",
             'Next-Action': "5dbcd21c7c276c4d15f8de29d9ef27aef5ea4a5e",
           },
-          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
+          body: "[\"$anilistId\", \"$malId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
       resFuture.then((res) {
         final split = res.body.split('1:')[1];
         final List<dynamic> parsed = jsonDecode(split)['sources'];
@@ -107,7 +108,7 @@ class AniPlay extends AnimeProvider {
     for (final item in sr) {
       res.add({
         'name': item.title['english'] ?? item.title['romaji'] ?? "_null_",
-        'alias': item.id.toString(),
+        'alias': item.id.toString() + "\$" + item.idMal.toString(),
         'imageUrl': item.cover,
       });
     }

@@ -17,6 +17,8 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
     SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+
+    subtitleSettings = SubtitleSettings();
   }
 
   @override
@@ -38,7 +40,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   int ind = 0;
 
-  SubtitleSettings settings = SubtitleSettings();
+  late SubtitleSettings settings;
 
   TextStyle subTextStyle() {
     return TextStyle(

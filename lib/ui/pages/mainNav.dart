@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -313,7 +314,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         popTimeoutWindow();
       },
       child: Scaffold(
-        body: MediaQuery.of(context).orientation == Orientation.landscape
+        body: MediaQuery.of(context).orientation == Orientation.landscape || Platform.isWindows
             ? Row(
                 children: [
                   NavigationRail(

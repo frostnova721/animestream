@@ -151,8 +151,10 @@ class _SearchState extends State<Search> {
           children: [
             GridView.builder(
               padding: EdgeInsets.zero,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 140,
+                mainAxisExtent: 230,
+                  // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
                   childAspectRatio: 120 / 230, //set as width and height of each child container
                   mainAxisSpacing: 15),

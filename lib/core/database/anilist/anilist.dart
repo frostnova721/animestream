@@ -8,7 +8,7 @@ class Anilist {
   Future<List<AnilistSearchResult>> search(String query) async {
     final gquery = '''
             query {
-                Page(perPage: 10) {
+                Page(perPage: 15) {
                     media(search: "$query", type: ANIME, isAdult: false) {
                         id
                         idMal

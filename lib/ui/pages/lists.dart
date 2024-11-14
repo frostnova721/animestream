@@ -330,8 +330,10 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           right: 10,
         ),
         child: GridView.builder(
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+            maxCrossAxisExtent: 140,
+            mainAxisExtent: 230,
+              // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
               childAspectRatio: 120 / 220,
               mainAxisSpacing: 10),
           padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),

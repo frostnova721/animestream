@@ -29,6 +29,7 @@ dependencies:
   provider: ^6.1.2
   file_picker: ^8.1.2
   dynamic_color: ^1.7.0
+  flutter_dotenv: ^5.2.1
 
   # Local storage
   hive: ^2.2.3

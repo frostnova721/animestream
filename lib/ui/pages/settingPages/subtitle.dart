@@ -19,6 +19,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
 
     subtitleSettings = SubtitleSettings();
+    settings = subtitleSettings;
   }
 
   @override

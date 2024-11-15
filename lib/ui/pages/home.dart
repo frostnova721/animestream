@@ -213,11 +213,7 @@ class _HomeState extends State<Home> {
                 child: Text(
                   storedUserData!.name,
                   style: TextStyle(
-                    fontFamily: "Poppins",
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: appTheme.textMainColor
-                  ),
+                      fontFamily: "Poppins", fontSize: 16, fontWeight: FontWeight.bold, color: appTheme.textMainColor),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 1,
                 ),
@@ -272,59 +268,87 @@ class _HomeState extends State<Home> {
         ),
         Container(
           height: 160,
-          child: widget.dataLoaded
-              ? list.length > 0
-                  ? ListView.builder(
-                      padding: EdgeInsets.zero,
-                      scrollDirection: Axis.horizontal,
-                      itemCount: list.length,
-                      itemBuilder: (context, index) {
-                        final item = list[index];
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Cards(context: context).animeCardExtended(
-                              item.id,
-                              item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '',
-                              item.coverImage,
-                              item.rating ?? 0.0,
-                              bannerImageUrl: item.coverImage,
-                              watchedEpisodeCount: item.watchedEpisodeCount,
-                              totalEpisodes: item.totalEpisodes,
-                              afterNavigation: () => getLists(userName: storedUserData?.name)),
-                        );
-                      })
-                  : Center(
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset(
-                              "lib/assets/images/ghost.png",
-                              color: Color.fromARGB(255, 80, 80, 80),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: Text(
-                                "Boo! Nothing's here!",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: "NunitoSans",
-                                  fontWeight: FontWeight.w500,
-                                  color: Color.fromARGB(255, 80, 80, 80),
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ),
-                          ],
+          child: widget.error
+              ? Center(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          "lib/assets/images/ghost.png",
+                          color: Color.fromARGB(255, 80, 80, 80),
                         ),
-                      ),
-                    )
-              : Center(
-                  child: CircularProgressIndicator(
-                    color: appTheme.accentColor,
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text(
+                            "Boo! Nothing's here!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "NunitoSans",
+                              fontWeight: FontWeight.w500,
+                              color: Color.fromARGB(255, 80, 80, 80),
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                )
+              : widget.dataLoaded
+                  ? list.length > 0
+                      ? ListView.builder(
+                          padding: EdgeInsets.zero,
+                          scrollDirection: Axis.horizontal,
+                          itemCount: list.length,
+                          itemBuilder: (context, index) {
+                            final item = list[index];
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Cards(context: context).animeCardExtended(
+                                  item.id,
+                                  item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '',
+                                  item.coverImage,
+                                  item.rating ?? 0.0,
+                                  bannerImageUrl: item.coverImage,
+                                  watchedEpisodeCount: item.watchedEpisodeCount,
+                                  totalEpisodes: item.totalEpisodes,
+                                  afterNavigation: () => getLists(userName: storedUserData?.name)),
+                            );
+                          })
+                      : Center(
+                          child: Container(
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Image.asset(
+                                  "lib/assets/images/ghost.png",
+                                  color: Color.fromARGB(255, 80, 80, 80),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10.0),
+                                  child: Text(
+                                    "Boo! Nothing's here!",
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                      fontFamily: "NunitoSans",
+                                      fontWeight: FontWeight.w500,
+                                      color: Color.fromARGB(255, 80, 80, 80),
+                                      fontSize: 18,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        )
+                  : Center(
+                      child: CircularProgressIndicator(
+                        color: appTheme.accentColor,
+                      ),
+                    ),
         )
       ],
     );

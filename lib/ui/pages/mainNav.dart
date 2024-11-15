@@ -43,13 +43,20 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     //check login status and get userprofile
     AniListLogin().isAnilistLoggedIn().then((loggedIn) {
       if (loggedIn) {
-        AniListLogin().getUserProfile().then((user) => {
-              userProfile = user,
-              storedUserData = user,
-              print("[AUTHENTICATION] ${storedUserData?.name} Login Successful"),
-              loadListsForHome(userName: user.name),
-              loadDiscoverItems(),
-            });
+        AniListLogin()
+            .getUserProfile()
+            .then((user) => {
+                  userProfile = user,
+                  storedUserData = user,
+                  print("[AUTHENTICATION] ${storedUserData?.name} Login Successful"),
+                  loadListsForHome(userName: user.name),
+                  loadDiscoverItems(),
+                })
+            .catchError((err) {
+          floatingSnackBar(context, "couldnt load user profile");
+          loadListsForHome();
+          loadDiscoverItems();
+        });
       } else {
         loadListsForHome();
         loadDiscoverItems();
@@ -60,7 +67,6 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   }
 
   //general variables
-
   UserModal? userProfile;
 
   late TabController tabController;
@@ -80,7 +86,14 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   Future<void> loadListsForHome({String? userName}) async {
     try {
-      List<UserAnimeListItem> watched = await getWatchedList(userName: userName);
+      //get all of em data
+      final futures = await Future.wait([
+        getWatchedList(userName: userName),
+        Anilist().getCurrentlyAiringAnime(),
+        if(userName != null) AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING),
+      ]);
+
+      List<UserAnimeListItem> watched = futures[0] as List<UserAnimeListItem>;
       if (watched.length > 40) watched = watched.sublist(0, 40);
       recentlyWatched = [];
       watched.forEach(
@@ -96,8 +109,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         ),
       );
 
-      final List<CurrentlyAiringResult> currentlyAiringResponse = await Anilist().getCurrentlyAiringAnime();
-      if (currentlyAiringResponse.length == 0) return;
+      final List<CurrentlyAiringResult> currentlyAiringResponse = futures[1] as List<CurrentlyAiringResult>;
+      if (currentlyAiringResponse.isEmpty) return;
 
       currentlyAiring = [];
       thisSeasonData = currentlyAiringResponse;
@@ -122,13 +135,14 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       });
 
       if (userName != null) {
-        List<UserAnimeList> pl = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING);
+        List<UserAnimeList> pl = futures[2] as List<UserAnimeList>;
         if (pl.isEmpty) {
           setState(() {
             homeDataLoaded = true;
           });
           return;
-        };
+        }
+        ;
         plannedList = [];
         List<UserAnimeListItem> itemList = pl[0].list;
         if (itemList.length > 25) itemList = itemList.sublist(0, 25);
@@ -151,7 +165,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     } catch (err) {
       print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        floatingSnackBar(context, err.toString());
+        floatingSnackBar(context, err.toString(), waitForPreviousToFinish: true);
+        floatingSnackBar(context, "couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
       if (mounted)
         setState(() {
           homePageError = true;

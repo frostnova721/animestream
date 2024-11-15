@@ -1,8 +1,9 @@
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
-dynamic floatingSnackBar(BuildContext context, String message, {int? duration}) {
-  ScaffoldMessenger.of(context).removeCurrentSnackBar();
+dynamic floatingSnackBar(BuildContext context, String message, {int? duration, bool waitForPreviousToFinish = false }) {
+  if(!waitForPreviousToFinish)
+    ScaffoldMessenger.of(context).removeCurrentSnackBar();
   return ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Center(

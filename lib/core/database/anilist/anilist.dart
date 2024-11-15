@@ -220,6 +220,7 @@ class Anilist {
 
     if (res.hasException) {
       print(res.exception.toString());
+      throw Exception("ERR_COULDNT_FETCH");
     }
 
     if (type == null) return res.data;

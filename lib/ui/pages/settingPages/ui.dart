@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
@@ -28,7 +30,10 @@ class _ThemeSettingState extends State<ThemeSetting> {
   }
 
   void getAPILevel() {
-    DeviceInfoPlugin().androidInfo.then((val) => isAboveAndroid12 = (val.version.sdkInt >= 31));
+    if (Platform.isAndroid)
+      DeviceInfoPlugin().androidInfo.then((val) => isAboveAndroid12 = (val.version.sdkInt >= 31));
+    else
+      isAboveAndroid12 = true;
   }
 
   void readSettings() {
@@ -83,8 +88,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
                         children: [
                           _toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
                               () async {
-                                //the package just wont work if <android 12!!!
-                                if(!isAboveAndroid12) return floatingSnackBar(context, "Android 12 or greater is required");
+                            //the package just wont work if <android 12!!!
+                            if (!isAboveAndroid12)
+                              return floatingSnackBar(context, "Android 12 or greater is required");
                             materialTheme = !materialTheme;
                             await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
                             setState(() {});

@@ -3,8 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  app_links
   awesome_notifications
   dynamic_color
+  flutter_secure_storage_windows
   permission_handler_windows
   url_launcher_windows
 )

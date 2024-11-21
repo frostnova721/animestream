@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/handler.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/header.dart';
@@ -25,10 +24,12 @@ class _SearchState extends State<Search> {
 
   Timer? debounce;
 
+  final db = DatabaseHandler();
+
   Future addCards(String query) async {
     results = []; //for cleaning the UI
     exactMatches = [];
-    final searchResults = await DatabaseHandler().search(query);
+    final searchResults = await db.search(query);
     results = []; //for removing the data from previous search invokation due to debouncing
     exactMatches = [];
     if (searchResults.length == 0)

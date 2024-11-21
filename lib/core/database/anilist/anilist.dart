@@ -2,9 +2,10 @@ import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/database/database.dart';
 import 'package:graphql/client.dart';
 
-class Anilist {
+class Anilist extends Database {
   Future<List<AnilistSearchResult>> search(String query) async {
     final gquery = '''
             query {

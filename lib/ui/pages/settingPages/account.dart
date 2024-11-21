@@ -105,6 +105,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                       height: 150,
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(25),
+                                        color: appTheme.textSubColor,
                                         image: DecorationImage(
                                           image: user?.banner != null
                                               ? NetworkImage(user!.banner!)

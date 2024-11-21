@@ -1,3 +1,5 @@
+import 'package:animestream/core/database/types.dart';
+
 class RecentlyUpdatedResult {
   final int episode;
   final Map<String, String?> title;
@@ -181,7 +183,7 @@ class CurrentlyAiringResult {
       required this.watchProgress});
 }
 
-class AnilistSearchResult {
+class AnilistSearchResult extends DatabaseSearchResult {
   final int id;
   final int? idMal;
   final Map<String, String?> title;

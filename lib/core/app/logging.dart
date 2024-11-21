@@ -1,6 +1,10 @@
 import 'dart:io';
 
 class Logger {
+  static final Logger _instance = Logger._internal();
+  Logger._internal();
+  factory Logger() => _instance;
+
   Future<void> writeLog(String data) async {
     //write the log to Documents folder
     final dir = await Directory('/storage/emulated/0/Documents/animestream/logs');

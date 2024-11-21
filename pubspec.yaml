@@ -19,7 +19,7 @@ dependencies:
   encrypt: ^5.0.3
   js_unpack: ^1.0.4
   url_launcher: ^6.2.5
-  oauth2: ^2.0.3
+  flutter_web_auth_2: ^4.0.1
   
   # Core utils
   path_provider: ^2.0.11
@@ -111,6 +111,7 @@ flutter:
     - lib/assets/images/mitsuha.jpg
     - lib/assets/images/profile_banner.jpg
     - lib/assets/images/chisato_AI.png
+    - .env
 
 
   fonts:

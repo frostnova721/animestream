@@ -15,6 +15,7 @@ import 'package:animestream/ui/theme/types.dart';
 import 'package:app_links/app_links.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -34,6 +35,8 @@ void main() async {
     AnimeOnsen().checkAndUpdateToken();
 
     NotificationService().init();
+
+    await dotenv.load(fileName: ".env");
 
     runApp(
       ChangeNotifierProvider(
@@ -127,9 +130,7 @@ class _AnimeStreamState extends State<AnimeStream> {
     _sub = _appLinks.uriLinkStream.listen((uri) {
       print("Invoked DeepLink uri: ${uri.toString()}");
       String path = uri.path;
-      if(path == "/simkl") {
-        
-      }
+      if (path == "/simkl") {}
     });
   }
 

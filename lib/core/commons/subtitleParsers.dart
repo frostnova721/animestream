@@ -1,4 +1,4 @@
-import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/ui/models/subtitles.dart';
 import 'package:http/http.dart';
 
 class Subtitleparsers {

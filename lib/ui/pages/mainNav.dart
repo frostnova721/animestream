@@ -56,6 +56,9 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           floatingSnackBar(context, "couldnt load user profile");
           loadListsForHome();
           loadDiscoverItems();
+
+          //return statement so that linter would shut up!
+          return <void>{};
         });
       } else {
         loadListsForHome();

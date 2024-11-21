@@ -1,10 +1,23 @@
 import 'package:animestream/core/commons/subtitleParsers.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
 enum SubtitleFormat { ASS }
+
+
+class Subtitle {
+  final Duration start;
+  final Duration end;
+  final String dialogue;
+  // final String
+
+  Subtitle({
+    required this.dialogue,
+    required this.end,
+    required this.start,
+  });
+}
 
 class SubtitleSettings {
   final Color textColor;

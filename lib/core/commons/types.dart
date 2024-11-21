@@ -70,16 +70,3 @@ class HomePageList {
     this.watchedEpisodeCount,
   });
 }
-
-class Subtitle {
-  final Duration start;
-  final Duration end;
-  final String dialogue;
-  // final String
-
-  Subtitle({
-    required this.dialogue,
-    required this.end,
-    required this.start,
-  });
-}

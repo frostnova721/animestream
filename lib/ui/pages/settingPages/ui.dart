@@ -409,51 +409,50 @@ class _ThemeSettingState extends State<ThemeSetting> {
     );
   }
 
-  InkWell _themeItem(String name, ThemeItem theme, context) {
-    return InkWell(
-      onTap: () async {
-        // if (theme.name == "Monochrome" && !darkMode) {
-        //   Navigator.of(context).pop();
-        //   floatingSnackBar(context, "No, Dont do it!");
-        //   return;
-        // }
-        //check if selected theme is same as current theme
-        if (currentThemeId != theme.id) {
-          await applyTheme(theme.id);
-          setState(() {
-            currentThemeId = theme.id;
-          });
-          Navigator.of(context).pop();
-        }
-      },
-      child: AnimatedContainer(
-        margin: EdgeInsets.only(top: 5, bottom: 5),
-        clipBehavior: Clip.hardEdge,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(20),
-          color: currentThemeId == theme.id ? appTheme.accentColor : appTheme.backgroundSubColor,
-        ),
-        duration: Duration(milliseconds: 200),
-        padding: EdgeInsets.only(left: 10, right: 10),
-        height: 60,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              "$name",
-              style: textStyle()
-                  .copyWith(color: currentThemeId == theme.id ? appTheme.backgroundColor : appTheme.textMainColor),
+  Widget _themeItem(String name, ThemeItem theme, context) {
+    return AnimatedContainer(
+      margin: EdgeInsets.only(top: 5, bottom: 5),
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: currentThemeId == theme.id ? appTheme.accentColor : appTheme.backgroundSubColor,
+      ),
+      duration: Duration(milliseconds: 200),
+      height: 60,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            if (currentThemeId != theme.id) {
+            await applyTheme(theme.id);
+            setState(() {
+              currentThemeId = theme.id;
+            });
+            Navigator.of(context).pop();
+          }
+          },
+          child: Padding(
+            padding: const EdgeInsets.only(left: 10, right: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "$name",
+                  style: textStyle()
+                      .copyWith(color: currentThemeId == theme.id ? appTheme.backgroundColor : appTheme.textMainColor),
+                ),
+                Container(
+                  height: 40,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black, width: 3),
+                    borderRadius: BorderRadius.circular(10),
+                    color: theme.theme.accentColor,
+                  ),
+                )
+              ],
             ),
-            Container(
-              height: 40,
-              width: 40,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.black, width: 3),
-                borderRadius: BorderRadius.circular(10),
-                color: theme.theme.accentColor,
-              ),
-            )
-          ],
+          ),
         ),
       ),
     );

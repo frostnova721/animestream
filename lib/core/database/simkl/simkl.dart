@@ -10,7 +10,7 @@ class Simkl extends Database {
 
   Future<List<SimklSearchResult>> search(String query) async {
     final url = "https://api.simkl.com/search/anime?q=$query&client_id=$simklClientId";
-    final List<Map<String, dynamic>> res = await fetch(url);
+    final List<dynamic> res = await fetch(url);
     List<SimklSearchResult> sr = [];
     res.forEach((it) {
       sr.add(SimklSearchResult(
@@ -30,7 +30,6 @@ class Simkl extends Database {
     if (res.statusCode < 200 || res.statusCode > 299) {
       throw Exception("ERR_COULDNT_FETCH_SIMKL");
     }
-
     return jsonDecode(res.body);
   }
 }

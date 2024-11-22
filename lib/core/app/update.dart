@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
@@ -50,119 +51,149 @@ Future<UpdateCheckResult?> checkForUpdates() async {
     return null;
 }
 
-showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre) {
+showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre) async {
   //dont show the sheet if recievePreRelease if off and release is a pre release
-  if(pre && pre != (currentUserSettings?.receivePreReleases! ?? false)) {
+  if (pre && pre != (currentUserSettings?.receivePreReleases! ?? false)) {
     return;
-  } 
-  showModalBottomSheet(
+  }
+  if (Platform.isWindows || await isTv()) {
+    return showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              content: Container(
+                width: MediaQuery.sizeOf(context).width / 3,
+                child: _updateSheetContent(context, markdownText, downloadLink, pre, isDesktop: true),
+              ),
+              actions: [
+                TextButton(
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text("maybe later")),
+                TextButton(
+                    onPressed: () async {
+                      final uri = Uri.parse(downloadLink);
+                      if (!(await launchUrl(uri))) {
+                        throw new Exception("Couldnt launch");
+                      }
+                    },
+                    child: Text("download")),
+              ],
+            ));
+  }
+  return showModalBottomSheet(
     showDragHandle: true,
     backgroundColor: appTheme.modalSheetBackgroundColor,
     isScrollControlled: true,
     context: context,
     builder: (context) {
-      return Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 15, right: 15, top: 10),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.end,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (pre)
-                Text(
-                  "Test Version",
-                  style: TextStyle(color: appTheme.textSubColor, fontFamily: "Poppins"),
+      return _updateSheetContent(context, markdownText, downloadLink, pre);
+    },
+  );
+}
+
+Widget _updateSheetContent(BuildContext context, String markdownText, String downloadLink, bool pre,
+    {bool isDesktop = false}) {
+  return Padding(
+    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 15, right: 15, top: 10),
+    child: SingleChildScrollView(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (pre)
+            Text(
+              "Test Version",
+              style: TextStyle(color: appTheme.textSubColor, fontFamily: "Poppins"),
+            ),
+          Container(
+            height: 400,
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                MarkdownBody(
+                  data: markdownText,
+                  styleSheet: MarkdownStyleSheet(
+                    h1: style(),
+                    h2: style(),
+                    listBullet: style(),
+                    h3: style(),
+                    h4: style(),
+                    h5: style(),
+                    h6: style(),
+                    p: style(),
+                  ),
                 ),
-              Container(
-                height: 400,
-                child: ListView(
-                  shrinkWrap: true,
-                  children: [
-                    MarkdownBody(
-                      data: markdownText,
-                      styleSheet: MarkdownStyleSheet(
-                        h1: style(),
-                        h2: style(),
-                        listBullet: style(),
-                        h3: style(),
-                        h4: style(),
-                        h5: style(),
-                        h6: style(),
-                        p: style(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: ElevatedButton(
-                        onPressed: () async {
-                          final uri = Uri.parse(downloadLink);
-                          if (!(await launchUrl(uri))) {
-                            throw new Exception("Couldnt launch");
-                          }
-                          ;
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: appTheme.accentColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            side: BorderSide(
-                              color: appTheme.accentColor,
-                            ),
+              ],
+            ),
+          ),
+          if (!isDesktop)
+            Container(
+              margin: EdgeInsets.only(top: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 10),
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        final uri = Uri.parse(downloadLink);
+                        if (!(await launchUrl(uri))) {
+                          throw new Exception("Couldnt launch");
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appTheme.accentColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          side: BorderSide(
+                            color: appTheme.accentColor,
                           ),
                         ),
-                        child: Container(
-                          child: Text(
-                            "download",
+                      ),
+                      child: Container(
+                        child: Text(
+                          "download",
+                          style: TextStyle(
+                            color: appTheme.backgroundColor,
+                            fontFamily: "Rubik",
+                            fontSize: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appTheme.accentColor,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          side: BorderSide(
+                            color: appTheme.accentColor,
+                          ),
+                        ),
+                      ),
+                      child: Container(
+                        child: Text("maybe later",
                             style: TextStyle(
                               color: appTheme.backgroundColor,
                               fontFamily: "Rubik",
                               fontSize: 20,
-                            ),
-                          ),
-                        ),
+                            )),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: appTheme.accentColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            side: BorderSide(
-                              color: appTheme.accentColor,
-                            ),
-                          ),
-                        ),
-                        child: Container(
-                          child: Text("maybe later",
-                              style: TextStyle(
-                                color: appTheme.backgroundColor,
-                                fontFamily: "Rubik",
-                                fontSize: 20,
-                              )),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            ],
-          ),
-        ),
-      );
-    },
+            ),
+        ],
+      ),
+    ),
   );
 }
 

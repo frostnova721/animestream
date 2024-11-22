@@ -228,7 +228,7 @@ class Cards {
                         decoration: BoxDecoration(
                           color: appTheme.accentColor.withOpacity(0.9),
                           borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(10),
+                            bottomRight: Radius.circular(17),
                             topLeft: Radius.circular(20),
                           ),
                         ),
@@ -241,8 +241,8 @@ class Cards {
                               padding: const EdgeInsets.only(right: 3),
                               child: Icon(
                                 Icons.star,
-                                size: 16,
-                                color: appTheme.textMainColor,
+                                size: 13,
+                                color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor
                               ),
                             ),
                             Text(
@@ -251,7 +251,7 @@ class Cards {
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: "NotoSans",
-                                color: appTheme.textMainColor,
+                                color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
                               ),
                             ),
                           ],

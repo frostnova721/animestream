@@ -88,7 +88,7 @@ class UserAnimeListItem {
   });
 }
 
-class AnilistAnimeRelatedRecommendation {
+class AnilistAnimeRelatedRecommendation extends DatabaseRelatedRecommendation {
   final int id;
   final Map<String, String?> title;
   final String cover;
@@ -104,7 +104,7 @@ class AnilistAnimeRelatedRecommendation {
   });
 }
 
-class AnilistInfo {
+class AnilistInfo extends DatabaseInfo {
   final Map<String, String?> title;
   final Map<String, String> aired;
   final String? banner;

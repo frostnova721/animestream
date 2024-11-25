@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/commons/enums.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart';
@@ -73,6 +75,7 @@ MediaStatus? assignItemEnum(String? valueInString) {
 }
 
 Future<bool> isTv() async {
+  if(!Platform.isAndroid) return false;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
   bool isTV = androidInfo.systemFeatures.contains('android.software.leanback');

@@ -236,8 +236,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   Downloader()
                       .download(qualities[ind]['link']!,
                           "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}", parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
-                      .catchError((err) {
+                      .onError((err, st) {
                     print(err);
+                    print(st);
                     floatingSnackBar(context, "$err");
                   });
                   Navigator.of(context).pop();

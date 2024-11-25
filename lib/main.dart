@@ -130,7 +130,6 @@ class _AnimeStreamState extends State<AnimeStream> {
     _sub = _appLinks.uriLinkStream.listen((uri) {
       print("Invoked DeepLink uri: ${uri.toString()}");
       String path = uri.path;
-      if (path == "/simkl") {}
     });
   }
 

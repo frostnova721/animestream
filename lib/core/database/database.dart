@@ -6,5 +6,5 @@ enum Databases { anilist, simkl }
 
 abstract class Database {
   Future<List<DatabaseSearchResult>> search(String query);
-  // Future<>;
+  Future<DatabaseInfo> getAnimeInfo(int id);
 } 

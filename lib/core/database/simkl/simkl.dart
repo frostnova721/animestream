@@ -6,7 +6,7 @@ import 'package:animestream/core/database/simkl/types.dart';
 import 'package:http/http.dart';
 
 class Simkl extends Database {
-  static String _imageLink(String url) => "https://wsrv.nl/?url=https://simkl.in/posters/${url}_ca.webp";
+  static String imageLink(String url, {bool fanart = false}) => "https://wsrv.nl/?url=https://simkl.in/${fanart ? "fanart" : "posters"}/${url}${fanart ? "_w" : "_ca"}.webp";
 
   Future<List<SimklSearchResult>> search(String query) async {
     final url = "https://api.simkl.com/search/anime?q=$query&client_id=$simklClientId";
@@ -14,13 +14,20 @@ class Simkl extends Database {
     List<SimklSearchResult> sr = [];
     res.forEach((it) {
       sr.add(SimklSearchResult(
-        cover: _imageLink(it['poster']),
+        cover: imageLink(it['poster']),
         id: it['ids']['simkl_id'],
         title: {'english': it['title_en'] ?? it['title'], 'romaji': it['title_romaji'] ?? it['title']},
       ));
     });
 
     return sr;
+  }
+
+  Future<SimklInfo> getAnimeInfo(int id) async {
+    final url = "https://api.simkl.com/anime/$id?extended=full&client_id=$simklClientId";
+    final res = await fetch(url);
+    final datafied = SimklInfo.fromJson(res);
+    return datafied;
   }
 
   Future<dynamic> fetch(String url) async {

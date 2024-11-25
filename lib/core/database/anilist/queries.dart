@@ -1,4 +1,3 @@
-import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
@@ -62,8 +61,7 @@ class AnilistQueries {
     return arrangedList;
   }
 
-  Future<AnilistInfo> getAnimeInfo(int anilistId) async {
-    final query = '''
+  static String infoQuery(int anilistId) => '''
       {
         Page(perPage: 100) {
           media(id: $anilistId) {
@@ -176,110 +174,6 @@ class AnilistQueries {
     }
   }
 }''';
-    final String? token = await getVal("token");
-    final result = await Anilist().fetchQuery(query, RequestType.media, token: token);
-
-    final Map<String, dynamic> info = result[0];
-
-    AnilistInfo convertToIAnimeDetails() {
-      final List<Map<String, dynamic>> characters = [];
-      info['characters']['edges'].forEach((character) {
-        characters.add({
-          'name': character['node']['name']['full'],
-          'role': character['role'],
-          'image': character['node']['image']['large'] ?? character['node']['image']['medium'],
-        });
-      });
-
-      final List<String> studios = [];
-
-      info['studios']['edges'].forEach((studio) {
-        if (studio['node']['isAnimationStudio'] && studio['isMain'] == true) {
-          studios.add(studio['node']['name']);
-        }
-      });
-
-      final List<AnilistAnimeRelatedRecommendation> recommended = [];
-
-      info['recommendations']['nodes'].forEach((recommendation) {
-        final rec = recommendation['mediaRecommendation'];
-        if (rec != null) {
-          recommended.add(
-            AnilistAnimeRelatedRecommendation(
-                id: rec['id'],
-                title: {
-                  'english': rec['title']['english'],
-                  'romaji': rec['title']['romaji'],
-                  'native': rec['title']['native'],
-                },
-                cover: rec['coverImage']['large'] ?? rec['coverImage']['extraLarge'],
-                type: rec['type'],
-                rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null),
-          );
-        }
-      });
-
-      final List relations = [];
-
-      info['relations']['edges'].forEach((relation) {
-        relations.add((
-          id: relation['node']['id'],
-          title: {
-            'english': relation['node']['title']['english'],
-            'romaji': relation['node']['title']['romaji'],
-            'native': relation['node']['title']['native'],
-          },
-          cover: relation['node']['coverImage']['large'] ?? relation['node']['coverImage']['extraLarge'],
-          type: relation['node']['type'],
-          relationType: relation['relationType']
-        ));
-      });
-
-      List<String> tags = [];
-      info['tags'].forEach((item) {
-        tags.add(item['name'].toString());
-      });
-
-      final convertedGuy = AnilistInfo(
-        title: {
-          'english': info['title']['english'],
-          'native': info['title']['native'],
-          'romaji': info['title']['romaji'],
-        },
-        aired: {
-          'start':
-              '${info['startDate']['day'] ?? ''} ${MonthnumberToMonthName(info['startDate']['month'])?['short'] ?? ''} ${info['startDate']['year'] ?? ''}',
-          'end':
-              '${info['endDate']['day'] ?? ''} ${MonthnumberToMonthName(info['endDate']['month'])?['short'] ?? ''} ${info['endDate']['year'] ?? ''}',
-        },
-        banner: info['bannerImage'] ?? null,
-        cover: info['coverImage']['large'] ?? info['coverImage']['medium'],
-        duration: '${info['duration'] ?? ''} minutes',
-        episodes: info['episodes'],
-        genres: info['genres'],
-        characters: characters,
-        nextAiringEpisode: (
-          airingAt: info['nextAiringEpisode']?['airingAt'] ?? '',
-          timeLeft: info['nextAiringEpisode']?['timeUntilAiring'] ?? '',
-          episode: info['nextAiringEpisode']?['episode'] ?? '',
-        ),
-        rating: info['averageScore'] != null ? (info['averageScore'] / 10)?.toDouble() : null,
-        recommended: recommended,
-        related: relations,
-        status: info['status'],
-        type: info['type'],
-        studios: studios,
-        synonyms: info['synonyms'],
-        synopsis: info['description'].replaceAll(RegExp(r'<[^>]*>'), "").replaceAll(RegExp(r'\n+'), '\n'),
-        tags: tags,
-        mediaListStatus: info['mediaListEntry']?['status'],
-      );
-
-      return convertedGuy;
-    }
-
-    return convertToIAnimeDetails();
-  }
 
   Future<List<AnilistRecommendations>> getRecommendedAnimes() async {
     final String query = '''{
@@ -396,7 +290,7 @@ class AnilistQueries {
           cover: item['coverImage']['large'],
           id: item['id'],
           status: item['status'],
-          rating: item['averageScore'] is int ? item['averageScore']/10 : null,
+          rating: item['averageScore'] is int ? item['averageScore'] / 10 : null,
           title: {
             'english': item['title']['english'],
             'romaji': item['title']['romaji'],

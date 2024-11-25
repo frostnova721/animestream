@@ -94,6 +94,7 @@ class AnilistAnimeRelatedRecommendation extends DatabaseRelatedRecommendation {
   final String cover;
   final String type;
   final double? rating;
+  final String? relationType;
 
   AnilistAnimeRelatedRecommendation({
     required this.cover,
@@ -101,6 +102,7 @@ class AnilistAnimeRelatedRecommendation extends DatabaseRelatedRecommendation {
     required this.rating,
     required this.title,
     required this.type,
+    this.relationType,
   });
 }
 
@@ -116,7 +118,7 @@ class AnilistInfo extends DatabaseInfo {
   final Object nextAiringEpisode;
   final double? rating;
   final List<AnilistAnimeRelatedRecommendation> recommended;
-  final List<dynamic> related;
+  final List<AnilistAnimeRelatedRecommendation> related;
   final String? status;
   final String type;
   final List<String?> studios;
@@ -124,6 +126,7 @@ class AnilistInfo extends DatabaseInfo {
   final String? synopsis;
   final List<String> tags;
   final String? mediaListStatus;
+  final List<AlternateDatabaseId> alternateDatabases;
 
   AnilistInfo({
     required this.aired,
@@ -145,6 +148,7 @@ class AnilistInfo extends DatabaseInfo {
     required this.tags,
     required this.title,
     required this.type,
+    required this.alternateDatabases,
   });
 }
 

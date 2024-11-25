@@ -1,8 +1,10 @@
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:graphql/client.dart';
 
 class Anilist extends Database {
@@ -35,19 +37,127 @@ class Anilist extends Database {
 
     data.forEach((item) {
       final classified = AnilistSearchResult(
-        cover: item['coverImage']['large'],
-        id: item['id'],
-        idMal: item['idMal'],
-        title: {
-          'english': item['title']['english'],
-          'romaji': item['title']['romaji'],
-        },
-        rating: item['averageScore'] is int ? item['averageScore']/10 : null
-      );
+          cover: item['coverImage']['large'],
+          id: item['id'],
+          idMal: item['idMal'],
+          title: {
+            'english': item['title']['english'],
+            'romaji': item['title']['romaji'],
+          },
+          rating: item['averageScore'] is int ? item['averageScore'] / 10 : null);
       searchResults.add(classified);
     });
 
     return searchResults;
+  }
+
+  Future<AnilistInfo> getAnimeInfo(int id) async {
+    final query = AnilistQueries.infoQuery(id);
+    final String? token = await getVal("token");
+    final result = await Anilist().fetchQuery(query, RequestType.media, token: token);
+
+    final Map<String, dynamic> info = result[0];
+
+    AnilistInfo convertToIAnimeDetails() {
+      final List<Map<String, dynamic>> characters = [];
+      info['characters']['edges'].forEach((character) {
+        characters.add({
+          'name': character['node']['name']['full'],
+          'role': character['role'],
+          'image': character['node']['image']['large'] ?? character['node']['image']['medium'],
+        });
+      });
+
+      final List<String> studios = [];
+
+      info['studios']['edges'].forEach((studio) {
+        if (studio['node']['isAnimationStudio'] && studio['isMain'] == true) {
+          studios.add(studio['node']['name']);
+        }
+      });
+
+      final List<AnilistAnimeRelatedRecommendation> recommended = [];
+
+      info['recommendations']['nodes'].forEach((recommendation) {
+        final rec = recommendation['mediaRecommendation'];
+        if (rec != null) {
+          recommended.add(
+            AnilistAnimeRelatedRecommendation(
+                id: rec['id'],
+                title: {
+                  'english': rec['title']['english'],
+                  'romaji': rec['title']['romaji'],
+                  'native': rec['title']['native'],
+                },
+                cover: rec['coverImage']['large'] ?? rec['coverImage']['extraLarge'],
+                type: rec['type'],
+                rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null),
+          );
+        }
+      });
+
+      final List<AnilistAnimeRelatedRecommendation> relations = [];
+
+      info['relations']['edges'].forEach((relation) {
+        relations.add(AnilistAnimeRelatedRecommendation(
+            id: relation['node']['id'],
+            title: {
+              'english': relation['node']['title']['english'],
+              'romaji': relation['node']['title']['romaji'],
+              'native': relation['node']['title']['native'],
+            },
+            cover: relation['node']['coverImage']['large'] ?? relation['node']['coverImage']['extraLarge'],
+            type: relation['node']['type'],
+            rating: null,
+            relationType: relation['relationType']));
+      });
+
+      List<String> tags = [];
+      info['tags'].forEach((item) {
+        tags.add(item['name'].toString());
+      });
+
+      final convertedGuy = AnilistInfo(
+          title: {
+            'english': info['title']['english'],
+            'native': info['title']['native'],
+            'romaji': info['title']['romaji'],
+          },
+          aired: {
+            'start':
+                '${info['startDate']['day'] ?? ''} ${MonthnumberToMonthName(info['startDate']['month'])?['short'] ?? ''} ${info['startDate']['year'] ?? ''}',
+            'end':
+                '${info['endDate']['day'] ?? ''} ${MonthnumberToMonthName(info['endDate']['month'])?['short'] ?? ''} ${info['endDate']['year'] ?? ''}',
+          },
+          banner: info['bannerImage'] ?? null,
+          cover: info['coverImage']['large'] ?? info['coverImage']['medium'],
+          duration: '${info['duration'] ?? ''} minutes',
+          episodes: info['episodes'],
+          genres: info['genres'],
+          characters: characters,
+          nextAiringEpisode: (
+            airingAt: info['nextAiringEpisode']?['airingAt'] ?? '',
+            timeLeft: info['nextAiringEpisode']?['timeUntilAiring'] ?? '',
+            episode: info['nextAiringEpisode']?['episode'] ?? '',
+          ),
+          rating: info['averageScore'] != null ? (info['averageScore'] / 10)?.toDouble() : null,
+          recommended: recommended,
+          related: relations,
+          status: info['status'],
+          type: info['type'],
+          studios: studios,
+          synonyms: info['synonyms'],
+          synopsis: info['description'].replaceAll(RegExp(r'<[^>]*>'), "").replaceAll(RegExp(r'\n+'), '\n'),
+          tags: tags,
+          mediaListStatus: info['mediaListEntry']?['status'],
+          alternateDatabases: [
+            AlternateDatabaseId(database: Databases.anilist, id: id),
+          ]);
+
+      return convertedGuy;
+    }
+
+    return convertToIAnimeDetails();
   }
 
   Future<List<CurrentlyAiringResult>> getCurrentlyAiringAnime() async {

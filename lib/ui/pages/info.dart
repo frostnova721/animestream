@@ -7,8 +7,8 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
-import 'package:animestream/core/database/anilist/queries.dart';
-import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/core/database/handler.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
@@ -39,7 +39,7 @@ class _InfoState extends State<Info> {
     });
   }
 
-  late AnilistInfo data;
+  late DatabaseInfo data;
 
   String selectedSource = currentUserSettings?.preferredProvider ?? sources[0];
   String? foundName;
@@ -61,13 +61,14 @@ class _InfoState extends State<Info> {
   bool loggedIn = false;
   bool dataLoaded = false;
   bool infoPage = true;
+  bool infoLoadError = false;
 
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences().getUserPreferences();
     gridMode = preferences.episodeGridView ?? false;
 
     //load TV stuff
-    if(await isTv()) {
+    if (await isTv()) {
       _watchInfoButtonFocusNode.requestFocus();
     }
   }
@@ -90,15 +91,20 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     try {
-      final info = await AnilistQueries().getAnimeInfo(id);
+      final info = await DatabaseHandler().getAnimeInfo(id);
       setState(() {
         dataLoaded = true;
         data = info;
         mediaListStatus = assignItemEnum(data.mediaListStatus);
       });
     } catch (err) {
+      print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
         floatingSnackBar(context, err.toString());
+      setState(() {
+        infoLoadError = true;
+      });
+      rethrow;
     }
   }
 
@@ -204,11 +210,11 @@ class _InfoState extends State<Info> {
       if (manualSearchQuery != null) searchTitle = manualSearchQuery;
       await search(searchTitle);
     } catch (err) {
-      print("Exception: " + err.toString());
+      print(err.toString());
       try {
         await search(data.title['romaji'] ?? '');
       } catch (err) {
-        print("Exception: " + err.toString());
+        print(err.toString());
         if (mounted)
           setState(() {
             _epSearcherror = true;
@@ -228,152 +234,156 @@ class _InfoState extends State<Info> {
 
   @override
   Widget build(BuildContext context) {
-    try {
-      return Scaffold(
-        backgroundColor: appTheme.backgroundColor,
-        body: dataLoaded
-            ? SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    _stack(),
-                    Container(
-                      margin: EdgeInsets.only(top: 30),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Container(
-                            // width: 120,
-                            child: ElevatedButton(
-                              focusNode: _watchInfoButtonFocusNode,
-                              onFocusChange: (val) {
-                                setState(() {});
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: _watchInfoButtonFocusNode.hasFocus
-                                    ? appTheme.textMainColor
-                                    : appTheme.accentColor,
-                                fixedSize: Size(135, 55),
-                              ),
-                              onPressed: () {
-                                setState(() {
-                                  infoPage = !infoPage;
-                                });
-                              },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    infoPage ? Icons.play_arrow_rounded : Icons.info_rounded,
-                                    color: Colors.black,
-                                    size: 28,
-                                  ),
-                                  Text(
-                                    infoPage ? "watch" : "info",
-                                    style: TextStyle(
-                                      color: Colors.black,
-                                      fontFamily: "Poppins",
-                                      fontSize: 18,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          if (loggedIn)
-                            Container(
-                              child: ElevatedButton(
-                                onPressed: () {
-                                  showModalBottomSheet(
-                                    context: context,
-                                    backgroundColor: appTheme.modalSheetBackgroundColor,
-                                    showDragHandle: true,
-                                    builder: (context) => MediaListStatusBottomSheet(
-                                      status: mediaListStatus,
-                                      id: widget.id,
-                                      refreshListStatus: refreshListStatus,
-                                      totalEpisodes: data.episodes ?? 0,
-                                      episodesWatched: watched,
-                                    ),
-                                  );
-                                },
-                                style: ElevatedButton.styleFrom(
-                                  shape: CircleBorder(
-                                    side: BorderSide(
-                                      color: appTheme.accentColor,
-                                    ),
-                                  ),
-                                  fixedSize: Size(50, 50),
-                                  backgroundColor: appTheme.backgroundColor,
-                                  padding: EdgeInsets.zero,
-                                ),
-                                child: Icon(
-                                  getTrackerIcon(),
-                                  color: appTheme.accentColor,
-                                  size: 28,
-                                ),
-                              ),
-                            )
-                        ],
+    return Scaffold(
+      backgroundColor: appTheme.backgroundColor,
+      body: infoLoadError
+          ? Center(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Image.asset(
+                    'lib/assets/images/broken_heart.png',
+                    scale: 7.5,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 15, left: 30, right: 30, bottom: 15),
+                    child: const Text(
+                      'oops! something went wrong',
+                      style: TextStyle(
+                          color: Colors.white, fontFamily: "NunitoSans", fontSize: 25, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: appTheme.accentColor,
                       ),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 45),
-                      padding: EdgeInsets.only(left: 20, right: 20),
-                      alignment: Alignment.center,
-                      // padding: EdgeInsets.only(left: 40, right: 25),
-                      child: Text(
-                        data.title['english'] ?? data.title['romaji'] ?? '',
-                        style: TextStyle(
-                          color: appTheme.textMainColor,
-                          fontFamily: "NunitoSans",
-                          fontSize: 25,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                    AnimatedSwitcher(
-                      duration: Duration(milliseconds: 200),
-                      child: infoPage ? _infoItems(context) : _watchItems(context),
-                    ),
-                  ],
-                ),
+                      child: Text("Go Back", style: TextStyle(color: appTheme.backgroundColor, fontWeight: FontWeight.bold),)),
+                ],
               ),
             )
-            : Center(
-                child: CircularProgressIndicator(
-                  color: appTheme.accentColor,
+          : dataLoaded
+              ? SingleChildScrollView(
+                  child: Padding(
+                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        _stack(),
+                        Container(
+                          margin: EdgeInsets.only(top: 30),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Container(
+                                // width: 120,
+                                child: ElevatedButton(
+                                  focusNode: _watchInfoButtonFocusNode,
+                                  onFocusChange: (val) {
+                                    setState(() {});
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: _watchInfoButtonFocusNode.hasFocus
+                                        ? appTheme.textMainColor
+                                        : appTheme.accentColor,
+                                    fixedSize: Size(135, 55),
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      infoPage = !infoPage;
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Icon(
+                                        infoPage ? Icons.play_arrow_rounded : Icons.info_rounded,
+                                        color: Colors.black,
+                                        size: 28,
+                                      ),
+                                      Text(
+                                        infoPage ? "watch" : "info",
+                                        style: TextStyle(
+                                          color: Colors.black,
+                                          fontFamily: "Poppins",
+                                          fontSize: 18,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (loggedIn)
+                                Container(
+                                  child: ElevatedButton(
+                                    onPressed: () {
+                                      showModalBottomSheet(
+                                        context: context,
+                                        backgroundColor: appTheme.modalSheetBackgroundColor,
+                                        showDragHandle: true,
+                                        builder: (context) => MediaListStatusBottomSheet(
+                                          status: mediaListStatus,
+                                          id: widget.id,
+                                          refreshListStatus: refreshListStatus,
+                                          totalEpisodes: data.episodes ?? 0,
+                                          episodesWatched: watched,
+                                        ),
+                                      );
+                                    },
+                                    style: ElevatedButton.styleFrom(
+                                      shape: CircleBorder(
+                                        side: BorderSide(
+                                          color: appTheme.accentColor,
+                                        ),
+                                      ),
+                                      fixedSize: Size(50, 50),
+                                      backgroundColor: appTheme.backgroundColor,
+                                      padding: EdgeInsets.zero,
+                                    ),
+                                    child: Icon(
+                                      getTrackerIcon(),
+                                      color: appTheme.accentColor,
+                                      size: 28,
+                                    ),
+                                  ),
+                                )
+                            ],
+                          ),
+                        ),
+                        Container(
+                          margin: EdgeInsets.only(top: 45),
+                          padding: EdgeInsets.only(left: 20, right: 20),
+                          alignment: Alignment.center,
+                          // padding: EdgeInsets.only(left: 40, right: 25),
+                          child: Text(
+                            data.title['english'] ?? data.title['romaji'] ?? '',
+                            style: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontFamily: "NunitoSans",
+                              fontSize: 25,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        AnimatedSwitcher(
+                          duration: Duration(milliseconds: 200),
+                          child: infoPage ? _infoItems(context) : _watchItems(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : Center(
+                  child: CircularProgressIndicator(
+                    color: appTheme.accentColor,
+                  ),
                 ),
-              ),
-      );
-    } catch (err) {
-      print(err);
-      return Scaffold(
-        backgroundColor: appTheme.backgroundColor,
-        body: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(
-              'lib/assets/images/broken_heart.png',
-              scale: 7.5,
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 15, left: 30, right: 30),
-              child: const Text(
-                'oops! something went wrong',
-                style:
-                    TextStyle(color: Colors.white, fontFamily: "NunitoSans", fontSize: 25, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
+    );
   }
 
   Column _watchItems(BuildContext context) {
@@ -1095,38 +1105,39 @@ class _InfoState extends State<Info> {
               ],
             ),
           ),
-          Container(
-            margin: EdgeInsets.only(top: 30),
-            padding: EdgeInsets.only(left: 15, right: 15),
-            child: Column(
-              children: [
-                _categoryTitle('Tags'),
-                SizedBox(
-                  height: 45,
-                  child: ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    itemCount: data.tags.length,
-                    itemBuilder: (context, index) {
-                      return Container(
-                        alignment: Alignment.center,
-                        margin: EdgeInsets.all(5),
-                        padding: EdgeInsets.only(left: 15, right: 15),
-                        decoration:
-                            BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(5)),
-                        child: Text(
-                          data.tags[index],
-                          style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontSize: 15,
+          if (data.tags != null)
+            Container(
+              margin: EdgeInsets.only(top: 30),
+              padding: EdgeInsets.only(left: 15, right: 15),
+              child: Column(
+                children: [
+                  _categoryTitle('Tags'),
+                  SizedBox(
+                    height: 45,
+                    child: ListView.builder(
+                      scrollDirection: Axis.horizontal,
+                      itemCount: data.tags!.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          alignment: Alignment.center,
+                          margin: EdgeInsets.all(5),
+                          padding: EdgeInsets.only(left: 15, right: 15),
+                          decoration:
+                              BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(5)),
+                          child: Text(
+                            data.tags![index],
+                            style: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontSize: 15,
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
           Container(
             margin: EdgeInsets.only(top: 30),
             padding: EdgeInsets.only(left: 25, right: 25),
@@ -1207,8 +1218,8 @@ class _InfoState extends State<Info> {
     );
   }
 
-  SizedBox _buildRecAndRel(List<dynamic> data, bool recommended, BuildContext context) {
-    if (data.length == 0)
+  SizedBox _buildRecAndRel(List<DatabaseRelatedRecommendation> data, bool recommended, BuildContext context) {
+    if (data.isEmpty)
       return SizedBox(
         height: 240,
         child: Center(
@@ -1250,11 +1261,11 @@ class _InfoState extends State<Info> {
                 width: 130,
                 child: recommended
                     ? Cards(context: context).animeCard(
-                        item.id, item.title['english'] ?? item.title['romaji'], item.cover,
+                        item.id, item.title['english'] ?? item.title['romaji'] ?? "", item.cover,
                         rating: item.rating)
                     : Cards().characterCard(
-                        item.title['english'] ?? item.title['romaji'],
-                        recommended ? item.type : item.relationType,
+                        item.title['english'] ?? item.title['romaji'] ?? "",
+                        recommended ? item.type : item.relationType!,
                         item.cover,
                       )),
           );

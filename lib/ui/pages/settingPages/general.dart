@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
@@ -85,7 +87,12 @@ class _GeneralSettingState extends State<GeneralSetting> {
                     }, description: "*download 2x items per batch"),
                     InkWell(
                       onTap: () async {
-                        final dir = await FilePickerIO().getDirectoryPath();
+                        String? dir;
+                        if(Platform.isWindows) {
+                          dir = await FilePickerWindows().getDirectoryPath();
+                        } else {
+                         dir = await FilePickerIO().getDirectoryPath();
+                        }
                         if(dir == null) return;
                         print("Path set to: $dir");
                         await Settings().writeSettings(SettingsModal(downloadPath: dir));

@@ -6,7 +6,7 @@ import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/types.dart';
 
 class DatabaseHandler extends Database {
-  static final db = Databases.anilist;
+  static Databases db = Databases.anilist;
 
   Database getActiveDatabaseInstance(Databases dbs) {
     switch (dbs) {
@@ -22,5 +22,10 @@ class DatabaseHandler extends Database {
   @override
   Future<List<DatabaseSearchResult>> search(String query) async {
     return await getActiveDatabaseInstance(db).search(query);
+  }
+
+  @override
+  Future<DatabaseInfo> getAnimeInfo(int id) async {
+    return await getActiveDatabaseInstance(db).getAnimeInfo(id);
   }
 }

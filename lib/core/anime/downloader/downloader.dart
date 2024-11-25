@@ -14,6 +14,7 @@ List<DownloadingItem> downloadQueue = [];
 class Downloader {
   // check for storage permission and request for permission if permission isnt granted
   Future<bool> checkPermission() async {
+    if(Platform.isWindows) return true;
     final os = await DeviceInfoPlugin().androidInfo;
     final sdkVer = os.version.sdkInt;
 
@@ -186,11 +187,14 @@ class Downloader {
       //sort the buffers
       buffers.sort((a, b) => a.index.compareTo(b.index));
 
+      print("[DOWNLOADER] writing file to disk...");
+      
       //write the data after full download.
       final out = await output.openWrite();
       for (final buffer in buffers) {
         out.add(buffer.buffer);
       }
+      print("[DOWNLOADER] succesfully written the file to disk");
 
       await out.close();
     } catch (err) {

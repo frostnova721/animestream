@@ -45,3 +45,4 @@ app.*.map.json
 flutter_*.png
 
 *.env
+*.env.g.dart

@@ -128,10 +128,25 @@ class _AnimeStreamState extends State<AnimeStream> {
   void listenDeepLinkCall() {
     _appLinks = AppLinks();
     _sub = _appLinks.uriLinkStream.listen((uri) {
-      print("Invoked DeepLink uri: ${uri.toString()}");
-      String path = uri.path;
+      if (uri.scheme == "animestream") {
+        print("Invoked DeepLink uri: ${uri.toString()}");
+        String host = uri.host;
+        switch (host) {
+          case "info":
+            {
+              final id = int.tryParse(uri.queryParameters['id'] ?? "nothing");
+              if (id != null)
+                //need to do smth T-T
+                break;
+            }
+          default:
+            print("BAD-INTENT-PATH");
+        }
+      }
     });
   }
+
+  Widget? deepLinkRequestedNavigationPage = null;
 
   // This widget is the root of *my* application.
   @override
@@ -195,7 +210,7 @@ class _AnimeStreamState extends State<AnimeStream> {
                   (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : themeProvider.theme.accentColor,
             ),
           ),
-          home: MainNavigator(),
+          home: deepLinkRequestedNavigationPage ?? MainNavigator(),
           debugShowCheckedModeBanner: false,
         );
       },

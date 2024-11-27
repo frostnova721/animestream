@@ -169,11 +169,16 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   void toggleControls(bool value) async {
+    if(_controlsTimer != null) {
+      _controlsTimer?.cancel();
+      _controlsTimer = null;
+    }
     await Future.delayed(
       Duration(milliseconds: 100),
     );
     setState(() {
       _visible = value;
+      _isTimerActive = false;
     });
   }
 
@@ -181,6 +186,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     if (_visible && !_isTimerActive) {
       if (_controlsTimer != null) {
         _controlsTimer!.cancel();
+        _controlsTimer = null;
       }
       _isTimerActive = true;
       print("called hideontimeout: $_visible");
@@ -192,7 +198,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -583,11 +589,14 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       height: MediaQuery.of(context).size.height / 2,
       child: AlertDialog(
           content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.only(bottom: 10),
-            child: Text("Speed", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),),
+            child: Text(
+              "Speed",
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),
+            ),
           ),
           StatefulBuilder(
             builder: (context, setState) => Container(

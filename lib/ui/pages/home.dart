@@ -54,9 +54,10 @@ class _HomeState extends State<Home> {
 
   Future<void> getLists({String? userName}) async {
     try {
-      setState(() {
-        refreshing = true;
-      });
+      if (mounted)
+        setState(() {
+          refreshing = true;
+        });
       List<UserAnimeListItem> watched = await getWatchedList(userName: userName);
       if (watched.length > 40) watched = watched.sublist(0, 40);
       recentlyWatched = [];
@@ -100,7 +101,9 @@ class _HomeState extends State<Home> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              buildHeader("Home", context, afterNavigation: () => setState(() {})),
+              buildHeader("Home", context, afterNavigation: () {
+                if (mounted) setState(() {});
+              }),
               // if (storedUserData != null)
               AnimatedSwitcher(
                 duration: Duration(milliseconds: 400),

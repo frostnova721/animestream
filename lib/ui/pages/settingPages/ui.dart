@@ -110,66 +110,25 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   "Mode",
                                   style: textStyle(),
                                 ),
-                                DropdownButton(
-                                  value: darkMode,
-                                  style: TextStyle(color: appTheme.textMainColor, fontSize: 18, fontFamily: "NotoSans"),
-                                  padding: EdgeInsets.only(left: 10, right: 10),
-                                  icon: Padding(
-                                    padding: const EdgeInsets.only(left: 10),
-                                    child: Icon(Icons.arrow_drop_down),
-                                  ),
-                                  items: [
-                                    DropdownMenuItem(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 10),
-                                        child: Text("dark"),
-                                      ),
-                                      value: true,
-                                    ),
-                                    DropdownMenuItem(
-                                      child: Padding(
-                                        padding: const EdgeInsets.only(left: 10),
-                                        child: Text("light"),
-                                      ),
-                                      value: false,
-                                    )
-                                  ],
-                                  onChanged: (val) async {
-                                    await setThemeMode(val ?? true);
-                                    setState(() {
-                                      darkMode = val ?? true;
-                                    });
-                                    // floatingSnackBar(context, "All set! restart the app to apply the theme");
-                                  },
-                                )
-                                // initialSelection: currentUserSettings?.darkMode ?? true,
-                                // onSelected: (val) async {
-                                //   await setThemeMode(val ?? true);
-                                //   setState(() {
-                                //     darkMode = val ?? true;
-                                //   });
-                                //   // floatingSnackBar(context, "All set! restart the app to apply the theme");
-                                // },
-                                // menuStyle:
-                                //     MenuStyle(backgroundColor: WidgetStatePropertyAll(appTheme.backgroundSubColor)),
-                                // textStyle: TextStyle(color: appTheme.textMainColor),
-                                // dropdownMenuEntries: [
-                                //   // DropdownMenuEntry(value: MediaQuery.of(context).platformBrightness == Brightness.dark, label: "auto"),
-                                //   DropdownMenuEntry(
-                                //     value: true,
-                                //     label: "dark",
-                                //     style: ButtonStyle(
-                                //       foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
-                                //     ),
-                                //   ),
-                                //   DropdownMenuEntry(
-                                //     value: false,
-                                //     label: "light (beta)",
-                                //     style: ButtonStyle(
-                                //       foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
-                                //     ),
-                                //   )
-                                // ])
+                                SegmentedButton(segments: [
+                                  ButtonSegment(value: false, icon: Icon(Icons.wb_sunny_rounded)),
+                                  ButtonSegment(value: true, icon: Icon(Icons.nights_stay_rounded))
+                                ], selected: {darkMode},
+                                multiSelectionEnabled: false,
+                                showSelectedIcon: false,
+                                emptySelectionAllowed: false,
+                                onSelectionChanged: (val) async {
+                                  await setThemeMode(val.first);
+                                  setState(() {
+                                    darkMode = val.first;
+                                  });
+                                },
+                                style: SegmentedButton.styleFrom(
+                                  selectedBackgroundColor: appTheme.accentColor,
+                                  selectedForegroundColor: appTheme.backgroundColor,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                                ),
+                                ),
                               ],
                             ),
                           ),

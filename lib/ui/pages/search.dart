@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/database/handler.dart';
+import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';

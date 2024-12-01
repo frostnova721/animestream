@@ -152,7 +152,7 @@ class AnilistInfo extends DatabaseInfo {
   });
 }
 
-class AnilistMutationResult {
+class AnilistMutationResult extends DatabaseMutationResult {
   final String status;
   final int? progress;
 

@@ -26,6 +26,11 @@ class AlternateDatabaseId {
   });
 }
 
+abstract class DatabaseMutationResult {
+  String? status;
+  int? progress;
+}
+
 abstract class DatabaseInfo {
   Map<String, String?> get title;
   Map<String, String> get aired;

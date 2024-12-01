@@ -164,14 +164,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                 Settings().writeSettings(
                                   SettingsModal(navbarTranslucency: navbarTranslucency),
                                 );
-                              })
-                          // _toggleItem("Translucent navbar", translucentNavbar, description: "Translucent effect of navigation bar" ,() {
-                          //   setState(() {
-                          //     translucentNavbar = !translucentNavbar;
-                          //      Settings().writeSettings(SettingsModal(translucentNavbar: translucentNavbar));
-                          //      showToast("done!");
-                          //   });
-                          // })
+                              }),
                         ],
                       )
                     : Container(),

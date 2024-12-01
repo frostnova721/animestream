@@ -126,3 +126,8 @@ class SimklInfo extends DatabaseInfo {
         ]);
   }
 }
+
+//idk just leave this mf here
+class SimklMutationResult extends DatabaseMutationResult {
+
+}

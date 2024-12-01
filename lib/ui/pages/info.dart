@@ -7,7 +7,7 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
-import 'package:animestream/core/database/handler.dart';
+import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';

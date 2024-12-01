@@ -2,8 +2,10 @@ import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/database/database.dart';
 
-class AnilistMutations {
+class AnilistMutations extends DatabaseMutation {
+  @override
   Future<AnilistMutationResult> mutateAnimeList({
     required int id,
     int? score,

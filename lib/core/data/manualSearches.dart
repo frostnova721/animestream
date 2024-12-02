@@ -1,7 +1,13 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/database/database.dart';
 
 Future<String?> getManualSearchQuery(String anilistId) async {
-  final Map<dynamic, dynamic> manualSearchQuery = await getVal('manualSearches', boxName: "animeInfo") ?? {};
+  //just handle anilist
+  if (currentUserSettings?.database != Databases.anilist) return null;
+
+  final Map<dynamic, dynamic> manualSearchQuery = await getVal(HiveKey.manualSearches, boxName: "animeInfo") ?? {};
   if (manualSearchQuery.isEmpty) {
     print("EMPTY MAP 'manualSearches'");
     return null;
@@ -16,7 +22,7 @@ Future<String?> getManualSearchQuery(String anilistId) async {
 }
 
 Future<void> addManualSearchQuery(String anilistId, String searchTerm) async {
-  Map<dynamic, dynamic> map = await getVal('manualSearches', boxName: "animeInfo") ?? {};
+  Map<dynamic, dynamic> map = await getVal(HiveKey.manualSearches, boxName: "animeInfo") ?? {};
   // if (map == null) map = {};
 
   map[anilistId] = searchTerm;
@@ -29,5 +35,5 @@ Future<void> addManualSearchQuery(String anilistId, String searchTerm) async {
     filteredMap = Map.fromEntries(entries);
   }
 
-  await storeVal('manualSearches', filteredMap, boxName: "animeInfo");
+  await storeVal(HiveKey.manualSearches, filteredMap, boxName: "animeInfo");
 }

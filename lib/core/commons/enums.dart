@@ -11,8 +11,21 @@ enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }
 
 enum SortType { AtoZ, RecentlyUpdated, TopRated }
 
+enum HiveKey {
+  manualSearches,
+  userPreferences,
+  settings,
+  theme,
+  watching,
+  animeOnsenToken,
+
+  @deprecated
+  token,
+}
+
 enum SecureStorageKey { 
-  simklToken("simkl_token");
+  simklToken("simkl_token"),
+  anilistToken("anilist_token");
  
   final String value;
 

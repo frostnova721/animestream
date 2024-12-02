@@ -49,7 +49,8 @@ dependencies:
   flutter_floating_bottom_bar: ^1.2.0
   pull_to_refresh: ^2.0.0
   flutter_markdown: ^0.6.20
-  webview_flutter: ^4.7.0
+  # webview_flutter: ^4.7.0
+  desktop_webview_window: ^0.2.3
   # flutter_inappwebview: ^6.1.5
   cached_network_image: ^3.3.1
   cupertino_icons: ^1.0.2

@@ -33,7 +33,7 @@ abstract class DatabaseMutationResult {
 
 abstract class DatabaseInfo {
   Map<String, String?> get title;
-  Map<String, String> get aired;
+  Map<String, String?> get aired;
   String? get banner;
   String get cover;
   String get duration;

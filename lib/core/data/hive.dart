@@ -1,22 +1,23 @@
+import 'package:animestream/core/commons/enums.dart';
 import 'package:hive/hive.dart';
 
-Future<dynamic>? getVal(String itemKey, {String boxName = 'animestream'}) async {
+Future<dynamic>? getVal(HiveKey itemKey, {String boxName = 'animestream'}) async {
   var box = await Hive.openBox(boxName);
   if (!box.isOpen) {
     box = await Hive.openBox(boxName);
   }
-  final vals = await box.get(itemKey);
+  final vals = await box.get(itemKey.name);
   await box.close();
   return vals;
 }
 
-Future<void> storeVal(String itemKey, dynamic val, {String boxName = 'animestream'}) async {
+Future<void> storeVal(HiveKey itemKey, dynamic val, {String boxName = 'animestream'}) async {
   try {
     var box = await Hive.openBox(boxName);
     if (!box.isOpen) {
       box = await Hive.openBox(boxName);
     }
-    await box.put(itemKey, val);
+    await box.put(itemKey.name, val);
     await box.close();
   } catch (err) {
     print(err);

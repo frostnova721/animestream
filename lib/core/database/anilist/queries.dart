@@ -1,4 +1,4 @@
-import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/commons/enums.dart';
@@ -194,7 +194,7 @@ class AnilistQueries {
     }
   }
 }''';
-    final String? token = await getVal('token');
+    final String? token = await getSecureVal(SecureStorageKey.anilistToken);
     final res = await Anilist().fetchQuery(query, null, token: token);
     final recommendations = res['Page']['recommendations'];
     List<AnilistRecommendations> recommendationList = [];

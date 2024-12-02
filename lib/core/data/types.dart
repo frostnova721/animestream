@@ -1,3 +1,4 @@
+import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/sources.dart';
 
 class SettingsModal {
@@ -14,6 +15,7 @@ class SettingsModal {
   final bool? materialTheme;
   final bool? isDev;
   final String? downloadPath;
+  final Databases? database;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -29,6 +31,7 @@ class SettingsModal {
     this.materialTheme,
     this.isDev,
     this.downloadPath,
+    this.database,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -46,6 +49,7 @@ class SettingsModal {
       materialTheme: map['materialTheme'] ?? false,
       isDev: map['isDev'] ?? false,
       downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download/animestream',
+      database: DatabaseFromString.getDb(map['database'] ?? "anilist"),
     );
   }
 
@@ -64,6 +68,7 @@ class SettingsModal {
       'materialTheme': materialTheme,
       'isDev': isDev,
       'downloadPath': downloadPath,
+      'database': database?.name,
     };
   }
 }

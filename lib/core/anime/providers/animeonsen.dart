@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/ui/models/subtitles.dart';
@@ -9,7 +10,7 @@ import 'package:http/http.dart';
 
 class AnimeOnsen extends AnimeProvider {
   Future<void> checkAndUpdateToken() async {
-    final Map<dynamic, dynamic> currentToken = await getVal("animeOnsenToken", boxName: "misc") ?? {};
+    final Map<dynamic, dynamic> currentToken = await getVal(HiveKey.animeOnsenToken, boxName: "misc") ?? {};
     final currentTime = DateTime.now().millisecondsSinceEpoch / 1000;
 
     //get the new token if the old one is expired
@@ -20,7 +21,7 @@ class AnimeOnsen extends AnimeProvider {
         'token': token['token'],
         'expiration': token['expiration'] + currentTime,
       };
-      await storeVal("animeOnsenToken", modifiedMap, boxName: "misc");
+      await storeVal(HiveKey.animeOnsenToken, modifiedMap, boxName: "misc");
       animeOnsenToken = token['token'];
       print("[PROVIDER] AO Token Saved!");
     } else {

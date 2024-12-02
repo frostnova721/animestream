@@ -1,11 +1,12 @@
+import 'package:graphql/client.dart';
+
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
-import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/types.dart';
-import 'package:graphql/client.dart';
 
 class Anilist extends Database {
   Future<List<AnilistSearchResult>> search(String query) async {
@@ -53,7 +54,7 @@ class Anilist extends Database {
 
   Future<AnilistInfo> getAnimeInfo(int id) async {
     final query = AnilistQueries.infoQuery(id);
-    final String? token = await getVal("token");
+    final String? token = await getSecureVal(SecureStorageKey.anilistToken);
     final result = await Anilist().fetchQuery(query, RequestType.media, token: token);
 
     final Map<String, dynamic> info = result[0];
@@ -182,7 +183,7 @@ class Anilist extends Database {
             }
           }''';
 
-    final List<dynamic> data = await fetchQuery(query, RequestType.media, token: await getVal('token'));
+    final List<dynamic> data = await fetchQuery(query, RequestType.media, token: await getSecureVal(SecureStorageKey.anilistToken));
 
     final List<CurrentlyAiringResult> airingAnimes = [];
 

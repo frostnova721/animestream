@@ -6,3 +6,8 @@ Future<String?> getSecureVal(SecureStorageKey key) async {
   final item = await st.read(key: key.value);
   return item;
 }
+
+Future<void> storeSecureVal(SecureStorageKey key, String? val) async {
+  final st = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
+  await st.write(key: key.value, value: val);
+}

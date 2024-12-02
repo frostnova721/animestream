@@ -48,7 +48,7 @@ class SimklRelatedRecommendation extends DatabaseRelatedRecommendation {
 
 class SimklInfo extends DatabaseInfo {
   final Map<String, String?> title;
-  final Map<String, String> aired;
+  final Map<String, String?> aired;
   final String type;
   final String duration;
   final String cover;

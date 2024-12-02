@@ -1,7 +1,8 @@
 import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -48,7 +49,7 @@ class _AccountSettingState extends State<AccountSetting> {
   bool loading = true;
 
   Future<bool> isLoggedIn() async {
-    final token = await getVal("token");
+    final token = await getSecureVal(SecureStorageKey.anilistToken);
     if (token != null && mounted) {
       setState(() {
         anilistLoggedIn = true;
@@ -197,7 +198,7 @@ class _AccountSettingState extends State<AccountSetting> {
                                             AniListLogin().launchWebView(context).then((logged) {
                                               if (logged) {
                                                 floatingSnackBar(context, "Login successful!");
-                                                Provider.of<ThemeProvider>(context).justRefresh();
+                                                Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                                               }
                                               //replace the page with itself to avoid recalling the functions in initState to update the user data
                                               Navigator.pushReplacement(

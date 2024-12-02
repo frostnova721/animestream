@@ -1,26 +1,47 @@
-import 'package:animestream/core/data/hive.dart';
+import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:animestream/ui/models/webView.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
 class AniListLogin {
-  String url =
-      "https://anilist.co/api/v2/oauth/authorize?client_id=15179&response_type=token";
+  String url = "https://anilist.co/api/v2/oauth/authorize?client_id=15179&response_type=token";
+
+  String _extractToken(String url) {
+    final RegExp regExp = RegExp(r'access_token=(.*?)&token_type=');
+    final match = regExp.firstMatch(url);
+    if (match != null) {
+      final token = match.group(1);
+      if (token != null) return token;
+      throw new Exception("ERR_COULDNT_EXTRACT_TOKEN");
+    } else {
+      throw new Exception("ERR_COULDNT_EXTRACT_TOKEN");
+    }
+  }
 
   /**Will only return bool (i hope) */
-  Future<dynamic> launchWebView(BuildContext context) {
-    final nav = Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => WebView(url: url),
-      ),
-    );
-    return nav;
+  Future<bool> launchWebView(BuildContext context) async {
+    final res = await FlutterWebAuth2.authenticate(url: url, callbackUrlScheme: "auth.animestream");
+    if (!res.contains("access_token")) {
+      print("ERR_RECIEVED_AUTH_CODE_NULL");
+      return false;
+    } else {
+      await storeSecureVal(SecureStorageKey.anilistToken, _extractToken(res));
+      return true;
+    }
+    // final nav = Navigator.push(
+    //   context,
+    //   MaterialPageRoute(
+    //     builder: (context) => WebView(url: url),
+    //   ),
+    // );
+    // return nav;
   }
 
   Future<void> removeToken() async {
-    await storeVal('token', null);
+    // await storeVal('token', null);
+    await storeSecureVal(SecureStorageKey.anilistToken, null);
   }
 
   Future<UserModal> getUserProfile() async {
@@ -36,7 +57,8 @@ class AniListLogin {
   }
 }''';
 
-    final String? token = await getVal("token");
+    // final String? token = await getVal("token");
+    final String? token = await getSecureVal(SecureStorageKey.anilistToken);
     if (token == null) throw new Exception("ERR_COULDNT_GET_TOKEN");
 
     final res = await Anilist().fetchQuery(query, null, token: token);
@@ -52,9 +74,10 @@ class AniListLogin {
   Future<bool> isAnilistLoggedIn() async {
     String? token;
     try {
-    token = await getVal('token');
+      token = await getSecureVal(SecureStorageKey.anilistToken);
     } catch (err) {
-      token = await getVal('token'); //if the box happens to be closed!
+      //why not
+      token = await getSecureVal(SecureStorageKey.anilistToken);
     }
     if (token != null) return true;
     return false;

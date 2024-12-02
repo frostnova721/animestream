@@ -7,6 +7,7 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
+import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
@@ -50,6 +51,7 @@ class _InfoState extends State<Info> {
   List<Stream> streamSources = [];
   List<Map<String, String>> qualities = [];
   List<List<Map<String, dynamic>>> visibleEpList = [];
+  List<AlternateDatabaseId> altDatabases = [];
 
   int currentPageIndex = 0;
   int watched = 1;
@@ -91,7 +93,20 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     try {
+
+      //fetch ids from simkl and save em
+      DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
+        DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id).then((r) {
+          final s = altDatabases.toSet();
+          r.alternateDatabases.forEach((it) {
+            s.add(it);
+          });
+          altDatabases = s.toList();
+        });
+      });
+
       final info = await DatabaseHandler().getAnimeInfo(id);
+      altDatabases = info.alternateDatabases;
       setState(() {
         dataLoaded = true;
         data = info;
@@ -818,7 +833,7 @@ class _InfoState extends State<Info> {
             },
             // child: Container(
             // padding: EdgeInsets.all(10),
-          
+
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,

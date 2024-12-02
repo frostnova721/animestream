@@ -12,7 +12,7 @@ class SimklMutation extends DatabaseMutation {
   @override
   Future<SimklMutationResult> mutateAnimeList({
     required int id,
-    int progress = 0,
+    int? progress = 0,
     MediaStatus? status,
     MediaStatus? previousStatus,
   }) async {
@@ -25,7 +25,7 @@ class SimklMutation extends DatabaseMutation {
         // '${now.second.toString().padLeft(2, '0')}';
 
     if (previousStatus?.name == status?.name)
-      syncToHistory(id, progress);
+      syncToHistory(id, progress!);
     else
       addToList(id, status ?? MediaStatus.CURRENT);
 

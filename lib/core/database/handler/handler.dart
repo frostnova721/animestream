@@ -6,9 +6,16 @@ import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/types.dart';
 
 class DatabaseHandler extends Database {
-  static Databases db = Databases.anilist;
 
-  Database getActiveDatabaseInstance(Databases dbs) {
+  DatabaseHandler({Databases? database}) {
+    if(database != null) {
+      this.db = database;
+    }
+  }
+
+  Databases db = Databases.anilist;
+
+  static Database getActiveDatabaseInstance(Databases dbs) {
     switch (dbs) {
       case Databases.anilist:
         return Anilist();
@@ -26,6 +33,6 @@ class DatabaseHandler extends Database {
 
   @override
   Future<DatabaseInfo> getAnimeInfo(int id) async {
-    return await getActiveDatabaseInstance(db).getAnimeInfo(id);
+      return await getActiveDatabaseInstance(db).getAnimeInfo(id);
   }
 }

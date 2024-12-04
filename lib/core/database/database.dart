@@ -21,6 +21,11 @@ class DatabaseFromString {
   }
 }
 
+abstract class DatabaseLogin {
+  Future<bool> initiateLogin();
+  Future<void> removeToken();
+}
+
 abstract class Database {
   Future<List<DatabaseSearchResult>> search(String query);
 

@@ -1,3 +1,4 @@
+import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/subtitles.dart';
 
 class Stream {
@@ -44,12 +45,14 @@ class WatchPageInfo {
   final String animeTitle;
   Stream streamInfo;
   int id;
+  List<AlternateDatabaseId> altDatabases;
 
   WatchPageInfo({
     required this.id,
     required this.animeTitle,
     required this.episodeNumber,
     required this.streamInfo,
+    required this.altDatabases,
   });
 }
 

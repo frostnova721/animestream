@@ -1,6 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:app_links/app_links.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:desktop_webview_window/desktop_webview_window.dart';
+import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:provider/provider.dart';
+
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -15,16 +26,6 @@ import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
-import 'package:app_links/app_links.dart';
-import 'package:desktop_webview_window/desktop_webview_window.dart';
-import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:awesome_notifications/awesome_notifications.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 void main(List<String >args) async {
   try {

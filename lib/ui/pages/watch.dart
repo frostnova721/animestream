@@ -121,6 +121,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         widget.info.id,
         info.animeTitle,
         episodeIndex,
+        widget.info.altDatabases,
       );
   }
 
@@ -129,6 +130,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       widget.info.id,
       info.animeTitle,
       episodeIndex + 1,
+      widget.info.altDatabases,
     );
   }
 
@@ -169,7 +171,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   void toggleControls(bool value) async {
-    if(_controlsTimer != null) {
+    if (_controlsTimer != null) {
       _controlsTimer?.cancel();
       _controlsTimer = null;
     }

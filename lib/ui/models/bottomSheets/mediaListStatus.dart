@@ -1,7 +1,8 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
-import 'package:animestream/core/database/anilist/mutations.dart';
+import 'package:animestream/core/database/handler/syncHandler.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 
@@ -11,6 +12,7 @@ class MediaListStatusBottomSheet extends StatefulWidget {
   final Function(String, int) refreshListStatus;
   final int totalEpisodes;
   final int episodesWatched;
+  final List<AlternateDatabaseId> otherIds;
 
   const MediaListStatusBottomSheet({
     super.key,
@@ -19,6 +21,7 @@ class MediaListStatusBottomSheet extends StatefulWidget {
     required this.refreshListStatus,
     required this.totalEpisodes,
     required this.episodesWatched,
+    required this.otherIds,
   });
 
   @override
@@ -272,11 +275,13 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     onPressed: () {
                       final int progress = int.parse(textEditingController.value.text);
                       if (selectedValue != null || progress != widget.episodesWatched || widget.status == null) {
-                        AnilistMutations()
+                        SyncHandler()
                             .mutateAnimeList(
                           id: widget.id,
                           status: assignItemEnum(selectedValue ?? initialSelection!),
+                          previousStatus: assignItemEnum(initialSelection),
                           progress: progress,
+                          otherIds: widget.otherIds,
                         )
                             .then((value) {
                           initialSelection = selectedValue ?? initialSelection;

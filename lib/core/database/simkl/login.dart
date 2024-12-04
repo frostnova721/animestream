@@ -2,15 +2,19 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/simkl/mutations.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 import 'package:http/http.dart';
 
-class SimklLogin {
+class SimklLogin extends DatabaseLogin {
   static const callbackScheme = "auth.animestream://";
 
-  static Future<void> initiateLogin() async {
+  @override
+  Future<bool> initiateLogin() async {
     final clientId = simklClientId;
     final clientSecret = dotenv.get("SIMKL_CLIENT_SECRET");
     if (clientSecret.isEmpty || clientId.isEmpty) {
@@ -45,9 +49,10 @@ class SimklLogin {
     storage.write(key: "simkl_token", value: at);
 
     print("[SIMKL-LOGIN]: Login success, Access token saved!");
+    return true;
   }
 
-  static Future<void> removeToken() async {
+  Future<void> removeToken() async {
     final storage = new FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
     storage.delete(key: "simkl_token");
   }
@@ -102,6 +107,21 @@ class SimklLogin {
       }
     });
     return await completer.future;
+  }
+
+  Future<UserModal> getUserProfile() async {
+    final url = "https://api.simkl.com/users/settings";
+    final headers = await SimklMutation.getHeader();
+    final res = await post(Uri.parse(url), headers: headers);
+    final jsoned = jsonDecode(res.body);
+    final userModal = UserModal(
+      avatar: jsoned['user']['avatar'],
+      banner: null,
+      id: jsoned['account']['id'],
+      name: jsoned['user']['name'],
+    );
+
+    return userModal;
   }
 
   static Future<bool> isLoggedIn() async {

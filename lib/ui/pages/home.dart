@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -9,7 +11,6 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
-import 'package:flutter/material.dart';
 
 class Home extends StatefulWidget {
   final List<HomePageList> recentlyWatched;

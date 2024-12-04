@@ -4,6 +4,7 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
@@ -14,11 +15,14 @@ class ServerSelectionBottomSheet extends StatefulWidget {
   final ServerSelectionBottomSheetContentData bottomSheetContentData;
   final Type type;
   final Function? getWatched;
+  final List<AlternateDatabaseId> altDatabases;
+
   const ServerSelectionBottomSheet({
     super.key,
     required this.getStreams,
     required this.bottomSheetContentData,
     required this.type,
+    required this.altDatabases,
     this.getWatched,
   });
 
@@ -154,19 +158,26 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 ),
                 child: ElevatedButton(
                   onPressed: () async {
-                    await storeWatching(widget.bottomSheetContentData.title, widget.bottomSheetContentData.cover,
-                        widget.bottomSheetContentData.id, widget.bottomSheetContentData.episodeIndex,
-                        totalEpisodes: widget.bottomSheetContentData.totalEpisodes);
+                    await storeWatching(
+                      widget.bottomSheetContentData.title,
+                      widget.bottomSheetContentData.cover,
+                      widget.bottomSheetContentData.id,
+                      widget.bottomSheetContentData.episodeIndex,
+                      totalEpisodes: widget.bottomSheetContentData.totalEpisodes,
+                      alternateDatabases: widget.altDatabases,
+                    );
                     Navigator.push(
                       context,
                       MaterialPageRoute(
                         builder: (context) => Watch(
                           selectedSource: widget.bottomSheetContentData.selectedSource,
                           info: WatchPageInfo(
-                              animeTitle: widget.bottomSheetContentData.title,
-                              episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
-                              streamInfo: streamSources[index],
-                              id: widget.bottomSheetContentData.id),
+                            animeTitle: widget.bottomSheetContentData.title,
+                            episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
+                            streamInfo: streamSources[index],
+                            id: widget.bottomSheetContentData.id,
+                            altDatabases: widget.altDatabases,
+                          ),
                           episodes: widget.bottomSheetContentData.epLinks,
                         ),
                       ),
@@ -235,7 +246,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 onPressed: () {
                   Downloader()
                       .download(qualities[ind]['link']!,
-                          "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}", parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                          "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}",
+                          parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
                       .onError((err, st) {
                     print(err);
                     print(st);

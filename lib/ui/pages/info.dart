@@ -1,5 +1,9 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/manualSearches.dart';
@@ -10,15 +14,12 @@ import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
-import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
+import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:animestream/core/commons/enums.dart';
 
 class Info extends StatefulWidget {
   final int id;
@@ -93,8 +94,9 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     try {
-
+      if(currentUserSettings?.database == Databases.anilist) {
       //fetch ids from simkl and save em
+      try {
       DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
         DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id).then((r) {
           final s = altDatabases.toSet();
@@ -104,6 +106,12 @@ class _InfoState extends State<Info> {
           altDatabases = s.toList();
         });
       });
+      } catch(err) {
+        if(currentUserSettings?.showErrors ?? false) {
+          floatingSnackBar(context, "Couldnt fetch simkl data");
+        }
+      }
+      }
 
       final info = await DatabaseHandler().getAnimeInfo(id);
       altDatabases = info.alternateDatabases;
@@ -350,6 +358,7 @@ class _InfoState extends State<Info> {
                                           refreshListStatus: refreshListStatus,
                                           totalEpisodes: data.episodes ?? 0,
                                           episodesWatched: watched,
+                                          otherIds: altDatabases,
                                         ),
                                       );
                                     },
@@ -692,6 +701,7 @@ class _InfoState extends State<Info> {
             builder: (BuildContext context) {
               return ServerSelectionBottomSheet(
                 getStreams: getStreams,
+                altDatabases: altDatabases,
                 bottomSheetContentData: ServerSelectionBottomSheetContentData(
                   totalEpisodes: data.episodes,
                   epLinks: epLinks,
@@ -814,6 +824,7 @@ class _InfoState extends State<Info> {
                   builder: (context) {
                     return ServerSelectionBottomSheet(
                       getStreams: getStreams,
+                      altDatabases: altDatabases,
                       bottomSheetContentData: ServerSelectionBottomSheetContentData(
                           totalEpisodes: data.episodes,
                           epLinks: epLinks,
@@ -870,6 +881,7 @@ class _InfoState extends State<Info> {
                                   builder: (BuildContext context) {
                                     return ServerSelectionBottomSheet(
                                       getStreams: getStreams,
+                                      altDatabases: altDatabases,
                                       bottomSheetContentData: ServerSelectionBottomSheetContentData(
                                         epLinks: epLinks,
                                         episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
@@ -948,6 +960,7 @@ class _InfoState extends State<Info> {
                         builder: (context) {
                           return ServerSelectionBottomSheet(
                             getStreams: getStreams,
+                            altDatabases: altDatabases,
                             bottomSheetContentData: ServerSelectionBottomSheetContentData(
                               totalEpisodes: data.episodes,
                               epLinks: epLinks,
@@ -1011,6 +1024,7 @@ class _InfoState extends State<Info> {
                                       builder: (BuildContext context) {
                                         return ServerSelectionBottomSheet(
                                           getStreams: getStreams,
+                                          altDatabases: altDatabases,
                                           bottomSheetContentData: ServerSelectionBottomSheetContentData(
                                             epLinks: epLinks,
                                             episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],

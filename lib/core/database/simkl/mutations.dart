@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:animestream/core/database/simkl/login.dart';
 import 'package:http/http.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -10,7 +11,7 @@ import 'package:animestream/core/database/simkl/types.dart';
 
 class SimklMutation extends DatabaseMutation {
   @override
-  Future<SimklMutationResult> mutateAnimeList({
+  Future<SimklMutationResult?> mutateAnimeList({
     required int id,
     int? progress = 0,
     MediaStatus? status,
@@ -23,6 +24,8 @@ class SimklMutation extends DatabaseMutation {
         // '${now.hour.toString().padLeft(2, '0')}:'
         // '${now.minute.toString().padLeft(2, '0')}:'
         // '${now.second.toString().padLeft(2, '0')}';
+
+    if(!(await SimklLogin.isLoggedIn())) return null;
 
     if (previousStatus?.name == status?.name)
       syncToHistory(id, progress!);
@@ -48,12 +51,13 @@ class SimklMutation extends DatabaseMutation {
     final header = await getHeader();
     final res = await post(Uri.parse(url), headers: header, body: body);
     if(res.statusCode != 200) {
-      throw Exception("Couldnt Sync Simkl");
+      // print(res.body);
+      throw Exception("Couldnt Sync Simkl [maybe false report]");
     }
   }
 
   Future syncToHistory(int id, int progress) async {
-    final url = "https://api.simkl.com/sync/add-to-list";
+    final url = "https://api.simkl.com/sync/history";
     List<Map<String, int>> episodes = [];
 
     //generate progress
@@ -77,11 +81,12 @@ class SimklMutation extends DatabaseMutation {
     final header = await getHeader();
     final res = await post(Uri.parse(url), headers: header, body: body);
     if(res.statusCode != 200) {
-      throw Exception("Couldnt Sync Simkl");
+      // print(res.body);
+      throw Exception("Couldnt Sync Simkl [maybe false report]");
     }
   }
 
-  Future<Map<String, String>> getHeader() async {
+  static Future<Map<String, String>> getHeader() async {
     final token = await getSecureVal(SecureStorageKey.simklToken);
     if (token == null) {
       throw Exception("SIMKL_SYNC: TOKEN NOT FOUND");

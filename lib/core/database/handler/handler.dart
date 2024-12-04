@@ -1,5 +1,6 @@
 //Call the database functions from this!
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/simkl.dart';
@@ -13,7 +14,7 @@ class DatabaseHandler extends Database {
     }
   }
 
-  Databases db = Databases.anilist;
+  Databases db = currentUserSettings?.database ?? Databases.anilist;
 
   static Database getActiveDatabaseInstance(Databases dbs) {
     switch (dbs) {

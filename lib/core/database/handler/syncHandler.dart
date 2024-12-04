@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
 import 'package:animestream/core/database/database.dart';
@@ -8,7 +9,7 @@ class SyncHandler extends DatabaseMutation {
   @override
   Future<DatabaseMutationResult?> mutateAnimeList({
     required int id,
-    List<AlternateDatabaseId>? otherIds = const [],
+    List<AlternateDatabaseId>? otherIds,
     MediaStatus? status,
     MediaStatus? previousStatus,
     int? progress,
@@ -20,6 +21,7 @@ class SyncHandler extends DatabaseMutation {
     //sync with the active database first
     activeDbInstance
         .mutateAnimeList(id: id, status: status, previousStatus: previousStatus, progress: progress)
+        .then((val) => print("[SYNC HANDLER]: Synced ${activedb.name}"))
         .catchError((e, st) {
       print(e);
       return null;
@@ -33,6 +35,7 @@ class SyncHandler extends DatabaseMutation {
           final mutInstance = getDatabaseMutationInstance(altdb);
           mutInstance
               .mutateAnimeList(id: it.id, status: status, previousStatus: previousStatus, progress: progress)
+              .then((val) => print("[SYNC HANDLER]: Synced ${it.database.name}"))
               .catchError((e, st) {
             print(e);
             return null;
@@ -57,6 +60,6 @@ class SyncHandler extends DatabaseMutation {
 
   //get the preferred/current database
   Databases getActiveDatabase() {
-    return Databases.anilist;
+    return currentUserSettings?.database ?? Databases.anilist;
   }
 }

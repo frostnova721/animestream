@@ -2,10 +2,10 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:flutter/material.dart';
+import 'package:animestream/core/database/database.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
 
-class AniListLogin {
+class AniListLogin extends DatabaseLogin {
   String url = "https://anilist.co/api/v2/oauth/authorize?client_id=15179&response_type=token";
 
   String _extractToken(String url) {
@@ -21,7 +21,8 @@ class AniListLogin {
   }
 
   /**Will only return bool (i hope) */
-  Future<bool> launchWebView(BuildContext context) async {
+  @override
+  Future<bool> initiateLogin() async {
     final res = await FlutterWebAuth2.authenticate(url: url, callbackUrlScheme: "auth.animestream");
     if (!res.contains("access_token")) {
       print("ERR_RECIEVED_AUTH_CODE_NULL");

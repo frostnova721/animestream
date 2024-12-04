@@ -1,17 +1,26 @@
 import "package:animestream/core/app/runtimeDatas.dart";
 import "package:animestream/core/database/anilist/login.dart";
-import "package:animestream/core/database/anilist/mutations.dart";
 import "package:animestream/core/database/anilist/queries.dart";
 import "package:animestream/core/database/anilist/types.dart";
 import 'package:animestream/core/commons/enums.dart';
+import "package:animestream/core/database/handler/syncHandler.dart";
+import "package:animestream/core/database/types.dart";
 import "package:hive/hive.dart";
 
-Future<void> storeWatching(String title, String imageUrl, int id, int watched, {int? totalEpisodes}) async {
+Future<void> storeWatching(
+  String title,
+  String imageUrl,
+  int id,
+  int watched, {
+  int? totalEpisodes,
+  List<AlternateDatabaseId>? alternateDatabases,
+}) async {
   try {
     //add to anilist if the user is logged in
     print("SETTING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
-      AnilistMutations().mutateAnimeList(id: id, status: MediaStatus.CURRENT, progress: watched);
+      SyncHandler()
+          .mutateAnimeList(id: id, status: MediaStatus.CURRENT, progress: watched, otherIds: alternateDatabases);
     } else {
       var box = await Hive.openBox('animestream');
       if (!box.isOpen) {
@@ -38,15 +47,17 @@ Future<void> storeWatching(String title, String imageUrl, int id, int watched, {
   }
 }
 
-Future<void> updateWatching(int? id, String title, int watched) async {
+Future<void> updateWatching(int? id, String title, int watched, List<AlternateDatabaseId> otherIds) async {
   try {
     print("UPDATING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
       if (id == null) throw new Exception("ERR_NO_ID_PROVIDED");
-      AnilistMutations().mutateAnimeList(
+      SyncHandler().mutateAnimeList(
         id: id,
         status: MediaStatus.CURRENT,
+        previousStatus: MediaStatus.CURRENT,
         progress: watched,
+        otherIds: otherIds,
       );
     } else {
       var box = await Hive.openBox('animestream');

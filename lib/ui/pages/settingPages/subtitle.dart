@@ -26,17 +26,17 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
   void dispose() {
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
-        SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     super.dispose();
   }
 
   String getSentence(int index) {
-  List<String> sentences = [
-    "It was a really tiring day...",
-    "I've seen this before, almost as if i lived here before.",
-    "Something's really strange. Better check it out alone when its night.",
-  ];
-  return sentences[index];
+    final sentences = [
+      "It was a really tiring day...",
+      "I've seen this before, almost as if I've lived here before.",
+      "Something's really strange. Better check it out alone when its night.",
+    ];
+    return sentences[index];
   }
 
   int ind = 0;
@@ -54,7 +54,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
       fontFamilyFallback: ["Poppins"],
       backgroundColor: settings.backgroundColor.withOpacity(settings.backgroundTransparency),
     );
-  }  
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +74,8 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
               children: [
                 Row(
                   children: [
-                    IconButton(onPressed: () => Navigator.of(context).pop(), icon: Icon(Icons.arrow_back_ios_new_rounded)),
+                    IconButton(
+                        onPressed: () => Navigator.of(context).pop(), icon: Icon(Icons.arrow_back_ios_new_rounded)),
                   ],
                 ),
                 Container(
@@ -93,10 +94,10 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                           ]),
                           textAlign: TextAlign.center,
                         ),
-                
+
                         //the stroke of that text since the flutter doesnt have it :(
                         Text(
-                         getSentence(ind),
+                          getSentence(ind),
                           style: subTextStyle().copyWith(
                             foreground: Paint()
                               ..style = PaintingStyle.stroke

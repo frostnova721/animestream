@@ -931,7 +931,9 @@ class _InfoState extends State<Info> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: MediaQuery.orientationOf(context) == Orientation.portrait ? 1 : 2,
           childAspectRatio: 3.2,
-          mainAxisSpacing: 0),
+          mainAxisSpacing: 0, 
+          mainAxisExtent: 110
+          ),
       padding: EdgeInsets.only(top: 0, bottom: 15),
       itemCount: visibleEpList[currentPageIndex].length,
       shrinkWrap: true,

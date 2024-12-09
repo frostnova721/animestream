@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
@@ -56,6 +57,11 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
   if (pre && pre != (currentUserSettings?.receivePreReleases! ?? false)) {
     return;
   }
+
+  if(kDebugMode) {
+    return;
+  }
+
   if (Platform.isWindows || await isTv()) {
     return showDialog(
         context: context,

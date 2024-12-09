@@ -57,7 +57,7 @@ class SimklLogin extends DatabaseLogin {
     storage.delete(key: "simkl_token");
   }
 
-  static Future<PCKECodeResult> getPckeCode() async {
+  static Future<PCKECodeResult> getPkceCode() async {
     final url = "https://api.simkl.com/oauth/pin?client_id=$simklClientId";
     final res = await get(Uri.parse(url));
     if (res.statusCode != 200) throw new Exception("Couldnt Get Code for Login");
@@ -75,7 +75,7 @@ class SimklLogin extends DatabaseLogin {
   }
 
   //function to call for polling
-  static Future<bool> verifyPckeCode(PCKECodeResult codeRes) async {
+  static Future<bool> verifyPkceCode(PCKECodeResult codeRes) async {
     final url = "https://api.simkl.com/oauth/pin/${codeRes.userCode}?client_id=$simklClientId";
     final Completer<bool> completer = Completer<bool>();
     int failCount = 0;

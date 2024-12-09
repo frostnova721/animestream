@@ -6,7 +6,7 @@ import 'package:html/parser.dart' as html;
 import '../extractors/vidstream.dart';
 
 class GogoAnime extends AnimeProvider {
-  final String _baseUrl = "https://ww5.gogoanimes.fi";
+  final String _baseUrl = "https://anitaku.bz/";
   final String _ajaxUrl = "https://ajax.gogocdn.net/ajax";
 
   Future<List<Map<String, String?>>> search(String query) async {

@@ -234,7 +234,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       isScrollable: true,
                       controller: tabController,
                       indicatorColor: appTheme.accentColor,
-                      overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withOpacity(0.3)),
+                      overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.3)),
                       labelColor: appTheme.textMainColor,
                       unselectedLabelColor: appTheme.textSubColor,
                       labelStyle: TextStyle(

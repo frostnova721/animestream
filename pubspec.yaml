@@ -40,7 +40,7 @@ dependencies:
   
   # Media and player related
   open_file: ^3.3.2
-  wakelock: ^0.6.2
+  wakelock_plus: ^1.2.8
   better_player:
     git: 
       url: https://github.com/frostnova721/betterplayer.git

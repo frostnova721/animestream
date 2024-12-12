@@ -226,7 +226,7 @@ class Cards {
                         height: 25,
                         width: 50,
                         decoration: BoxDecoration(
-                          color: appTheme.accentColor.withOpacity(0.9),
+                          color: appTheme.accentColor.withValues(alpha: 0.9),
                           borderRadius: BorderRadius.only(
                             bottomRight: Radius.circular(17),
                             topLeft: Radius.circular(20),
@@ -427,7 +427,7 @@ class Cards {
                                   width: 52,
                                   padding: EdgeInsets.all(5),
                                   decoration: BoxDecoration(
-                                      color: appTheme.accentColor.withOpacity(0.8), borderRadius: BorderRadius.circular(10)),
+                                      color: appTheme.accentColor.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(10)),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [

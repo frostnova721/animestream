@@ -185,7 +185,7 @@ class _SubViewerState extends State<SubViewer> {
       letterSpacing: -0.4,
       // wordSpacing: 1,
       fontFamilyFallback: ["Poppins"],
-      backgroundColor: settings.backgroundColor.withOpacity(settings.backgroundTransparency),
+      backgroundColor: settings.backgroundColor.withValues(alpha: settings.backgroundTransparency),
     );
   }
 

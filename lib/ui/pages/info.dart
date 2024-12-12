@@ -870,7 +870,7 @@ class _InfoState extends State<Info> {
                           Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
-                                color: appTheme.accentColor.withOpacity(0.8)),
+                                color: appTheme.accentColor.withValues(alpha: 0.8)),
                             child: IconButton(
                               onPressed: () async {
                                 showModalBottomSheet(

@@ -393,7 +393,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                 ],
               )
             : BottomBar(
-                barColor: appTheme.backgroundSubColor.withOpacity(currentUserSettings!.navbarTranslucency ?? 0.6),
+                barColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings!.navbarTranslucency ?? 0.6),
                 borderRadius: BorderRadius.circular(10),
                 barAlignment: Alignment.bottomCenter,
                 width: MediaQuery.of(context).size.width / 2 + 20,

@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
       clipBehavior: Clip.hardEdge,
       color: appTheme.backgroundSubColor,
       child: InkWell(
-        overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withOpacity(0.1)),
+        overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.1)),
         onTap: () => Navigator.of(context).push(
           MaterialPageRoute(
             builder: (context) => UserStats(userModal: storedUserData!),
@@ -236,7 +236,7 @@ class _HomeState extends State<Home> {
         margin: EdgeInsets.only(top: 15, bottom: 15),
         height: 6,
         decoration: BoxDecoration(
-          color: appTheme.accentColor.withOpacity(0.6),
+          color: appTheme.accentColor.withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(8),
         ),
       ),

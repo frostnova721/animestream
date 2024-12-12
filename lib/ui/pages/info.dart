@@ -329,13 +329,13 @@ class _InfoState extends State<Info> {
                                     children: [
                                       Icon(
                                         infoPage ? Icons.play_arrow_rounded : Icons.info_rounded,
-                                        color: Colors.black,
+                                        color: appTheme.onAccent,
                                         size: 28,
                                       ),
                                       Text(
-                                        infoPage ? "watch" : "info",
+                                        infoPage ? "watch" : " info",
                                         style: TextStyle(
-                                          color: Colors.black,
+                                          color: appTheme.onAccent,
                                           fontFamily: "Poppins",
                                           fontSize: 18,
                                         ),
@@ -658,7 +658,7 @@ class _InfoState extends State<Info> {
                     child: Text(
                       "${(index * 24) + 1} - ${(index * 24) + 24 > epLinks.length ? epLinks.length : (index * 24) + 24}",
                       style: TextStyle(
-                        color: currentPageIndex == index ? appTheme.backgroundColor : appTheme.textMainColor,
+                        color: currentPageIndex == index ? appTheme.onAccent : appTheme.textMainColor,
                         fontFamily: 'NotoSans',
                         fontWeight: FontWeight.bold,
                       ),
@@ -1402,7 +1402,7 @@ class _InfoState extends State<Info> {
                             child: Text(
                               "save",
                               style: TextStyle(
-                                  color: appTheme.backgroundColor,
+                                  color: appTheme.onAccent,
                                   fontFamily: "Poppins",
                                   fontWeight: FontWeight.bold,
                                   fontSize: 20),

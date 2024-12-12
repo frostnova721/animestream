@@ -91,18 +91,20 @@ Future<void> loadAndAssignSettings() async {
     final darkMode = currentUserSettings!.darkMode!;
 
     final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
+    activeThemeItem = theme;
     if (darkMode) {
       appTheme = theme.theme;
       appTheme.backgroundColor =
-          (currentUserSettings!.amoledBackground ?? false) ? Colors.black : darkModeValues.backgroundColor;
+          (currentUserSettings!.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor;
     } else {
       appTheme = AnimeStreamTheme(
-        accentColor: theme.theme.accentColor,
-        textMainColor: lightModeValues.textMainColor,
-        textSubColor: lightModeValues.textSubColor,
-        backgroundColor: lightModeValues.backgroundColor,
-        backgroundSubColor: lightModeValues.backgroundSubColor,
-        modalSheetBackgroundColor: lightModeValues.modalSheetBackgroundColor,
+        accentColor: theme.lightVariant.accentColor,
+        textMainColor: theme.lightVariant.textMainColor,
+        textSubColor: theme.lightVariant.textSubColor,
+        backgroundColor: theme.lightVariant.backgroundColor,
+        backgroundSubColor: theme.lightVariant.backgroundSubColor,
+        modalSheetBackgroundColor: theme.lightVariant.modalSheetBackgroundColor,
+         onAccent: theme.lightVariant.onAccent,
       );
     }
 
@@ -188,6 +190,7 @@ class _AnimeStreamState extends State<AnimeStream> {
             textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
             textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,
             modalSheetBackgroundColor: darkScheme?.surface ?? appTheme.modalSheetBackgroundColor,
+            onAccent: darkScheme?.onPrimary ?? appTheme.onAccent,
           );
         } else {
           scheme = AnimeStreamTheme(
@@ -197,12 +200,17 @@ class _AnimeStreamState extends State<AnimeStream> {
             textMainColor: lightScheme?.onSurface ?? appTheme.textMainColor,
             textSubColor: lightScheme?.onSurfaceVariant ?? appTheme.textSubColor,
             modalSheetBackgroundColor: lightScheme?.surface ?? appTheme.modalSheetBackgroundColor,
+            onAccent: lightScheme?.onPrimary ?? appTheme.onAccent,
           );
         }
 
         if (currentUserSettings?.materialTheme ?? false) {
           appTheme = scheme;
           // print("[THEME] Applying Material You Theme");
+        } else {
+          //lmao we can make it follow material theme XD
+         // final t = ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: appTheme.accentColor, brightness: (currentUserSettings?.darkMode ?? true) ? Brightness.dark : Brightness.light)).colorScheme;
+         // appTheme = AnimeStreamTheme(accentColor: t.primary, backgroundColor: t.surface, backgroundSubColor: t.secondaryContainer, textMainColor: t.onSurface, textSubColor: t.outline, modalSheetBackgroundColor: t.surface);
         }
 
         final themeProvider = Provider.of<ThemeProvider>(context);

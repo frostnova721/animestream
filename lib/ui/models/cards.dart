@@ -242,7 +242,8 @@ class Cards {
                               child: Icon(
                                 Icons.star,
                                 size: 13,
-                                color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor
+                                color: appTheme.onAccent, 
+                                // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor
                               ),
                             ),
                             Text(
@@ -251,7 +252,8 @@ class Cards {
                                 fontSize: 14,
                                 fontWeight: FontWeight.bold,
                                 fontFamily: "NotoSans",
-                                color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
+                                color: appTheme.onAccent, 
+                                //(currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
                               ),
                             ),
                           ],
@@ -422,26 +424,32 @@ class Cards {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Container(
-                                  width: 50,
+                                  width: 52,
                                   padding: EdgeInsets.all(5),
                                   decoration: BoxDecoration(
                                       color: appTheme.accentColor.withOpacity(0.8), borderRadius: BorderRadius.circular(10)),
                                   child: Row(
+                                    crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
                                       Icon(
                                         Icons.star,
-                                        color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
-                                        size: 18,
+                                        color: appTheme.onAccent,
+                                        // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
+                                        size: 15,
                                       ),
-                                      Text(
-                                        "$rating",
-                                        style: TextStyle(
-                                          color: (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
-                                          fontFamily: "NotoSans",
-                                          fontWeight: FontWeight.w600,
-                                          fontSize: 14,
+                                      Padding(
+                                        padding: const EdgeInsets.only(left: 3),
+                                        child: Text(
+                                          "$rating",
+                                          style: TextStyle(
+                                            color:appTheme.onAccent,
+                                            //  (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
+                                            fontFamily: "NotoSans",
+                                            fontWeight: FontWeight.w600,
+                                            fontSize: 14,
+                                          ),
+                                          maxLines: 2,
                                         ),
-                                        maxLines: 2,
                                       ),
                                     ],
                                   ),

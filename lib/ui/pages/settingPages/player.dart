@@ -182,6 +182,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     style: SegmentedButton.styleFrom(
                                         backgroundColor: appTheme.backgroundSubColor,
                                         selectedBackgroundColor: appTheme.accentColor,
+                                        selectedForegroundColor: appTheme.onAccent,
                                         shape: RoundedRectangleBorder(
                                           borderRadius: BorderRadius.circular(10),
                                         ),

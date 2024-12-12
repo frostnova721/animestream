@@ -84,29 +84,11 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                   child: Container(
                     width: MediaQuery.of(context).size.width / 1.6,
                     alignment: Alignment.bottomCenter,
-                    child: Stack(
-                      children: [
-                        //the actual text
-                        Text(
-                          getSentence(ind),
-                          style: subTextStyle().copyWith(shadows: [
-                            Shadow(color: Colors.black, blurRadius: 4.5),
-                          ]),
-                          textAlign: TextAlign.center,
-                        ),
-
-                        //the stroke of that text since the flutter doesnt have it :(
-                        Text(
-                          getSentence(ind),
-                          style: subTextStyle().copyWith(
-                            foreground: Paint()
-                              ..style = PaintingStyle.stroke
-                              ..color = settings.strokeColor
-                              ..strokeWidth = settings.strokeWidth,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ],
+                    child: SubtitleText(
+                      text: getSentence(ind),
+                      style: subTextStyle(),
+                      strokeColor: settings.strokeColor,
+                      strokeWidth: settings.strokeWidth,
                     ),
                   ),
                 ),

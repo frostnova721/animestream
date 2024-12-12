@@ -118,7 +118,7 @@ class _DiscoverState extends State<Discover> {
                       height: 75,
                       width: 150,
                       decoration: BoxDecoration(
-                        color: appTheme.backgroundSubColor,
+                        // color: appTheme.backgroundSubColor,
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
                             image: AssetImage(
@@ -153,7 +153,7 @@ class _DiscoverState extends State<Discover> {
                       height: 75,
                       width: 150,
                       decoration: BoxDecoration(
-                        color: appTheme.backgroundSubColor,
+                        // color: appTheme.backgroundSubColor,
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
                             image: AssetImage(

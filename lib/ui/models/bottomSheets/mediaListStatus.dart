@@ -228,7 +228,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
               ],
             ),
             Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 5, top: 50),
+              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 10, top: 50),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -243,7 +243,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                           color: appTheme.accentColor,
                         ),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
+                          borderRadius: BorderRadius.circular(10),
                         ),
                       ),
                       onPressed: () {
@@ -254,7 +254,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                         child: Text(
                           "cancel",
                           style: TextStyle(
-                            color: appTheme.backgroundColor,
+                            color: appTheme.onAccent,
                             fontFamily: "Poppins",
                             fontSize: 22,
                           ),
@@ -269,7 +269,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                         color: appTheme.accentColor,
                       ),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+                        borderRadius: BorderRadius.circular(10),
                       ),
                     ),
                     onPressed: () {
@@ -296,7 +296,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     child: Text(
                       "save",
                       style: TextStyle(
-                        color: appTheme.backgroundColor,
+                        color: appTheme.onAccent,
                         fontFamily: "Poppins",
                         fontSize: 22,
                       ),

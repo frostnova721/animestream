@@ -4,18 +4,26 @@ import 'package:flutter/material.dart';
 class ThemeItem {
   final String name;
   final AnimeStreamTheme theme;
+  final AnimeStreamTheme lightVariant;
   final int id;
 
-  ThemeItem({required this.name, required this.theme, required this.id});
+  ThemeItem({
+    required this.id,
+    required this.name,
+    required this.theme,
+    required this.lightVariant,
+  });
 }
 
 class AnimeStreamTheme {
-  Color backgroundColor;
-  Color accentColor;
-  Color textMainColor;
-  Color textSubColor;
-  Color backgroundSubColor;
-  Color modalSheetBackgroundColor;
+  //core theme
+  Color backgroundColor;               //background
+  Color accentColor;                   //accent
+  Color textMainColor;                 //for main texts
+  Color textSubColor;                  //for description|sub texts
+  Color backgroundSubColor;            //for card tints and some button highlights
+  Color modalSheetBackgroundColor;     //for modal sheet (no issue being same as background)
+  Color onAccent; 
 
   AnimeStreamTheme({
     required this.accentColor,
@@ -24,6 +32,7 @@ class AnimeStreamTheme {
     required this.textMainColor,
     required this.textSubColor,
     required this.modalSheetBackgroundColor,
+    required this.onAccent,
   });
 
   //convert map to class
@@ -39,6 +48,7 @@ class AnimeStreamTheme {
       modalSheetBackgroundColor: Color(int.parse(
           map['modalSheetBackgroundColor'] ?? lime.modalSheetBackgroundColor.value.toRadixString(16),
           radix: 16)),
+          onAccent: Color(int.parse(map['onAccent'] ?? lime.onAccent.value.toRadixString(16), radix: 16)),
     );
   }
 
@@ -51,6 +61,7 @@ class AnimeStreamTheme {
       'textMainColor': textMainColor.value.toRadixString(16),
       'textSubColor': textSubColor.value.toRadixString(16),
       'modalSheetBackgroundColor': modalSheetBackgroundColor.value.toRadixString(16),
+      'onAccent': onAccent.value.toRadixString(16),
     };
   }
 }

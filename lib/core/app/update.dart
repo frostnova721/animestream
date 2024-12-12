@@ -161,7 +161,7 @@ Widget _updateSheetContent(BuildContext context, String markdownText, String dow
                         child: Text(
                           "download",
                           style: TextStyle(
-                            color: appTheme.backgroundColor,
+                            color: appTheme.onAccent,
                             fontFamily: "Rubik",
                             fontSize: 20,
                           ),
@@ -187,7 +187,7 @@ Widget _updateSheetContent(BuildContext context, String markdownText, String dow
                       child: Container(
                         child: Text("maybe later",
                             style: TextStyle(
-                              color: appTheme.backgroundColor,
+                              color: appTheme.onAccent,
                               fontFamily: "Rubik",
                               fontSize: 20,
                             )),

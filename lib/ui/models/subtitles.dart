@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 enum SubtitleFormat { ASS }
 
-
 class Subtitle {
   final Duration start;
   final Duration end;
@@ -61,6 +60,44 @@ class SubtitleSettings {
       strokeColor: strokeColor ?? this.strokeColor,
       strokeWidth: strokeWidth ?? this.strokeWidth,
       textColor: textColor ?? this.textColor,
+    );
+  }
+}
+
+class SubtitleText extends StatelessWidget {
+  final String text;
+  final TextStyle style;
+  final Color strokeColor;
+  final double strokeWidth;
+
+  const SubtitleText(
+      {super.key, required this.text, required this.style, required this.strokeColor, required this.strokeWidth});
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        //the actual text
+        Text(
+          text,
+          style: style.copyWith(shadows: [
+            Shadow(color: Colors.black, blurRadius: 4.5),
+          ]),
+          textAlign: TextAlign.center,
+        ),
+
+        //the stroke of that text since the flutter doesnt have it :(
+        Text(
+          text,
+          style: style.copyWith(
+            foreground: Paint()
+              ..style = PaintingStyle.stroke
+              ..color = strokeColor
+              ..strokeWidth = strokeWidth,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
     );
   }
 }
@@ -162,29 +199,11 @@ class _SubViewerState extends State<SubViewer> {
       child: Container(
         width: MediaQuery.of(context).size.width / 1.6,
         alignment: Alignment.bottomCenter,
-        child: Stack(
-          children: [
-            //the actual text
-            Text(
-              areSubsLoading ? "Loading subs.." : activeLine,
-              style: subTextStyle().copyWith(shadows: [
-                Shadow(color: Colors.black, blurRadius: 4.5),
-              ]),
-              textAlign: TextAlign.center,
-            ),
-
-            //the stroke of that text since the flutter doesnt have it :(
-            Text(
-              areSubsLoading ? "Loading subs.." : activeLine,
-              style: subTextStyle().copyWith(
-                foreground: Paint()
-                  ..style = PaintingStyle.stroke
-                  ..color = settings.strokeColor
-                  ..strokeWidth = settings.strokeWidth,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
+        child: SubtitleText(
+          text: activeLine,
+          style: subTextStyle(),
+          strokeColor: settings.strokeColor,
+          strokeWidth: settings.strokeWidth,
         ),
       ),
     );

@@ -56,10 +56,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
 
   Future<void> applyTheme(int id) async {
     await setTheme(id);
-    // print(Theme.of(context).);
-    Provider.of<ThemeProvider>(context, listen: false)
-        .applyTheme(availableThemes.where((themeItem) => themeItem.id == id).toList()[0].theme);
-    // floatingSnackBar(context, "All set! restart the app to apply the theme");
+    final theme = availableThemes.where((themeItem) => themeItem.id == id).toList()[0];
+    Provider.of<ThemeProvider>(context, listen: false).themeItem = theme;
+    Provider.of<ThemeProvider>(context, listen: false).applyTheme(darkMode ? theme.theme : theme.lightVariant);
   }
 
   int? currentThemeId;
@@ -110,24 +109,26 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   "Mode",
                                   style: textStyle(),
                                 ),
-                                SegmentedButton(segments: [
-                                  ButtonSegment(value: false, icon: Icon(Icons.wb_sunny_rounded)),
-                                  ButtonSegment(value: true, icon: Icon(Icons.nights_stay_rounded))
-                                ], selected: {darkMode},
-                                multiSelectionEnabled: false,
-                                showSelectedIcon: false,
-                                emptySelectionAllowed: false,
-                                onSelectionChanged: (val) async {
-                                  await setThemeMode(val.first);
-                                  setState(() {
-                                    darkMode = val.first;
-                                  });
-                                },
-                                style: SegmentedButton.styleFrom(
-                                  selectedBackgroundColor: appTheme.accentColor,
-                                  selectedForegroundColor: appTheme.backgroundColor,
-                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
-                                ),
+                                SegmentedButton(
+                                  segments: [
+                                    ButtonSegment(value: false, icon: Icon(Icons.wb_sunny_rounded)),
+                                    ButtonSegment(value: true, icon: Icon(Icons.nights_stay_rounded))
+                                  ],
+                                  selected: {darkMode},
+                                  multiSelectionEnabled: false,
+                                  showSelectedIcon: false,
+                                  emptySelectionAllowed: false,
+                                  onSelectionChanged: (val) async {
+                                    await setThemeMode(val.first);
+                                    setState(() {
+                                      darkMode = val.first;
+                                    });
+                                  },
+                                  style: SegmentedButton.styleFrom(
+                                    selectedBackgroundColor: appTheme.accentColor,
+                                    selectedForegroundColor: appTheme.onAccent,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                                  ),
                                 ),
                               ],
                             ),
@@ -136,20 +137,29 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             "AMOLED Background",
                             AMOLEDBackgroundEnabled,
                             () {
+                              final thm = availableThemes.firstWhere((i) => i.id == currentThemeId);
                               setState(() {
                                 AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
                                 Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
-                                appTheme.backgroundColor = AMOLEDBackgroundEnabled && darkMode
-                                    ? Colors.black
-                                    : darkMode
-                                        ? darkModeValues.backgroundColor
-                                        : lightModeValues.backgroundColor;
+                                appTheme = darkMode
+                                    ? AnimeStreamTheme(
+                                        accentColor: thm.theme.accentColor,
+                                        backgroundColor:
+                                            AMOLEDBackgroundEnabled ? Colors.black : thm.theme.backgroundColor,
+                                        backgroundSubColor: thm.theme.backgroundSubColor,
+                                        textMainColor: thm.theme.textMainColor,
+                                        textSubColor: thm.theme.textSubColor,
+                                        modalSheetBackgroundColor: thm.theme.modalSheetBackgroundColor,
+                                        onAccent: thm.theme.onAccent
+                                      )
+                                    : thm.lightVariant;
                                 // floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
                               return Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                             },
                             description: "Full black background",
                           ),
+                          if(Platform.isAndroid)
                           _sliderItem("Navbar Translucency", navbarTranslucency,
                               min: 0,
                               max: 1,
@@ -376,12 +386,12 @@ class _ThemeSettingState extends State<ThemeSetting> {
         child: InkWell(
           onTap: () async {
             if (currentThemeId != theme.id) {
-            await applyTheme(theme.id);
-            setState(() {
-              currentThemeId = theme.id;
-            });
-            Navigator.of(context).pop();
-          }
+              await applyTheme(theme.id);
+              setState(() {
+                currentThemeId = theme.id;
+              });
+              Navigator.of(context).pop();
+            }
           },
           child: Padding(
             padding: const EdgeInsets.only(left: 10, right: 10),
@@ -391,7 +401,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                 Text(
                   "$name",
                   style: textStyle()
-                      .copyWith(color: currentThemeId == theme.id ? appTheme.backgroundColor : appTheme.textMainColor),
+                      .copyWith(color: currentThemeId == theme.id ? appTheme.onAccent : appTheme.textMainColor),
                 ),
                 Container(
                   height: 40,

@@ -13,6 +13,9 @@ SettingsModal? currentUserSettings;
 //saved theme
 late AnimeStreamTheme appTheme;
 
+//active theme's themeItem
+late ThemeItem activeThemeItem;
+
 //saved subtitle settings
 late SubtitleSettings subtitleSettings;
 

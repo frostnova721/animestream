@@ -53,8 +53,8 @@ class SyncHandler extends DatabaseMutation {
         return AnilistMutations();
       case Databases.simkl:
         return SimklMutation();
-      default:
-        throw Exception("NOT_AN_OPTION_LIL_BRO");
+      // default:
+        // throw Exception("NOT_AN_OPTION_LIL_BRO");
     }
   }
 

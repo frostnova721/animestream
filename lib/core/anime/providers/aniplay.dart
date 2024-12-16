@@ -121,9 +121,10 @@ class AniPlay extends AnimeProvider {
         headers: {
           'Referer': l,
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': "f3422af67c84852f5e63d50e1f51718f1c0225c4"
+          'Next-Action': "f3422af67c84852f5e63d50e1f51718f1c0225c4",
         },
-        body: "[\"$id\", false, false]");
+        body: "[\"$id\",true,false]");
+        print(res.body);
     final split = res.body.split('1:')[1];
     final List<dynamic> parsed = jsonDecode(split);
 

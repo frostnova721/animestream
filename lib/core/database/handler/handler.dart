@@ -22,8 +22,8 @@ class DatabaseHandler extends Database {
         return Anilist();
       case Databases.simkl:
         return Simkl();
-      default:
-        throw Exception("NOT_AN_OPTION_LIL_BRO");
+      // default:
+      //   throw Exception("NOT_AN_OPTION_LIL_BRO");
     }
   }
 

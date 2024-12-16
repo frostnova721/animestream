@@ -110,8 +110,8 @@ class SimklMutation extends DatabaseMutation {
         return "onhold";
       case MediaStatus.PLANNING:
         return "plantowatch";
-      default:
-        throw Exception("UNHANDLED MEDIA STATUS CASE");
+      // default:
+        // throw Exception("UNHANDLED MEDIA STATUS CASE");
     }
   }
 }

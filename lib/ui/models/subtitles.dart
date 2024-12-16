@@ -1,7 +1,12 @@
-import 'package:animestream/core/commons/subtitleParsers.dart';
-import 'package:animestream/ui/models/snackBar.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
+import 'package:animestream/core/data/preferences.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:flutter/material.dart';
+
+import 'package:animestream/core/commons/subtitleParsers.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 
 enum SubtitleFormat { ASS }
 
@@ -62,6 +67,37 @@ class SubtitleSettings {
       textColor: textColor ?? this.textColor,
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'textColor': textColor.value,
+      'strokeColor': strokeColor.value,
+      'backgroundColor': backgroundColor.value,
+      'fontFamily': fontFamily,
+      'strokeWidth': strokeWidth,
+      'fontSize': fontSize,
+      'bottomMargin': bottomMargin,
+      'backgroundTransparency': backgroundTransparency,
+    };
+  }
+
+  factory SubtitleSettings.fromMap(Map<String, dynamic> map) {
+    return SubtitleSettings(
+      textColor: Color(map['textColor'] as int),
+      strokeColor: Color(map['strokeColor'] as int),
+      backgroundColor: Color(map['backgroundColor'] as int),
+      fontFamily: map['fontFamily'] != null ? map['fontFamily'] as String : null,
+      strokeWidth: map['strokeWidth'] as double,
+      fontSize: map['fontSize'] as double,
+      bottomMargin: map['bottomMargin'] as double,
+      backgroundTransparency: map['backgroundTransparency'] as double,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory SubtitleSettings.fromJson(String source) =>
+      SubtitleSettings.fromMap(json.decode(source) as Map<String, dynamic>);
 }
 
 class SubtitleText extends StatelessWidget {
@@ -123,24 +159,30 @@ class _SubViewerState extends State<SubViewer> {
   void initState() {
     super.initState();
     widget.controller.addListener(_updateSubtitle);
-    loadSubs();
-    print("subs initialized");
+    initiateSubs().then((_) {
+      loadSubs();
+      print("subs initialized");
+    });
   }
 
   List<Subtitle> subs = [];
 
-  SubtitleSettings settings = SubtitleSettings();
+  late SubtitleSettings settings;
 
   String activeLine = "";
   bool areSubsLoading = true;
+
+  Future<void> initiateSubs() async {
+    settings = (await UserPreferences().getUserPreferences()).subtitleSettings ?? SubtitleSettings();
+  }
 
   void loadSubs() async {
     try {
       switch (widget.format) {
         case SubtitleFormat.ASS:
           subs = await Subtitleparsers().parseAss(widget.subtitleSource);
-        default:
-          throw Exception("Not implemented!");
+        // default:
+        // throw Exception("Not implemented!");
       }
       setState(() {
         areSubsLoading = false;

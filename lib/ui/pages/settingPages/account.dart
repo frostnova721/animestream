@@ -94,8 +94,8 @@ class _AccountSettingState extends State<AccountSetting> {
         return anilistLoggedIn;
       case Databases.simkl:
         return simklLoggedIn;
-      default:
-        return false; // Default for other databases
+      // default:
+      //   return false; // Default for other databases
     }
   }
 
@@ -116,8 +116,8 @@ class _AccountSettingState extends State<AccountSetting> {
         return AniListLogin().initiateLogin;
       case Databases.simkl:
         return SimklLogin().initiateLogin;
-      default:
-        throw Exception("Login function not defined for $db");
+      // default:
+      //   throw Exception("Login function not defined for $db");
     }
   }
 
@@ -127,8 +127,8 @@ class _AccountSettingState extends State<AccountSetting> {
         return AniListLogin().removeToken;
       case Databases.simkl:
         return SimklLogin().removeToken;
-      default:
-        throw Exception("Logout function not defined for $db");
+      // default:
+        // throw Exception("Logout function not defined for $db");
     }
   }
 

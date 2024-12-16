@@ -1,5 +1,6 @@
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/subtitles.dart';
 
 class SettingsModal {
   final int? skipDuration;
@@ -75,16 +76,21 @@ class SettingsModal {
 
 class UserPreferencesModal {
   final bool? episodeGridView;
+  final SubtitleSettings? subtitleSettings;
 
-  UserPreferencesModal({this.episodeGridView});
+  UserPreferencesModal({this.episodeGridView, this.subtitleSettings});
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
-    return UserPreferencesModal(episodeGridView: map['episodeGridView'] ?? false);
+    return UserPreferencesModal(
+      episodeGridView: map['episodeGridView'] ?? false,
+      subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings']),
+    );
   }
 
   Map<dynamic, dynamic> toMap() {
     return {
       'episodeGridView': episodeGridView ?? false,
+      'subtitleSettings': subtitleSettings ?? SubtitleSettings(),
     };
   }
 }

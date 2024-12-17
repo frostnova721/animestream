@@ -48,7 +48,7 @@ final monochromeLight = AnimeStreamTheme(
 /**hotpink accent */
 
 final hotPink = AnimeStreamTheme(
-  accentColor: Color.fromARGB(255, 255, 9, 132),
+  accentColor: Color.fromARGB(255, 255, 91, 173),
   backgroundColor: Color.fromARGB(255, 24, 24, 24),
   backgroundSubColor: Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
@@ -58,7 +58,7 @@ final hotPink = AnimeStreamTheme(
 );
 
 final hotPinkLight = AnimeStreamTheme(
-  accentColor: Color.fromARGB(255, 255, 9, 132),
+  accentColor: Color.fromARGB(255, 255, 91, 173),
   backgroundColor: Colors.white,
   backgroundSubColor: Color.fromARGB(255, 179, 179, 179),
   textMainColor: Colors.black,

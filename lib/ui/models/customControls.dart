@@ -84,7 +84,7 @@ class _ControlsState extends State<Controls> {
 
   int selectedQuality = 0;
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
-  int? megaSkipDuration = currentUserSettings?.skipDuration ?? 85;
+  int? megaSkipDuration = currentUserSettings?.megaSkipDuration ?? 85;
 
   bool buffering = false;
   bool finalEpisodeReached = false;

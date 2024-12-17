@@ -21,7 +21,8 @@ class _GenresPageState extends State<GenresPage> {
   }
 
   void scrollListener() async {
-    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
+    //fetch more when scroll space is less than 300px
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 300) {
       if (!_isLazyLoading) {
         print("loading...");
         getList(lazyLoaded: true);
@@ -45,8 +46,13 @@ class _GenresPageState extends State<GenresPage> {
         return;
       }
       print("loading page $currentLoadedPage");
-      final res =
-          await AnilistQueries().getAnimesWithGenresAndTags(selectedGenres, selectedTags, page: currentLoadedPage);
+      final res = await AnilistQueries().getAnimesWithGenresAndTags(
+        selectedGenres,
+        selectedTags,
+        page: currentLoadedPage,
+        ratingHigh: ratingRange.end.toInt(),
+        ratingLow: ratingRange.start.toInt(),
+      );
       res.forEach((e) {
         searchResultsAsWidgets.add(
           Cards(context: context).animeCard(
@@ -73,6 +79,8 @@ class _GenresPageState extends State<GenresPage> {
 
   List<String> selectedGenres = [];
   List<String> selectedTags = [];
+
+  RangeValues ratingRange = RangeValues(1, 10);
 
   List<Card> searchResultsAsWidgets = [];
 
@@ -105,7 +113,10 @@ class _GenresPageState extends State<GenresPage> {
                       child: Text(
                         "Results",
                         style: TextStyle(
-                            color: appTheme.textMainColor, fontFamily: "NotoSans", fontSize: 22, fontWeight: FontWeight.bold),
+                            color: appTheme.textMainColor,
+                            fontFamily: "NotoSans",
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
                     ElevatedButton(
@@ -135,6 +146,20 @@ class _GenresPageState extends State<GenresPage> {
                                       title: "Genres", mainList: genres, selectedList: selectedGenres),
                                   _scrollablelListWithTitle(setChildState,
                                       title: "Tags", mainList: tags, selectedList: selectedTags),
+                                  _filterItemTitle("Rating range"),
+                                  RangeSlider(
+                                    values: ratingRange,
+                                    min: 1,
+                                    max: 10,
+                                    divisions: 9,
+                                    activeColor: appTheme.accentColor,
+                                    labels: RangeLabels(ratingRange.start.toString(), ratingRange.end.toString()),
+                                    onChanged: (rv) {
+                                      setChildState(() {
+                                        ratingRange = RangeValues(rv.start.roundToDouble(), rv.end.roundToDouble());
+                                      });
+                                    },
+                                  ),
                                   Container(
                                     margin: EdgeInsets.only(top: 25),
                                     child: Row(
@@ -217,11 +242,13 @@ class _GenresPageState extends State<GenresPage> {
                         children: [
                           GridView.builder(
                             physics: NeverScrollableScrollPhysics(),
-                            padding: EdgeInsets.zero,
-                            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 140,
+                                mainAxisExtent: 230,
+                                // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                                 childAspectRatio: 120 / 220,
                                 mainAxisSpacing: 10),
+                            padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
                             shrinkWrap: true,
                             itemCount: searchResultsAsWidgets.length,
                             itemBuilder: (context, index) => Container(
@@ -242,6 +269,22 @@ class _GenresPageState extends State<GenresPage> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  Container _filterItemTitle(String title) {
+    return Container(
+      padding: const EdgeInsets.only(bottom: 15, top: 20, left: 20),
+      alignment: Alignment.centerLeft,
+      child: Text(
+        title,
+        style: TextStyle(
+          color: appTheme.textMainColor,
+          fontFamily: "Rubik",
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -290,7 +333,7 @@ class _GenresPageState extends State<GenresPage> {
                                 controller: _tagsScrollController,
                                 interactive: true,
                                 child: GridView(
-                                  controller: _tagsScrollController,
+                                    controller: _tagsScrollController,
                                     shrinkWrap: true,
                                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                                       crossAxisCount: 2,
@@ -314,12 +357,16 @@ class _GenresPageState extends State<GenresPage> {
                                               height: 40,
                                               alignment: Alignment.center,
                                               decoration: BoxDecoration(
-                                                  color: selectedList.contains(e) ? appTheme.accentColor : appTheme.backgroundSubColor,
+                                                  color: selectedList.contains(e)
+                                                      ? appTheme.accentColor
+                                                      : appTheme.backgroundSubColor,
                                                   borderRadius: BorderRadius.circular(13)),
                                               child: Text(
                                                 e,
                                                 style: TextStyle(
-                                                    color: selectedList.contains(e) ? appTheme.backgroundColor : appTheme.textMainColor,
+                                                    color: selectedList.contains(e)
+                                                        ? appTheme.backgroundColor
+                                                        : appTheme.textMainColor,
                                                     fontFamily: "NotoSans",
                                                     fontWeight: FontWeight.bold),
                                               ),

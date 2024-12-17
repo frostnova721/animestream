@@ -106,13 +106,13 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  "Mode",
+                                  "Theme Mode",
                                   style: textStyle(),
                                 ),
                                 SegmentedButton(
                                   segments: [
-                                    ButtonSegment(value: false, icon: Icon(Icons.wb_sunny_rounded)),
-                                    ButtonSegment(value: true, icon: Icon(Icons.nights_stay_rounded))
+                                    ButtonSegment(value: false, icon: Icon(Icons.wb_sunny_rounded, color: !darkMode ? appTheme.onAccent : appTheme.textMainColor)),
+                                    ButtonSegment(value: true, icon: Icon(Icons.nights_stay_rounded, color: darkMode ? appTheme.onAccent: appTheme.accentColor,))
                                   ],
                                   selected: {darkMode},
                                   multiSelectionEnabled: false,
@@ -126,8 +126,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   },
                                   style: SegmentedButton.styleFrom(
                                     selectedBackgroundColor: appTheme.accentColor,
-                                    selectedForegroundColor: appTheme.onAccent,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
+                                    selectedForegroundColor: appTheme.onAccent, //not workin for some reason
+                                    foregroundColor: appTheme.textMainColor,
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                                   ),
                                 ),
                               ],
@@ -150,8 +151,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                         textMainColor: thm.theme.textMainColor,
                                         textSubColor: thm.theme.textSubColor,
                                         modalSheetBackgroundColor: thm.theme.modalSheetBackgroundColor,
-                                        onAccent: thm.theme.onAccent
-                                      )
+                                        onAccent: thm.theme.onAccent)
                                     : thm.lightVariant;
                                 // floatingSnackBar(context, "All set! restart the app to apply the theme");
                               });
@@ -159,22 +159,22 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             },
                             description: "Full black background",
                           ),
-                          if(Platform.isAndroid)
-                          _sliderItem("Navbar Translucency", navbarTranslucency,
-                              min: 0,
-                              max: 1,
-                              description: "transparency and blur of the navbar",
-                              onChangedFunction: (val) {
-                                setState(() {
-                                  navbarTranslucency = val;
-                                });
-                              },
-                              divisions: 10,
-                              onDragEnd: (val) {
-                                Settings().writeSettings(
-                                  SettingsModal(navbarTranslucency: navbarTranslucency),
-                                );
-                              }),
+                          if (Platform.isAndroid)
+                            _sliderItem("Navbar Translucency", navbarTranslucency,
+                                min: 0,
+                                max: 1,
+                                description: "transparency and blur of the navbar",
+                                onChangedFunction: (val) {
+                                  setState(() {
+                                    navbarTranslucency = val;
+                                  });
+                                },
+                                divisions: 10,
+                                onDragEnd: (val) {
+                                  Settings().writeSettings(
+                                    SettingsModal(navbarTranslucency: navbarTranslucency),
+                                  );
+                                }),
                         ],
                       )
                     : Container(),

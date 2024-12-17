@@ -90,16 +90,21 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
   );
 }
 
-InkWell toggleItem(String label, bool value, void Function() onTapFunction, {String? description = null, bool applySidePadding = true,}) {
+InkWell toggleItem(
+  String label,
+  bool value,
+  void Function() onTapFunction, {
+  String? description = null,
+}) {
   return InkWell(
     onTap: onTapFunction,
     child: Container(
-      padding:  EdgeInsets.only(top: 10, bottom: 10, left: applySidePadding ? 10 : 0, right: applySidePadding ? 10 : 0) ,
+      padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
       child: Container(
-        padding: applySidePadding ? EdgeInsets.only(
+        padding: EdgeInsets.only(
           left: 10,
           right: 10,
-        ) : null,
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [

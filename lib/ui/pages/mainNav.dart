@@ -348,20 +348,20 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                       NavigationRailDestination(
                         icon: Icon(
                           Icons.home,
-                          color: tabController.index == 0 ? appTheme.backgroundSubColor : appTheme.textMainColor,
+                          color: tabController.index == 0 ? appTheme.onAccent : appTheme.textMainColor,
                         ),
                         label: Text("Home"),
                       ),
                       NavigationRailDestination(
                         icon: ImageIcon(
-                          color: tabController.index == 1 ? appTheme.backgroundSubColor : appTheme.textMainColor,
+                          color: tabController.index == 1 ? appTheme.onAccent : appTheme.textMainColor,
                           AssetImage("lib/assets/images/shines.png"),
                         ),
                         label: Text("Discover"),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.search_rounded,
-                            color: tabController.index == 2 ? appTheme.backgroundSubColor : appTheme.textMainColor),
+                            color: tabController.index == 2 ? appTheme.onAccent : appTheme.textMainColor),
                         label: Text("Search"),
                       ),
                     ],

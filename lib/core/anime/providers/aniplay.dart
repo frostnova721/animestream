@@ -69,7 +69,7 @@ class AniPlay extends AnimeProvider {
         }
 
         //choosing this since the quality is changeable in the default
-        final stream = parsed!.where((element) => element['quality'] == "default").firstOrNull;
+        final stream = parsed.where((element) => element['quality'] == "default").firstOrNull;
         if (stream != null) {
           serversFetched++;
           update([

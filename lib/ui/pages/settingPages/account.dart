@@ -305,19 +305,18 @@ class _AccountSettingState extends State<AccountSetting> {
           height: 150,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
-            color: appTheme.textSubColor,
             image: DecorationImage(
               image: usermodal?.banner != null
                   ? NetworkImage(usermodal!.banner!)
                   : AssetImage('lib/assets/images/profile_banner.jpg') //such a nice image!
                       as ImageProvider,
               fit: BoxFit.cover,
-              opacity: 0.65,
+              opacity: 0.75,
             ),
           ),
           // alignment: Alignment.bottomCenter,
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
+            filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -344,7 +343,7 @@ class _AccountSettingState extends State<AccountSetting> {
                       ElevatedButton(
                         onPressed: onLogout,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.transparent,
+                          backgroundColor: Colors.transparent.withAlpha(50),
                           shape: RoundedRectangleBorder(
                             side: BorderSide(color: appTheme.accentColor),
                             borderRadius: BorderRadius.circular(
@@ -355,7 +354,7 @@ class _AccountSettingState extends State<AccountSetting> {
                         child: Text(
                           "Logout",
                           style: TextStyle(
-                            color: appTheme.accentColor,
+                            color: Colors.white,
                             fontFamily: "NotoSans",
                             fontWeight: FontWeight.bold,
                           ),

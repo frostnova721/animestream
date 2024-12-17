@@ -67,7 +67,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                   children: [
                     settingPagesTitleHeader(context, "Player"),
                     Container(
-                      padding: EdgeInsets.only(left: 20, right: 20, top: 0),
+                      // padding: EdgeInsets.only(left: 20, right: 20, top: 0),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -212,7 +212,8 @@ class PlayerSettingState extends State<PlayerSetting> {
                           ),
                           InkWell(
                             onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(builder: (context) => SubtitleSettingPage()));
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(builder: (context) => SubtitleSettingPage()));
                             },
                             child: item(
                               // padding: EdgeInsets.only(top: 10, bottom: 10),
@@ -237,7 +238,8 @@ class PlayerSettingState extends State<PlayerSetting> {
                               ),
                             ),
                           ),
-                          toggleItem("Enable super speeds", enableSuperSpeeds, applySidePadding: false,() {
+                          toggleItem("Enable super speeds", enableSuperSpeeds,
+                              description: "Enable extra player speeds", () {
                             enableSuperSpeeds = !enableSuperSpeeds;
                             writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
                           })
@@ -254,7 +256,7 @@ class PlayerSettingState extends State<PlayerSetting> {
 
   Container item({required Widget child}) {
     return Container(
-      padding: EdgeInsets.only(top: 15, bottom: 15),
+      padding: EdgeInsets.fromLTRB(20, 15, 20, 15),
       child: child,
     );
   }

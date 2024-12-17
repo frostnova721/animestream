@@ -30,6 +30,8 @@ class PlayerSettingState extends State<PlayerSetting> {
 
   String? preferredQuality;
 
+  late bool enableSuperSpeeds;
+
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
     loaded = true;
@@ -39,6 +41,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       preferredQuality = settings.preferredQuality;
       skipDurationSliderValue = skipDuration!.toDouble();
       megaSkipDurationSliderValue = megaSkipDuration!.toDouble();
+      enableSuperSpeeds = settings.enableSuperSpeeds ?? false;
     });
   }
 
@@ -234,6 +237,10 @@ class PlayerSettingState extends State<PlayerSetting> {
                               ),
                             ),
                           ),
+                          toggleItem("Enable super speeds", enableSuperSpeeds, applySidePadding: false,() {
+                            enableSuperSpeeds = !enableSuperSpeeds;
+                            writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
+                          })
                         ],
                       ),
                     )

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
@@ -66,7 +65,7 @@ class _ControlsState extends State<Controls> {
 
     finalEpisodeReached = currentEpIndex + 1 >= widget.episode['epLinks'].length;
 
-    assignSettings();
+    // assignSettings();
 
     //this widget will only be open when the video is initialised. so to hide the controls, call it first
     widget.hideControlsOnTimeout();
@@ -84,8 +83,8 @@ class _ControlsState extends State<Controls> {
   String maxTime = "0:00";
 
   int selectedQuality = 0;
-  int? skipDuration;
-  int? megaSkipDuration;
+  int? skipDuration = currentUserSettings?.skipDuration ?? 10;
+  int? megaSkipDuration = currentUserSettings?.skipDuration ?? 85;
 
   bool buffering = false;
   bool finalEpisodeReached = false;
@@ -149,14 +148,14 @@ class _ControlsState extends State<Controls> {
     currentEpIndex = updatedIndex;
   }
 
-  //assign player settings
-  Future<void> assignSettings() async {
-    final settings = await Settings().getSettings();
-    setState(() {
-      skipDuration = settings.skipDuration ?? 10;
-      megaSkipDuration = settings.megaSkipDuration ?? 85;
-    });
-  }
+  //assign player settings - directly take the values, its faster
+  // Future<void> assignSettings() async {
+  //   final settings = currentUserSettings;
+  //   setState(() {
+  //     skipDuration = settings?.skipDuration ?? 10;
+  //     megaSkipDuration = settings?.megaSkipDuration ?? 85;
+  //   });
+  // }
 
   Future<void> playPreloadedEpisode() async {
     //just return if episode ended and next video is being loaded or the episode is the last one

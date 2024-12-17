@@ -17,6 +17,7 @@ class SettingsModal {
   final bool? isDev;
   final String? downloadPath;
   final Databases? database;
+  final bool? enableSuperSpeeds;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -33,6 +34,7 @@ class SettingsModal {
     this.isDev,
     this.downloadPath,
     this.database,
+    this.enableSuperSpeeds,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -51,6 +53,7 @@ class SettingsModal {
       isDev: map['isDev'] ?? false,
       downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download/animestream',
       database: DatabaseFromString.getDb(map['database'] ?? "anilist"),
+      enableSuperSpeeds: map['enableSuperSpeeds'] ?? false,
     );
   }
 
@@ -70,6 +73,7 @@ class SettingsModal {
       'isDev': isDev,
       'downloadPath': downloadPath,
       'database': database?.name,
+      'enableSuperSpeeds': enableSuperSpeeds,
     };
   }
 }

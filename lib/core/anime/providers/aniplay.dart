@@ -10,7 +10,7 @@ class AniPlay extends AnimeProvider {
 
   @override
   Future<List<String>> getAnimeEpisodeLink(String aliasId) async {
-    final serversAndEps = await _getAllServerLinks(aliasId);
+    final serversAndEps = await _getAllServerLinks(aliasId.split('\$')[0]);
     //it is a map!, but dart says its not a map :(
     final List<dynamic> eps = serversAndEps[0]['episodes'];
     final List<String> epIds = [];
@@ -38,7 +38,7 @@ class AniPlay extends AnimeProvider {
     final epId = epIdSplit[0].split(",");
     final servers = epIdSplit[1].split(",");
     final anilistId = epIdSplit[2].split("\$")[0];
-    final malId = epIdSplit[2].split("\$")[1];
+    // final malId = epIdSplit[2].split("\$")[1];
     final epNum = epIdSplit[3];
 
     int serversFetched = 0;
@@ -52,14 +52,24 @@ class AniPlay extends AnimeProvider {
             "Content-Type": "application/json",
             'Next-Action': "5dbcd21c7c276c4d15f8de29d9ef27aef5ea4a5e",
           },
-          body: "[\"$anilistId\", \"$malId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
+          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
+      resFuture.onError((e, st) {
+        print(e.toString());
+        return Response("", 401);
+      });
       resFuture.then((res) {
         final split = res.body.split('1:')[1];
-        final List<dynamic> parsed = jsonDecode(split)['sources'];
+        final List<dynamic>? parsed = jsonDecode(split)['sources'];
+
+        if (parsed == null) {
+          serversFetched++;
+          update([], serversFetched == servers.length);
+
+          return;
+        }
 
         //choosing this since the quality is changeable in the default
-        final stream =
-            parsed.where((element) => element['quality'] == "default").firstOrNull;
+        final stream = parsed!.where((element) => element['quality'] == "default").firstOrNull;
         if (stream != null) {
           serversFetched++;
           update([
@@ -124,7 +134,6 @@ class AniPlay extends AnimeProvider {
           'Next-Action': "f3422af67c84852f5e63d50e1f51718f1c0225c4",
         },
         body: "[\"$id\",true,false]");
-        print(res.body);
     final split = res.body.split('1:')[1];
     final List<dynamic> parsed = jsonDecode(split);
 

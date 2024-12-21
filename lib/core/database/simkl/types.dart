@@ -94,7 +94,6 @@ class SimklInfo extends DatabaseInfo {
       if(titleList == null || titleList.isEmpty) return null;
       return titleList[0]['name'];
     }
-
     return SimklInfo(
         title: {
           'romaji': getTitleFromAltTitles(33) ?? json['title'],
@@ -123,6 +122,8 @@ class SimklInfo extends DatabaseInfo {
           if (json['ids']['anilist'] != null)
             AlternateDatabaseId(database: Databases.anilist, id: int.parse(json['ids']['anilist'])),
           AlternateDatabaseId(database: Databases.simkl, id: json['ids']['simkl']),
+          if(json['ids']['mal'] != null)
+            AlternateDatabaseId(database: Databases.mal, id: int.parse(json['ids']['mal'])),
         ]);
   }
 }

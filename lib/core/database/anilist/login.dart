@@ -83,4 +83,9 @@ class AniListLogin extends DatabaseLogin {
     if (token != null) return true;
     return false;
   }
+  
+  @override
+  Future<void>? refreshToken() {
+    return null; //the access token is permanent
+  }
 }

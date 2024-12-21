@@ -2,6 +2,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/mal/mutations.dart';
 import 'package:animestream/core/database/simkl/mutations.dart';
 import 'package:animestream/core/database/types.dart';
 
@@ -24,6 +25,7 @@ class SyncHandler extends DatabaseMutation {
         .then((val) => print("[SYNC HANDLER]: Synced ${activedb.name}"))
         .catchError((e, st) {
       print(e);
+      print(st.toString());
       return null;
     });
 
@@ -38,6 +40,7 @@ class SyncHandler extends DatabaseMutation {
               .then((val) => print("[SYNC HANDLER]: Synced ${it.database.name}"))
               .catchError((e, st) {
             print(e);
+            print(st.toString());
             return null;
           });
         }
@@ -53,8 +56,10 @@ class SyncHandler extends DatabaseMutation {
         return AnilistMutations();
       case Databases.simkl:
         return SimklMutation();
+      case Databases.mal:
+        return MALMutation();
       // default:
-        // throw Exception("NOT_AN_OPTION_LIL_BRO");
+      // throw Exception("NOT_AN_OPTION_LIL_BRO");
     }
   }
 

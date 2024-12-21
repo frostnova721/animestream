@@ -5,6 +5,7 @@ import 'package:animestream/core/database/types.dart';
 
 enum Databases {
   anilist,
+  mal,
   simkl;
 }
 
@@ -15,6 +16,8 @@ class DatabaseFromString {
         return Databases.anilist;
       case "simkl":
         return Databases.simkl;
+      case "mal":
+        return Databases.mal;
       default:
         return Databases.anilist;
     }
@@ -24,6 +27,7 @@ class DatabaseFromString {
 abstract class DatabaseLogin {
   Future<bool> initiateLogin();
   Future<void> removeToken();
+  Future<void>? refreshToken();
 }
 
 abstract class Database {

@@ -132,6 +132,11 @@ class SimklLogin extends DatabaseLogin {
     }
     return true;
   }
+  
+  @override
+  Future<void>? refreshToken() {
+    return null; //permanent access token, no need to refresh
+  }
 }
 
 class PCKECodeResult {

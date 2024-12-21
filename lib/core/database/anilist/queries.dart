@@ -65,6 +65,7 @@ class AnilistQueries {
       {
         Page(perPage: 100) {
           media(id: $anilistId) {
+            idMal
             title {
               romaji
               english

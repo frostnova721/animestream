@@ -3,13 +3,13 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/types.dart';
 
 class DatabaseHandler extends Database {
-
   DatabaseHandler({Databases? database}) {
-    if(database != null) {
+    if (database != null) {
       this.db = database;
     }
   }
@@ -22,6 +22,8 @@ class DatabaseHandler extends Database {
         return Anilist();
       case Databases.simkl:
         return Simkl();
+      case Databases.mal:
+        return MAL();
       // default:
       //   throw Exception("NOT_AN_OPTION_LIL_BRO");
     }
@@ -34,6 +36,6 @@ class DatabaseHandler extends Database {
 
   @override
   Future<DatabaseInfo> getAnimeInfo(int id) async {
-      return await getActiveDatabaseInstance(db).getAnimeInfo(id);
+    return await getActiveDatabaseInstance(db).getAnimeInfo(id);
   }
 }

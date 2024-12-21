@@ -6,6 +6,7 @@ import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -25,8 +26,8 @@ class _AccountSettingState extends State<AccountSetting> {
   @override
   void initState() {
     getLoggedIn().then((value) {
-      //display login button if not logged in
-      if (!anilistLoggedIn && !simklLoggedIn) {
+      //display login button if not logged in any of accounts
+      if (!anilistLoggedIn && !simklLoggedIn && !malLoggedIn) {
         if (mounted)
           setState(() {
             loading = false;
@@ -34,7 +35,7 @@ class _AccountSettingState extends State<AccountSetting> {
       }
 
       List<Future> futures = [];
-      UserModal? alu, simu;
+      UserModal? alu, simu, malu;
 
       //load user profile if logged in
       if (anilistLoggedIn) {
@@ -48,11 +49,18 @@ class _AccountSettingState extends State<AccountSetting> {
         }));
       }
 
+      if(malLoggedIn) {
+        futures.add(MALLogin().getUserProfile().then((res) {
+          malu = res;
+        }));
+      }
+
       Future.wait(futures).then((val) {
         if (mounted)
           setState(() {
             simklUser = simu;
             user = alu;
+            malu = malu;
             loading = false;
           });
       });
@@ -62,18 +70,26 @@ class _AccountSettingState extends State<AccountSetting> {
 
   bool anilistLoggedIn = false;
   bool simklLoggedIn = false;
+  bool malLoggedIn = false;
 
   UserModal? user;
   UserModal? simklUser;
+  UserModal? malUser;
 
   bool loading = true;
 
   Future<void> getLoggedIn() async {
     final aniToken = await getSecureVal(SecureStorageKey.anilistToken);
     final simklToken = await getSecureVal(SecureStorageKey.simklToken);
+    final malToken = await getSecureVal(SecureStorageKey.malToken);
     if (aniToken != null && mounted) {
       setState(() {
         anilistLoggedIn = true;
+      });
+    }
+    if (malToken != null && mounted) {
+      setState(() {
+        malLoggedIn = true;
       });
     }
     if (simklToken != null && mounted) {
@@ -94,6 +110,8 @@ class _AccountSettingState extends State<AccountSetting> {
         return anilistLoggedIn;
       case Databases.simkl:
         return simklLoggedIn;
+      case Databases.mal:
+        return malLoggedIn;
       // default:
       //   return false; // Default for other databases
     }
@@ -105,6 +123,8 @@ class _AccountSettingState extends State<AccountSetting> {
         return user;
       case "simkl":
         return simklUser;
+      case "mal":
+        return malUser;
       default:
         throw Exception("No User for $databaseName");
     }
@@ -116,6 +136,8 @@ class _AccountSettingState extends State<AccountSetting> {
         return AniListLogin().initiateLogin;
       case Databases.simkl:
         return SimklLogin().initiateLogin;
+      case Databases.mal:
+        return MALLogin().initiateLogin;
       // default:
       //   throw Exception("Login function not defined for $db");
     }
@@ -127,8 +149,10 @@ class _AccountSettingState extends State<AccountSetting> {
         return AniListLogin().removeToken;
       case Databases.simkl:
         return SimklLogin().removeToken;
+      case Databases.mal:
+        return MALLogin().removeToken;
       // default:
-        // throw Exception("Logout function not defined for $db");
+      // throw Exception("Logout function not defined for $db");
     }
   }
 
@@ -155,8 +179,8 @@ class _AccountSettingState extends State<AccountSetting> {
                       ),
                     )
                   : ListView.builder(
-                    padding: EdgeInsets.zero,
-                    physics: NeverScrollableScrollPhysics(),
+                      padding: EdgeInsets.zero,
+                      physics: NeverScrollableScrollPhysics(),
                       itemCount: dbs.length,
                       shrinkWrap: true,
                       itemBuilder: (context, index) {
@@ -213,6 +237,8 @@ class _AccountSettingState extends State<AccountSetting> {
                             anilistLoggedIn = false;
                           } else if (databaseName.toLowerCase() == 'simkl') {
                             simklLoggedIn = false;
+                          } else if (databaseName.toLowerCase() == 'mal') {
+                            malLoggedIn = false;
                           }
                         }),
                       );
@@ -235,6 +261,8 @@ class _AccountSettingState extends State<AccountSetting> {
                       );
                     }).onError((err, st) {
                       floatingSnackBar(context, "Login failed! Try again");
+                      print(err.toString());
+                      print(st.toString());
                     });
                   });
                 }),

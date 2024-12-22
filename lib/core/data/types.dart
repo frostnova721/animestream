@@ -87,7 +87,7 @@ class UserPreferencesModal {
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(
       episodeGridView: map['episodeGridView'] ?? false,
-      subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings']),
+      subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings'] ?? SubtitleSettings().toMap()),
     );
   }
 

@@ -10,6 +10,7 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/bottomBar.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/discover.dart';
@@ -17,7 +18,6 @@ import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_floating_bottom_bar/flutter_floating_bottom_bar.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class MainNavigator extends StatefulWidget {
@@ -74,6 +74,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
   late TabController tabController;
 
+  AnimeStreamBottomBarController _barController = AnimeStreamBottomBarController(length: 3);
+
   bool popInvoked = false;
 
   RefreshController refreshController = RefreshController(initialRefresh: false);
@@ -93,7 +95,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       final futures = await Future.wait([
         getWatchedList(userName: userName),
         Anilist().getCurrentlyAiringAnime(),
-        if(userName != null) AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING),
+        if (userName != null) AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING),
       ]);
 
       List<UserAnimeListItem> watched = futures[0] as List<UserAnimeListItem>;
@@ -169,7 +171,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
       print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
         floatingSnackBar(context, err.toString(), waitForPreviousToFinish: true);
-        floatingSnackBar(context, "couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
+      floatingSnackBar(context, "couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
       if (mounted)
         setState(() {
           homePageError = true;
@@ -392,74 +394,124 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   ),
                 ],
               )
-            : BottomBar(
-                barColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings!.navbarTranslucency ?? 0.6),
-                borderRadius: BorderRadius.circular(10),
-                barAlignment: Alignment.bottomCenter,
-                width: MediaQuery.of(context).size.width / 2 + 20,
-                offset: MediaQuery.of(context).padding.bottom + 10,
-                child: ClipRRect(
-                  clipBehavior: Clip.hardEdge,
-                  borderRadius: BorderRadius.circular(10),
-                  child: Container(
-                    padding: EdgeInsets.only(top: 5),
-                    child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: blurSigmaValue, sigmaY: blurSigmaValue),
-                      child: TabBar(
-                        onTap: (val) => setState(() {}),
-                        overlayColor: WidgetStateColor.transparent,
-                        controller: tabController,
-                        isScrollable: false,
-                        labelColor: appTheme.accentColor,
-                        unselectedLabelColor: appTheme.textSubColor,
-                        dividerHeight: 0,
-                        indicatorColor: appTheme.accentColor,
-                        labelPadding: EdgeInsets.only(bottom: 5),
-                        tabs: [
-                          TabIcon(
-                            icon: Icons.home_rounded,
-                            label: "Home",
-                            animate: tabController.index == 0,
-                          ),
-                          TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
-                          TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-                body: (context, scrollController) => SmartRefresher(
-                  controller: refreshController,
-                  onRefresh: refresh,
-                  header: MaterialClassicHeader(
-                    color: appTheme.accentColor,
-                    backgroundColor: appTheme.backgroundSubColor,
-                  ),
-                  child: TabBarView(
-                    controller: tabController,
-                    physics: NeverScrollableScrollPhysics(),
-                    children: [
-                      Home(
-                        recentlyWatched: recentlyWatched,
-                        currentlyAiring: currentlyAiring,
-                        dataLoaded: homeDataLoaded,
-                        error: homePageError,
-                        updateWatchedList: updateWatchedList,
-                        planned: plannedList,
-                      ),
-                      Discover(
-                        thisSeason: thisSeason,
-                        recentlyUpdatedList: recentlyUpdatedList,
-                        recommendedList: recommendedList,
-                        trendingList: trendingList,
-                      ),
-                      Search(),
-                    ],
-                  ),
-                ),
-              ),
+            : _bottomBar(context, blurSigmaValue),
       ),
     );
+  }
+
+  Widget _bottomBar(BuildContext context, double blurSigmaValue) {
+    // if (useNewBottomBar) {
+      return Stack(children: [
+        BottomBarView(
+          controller: _barController,
+          children: [
+            Home(
+              key: ValueKey("0"),
+                recentlyWatched: recentlyWatched,
+                currentlyAiring: currentlyAiring,
+                dataLoaded: homeDataLoaded,
+                error: homePageError,
+                updateWatchedList: updateWatchedList,
+                planned: plannedList,
+              ),
+              Discover(
+                key: ValueKey("1"),
+                thisSeason: thisSeason,
+                recentlyUpdatedList: recentlyUpdatedList,
+                recommendedList: recommendedList,
+                trendingList: trendingList,
+              ),
+              Search(key: ValueKey("2"),),
+          ],
+        ),
+        AnimeStreamBottomBar(
+          controller: _barController,
+          accentColor: appTheme.accentColor,
+          backgroundColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
+          borderRadius: 10,
+          items: [
+            BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
+            BottomBarItem(
+                title: 'Discover',
+                icon: Padding(
+                  padding: const EdgeInsets.only(top: 15, bottom: 15),
+                  child: ImageIcon(
+                    AssetImage('lib/assets/images/shines.png'),
+                    size: 20,
+                  ),
+                )),
+            BottomBarItem(title: 'Search', icon: Icon(Icons.search)),
+          ],
+        )
+      ],);
+    // } else {
+    //   return BottomBar(
+    //     barColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings!.navbarTranslucency ?? 0.6),
+    //     borderRadius: BorderRadius.circular(10),
+    //     barAlignment: Alignment.bottomCenter,
+    //     width: MediaQuery.of(context).size.width / 2 + 20,
+    //     offset: MediaQuery.of(context).padding.bottom + 10,
+    //     child: ClipRRect(
+    //       clipBehavior: Clip.hardEdge,
+    //       borderRadius: BorderRadius.circular(10),
+    //       child: Container(
+    //         padding: EdgeInsets.only(top: 5),
+    //         child: BackdropFilter(
+    //           filter: ImageFilter.blur(sigmaX: blurSigmaValue, sigmaY: blurSigmaValue),
+    //           child: TabBar(
+    //             onTap: (val) => setState(() {}),
+    //             overlayColor: WidgetStateColor.transparent,
+    //             controller: tabController,
+    //             isScrollable: false,
+    //             labelColor: appTheme.accentColor,
+    //             unselectedLabelColor: appTheme.textSubColor,
+    //             dividerHeight: 0,
+    //             indicatorColor: appTheme.accentColor,
+    //             labelPadding: EdgeInsets.only(bottom: 5),
+    //             tabs: [
+    //               TabIcon(
+    //                 icon: Icons.home_rounded,
+    //                 label: "Home",
+    //                 animate: tabController.index == 0,
+    //               ),
+    //               TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
+    //               TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
+    //             ],
+    //           ),
+    //         ),
+    //       ),
+    //     ),
+    //     body: (context, scrollController) => SmartRefresher(
+    //       controller: refreshController,
+    //       onRefresh: refresh,
+    //       header: MaterialClassicHeader(
+    //         color: appTheme.accentColor,
+    //         backgroundColor: appTheme.backgroundSubColor,
+    //       ),
+    //       child: TabBarView(
+    //         controller: tabController,
+    //         physics: NeverScrollableScrollPhysics(),
+    //         children: [
+    //           Home(
+    //             recentlyWatched: recentlyWatched,
+    //             currentlyAiring: currentlyAiring,
+    //             dataLoaded: homeDataLoaded,
+    //             error: homePageError,
+    //             updateWatchedList: updateWatchedList,
+    //             planned: plannedList,
+    //           ),
+    //           Discover(
+    //             thisSeason: thisSeason,
+    //             recentlyUpdatedList: recentlyUpdatedList,
+    //             recommendedList: recommendedList,
+    //             trendingList: trendingList,
+    //           ),
+    //           Search(),
+    //         ],
+    //       ),
+    //     ),
+    //   );
+    // }
   }
 }
 

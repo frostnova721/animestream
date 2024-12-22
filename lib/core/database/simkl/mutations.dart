@@ -50,10 +50,11 @@ class SimklMutation extends DatabaseMutation {
 
     final header = await getHeader();
     final res = await post(Uri.parse(url), headers: header, body: body);
-    if(res.statusCode != 200) {
-      // print(res.body);
-      throw Exception("Couldnt Sync Simkl [maybe false report]");
-    }
+    // print(res.statusCode);
+    // if(res.statusCode != 200) {
+    //   // print(res.body);
+    //   throw Exception("Couldnt Sync Simkl [maybe false report]");
+    // }
   }
 
   Future syncToHistory(int id, int progress) async {

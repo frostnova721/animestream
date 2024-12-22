@@ -68,6 +68,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   late bool darkMode;
   late bool isAboveAndroid12;
   late bool materialTheme;
+  late bool useNewHomeScreen;
 
   @override
   Widget build(BuildContext context) {
@@ -111,8 +112,16 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                 ),
                                 SegmentedButton(
                                   segments: [
-                                    ButtonSegment(value: false, icon: Icon(Icons.wb_sunny_rounded, color: !darkMode ? appTheme.onAccent : appTheme.textMainColor)),
-                                    ButtonSegment(value: true, icon: Icon(Icons.nights_stay_rounded, color: darkMode ? appTheme.onAccent: appTheme.accentColor,))
+                                    ButtonSegment(
+                                        value: false,
+                                        icon: Icon(Icons.wb_sunny_rounded,
+                                            color: !darkMode ? appTheme.onAccent : appTheme.textMainColor)),
+                                    ButtonSegment(
+                                        value: true,
+                                        icon: Icon(
+                                          Icons.nights_stay_rounded,
+                                          color: darkMode ? appTheme.onAccent : appTheme.accentColor,
+                                        ))
                                   ],
                                   selected: {darkMode},
                                   multiSelectionEnabled: false,
@@ -170,10 +179,11 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   });
                                 },
                                 divisions: 10,
-                                onDragEnd: (val) {
-                                  Settings().writeSettings(
+                                onDragEnd: (val) async {
+                                  await Settings().writeSettings(
                                     SettingsModal(navbarTranslucency: navbarTranslucency),
                                   );
+                                  Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                                 }),
                         ],
                       )

@@ -60,7 +60,7 @@ class _AccountSettingState extends State<AccountSetting> {
           setState(() {
             simklUser = simu;
             user = alu;
-            malu = malu;
+            malUser = malu;
             loading = false;
           });
       });
@@ -344,7 +344,7 @@ class _AccountSettingState extends State<AccountSetting> {
           ),
           // alignment: Alignment.bottomCenter,
           child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+            filter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [

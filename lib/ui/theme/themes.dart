@@ -92,7 +92,7 @@ final coldPurpleLight = AnimeStreamTheme(
 final midnightBloom = AnimeStreamTheme(
   accentColor: Color(0xff522b5b),
   backgroundColor:  Color.fromARGB(255, 26, 17, 26),
-  backgroundSubColor: Color(0xff854f6c),
+  backgroundSubColor: Color.fromARGB(255, 148, 88, 120),
   textMainColor: Color(0xfffbe4d8),
   textSubColor: Color(0xffdfb6b2),
   modalSheetBackgroundColor: Color(0xff190019),

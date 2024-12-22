@@ -99,7 +99,7 @@ class Downloader {
     }
   }
 
-  Future<void> download(String streamLink, String fileName, {int retryAttempts = 3, int parallelBatches = 5}) async {
+  Future<void> download(String streamLink, String fileName, {int retryAttempts = 5, int parallelBatches = 5}) async {
     final permission = await checkPermission();
     if (!permission) {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");

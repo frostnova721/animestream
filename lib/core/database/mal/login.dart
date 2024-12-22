@@ -6,6 +6,7 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/mal/types.dart';
 import 'package:crypto/crypto.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -123,8 +124,9 @@ class MALLogin extends DatabaseLogin {
   Future<UserModal> getUserProfile() async {
     final url = "https://api.myanimelist.net/v2/users/@me";
 
-    final res = await get(Uri.parse(url));
-    print(res.body);
-    return UserModal(avatar: "", banner: "", id: 0, name: "");
+    final res = await MAL().fetch(url);
+    final data = jsonDecode(res);
+    //doesnt have banners
+    return UserModal(avatar: data['picture'], banner: null, id: data['id'], name: data['name']);
   }
 }

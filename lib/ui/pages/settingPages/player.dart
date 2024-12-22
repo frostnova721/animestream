@@ -267,7 +267,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       label: Text(
         label,
         style: TextStyle(
-          color: preferredQuality == label ? appTheme.backgroundColor : appTheme.accentColor,
+          // color: preferredQuality == label ? appTheme.backgroundColor : appTheme.accentColor,
           fontSize: 16,
           fontFamily: "NotoSans",
           fontWeight: FontWeight.bold,

@@ -17,13 +17,18 @@ class MAL extends Database {
     // TODO: implement search
     throw UnimplementedError();
   }
+
+  static Map<String, String>? headers = null;
   
   static Future<Map<String, String>> getHeader() async {
+    if(headers != null) return headers!;
     final token = await getSecureVal(SecureStorageKey.malToken);
-    return {
-      'Content-Type': "application/json",
+    final map = {
+      // 'Content-Type': "",
       'Authorization': "Bearer ${token}",
     };
+    headers = map;
+    return map;
   }
 
   Future<String> fetch(String url, {int recallAttempt = 0 }) async {

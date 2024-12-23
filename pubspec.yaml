@@ -47,7 +47,7 @@ dependencies:
       url: https://github.com/frostnova721/betterplayer.git
 
   # UI
-  flutter_floating_bottom_bar: ^1.2.0
+  # flutter_floating_bottom_bar: ^1.2.0
   pull_to_refresh: ^2.0.0
   flutter_markdown: ^0.6.20
   # webview_flutter: ^4.7.0

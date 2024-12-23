@@ -38,13 +38,14 @@ class MAL extends Database {
     final headers = await getHeader();
     final res = await get(Uri.parse(url), headers: headers);
 
-    if(res.statusCode == 200) {
-      throw Exception("SOMETHING WRONG HAPPENED WHILE FETCHING MAL");
-    }
-
     if(res.statusCode == 401) {
       await MALLogin().refreshToken();
       return await fetch(url, recallAttempt: recallAttempt++);
+    }
+
+    //might have to remove this!
+    if(res.statusCode != 200) {
+      throw Exception("SOMETHING WRONG HAPPENED WHILE FETCHING MAL");
     }
 
     return res.body;  

@@ -88,10 +88,10 @@ final coldPurpleLight = AnimeStreamTheme(
   onAccent: Colors.white,
 );
 
-/**SOMETHING NEW */
+/**Midnight Blooom */
 final midnightBloom = AnimeStreamTheme(
   accentColor: Color(0xff522b5b),
-  backgroundColor:  Color.fromARGB(255, 26, 17, 26),
+  backgroundColor: Color.fromARGB(255, 26, 17, 26),
   backgroundSubColor: Color.fromARGB(255, 148, 88, 120),
   textMainColor: Color(0xfffbe4d8),
   textSubColor: Color(0xffdfb6b2),
@@ -101,7 +101,7 @@ final midnightBloom = AnimeStreamTheme(
 
 final midnightBloomLight = AnimeStreamTheme(
   accentColor: Color(0xff522b5b),
-  backgroundColor:  Color(0xfffbe4d8),
+  backgroundColor: Color(0xfffbe4d8),
   backgroundSubColor: Color.fromARGB(255, 206, 150, 180),
   textMainColor: Color(0xff190019),
   textSubColor: Color.fromARGB(255, 80, 65, 64),
@@ -109,14 +109,37 @@ final midnightBloomLight = AnimeStreamTheme(
   onAccent: Color(0xfffbe4d8),
 );
 
-//try this pink color! #bc0150, sub color: 18181d
+/**Rizzling Coffee */
+final rizzlingCoffee = AnimeStreamTheme(
+  accentColor: Color(0xff8C7972),
+  backgroundColor: Color(0xff261E18),
+  backgroundSubColor: Color(0xff59473C),
+  textMainColor: Color(0xffF2F2F2),
+  textSubColor: Color(0xFFBFB0AA),
+  modalSheetBackgroundColor: Color(0xff261E18),
+  onAccent: Color(0xffF2F2F2),
+);
 
+final rizzlingCoffeeLight = AnimeStreamTheme(
+  accentColor: Color(0xff8C7972),
+  backgroundColor: Color(0xffF2F2F2),
+  backgroundSubColor: Color.fromARGB(255, 163, 131, 111),
+  textMainColor: Color(0xff261E18),
+  textSubColor: Color.fromARGB(255, 54, 50, 48),
+  modalSheetBackgroundColor: Color(0xffF2F2F2),
+  onAccent: Color(0xff261E18),
+);
+
+/** List of available themes.
+ *
+The theme list in UI screen is generated from this list */
 List<ThemeItem> availableThemes = [
   ThemeItem(id: 01, name: "Lime Zest", theme: lime, lightVariant: lightLime),
   ThemeItem(id: 02, name: "Monochrome", theme: monochrome, lightVariant: monochromeLight),
   ThemeItem(id: 03, name: "Cold Purple", theme: coldPurple, lightVariant: coldPurpleLight),
   ThemeItem(id: 04, name: "Hot Pink", theme: hotPink, lightVariant: hotPinkLight),
-  ThemeItem(id: 05, name: "Midnight Bloom", theme: midnightBloom, lightVariant: midnightBloomLight)
+  ThemeItem(id: 05, name: "Midnight Bloom", theme: midnightBloom, lightVariant: midnightBloomLight),
+  ThemeItem(id: 06, name: "Rizzling Coffee", theme: rizzlingCoffee, lightVariant: rizzlingCoffeeLight)
 ];
 
 ThemeModeValues lightModeValues = ThemeModeValues(

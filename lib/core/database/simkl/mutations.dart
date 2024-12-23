@@ -49,7 +49,8 @@ class SimklMutation extends DatabaseMutation {
     });
 
     final header = await getHeader();
-    final res = await post(Uri.parse(url), headers: header, body: body);
+    // final res = 
+    await post(Uri.parse(url), headers: header, body: body);
     // print(res.statusCode);
     // if(res.statusCode != 200) {
     //   // print(res.body);

@@ -184,10 +184,11 @@ class _BottomBarViewState extends State<BottomBarView> {
     if (widget.controller.length != widget.children.length) {
       throw Exception("Index out of bounds");
     }
+    // return widget.children[widget.controller.currentIndex];
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 200),
       transitionBuilder: (Widget child, Animation<double> animation) {
-        return ScaleTransition(scale: Tween<double>(begin: 1.1, end: 1.0).animate(animation), child: child);
+        return FadeTransition(opacity: animation, child: child,);
       },
       child: widget.children[widget.controller.currentIndex],
     );

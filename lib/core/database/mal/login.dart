@@ -102,7 +102,7 @@ class MALLogin extends DatabaseLogin {
   
   @override
   Future<void>? refreshToken() async {
-    final authResp = await getSecureVal(SecureStorageKey.malToken);
+    final authResp = await getSecureVal(SecureStorageKey.malAuthResponse);
     if(authResp == null) throw Exception("FOUND AUTH RESPONSE AS NULL. TRY LOGGING IN TO MAL AGAIN");
     final classed = MALAuthResponse.fromMap(jsonDecode(authResp));
     final body = jsonEncode({

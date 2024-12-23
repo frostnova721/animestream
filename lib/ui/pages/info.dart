@@ -736,7 +736,7 @@ class _InfoState extends State<Info> {
                 Text(
                   '${started ? 'Continue' : 'Start'} from:',
                   style: TextStyle(
-                    color: appTheme.accentColor,
+                    color: appTheme.textMainColor,
                     fontFamily: "Rubik",
                     fontSize: 14,
                   ),
@@ -744,7 +744,7 @@ class _InfoState extends State<Info> {
                 Text(
                   'Episode ${watched < epLinks.length ? watched + 1 : watched}',
                   style: TextStyle(
-                    color: appTheme.accentColor,
+                    color: appTheme.textMainColor,
                     fontFamily: "Rubik",
                     fontSize: 17,
                   ),
@@ -1063,7 +1063,7 @@ class _InfoState extends State<Info> {
                   padding: const EdgeInsets.only(top: 20, right: 25),
                   child: ImageIcon(
                     AssetImage('lib/assets/images/check.png'),
-                    color: Colors.white,
+                    color: appTheme.textMainColor,
                     size: 18,
                   ),
                 ),

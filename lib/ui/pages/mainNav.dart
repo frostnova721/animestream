@@ -339,8 +339,10 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                 children: [
                   NavigationRail(
                     onDestinationSelected: (value) {
+                      _barController.currentIndex = value;
                       setState(() {
-                        tabController.animateTo(value);
+
+                        // tabController.animateTo(value);
                       });
                     },
                     backgroundColor: appTheme.backgroundColor,
@@ -350,29 +352,29 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                       NavigationRailDestination(
                         icon: Icon(
                           Icons.home,
-                          color: tabController.index == 0 ? appTheme.onAccent : appTheme.textMainColor,
+                          color: _barController.currentIndex == 0 ? appTheme.onAccent : appTheme.textMainColor,
                         ),
                         label: Text("Home"),
                       ),
                       NavigationRailDestination(
                         icon: ImageIcon(
-                          color: tabController.index == 1 ? appTheme.onAccent : appTheme.textMainColor,
+                          color: _barController.currentIndex == 1 ? appTheme.onAccent : appTheme.textMainColor,
                           AssetImage("lib/assets/images/shines.png"),
                         ),
                         label: Text("Discover"),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.search_rounded,
-                            color: tabController.index == 2 ? appTheme.onAccent : appTheme.textMainColor),
+                            color: _barController.currentIndex == 2 ? appTheme.onAccent : appTheme.textMainColor),
                         label: Text("Search"),
                       ),
                     ],
-                    selectedIndex: tabController.index,
+                    selectedIndex: _barController.currentIndex,
                   ),
                   Expanded(
-                    child: TabBarView(
-                      controller: tabController,
-                      physics: NeverScrollableScrollPhysics(),
+                    child: BottomBarView(
+                      controller: _barController,
+                      // physics: NeverScrollableScrollPhysics(),
                       children: [
                         Home(
                           recentlyWatched: recentlyWatched,

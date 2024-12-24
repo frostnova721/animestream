@@ -94,7 +94,7 @@ class UserPreferencesModal {
   Map<dynamic, dynamic> toMap() {
     return {
       'episodeGridView': episodeGridView ?? false,
-      'subtitleSettings': subtitleSettings ?? SubtitleSettings(),
+      'subtitleSettings': subtitleSettings?.toMap() ?? SubtitleSettings().toMap(),
     };
   }
 }

@@ -43,7 +43,7 @@ class SubtitleSettings {
     this.strokeColor = Colors.black,
     this.strokeWidth = 1.1,
     this.textColor = Colors.white,
-    this.fontFamily = null,
+    this.fontFamily = "Rubik",
   });
 
   SubtitleSettings copyWith({
@@ -81,7 +81,7 @@ class SubtitleSettings {
     };
   }
 
-  factory SubtitleSettings.fromMap(Map<String, dynamic> map) {
+  factory SubtitleSettings.fromMap(Map<dynamic, dynamic> map) {
     return SubtitleSettings(
       textColor: Color(map['textColor'] as int),
       strokeColor: Color(map['strokeColor'] as int),
@@ -104,36 +104,48 @@ class SubtitleText extends StatelessWidget {
   final String text;
   final TextStyle style;
   final Color strokeColor;
+  final Color backgroundColor;
   final double strokeWidth;
+  final double backgroundTransparency;
 
-  const SubtitleText(
-      {super.key, required this.text, required this.style, required this.strokeColor, required this.strokeWidth});
+  const SubtitleText({
+    super.key,
+    required this.text,
+    required this.style,
+    required this.strokeColor,
+    required this.strokeWidth,
+    required this.backgroundColor,
+    required this.backgroundTransparency,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        //the actual text
-        Text(
-          text,
-          style: style.copyWith(shadows: [
-            Shadow(color: Colors.black, blurRadius: 4.5),
-          ]),
-          textAlign: TextAlign.center,
-        ),
-
-        //the stroke of that text since the flutter doesnt have it :(
-        Text(
-          text,
-          style: style.copyWith(
-            foreground: Paint()
-              ..style = PaintingStyle.stroke
-              ..color = strokeColor
-              ..strokeWidth = strokeWidth,
+    return Container(
+      color: backgroundColor.withAlpha((backgroundTransparency * 255).toInt()),
+      child: Stack(
+        children: [
+          //the actual text
+          Text(
+            text,
+            style: style.copyWith(shadows: [
+              Shadow(color: Colors.black, blurRadius: 4.5),
+            ]),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+
+          //the stroke of that text since the flutter doesnt have it :(
+          Text(
+            text,
+            style: style.copyWith(
+              foreground: Paint()
+                ..style = PaintingStyle.stroke
+                ..color = strokeColor
+                ..strokeWidth = strokeWidth,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
@@ -227,7 +239,7 @@ class _SubViewerState extends State<SubViewer> {
       letterSpacing: -0.4,
       // wordSpacing: 1,
       fontFamilyFallback: ["Poppins"],
-      backgroundColor: settings.backgroundColor.withValues(alpha: settings.backgroundTransparency),
+      // backgroundColor: settings.backgroundColor.withValues(alpha: settings.backgroundTransparency),
     );
   }
 
@@ -246,6 +258,8 @@ class _SubViewerState extends State<SubViewer> {
           style: subTextStyle(),
           strokeColor: settings.strokeColor,
           strokeWidth: settings.strokeWidth,
+          backgroundColor: settings.backgroundColor,
+          backgroundTransparency: settings.backgroundTransparency,
         ),
       ),
     );

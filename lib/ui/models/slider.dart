@@ -59,7 +59,7 @@ class CustomSliderState extends State<CustomSlider> {
         trackHeight: 13,
         thumbShape: RoundedRectangularThumbShape(width: 10, radius: 4),
         overlayColor: Colors.white,
-        overlayShape: RoundedRectangularThumbShape(width: 15, radius: 5, height: 30),
+        overlayShape: RoundedRectangularThumbShape(width: 12, radius: 5, height: 30),
         activeTickMarkColor: appTheme.backgroundColor,
       ),
       child: Slider(

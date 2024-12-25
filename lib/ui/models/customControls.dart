@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:better_player/src/controls/better_player_material_progress_bar.dart';
+import 'package:flutter/services.dart';
 import 'package:wakelock/wakelock.dart';
 import 'package:animestream/core/commons/types.dart';
 
@@ -126,7 +127,9 @@ class _ControlsState extends State<Controls> {
     }
 
     //play the loaded episode if equal to duration
-    if (!finalEpisodeReached &&  _controller.value.duration != null &&  _controller.value.position.inSeconds ==  _controller.value.duration!.inSeconds) {
+    if (!finalEpisodeReached &&
+        _controller.value.duration != null &&
+        _controller.value.position.inSeconds == _controller.value.duration!.inSeconds) {
       if (_controller.value.isPlaying) {
         await _controller.pause();
       }
@@ -137,7 +140,8 @@ class _ControlsState extends State<Controls> {
     final currentByTotal = _controller.value.position.inSeconds / (_controller.value.duration?.inSeconds ?? 0);
     if (currentByTotal * 100 >= 75 && !preloadStarted && _controller.value.isPlaying) {
       print("====================== above 75% ======================");
-      print("when position= ${_controller.value.position.inSeconds}, duration= ${_controller.value.duration?.inSeconds ?? 0} ");
+      print(
+          "when position= ${_controller.value.position.inSeconds}, duration= ${_controller.value.duration?.inSeconds ?? 0} ");
       preloadNextEpisode();
       widget.updateWatchProgress(currentEpIndex);
     }
@@ -165,7 +169,7 @@ class _ControlsState extends State<Controls> {
     calledAutoNext = true;
     if (preloadedSources.isNotEmpty) {
       currentEpIndex = currentEpIndex + 1;
-      
+
       //try to get the preferred source otherwise use the first source from the list
       final preferredServerLink = preloadedSources.where((source) => source.server == widget.preferredServer).toList();
       print("${preferredServerLink[0].server}");
@@ -277,102 +281,158 @@ class _ControlsState extends State<Controls> {
     Wakelock.disable();
   }
 
-  // final _fn = FocusNode();
+  final _fn = FocusNode();
+
+  void _keyListenerEvent(KeyEvent event) {
+    if (event is KeyUpEvent) return;
+    print("Key pressed: ${event.logicalKey.keyLabel}");
+    print(event);
+    switch (event.logicalKey) {
+      case LogicalKeyboardKey.mediaPlayPause:
+        _controller.value.isPlaying ? _controller.pause() : _controller.play();
+        break;
+      case LogicalKeyboardKey.mediaPause:
+        _controller.pause();
+        break;
+      case LogicalKeyboardKey.mediaPlay:
+        _controller.play();
+        break;
+      case LogicalKeyboardKey.mediaTrackNext:
+        if (currentEpIndex + 1 == widget.episode['epLinks'].length) return;
+        playPreloadedEpisode();
+        break;
+      case LogicalKeyboardKey.mediaTrackPrevious:
+        if (currentEpIndex == 0) return;
+        showModalBottomSheet(
+            isScrollControlled: true,
+            backgroundColor: appTheme.modalSheetBackgroundColor,
+            context: context,
+            builder: (BuildContext context) {
+              return CustomControlsBottomSheet(
+                getEpisodeSources: widget.episode['getEpisodeSources'],
+                currentSources: currentSources,
+                currentEpIndex: currentEpIndex,
+                playVideo: playVideo,
+                next: false,
+                refreshPage: widget.refreshPage,
+                epLinks: widget.episode['epLinks'],
+                updateCurrentEpIndex: updateCurrentEpIndex,
+                preferredServer: widget.preferredServer,
+              );
+            });
+        break;
+      case LogicalKeyboardKey.mediaFastForward:
+        fastForward(skipDuration ?? 10);
+        break;
+      case LogicalKeyboardKey.mediaRewind:
+        fastForward(-(skipDuration ?? 10));
+        break;
+      default:
+        print("Unhandled key: ${event.logicalKey.keyLabel} (${event.logicalKey.keyId}) type: ${event.deviceType.name}");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return OrientationBuilder(
-      builder: (context, orientation) {
-        double LRpadding = 30;
-        if (orientation == Orientation.portrait) LRpadding = 10;
-        return Padding(
-          padding: EdgeInsets.only(top: 15, left: LRpadding, right: LRpadding, bottom: 5),
-          child: Column(
-            children: [
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    widget.topControls,
-                    Expanded(
-                      child: widget.isControlsLocked() ? lockedCenterControls() : centerControls(context),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  Text(
-                                    currentTime,
-                                    style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
-                                  ),
-                                  const Text(
-                                    " / ",
-                                    style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
-                                  ),
-                                  Text(
-                                    maxTime,
-                                    style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
-                                  ),
-                                ],
-                              ),
-                              if (megaSkipDuration != null) widget.isControlsLocked() ? Container() : megaSkipButton(),
-                            ],
-                          ),
-                          Container(
-                            alignment: Alignment.bottomCenter,
-                            child: Container(
-                              height: 20,
-                              child: IgnorePointer(
-                                ignoring: widget.isControlsLocked(),
-                                child: Container(
-                                  child: SliderTheme(
-                                    data: SliderThemeData(
-                                        trackHeight: 1.3,
-                                        thumbColor: appTheme.accentColor,
-                                        activeTrackColor: appTheme.accentColor,
-                                        inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
-                                        secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
-                                        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
-                                        trackShape: EdgeToEdgeTrackShape(),
-                                        overlayShape: SliderComponentShape.noThumb),
-                                    child: BetterPlayerMaterialVideoProgressBar(
-                                      _controller,
-                                      widget.controller,
-                                      onDragStart: () {
-                                        widget.controller.pause();
-                                      },
-                                      onDragEnd: () {
-                                        widget.controller.play();
-                                      },
-                                      colors: BetterPlayerProgressColors(
-                                        playedColor: appTheme.accentColor,
-                                        handleColor: widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
-                                        bufferedColor: Color.fromARGB(255, 167, 167, 167),
-                                        backgroundColor: Color.fromARGB(255, 94, 94, 94),
+    return KeyboardListener(
+      focusNode: _fn,
+      autofocus: true,
+      onKeyEvent: _keyListenerEvent,
+      child: OrientationBuilder(
+        builder: (context, orientation) {
+          double LRpadding = 30;
+          if (orientation == Orientation.portrait) LRpadding = 10;
+          return Padding(
+            padding: EdgeInsets.only(top: 15, left: LRpadding, right: LRpadding, bottom: 5),
+            child: Column(
+              children: [
+                Expanded(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      widget.topControls,
+                      Expanded(
+                        child: widget.isControlsLocked() ? lockedCenterControls() : centerControls(context),
+                      ),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      currentTime,
+                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                    ),
+                                    const Text(
+                                      " / ",
+                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                    ),
+                                    Text(
+                                      maxTime,
+                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                    ),
+                                  ],
+                                ),
+                                if (megaSkipDuration != null)
+                                  widget.isControlsLocked() ? Container() : megaSkipButton(),
+                              ],
+                            ),
+                            Container(
+                              alignment: Alignment.bottomCenter,
+                              child: Container(
+                                height: 20,
+                                child: IgnorePointer(
+                                  ignoring: widget.isControlsLocked(),
+                                  child: Container(
+                                    child: SliderTheme(
+                                      data: SliderThemeData(
+                                          trackHeight: 1.3,
+                                          thumbColor: appTheme.accentColor,
+                                          activeTrackColor: appTheme.accentColor,
+                                          inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
+                                          secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
+                                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                                          trackShape: EdgeToEdgeTrackShape(),
+                                          overlayShape: SliderComponentShape.noThumb),
+                                      child: BetterPlayerMaterialVideoProgressBar(
+                                        _controller,
+                                        widget.controller,
+                                        onDragStart: () {
+                                          widget.controller.pause();
+                                        },
+                                        onDragEnd: () {
+                                          widget.controller.play();
+                                        },
+                                        colors: BetterPlayerProgressColors(
+                                          playedColor: appTheme.accentColor,
+                                          handleColor:
+                                              widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
+                                          bufferedColor: Color.fromARGB(255, 167, 167, 167),
+                                          backgroundColor: Color.fromARGB(255, 94, 94, 94),
+                                        ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          widget.bottomControls
-                        ],
+                            widget.bottomControls
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
-        );
-      },
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 

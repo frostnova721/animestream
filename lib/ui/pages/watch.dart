@@ -104,13 +104,13 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   void refreshPlayerValues() {
     playBackSpeeds = [
-    1,
-    1.25,
-    1.5,
-    1.75,
-    2,
-    if (currentUserSettings?.enableSuperSpeeds ?? false) ...[4, 5, 8, 10]
-  ];
+      1,
+      1.25,
+      1.5,
+      1.75,
+      2,
+      if (currentUserSettings?.enableSuperSpeeds ?? false) ...[4, 5, 8, 10]
+    ];
   }
 
   Future<void> playVideo(String url) async {
@@ -590,7 +590,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   )),
               IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting())).then((val) => refreshPlayerValues());
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting()))
+                      .then((val) => refreshPlayerValues());
                 },
                 icon: Icon(
                   Icons.video_settings_rounded,

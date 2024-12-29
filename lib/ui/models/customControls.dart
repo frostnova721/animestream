@@ -8,7 +8,7 @@ import 'package:better_player/better_player.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:better_player/src/controls/better_player_material_progress_bar.dart';
 import 'package:flutter/services.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:animestream/core/commons/types.dart';
 
 class Controls extends StatefulWidget {
@@ -56,7 +56,7 @@ class _ControlsState extends State<Controls> {
   void initState() {
     super.initState();
 
-    Wakelock.enable();
+    WakelockPlus.enable();
     wakelockEnabled = true;
     debugPrint("wakelock enabled");
 
@@ -117,11 +117,11 @@ class _ControlsState extends State<Controls> {
       });
 
     if (_controller.value.isPlaying && !wakelockEnabled) {
-      Wakelock.enable();
+      WakelockPlus.enable();
       wakelockEnabled = true;
       debugPrint("wakelock enabled");
     } else if (!_controller.value.isPlaying && wakelockEnabled) {
-      Wakelock.disable();
+      WakelockPlus.disable();
       wakelockEnabled = false;
       debugPrint("wakelock disabled");
     }
@@ -278,7 +278,7 @@ class _ControlsState extends State<Controls> {
   @override
   void dispose() {
     super.dispose();
-    Wakelock.disable();
+    WakelockPlus.disable();
   }
 
   final _fn = FocusNode();
@@ -327,6 +327,16 @@ class _ControlsState extends State<Controls> {
       case LogicalKeyboardKey.mediaRewind:
         fastForward(-(skipDuration ?? 10));
         break;
+      case LogicalKeyboardKey.select:
+        widget.hideControlsOnTimeout();
+        break;
+      case LogicalKeyboardKey.arrowUp:
+      case LogicalKeyboardKey.arrowDown:
+      case LogicalKeyboardKey.arrowLeft:
+      case LogicalKeyboardKey.arrowRight:
+      if(widget.isControlsVisible)
+        widget.hideControlsOnTimeout();
+
       default:
         print("Unhandled key: ${event.logicalKey.keyLabel} (${event.logicalKey.keyId}) type: ${event.deviceType.name}");
     }
@@ -334,104 +344,109 @@ class _ControlsState extends State<Controls> {
 
   @override
   Widget build(BuildContext context) {
-    return KeyboardListener(
-      focusNode: _fn,
-      autofocus: true,
-      onKeyEvent: _keyListenerEvent,
-      child: OrientationBuilder(
-        builder: (context, orientation) {
-          double LRpadding = 30;
-          if (orientation == Orientation.portrait) LRpadding = 10;
-          return Padding(
-            padding: EdgeInsets.only(top: 15, left: LRpadding, right: LRpadding, bottom: 5),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      widget.topControls,
-                      Expanded(
-                        child: widget.isControlsLocked() ? lockedCenterControls() : centerControls(context),
-                      ),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Row(
-                                  children: [
-                                    Text(
-                                      currentTime,
-                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
-                                    ),
-                                    const Text(
-                                      " / ",
-                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
-                                    ),
-                                    Text(
-                                      maxTime,
-                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
-                                    ),
-                                  ],
-                                ),
-                                if (megaSkipDuration != null)
-                                  widget.isControlsLocked() ? Container() : megaSkipButton(),
-                              ],
-                            ),
-                            Container(
-                              alignment: Alignment.bottomCenter,
-                              child: Container(
-                                height: 20,
-                                child: IgnorePointer(
-                                  ignoring: widget.isControlsLocked(),
-                                  child: Container(
-                                    child: SliderTheme(
-                                      data: SliderThemeData(
-                                          trackHeight: 1.3,
-                                          thumbColor: appTheme.accentColor,
-                                          activeTrackColor: appTheme.accentColor,
-                                          inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
-                                          secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
-                                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
-                                          trackShape: EdgeToEdgeTrackShape(),
-                                          overlayShape: SliderComponentShape.noThumb),
-                                      child: BetterPlayerMaterialVideoProgressBar(
-                                        _controller,
-                                        widget.controller,
-                                        onDragStart: () {
-                                          widget.controller.pause();
-                                        },
-                                        onDragEnd: () {
-                                          widget.controller.play();
-                                        },
-                                        colors: BetterPlayerProgressColors(
-                                          playedColor: appTheme.accentColor,
-                                          handleColor:
-                                              widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
-                                          bufferedColor: Color.fromARGB(255, 167, 167, 167),
-                                          backgroundColor: Color.fromARGB(255, 94, 94, 94),
+    return Shortcuts(
+      shortcuts: {
+        LogicalKeySet(LogicalKeyboardKey.select): const SelectIntent(),
+      },
+      child: KeyboardListener(
+        focusNode: _fn,
+        autofocus: true,
+        onKeyEvent: _keyListenerEvent,
+        child: OrientationBuilder(
+          builder: (context, orientation) {
+            double LRpadding = 30;
+            if (orientation == Orientation.portrait) LRpadding = 10;
+            return Padding(
+              padding: EdgeInsets.only(top: 15, left: LRpadding, right: LRpadding, bottom: 5),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        widget.topControls,
+                        Expanded(
+                          child: widget.isControlsLocked() ? lockedCenterControls() : centerControls(context),
+                        ),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Text(
+                                        currentTime,
+                                        style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                      ),
+                                      const Text(
+                                        " / ",
+                                        style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                      ),
+                                      Text(
+                                        maxTime,
+                                        style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                      ),
+                                    ],
+                                  ),
+                                  if (megaSkipDuration != null)
+                                    widget.isControlsLocked() ? Container() : megaSkipButton(),
+                                ],
+                              ),
+                              Container(
+                                alignment: Alignment.bottomCenter,
+                                child: Container(
+                                  height: 20,
+                                  child: IgnorePointer(
+                                    ignoring: widget.isControlsLocked(),
+                                    child: Container(
+                                      child: SliderTheme(
+                                        data: SliderThemeData(
+                                            trackHeight: 1.3,
+                                            thumbColor: appTheme.accentColor,
+                                            activeTrackColor: appTheme.accentColor,
+                                            inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
+                                            secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
+                                            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                                            trackShape: EdgeToEdgeTrackShape(),
+                                            overlayShape: SliderComponentShape.noThumb),
+                                        child: BetterPlayerMaterialVideoProgressBar(
+                                          _controller,
+                                          widget.controller,
+                                          onDragStart: () {
+                                            widget.controller.pause();
+                                          },
+                                          onDragEnd: () {
+                                            widget.controller.play();
+                                          },
+                                          colors: BetterPlayerProgressColors(
+                                            playedColor: appTheme.accentColor,
+                                            handleColor:
+                                                widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
+                                            bufferedColor: Color.fromARGB(255, 167, 167, 167),
+                                            backgroundColor: Color.fromARGB(255, 94, 94, 94),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                            widget.bottomControls
-                          ],
+                              widget.bottomControls
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          );
-        },
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

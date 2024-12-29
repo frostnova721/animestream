@@ -33,6 +33,7 @@ dependencies:
   dynamic_color: ^1.7.0
   flutter_dotenv: ^5.2.1
   app_links: ^6.3.2
+  # flutter_downloader: ^1.11.8
 
   # Local storage
   hive: ^2.2.3
@@ -47,7 +48,6 @@ dependencies:
       url: https://github.com/frostnova721/betterplayer.git
 
   # UI
-  # flutter_floating_bottom_bar: ^1.2.0
   pull_to_refresh: ^2.0.0
   flutter_markdown: ^0.6.20
   # webview_flutter: ^4.7.0

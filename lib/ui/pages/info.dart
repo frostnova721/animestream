@@ -700,7 +700,6 @@ class _InfoState extends State<Info> {
             context: context,
             builder: (BuildContext context) {
               return ServerSelectionBottomSheet(
-                getStreams: getStreams,
                 altDatabases: altDatabases,
                 bottomSheetContentData: ServerSelectionBottomSheetContentData(
                   totalEpisodes: data.episodes,
@@ -823,7 +822,6 @@ class _InfoState extends State<Info> {
                   backgroundColor: appTheme.modalSheetBackgroundColor,
                   builder: (context) {
                     return ServerSelectionBottomSheet(
-                      getStreams: getStreams,
                       altDatabases: altDatabases,
                       bottomSheetContentData: ServerSelectionBottomSheetContentData(
                           totalEpisodes: data.episodes,
@@ -880,7 +878,6 @@ class _InfoState extends State<Info> {
                                   backgroundColor: appTheme.modalSheetBackgroundColor,
                                   builder: (BuildContext context) {
                                     return ServerSelectionBottomSheet(
-                                      getStreams: getStreams,
                                       altDatabases: altDatabases,
                                       bottomSheetContentData: ServerSelectionBottomSheetContentData(
                                         epLinks: epLinks,
@@ -961,7 +958,6 @@ class _InfoState extends State<Info> {
                         backgroundColor: appTheme.modalSheetBackgroundColor,
                         builder: (context) {
                           return ServerSelectionBottomSheet(
-                            getStreams: getStreams,
                             altDatabases: altDatabases,
                             bottomSheetContentData: ServerSelectionBottomSheetContentData(
                               totalEpisodes: data.episodes,
@@ -1025,7 +1021,6 @@ class _InfoState extends State<Info> {
                                       isScrollControlled: true,
                                       builder: (BuildContext context) {
                                         return ServerSelectionBottomSheet(
-                                          getStreams: getStreams,
                                           altDatabases: altDatabases,
                                           bottomSheetContentData: ServerSelectionBottomSheetContentData(
                                             epLinks: epLinks,

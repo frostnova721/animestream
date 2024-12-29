@@ -132,7 +132,7 @@ class GogoAnime extends AnimeProvider {
     final totalEps = int.parse(epEnd);
     final baseEpLink = _baseUrl + '${split.sublist(0, split.length - 1).join('-')}-'.trim();
     final List<String> episodes = [];
-    for(int i=1; i<=totalEps; i++) {
+    for (int i = 1; i <= totalEps; i++) {
       episodes.add("${baseEpLink}$i");
     }
     return episodes;
@@ -164,5 +164,10 @@ class GogoAnime extends AnimeProvider {
   Future<http.Response> get(String url) async {
     final response = await http.get(Uri.parse(url));
     return response;
+  }
+
+  @override
+  Future<void>? getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+    return null;
   }
 }

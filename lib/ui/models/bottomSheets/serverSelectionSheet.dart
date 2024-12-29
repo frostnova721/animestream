@@ -9,9 +9,9 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
+import 'package:animestream/ui/models/sources.dart' as srcs;
 
 class ServerSelectionBottomSheet extends StatefulWidget {
-  final Function(String selectedSource, String epLink, Function(List<Stream>, bool)) getStreams;
   final ServerSelectionBottomSheetContentData bottomSheetContentData;
   final Type type;
   final Function? getWatched;
@@ -19,7 +19,6 @@ class ServerSelectionBottomSheet extends StatefulWidget {
 
   const ServerSelectionBottomSheet({
     super.key,
-    required this.getStreams,
     required this.bottomSheetContentData,
     required this.type,
     required this.altDatabases,
@@ -34,35 +33,67 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   List<Stream> streamSources = [];
   List<Map<String, String>> qualities = [];
 
-  getStreams() async {
+  getStreams({bool directElseBlock = false}) async {
     streamSources = [];
-    await widget.getStreams(widget.bottomSheetContentData.selectedSource,
-        widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex], (list, finished) {
-      if (mounted)
-        setState(() {
-          if (finished) {
-            _isLoading = widget.type == Type.download ? true : false;
-          }
-          streamSources = streamSources + list;
-          if (widget.type == Type.download) {
-            list.forEach((element) async {
-              if (element.quality == "multi-quality") {
-                await getQualities(element.link, element.server, element.backup);
-              } else {
-                qualities.add({
-                  'link': element.link,
-                  'server': "${element.server}  ${element.backup ? "- backup" : ""}",
-                  'quality': "${element.quality}"
-                });
-              }
-            });
-            if (mounted)
-              setState(() {
-                _isLoading = false;
+    if (widget.type == Type.download && !directElseBlock) {
+      await (
+        srcs.getDownloadSources(
+              widget.bottomSheetContentData.selectedSource,
+              widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex],
+              (list, finished) {
+                if (mounted)
+                  setState(() {
+                    if (finished) {
+                      _isLoading = widget.type == Type.download ? true : false;
+                    }
+                    streamSources = streamSources + list;
+                    if (widget.type == Type.download) {
+                      list.forEach((element) async {
+                        qualities.add({
+                          'link': element.link,
+                          'server': "${element.server}  ${element.backup ? "- backup" : ""}",
+                          'quality': "${element.quality}"
+                        });
+                      });
+                      if (mounted)
+                        setState(() {
+                          _isLoading = false;
+                        });
+                    }
+                  });
+              },
+            ) ??
+            getStreams(directElseBlock: true),
+      );
+    } else {
+      await srcs.getStreams(widget.bottomSheetContentData.selectedSource,
+          widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex], (list, finished) {
+        if (mounted)
+          setState(() {
+            if (finished) {
+              _isLoading = widget.type == Type.download ? true : false;
+            }
+            streamSources = streamSources + list;
+            if (widget.type == Type.download) {
+              list.forEach((element) async {
+                if (element.quality == "multi-quality") {
+                  await getQualities(element.link, element.server, element.backup);
+                } else {
+                  qualities.add({
+                    'link': element.link,
+                    'server': "${element.server}  ${element.backup ? "- backup" : ""}",
+                    'quality': "${element.quality}"
+                  });
+                }
               });
-          }
-        });
-    });
+              if (mounted)
+                setState(() {
+                  _isLoading = false;
+                });
+            }
+          });
+      });
+    }
   }
 
   Future<void> getQualities(String link, String server, bool backup) async {

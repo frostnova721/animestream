@@ -1,3 +1,4 @@
+import "dart:async";
 import "dart:io";
 import "dart:typed_data";
 import "package:animestream/core/anime/downloader/types.dart";
@@ -16,7 +17,7 @@ List<DownloadingItem> downloadQueue = [];
 class Downloader {
   // check for storage permission and request for permission if permission isnt granted
   Future<bool> checkPermission() async {
-    if(Platform.isWindows) return true;
+    if (Platform.isWindows) return true;
     final os = await DeviceInfoPlugin().androidInfo;
     final sdkVer = os.version.sdkInt;
 
@@ -131,9 +132,13 @@ class Downloader {
     //generate an id for the downloading item and add it to the queue(list)
     final downloadId = generateId();
     downloadQueue.add(DownloadingItem(id: downloadId, downloading: true));
-    final streamBaseLink = _makeBaseLink(streamLink);
+
+    if (!streamLink.endsWith("m3u8")) {
+      return await downloadMp4(streamLink, finalPath, fileName, downloadId);
+    }
 
     try {
+      final streamBaseLink = _makeBaseLink(streamLink);
       final List<String> segments = await _getSegments(streamLink);
       List<String> segmentsFiltered = [];
       segments.forEach(
@@ -177,10 +182,10 @@ class Downloader {
           );
           final res = await downloadSegmentWithRetries(uri, retryAttempts);
           if (res.statusCode == 200) {
-            if(encryptionKey != null) {
+            if (encryptionKey != null) {
               buffers.add(BufferItem(index: segmentNumber, buffer: decryptSegment(res.bodyBytes)));
-            } else 
-            buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
+            } else
+              buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
           } else
             throw new Exception("ERR_REQ_FAILED");
         });
@@ -193,7 +198,7 @@ class Downloader {
       buffers.sort((a, b) => a.index.compareTo(b.index));
 
       print("[DOWNLOADER] writing file to disk...");
-      
+
       //write the data after full download.
       final out = await output.openWrite();
       for (final buffer in buffers) {
@@ -217,6 +222,40 @@ class Downloader {
     }
   }
 
+  Future<void> downloadMp4(String link, String filepath, String fileName, int downloadId) async {
+    //we considering the file as mp4
+    final req = Request("GET", Uri.parse(link));
+    final res = await req.send();
+    if (res.statusCode != 200) {
+      throw Exception("Received response with status code ${res.statusCode}");
+    }
+    final totalSize = res.contentLength ?? -1;
+    int downloadedBytes = 0;
+    final sink = File(filepath).openWrite();
+
+    await res.stream.listen((chunk) {
+      sink.add(chunk);
+      downloadedBytes += chunk.length;
+
+      final progress = (downloadedBytes / totalSize * 100).toInt();
+      print("[DOWNLOADER]<$downloadId> Progress: $progress");
+
+      NotificationService().updateNotificationProgressBar(
+        id: downloadId,
+        currentStep: progress,
+        maxStep: 100,
+        fileName: "$fileName.mp4",
+        path: filepath,
+      );
+    }, onDone: () async {
+      await sink.close();
+    },
+    onError: (err) {
+      print(err);
+      NotificationService().pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
+    });
+  }
+
   //The enc key [im assuming AES for animepahe cus thats the only use case for this in this app rn]
   Uint8List? encryptionKey = null;
 
@@ -232,10 +271,10 @@ class Downloader {
 
   Uint8List decryptSegment(Uint8List buffer) {
     try {
-    final encrypt = Encrypter(AES(Key(encryptionKey!), mode: AESMode.cbc));
-    final decryptedBuffer = encrypt.decryptBytes(Encrypted(buffer), iv: IV.fromLength(16));
-    return Uint8List.fromList(decryptedBuffer);
-    } catch(err) {
+      final encrypt = Encrypter(AES(Key(encryptionKey!), mode: AESMode.cbc));
+      final decryptedBuffer = encrypt.decryptBytes(Encrypted(buffer), iv: IV.fromLength(16));
+      return Uint8List.fromList(decryptedBuffer);
+    } catch (err) {
       print("COULDNT DECRYPT A SEGMENT, KILLING THE DOWNLOAD");
       print(err.toString());
       rethrow;
@@ -269,11 +308,11 @@ class Downloader {
         segments.add(line.trim());
       } else {
         //get the encryption key if it exists
-        if(encryptionKey == null && line.startsWith("#EXT-X-KEY:METHOD=")) {
+        if (encryptionKey == null && line.startsWith("#EXT-X-KEY:METHOD=")) {
           final regex = RegExp(r'#EXT-X-KEY:METHOD=([^"]+),URI="([^"]+)"');
           final match = regex.firstMatch(line);
-          if(match!=null) {
-            if(match.group(1) == null || match.group(2) == null) {
+          if (match != null) {
+            if (match.group(1) == null || match.group(2) == null) {
               print("[DOWNLOADER] COULDNT GET THE ENCRYPTION TYPE OR THE KEY");
               continue;
             }

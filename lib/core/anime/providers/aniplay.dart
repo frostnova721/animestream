@@ -148,4 +148,9 @@ class AniPlay extends AnimeProvider {
 
     return servers;
   }
+
+  @override
+  Future<void>? getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+    return null;
+  }
 }

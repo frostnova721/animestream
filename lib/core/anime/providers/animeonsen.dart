@@ -111,4 +111,9 @@ class AnimeOnsen extends AnimeProvider {
 
     return searchResults;
   }
+  
+  @override
+  Future<void>? getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+    return null;
+  }
 }

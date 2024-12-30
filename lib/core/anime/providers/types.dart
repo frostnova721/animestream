@@ -22,5 +22,5 @@ abstract class AnimeProvider {
    * This method should return a list of [Stream] objects containing direct download
    * links to the episode
    */
-  Future<void>? getDownloadSources(String episodeUrl, Function(List<Stream>, bool) update);
+  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream>, bool) update);
 }

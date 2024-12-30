@@ -1,16 +1,18 @@
 import "dart:async";
 import "dart:io";
 import "dart:typed_data";
-import "package:animestream/core/anime/downloader/types.dart";
-import "package:animestream/core/app/runtimeDatas.dart";
-import "package:animestream/ui/models/notification.dart";
-import "package:animestream/ui/models/snackBar.dart";
+
 import "package:encrypt/encrypt.dart";
 import "package:http/http.dart";
 import "package:path_provider/path_provider.dart";
 import "package:permission_handler/permission_handler.dart";
-import "package:animestream/core/commons/utils.dart";
 import 'package:device_info_plus/device_info_plus.dart';
+
+import "package:animestream/core/anime/downloader/types.dart";
+import "package:animestream/core/app/runtimeDatas.dart";
+import "package:animestream/core/commons/utils.dart";
+import "package:animestream/ui/models/notification.dart";
+import "package:animestream/ui/models/snackBar.dart";
 
 List<DownloadingItem> downloadQueue = [];
 
@@ -133,7 +135,7 @@ class Downloader {
     final downloadId = generateId();
     downloadQueue.add(DownloadingItem(id: downloadId, downloading: true));
 
-    if (!streamLink.endsWith("m3u8")) {
+    if (!streamLink.contains(".m3u8")) {
       return await downloadMp4(streamLink, finalPath, fileName, downloadId);
     }
 
@@ -232,27 +234,34 @@ class Downloader {
     final totalSize = res.contentLength ?? -1;
     int downloadedBytes = 0;
     final sink = File(filepath).openWrite();
+    int lastProgress = 0;
 
     await res.stream.listen((chunk) {
       sink.add(chunk);
       downloadedBytes += chunk.length;
 
       final progress = (downloadedBytes / totalSize * 100).toInt();
-      print("[DOWNLOADER]<$downloadId> Progress: $progress");
 
-      NotificationService().updateNotificationProgressBar(
-        id: downloadId,
-        currentStep: progress,
-        maxStep: 100,
-        fileName: "$fileName.mp4",
-        path: filepath,
-      );
+      if (progress > lastProgress) {
+        print("[DOWNLOADER]<$downloadId> Progress: $progress%");
+
+        NotificationService().updateNotificationProgressBar(
+          id: downloadId,
+          currentStep: progress,
+          maxStep: 100,
+          fileName: "$fileName.mp4",
+          path: filepath,
+        );
+      }
+
+      lastProgress = progress;
     }, onDone: () async {
       await sink.close();
-    },
-    onError: (err) {
+      print("[DOWNLOADER] succesfully written the file to disk");
+    }, onError: (err) {
       print(err);
-      NotificationService().pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
+      NotificationService()
+          .pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
     });
   }
 

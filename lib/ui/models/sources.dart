@@ -81,11 +81,12 @@ Future<List<String>> getAnimeEpisodes(String source, String link) async {
 
 Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link) async {
   // final qualities = await Vidstream().generateQualityStreams(link);
+  if(!link.contains(".m3u8")) return [];
   final qualities = await getQualityStreams(link);
   return qualities;
 }
 
-Future<void>? getDownloadSources(String source, String episodeUrl, Function(List<Stream>, bool) updateFunction) async {
+Future<void> getDownloadSources(String source, String episodeUrl, Function(List<Stream>, bool) updateFunction) async {
   final streams = await getClass(source).getDownloadSources(episodeUrl, updateFunction);
   return streams;
 }

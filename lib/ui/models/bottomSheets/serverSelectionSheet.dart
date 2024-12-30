@@ -36,7 +36,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   getStreams({bool directElseBlock = false}) async {
     streamSources = [];
     if (widget.type == Type.download && !directElseBlock) {
-      await (
+      try {
+      await
         srcs.getDownloadSources(
               widget.bottomSheetContentData.selectedSource,
               widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex],
@@ -62,9 +63,12 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                     }
                   });
               },
-            ) ??
-            getStreams(directElseBlock: true),
-      );
+            );
+      } catch(err) {
+        if(err is UnimplementedError) {
+          getStreams(directElseBlock: true);
+        }
+      }
     } else {
       await srcs.getStreams(widget.bottomSheetContentData.selectedSource,
           widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex], (list, finished) {

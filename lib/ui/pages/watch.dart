@@ -87,12 +87,15 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
     //try to get the qualities. play with the default link if qualities arent available
     try {
-      getQualities().then((val) {
-        print(qualities);
-        print("${info.streamInfo.subtitle ?? "no subs!"}");
-        final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
-        changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
-      });
+      if (!info.streamInfo.isM3u8)
+        playVideo(info.streamInfo.link);
+      else
+        getQualities().then((val) {
+          print(qualities);
+          print("${info.streamInfo.subtitle ?? "no subs!"}");
+          final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
+          changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
+        });
     } catch (err) {
       print(err.toString());
       if (currentUserSettings?.showErrors ?? false) {

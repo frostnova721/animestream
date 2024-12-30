@@ -60,21 +60,12 @@ class AnimePahe extends AnimeProvider {
 
   @override
   Future<void> getStreams(String episodeUrl, Function(List<Stream> list, bool) update) async {
-    final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
-    final document = html.parse(data.body);
-    final streams = document.querySelectorAll('div#resolutionMenu > button');
-    final links = [];
-    streams.forEach((e) {
-      final link = e.attributes['data-src'] ?? '';
-      final text = e.text;
-      final server = text.split('·')[0].trim();
-      final quality = text.split('·')[1].trim();
-      links.add({'link': link, 'server': server, 'quality': quality});
-    });
-
-    // final servers = document.querySelectorAll('div#pickProvider > button');
-
-    // servers.forEach((e) {
+    return await getDownloadSources(episodeUrl, update);
+    // final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
+    // final document = html.parse(data.body);
+    // final streams = document.querySelectorAll('div#resolutionMenu > button');
+    // final links = [];
+    // streams.forEach((e) {
     //   final link = e.attributes['data-src'] ?? '';
     //   final text = e.text;
     //   final server = text.split('·')[0].trim();
@@ -82,20 +73,30 @@ class AnimePahe extends AnimeProvider {
     //   links.add({'link': link, 'server': server, 'quality': quality});
     // });
 
-    final totalStreams = links.length;
-    int returns = 0;
+    // // final servers = document.querySelectorAll('div#pickProvider > button');
 
-    links.forEach((e) {
-      final extracted = Kwik().extract(e['link'], server: e['server'], quality: e['quality']);
-      extracted.then((res) {
-        returns++;
-        update(res, returns == totalStreams);
-      }).catchError((error) {
-        print(error);
-        returns++;
-        update([], returns == totalStreams);
-      });
-    });
+    // // servers.forEach((e) {
+    // //   final link = e.attributes['data-src'] ?? '';
+    // //   final text = e.text;
+    // //   final server = text.split('·')[0].trim();
+    // //   final quality = text.split('·')[1].trim();
+    // //   links.add({'link': link, 'server': server, 'quality': quality});
+    // // });
+
+    // final totalStreams = links.length;
+    // int returns = 0;
+
+    // links.forEach((e) {
+    //   final extracted = Kwik().extract(e['link'], server: e['server'], quality: e['quality']);
+    //   extracted.then((res) {
+    //     returns++;
+    //     update(res, returns == totalStreams);
+    //   }).catchError((error) {
+    //     print(error);
+    //     returns++;
+    //     update([], returns == totalStreams);
+    //   });
+    // });
   }
 
   Future<void> getDownloadSources(String episodeUrl, Function(List<Stream> list, bool) update) async {

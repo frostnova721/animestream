@@ -11,6 +11,7 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:better_player/better_player.dart';
@@ -45,6 +46,25 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   late WatchPageInfo info;
 
   int currentEpIndex = 0;
+  int currentViewMode = 0;
+
+  final List<Map<String, dynamic>> viewModes = [
+    {
+      'icon': Icons.fullscreen,
+      'desc': "fit",
+      'value': BoxFit.contain,
+    },
+    {
+      'icon': Icons.zoom_out_map_rounded,
+      'desc': "filled",
+      'value': BoxFit.fill,
+    },
+    {
+      'icon': Icons.crop_outlined,
+      'desc': "cropped",
+      'value': BoxFit.cover,
+    },
+  ];
 
   bool _isTimerActive = false;
   bool controlsLocked = false;
@@ -342,23 +362,35 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   color: Colors.white,
                 ),
               ),
+              if (kDebugMode)
+                IconButton(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) => AlertDialog(
+                        backgroundColor: Colors.black,
+                        contentTextStyle: TextStyle(color: Colors.white),
+                        title: Text("Stream info", style: TextStyle(color: appTheme.accentColor)),
+                        content: Text(
+                          //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
+                          "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info.streamInfo.server} ${info.streamInfo.backup ? "\(backup\)" : ''}",
+                        ),
+                      ),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.info_rounded,
+                    color: Colors.white,
+                  ),
+                ),
               IconButton(
                 onPressed: () {
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) => AlertDialog(
-                      backgroundColor: Colors.black,
-                      contentTextStyle: TextStyle(color: Colors.white),
-                      title: Text("Stream info", style: TextStyle(color: appTheme.accentColor)),
-                      content: Text(
-                        //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
-                        "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info.streamInfo.server} ${info.streamInfo.backup ? "\(backup\)" : ''}",
-                      ),
-                    ),
-                  );
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting()))
+                      .then((val) => refreshPlayerValues());
                 },
+                tooltip: "Player settings",
                 icon: Icon(
-                  Icons.info_rounded,
+                  Icons.video_settings_rounded,
                   color: Colors.white,
                 ),
               ),
@@ -579,6 +611,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     },
                   );
                 },
+                tooltip: "Playback speed",
                 icon: Icon(
                   Icons.speed_rounded,
                   color: Colors.white,
@@ -590,20 +623,21 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                       showSubs = !showSubs;
                     });
                   },
+                  tooltip: "Subtitles",
                   icon: Icon(
                     !showSubs ? Icons.subtitles_outlined : Icons.subtitles_rounded,
                     color: Colors.white,
                   )),
               IconButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting()))
-                      .then((val) => refreshPlayerValues());
+                  currentViewMode = (currentViewMode + 1) % 3;
+                  controller.setOverriddenFit(viewModes[currentViewMode]['value']);
+                  setState(() {});
                 },
-                icon: Icon(
-                  Icons.video_settings_rounded,
-                  color: Colors.white,
-                ),
-              ),
+                icon: Icon(viewModes[currentViewMode]['icon']),
+                tooltip: viewModes[currentViewMode]['desc'],
+                color: Colors.white,
+              )
             ],
           )
         ],

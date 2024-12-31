@@ -45,14 +45,16 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   Future<void> saveSubSettings() async {
     await UserPreferences().saveUserPreferences(UserPreferencesModal(subtitleSettings: settings));
+    print("Sub preference saved!");
   }
 
-  String getSentence(int index) {
-    final sentences = [
+  List<String> sentences = [
       "It was a really tiring day...",
       "I've seen this before, almost as if I've lived here before.",
       "Something's really strange. Better check it out alone when its night.",
     ];
+
+  String getSentence(int index) {
     return sentences[index];
   }
 
@@ -83,18 +85,15 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
     return PopScope(
       canPop: !previewMode,
       onPopInvokedWithResult: (didPop, result) {
-        if(previewMode) {
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.portraitUp,
-            DeviceOrientation.landscapeRight,
-            DeviceOrientation.landscapeLeft
-          ]);
+        if (previewMode) {
+          SystemChrome.setPreferredOrientations(
+              [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
           setState(() {
             previewMode = false;
           });
-        } 
+        }
         // else {
-          // Navigator.of(context).pop();
+        // Navigator.of(context).pop();
         // }
       },
       child: Scaffold(
@@ -135,7 +134,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                   alignment: Alignment.bottomCenter,
                                   padding: EdgeInsets.only(top: 20, bottom: 20),
                                   color: Colors.white,
-                                  height: 150,
+                                  height: 170,
                                   margin: EdgeInsets.only(bottom: settings.bottomMargin),
                                   child: Container(
                                     width: MediaQuery.of(context).size.width / 1.6,
@@ -249,8 +248,8 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                 value: settings.backgroundTransparency,
                                 onChanged: (value) {
                                   setState(() {
-                                    settings =
-                                        settings.copyWith(backgroundTransparency: double.parse(value.toStringAsFixed(2)));
+                                    settings = settings.copyWith(
+                                        backgroundTransparency: double.parse(value.toStringAsFixed(2)));
                                   });
                                   saveSubSettings();
                                 },
@@ -291,17 +290,51 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
       ),
       Container(
         alignment: Alignment.topRight,
-        margin: EdgeInsets.only(top: MediaQuery.paddingOf(context).top, right: 10),
-        child: IconButton(onPressed: () {
-          SystemChrome.setPreferredOrientations([
-            DeviceOrientation.portraitUp,
-            DeviceOrientation.landscapeRight,
-            DeviceOrientation.landscapeLeft
-          ]);
-          setState(() {
-            previewMode = false;
-          });
-        }, icon: Icon(Icons.close, color: Colors.black, size: 30,)),
+        margin: EdgeInsets.only(top: MediaQuery.paddingOf(context).top, right: MediaQuery.paddingOf(context).right + 10, left: MediaQuery.paddingOf(context).left + 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Preview Mode", style: TextStyle(color: Colors.black, fontSize: 25, fontWeight: FontWeight.bold),),
+                IconButton(
+                    onPressed: () {
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.portraitUp,
+                        DeviceOrientation.landscapeRight,
+                        DeviceOrientation.landscapeLeft
+                      ]);
+                      setState(() {
+                        previewMode = false;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.black,
+                      size: 30,
+                    )),
+              ],
+            ),
+            ListView.builder(
+              shrinkWrap: true,
+              itemCount: sentences.length,
+              padding: EdgeInsets.zero,
+              itemBuilder: (context, index) {
+                return Container(
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        ind = index;
+                      });
+                    },
+                    icon: Text("${index + 1}", style: TextStyle(color: Colors.black, )),
+                  ),
+                );
+              },
+            )
+          ],
+        ),
       ),
     ]);
   }

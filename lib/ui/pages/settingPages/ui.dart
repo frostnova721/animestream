@@ -169,10 +169,10 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             description: "Full black background",
                           ),
                           if (Platform.isAndroid)
-                            _sliderItem("Navbar Translucency", navbarTranslucency,
+                            _sliderItem("Navbar Transparency", navbarTranslucency,
                                 min: 0,
                                 max: 1,
-                                description: "transparency and blur of the navbar",
+                                description: "Transparency of the navbar",
                                 onChangedFunction: (val) {
                                   setState(() {
                                     navbarTranslucency = val;

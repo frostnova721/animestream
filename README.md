@@ -4,9 +4,10 @@ A Flutter project made to stream and download Anime with Anilist tracking.
 
 <p align="center">
 <a href="https://www.codefactor.io/repository/github/frostnova721/animestream/overview/master"><img src="https://www.codefactor.io/repository/github/frostnova721/animestream/badge/master?style=for-the-badge" alt="CodeFactor" /></a>
-<a href="https://img.shields.io/github/downloads/frostnova721/animestream/total.svg?style=for-the-badge"><img src="https://img.shields.io/github/downloads/frostnova721/animestream/total.svg?style=for-the-badge&color=CAF979"></a>
+<a href="https://github.com/frostnova721/animestream/releases"><img src="https://img.shields.io/github/downloads/frostnova721/animestream/total.svg?style=for-the-badge&color=CAF979"></a>
 <a href="https://img.shields.io/badge/Made_With-Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white"><img src="https://img.shields.io/badge/Made_With-Flutter-%2302569B.svg?style=for-the-badge&logo=Flutter&logoColor=white"></a>
 <a href="https://img.shields.io/badge/Made_For-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white"><img src="https://img.shields.io/badge/Made_For-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white"></a>
+<a href="https://discord.gg/DEQHYGJ9Zr"><img src="https://img.shields.io/discord/1323364150067466331?style=for-the-badge&logo=discord&color=5865F2"></a>
 </p>
 
 <p align="center">
@@ -30,8 +31,9 @@ You can download the latest apk file from the [releases](https://github.com/fros
 Currently, you can enjoy anime content from the following sources:
 
 - **Gogo**
-- **Ryuk**
+- **Animepahe**
 - **AnimeOnsen**  
+- **Aniplay**
 
 ## Known Issues
 
@@ -60,6 +62,19 @@ This project is licensed under the **GNU Public License version 3.0**.
 - By using this app, you agree that the developer(s) of animestream is not responsible for any content within the app and won't be legally responsible for any violations.
 - All the contents in animestream are taken from 3rd party websites and API's, and the developer(s) of animestream is not accountable for their nature or legality. Users are advised to use the application responsibly and in compliance with relevant laws and regulations.
 - animestream or its developer(s) are not responsible for the misuse of any content within or outside the app and shall not be responsible for dissemination of any content within the app.
+
+## Official Communities
+
+### Discord
+<a href="https://discord.gg/DEQHYGJ9Zr">
+<img src="http://invidget.switchblade.xyz/DEQHYGJ9Zr">
+</a>
+
+### Reddit
+<a href="https://www.reddit.com/r/animestream/">
+<img src="https://img.shields.io/badge/Reddit-Join%20Our%20Community-FF4500?style=for-the-badge&logo=reddit&logoColor=white">
+</a>
+
 
 ## Contributors
 

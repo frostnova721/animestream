@@ -67,4 +67,5 @@ class SyncHandler extends DatabaseMutation {
   Databases getActiveDatabase() {
     return currentUserSettings?.database ?? Databases.anilist;
   }
+
 }

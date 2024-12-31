@@ -232,12 +232,12 @@ class _AnimeStreamState extends State<AnimeStream> {
             brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
             textTheme:
                 Theme.of(context).textTheme.apply(bodyColor: themeProvider.theme.textMainColor, fontFamily: "NotoSans"),
-            scaffoldBackgroundColor: themeProvider.theme.backgroundColor,
-            bottomSheetTheme: BottomSheetThemeData(backgroundColor: themeProvider.theme.modalSheetBackgroundColor),
+            scaffoldBackgroundColor: appTheme.backgroundColor,
+            bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
             colorScheme: ColorScheme.fromSeed(
               brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
               seedColor:
-                  (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : themeProvider.theme.accentColor,
+                  (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
             ),
           ),
           home: deepLinkRequestedNavigationPage ?? MainNavigator(),

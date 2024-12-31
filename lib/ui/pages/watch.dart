@@ -37,6 +37,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   String currentQualityLink = '';
   String selectedQuality = (currentUserSettings?.preferredQuality?.replaceAll("p", "") ?? "720");
+  // String? subs;
 
   List<String> epLinks = [];
   List qualities = [];
@@ -49,7 +50,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   bool controlsLocked = false;
   bool _visible = true; //inverse of this means that the controls is being ignored
   bool initialised = false;
-  bool showSubs = true;
+  bool showSubs = false;
 
   //1x speed initially
   double playBackSpeed = 1;
@@ -74,6 +75,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     info = widget.info;
     currentEpIndex = info.episodeNumber - 1;
     epLinks = widget.episodes;
+
+    showSubs = info.streamInfo.subtitle != null;
 
     final config = BetterPlayerConfiguration(
         aspectRatio: 16 / 9,

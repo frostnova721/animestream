@@ -46,13 +46,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
     materialTheme = currentUserSettings?.materialTheme ?? false;
   }
 
-  Future<void> setThemeMode(bool isDark) async {
-    await Settings().writeSettings(SettingsModal(darkMode: isDark));
+  // Future<void> setThemeMode(bool isDark) async {
 
-    Provider.of<ThemeProvider>(context, listen: false).applyThemeMode(isDark);
-
-    return;
-  }
+  // }
 
   Future<void> applyTheme(int id) async {
     await setTheme(id);
@@ -73,7 +69,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: appTheme.backgroundColor,
+      // backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
         child: Padding(
           padding: pagePadding(context, bottom: true),
@@ -128,10 +124,12 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   showSelectedIcon: false,
                                   emptySelectionAllowed: false,
                                   onSelectionChanged: (val) async {
-                                    await setThemeMode(val.first);
-                                    setState(() {
-                                      darkMode = val.first;
-                                    });
+                                    darkMode = val.first;
+                                    await Settings().writeSettings(SettingsModal(darkMode: darkMode));
+
+                                    await Provider.of<ThemeProvider>(context, listen: false).applyThemeMode(darkMode);
+                                    // await setThemeMode(val.first);
+                                    setState(() {});
                                   },
                                   style: SegmentedButton.styleFrom(
                                     selectedBackgroundColor: appTheme.accentColor,
@@ -146,25 +144,27 @@ class _ThemeSettingState extends State<ThemeSetting> {
                           _toggleItem(
                             "AMOLED Background",
                             AMOLEDBackgroundEnabled,
-                            () {
+                            () async {
                               final thm = availableThemes.firstWhere((i) => i.id == currentThemeId);
-                              setState(() {
-                                AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
-                                Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
-                                appTheme = darkMode
-                                    ? AnimeStreamTheme(
-                                        accentColor: thm.theme.accentColor,
-                                        backgroundColor:
-                                            AMOLEDBackgroundEnabled ? Colors.black : thm.theme.backgroundColor,
-                                        backgroundSubColor: thm.theme.backgroundSubColor,
-                                        textMainColor: thm.theme.textMainColor,
-                                        textSubColor: thm.theme.textSubColor,
-                                        modalSheetBackgroundColor: thm.theme.modalSheetBackgroundColor,
-                                        onAccent: thm.theme.onAccent)
-                                    : thm.lightVariant;
-                                // floatingSnackBar(context, "All set! restart the app to apply the theme");
-                              });
-                              return Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                              // setState(() {
+                              AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
+                              // });
+                              await Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
+                              appTheme = darkMode
+                                  ? AnimeStreamTheme(
+                                      accentColor: thm.theme.accentColor,
+                                      backgroundColor:
+                                          AMOLEDBackgroundEnabled ? Colors.black : thm.theme.backgroundColor,
+                                      backgroundSubColor: thm.theme.backgroundSubColor,
+                                      textMainColor: thm.theme.textMainColor,
+                                      textSubColor: thm.theme.textSubColor,
+                                      modalSheetBackgroundColor: thm.theme.modalSheetBackgroundColor,
+                                      onAccent: thm.theme.onAccent)
+                                  : thm.lightVariant;
+                              // floatingSnackBar(context, "All set! restart the app to apply the theme");
+                              // });
+                              Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                              setState(() {});
                             },
                             description: "Full black background",
                           ),
@@ -290,9 +290,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
           showDragHandle: true,
           builder: (context) {
             return Container(
-              height: MediaQuery.of(context).orientation == Orientation.landscape
-                  ? MediaQuery.of(context).size.height / 2 + 100
-                  : MediaQuery.of(context).size.height / 3 + 100,
+              // height: MediaQuery.of(context).orientation == Orientation.landscape
+              //     ? MediaQuery.of(context).size.height / 2 + 100
+              //     : MediaQuery.of(context).size.height / 3 + 100,
               padding: EdgeInsets.only(
                 top: 10,
                 left: 20,
@@ -301,6 +301,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
               margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 10, bottom: 20),
@@ -311,13 +312,13 @@ class _ThemeSettingState extends State<ThemeSetting> {
                       ),
                     ),
                   ),
-                  Expanded(
-                    // height: MediaQuery.of(context).orientation == Orientation.landscape
-                    //     ? MediaQuery.of(context).size.height / 2
-                    //     : MediaQuery.of(context).size.height / 3,
+                  Container(
+                    height: MediaQuery.of(context).orientation == Orientation.landscape
+                        ? MediaQuery.of(context).size.height / 2
+                        : MediaQuery.of(context).size.height / 3 + 120,
                     child: ListView.builder(
                       padding: EdgeInsets.zero,
-                      // shrinkWrap: true,
+                      shrinkWrap: true,
                       itemCount: availableThemes.length,
                       itemBuilder: (context, index) {
                         return _themeItem(availableThemes[index].name, availableThemes[index], context);

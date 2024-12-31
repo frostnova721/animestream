@@ -37,6 +37,7 @@ class _GenresPageState extends State<GenresPage> {
     } else {
       currentLoadedPage = 1;
     }
+    if (!_firstSearchDone) _firstSearchDone = true;
     try {
       setState(() {
         searchResultsAsWidgets = lazyLoaded ? searchResultsAsWidgets : [];
@@ -88,6 +89,7 @@ class _GenresPageState extends State<GenresPage> {
 
   bool _searching = false;
   bool _isLazyLoading = false;
+  bool _firstSearchDone = false;
 
   final ScrollController _scrollController = ScrollController();
 
@@ -222,20 +224,28 @@ class _GenresPageState extends State<GenresPage> {
                     ? Container(
                         margin: EdgeInsets.only(top: 40),
                         child: Center(
-                          child: Column(
-                            children: [
-                              Container(
-                                  padding: EdgeInsets.only(bottom: 10),
-                                  child: Image.asset(
-                                    'lib/assets/images/ghost.png',
-                                    color: appTheme.textMainColor,
-                                  )),
-                              Text(
-                                "~~nooo matches~~",
-                                style: TextStyle(color: appTheme.textMainColor, fontFamily: "NunitoSans", fontSize: 17),
-                              ),
-                            ],
-                          ),
+                          child: _firstSearchDone
+                              ? Column(
+                                  children: [
+                                    Container(
+                                        padding: EdgeInsets.only(bottom: 10),
+                                        child: Image.asset(
+                                          'lib/assets/images/ghost.png',
+                                          color: appTheme.textMainColor,
+                                        )),
+                                    Text(
+                                      "~~nooo matches~~",
+                                      style: TextStyle(
+                                          color: appTheme.textMainColor, fontFamily: "NunitoSans", fontSize: 17),
+                                    ),
+                                  ],
+                                )
+                              : Text(
+                                  'Apply filters to discover animes!',
+                                  style:
+                                      TextStyle(color: appTheme.textMainColor, fontFamily: "NunitoSans", fontSize: 16),
+                                      textAlign: TextAlign.center,
+                                ),
                         ),
                       )
                     : Column(

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:animestream/core/anime/extractors/kwik.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:http/http.dart' as http;

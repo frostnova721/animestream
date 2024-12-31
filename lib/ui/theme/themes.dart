@@ -89,7 +89,7 @@ final coldPurpleLight = AnimeStreamTheme(
 );
 
 /**Midnight Blooom */
-final midnightBloom = AnimeStreamTheme(
+final amethyst = AnimeStreamTheme(
   accentColor: Color(0xff522b5b),
   backgroundColor: Color.fromARGB(255, 26, 17, 26),
   backgroundSubColor: Color.fromARGB(255, 148, 88, 120),
@@ -99,7 +99,7 @@ final midnightBloom = AnimeStreamTheme(
   onAccent: Color(0xfffbe4d8),
 );
 
-final midnightBloomLight = AnimeStreamTheme(
+final amethystLight = AnimeStreamTheme(
   accentColor: Color(0xff522b5b),
   backgroundColor: Color(0xfffbe4d8),
   backgroundSubColor: Color.fromARGB(255, 206, 150, 180),
@@ -110,7 +110,7 @@ final midnightBloomLight = AnimeStreamTheme(
 );
 
 /**Rizzling Coffee */
-final rizzlingCoffee = AnimeStreamTheme(
+final mocha = AnimeStreamTheme(
   accentColor: Color(0xff8C7972),
   backgroundColor: Color(0xff261E18),
   backgroundSubColor: Color(0xff59473C),
@@ -120,10 +120,10 @@ final rizzlingCoffee = AnimeStreamTheme(
   onAccent: Color(0xffF2F2F2),
 );
 
-final rizzlingCoffeeLight = AnimeStreamTheme(
+final mochaLight = AnimeStreamTheme(
   accentColor: Color(0xff8C7972),
   backgroundColor: Color(0xffF2F2F2),
-  backgroundSubColor: Color.fromARGB(255, 163, 131, 111),
+  backgroundSubColor: Color.fromARGB(255, 190, 154, 131),
   textMainColor: Color(0xff261E18),
   textSubColor: Color.fromARGB(255, 54, 50, 48),
   modalSheetBackgroundColor: Color(0xffF2F2F2),
@@ -138,8 +138,8 @@ List<ThemeItem> availableThemes = [
   ThemeItem(id: 02, name: "Monochrome", theme: monochrome, lightVariant: monochromeLight),
   ThemeItem(id: 03, name: "Cold Purple", theme: coldPurple, lightVariant: coldPurpleLight),
   ThemeItem(id: 04, name: "Hot Pink", theme: hotPink, lightVariant: hotPinkLight),
-  ThemeItem(id: 05, name: "Midnight Bloom", theme: midnightBloom, lightVariant: midnightBloomLight),
-  ThemeItem(id: 06, name: "Rizzling Coffee", theme: rizzlingCoffee, lightVariant: rizzlingCoffeeLight)
+  ThemeItem(id: 05, name: "Amethyst", theme: amethyst, lightVariant: amethystLight),
+  ThemeItem(id: 06, name: "Mocha", theme: mocha, lightVariant: mochaLight)
 ];
 
 ThemeModeValues lightModeValues = ThemeModeValues(

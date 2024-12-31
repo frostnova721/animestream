@@ -39,35 +39,6 @@ class ThemeProvider with ChangeNotifier {
 
   set isDark(bool dark) {
     _isDark = dark;
-
-    getTheme().then((id) {
-      final theme = availableThemes.firstWhere((thm) => thm.id == id, orElse: () => availableThemes[0]);
-
-      if (dark) {
-        appTheme = AnimeStreamTheme(
-          accentColor: theme.theme.accentColor,
-          backgroundColor:
-              (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor,
-          backgroundSubColor: theme.theme.backgroundSubColor,
-          textMainColor: theme.theme.textMainColor,
-          textSubColor: theme.theme.textSubColor,
-          modalSheetBackgroundColor: theme.theme.modalSheetBackgroundColor,
-          onAccent: theme.theme.onAccent,
-        );
-      } else {
-        appTheme = AnimeStreamTheme(
-          accentColor: theme.lightVariant.accentColor,
-          backgroundColor: theme.lightVariant.backgroundColor,
-          backgroundSubColor: theme.lightVariant.backgroundSubColor,
-          textMainColor: theme.lightVariant.textMainColor,
-          textSubColor: theme.lightVariant.textSubColor,
-          modalSheetBackgroundColor: theme.lightVariant.modalSheetBackgroundColor,
-          onAccent: theme.lightVariant.onAccent,
-        );
-      }
-
-      notifyListeners();
-    });
   }
 
   set themeItem(ThemeItem ti) {
@@ -78,8 +49,34 @@ class ThemeProvider with ChangeNotifier {
     theme = t;
   }
 
-  void applyThemeMode(bool dark) {
+  Future<void> applyThemeMode(bool dark) async {
     isDark = dark;
+    final themeId = await getTheme();
+    final theme = availableThemes.firstWhere((thm) => thm.id == themeId, orElse: () => availableThemes[0]);
+
+    if (dark) {
+      appTheme = AnimeStreamTheme(
+        accentColor: theme.theme.accentColor,
+        backgroundColor: (currentUserSettings?.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor,
+        backgroundSubColor: theme.theme.backgroundSubColor,
+        textMainColor: theme.theme.textMainColor,
+        textSubColor: theme.theme.textSubColor,
+        modalSheetBackgroundColor: theme.theme.modalSheetBackgroundColor,
+        onAccent: theme.theme.onAccent,
+      );
+    } else {
+      appTheme = AnimeStreamTheme(
+        accentColor: theme.lightVariant.accentColor,
+        backgroundColor: theme.lightVariant.backgroundColor,
+        backgroundSubColor: theme.lightVariant.backgroundSubColor,
+        textMainColor: theme.lightVariant.textMainColor,
+        textSubColor: theme.lightVariant.textSubColor,
+        modalSheetBackgroundColor: theme.lightVariant.modalSheetBackgroundColor,
+        onAccent: theme.lightVariant.onAccent,
+      );
+    }
+
+    notifyListeners();
   }
 
   void justRefresh() {

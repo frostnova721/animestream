@@ -21,10 +21,9 @@ class AnilistMutations extends DatabaseMutation {
         }
       }
     ''';
-    final res = await Anilist()
-        .fetchQuery(query, RequestType.mutate, token: await getSecureVal(SecureStorageKey.anilistToken));
+    final res =
+        await Anilist().fetchQuery(query, RequestType.mutate, token: await getSecureVal(SecureStorageKey.anilistToken));
     return AnilistMutationResult(
-        status: res?['SaveMediaListEntry']?['status'],
-        progress: res?['SaveMediaListEntry']?['progress']);
+        status: res?['SaveMediaListEntry']?['status'], progress: res?['SaveMediaListEntry']?['progress']);
   }
 }

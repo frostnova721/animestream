@@ -183,9 +183,13 @@ class _SubViewerState extends State<SubViewer> {
 
   String activeLine = "";
   bool areSubsLoading = true;
+  bool settingsInited = false;
 
   Future<void> initiateSubs() async {
     settings = (await UserPreferences().getUserPreferences()).subtitleSettings ?? SubtitleSettings();
+    setState(() {
+      settingsInited = true;
+    });
   }
 
   void loadSubs() async {
@@ -247,21 +251,23 @@ class _SubViewerState extends State<SubViewer> {
   Widget build(BuildContext context) {
     ///uncomment the bottom line to reflect changes on refresh while tryin to edit the [SubtitleSettings]
     // settings = SubtitleSettings();
-    return Container(
-      alignment: Alignment.bottomCenter,
-      margin: EdgeInsets.only(bottom: settings.bottomMargin),
-      child: Container(
-        width: MediaQuery.of(context).size.width / 1.6,
-        alignment: Alignment.bottomCenter,
-        child: SubtitleText(
-          text: activeLine,
-          style: subTextStyle(),
-          strokeColor: settings.strokeColor,
-          strokeWidth: settings.strokeWidth,
-          backgroundColor: settings.backgroundColor,
-          backgroundTransparency: settings.backgroundTransparency,
-        ),
-      ),
-    );
+    return settingsInited
+        ? Container(
+            alignment: Alignment.bottomCenter,
+            margin: EdgeInsets.only(bottom: settings.bottomMargin),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 1.6,
+              alignment: Alignment.bottomCenter,
+              child: SubtitleText(
+                text: activeLine,
+                style: subTextStyle(),
+                strokeColor: settings.strokeColor,
+                strokeWidth: settings.strokeWidth,
+                backgroundColor: settings.backgroundColor,
+                backgroundTransparency: settings.backgroundTransparency,
+              ),
+            ),
+          )
+        : SizedBox();
   }
 }

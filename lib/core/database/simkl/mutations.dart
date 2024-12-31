@@ -21,12 +21,13 @@ class SimklMutation extends DatabaseMutation {
     // final utc = '${now.year.toString().padLeft(4, '0')}-'
     //     '${now.month.toString().padLeft(2, '0')}-'
     //     '${now.day.toString().padLeft(2, '0')} '
-        // '${now.hour.toString().padLeft(2, '0')}:'
-        // '${now.minute.toString().padLeft(2, '0')}:'
-        // '${now.second.toString().padLeft(2, '0')}';
+    // '${now.hour.toString().padLeft(2, '0')}:'
+    // '${now.minute.toString().padLeft(2, '0')}:'
+    // '${now.second.toString().padLeft(2, '0')}';
 
-    if(!(await SimklLogin.isLoggedIn())) return null;
+    if (!(await SimklLogin.isLoggedIn())) return null;
 
+    //this condition works only for currently watching animes
     if (previousStatus?.name == status?.name)
       syncToHistory(id, progress!);
     else
@@ -49,7 +50,7 @@ class SimklMutation extends DatabaseMutation {
     });
 
     final header = await getHeader();
-    // final res = 
+    // final res =
     await post(Uri.parse(url), headers: header, body: body);
     // print(res.statusCode);
     // if(res.statusCode != 200) {
@@ -58,31 +59,35 @@ class SimklMutation extends DatabaseMutation {
     // }
   }
 
-  Future syncToHistory(int id, int progress) async {
+  Future syncToHistory(int id, int progress, {String? bodyString = null}) async {
     final url = "https://api.simkl.com/sync/history";
     List<Map<String, int>> episodes = [];
 
-    //generate progress
-    for (int i = 0; i < progress; i++) {
-      episodes.add({'number': i + 1});
-    }
+    String body = bodyString ?? '';
 
-    final body = jsonEncode({
-      'shows': [
-        {
-          'ids': {
-            'simkl': id,
+    if (bodyString == null) {
+      //generate progress
+      for (int i = 0; i < progress; i++) {
+        episodes.add({'number': i + 1});
+      }
+
+      body = jsonEncode({
+        'shows': [
+          {
+            'ids': {
+              'simkl': id,
+            },
+            'seasons': [
+              {'number': 1, "episodes": episodes}
+            ],
           },
-          'seasons': [
-            {'number': 1, "episodes": episodes}
-          ],
-        },
-      ],
-    });
+        ],
+      });
+    }
 
     final header = await getHeader();
     final res = await post(Uri.parse(url), headers: header, body: body);
-    if(res.statusCode != 200) {
+    if (res.statusCode != 200) {
       // print(res.body);
       throw Exception("Couldnt Sync Simkl [maybe false report]");
     }
@@ -113,7 +118,7 @@ class SimklMutation extends DatabaseMutation {
       case MediaStatus.PLANNING:
         return "plantowatch";
       // default:
-        // throw Exception("UNHANDLED MEDIA STATUS CASE");
+      // throw Exception("UNHANDLED MEDIA STATUS CASE");
     }
   }
 }

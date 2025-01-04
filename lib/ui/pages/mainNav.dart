@@ -1,10 +1,10 @@
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/app/update.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
@@ -31,6 +31,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   @override
   void initState() {
     super.initState();
+    isTv().then((value) => tv = value);
+    
 
     //check for app updates
     checkForUpdates().then((data) => {
@@ -65,18 +67,16 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         loadDiscoverItems();
       }
     });
-
-    tabController = TabController(length: 3, vsync: this);
   }
 
   //general variables
   UserModal? userProfile;
 
-  late TabController tabController;
-
   AnimeStreamBottomBarController _barController = AnimeStreamBottomBarController(length: 3);
 
   bool popInvoked = false;
+  late bool tv;
+  bool isAndroid = Platform.isAndroid;
 
   RefreshController refreshController = RefreshController(initialRefresh: false);
 
@@ -205,6 +205,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           elem.title['english'] ?? elem.title['romaji'] ?? '',
           elem.cover,
           rating: (elem.rating ?? 0) / 10,
+          isMobile: !tv && isAndroid,
         ),
       );
     });
@@ -216,6 +217,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
         rating: item.rating,
+        isMobile: !tv && isAndroid 
       ));
     });
 
@@ -226,6 +228,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
         rating: item.rating,
+        isMobile: !tv && isAndroid
       ));
     });
 
@@ -446,120 +449,5 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           ],
         )
       ],);
-    // } else {
-    //   return BottomBar(
-    //     barColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings!.navbarTranslucency ?? 0.6),
-    //     borderRadius: BorderRadius.circular(10),
-    //     barAlignment: Alignment.bottomCenter,
-    //     width: MediaQuery.of(context).size.width / 2 + 20,
-    //     offset: MediaQuery.of(context).padding.bottom + 10,
-    //     child: ClipRRect(
-    //       clipBehavior: Clip.hardEdge,
-    //       borderRadius: BorderRadius.circular(10),
-    //       child: Container(
-    //         padding: EdgeInsets.only(top: 5),
-    //         child: BackdropFilter(
-    //           filter: ImageFilter.blur(sigmaX: blurSigmaValue, sigmaY: blurSigmaValue),
-    //           child: TabBar(
-    //             onTap: (val) => setState(() {}),
-    //             overlayColor: WidgetStateColor.transparent,
-    //             controller: tabController,
-    //             isScrollable: false,
-    //             labelColor: appTheme.accentColor,
-    //             unselectedLabelColor: appTheme.textSubColor,
-    //             dividerHeight: 0,
-    //             indicatorColor: appTheme.accentColor,
-    //             labelPadding: EdgeInsets.only(bottom: 5),
-    //             tabs: [
-    //               TabIcon(
-    //                 icon: Icons.home_rounded,
-    //                 label: "Home",
-    //                 animate: tabController.index == 0,
-    //               ),
-    //               TabIcon(icon: null, label: "Discover", animate: tabController.index == 1, image: true),
-    //               TabIcon(icon: Icons.search_rounded, label: 'Search', animate: tabController.index == 2),
-    //             ],
-    //           ),
-    //         ),
-    //       ),
-    //     ),
-    //     body: (context, scrollController) => SmartRefresher(
-    //       controller: refreshController,
-    //       onRefresh: refresh,
-    //       header: MaterialClassicHeader(
-    //         color: appTheme.accentColor,
-    //         backgroundColor: appTheme.backgroundSubColor,
-    //       ),
-    //       child: TabBarView(
-    //         controller: tabController,
-    //         physics: NeverScrollableScrollPhysics(),
-    //         children: [
-    //           Home(
-    //             recentlyWatched: recentlyWatched,
-    //             currentlyAiring: currentlyAiring,
-    //             dataLoaded: homeDataLoaded,
-    //             error: homePageError,
-    //             updateWatchedList: updateWatchedList,
-    //             planned: plannedList,
-    //           ),
-    //           Discover(
-    //             thisSeason: thisSeason,
-    //             recentlyUpdatedList: recentlyUpdatedList,
-    //             recommendedList: recommendedList,
-    //             trendingList: trendingList,
-    //           ),
-    //           Search(),
-    //         ],
-    //       ),
-    //     ),
-    //   );
-    // }
-  }
-}
-
-class TabIcon extends StatefulWidget {
-  final IconData? icon;
-  final String label;
-  final bool animate;
-  final bool image;
-  const TabIcon({super.key, required this.icon, this.image = false, required this.label, required this.animate});
-
-  @override
-  State<TabIcon> createState() => _TabIconState();
-}
-
-class _TabIconState extends State<TabIcon> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  final double iconSize = 30;
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.image == false && widget.icon == null) throw Exception("DIDNT RECIEVE 'IconData'");
-    return Container(
-      height: 40,
-      child: AnimatedSwitcher(
-        duration: Duration(milliseconds: 300),
-        child: widget.animate
-            ? Text(
-                widget.label,
-                style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.w600, fontSize: 14),
-              )
-            : widget.image
-                ? ImageIcon(
-                    AssetImage("lib/assets/images/shines.png"),
-                    size: iconSize - 4,
-                    color: appTheme.textMainColor,
-                  )
-                : Icon(
-                    widget.icon,
-                    size: iconSize,
-                    color: appTheme.textMainColor,
-                  ),
-      ),
-    );
   }
 }

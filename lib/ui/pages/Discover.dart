@@ -330,17 +330,14 @@ class _DiscoverState extends State<Discover> {
 
   Container _scrollList(List<AnimeCard> list) {
     return Container(
-      height: 240,
+      height: (list[0].isMobile) ? 220 : 240,
       padding: EdgeInsets.only(left: 10, right: 10),
       child: list.length > 0
           ? ListView.builder(
               padding: EdgeInsets.zero,
               itemCount: list.length,
               scrollDirection: Axis.horizontal,
-              itemBuilder: (context, index) => Container(
-                width: 130,
-                child: list[index],
-              ),
+              itemBuilder: (context, index) => list[index],
             )
           : Center(
               child: CircularProgressIndicator(

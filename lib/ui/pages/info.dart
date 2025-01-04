@@ -98,6 +98,7 @@ class _InfoState extends State<Info> {
       //fetch ids from simkl and save em
       try {
       DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
+        if(res.isEmpty) return;
         DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id).then((r) {
           final s = altDatabases.toSet();
           r.alternateDatabases.forEach((it) {

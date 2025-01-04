@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -155,6 +156,7 @@ class Cards {
     bool isAnime = true,
     String? subText = null,
     double? rating = null,
+    bool isMobile = true,
     void Function()? afterNavigation,
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
@@ -356,6 +358,7 @@ class AnimeCard extends StatefulWidget {
   final bool ongoing;
   final bool shouldNavigate;
   final bool isAnime;
+  final bool isMobile;
   final String? subText;
   final double? rating;
   final void Function()? afterNavigation;
@@ -371,6 +374,7 @@ class AnimeCard extends StatefulWidget {
     this.rating = null,
     this.shouldNavigate = true,
     this.subText = null,
+    this.isMobile = true,
   });
 
   @override
@@ -378,194 +382,106 @@ class AnimeCard extends StatefulWidget {
 }
 
 class _AnimeCardState extends State<AnimeCard> {
-
   bool isFocused = false;
+  double width = Platform.isWindows ? 150 : 110;
+  double height = Platform.isWindows ? 200 : 160;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      color: appTheme.backgroundColor,
-      shadowColor: null,
-      borderOnForeground: false,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      // clipBehavior: Clip.hardEdge,
-      child: InkWell(
+    return Container(
+      width: width,
+      margin: EdgeInsets.only(left: 5, right: 5),
+      child: Focus(
         onFocusChange: (value) {
           setState(() {
             isFocused = value;
           });
         },
-        onTap: () {
-          if (!widget.isAnime) return floatingSnackBar(context, "Mangas/Novels arent supported");
-          if (widget.shouldNavigate)
-            Navigator.of(context)
-                .push(
-              MaterialPageRoute(
-                builder: (context) => Info(
-                  id: widget.id,
-                ),
-              ),
-            )
-                .then((val) {
-              if (widget.afterNavigation != null) {
-                widget.afterNavigation!();
-              }
-            });
-        },
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        splashFactory: NoSplash.splashFactory,
-        focusColor: Colors.transparent,
-        hoverColor: Colors.transparent,
-        onHover: (value) => setState(() {
-          isFocused = value;
-        }) ,
-        child: Container(
-          alignment: Alignment.center,
-          width: 125,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                alignment: Alignment.center,
-                margin: EdgeInsets.only(bottom: 10),
-                // decoration: BoxDecoration(
-                  // borderRadius: BorderRadius.circular(20),
-                // ),
-                // clipBehavior: Clip.hardEdge,
-                height: 180,
-                width: 125,
-                child: Stack(
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 50),
-                      curve: Curves.easeIn,
-                      decoration: BoxDecoration(
-                        border: isFocused ? Border.all(color: appTheme.accentColor, width: 2, strokeAlign: BorderSide.strokeAlignOutside) : null,
-                        borderRadius: BorderRadius.circular(isFocused ? 10 : 20),
-                      ),
-                      height: isFocused ? 177 : 165,
-                        width: isFocused ? 116 : 110,
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(isFocused ? 10 : 20),
-                        child: CachedNetworkImage(
-                          imageUrl: widget.imageUrl,
-                          fit: BoxFit.cover,
-                          fadeInCurve: Curves.easeIn,
-                          fadeInDuration: const Duration(milliseconds: 200),
-                          placeholder: (context, url) => Container(
-                            color: appTheme.backgroundSubColor,
-                          ),
-                        ),
-                      ),
-                    ),
-                    AnimatedPositioned(
-                      duration: const Duration(milliseconds: 200),
-                      bottom: isFocused ? 7 : 5,
-                      right: isFocused ? 7 : 5,
-                      // alignment: Alignment.bottomRight,
-                      child: Container(
-                        padding: const EdgeInsets.only(left: 5, top: 2, bottom: 2, right: 5),
-                        height: 25,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: appTheme.accentColor.withValues(alpha: 0.9),
-                          borderRadius: isFocused ? BorderRadius.circular(7): BorderRadius.only(
-                            bottomRight: Radius.circular(17),
-                            topLeft: Radius.circular(20),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 3),
-                              child: Icon(
-                                Icons.star,
-                                size: 13,
-                                color: appTheme.onAccent,
-                                // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor
-                              ),
-                            ),
-                            Text(
-                              "${widget.rating ?? "??"}",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: "NotoSans",
-                                color: appTheme.onAccent,
-                                //(currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (widget.ongoing)
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
-                              borderRadius: BorderRadius.circular(100),
-                              color: Color.fromARGB(255, 40, 209, 46),
-                              border: Border.all(color: Colors.black, width: 2)),
-                        ),
-                      ),
-                  ],
-                  // ),
-                  // : Container(
-                  //     decoration: BoxDecoration(
-                  //       borderRadius: BorderRadius.circular(20),
-                  //     ),
-                  //     clipBehavior: Clip.hardEdge,
-                  //     child: CachedNetworkImage(
-                  //       imageUrl: imageUrl,
-                  //       fit: BoxFit.cover,
-                  //       height: 165,
-                  //       width: 110,
-                  //       fadeInCurve: Curves.easeIn,
-                  //       fadeInDuration: Duration(milliseconds: 200),
-                  //       placeholder: (context, url) => Container(color: appTheme.backgroundSubColor,),
-                  //     ),
-                  //   ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 5, bottom: widget.subText == null ? 0 : 5),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    widget.title,
-                    style: TextStyle(
-                      color: appTheme.textMainColor,
-                      fontFamily: 'NotoSans',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    maxLines: 2,
-                    textAlign: TextAlign.left,
+        child: GestureDetector(
+          onTap: () {
+            if (!widget.isAnime) return floatingSnackBar(context, "Manga or Novels aren't supported");
+            if (widget.shouldNavigate)
+              Navigator.of(context)
+                  .push(
+                MaterialPageRoute(
+                  builder: (context) => Info(
+                    id: widget.id,
                   ),
                 ),
+              )
+                  .then((val) {
+                widget.afterNavigation?.call();
+              });
+          },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Stack(
+                children: [
+                  Container(
+                    height: height,
+                    width: width,
+                    margin: EdgeInsets.only(bottom: 10),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    clipBehavior: Clip.hardEdge,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.imageUrl,
+                      fadeInDuration: Duration(milliseconds: 200),
+                      fit: BoxFit.cover,
+                      placeholder: (context, url) => Container(
+                        color: appTheme.backgroundSubColor,
+                        height: height,
+                        width: width,
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    right: 0,
+                    bottom: 10,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.only(topLeft: Radius.circular(15), bottomRight: Radius.circular(15)),
+                        color: appTheme.accentColor,
+                      ),
+                      width: width / 2,
+                      padding: EdgeInsets.only(left: 5, right: 5, top: 2, bottom: 2),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.star,
+                            color: appTheme.onAccent,
+                            size: 16,
+                          ),
+                          Text(
+                            " ${widget.rating ?? '00'}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: appTheme.onAccent,
+                              fontFamily: "NotoSans",
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+              Text(
+                widget.title,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                textAlign: TextAlign.left,
+                style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold, fontSize: 15),
               ),
               if (widget.subText != null)
                 Text(
                   widget.subText!,
-                  style: TextStyle(
-                    color: appTheme.textSubColor,
-                    fontFamily: 'NotoSans',
-                    fontSize: 12,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
+                  style: TextStyle(fontFamily: "NunitoSans", color: appTheme.textSubColor),
+                )
             ],
           ),
         ),

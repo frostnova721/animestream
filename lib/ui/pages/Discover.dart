@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/header.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
@@ -11,10 +12,10 @@ import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 
 class Discover extends StatefulWidget {
-  final List<Card> thisSeason;
+  final List<AnimeCard> thisSeason;
   final List<TrendingResult> trendingList;
-  final List<Card> recentlyUpdatedList;
-  final List<Card> recommendedList;
+  final List<AnimeCard> recentlyUpdatedList;
+  final List<AnimeCard> recommendedList;
   const Discover({
     super.key,
     required this.recentlyUpdatedList,
@@ -39,10 +40,10 @@ class _DiscoverState extends State<Discover> {
     _pageController.addListener(onScroll);
   }
 
-  // List<Card> thisSeason = [];
+  // List<AnimeCard> thisSeason = [];
   // List<TrendingResult> trendingList = [];
-  // List<Card> recentlyUpdatedList = [];
-  // List<Card> recommendedList = [];
+  // List<AnimeCard> recentlyUpdatedList = [];
+  // List<AnimeCard> recommendedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
@@ -327,9 +328,9 @@ class _DiscoverState extends State<Discover> {
         });
   }
 
-  Container _scrollList(List<Card> list) {
+  Container _scrollList(List<AnimeCard> list) {
     return Container(
-      height: 230,
+      height: 240,
       padding: EdgeInsets.only(left: 10, right: 10),
       child: list.length > 0
           ? ListView.builder(
@@ -337,7 +338,7 @@ class _DiscoverState extends State<Discover> {
               itemCount: list.length,
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) => Container(
-                width: 125,
+                width: 130,
                 child: list[index],
               ),
             )

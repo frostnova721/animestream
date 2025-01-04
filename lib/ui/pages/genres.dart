@@ -83,7 +83,7 @@ class _GenresPageState extends State<GenresPage> {
 
   RangeValues ratingRange = RangeValues(1, 10);
 
-  List<Card> searchResultsAsWidgets = [];
+  List<AnimeCard> searchResultsAsWidgets = [];
 
   int currentLoadedPage = 1;
 

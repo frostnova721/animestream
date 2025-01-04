@@ -188,11 +188,11 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   //discover items
 
   List<TrendingResult> trendingList = [];
-  List<Card> recommendedList = [];
+  List<AnimeCard> recommendedList = [];
   List<AnilistRecommendations> recommendedListData = [];
-  List<Card> recentlyUpdatedList = [];
+  List<AnimeCard> recentlyUpdatedList = [];
   List<RecentlyUpdatedResult> recentlyUpdatedListData = [];
-  List<Card> thisSeason = [];
+  List<AnimeCard> thisSeason = [];
   List<CurrentlyAiringResult> thisSeasonData = [];
 
   void rebuildCards() {

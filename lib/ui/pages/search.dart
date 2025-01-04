@@ -15,8 +15,8 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  List<Card> results = [];
-  List<Card> exactMatches = [];
+  List<AnimeCard> results = [];
+  List<AnimeCard> exactMatches = [];
 
   TextEditingController textEditingController = TextEditingController();
 

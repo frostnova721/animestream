@@ -20,13 +20,13 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     super.initState();
   }
 
-  List<Card> watchingList = [];
-  List<Card> plannedList = [];
-  List<Card> completedList = [];
-  List<Card> droppedList = [];
+  List<AnimeCard> watchingList = [];
+  List<AnimeCard> plannedList = [];
+  List<AnimeCard> completedList = [];
+  List<AnimeCard> droppedList = [];
   List<UserAnimeList> rawAnimeList = [];
 
-  List<Card> getSelectedTabView(int tabIndex) {
+  List<AnimeCard> getSelectedTabView(int tabIndex) {
     switch (tabIndex) {
       case 0:
         return watchingList;

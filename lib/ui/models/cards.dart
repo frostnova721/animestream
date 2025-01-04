@@ -146,7 +146,7 @@ class Cards {
   }
 
   /**Builds a card for anime (optional navigation) */
-  Card animeCard(
+  AnimeCard animeCard(
     int id,
     String title,
     String imageUrl, {
@@ -158,172 +158,17 @@ class Cards {
     void Function()? afterNavigation,
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
-    return Card(
-      color: appTheme.backgroundColor,
-      shadowColor: null,
-      borderOnForeground: false,
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: InkWell(
-        onTap: () {
-          if (!isAnime) return floatingSnackBar(context!, "Mangas/Novels arent supported");
-          if (shouldNavigate)
-            Navigator.of(context!)
-                .push(
-              MaterialPageRoute(
-                builder: (context) => Info(
-                  id: id,
-                ),
-              ),
-            )
-                .then((val) {
-              if (afterNavigation != null) afterNavigation();
-            });
-        },
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-        splashFactory: NoSplash.splashFactory,
-        focusColor: appTheme.textSubColor,
-        child: Container(
-          alignment: Alignment.center,
-          width: 120,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Container(
-                margin: EdgeInsets.only(bottom: 10),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                // clipBehavior: Clip.hardEdge,
-                height: 165,
-                width: 110,
-                child: Stack(
-                  children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      clipBehavior: Clip.hardEdge,
-                      child: CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.cover,
-                        height: 165,
-                        width: 110,
-                        fadeInCurve: Curves.easeIn,
-                        fadeInDuration: Duration(milliseconds: 200),
-                        placeholder: (context, url) => Container(
-                          color: appTheme.backgroundSubColor,
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.bottomRight,
-                      child: Container(
-                        padding: EdgeInsets.only(left: 5, top: 2, bottom: 2, right: 5),
-                        height: 25,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          color: appTheme.accentColor.withValues(alpha: 0.9),
-                          borderRadius: BorderRadius.only(
-                            bottomRight: Radius.circular(17),
-                            topLeft: Radius.circular(20),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(right: 3),
-                              child: Icon(
-                                Icons.star,
-                                size: 13,
-                                color: appTheme.onAccent, 
-                                // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor
-                              ),
-                            ),
-                            Text(
-                              "${rating ?? "??"}",
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                fontFamily: "NotoSans",
-                                color: appTheme.onAccent, 
-                                //(currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    if (ongoing)
-                      Align(
-                        alignment: Alignment.topLeft,
-                        child: Container(
-                          width: 16,
-                          height: 16,
-                          decoration: BoxDecoration(
-                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
-                              borderRadius: BorderRadius.circular(100),
-                              color: Color.fromARGB(255, 40, 209, 46),
-                              border: Border.all(color: Colors.black, width: 2)),
-                        ),
-                      ),
-                  ],
-                  // ),
-                  // : Container(
-                  //     decoration: BoxDecoration(
-                  //       borderRadius: BorderRadius.circular(20),
-                  //     ),
-                  //     clipBehavior: Clip.hardEdge,
-                  //     child: CachedNetworkImage(
-                  //       imageUrl: imageUrl,
-                  //       fit: BoxFit.cover,
-                  //       height: 165,
-                  //       width: 110,
-                  //       fadeInCurve: Curves.easeIn,
-                  //       fadeInDuration: Duration(milliseconds: 200),
-                  //       placeholder: (context, url) => Container(color: appTheme.backgroundSubColor,),
-                  //     ),
-                  //   ),
-                ),
-              ),
-              Padding(
-                padding: EdgeInsets.only(right: 5, bottom: subText == null ? 0 : 5),
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      color: appTheme.textMainColor,
-                      fontFamily: 'NotoSans',
-                      fontWeight: FontWeight.w600,
-                      fontSize: 14,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    maxLines: 2,
-                    textAlign: TextAlign.left,
-                  ),
-                ),
-              ),
-              if (subText != null)
-                Text(
-                  subText,
-                  style: TextStyle(
-                    color: appTheme.textSubColor,
-                    fontFamily: 'NotoSans',
-                    fontSize: 12,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-            ],
-          ),
-        ),
-      ),
+    return AnimeCard(
+      // context: context,
+      id: id,
+      title: title,
+      imageUrl: imageUrl,
+      afterNavigation: afterNavigation,
+      ongoing: ongoing,
+      shouldNavigate: shouldNavigate,
+      isAnime: isAnime,
+      subText: subText,
+      rating: rating,
     );
   }
 
@@ -427,7 +272,8 @@ class Cards {
                                   width: 52,
                                   padding: EdgeInsets.all(5),
                                   decoration: BoxDecoration(
-                                      color: appTheme.accentColor.withValues(alpha: 0.8), borderRadius: BorderRadius.circular(10)),
+                                      color: appTheme.accentColor.withValues(alpha: 0.8),
+                                      borderRadius: BorderRadius.circular(10)),
                                   child: Row(
                                     crossAxisAlignment: CrossAxisAlignment.center,
                                     children: [
@@ -442,7 +288,7 @@ class Cards {
                                         child: Text(
                                           "$rating",
                                           style: TextStyle(
-                                            color:appTheme.onAccent,
+                                            color: appTheme.onAccent,
                                             //  (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
                                             fontFamily: "NotoSans",
                                             fontWeight: FontWeight.w600,
@@ -459,8 +305,7 @@ class Cards {
                                   padding: const EdgeInsets.only(left: 13, right: 13),
                                   child: Text(
                                     '•',
-                                    style: TextStyle(fontSize: 17,
-                                    color: Theme.of(context!).colorScheme.secondary),
+                                    style: TextStyle(fontSize: 17, color: Theme.of(context!).colorScheme.secondary),
                                   ),
                                 ),
                                 Container(
@@ -496,6 +341,231 @@ class Cards {
                   ],
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class AnimeCard extends StatefulWidget {
+  final int id;
+  final String title;
+  final String imageUrl;
+  final bool ongoing;
+  final bool shouldNavigate;
+  final bool isAnime;
+  final String? subText;
+  final double? rating;
+  final void Function()? afterNavigation;
+
+  const AnimeCard({
+    super.key,
+    required this.id,
+    required this.title,
+    required this.afterNavigation,
+    required this.imageUrl,
+    this.isAnime = true,
+    this.ongoing = false,
+    this.rating = null,
+    this.shouldNavigate = true,
+    this.subText = null,
+  });
+
+  @override
+  State<AnimeCard> createState() => _AnimeCardState();
+}
+
+class _AnimeCardState extends State<AnimeCard> {
+
+  bool isFocused = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      color: appTheme.backgroundColor,
+      shadowColor: null,
+      borderOnForeground: false,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+      // clipBehavior: Clip.hardEdge,
+      child: InkWell(
+        onFocusChange: (value) {
+          setState(() {
+            isFocused = value;
+          });
+        },
+        onTap: () {
+          if (!widget.isAnime) return floatingSnackBar(context, "Mangas/Novels arent supported");
+          if (widget.shouldNavigate)
+            Navigator.of(context)
+                .push(
+              MaterialPageRoute(
+                builder: (context) => Info(
+                  id: widget.id,
+                ),
+              ),
+            )
+                .then((val) {
+              if (widget.afterNavigation != null) {
+                widget.afterNavigation!();
+              }
+            });
+        },
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
+        focusColor: Colors.transparent,
+        hoverColor: Colors.transparent,
+        onHover: (value) => setState(() {
+          isFocused = value;
+        }) ,
+        child: Container(
+          alignment: Alignment.center,
+          width: 125,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                margin: EdgeInsets.only(bottom: 10),
+                // decoration: BoxDecoration(
+                  // borderRadius: BorderRadius.circular(20),
+                // ),
+                // clipBehavior: Clip.hardEdge,
+                height: 180,
+                width: 125,
+                child: Stack(
+                  children: [
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 50),
+                      curve: Curves.easeIn,
+                      decoration: BoxDecoration(
+                        border: isFocused ? Border.all(color: appTheme.accentColor, width: 2, strokeAlign: BorderSide.strokeAlignOutside) : null,
+                        borderRadius: BorderRadius.circular(isFocused ? 10 : 20),
+                      ),
+                      height: isFocused ? 177 : 165,
+                        width: isFocused ? 116 : 110,
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(isFocused ? 10 : 20),
+                        child: CachedNetworkImage(
+                          imageUrl: widget.imageUrl,
+                          fit: BoxFit.cover,
+                          fadeInCurve: Curves.easeIn,
+                          fadeInDuration: const Duration(milliseconds: 200),
+                          placeholder: (context, url) => Container(
+                            color: appTheme.backgroundSubColor,
+                          ),
+                        ),
+                      ),
+                    ),
+                    AnimatedPositioned(
+                      duration: const Duration(milliseconds: 200),
+                      bottom: isFocused ? 7 : 5,
+                      right: isFocused ? 7 : 5,
+                      // alignment: Alignment.bottomRight,
+                      child: Container(
+                        padding: const EdgeInsets.only(left: 5, top: 2, bottom: 2, right: 5),
+                        height: 25,
+                        width: 50,
+                        decoration: BoxDecoration(
+                          color: appTheme.accentColor.withValues(alpha: 0.9),
+                          borderRadius: isFocused ? BorderRadius.circular(7): BorderRadius.only(
+                            bottomRight: Radius.circular(17),
+                            topLeft: Radius.circular(20),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(right: 3),
+                              child: Icon(
+                                Icons.star,
+                                size: 13,
+                                color: appTheme.onAccent,
+                                // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor
+                              ),
+                            ),
+                            Text(
+                              "${widget.rating ?? "??"}",
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
+                                fontFamily: "NotoSans",
+                                color: appTheme.onAccent,
+                                //(currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    if (widget.ongoing)
+                      Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          width: 16,
+                          height: 16,
+                          decoration: BoxDecoration(
+                              boxShadow: <BoxShadow>[BoxShadow(color: Colors.green, spreadRadius: 2)],
+                              borderRadius: BorderRadius.circular(100),
+                              color: Color.fromARGB(255, 40, 209, 46),
+                              border: Border.all(color: Colors.black, width: 2)),
+                        ),
+                      ),
+                  ],
+                  // ),
+                  // : Container(
+                  //     decoration: BoxDecoration(
+                  //       borderRadius: BorderRadius.circular(20),
+                  //     ),
+                  //     clipBehavior: Clip.hardEdge,
+                  //     child: CachedNetworkImage(
+                  //       imageUrl: imageUrl,
+                  //       fit: BoxFit.cover,
+                  //       height: 165,
+                  //       width: 110,
+                  //       fadeInCurve: Curves.easeIn,
+                  //       fadeInDuration: Duration(milliseconds: 200),
+                  //       placeholder: (context, url) => Container(color: appTheme.backgroundSubColor,),
+                  //     ),
+                  //   ),
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.only(right: 5, bottom: widget.subText == null ? 0 : 5),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.title,
+                    style: TextStyle(
+                      color: appTheme.textMainColor,
+                      fontFamily: 'NotoSans',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 2,
+                    textAlign: TextAlign.left,
+                  ),
+                ),
+              ),
+              if (widget.subText != null)
+                Text(
+                  widget.subText!,
+                  style: TextStyle(
+                    color: appTheme.textSubColor,
+                    fontFamily: 'NotoSans',
+                    fontSize: 12,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
             ],
           ),
         ),

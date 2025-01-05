@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/cards.dart';
 import 'package:animestream/ui/models/header.dart';
@@ -330,7 +331,7 @@ class _DiscoverState extends State<Discover> {
 
   Container _scrollList(List<AnimeCard> list) {
     return Container(
-      height: (list[0].isMobile) ? 220 : 240,
+      height: (list[0].isMobile) ? 220 : 265,
       padding: EdgeInsets.only(left: 10, right: 10),
       child: list.length > 0
           ? ListView.builder(

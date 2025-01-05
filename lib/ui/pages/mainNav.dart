@@ -198,6 +198,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   void rebuildCards() {
     recentlyUpdatedList.clear();
 
+    final isMobile = !tv && isAndroid;
+
     recentlyUpdatedListData.forEach((elem) {
       recentlyUpdatedList.add(
         Cards(context: context).animeCard(
@@ -205,7 +207,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           elem.title['english'] ?? elem.title['romaji'] ?? '',
           elem.cover,
           rating: (elem.rating ?? 0) / 10,
-          isMobile: !tv && isAndroid,
+          isMobile: isMobile,
         ),
       );
     });
@@ -217,7 +219,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
         rating: item.rating,
-        isMobile: !tv && isAndroid 
+        isMobile: isMobile
       ));
     });
 
@@ -228,7 +230,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
         rating: item.rating,
-        isMobile: !tv && isAndroid
+        isMobile: isMobile
       ));
     });
 
@@ -253,6 +255,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           item.title['english'] ?? item.title['romaji'] ?? '',
           item.cover,
           rating: item.rating,
+          isMobile: !tv && isAndroid,
         ),
       );
     }
@@ -273,6 +276,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             elem.title['english'] ?? elem.title['romaji'] ?? '',
             elem.cover,
             rating: (elem.rating ?? 0) / 10,
+            isMobile: !tv && isAndroid,
           ),
         );
       }

@@ -208,6 +208,8 @@ class Downloader {
       }
       print("[DOWNLOADER] succesfully written the file to disk");
 
+      cancelDownload(downloadId); //remove the download from the active list
+
       await out.close();
     } catch (err) {
       print(err);
@@ -233,10 +235,24 @@ class Downloader {
     }
     final totalSize = res.contentLength ?? -1;
     int downloadedBytes = 0;
-    final sink = File(filepath).openWrite();
+    final file = File(filepath);
+    final sink = file.openWrite();
     int lastProgress = 0;
 
-    await res.stream.listen((chunk) {
+    StreamSubscription<List<int>>? subscription;
+
+    subscription = res.stream.listen((chunk) {
+      if(downloadQueue.where((it) => it.id == downloadId).firstOrNull == null) {
+        subscription?.cancel();
+        sink.close();
+        file.deleteSync();
+        NotificationService().pushBasicNotification(
+            downloadId,
+            "Download Cancelled",
+            "The download ($fileName) has been cancelled.",
+          ); 
+        return;
+      }
       sink.add(chunk);
       downloadedBytes += chunk.length;
 
@@ -258,10 +274,12 @@ class Downloader {
     }, onDone: () async {
       await sink.close();
       print("[DOWNLOADER] succesfully written the file to disk");
+      cancelDownload(downloadId);
     }, onError: (err) {
       print(err);
       NotificationService()
           .pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
+      cancelDownload(downloadId);
     });
   }
 

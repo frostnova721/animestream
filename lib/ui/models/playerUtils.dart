@@ -1,7 +1,7 @@
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 
-BetterPlayerDataSource dataSourceConfig(String url) {
+BetterPlayerDataSource dataSourceConfig(String url, { Map<String, String>? headers = null}) {
   return BetterPlayerDataSource(
     BetterPlayerDataSourceType.network,
     url,
@@ -13,6 +13,7 @@ BetterPlayerDataSource dataSourceConfig(String url) {
       maxCacheFileSize: 50 * 1024 * 1024,
       maxCacheSize: 50 * 1024 * 1024,
     ),
+    headers: headers,
     placeholder: Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,

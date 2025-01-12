@@ -9,6 +9,7 @@ class Stream {
   final SubtitleFormat? subtitleFormat;
   final String server;
   final bool backup;
+  final Map<String, String>? customHeaders;
 
   Stream(
       {required this.quality,
@@ -17,7 +18,9 @@ class Stream {
       required this.server,
       required this.backup,
       this.subtitleFormat = null,
-      this.subtitle = null});
+      this.subtitle = null, 
+      this.customHeaders = null,
+      });
 }
 
 class ServerSelectionBottomSheetContentData {

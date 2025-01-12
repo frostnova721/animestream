@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/subtitleParsers.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 
-enum SubtitleFormat { ASS }
+enum SubtitleFormat { ASS, VTT }
 
 class Subtitle {
   final Duration start;
@@ -197,6 +197,8 @@ class _SubViewerState extends State<SubViewer> {
       switch (widget.format) {
         case SubtitleFormat.ASS:
           subs = await Subtitleparsers().parseAss(widget.subtitleSource);
+          case SubtitleFormat.VTT:
+          subs = await Subtitleparsers().parseVtt(widget.subtitleSource);
         // default:
         // throw Exception("Not implemented!");
       }

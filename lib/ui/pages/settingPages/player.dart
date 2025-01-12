@@ -165,6 +165,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     min: 20,
                                   ),
                                 ),
+                               
                               ],
                             ),
                           ),

@@ -140,7 +140,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> playVideo(String url) async {
-    await controller.setupDataSource(dataSourceConfig(url));
+    await controller.setupDataSource(dataSourceConfig(url, headers: info.streamInfo.customHeaders));
     setState(() {
       initialised = true;
     });

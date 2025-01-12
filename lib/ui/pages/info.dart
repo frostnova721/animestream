@@ -94,24 +94,24 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     try {
-      if(currentUserSettings?.database == Databases.anilist) {
-      //fetch ids from simkl and save em
-      try {
-      DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
-        if(res.isEmpty) return;
-        DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id).then((r) {
-          final s = altDatabases.toSet();
-          r.alternateDatabases.forEach((it) {
-            s.add(it);
+      if (currentUserSettings?.database == Databases.anilist) {
+        //fetch ids from simkl and save em
+        try {
+          DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
+            if (res.isEmpty) return;
+            DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id).then((r) {
+              final s = altDatabases.toSet();
+              r.alternateDatabases.forEach((it) {
+                s.add(it);
+              });
+              altDatabases = s.toList();
+            });
           });
-          altDatabases = s.toList();
-        });
-      });
-      } catch(err) {
-        if(currentUserSettings?.showErrors ?? false) {
-          floatingSnackBar(context, "Couldnt fetch simkl data");
+        } catch (err) {
+          if (currentUserSettings?.showErrors ?? false) {
+            floatingSnackBar(context, "Couldnt fetch simkl data");
+          }
         }
-      }
       }
 
       final info = await DatabaseHandler().getAnimeInfo(id);
@@ -294,11 +294,9 @@ class _InfoState extends State<Info> {
               ),
             )
           : dataLoaded
-              ? SingleChildScrollView(
-                  child: Padding(
-                    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
+              ? CustomScrollView(
+                  slivers: [
+                    SliverList.list(
                       children: [
                         _stack(),
                         Container(
@@ -404,7 +402,7 @@ class _InfoState extends State<Info> {
                         ),
                       ],
                     ),
-                  ),
+                  ],
                 )
               : Center(
                   child: CircularProgressIndicator(
@@ -929,9 +927,8 @@ class _InfoState extends State<Info> {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: MediaQuery.orientationOf(context) == Orientation.portrait ? 1 : 2,
           childAspectRatio: 3.2,
-          mainAxisSpacing: 0, 
-          mainAxisExtent: 110
-          ),
+          mainAxisSpacing: 0,
+          mainAxisExtent: 110),
       padding: EdgeInsets.only(top: 0, bottom: 15),
       itemCount: visibleEpList[currentPageIndex].length,
       shrinkWrap: true,
@@ -1368,6 +1365,7 @@ class _InfoState extends State<Info> {
                     padding: EdgeInsets.all(20),
                     child: Column(
                       children: [
+                        Text("${data.title['english'] ?? data.title['romaji']} - Banner", style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 20),),
                         Image.network(
                           img,
                           height: 250,

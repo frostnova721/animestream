@@ -106,7 +106,7 @@ class SimklInfo extends DatabaseInfo {
         type: json['anime_type'],
         duration: "${json['runtime']} min",
         cover: Simkl.imageLink(json['poster']),
-        rating: json['ratings']['simkl']['rating'].toDouble(),
+        rating: json['ratings']?['simkl']['rating']?.toDouble() ?? 0,
         genres: List<String>.from(json['genres']),
         recommended:
             (json['users_recommendations'] as List?)?.map((rec) => SimklRelatedRecommendation.fromJson(rec)).toList() ?? [],

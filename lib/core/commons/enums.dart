@@ -1,7 +1,4 @@
-enum SettingKey {
-  megaSkipDuration,
-  skipDuration
-}
+enum SettingKey { megaSkipDuration, skipDuration }
 
 enum RequestType { recentlyUpdatedAnime, media, mutate }
 
@@ -10,6 +7,8 @@ enum Type { watch, download }
 enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }
 
 enum SortType { AtoZ, RecentlyUpdated, TopRated }
+
+enum EpisodeViewModes { tile, grid, list }
 
 enum HiveKey {
   manualSearches,
@@ -23,7 +22,7 @@ enum HiveKey {
   token,
 }
 
-enum SecureStorageKey { 
+enum SecureStorageKey {
   //tokens
   simklToken("simkl_token"),
   anilistToken("anilist_token"),
@@ -34,7 +33,7 @@ enum SecureStorageKey {
 
   //codes
   malChallengeVerifier("mal_challenge_verifier");
- 
+
   final String value;
 
   const SecureStorageKey(this.value);

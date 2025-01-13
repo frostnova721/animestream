@@ -56,9 +56,9 @@ class _InfoState extends State<Info> {
 
   int currentPageIndex = 0;
   int watched = 1;
+  int viewModeIndexLength = 3;
 
   bool showBar = false;
-  bool gridMode = false;
   bool started = false;
   bool _epSearcherror = false;
   bool loggedIn = false;
@@ -66,9 +66,11 @@ class _InfoState extends State<Info> {
   bool infoPage = true;
   bool infoLoadError = false;
 
+  int viewMode = 0;
+
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences().getUserPreferences();
-    gridMode = preferences.episodeGridView ?? false;
+    viewMode = UserPreferencesModal.getViewModeIndex(preferences.episodesViewMode ?? EpisodeViewModes.tile);
 
     //load TV stuff
     if (await isTv()) {
@@ -412,6 +414,32 @@ class _InfoState extends State<Info> {
     );
   }
 
+  IconData viewModeIcon() {
+    switch (viewMode) {
+      case 0:
+        return Icons.grid_view_rounded;
+      case 1:
+        return Icons.view_module_rounded;
+      case 2:
+        return Icons.view_list_rounded;
+      default:
+        throw Exception("Unknown Index For Icon");
+    }
+  }
+
+  GridView viewModeWidget() {
+    switch (viewMode) {
+      case 0:
+        return _episodes();
+      case 1:
+        return _episodesGrid();
+      case 2:
+        return _episodeTiles();
+      default:
+        throw Exception("Unknown Index For Icon");
+    }
+  }
+
   Column _watchItems(BuildContext context) {
     return Column(
       children: [
@@ -504,16 +532,18 @@ class _InfoState extends State<Info> {
                           Padding(
                             padding: const EdgeInsets.only(right: 10),
                             child: IconButton(
-                              tooltip: gridMode ? "switch to list view" : "switch to grid view",
+                              tooltip:
+                                  "switch to ${UserPreferencesModal.getViewModeEnum((viewMode + 1) % viewModeIndexLength).name} view",
                               onPressed: () {
                                 setState(() {
-                                  gridMode = !gridMode;
-                                  UserPreferences()
-                                      .saveUserPreferences(UserPreferencesModal(episodeGridView: gridMode));
+                                  viewMode = (viewMode + 1) % viewModeIndexLength;
+                                  print(viewMode);
+                                  UserPreferences().saveUserPreferences(UserPreferencesModal(
+                                      episodesViewMode: UserPreferencesModal.getViewModeEnum(viewMode)));
                                 });
                               },
                               icon: Icon(
-                                gridMode ? Icons.view_list_rounded : Icons.grid_view_rounded,
+                                viewModeIcon(),
                               ),
                               color: appTheme.textMainColor,
                               iconSize: 28,
@@ -554,7 +584,7 @@ class _InfoState extends State<Info> {
                             _pages(),
                             AnimatedSwitcher(
                               duration: Duration(milliseconds: 400),
-                              child: gridMode ? _episodesGrid() : _episodes(),
+                              child: viewModeWidget(),
                             ),
                           ],
                         )
@@ -788,6 +818,109 @@ class _InfoState extends State<Info> {
         ),
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
+      ),
+    );
+  }
+
+  GridView _episodeTiles() {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 5 : 10,
+      ),
+      shrinkWrap: true,
+      itemCount: visibleEpList[currentPageIndex].length,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.all(10),
+      itemBuilder: (context, index) => GestureDetector(
+        onLongPress: () {
+          showModalBottomSheet(
+              showDragHandle: true,
+              context: context,
+              builder: (ctx) => Container(
+                    padding: EdgeInsets.only(left: 20, right: 20, bottom: MediaQuery.paddingOf(ctx).bottom),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(
+                        Type.values.length,
+                        (ind) => Container(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: appTheme.accentColor,
+                              foregroundColor: appTheme.backgroundColor,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                            ),
+                            onPressed: () async {
+                              Navigator.of(ctx).pop();
+                              showModalBottomSheet(
+                                showDragHandle: true,
+                                isScrollControlled: true,
+                                context: context,
+                                backgroundColor: appTheme.modalSheetBackgroundColor,
+                                builder: (BuildContext context) {
+                                  return ServerSelectionBottomSheet(
+                                    altDatabases: altDatabases,
+                                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                                      epLinks: epLinks,
+                                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                      selectedSource: selectedSource,
+                                      title: data.title['english'] ?? data.title['romaji'] ?? '',
+                                      id: widget.id,
+                                      cover: data.cover,
+                                    ),
+                                    type: Type.values[ind],
+                                    getWatched: getWatched,
+                                  );
+                                },
+                              );
+                            },
+                            child: Text(
+                              Type.values[ind].name,
+                              style: TextStyle(fontFamily: "Poppins", fontSize: 18),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ));
+        },
+        onTap: () {
+          showModalBottomSheet(
+              showDragHandle: true,
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: appTheme.modalSheetBackgroundColor,
+              builder: (context) {
+                return ServerSelectionBottomSheet(
+                  altDatabases: altDatabases,
+                  bottomSheetContentData: ServerSelectionBottomSheetContentData(
+                      totalEpisodes: data.episodes,
+                      epLinks: epLinks,
+                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                      selectedSource: selectedSource,
+                      title: data.title['english'] ?? data.title['romaji'] ?? '',
+                      id: widget.id,
+                      cover: data.cover),
+                  type: Type.watch,
+                  getWatched: getWatched,
+                );
+              }).then((val) {
+            if (val == true) {
+              refreshListStatus("CURRENT", watched);
+            }
+          });
+        },
+        child: Container(
+          clipBehavior: Clip.hardEdge,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: appTheme.backgroundColor,
+          ),
+          padding: EdgeInsets.all(7),
+          margin: EdgeInsets.all(3),
+          alignment: Alignment.center,
+          child: Text("${index + 1}"),
+        ),
       ),
     );
   }
@@ -1365,7 +1498,10 @@ class _InfoState extends State<Info> {
                     padding: EdgeInsets.all(20),
                     child: Column(
                       children: [
-                        Text("${data.title['english'] ?? data.title['romaji']} - Banner", style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 20),),
+                        Text(
+                          "${data.title['english'] ?? data.title['romaji']} - Banner",
+                          style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
                         Image.network(
                           img,
                           height: 250,

@@ -1,3 +1,4 @@
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/subtitles.dart';
@@ -18,6 +19,7 @@ class SettingsModal {
   final String? downloadPath;
   final Databases? database;
   final bool? enableSuperSpeeds;
+  final bool? useQueuedDownloads;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -35,6 +37,7 @@ class SettingsModal {
     this.downloadPath,
     this.database,
     this.enableSuperSpeeds,
+    this.useQueuedDownloads
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -54,6 +57,7 @@ class SettingsModal {
       downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download/animestream',
       database: DatabaseFromString.getDb(map['database'] ?? "anilist"),
       enableSuperSpeeds: map['enableSuperSpeeds'] ?? false,
+      useQueuedDownloads: map['useQueuedDownloads'] ?? false,
     );
   }
 
@@ -74,27 +78,52 @@ class SettingsModal {
       'downloadPath': downloadPath,
       'database': database?.name,
       'enableSuperSpeeds': enableSuperSpeeds,
+      'useQueuedDownloads': useQueuedDownloads,
     };
   }
 }
 
 class UserPreferencesModal {
-  final bool? episodeGridView;
+  final EpisodeViewModes? episodesViewMode;
   final SubtitleSettings? subtitleSettings;
 
-  UserPreferencesModal({this.episodeGridView, this.subtitleSettings});
+  UserPreferencesModal({this.episodesViewMode, this.subtitleSettings});
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(
-      episodeGridView: map['episodeGridView'] ?? false,
+      episodesViewMode: getViewModeEnum(map['episodesViewMode'] ?? 0),
       subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings'] ?? SubtitleSettings().toMap()),
     );
   }
 
   Map<dynamic, dynamic> toMap() {
     return {
-      'episodeGridView': episodeGridView ?? false,
+      'episodesViewMode': getViewModeIndex(episodesViewMode ?? EpisodeViewModes.list),
       'subtitleSettings': subtitleSettings?.toMap() ?? SubtitleSettings().toMap(),
     };
+  }
+
+  static EpisodeViewModes getViewModeEnum(int modeIndex) {
+    switch (modeIndex) {
+      case 0:
+        return EpisodeViewModes.list;
+      case 1:
+        return EpisodeViewModes.grid;
+      case 2:
+        return EpisodeViewModes.tile;
+      default:
+        throw Exception("Unknown index for episode view mode enum");
+    }
+  }
+
+  static int getViewModeIndex(EpisodeViewModes mode) {
+    switch (mode) {
+      case EpisodeViewModes.tile:
+        return 2;
+      case EpisodeViewModes.grid:
+        return 1;
+      case EpisodeViewModes.list:
+        return 0;
+    }
   }
 }

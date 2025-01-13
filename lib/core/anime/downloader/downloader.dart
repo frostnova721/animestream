@@ -1,4 +1,5 @@
 import "dart:async";
+import "dart:collection";
 import "dart:io";
 import "dart:typed_data";
 
@@ -14,9 +15,10 @@ import "package:animestream/core/commons/utils.dart";
 import "package:animestream/ui/models/notification.dart";
 import "package:animestream/ui/models/snackBar.dart";
 
-List<DownloadingItem> downloadQueue = [];
-
 class Downloader {
+  //list of downloading items
+  static List<DownloadingItem> downloadItems = [];
+
   // check for storage permission and request for permission if permission isnt granted
   Future<bool> checkPermission() async {
     if (Platform.isWindows) return true;
@@ -57,11 +59,13 @@ class Downloader {
   }
 
   void cancelDownload(int id) {
-    downloadQueue.removeWhere((item) => item.id == id);
+    Downloader.downloadItems.removeWhere((item) => item.id == id);
   }
 
   int generateId() {
-    int maxId = downloadQueue.isNotEmpty ? downloadQueue.map((item) => item.id).reduce((a, b) => a > b ? a : b) : 0;
+    int maxId = Downloader.downloadItems.isNotEmpty
+        ? Downloader.downloadItems.map((item) => item.id).reduce((a, b) => a > b ? a : b)
+        : 0;
     return maxId + 1;
   }
 
@@ -71,16 +75,21 @@ class Downloader {
       showToast("Permission denied! Grant access to storage");
       throw Exception("Couldnt download image due to lack of permission!");
     }
+
     final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream';
     final downPath = await Directory(basePath);
+
     String finalPath;
+
     final fileExtension = imageUrl.split('/').last.split(".").last.trim();
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
+
     if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
+
       finalPath = '${downPath.path}/${fileName}.${fileExtension}';
     } else {
       final externalStorage = await getExternalStorageDirectory();
@@ -88,6 +97,7 @@ class Downloader {
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
+
       finalPath = "${externalStorage?.path}/${fileName}.${fileExtension}";
     }
     try {
@@ -95,6 +105,7 @@ class Downloader {
 
       final imageData = (await get(Uri.parse(imageUrl))).bodyBytes;
       await out.writeAsBytes(imageData);
+
       print("saved to ${out.path}");
       return;
     } catch (err) {
@@ -112,12 +123,15 @@ class Downloader {
 
     final downPath = await Directory(basePath);
     String finalPath;
+
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
+
     if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
+
       finalPath = '$basePath/${fileName}.mp4';
     } else {
       final externalStorage = await getExternalStorageDirectory();
@@ -125,6 +139,7 @@ class Downloader {
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
+
       finalPath = "${externalStorage?.path}/${fileName}.mp4";
     }
 
@@ -133,7 +148,7 @@ class Downloader {
 
     //generate an id for the downloading item and add it to the queue(list)
     final downloadId = generateId();
-    downloadQueue.add(DownloadingItem(id: downloadId, downloading: true));
+    Downloader.downloadItems.add(DownloadingItem(id: downloadId, downloading: true));
 
     if (!streamLink.contains(".m3u8")) {
       return await downloadMp4(streamLink, finalPath, fileName, downloadId);
@@ -152,7 +167,7 @@ class Downloader {
       final parallelDownloadsBatchSize = parallelBatches;
 
       for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
-        final downloading = downloadQueue.where((item) => item.id == downloadId).firstOrNull;
+        final downloading = Downloader.downloadItems.where((item) => item.id == downloadId).firstOrNull;
 
         //send cancelled notification and clear the buffer
         if (downloading == null) {
@@ -242,15 +257,15 @@ class Downloader {
     StreamSubscription<List<int>>? subscription;
 
     subscription = res.stream.listen((chunk) {
-      if(downloadQueue.where((it) => it.id == downloadId).firstOrNull == null) {
+      if (Downloader.downloadItems.where((it) => it.id == downloadId).firstOrNull == null) {
         subscription?.cancel();
         sink.close();
         file.deleteSync();
         NotificationService().pushBasicNotification(
-            downloadId,
-            "Download Cancelled",
-            "The download ($fileName) has been cancelled.",
-          ); 
+          downloadId,
+          "Download Cancelled",
+          "The download ($fileName) has been cancelled.",
+        );
         return;
       }
       sink.add(chunk);

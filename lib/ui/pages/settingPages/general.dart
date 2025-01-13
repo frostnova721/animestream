@@ -31,6 +31,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
       showErrorsButtonState = settings.showErrors!;
       receivePreReleases = settings.receivePreReleases!;
       fasterDownloads = settings.fasterDownloads!;
+      useQueuedDownloads = settings.useQueuedDownloads!;
     });
   }
 
@@ -45,6 +46,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool showErrorsButtonState = false;
   bool receivePreReleases = false;
   bool fasterDownloads = false;
+  bool useQueuedDownloads = false;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +87,12 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       });
                       writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
                     }, description: "*download 2x items per batch"),
+                    toggleItem("Queued Downloads", useQueuedDownloads,description: "Download items one by one" ,() {
+                      setState(() {
+                        useQueuedDownloads = !useQueuedDownloads;
+                        writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
+                      });
+                    }),
                     InkWell(
                       onTap: () async {
                         String? dir;

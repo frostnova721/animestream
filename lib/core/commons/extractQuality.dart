@@ -1,4 +1,4 @@
-import 'package:animestream/core/commons/utils.dart';
+import 'package:http/http.dart';
 
 String _makeBaseLink(String uri) {
   final split = uri.split('/');
@@ -6,9 +6,9 @@ String _makeBaseLink(String uri) {
   return split.join('/');
 }
 
-Future<List<Map<String, String>>> getQualityStreams(String streamUrl) async {
+Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<String, String>? customHeader = null}) async {
   try {
-  final content = await fetch(streamUrl);
+  final content = (await get(Uri.parse(streamUrl), headers: customHeader)).body;
 
   List<String> links = [];
   List<String> resolutions = [];

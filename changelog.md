@@ -4,6 +4,8 @@
 
 - Animations for cards on focus (might need to remove after checking performance)
 - New source: gojo (gojo.wtf)
+- Added queued downloading (suggestion from #12)
+- Minor UI changes
 
 ## Fixes
 

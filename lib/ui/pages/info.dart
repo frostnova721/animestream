@@ -537,7 +537,6 @@ class _InfoState extends State<Info> {
                               onPressed: () {
                                 setState(() {
                                   viewMode = (viewMode + 1) % viewModeIndexLength;
-                                  print(viewMode);
                                   UserPreferences().saveUserPreferences(UserPreferencesModal(
                                       episodesViewMode: UserPreferencesModal.getViewModeEnum(viewMode)));
                                 });
@@ -846,10 +845,9 @@ class _InfoState extends State<Info> {
                           width: double.infinity,
                           child: ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: appTheme.accentColor,
-                              foregroundColor: appTheme.backgroundColor,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
-                            ),
+                                backgroundColor: appTheme.accentColor,
+                                foregroundColor: appTheme.backgroundColor,
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                             onPressed: () async {
                               Navigator.of(ctx).pop();
                               showModalBottomSheet(
@@ -919,7 +917,13 @@ class _InfoState extends State<Info> {
           padding: EdgeInsets.all(7),
           margin: EdgeInsets.all(3),
           alignment: Alignment.center,
-          child: Text("${index + 1}"),
+          child: Text(
+            "${index + 1}",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16
+            ),
+          ),
         ),
       ),
     );

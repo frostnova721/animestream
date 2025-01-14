@@ -19,6 +19,9 @@ class Downloader {
   //list of downloading items
   static List<DownloadingItem> downloadItems = [];
 
+  //queue of downloading items
+  static Queue<DownloadingItem> downloadQueue = Queue();
+
   // check for storage permission and request for permission if permission isnt granted
   Future<bool> checkPermission() async {
     if (Platform.isWindows) return true;
@@ -60,6 +63,7 @@ class Downloader {
 
   void cancelDownload(int id) {
     Downloader.downloadItems.removeWhere((item) => item.id == id);
+    Downloader.downloadQueue.removeWhere((item) => item.id == id);
   }
 
   int generateId() {
@@ -113,12 +117,61 @@ class Downloader {
     }
   }
 
-  Future<void> download(String streamLink, String fileName, {int retryAttempts = 5, int parallelBatches = 5}) async {
-    final permission = await checkPermission();
-    if (!permission) {
-      throw new Exception("ERR_NO_STORAGE_PERMISSION");
-    }
+  Future<void> addToQueue(
+    String streamLink,
+    String fileName, {
+    int retryAttempts = 5,
+    int parallelBatches = 5,
+  }) async {
+    final id = generateId();
+    final downloadItem = DownloadingItem(
+      id: id,
+      downloading: false,
+      streamLink: streamLink,
+      fileName: fileName,
+      retryAttempts: retryAttempts,
+      parallelBatches: parallelBatches,
+    );
 
+    downloadQueue.add(downloadItem);
+    print("[DOWNLOADER] Added download $id to queue. Queue size: ${downloadQueue.length}");
+
+    if (!downloadItems.any((item) => item.downloading)) {
+      _processQueue();
+    }
+  }
+
+  Future<void> _processQueue() async {
+    if (downloadQueue.isEmpty) return;
+
+    final item = downloadQueue.first;
+    downloadQueue.removeFirst();
+    downloadItems.add(DownloadingItem(id: item.id, downloading: true));
+    
+    try {
+      await download(
+        item.streamLink!,
+        item.fileName!,
+        retryAttempts: item.retryAttempts,
+        parallelBatches: item.parallelBatches,
+        id: item.id,
+      );
+    } catch (e) {
+      print("[DOWNLOADER] Error processing download ${item.id}: $e");
+    } finally {
+      print("Cancelling");
+      cancelDownload(item.id);
+      
+      // Process next item (if available)
+      if (downloadQueue.isNotEmpty) {
+        _processQueue();
+      }
+    }
+  
+    // _isProcessingQueue = false;
+  }
+
+  Future<String> makeDirectory({required String fileName, bool isImage = false, String? extension = null}) async {
     final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream';
 
     final downPath = await Directory(basePath);
@@ -126,29 +179,47 @@ class Downloader {
 
     fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
 
+    final ext = extension ?? (isImage ? "png" : "mp4");
+
+    final animeName = fileName.split("_").first;
+
     if (downPath.existsSync()) {
-      final directory = Directory("${downPath.path}/");
+      final directory = Directory("${downPath.path}/$animeName");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
 
-      finalPath = '$basePath/${fileName}.mp4';
+      finalPath = '$basePath/$animeName/$fileName.$ext';
     } else {
       final externalStorage = await getExternalStorageDirectory();
-      final directory = Directory("${externalStorage?.path}/");
+      final directory = Directory("${externalStorage?.path}/$animeName");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
 
-      finalPath = "${externalStorage?.path}/${fileName}.mp4";
+      finalPath = "${externalStorage?.path}/$animeName/$fileName.$ext";
     }
+
+    return finalPath;
+  }
+
+  Future<void> download(String streamLink, String fileName, {int retryAttempts = 5, int parallelBatches = 5, int? id = null}) async {
+    final permission = await checkPermission();
+    if (!permission) {
+      throw new Exception("ERR_NO_STORAGE_PERMISSION");
+    }
+
+    final finalPath = await makeDirectory(fileName: fileName, extension: "mp4");
 
     final output = File(finalPath);
     final List<BufferItem> buffers = [];
 
-    //generate an id for the downloading item and add it to the queue(list)
-    final downloadId = generateId();
+    // //generate an id for the downloading item and add it to the queue(list)
+    int? downloadId = id;
+    if(downloadId == null) {
+    downloadId = generateId();
     Downloader.downloadItems.add(DownloadingItem(id: downloadId, downloading: true));
+    }
 
     if (!streamLink.contains(".m3u8")) {
       return await downloadMp4(streamLink, finalPath, fileName, downloadId);
@@ -191,7 +262,7 @@ class Downloader {
           print("[DOWNLOADER]<${downloadId}> fetching segment [$segmentNumber/${segments.length - 1}]");
 
           NotificationService().updateNotificationProgressBar(
-            id: downloadId,
+            id: downloadId!,
             currentStep: segmentNumber,
             maxStep: segments.length - 1,
             fileName: "$fileName.mp4",
@@ -256,8 +327,10 @@ class Downloader {
 
     StreamSubscription<List<int>>? subscription;
 
+    final completer = Completer<void>();
+
     subscription = res.stream.listen((chunk) {
-      if (Downloader.downloadItems.where((it) => it.id == downloadId).firstOrNull == null) {
+      if ((downloadItems.where((it) => it.id == downloadId).firstOrNull) == null) {
         subscription?.cancel();
         sink.close();
         file.deleteSync();
@@ -266,7 +339,7 @@ class Downloader {
           "Download Cancelled",
           "The download ($fileName) has been cancelled.",
         );
-        return;
+        return completer.complete();
       }
       sink.add(chunk);
       downloadedBytes += chunk.length;
@@ -290,12 +363,16 @@ class Downloader {
       await sink.close();
       print("[DOWNLOADER] succesfully written the file to disk");
       cancelDownload(downloadId);
+      completer.complete();
     }, onError: (err) {
       print(err);
       NotificationService()
           .pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
       cancelDownload(downloadId);
+      completer.completeError(err);
     });
+
+    return completer.future;
   }
 
   //The enc key [im assuming AES for animepahe cus thats the only use case for this in this app rn]

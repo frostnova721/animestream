@@ -83,10 +83,10 @@ Future<List<String>> getAnimeEpisodes(String source, String link) async {
   // return episodeLinks;
 }
 
-Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link) async {
+Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link, { Map<String, String>? customHeaders = null}) async {
   // final qualities = await Vidstream().generateQualityStreams(link);
   if (!link.contains(".m3u8")) return [];
-  final qualities = await getQualityStreams(link);
+  final qualities = await getQualityStreams(link, customHeader: customHeaders);
   return qualities;
 }
 

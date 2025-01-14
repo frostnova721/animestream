@@ -37,35 +37,34 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
     streamSources = [];
     if (widget.type == Type.download && !directElseBlock) {
       try {
-      await
-        srcs.getDownloadSources(
-              widget.bottomSheetContentData.selectedSource,
-              widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex],
-              (list, finished) {
-                if (mounted)
-                  setState(() {
-                    if (finished) {
-                      _isLoading = widget.type == Type.download ? true : false;
-                    }
-                    streamSources = streamSources + list;
-                    if (widget.type == Type.download) {
-                      list.forEach((element) async {
-                        qualities.add({
-                          'link': element.link,
-                          'server': "${element.server}  ${element.backup ? "- backup" : ""}",
-                          'quality': "${element.quality}"
-                        });
-                      });
-                      if (mounted)
-                        setState(() {
-                          _isLoading = false;
-                        });
-                    }
+        await srcs.getDownloadSources(
+          widget.bottomSheetContentData.selectedSource,
+          widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex],
+          (list, finished) {
+            if (mounted)
+              setState(() {
+                if (finished) {
+                  _isLoading = widget.type == Type.download ? true : false;
+                }
+                streamSources = streamSources + list;
+                if (widget.type == Type.download) {
+                  list.forEach((element) async {
+                    qualities.add({
+                      'link': element.link,
+                      'server': "${element.server}  ${element.backup ? "- backup" : ""}",
+                      'quality': "${element.quality}"
+                    });
                   });
-              },
-            );
-      } catch(err) {
-        if(err is UnimplementedError) {
+                  if (mounted)
+                    setState(() {
+                      _isLoading = false;
+                    });
+                }
+              });
+          },
+        );
+      } catch (err) {
+        if (err is UnimplementedError) {
           getStreams(directElseBlock: true);
         }
       }
@@ -279,15 +278,27 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               ),
               child: ElevatedButton(
                 onPressed: () {
-                  Downloader()
-                      .download(qualities[ind]['link']!,
-                          "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}",
-                          parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
-                      .onError((err, st) {
-                    print(err);
-                    print(st);
-                    floatingSnackBar(context, "$err");
-                  });
+                  if (currentUserSettings?.useQueuedDownloads ?? false) {
+                    Downloader()
+                        .addToQueue(qualities[ind]['link']!,
+                            "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}",
+                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                        .onError((err, st) {
+                      print(err);
+                      print(st);
+                      floatingSnackBar(context, "$err");
+                    });
+                  } else {
+                    Downloader()
+                        .download(qualities[ind]['link']!,
+                            "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}",
+                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                        .onError((err, st) {
+                      print(err);
+                      print(st);
+                      floatingSnackBar(context, "$err");
+                    });
+                  }
                   Navigator.of(context).pop();
                   floatingSnackBar(context, "Downloading the episode to your downloads folder");
                 },

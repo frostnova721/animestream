@@ -117,7 +117,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           print(qualities);
           print("${info.streamInfo.subtitle ?? "no subs!"}");
           final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
-          changeQuality(preferredOne.length > 0 ? preferredOne[0]['link'] : qualities[0]['link'], null);
+          changeQuality(preferredOne.isNotEmpty ? preferredOne[0]['link'] : qualities[0]['link'], null);
         });
     } catch (err) {
       print(err.toString());
@@ -183,7 +183,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> getQualities({String? link}) async {
-    final List list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link);
+    final List list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link, customHeaders: info.streamInfo.customHeaders);
     if (mounted)
       setState(() {
         qualities = list;
@@ -552,7 +552,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             child: Column(
                               children: [
                                 Padding(
-                                  padding: const EdgeInsets.only(bottom: 10),
+                                  padding: const EdgeInsets.only(bottom: 20),
                                   child: Text(
                                     "Select Episode",
                                     style: textStyle().copyWith(fontSize: 23),
@@ -560,9 +560,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                 ),
                                 Container(
                                   height: MediaQuery.of(context).size.height - 150,
-                                  child: ListView.builder(
+                                  child: GridView.builder(
                                     itemCount: epLinks.length,
+                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 4),
                                     shrinkWrap: true,
+                                    padding: EdgeInsets.only(left: 10, right: 10),
                                     itemBuilder: (context, index) {
                                       return GestureDetector(
                                         onTap: () {
@@ -571,15 +573,14 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                           sheet2(index, index > currentEpIndex);
                                         },
                                         child: Container(
-                                          margin: EdgeInsets.only(top: 5, bottom: 5, left: 20, right: 20),
-                                          padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+                                          margin: EdgeInsets.all(5),
                                           height: 50,
                                           decoration: BoxDecoration(
                                               color: index == currentEpIndex
                                                   ? appTheme.accentColor
                                                   : appTheme.backgroundSubColor,
                                               borderRadius: BorderRadius.circular(12)),
-                                          alignment: Alignment.centerLeft,
+                                          alignment: Alignment.center,
                                           child: Text(
                                             "Episode ${index + 1}",
                                             style: TextStyle(

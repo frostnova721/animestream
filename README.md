@@ -26,15 +26,6 @@ Built with ❤️ using Flutter
 
 You can download the latest apk file from the [releases](https://github.com/frostnova721/animestream/releases) tab. Then install the downloaded apk!
 
-## Available Sources
-
-Currently, you can enjoy anime content from the following sources:
-
-- **Gogo**
-- **Animepahe**
-- **AnimeOnsen**  
-- **Aniplay**
-
 ## Known Issues
 
 Downloading: sometimes the downloads may be stuck at 100%. This is just a UI bug and the file will be downloaded in the storage! You can just cancel that download without losing the file then.

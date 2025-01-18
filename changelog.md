@@ -10,3 +10,4 @@
 ## Fixes
 
 - Fixed some issues with notification when downloading from animepahe
+- Fixed grey screen while switching to watch section in info page

@@ -183,7 +183,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> getQualities({String? link}) async {
-    final List list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link, customHeaders: info.streamInfo.customHeaders);
+    final List list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link,
+        customHeaders: info.streamInfo.customHeaders);
     if (mounted)
       setState(() {
         qualities = list;
@@ -355,17 +356,6 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                         ],
                       ),
               ),
-              IconButton(
-                onPressed: () {
-                  setState(() {
-                    controlsLocked = !controlsLocked;
-                  });
-                },
-                icon: Icon(
-                  !controlsLocked ? Icons.lock_open_rounded : Icons.lock_rounded,
-                  color: Colors.white,
-                ),
-              ),
               if (kDebugMode && !controlsLocked)
                 IconButton(
                   onPressed: () {
@@ -399,6 +389,17 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     color: Colors.white,
                   ),
                 ),
+              IconButton(
+                onPressed: () {
+                  setState(() {
+                    controlsLocked = !controlsLocked;
+                  });
+                },
+                icon: Icon(
+                  !controlsLocked ? Icons.lock_open_rounded : Icons.lock_rounded,
+                  color: Colors.white,
+                ),
+              ),
             ],
           ),
         ),
@@ -562,7 +563,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                   height: MediaQuery.of(context).size.height - 150,
                                   child: GridView.builder(
                                     itemCount: epLinks.length,
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 4),
+                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2, childAspectRatio: 4),
                                     shrinkWrap: true,
                                     padding: EdgeInsets.only(left: 10, right: 10),
                                     itemBuilder: (context, index) {

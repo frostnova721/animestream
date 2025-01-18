@@ -89,7 +89,7 @@ class _InfoState extends State<Info> {
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 
-    currentPageIndex = watched ~/ 24;
+    currentPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
     if (mounted) setState(() {});
   }
@@ -827,7 +827,7 @@ class _InfoState extends State<Info> {
         crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 5 : 10,
       ),
       shrinkWrap: true,
-      itemCount: visibleEpList[currentPageIndex].length,
+      itemCount:  visibleEpList[currentPageIndex].length,
       physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.all(10),
       itemBuilder: (context, index) => GestureDetector(

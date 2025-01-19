@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:animestream/core/data/preferences.dart';
+import 'package:animestream/ui/models/extensions.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
@@ -70,9 +71,9 @@ class SubtitleSettings {
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
-      'textColor': textColor.value,
-      'strokeColor': strokeColor.value,
-      'backgroundColor': backgroundColor.value,
+      'textColor': textColor.toInt(),
+      'strokeColor': strokeColor.toInt(),
+      'backgroundColor': backgroundColor.toInt(),
       'fontFamily': fontFamily,
       'strokeWidth': strokeWidth,
       'fontSize': fontSize,

@@ -16,7 +16,7 @@ class Controls extends StatefulWidget {
   final Widget bottomControls;
   final Widget topControls;
   final Map<String, dynamic> episode;
-  final Future<void> Function(int, dynamic) refreshPage;
+  final Future<void> Function(int, Stream) refreshPage;
   final Future<void> Function(int) updateWatchProgress;
   final bool Function() isControlsLocked;
   final void Function() hideControlsOnTimeout;

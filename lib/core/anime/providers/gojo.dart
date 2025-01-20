@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
-import 'package:animestream/ui/models/subtitles.dart';
 import 'package:http/http.dart';
 
 const String apiUrl = "https://backend.gojo.wtf/api/anime";

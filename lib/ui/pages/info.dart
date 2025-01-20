@@ -17,7 +17,7 @@ import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
-import 'package:animestream/ui/models/cards.dart';
+import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 

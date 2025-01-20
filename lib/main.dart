@@ -27,12 +27,11 @@ import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
 
-void main(List<String >args) async {
+void main(List<String> args) async {
   try {
-
     if (runWebViewTitleBarWidget(args)) {
-    return;
-  }
+      return;
+    }
 
     WidgetsFlutterBinding.ensureInitialized();
 
@@ -66,11 +65,12 @@ void main(List<String >args) async {
 
 Future<void> migrateToSecureStorage() async {
   final token = await getVal(HiveKey.token);
-  if(token != null) {
+  if (token != null) {
     await storeSecureVal(SecureStorageKey.anilistToken, token);
     await storeVal(HiveKey.token, null);
     print("[STARTUP] Migrated to Secure Storage");
-  };
+  }
+  ;
 }
 
 Future<void> loadAndAssignSettings() async {
@@ -104,7 +104,7 @@ Future<void> loadAndAssignSettings() async {
         backgroundColor: theme.lightVariant.backgroundColor,
         backgroundSubColor: theme.lightVariant.backgroundSubColor,
         modalSheetBackgroundColor: theme.lightVariant.modalSheetBackgroundColor,
-         onAccent: theme.lightVariant.onAccent,
+        onAccent: theme.lightVariant.onAccent,
       );
     }
 
@@ -136,7 +136,8 @@ class _AnimeStreamState extends State<AnimeStream> {
     );
 
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.black.withValues(alpha: 0.002), systemNavigationBarColor: Colors.black.withValues(alpha: 0.002)));
+        statusBarColor: Colors.black.withValues(alpha: 0.002),
+        systemNavigationBarColor: Colors.black.withValues(alpha: 0.002)));
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
 
@@ -208,9 +209,21 @@ class _AnimeStreamState extends State<AnimeStream> {
           appTheme = scheme;
           // print("[THEME] Applying Material You Theme");
         } else {
-          //lmao we can make it follow material theme XD
-         // final t = ThemeData.from(colorScheme: ColorScheme.fromSeed(seedColor: appTheme.accentColor, brightness: (currentUserSettings?.darkMode ?? true) ? Brightness.dark : Brightness.light)).colorScheme;
-         // appTheme = AnimeStreamTheme(accentColor: t.primary, backgroundColor: t.surface, backgroundSubColor: t.secondaryContainer, textMainColor: t.onSurface, textSubColor: t.outline, modalSheetBackgroundColor: t.surface);
+          // lmao we can make it follow material theme XD
+          // final t = ThemeData.from(
+          //   colorScheme: ColorScheme.fromSeed(
+          //       seedColor: appTheme.accentColor,
+          //       brightness: (currentUserSettings?.darkMode ?? true) ? Brightness.dark : Brightness.light),
+          // ).colorScheme;
+          // appTheme = AnimeStreamTheme(
+          //   accentColor: t.primary,
+          //   backgroundColor: t.surface,
+          //   backgroundSubColor: t.secondaryContainer,
+          //   textMainColor: t.onSurface,
+          //   textSubColor: t.outline,
+          //   modalSheetBackgroundColor: t.surface,
+          //   onAccent: t.onPrimary,
+          // );
         }
 
         final themeProvider = Provider.of<ThemeProvider>(context);
@@ -230,14 +243,12 @@ class _AnimeStreamState extends State<AnimeStream> {
           theme: ThemeData(
             useMaterial3: true,
             brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-            textTheme:
-                Theme.of(context).textTheme.apply(bodyColor: themeProvider.theme.textMainColor, fontFamily: "NotoSans"),
+            textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
             scaffoldBackgroundColor: appTheme.backgroundColor,
             bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
             colorScheme: ColorScheme.fromSeed(
               brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-              seedColor:
-                  (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
+              seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
             ),
           ),
           home: deepLinkRequestedNavigationPage ?? MainNavigator(),

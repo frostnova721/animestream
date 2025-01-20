@@ -1,6 +1,6 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/news/animenews.dart';
-import 'package:animestream/ui/models/cards.dart';
+import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/pages/newsDetail.dart';
 import 'package:flutter/material.dart';
 

@@ -10,6 +10,8 @@ enum SortType { AtoZ, RecentlyUpdated, TopRated }
 
 enum EpisodeViewModes { tile, grid, list }
 
+enum SubtitleFormat { ASS, VTT }
+
 enum HiveKey {
   manualSearches,
   userPreferences,

@@ -1,8 +1,8 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
-import 'package:animestream/ui/models/slider.dart';
-import 'package:animestream/ui/models/subtitles.dart';
+import 'package:animestream/ui/models/widgets/slider.dart';
+import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

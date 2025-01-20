@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/handler/handler.dart';
-import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/models/header.dart';
+import 'package:animestream/ui/models/widgets/cards.dart';
+import 'package:animestream/ui/models/widgets/header.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 
@@ -68,7 +68,7 @@ class _SearchState extends State<Search> {
       body: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: Padding(
-          padding: pagePadding(context),
+          padding: pagePadding(context).copyWith(left: 0),
           child: Column(
             children: [
               buildHeader("Search", context, afterNavigation: () => setState(() {})),

@@ -1,5 +1,5 @@
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/types.dart';
-import 'package:animestream/ui/models/subtitles.dart';
 
 class Stream {
   final String quality;

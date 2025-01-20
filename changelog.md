@@ -11,3 +11,6 @@
 
 - Fixed some issues with notification when downloading from animepahe
 - Fixed grey screen while switching to watch section in info page
+- Fixed disabling material theme not selecting the light theme if it was applied before
+- Fixed some text not changing color while switching theme mode
+- Fixed padding for discover and search title in respective pages

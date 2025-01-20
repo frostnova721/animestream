@@ -1,14 +1,15 @@
 import 'dart:async';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/customControls.dart';
+import 'package:animestream/ui/models/widgets/customControls.dart';
 import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:animestream/ui/models/subtitles.dart';
+import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:flutter/foundation.dart';
@@ -150,7 +151,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     return controlsLocked;
   }
 
-  Future<void> refreshPage(int episodeIndex, dynamic streamInfo) async {
+  Future<void> refreshPage(int episodeIndex, Stream streamInfo) async {
     print('refreshing $episodeIndex');
     info.streamInfo = streamInfo;
     qualities = [];

@@ -5,7 +5,6 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/hive.dart';
-import 'package:animestream/ui/models/subtitles.dart';
 import 'package:http/http.dart';
 
 class AnimeOnsen extends AnimeProvider {

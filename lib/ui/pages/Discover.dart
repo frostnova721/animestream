@@ -1,15 +1,16 @@
 import 'dart:async';
 import 'dart:ui';
 
+import 'package:flutter/material.dart';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/types.dart';
-import 'package:animestream/ui/models/cards.dart';
-import 'package:animestream/ui/models/header.dart';
+import 'package:animestream/ui/models/widgets/cards.dart';
+import 'package:animestream/ui/models/widgets/header.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:flutter/material.dart';
 
 class Discover extends StatefulWidget {
   final List<AnimeCard> thisSeason;
@@ -72,6 +73,8 @@ class _DiscoverState extends State<Discover> {
 
   bool initialTimeOutCalled = false;
 
+  bool isHoveredOverScrollList = false;
+
   @override
   Widget build(BuildContext context) {
     if (!initialTimeOutCalled && widget.trendingList.length > 0) {
@@ -81,6 +84,7 @@ class _DiscoverState extends State<Discover> {
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: SingleChildScrollView(
+        physics: isHoveredOverScrollList ? NeverScrollableScrollPhysics() : null,
         child: Column(
           children: [
             Stack(
@@ -100,8 +104,8 @@ class _DiscoverState extends State<Discover> {
                         ),
                 ),
                 Padding(
-                  padding: pagePadding(context),
-                  child: buildHeader("Discover", context, afterNavigation: () => setState((){})),
+                  padding: pagePadding(context).copyWith(left: 0),
+                  child: buildHeader("Discover", context, afterNavigation: () => setState(() {})),
                 )
               ],
             ),
@@ -310,7 +314,8 @@ class _DiscoverState extends State<Discover> {
                                     ),
                                     Text(
                                       "${widget.trendingList[index % widget.trendingList.length].rating != null ? widget.trendingList[index % widget.trendingList.length].rating! / 10 : '??'}",
-                                      style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 17),
+                                      style:
+                                          TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 17),
                                     ),
                                   ],
                                 ),

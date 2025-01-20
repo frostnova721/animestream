@@ -4,7 +4,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
-import 'package:animestream/ui/models/slider.dart';
+import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/theme/themeProvider.dart';
@@ -93,8 +93,9 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             if (materialTheme) {
                               return Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                             }
-                            Provider.of<ThemeProvider>(context, listen: false).applyTheme(
-                                availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0].theme);
+                            final t = availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0];
+                            Provider.of<ThemeProvider>(context, listen: false)
+                                .applyTheme(darkMode ? t.theme : t.lightVariant);
                           }),
                           _themes(),
                           Container(

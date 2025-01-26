@@ -6,6 +6,7 @@
 - New source: gojo (gojo.wtf)
 - Added queued downloading (suggestion from #12)
 - Minor UI changes
+- Windows Support????
 
 ## Fixes
 

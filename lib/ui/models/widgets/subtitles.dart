@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/ui/models/extensions.dart';
+import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:better_player/src/video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
@@ -151,7 +152,7 @@ class SubtitleText extends StatelessWidget {
 }
 
 class SubViewer extends StatefulWidget {
-  final VideoPlayerController controller;
+  final VideoController controller;
   final String subtitleSource;
   final SubtitleFormat format;
 
@@ -215,7 +216,9 @@ class _SubViewerState extends State<SubViewer> {
   }
 
   void _updateSubtitle() {
-    final currentPosition = widget.controller.value.position.inMilliseconds;
+    final currentPosition = widget.controller.position;
+
+    if(currentPosition == null) return;
 
     // Find the subtitle matching the current time
     for (var subtitle in subs) {

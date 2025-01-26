@@ -14,7 +14,18 @@ BetterPlayerDataSource dataSourceConfig(String url, { Map<String, String>? heade
       maxCacheSize: 50 * 1024 * 1024,
     ),
     headers: headers,
-    placeholder: Center(
+    placeholder: PlayerLoadingWidget(),
+  );
+}
+
+class PlayerLoadingWidget extends StatelessWidget {
+  const PlayerLoadingWidget({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
@@ -32,6 +43,6 @@ BetterPlayerDataSource dataSourceConfig(String url, { Map<String, String>? heade
           )
         ],
       ),
-    ),
-  );
+    );
+  }
 }

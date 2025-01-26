@@ -3,6 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  av_media_player
   awesome_notifications
   desktop_webview_window
   dynamic_color

@@ -33,18 +33,8 @@ class _DiscoverState extends State<Discover> {
   @override
   void initState() {
     super.initState();
-    // getLists();
-    // getTrendingList();
-    // getRecentlyUpdated();
-    // getRecommended();
-
     _pageController.addListener(onScroll);
   }
-
-  // List<AnimeCard> thisSeason = [];
-  // List<TrendingResult> trendingList = [];
-  // List<AnimeCard> recentlyUpdatedList = [];
-  // List<AnimeCard> recommendedList = [];
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:better_player/better_player.dart';
 import 'package:better_player/src/video_player/video_player.dart';
@@ -12,7 +13,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:animestream/core/commons/types.dart';
 
 class Controls extends StatefulWidget {
-  final BetterPlayerController controller;
+  final VideoController controller;
   final Widget bottomControls;
   final Widget topControls;
   final Map<String, dynamic> episode;
@@ -46,7 +47,7 @@ class Controls extends StatefulWidget {
 }
 
 class _ControlsState extends State<Controls> {
-  late VideoPlayerController _controller;
+  late VideoController _controller;
 
   bool startedLoadingNext = false;
 
@@ -68,7 +69,7 @@ class _ControlsState extends State<Controls> {
 
     currentEpIndex = widget.episode['currentEpIndex'];
 
-    _controller = widget.controller.videoPlayerController!;
+    _controller = widget.controller;
 
     finalEpisodeReached = currentEpIndex + 1 >= widget.episode['epLinks'].length;
 
@@ -114,19 +115,19 @@ class _ControlsState extends State<Controls> {
     //managing the UI updation
     if (mounted)
       setState(() {
-        int duration = _controller.value.duration?.inSeconds ?? 0;
-        int val = _controller.value.position.inSeconds;
-        playPause = _controller.value.isPlaying ? Icons.pause_rounded : Icons.play_arrow_rounded;
+        int duration = ((_controller.duration ?? 0) / 1000).toInt();
+        int val = ((_controller.position ?? 0) / 1000).toInt();
+        playPause = (_controller.isPlaying ?? false) ? Icons.pause_rounded : Icons.play_arrow_rounded;
         currentTime = getFormattedTime(val);
         maxTime = getFormattedTime(duration);
-        buffering = _controller.value.isBuffering;
+        buffering = _controller.isBuffering ?? true;
       });
 
-    if (_controller.value.isPlaying && !wakelockEnabled) {
+    if ((_controller.isPlaying ?? false) && !wakelockEnabled) {
       WakelockPlus.enable();
       wakelockEnabled = true;
       debugPrint("wakelock enabled");
-    } else if (!_controller.value.isPlaying && wakelockEnabled) {
+    } else if (!(_controller.isPlaying ?? false) && wakelockEnabled) {
       WakelockPlus.disable();
       wakelockEnabled = false;
       debugPrint("wakelock disabled");
@@ -134,20 +135,19 @@ class _ControlsState extends State<Controls> {
 
     //play the loaded episode if equal to duration
     if (!finalEpisodeReached &&
-        _controller.value.duration != null &&
-        _controller.value.position.inSeconds == _controller.value.duration!.inSeconds) {
-      if (_controller.value.isPlaying) {
+        _controller.duration != null &&
+        (_controller.position ?? 0) / 1000 == (_controller.duration ?? 0) / 1000) {
+      if (_controller.isPlaying ?? false) {
         await _controller.pause();
       }
       await playPreloadedEpisode();
     }
 
     //calculate the percentage
-    final currentByTotal = _controller.value.position.inSeconds / (_controller.value.duration?.inSeconds ?? 0);
-    if (currentByTotal * 100 >= 75 && !preloadStarted && _controller.value.isPlaying) {
+    final currentByTotal = (_controller.position ?? 0) / 1000 / (_controller.duration ?? 0);
+    if (currentByTotal / 1000 >= 75 && !preloadStarted && (_controller.isPlaying ?? false)) {
       print("====================== above 75% ======================");
-      print(
-          "when position= ${_controller.value.position.inSeconds}, duration= ${_controller.value.duration?.inSeconds ?? 0} ");
+      print("when position= ${(_controller.position ?? 0) / 1000}, duration= ${(_controller.duration ?? 0) / 1000} ");
       preloadNextEpisode();
       widget.updateWatchProgress(currentEpIndex);
     }
@@ -268,15 +268,15 @@ class _ControlsState extends State<Controls> {
   }
 
   void fastForward(int seekDuration) async {
-    if ((_controller.value.position.inSeconds + seekDuration) <= 0) {
+    if (((_controller.position ?? 0) / 1000 + seekDuration) <= 0) {
       _controller.seekTo(Duration(seconds: 0));
       return;
     } else {
-      if ((_controller.value.position.inSeconds + seekDuration) >= _controller.value.duration!.inSeconds) {
-        _controller.seekTo(Duration(milliseconds: _controller.value.duration!.inMilliseconds - 500));
+      if (((_controller.position ?? 0) ~/ 1000 + seekDuration) >= (_controller.duration ?? 0) ~/ 1000) {
+        _controller.seekTo(Duration(milliseconds: (_controller.duration ?? 0) - 500));
         return;
       }
-      _controller.seekTo(Duration(seconds: _controller.value.position.inSeconds + seekDuration));
+      _controller.seekTo(Duration(seconds: (_controller.position ?? 0) ~/ 1000 + seekDuration));
       return;
     }
   }
@@ -296,7 +296,10 @@ class _ControlsState extends State<Controls> {
     print(event);
     switch (event.logicalKey) {
       case LogicalKeyboardKey.mediaPlayPause:
-        _controller.value.isPlaying ? { _controller.pause(), widget.toggleControls(!widget.isControlsVisible) } : _controller.play();
+      case LogicalKeyboardKey.space:
+        _controller.isPlaying ?? false
+            ? {_controller.pause(), widget.toggleControls(!widget.isControlsVisible)}
+            : _controller.play();
         break;
       case LogicalKeyboardKey.mediaPause:
         _controller.pause();
@@ -337,8 +340,8 @@ class _ControlsState extends State<Controls> {
       case LogicalKeyboardKey.select:
         {
           // if (!widget.isControlsVisible) {
-            widget.toggleControls(!widget.isControlsVisible);
-            widget.hideControlsOnTimeout();
+          widget.toggleControls(!widget.isControlsVisible);
+          widget.hideControlsOnTimeout();
           // }
           break;
         }
@@ -424,23 +427,24 @@ class _ControlsState extends State<Controls> {
                                           thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
                                           trackShape: EdgeToEdgeTrackShape(),
                                           overlayShape: SliderComponentShape.noThumb),
-                                      child: BetterPlayerMaterialVideoProgressBar(
-                                        _controller,
-                                        widget.controller,
-                                        onDragStart: () {
-                                          widget.controller.pause();
-                                        },
-                                        onDragEnd: () {
-                                          widget.controller.play();
-                                        },
-                                        colors: BetterPlayerProgressColors(
-                                          playedColor: appTheme.accentColor,
-                                          handleColor:
-                                              widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
-                                          bufferedColor: Color.fromARGB(255, 167, 167, 167),
-                                          backgroundColor: Color.fromARGB(255, 94, 94, 94),
-                                        ),
-                                      ),
+                                      child: Container(),
+                                      //  BetterPlayerMaterialVideoProgressBar(
+                                      //   _controller,
+                                      //   widget.controller,
+                                      //   onDragStart: () {
+                                      //     widget.controller.pause();
+                                      //   },
+                                      //   onDragEnd: () {
+                                      //     widget.controller.play();
+                                      //   },
+                                      //   colors: BetterPlayerProgressColors(
+                                      //     playedColor: appTheme.accentColor,
+                                      //     handleColor:
+                                      //         widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
+                                      //     bufferedColor: Color.fromARGB(255, 167, 167, 167),
+                                      //     backgroundColor: Color.fromARGB(255, 94, 94, 94),
+                                      //   ),
+                                      // ),
                                     ),
                                   ),
                                 ),
@@ -593,7 +597,7 @@ class _ControlsState extends State<Controls> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
-                          if (_controller.value.isPlaying) {
+                          if (_controller.isPlaying ?? false) {
                             playPause = Icons.play_arrow_rounded;
                             _controller.pause();
                           } else {

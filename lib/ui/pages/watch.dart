@@ -1,10 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
+import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/customControls.dart';
 import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -12,6 +15,7 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
+import 'package:av_media_player/index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -33,7 +37,8 @@ class Watch extends StatefulWidget {
 }
 
 class _WatchState extends State<Watch> with TickerProviderStateMixin {
-  late BetterPlayerController controller;
+  // late BetterPlayerController controller;
+  late VideoController controller;
 
   Timer? _controlsTimer;
 
@@ -42,7 +47,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   // String? subs;
 
   List<String> epLinks = [];
-  List qualities = [];
+  List<Map<String, String>> qualities = [];
 
   late WatchPageInfo info;
 
@@ -107,7 +112,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         autoDispose: true,
         controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false));
 
-    controller = BetterPlayerController(config);
+    // controller = BetterPlayerController(config);
+    controller = Platform.isWindows ?  AvPlayerWrapper() : BetterPlayerWrapper();
 
     //try to get the qualities. play with the default link if qualities arent available
     try {
@@ -118,7 +124,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           print(qualities);
           print("${info.streamInfo.subtitle ?? "no subs!"}");
           final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
-          changeQuality(preferredOne.isNotEmpty ? preferredOne[0]['link'] : qualities[0]['link'], null);
+          changeQuality(preferredOne.isNotEmpty ? preferredOne[0]['link']! : qualities[0]['link']!, null);
         });
     } catch (err) {
       print(err.toString());
@@ -141,7 +147,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> playVideo(String url) async {
-    await controller.setupDataSource(dataSourceConfig(url, headers: info.streamInfo.customHeaders));
+    // await controller.setupDataSource(dataSourceConfig(url, headers: info.streamInfo.customHeaders));
+    await controller.initiateVideo(url, headers: headers);
     setState(() {
       initialised = true;
     });
@@ -184,7 +191,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   Future<void> getQualities({String? link}) async {
-    final List list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link,
+    final list = await generateQualitiesForMultiQuality(link ?? info.streamInfo.link,
         customHeaders: info.streamInfo.customHeaders);
     if (mounted)
       setState(() {
@@ -200,8 +207,11 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       await getQualities(link: link);
       final preferredQuality = qualities.where((item) => item['quality'] == selectedQuality).toList();
       print(preferredQuality[0]['link']);
-      await changeQuality(preferredQuality[0]['link'],
-          preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null);
+      await changeQuality(
+        preferredQuality[0]['link']!,
+        // preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null,
+        preserveProgress ? (controller.position ?? 0) * 100 : null,
+      );
     } catch (err) {
       print(err);
       await playVideo(link);
@@ -239,7 +249,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       _isTimerActive = true;
       print("called hideontimeout: $_visible");
       _controlsTimer = Timer(Duration(seconds: 5), () {
-        if (mounted && (controller.isPlaying() ?? false)) {
+        if (mounted && (controller.isPlaying ?? false)) {
           toggleControls(false);
         }
         _isTimerActive = false;
@@ -258,10 +268,30 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         backgroundColor: Colors.black,
         body: Stack(
           children: [
-            BetterPlayer(controller: controller),
-            if (info.streamInfo.subtitle != null && controller.videoPlayerController != null && showSubs)
+            Player(controller),
+            // Platform.isWindows
+            //     ? Stack(
+            //         children: [
+            //           AvMediaView(
+            //             initSource: info.streamInfo.link,
+            //             initAutoPlay: true,
+            //             onCreated: (p) {},
+            //           ),
+            //           IconButton(
+            //               onPressed: () {
+            //                 Navigator.of(context).pop();
+            //               },
+            //               icon: Icon(Icons.no_backpack_sharp)),
+            //         ],
+            //       )
+            //     : BetterPlayer(controller: controller),
+            if (info.streamInfo.subtitle != null
+                // && controller.videoPlayerController != null
+                &&
+                showSubs)
               SubViewer(
-                  controller: controller.videoPlayerController!,
+                  // controller: controller.videoPlayerController!,
+                  controller: controller,
                   format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
                   subtitleSource: info.streamInfo.subtitle!),
             AnimatedOpacity(
@@ -273,6 +303,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                   IgnorePointer(
                     ignoring: !_visible,
                     child: initialised
+                        // ? Container()
                         ? Controls(
                             controller: controller,
                             bottomControls: bottomControls(),
@@ -478,10 +509,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                         padding: EdgeInsets.only(left: 25, right: 25),
                                         child: ElevatedButton(
                                           onPressed: () async {
-                                            final src = qualities[index]['link'];
-                                            selectedQuality = qualities[index]['quality'] ?? 720;
-                                            changeQuality(
-                                                src, controller.videoPlayerController!.value.position.inSeconds);
+                                            final src = qualities[index]['link']!;
+                                            selectedQuality = qualities[index]['quality'] ?? '720';
+                                            changeQuality(src, controller.position ?? 0 * 100);
                                             Navigator.pop(context);
                                           },
                                           style: ElevatedButton.styleFrom(
@@ -645,7 +675,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     IconButton(
                       onPressed: () {
                         currentViewMode = (currentViewMode + 1) % 3;
-                        controller.setOverriddenFit(viewModes[currentViewMode]['value']);
+                        // controller.setOverriddenFit(viewModes[currentViewMode]['value']);
                         setState(() {});
                       },
                       icon: Icon(viewModes[currentViewMode]['icon']),
@@ -695,7 +725,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                           setState(() {
                             playBackSpeed = playBackSpeeds[index];
                           });
-                          controller.videoPlayerController?.setSpeed(playBackSpeed);
+                          controller.setSpeed(playBackSpeed);
                         },
                         child: Row(
                           children: [
@@ -706,7 +736,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                 setState(() {
                                   playBackSpeed = val ?? 1.0;
                                 });
-                                controller.videoPlayerController?.setSpeed(playBackSpeed);
+                                controller.setSpeed(playBackSpeed);
                               },
                             ),
                             Text(playBackSpeeds[index].toString() + "x"),

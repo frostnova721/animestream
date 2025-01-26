@@ -34,7 +34,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     isTv().then((value) => tv = value);
     
 
-    //check for app updates
+    //check for app updates & show prompt
     checkForUpdates().then((data) => {
           if (data != null)
             {

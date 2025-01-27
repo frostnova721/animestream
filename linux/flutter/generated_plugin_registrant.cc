@@ -6,7 +6,6 @@
 
 #include "generated_plugin_registrant.h"
 
-#include <av_media_player/av_media_player_plugin.h>
 #include <awesome_notifications/awesome_notifications_plugin.h>
 #include <desktop_webview_window/desktop_webview_window_plugin.h>
 #include <dynamic_color/dynamic_color_plugin.h>
@@ -16,9 +15,6 @@
 #include <window_to_front/window_to_front_plugin.h>
 
 void fl_register_plugins(FlPluginRegistry* registry) {
-  g_autoptr(FlPluginRegistrar) av_media_player_registrar =
-      fl_plugin_registry_get_registrar_for_plugin(registry, "AvMediaPlayerPlugin");
-  av_media_player_plugin_register_with_registrar(av_media_player_registrar);
   g_autoptr(FlPluginRegistrar) awesome_notifications_registrar =
       fl_plugin_registry_get_registrar_for_plugin(registry, "AwesomeNotificationsPlugin");
   awesome_notifications_plugin_register_with_registrar(awesome_notifications_registrar);

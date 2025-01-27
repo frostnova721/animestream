@@ -1,10 +1,9 @@
 import 'package:animestream/ui/models/playerUtils.dart';
-import 'package:av_media_player/player.dart';
-import 'package:av_media_player/widget.dart';
+// import 'package:av_media_player/player.dart';
+// import 'package:av_media_player/widget.dart';
 import 'package:better_player/better_player.dart';
+import 'package:video_player_win/video_player_win.dart';
 import 'package:flutter/material.dart';
-
-class Watchpageutil {}
 
 class Player extends StatelessWidget {
   late final VideoController controller;
@@ -14,7 +13,7 @@ class Player extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return controller.getWidget();
+    return Center(child: controller.getWidget());
   }
 }
 
@@ -44,14 +43,19 @@ abstract class VideoController {
   int? get position;
 
   int? get duration;
+
+  int? get buffered;
 }
 
 class BetterPlayerWrapper implements VideoController {
   final BetterPlayerController controller = BetterPlayerController(
     BetterPlayerConfiguration(
-      controlsConfiguration: BetterPlayerControlsConfiguration(
-        showControls: false,
-      ),
+      aspectRatio: 16 / 9,
+      fit: BoxFit.contain,
+      expandToFill: true,
+      autoPlay: true,
+      autoDispose: true,
+      controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false),
     ),
   );
 
@@ -71,6 +75,9 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   int? get duration => controller.videoPlayerController?.value.duration?.inMilliseconds;
+
+  @override
+  int? get buffered => controller.videoPlayerController?.value.buffered.last.end.inSeconds;
 
   @override
   Future<void> pause() {
@@ -101,65 +108,131 @@ class BetterPlayerWrapper implements VideoController {
   Widget getWidget() {
     return BetterPlayer(controller: controller);
   }
-  
+
   @override
   void addListener(VoidCallback cb) {
     controller.videoPlayerController?.addListener(cb);
   }
 }
 
-class AvPlayerWrapper implements VideoController {
-  final AvMediaPlayer controller = AvMediaPlayer();
+class VideoPlayerWindowsWrapper implements VideoController {
+  WinVideoPlayerController controller = WinVideoPlayerController.network("");
 
   @override
-  Future<void> initiateVideo(String url, {Map<String, String>? headers = null}) async {
-    return controller.open(url);
-  }
-
-  @override
-  bool? get isBuffering => controller.loading.value;
-
-  @override
-  bool? get isPlaying => controller.playbackState.value == PlaybackState.playing;
-
-  @override
-  int? get position => controller.position.value;
-
-  @override
-  int? get duration => controller.mediaInfo.value?.duration;
-
-  @override
-  Future<void> pause() async {
-    controller.pause();
-  }
-
-  @override
-  Future<void> play() async {
+  Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
+    controller = WinVideoPlayerController.network(url);
+    await controller.initialize();
     controller.play();
   }
 
   @override
-  Future<void> seekTo(Duration duration) async {
-    controller.seekTo(duration.inMilliseconds);
+  bool? get isBuffering => controller.value.isBuffering;
+
+  @override
+  bool? get isPlaying => controller.value.isPlaying;
+
+  @override
+  int? get position => controller.value.position.inMilliseconds;
+
+  @override
+  int? get duration => controller.value.duration.inMilliseconds;
+
+  @override
+  Future<void> pause() {
+    return controller.pause();
+  }
+
+  @override
+  Future<void> play() {
+    return controller.play();
+  }
+
+  @override
+  Future<void> seekTo(Duration duration) {
+    return controller.seekTo(duration);
   }
 
   @override
   Future<void> setSpeed(double speed) async {
-    controller.setSpeed(speed);
+    controller.setPlaybackSpeed(speed);
   }
 
   @override
-  void dispose() {
-    return controller.dispose();
+  void dispose() async {
+    return await controller.dispose();
   }
 
   @override
   Widget getWidget() {
-    return AvMediaView(initPlayer: controller, initAutoPlay: true,);
+    return WinVideoPlayer(controller);
+  }
+
+  @override
+  void addListener(VoidCallback cb) {
+    controller.addListener(cb);
   }
   
   @override
-  void addListener(VoidCallback cb) {
-    controller.loading.addListener(cb);
-  }
+  int? get buffered => null;
 }
+
+// un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26
+ 
+// class AvPlayerWrapper implements VideoController {
+//   final AvMediaPlayer controller = AvMediaPlayer();
+
+//   @override
+//   Future<void> initiateVideo(String url, {Map<String, String>? headers = null}) async {
+//     return controller.open(url);
+//   }
+
+//   @override
+//   bool? get isBuffering => controller.loading.value;
+
+//   @override
+//   bool? get isPlaying => controller.playbackState.value == PlaybackState.playing;
+
+//   @override
+//   int? get position => controller.position.value;
+
+//   @override
+//   int? get duration => controller.mediaInfo.value?.duration;
+
+//   @override
+//   Future<void> pause() async {
+//     controller.pause();
+//   }
+
+//   @override
+//   Future<void> play() async {
+//     controller.play();
+//   }
+
+//   @override
+//   Future<void> seekTo(Duration duration) async {
+//     controller.seekTo(duration.inMilliseconds);
+//   }
+
+//   @override
+//   Future<void> setSpeed(double speed) async {
+//     controller.setSpeed(speed);
+//   }
+
+//   @override
+//   void dispose() {
+//     return controller.dispose();
+//   }
+
+//   @override
+//   Widget getWidget() {
+//     return AvMediaView(
+//       initPlayer: controller,
+//       initAutoPlay: true,
+//     );
+//   }
+
+//   @override
+//   void addListener(VoidCallback cb) {
+//     controller.loading.addListener(cb);
+//   }
+// }

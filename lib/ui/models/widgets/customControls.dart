@@ -94,6 +94,8 @@ class _ControlsState extends State<Controls> {
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
   int? megaSkipDuration = currentUserSettings?.megaSkipDuration ?? 85;
 
+  int sliderValue = 0;
+
   bool buffering = false;
   bool finalEpisodeReached = false;
   bool wakelockEnabled = false;
@@ -117,6 +119,7 @@ class _ControlsState extends State<Controls> {
       setState(() {
         int duration = ((_controller.duration ?? 0) / 1000).toInt();
         int val = ((_controller.position ?? 0) / 1000).toInt();
+        sliderValue = val;
         playPause = (_controller.isPlaying ?? false) ? Icons.pause_rounded : Icons.play_arrow_rounded;
         currentTime = getFormattedTime(val);
         maxTime = getFormattedTime(duration);
@@ -345,6 +348,8 @@ class _ControlsState extends State<Controls> {
           // }
           break;
         }
+        case LogicalKeyboardKey.f11:
+
       // case LogicalKeyboardKey.arrowUp:
       // case LogicalKeyboardKey.arrowDown:
       // case LogicalKeyboardKey.arrowLeft:
@@ -418,34 +423,51 @@ class _ControlsState extends State<Controls> {
                                   ignoring: widget.isControlsLocked(),
                                   child: Container(
                                     child: SliderTheme(
-                                      data: SliderThemeData(
-                                          trackHeight: 1.3,
-                                          thumbColor: appTheme.accentColor,
-                                          activeTrackColor: appTheme.accentColor,
-                                          inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
-                                          secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
-                                          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
-                                          trackShape: EdgeToEdgeTrackShape(),
-                                          overlayShape: SliderComponentShape.noThumb),
-                                      child: Container(),
-                                      //  BetterPlayerMaterialVideoProgressBar(
-                                      //   _controller,
-                                      //   widget.controller,
-                                      //   onDragStart: () {
-                                      //     widget.controller.pause();
-                                      //   },
-                                      //   onDragEnd: () {
-                                      //     widget.controller.play();
-                                      //   },
-                                      //   colors: BetterPlayerProgressColors(
-                                      //     playedColor: appTheme.accentColor,
-                                      //     handleColor:
-                                      //         widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
-                                      //     bufferedColor: Color.fromARGB(255, 167, 167, 167),
-                                      //     backgroundColor: Color.fromARGB(255, 94, 94, 94),
-                                      //   ),
-                                      // ),
-                                    ),
+                                        data: SliderThemeData(
+                                            trackHeight: 1.3,
+                                            thumbColor: appTheme.accentColor,
+                                            activeTrackColor: appTheme.accentColor,
+                                            inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
+                                            secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
+                                            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                                            trackShape: EdgeToEdgeTrackShape(),
+                                            overlayShape: SliderComponentShape.noThumb),
+                                        child: Slider(
+                                          value: sliderValue.toDouble(),
+                                          secondaryTrackValue: _controller.buffered?.toDouble(),
+                                          
+                                          onChangeEnd: (value) {
+                                            print(value);
+                                            _controller.seekTo(Duration(seconds: value.toInt()));
+                                            widget.controller.play();
+                                          },
+                                          onChangeStart: (value) => widget.controller.pause(),
+                                          onChanged: (val) {
+                                            setState(() {
+                                              sliderValue = val.toInt();
+                                            });
+                                          },
+                                          min: 0,
+                                          max: (_controller.duration ?? 0) / 1000,
+                                        )
+                                        //  BetterPlayerMaterialVideoProgressBar(
+                                        //   _controller,
+                                        //   widget.controller,
+                                        //   onDragStart: () {
+                                        //     widget.controller.pause();
+                                        //   },
+                                        //   onDragEnd: () {
+                                        //     widget.controller.play();
+                                        //   },
+                                        //   colors: BetterPlayerProgressColors(
+                                        //     playedColor: appTheme.accentColor,
+                                        //     handleColor:
+                                        //         widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
+                                        //     bufferedColor: Color.fromARGB(255, 167, 167, 167),
+                                        //     backgroundColor: Color.fromARGB(255, 94, 94, 94),
+                                        //   ),
+                                        // ),
+                                        ),
                                   ),
                                 ),
                               ),

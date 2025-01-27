@@ -9,17 +9,14 @@ import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/customControls.dart';
-import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
-import 'package:av_media_player/index.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:better_player/better_player.dart';
 
 class Watch extends StatefulWidget {
   final String selectedSource;
@@ -104,16 +101,16 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
     showSubs = info.streamInfo.subtitle != null;
 
-    final config = BetterPlayerConfiguration(
-        aspectRatio: 16 / 9,
-        fit: BoxFit.contain,
-        expandToFill: true,
-        autoPlay: true,
-        autoDispose: true,
-        controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false));
+    // final config = BetterPlayerConfiguration(
+    //     aspectRatio: 16 / 9,
+    //     fit: BoxFit.contain,
+    //     expandToFill: true,
+    //     autoPlay: true,
+    //     autoDispose: true,
+    //     controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false));
 
     // controller = BetterPlayerController(config);
-    controller = Platform.isWindows ?  AvPlayerWrapper() : BetterPlayerWrapper();
+    controller = Platform.isWindows ?  VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
 
     //try to get the qualities. play with the default link if qualities arent available
     try {

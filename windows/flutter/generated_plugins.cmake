@@ -4,13 +4,13 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
-  av_media_player
   awesome_notifications
   desktop_webview_window
   dynamic_color
   flutter_secure_storage_windows
   permission_handler_windows
   url_launcher_windows
+  video_player_win
   window_to_front
 )
 

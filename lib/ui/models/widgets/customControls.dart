@@ -5,9 +5,6 @@ import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:flutter/material.dart';
-import 'package:better_player/better_player.dart';
-import 'package:better_player/src/video_player/video_player.dart';
-import 'package:better_player/src/controls/better_player_material_progress_bar.dart';
 import 'package:flutter/services.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:animestream/core/commons/types.dart';
@@ -429,23 +426,23 @@ class _ControlsState extends State<Controls> {
                                             activeTrackColor: appTheme.accentColor,
                                             inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
                                             secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
-                                            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 6),
+                                            thumbShape: widget.isControlsLocked() ? SliderComponentShape.noThumb : RoundSliderThumbShape(enabledThumbRadius: 6),
                                             trackShape: EdgeToEdgeTrackShape(),
                                             overlayShape: SliderComponentShape.noThumb),
                                         child: Slider(
                                           value: sliderValue.toDouble(),
                                           secondaryTrackValue: _controller.buffered?.toDouble(),
-                                          
-                                          onChangeEnd: (value) {
-                                            print(value);
-                                            _controller.seekTo(Duration(seconds: value.toInt()));
-                                            widget.controller.play();
-                                          },
-                                          onChangeStart: (value) => widget.controller.pause(),
                                           onChanged: (val) {
                                             setState(() {
                                               sliderValue = val.toInt();
+                                              _controller.seekTo(Duration(seconds: val.toInt()));
                                             });
+                                          },
+                                          onChangeStart: (value) {
+                                            _controller.pause();
+                                          },
+                                          onChangeEnd: (value) {
+                                            _controller.play();
                                           },
                                           min: 0,
                                           max: (_controller.duration ?? 0) / 1000,

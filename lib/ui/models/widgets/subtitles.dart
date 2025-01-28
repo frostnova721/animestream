@@ -5,7 +5,6 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/ui/models/extensions.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
-import 'package:better_player/src/video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/commons/subtitleParsers.dart';

@@ -1,3 +1,4 @@
+import 'package:animestream/core/data/lastWatchDuration.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -57,6 +58,7 @@ class _InfoState extends State<Info> {
   int currentPageIndex = 0;
   int watched = 1;
   int viewModeIndexLength = 3;
+  int lastWatchedDuration = 0;
 
   bool showBar = false;
   bool started = false;
@@ -116,6 +118,7 @@ class _InfoState extends State<Info> {
         }
       }
 
+      getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDuration = it); // retrieve the last watch duration
       final info = await DatabaseHandler().getAnimeInfo(id);
       altDatabases = info.alternateDatabases;
       setState(() {
@@ -783,14 +786,14 @@ class _InfoState extends State<Info> {
 
         //needs to store progress :(
         // Container(
-        //   width: 325 * ((timeProgress[watched < epLinks.length ? watched + 1 : watched]) ?? 1 / 100),
+        //   width: 325 * (lastWatchedDuration / 100),
         //   margin: EdgeInsets.only(left: 15),
         //   height: 2,
         //   decoration: BoxDecoration(
         //     borderRadius: BorderRadius.circular(10),
         //     color: appTheme.textMainColor,
         //   ),
-        // ),
+        // )
         // ],
         // ),
       ),

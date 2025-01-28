@@ -48,7 +48,7 @@ class SettingsModal {
       receivePreReleases: map['receivePreReleases'] ?? false,
       amoledBackground: map['amoledBackground'] ?? false,
       preferredQuality: map['preferredQuality'] ?? "720p",
-      navbarTranslucency: map['navbarTranslucency'] ?? 0.5,
+      navbarTranslucency: map['navbarTranslucency'] ?? 1.0,
       fasterDownloads: map['fasterDownloads'] ?? false,
       preferredProvider: map['preferredProvider'] ?? sources[0],
       darkMode: map['darkMode'] ?? true,

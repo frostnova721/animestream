@@ -5,6 +5,7 @@ import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/data/lastWatchDuration.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
@@ -110,7 +111,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     //     controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false));
 
     // controller = BetterPlayerController(config);
-    controller = Platform.isWindows ?  VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+    controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
 
     //try to get the qualities. play with the default link if qualities arent available
     try {
@@ -139,7 +140,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       1.5,
       1.75,
       2,
-      if (currentUserSettings?.enableSuperSpeeds ?? false) ...[4, 5, 8, 10]
+      if ((currentUserSettings?.enableSuperSpeeds ?? false) && !Platform.isWindows) ...[4, 5, 8, 10]
     ];
   }
 
@@ -201,16 +202,21 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     try {
       toggleControls(true); //show the controls ig
       await controller.pause();
-      await getQualities(link: link);
-      final preferredQuality = qualities.where((item) => item['quality'] == selectedQuality).toList();
-      print(preferredQuality[0]['link']);
-      await changeQuality(
-        preferredQuality[0]['link']!,
-        // preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null,
-        preserveProgress ? (controller.position ?? 0) * 100 : null,
-      );
+      if (link.contains(".m3u8")) {
+        await getQualities(link: link);
+        final preferredQuality = qualities.where((item) => item['quality'] == selectedQuality).toList();
+        print(preferredQuality[0]['link']);
+        await changeQuality(
+          preferredQuality[0]['link']!,
+          // preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null,
+          preserveProgress ? ((controller.position ?? 0) / 1000).toInt() : null,
+        );
+      }
     } catch (err) {
+      if (currentUserSettings?.showErrors ?? false) floatingSnackBar(context, err.toString());
       print(err);
+      // rethrow;
+    } finally {
       await playVideo(link);
     }
   }
@@ -266,22 +272,6 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         body: Stack(
           children: [
             Player(controller),
-            // Platform.isWindows
-            //     ? Stack(
-            //         children: [
-            //           AvMediaView(
-            //             initSource: info.streamInfo.link,
-            //             initAutoPlay: true,
-            //             onCreated: (p) {},
-            //           ),
-            //           IconButton(
-            //               onPressed: () {
-            //                 Navigator.of(context).pop();
-            //               },
-            //               icon: Icon(Icons.no_backpack_sharp)),
-            //         ],
-            //       )
-            //     : BetterPlayer(controller: controller),
             if (info.streamInfo.subtitle != null
                 // && controller.videoPlayerController != null
                 &&
@@ -672,7 +662,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     IconButton(
                       onPressed: () {
                         currentViewMode = (currentViewMode + 1) % 3;
-                        // controller.setOverriddenFit(viewModes[currentViewMode]['value']);
+                        controller.setFit(viewModes[currentViewMode]['value']);
                         setState(() {});
                       },
                       icon: Icon(viewModes[currentViewMode]['icon']),
@@ -791,6 +781,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+    // addLastWatchedDuration(widget.info.id.toString(), ((controller.position ?? 0) / 1000).toInt());
+    // print("[PLAYER] SAVED WATCH DURATION");
     controller.dispose();
     _controlsTimer?.cancel();
     super.dispose();

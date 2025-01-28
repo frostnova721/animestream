@@ -19,6 +19,7 @@ enum HiveKey {
   theme,
   watching,
   animeOnsenToken,
+  lastWatchDuration,
 
   @deprecated
   token,

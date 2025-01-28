@@ -101,7 +101,7 @@ class Gojo extends AnimeProvider {
       sources?.forEach((i) => update(
             [
               Stream(
-                quality: i['quality'] == 'master' ? "multi-quality" : i['quality'],
+                quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
                 link: i['url'],
                 isM3u8: i['url'].endsWith('.m3u8'),
                 server: provider,

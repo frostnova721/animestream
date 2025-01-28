@@ -36,6 +36,8 @@ abstract class VideoController {
 
   void addListener(VoidCallback cb);
 
+  void setFit(BoxFit fit);
+
   bool? get isPlaying;
 
   bool? get isBuffering;
@@ -77,7 +79,7 @@ class BetterPlayerWrapper implements VideoController {
   int? get duration => controller.videoPlayerController?.value.duration?.inMilliseconds;
 
   @override
-  int? get buffered => controller.videoPlayerController?.value.buffered.last.end.inSeconds;
+  int? get buffered => controller.videoPlayerController?.value.buffered.lastOrNull?.end.inSeconds;
 
   @override
   Future<void> pause() {
@@ -112,6 +114,11 @@ class BetterPlayerWrapper implements VideoController {
   @override
   void addListener(VoidCallback cb) {
     controller.videoPlayerController?.addListener(cb);
+  }
+  
+  @override
+  void setFit(BoxFit fit) {
+    return controller.setOverriddenFit(fit);
   }
 }
 
@@ -174,6 +181,11 @@ class VideoPlayerWindowsWrapper implements VideoController {
   
   @override
   int? get buffered => null;
+  
+  @override
+  void setFit(BoxFit fit) {
+    return;
+  }
 }
 
 // un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26

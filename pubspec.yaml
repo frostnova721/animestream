@@ -33,7 +33,6 @@ dependencies:
   dynamic_color: ^1.7.0
   flutter_dotenv: ^5.2.1
   app_links: ^6.3.2
-  # flutter_downloader: ^1.11.8
 
   # Local storage
   hive: ^2.2.3
@@ -52,11 +51,11 @@ dependencies:
   # UI
   pull_to_refresh: ^2.0.0
   flutter_markdown: ^0.6.20
-  # webview_flutter: ^4.7.0
   desktop_webview_window: ^0.2.3
-  # flutter_inappwebview: ^6.1.5
   cached_network_image: ^3.3.1
   cupertino_icons: ^1.0.2
+  window_manager: ^0.4.3
+  bitsdojo_window: ^0.1.6
 
   # Misc
   flutter_native_splash: ^2.4.0

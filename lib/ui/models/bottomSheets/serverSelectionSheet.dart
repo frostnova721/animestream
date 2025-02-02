@@ -211,6 +211,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                             streamInfo: streamSources[index],
                             id: widget.bottomSheetContentData.id,
                             altDatabases: widget.altDatabases,
+                            lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,
                           ),
                           episodes: widget.bottomSheetContentData.epLinks,
                         ),

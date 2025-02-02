@@ -57,6 +57,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       throw new Exception("Index too low or too high. Item not found!");
     }
     currentSources = [];
+    bool alreadyCalledaSource = false;
     final index = widget.customIndex != null
         ? widget.customIndex
         : nextEpisode
@@ -64,12 +65,14 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
             : currentEpIndex - 1;
     final srcs = await widget.getEpisodeSources(widget.epLinks[index!], (list, finished) {
       if (list.length > 0) {
-        if (list[0].server == widget.preferredServer) {
+        if (list[0].server == widget.preferredServer && !alreadyCalledaSource) {
           widget.playVideo(list[0].link, preserveProgress: widget.preserveProgress);
           currentEpIndex = index;
           widget.refreshPage(currentEpIndex, list[0]);
           widget.updateCurrentEpIndex(currentEpIndex);
           Navigator.pop(context);
+          alreadyCalledaSource = true;
+          return;
         }
       }
       if (mounted)

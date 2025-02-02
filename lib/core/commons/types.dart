@@ -31,6 +31,7 @@ class ServerSelectionBottomSheetContentData {
   final int id;
   final String cover;
   final int? totalEpisodes;
+  final double? lastWatchDuration;
 
   ServerSelectionBottomSheetContentData({
     required this.episodeIndex,
@@ -39,6 +40,7 @@ class ServerSelectionBottomSheetContentData {
     required this.title,
     required this.id,
     required this.cover,
+    required this.lastWatchDuration,
     this.totalEpisodes,
   });
 }
@@ -49,6 +51,7 @@ class WatchPageInfo {
   Stream streamInfo;
   int id;
   List<AlternateDatabaseId> altDatabases;
+  double? lastWatchDuration;
 
   WatchPageInfo({
     required this.id,
@@ -56,6 +59,7 @@ class WatchPageInfo {
     required this.episodeNumber,
     required this.streamInfo,
     required this.altDatabases,
+    required this.lastWatchDuration,
   });
 }
 

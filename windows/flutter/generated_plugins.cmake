@@ -5,12 +5,15 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   app_links
   awesome_notifications
+  bitsdojo_window_windows
   desktop_webview_window
   dynamic_color
   flutter_secure_storage_windows
   permission_handler_windows
+  screen_retriever_windows
   url_launcher_windows
   video_player_win
+  window_manager
   window_to_front
 )
 

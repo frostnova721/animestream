@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
+import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:flutter/material.dart';
@@ -60,17 +61,11 @@ class _ControlsState extends State<Controls> {
     wakelockEnabled = true;
     debugPrint("wakelock enabled");
 
-    //  WidgetsBinding.instance.addPostFrameCallback((_) {
-    //   FocusScope.of(context).requestFocus(_fn);
-    // });
-
     currentEpIndex = widget.episode['currentEpIndex'];
 
     _controller = widget.controller;
 
     finalEpisodeReached = currentEpIndex + 1 >= widget.episode['epLinks'].length;
-
-    // assignSettings();
 
     //this widget will only be open when the video is initialised. so to hide the controls, call it first
     widget.hideControlsOnTimeout();
@@ -144,8 +139,8 @@ class _ControlsState extends State<Controls> {
     }
 
     //calculate the percentage
-    final currentByTotal = (_controller.position ?? 0) / 1000 / (_controller.duration ?? 0);
-    if (currentByTotal / 1000 >= 75 && !preloadStarted && (_controller.isPlaying ?? false)) {
+    final currentByTotal = (_controller.position ?? 0) / (_controller.duration ?? 0);
+    if (currentByTotal * 100 >= 75 && !preloadStarted && (_controller.isPlaying ?? false)) {
       print("====================== above 75% ======================");
       print("when position= ${(_controller.position ?? 0) / 1000}, duration= ${(_controller.duration ?? 0) / 1000} ");
       preloadNextEpisode();
@@ -156,16 +151,9 @@ class _ControlsState extends State<Controls> {
   //probably redundant function. might remove later
   void updateCurrentEpIndex(int updatedIndex) {
     currentEpIndex = updatedIndex;
+    sliderValue = 0;
   }
 
-  //assign player settings - directly take the values, its faster
-  // Future<void> assignSettings() async {
-  //   final settings = currentUserSettings;
-  //   setState(() {
-  //     skipDuration = settings?.skipDuration ?? 10;
-  //     megaSkipDuration = settings?.megaSkipDuration ?? 85;
-  //   });
-  // }
 
   Future<void> playPreloadedEpisode() async {
     //just return if episode ended and next video is being loaded or the episode is the last one
@@ -248,23 +236,6 @@ class _ControlsState extends State<Controls> {
       setState(() {
         currentSources = srcs;
       });
-  }
-
-  /**Format seconds to hour:min:sec format */
-  String getFormattedTime(int timeInSeconds) {
-    String formatTime(int val) {
-      return val.toString().padLeft(2, '0');
-    }
-
-    int hours = timeInSeconds ~/ 3600;
-    int minutes = (timeInSeconds % 3600) ~/ 60;
-    int seconds = timeInSeconds % 60;
-
-    String formattedHours = hours == 0 ? '' : formatTime(hours);
-    String formattedMins = formatTime(minutes);
-    String formattedSeconds = formatTime(seconds);
-
-    return "${formattedHours.length > 0 ? "$formattedHours:" : ''}$formattedMins:$formattedSeconds";
   }
 
   void fastForward(int seekDuration) async {

@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
@@ -12,6 +11,7 @@ import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/customControls.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/widgets/desktopControls.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
@@ -102,27 +102,24 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
     showSubs = info.streamInfo.subtitle != null;
 
-    // final config = BetterPlayerConfiguration(
-    //     aspectRatio: 16 / 9,
-    //     fit: BoxFit.contain,
-    //     expandToFill: true,
-    //     autoPlay: true,
-    //     autoDispose: true,
-    //     controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false));
-
-    // controller = BetterPlayerController(config);
     controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
 
     //try to get the qualities. play with the default link if qualities arent available
     try {
       if (!info.streamInfo.isM3u8)
-        playVideo(info.streamInfo.link);
+        playVideo(info.streamInfo.link).then((val) {
+          if (widget.info.lastWatchDuration != null)
+            controller.seekTo(Duration(
+                milliseconds: ((widget.info.lastWatchDuration! / 100) * (controller.duration ?? 1))
+                    .toInt())); //percentage to value
+        });
       else
         getQualities().then((val) {
           print(qualities);
           print("${info.streamInfo.subtitle ?? "no subs!"}");
           final preferredOne = qualities.where((item) => item['quality'] == selectedQuality).toList();
-          changeQuality(preferredOne.isNotEmpty ? preferredOne[0]['link']! : qualities[0]['link']!, null);
+          changeQuality(preferredOne.isNotEmpty ? preferredOne[0]['link']! : qualities[0]['link']!, null,
+              skipTolastWatched: true);
         });
     } catch (err) {
       print(err.toString());
@@ -146,7 +143,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   Future<void> playVideo(String url) async {
     // await controller.setupDataSource(dataSourceConfig(url, headers: info.streamInfo.customHeaders));
-    await controller.initiateVideo(url, headers: headers);
+    await controller.initiateVideo(url, headers: info.streamInfo.customHeaders);
     setState(() {
       initialised = true;
     });
@@ -211,6 +208,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           // preserveProgress ? controller.videoPlayerController!.value.position.inSeconds : null,
           preserveProgress ? ((controller.position ?? 0) / 1000).toInt() : null,
         );
+        return;
       }
     } catch (err) {
       if (currentUserSettings?.showErrors ?? false) floatingSnackBar(context, err.toString());
@@ -221,10 +219,16 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     }
   }
 
-  Future<void> changeQuality(String link, int? currentTime) async {
+  Future<void> changeQuality(String link, int? currentTime, {bool skipTolastWatched = false}) async {
     if (currentQualityLink != link) {
       await playVideo(link);
-      if (currentTime != null) controller.seekTo(Duration(seconds: currentTime));
+      int? seekTime = currentTime;
+      if (skipTolastWatched) {
+        //calculate seconds from stored watched percentage
+        seekTime = (((info.lastWatchDuration! * (controller.duration ?? 1)) / 100) / 1000).toInt();
+      }
+      if (skipTolastWatched) print("last watch: ${seekTime}");
+      if (seekTime != null) await controller.seekTo(Duration(seconds: seekTime));
       currentQualityLink = link;
     }
   }
@@ -291,7 +295,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     ignoring: !_visible,
                     child: initialised
                         // ? Container()
-                        ? Controls(
+                        ? Platform.isAndroid ? Controls(
                             controller: controller,
                             bottomControls: bottomControls(),
                             topControls: topControls(),
@@ -308,7 +312,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             preferredServer: info.streamInfo.server,
                             isControlsVisible: _visible,
                             toggleControls: toggleControls,
-                          )
+                          ) : Desktopcontrols(controller: controller)
                         : Container(),
                   ),
                 ],
@@ -781,8 +785,13 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
     SystemChrome.setPreferredOrientations(
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
-    // addLastWatchedDuration(widget.info.id.toString(), ((controller.position ?? 0) / 1000).toInt());
-    // print("[PLAYER] SAVED WATCH DURATION");
+    if (controller.duration != null && controller.duration! > 0) {
+      //store the exact percentage of watched
+      addLastWatchedDuration(widget.info.id.toString(), {
+        currentEpIndex + 1: ((controller.position ?? 0) / controller.duration!) * 100
+      });
+    }
+    print("[PLAYER] SAVED WATCH DURATION");
     controller.dispose();
     _controlsTimer?.cancel();
     super.dispose();

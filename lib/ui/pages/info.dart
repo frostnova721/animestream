@@ -58,7 +58,8 @@ class _InfoState extends State<Info> {
   int currentPageIndex = 0;
   int watched = 1;
   int viewModeIndexLength = 3;
-  int lastWatchedDuration = 0;
+
+  Map? lastWatchedDurationMap = {};
 
   bool showBar = false;
   bool started = false;
@@ -88,6 +89,7 @@ class _InfoState extends State<Info> {
       });
     }
     final item = await getAnimeWatchProgress(widget.id, mediaListStatus);
+    await getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDurationMap = it ?? {});
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 
@@ -118,7 +120,7 @@ class _InfoState extends State<Info> {
         }
       }
 
-      getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDuration = it); // retrieve the last watch duration
+      // getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDurationMap = it ?? {}); // retrieve the last watch duration
       final info = await DatabaseHandler().getAnimeInfo(id);
       altDatabases = info.alternateDatabases;
       setState(() {
@@ -706,11 +708,13 @@ class _InfoState extends State<Info> {
 
   Container _continueButton() {
     return Container(
+      width: 325,
       margin: EdgeInsets.only(
         top: 25,
         left: 20,
         right: 20,
       ),
+      padding: EdgeInsets.only(left: 20, right: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         border: Border.all(color: appTheme.accentColor),
@@ -740,6 +744,7 @@ class _InfoState extends State<Info> {
                   title: data.title['english'] ?? data.title['romaji'] ?? '',
                   id: widget.id,
                   cover: data.cover,
+                  lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
                 ),
                 type: Type.watch,
                 getWatched: getWatched,
@@ -751,51 +756,51 @@ class _InfoState extends State<Info> {
             }
           });
         },
-        child:
-            // Column(
-            // crossAxisAlignment: CrossAxisAlignment.start,
-            // mainAxisSize: MainAxisSize.min,
-            // children: [
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
             Container(
-          width: 325,
-          height: 80,
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  '${started ? 'Continue' : 'Start'} from:',
-                  style: TextStyle(
-                    color: appTheme.textMainColor,
-                    fontFamily: "Rubik",
-                    fontSize: 14,
-                  ),
+              width: 325,
+              height: 80,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      '${started ? 'Continue' : 'Start'} from:',
+                      style: TextStyle(
+                        color: appTheme.textMainColor,
+                        fontFamily: "Rubik",
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      'Episode ${watched < epLinks.length ? watched + 1 : watched}',
+                      style: TextStyle(
+                        color: appTheme.textMainColor,
+                        fontFamily: "Rubik",
+                        fontSize: 17,
+                      ),
+                    ),
+                  ],
                 ),
-                Text(
-                  'Episode ${watched < epLinks.length ? watched + 1 : watched}',
-                  style: TextStyle(
-                    color: appTheme.textMainColor,
-                    fontFamily: "Rubik",
-                    fontSize: 17,
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ),
 
-        //needs to store progress :(
-        // Container(
-        //   width: 325 * (lastWatchedDuration / 100),
-        //   margin: EdgeInsets.only(left: 15),
-        //   height: 2,
-        //   decoration: BoxDecoration(
-        //     borderRadius: BorderRadius.circular(10),
-        //     color: appTheme.textMainColor,
-        //   ),
-        // )
-        // ],
-        // ),
+            //needs to store progress :(
+            if (lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched] != null)
+              Container(
+                width: 285 * ((lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched] ?? 0) / 100)
+                    as double,
+                height: 1.8,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  color: appTheme.textMainColor,
+                ),
+              )
+          ],
+        ),
       ),
     );
   }
@@ -830,7 +835,7 @@ class _InfoState extends State<Info> {
         crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 5 : 10,
       ),
       shrinkWrap: true,
-      itemCount:  visibleEpList[currentPageIndex].length,
+      itemCount: visibleEpList[currentPageIndex].length,
       physics: NeverScrollableScrollPhysics(),
       padding: EdgeInsets.all(10),
       itemBuilder: (context, index) => GestureDetector(
@@ -868,6 +873,8 @@ class _InfoState extends State<Info> {
                                       title: data.title['english'] ?? data.title['romaji'] ?? '',
                                       id: widget.id,
                                       cover: data.cover,
+                                      lastWatchDuration:
+                                          lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
                                     ),
                                     type: Type.values[ind],
                                     getWatched: getWatched,
@@ -897,6 +904,7 @@ class _InfoState extends State<Info> {
                   bottomSheetContentData: ServerSelectionBottomSheetContentData(
                       totalEpisodes: data.episodes,
                       epLinks: epLinks,
+                      lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
                       episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
                       selectedSource: selectedSource,
                       title: data.title['english'] ?? data.title['romaji'] ?? '',
@@ -922,10 +930,7 @@ class _InfoState extends State<Info> {
           alignment: Alignment.center,
           child: Text(
             "${index + 1}",
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
         ),
       ),
@@ -963,13 +968,15 @@ class _InfoState extends State<Info> {
                     return ServerSelectionBottomSheet(
                       altDatabases: altDatabases,
                       bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                          totalEpisodes: data.episodes,
-                          epLinks: epLinks,
-                          episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                          selectedSource: selectedSource,
-                          title: data.title['english'] ?? data.title['romaji'] ?? '',
-                          id: widget.id,
-                          cover: data.cover),
+                        totalEpisodes: data.episodes,
+                        epLinks: epLinks,
+                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                        selectedSource: selectedSource,
+                        title: data.title['english'] ?? data.title['romaji'] ?? '',
+                        id: widget.id,
+                        lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
+                        cover: data.cover,
+                      ),
                       type: Type.watch,
                       getWatched: getWatched,
                     );
@@ -1024,6 +1031,8 @@ class _InfoState extends State<Info> {
                                         selectedSource: selectedSource,
                                         title: data.title['english'] ?? data.title['romaji'] ?? '',
                                         id: widget.id,
+                                        lastWatchDuration:
+                                            lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
                                         cover: data.cover,
                                       ),
                                       type: Type.download,
@@ -1105,6 +1114,8 @@ class _InfoState extends State<Info> {
                               title: data.title['english'] ?? data.title['romaji'] ?? '',
                               id: widget.id,
                               cover: data.cover,
+                              lastWatchDuration:
+                                  lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
                             ),
                             type: Type.watch,
                             getWatched: getWatched,
@@ -1167,6 +1178,7 @@ class _InfoState extends State<Info> {
                                             title: data.title['english'] ?? data.title['romaji'] ?? '',
                                             id: widget.id,
                                             cover: data.cover,
+                                            lastWatchDuration: null,
                                           ),
                                           type: Type.download,
                                         );

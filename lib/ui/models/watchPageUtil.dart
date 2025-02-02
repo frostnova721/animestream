@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animestream/ui/models/playerUtils.dart';
 // import 'package:av_media_player/player.dart';
 // import 'package:av_media_player/widget.dart';
@@ -32,6 +34,8 @@ abstract class VideoController {
 
   Future<void> setSpeed(double speed);
 
+  Future<void> setVolume(double volume);
+
   void dispose();
 
   void addListener(VoidCallback cb);
@@ -50,20 +54,22 @@ abstract class VideoController {
 }
 
 class BetterPlayerWrapper implements VideoController {
-  final BetterPlayerController controller = BetterPlayerController(
-    BetterPlayerConfiguration(
-      aspectRatio: 16 / 9,
-      fit: BoxFit.contain,
-      expandToFill: true,
-      autoPlay: true,
-      autoDispose: true,
-      controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false),
-    ),
+  late BetterPlayerController controller = BetterPlayerController(_config);
+
+  final List<VoidCallback?> listeners = [];
+
+  static final _config = BetterPlayerConfiguration(
+    aspectRatio: 16 / 9,
+    fit: BoxFit.contain,
+    expandToFill: true,
+    autoPlay: true,
+    autoDispose: true,
+    controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false),
   );
 
   @override
   Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
-    await controller.setupDataSource(dataSourceConfig(url, headers: headers));
+    return await controller.setupDataSource(dataSourceConfig(url, headers: headers));
   }
 
   @override
@@ -113,23 +119,36 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   void addListener(VoidCallback cb) {
+    listeners.add(cb);
     controller.videoPlayerController?.addListener(cb);
   }
-  
+
   @override
   void setFit(BoxFit fit) {
     return controller.setOverriddenFit(fit);
+  }
+  
+  @override
+  Future<void> setVolume(double volume) {
+    return controller.setVolume(volume);
   }
 }
 
 class VideoPlayerWindowsWrapper implements VideoController {
   WinVideoPlayerController controller = WinVideoPlayerController.network("");
 
+  final List<VoidCallback> _listeners = [];
+
   @override
   Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
+    //kill the player and create a new instance :)
+    await controller.dispose();
     controller = WinVideoPlayerController.network(url);
     await controller.initialize();
-    controller.play();
+    for(final listener in _listeners) {
+      controller.addListener(listener);
+    }
+    await controller.play();
   }
 
   @override
@@ -176,20 +195,26 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   void addListener(VoidCallback cb) {
+    _listeners.add(cb);
     controller.addListener(cb);
   }
-  
+
   @override
   int? get buffered => null;
-  
+
   @override
   void setFit(BoxFit fit) {
     return;
   }
+  
+  @override
+  Future<void> setVolume(double volume) {
+    return controller.setVolume(volume);
+  }
 }
 
-// un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26
- 
+// un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26 for android
+
 // class AvPlayerWrapper implements VideoController {
 //   final AvMediaPlayer controller = AvMediaPlayer();
 

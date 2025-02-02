@@ -124,7 +124,7 @@ class AnimePahe extends AnimeProvider {
             quality: e['quality']! + " [${e['size']}]",
             server: e['server'] ?? "unknown",
             link: val,
-            isM3u8: val.endsWith(".m3u8"),
+            isM3u8: val.contains(".m3u8"),
             backup: false,
             subtitle: null,
             subtitleFormat: null,

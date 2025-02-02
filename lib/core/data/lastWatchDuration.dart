@@ -4,31 +4,24 @@ import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/database/database.dart';
 
 /// Retruns the duration on last watched episode in seconds
-Future<int> getLastWatchedDuration(String anilistId) async {
+Future<Map?> getLastWatchedDuration(String anilistId) async {
   //just handle anilist
-  if (currentUserSettings?.database != Databases.anilist) return 0;
+  if (currentUserSettings?.database != Databases.anilist) return null;
 
   final Map<dynamic, dynamic> lastWatch = await getVal(HiveKey.lastWatchDuration, boxName: "animeInfo") ?? {};
   if (lastWatch.isEmpty) {
     print("EMPTY MAP 'lastWatchDuration'");
-    return 0;
+    return null;
   }
-  final int item = lastWatch[anilistId] ?? 0;
-  // if (item.isEmpty) {
-  //   print("NO QUERY FOR ALTERNATE SEARCHING");
-  //   return 0;
-  // }
+  final Map<dynamic, dynamic>? item = lastWatch[anilistId] ?? null;
 
   return item;
 }
 
-
-/// aah its f-cked
-Future<void> addLastWatchedDuration(String anilistId, int duration) async {
+Future<void> addLastWatchedDuration(String anilistId, Map<int, double> item) async {
   Map<dynamic, dynamic> map = await getVal(HiveKey.lastWatchDuration, boxName: "animeInfo") ?? {};
-  // if (map == null) map = {};
 
-  map[anilistId] = duration;
+  map[anilistId] = item;
 
   Map<dynamic, dynamic> filteredMap = map;
 

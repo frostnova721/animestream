@@ -53,9 +53,8 @@ dependencies:
   flutter_markdown: ^0.6.20
   desktop_webview_window: ^0.2.3
   cached_network_image: ^3.3.1
-  cupertino_icons: ^1.0.2
   window_manager: ^0.4.3
-  bitsdojo_window: ^0.1.6
+  fluentui_system_icons: ^1.1.273
 
   # Misc
   flutter_native_splash: ^2.4.0

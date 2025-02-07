@@ -312,7 +312,14 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                             preferredServer: info.streamInfo.server,
                             isControlsVisible: _visible,
                             toggleControls: toggleControls,
-                          ) : Desktopcontrols(controller: controller)
+                          ) : Desktopcontrols(controller: controller,episode: {
+                              'getEpisodeSources': getEpisodeSources,
+                              'epLinks': epLinks,
+                              'currentEpIndex': currentEpIndex,
+                              'showTitle': info.animeTitle,
+                            },
+                            refreshPage: refreshPage,
+                            updateWatchProgress: updateWatchProgress,)
                         : Container(),
                   ),
                 ],

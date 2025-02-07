@@ -1,6 +1,8 @@
+import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
 
 class AppWrapper extends StatelessWidget {
@@ -10,7 +12,7 @@ class AppWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: (defaultTargetPlatform == TargetPlatform.windows)
+      appBar: (defaultTargetPlatform == TargetPlatform.windows && !Provider.of<ThemeProvider>(context).isFullScreen)
           ? PreferredSize(
               preferredSize: const Size(double.maxFinite, 34),
               child: Row(
@@ -53,21 +55,7 @@ class AppWrapper extends StatelessWidget {
           : null,
       body: Navigator(
         onGenerateRoute: (settings) {
-          bool fs = false;
-          final page = Scaffold(
-            body: ElevatedButton(
-                onPressed: () async {
-                  fs = !fs;
-                  // windowManager.setTitleBarStyle(TitleBarStyle.hidden);
-                  // windowManager.setAlwaysOnTop(fs);
-                  
-                  windowManager.setFullScreen(fs);
-
-                  // windowManager.setAsFrameless();
-                },
-                child: Text("FullScreen!")),
-          );
-          // Widget page = firstPage;
+          Widget page = firstPage;
           return MaterialPageRoute(builder: (context) => page);
         },
       ),

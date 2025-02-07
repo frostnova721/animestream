@@ -17,6 +17,15 @@ class ThemeProvider with ChangeNotifier {
 
   ThemeItem get themeItem => _themeItem;
 
+  bool _isFullScreen = false;
+
+  bool get isFullScreen => _isFullScreen;
+
+  set isFullScreen(bool fs) {
+    _isFullScreen = fs;
+    notifyListeners();
+  }
+
   set theme(AnimeStreamTheme selectedTheme) {
     _theme = selectedTheme;
 

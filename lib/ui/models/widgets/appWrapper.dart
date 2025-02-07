@@ -58,8 +58,11 @@ class AppWrapper extends StatelessWidget {
             body: ElevatedButton(
                 onPressed: () async {
                   fs = !fs;
-                  windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+                  // windowManager.setTitleBarStyle(TitleBarStyle.hidden);
+                  // windowManager.setAlwaysOnTop(fs);
+                  
                   windowManager.setFullScreen(fs);
+
                   // windowManager.setAsFrameless();
                 },
                 child: Text("FullScreen!")),

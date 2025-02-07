@@ -8,6 +8,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
   flutter_secure_storage_linux
   gtk
+  open_file_linux
   screen_retriever_linux
   url_launcher_linux
   window_manager

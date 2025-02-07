@@ -38,8 +38,13 @@ void main(List<String> args) async {
     WidgetsFlutterBinding.ensureInitialized();
 
     if (Platform.isWindows) {
+
+      final opts = WindowOptions(
+        titleBarStyle: TitleBarStyle.hidden,
+      );
       await windowManager.ensureInitialized();
-      windowManager.setAsFrameless();
+      await windowManager.waitUntilReadyToShow(opts);
+      // windowManager.setAsFrameless();
     }
 
     final Directory dir = await getApplicationDocumentsDirectory();

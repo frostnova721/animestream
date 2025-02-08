@@ -78,7 +78,6 @@ Future<void> migrateToSecureStorage() async {
     await storeVal(HiveKey.token, null);
     print("[STARTUP] Migrated to Secure Storage");
   }
-  ;
 }
 
 Future<void> loadAndAssignSettings() async {

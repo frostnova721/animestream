@@ -7,6 +7,7 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/lastWatchDuration.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
+import 'package:animestream/ui/models/controlsProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/customControls.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -18,6 +19,7 @@ import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class Watch extends StatefulWidget {
   final String selectedSource;
@@ -295,31 +297,37 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                     ignoring: !_visible,
                     child: initialised
                         // ? Container()
-                        ? Platform.isAndroid ? Controls(
-                            controller: controller,
-                            bottomControls: bottomControls(),
-                            topControls: topControls(),
-                            episode: {
-                              'getEpisodeSources': getEpisodeSources,
-                              'epLinks': epLinks,
-                              'currentEpIndex': currentEpIndex,
-                            },
-                            refreshPage: refreshPage,
-                            updateWatchProgress: updateWatchProgress,
-                            isControlsLocked: isControlsLocked,
-                            hideControlsOnTimeout: hideControlsOnTimeout,
-                            playAnotherEpisode: playAnotherEpisode,
-                            preferredServer: info.streamInfo.server,
-                            isControlsVisible: _visible,
-                            toggleControls: toggleControls,
-                          ) : Desktopcontrols(controller: controller,episode: {
-                              'getEpisodeSources': getEpisodeSources,
-                              'epLinks': epLinks,
-                              'currentEpIndex': currentEpIndex,
-                              'showTitle': info.animeTitle,
-                            },
-                            refreshPage: refreshPage,
-                            updateWatchProgress: updateWatchProgress,)
+                        ? ChangeNotifierProvider(
+                            create: (context) => ControlsProvider(
+                                  controller: controller,
+                                  episode: {
+                                    'getEpisodeSources': getEpisodeSources,
+                                    'epLinks': epLinks,
+                                    'currentEpIndex': currentEpIndex,
+                                  },
+                                  preferredServer: info.streamInfo.server,
+                                  updateWatchProgress: updateWatchProgress,
+                                  refreshPage: refreshPage,
+                                  playAnotherEpisode: playAnotherEpisode,
+                                ),
+                            child: Platform.isAndroid
+                                ? Controls(
+                                    bottomControls: bottomControls(),
+                                    topControls: topControls(),
+                                    isControlsLocked: isControlsLocked,
+                                    hideControlsOnTimeout: hideControlsOnTimeout,
+                                  )
+                                : Desktopcontrols(
+                                    controller: controller,
+                                    episode: {
+                                      'getEpisodeSources': getEpisodeSources,
+                                      'epLinks': epLinks,
+                                      'currentEpIndex': currentEpIndex,
+                                      'showTitle': info.animeTitle,
+                                    },
+                                    refreshPage: refreshPage,
+                                    updateWatchProgress: updateWatchProgress,
+                                  ))
                         : Container(),
                   ),
                 ],
@@ -794,9 +802,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
-      addLastWatchedDuration(widget.info.id.toString(), {
-        currentEpIndex + 1: ((controller.position ?? 0) / controller.duration!) * 100
-      });
+      addLastWatchedDuration(
+          widget.info.id.toString(), {currentEpIndex + 1: ((controller.position ?? 0) / controller.duration!) * 100});
     }
     print("[PLAYER] SAVED WATCH DURATION");
     controller.dispose();

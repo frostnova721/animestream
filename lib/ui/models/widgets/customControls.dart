@@ -1,43 +1,26 @@
-import 'dart:async';
-
-import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/playerUtils.dart';
-import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
-import 'package:animestream/core/commons/types.dart';
+
+import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
+import 'package:animestream/ui/models/controlsProvider.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 
 class Controls extends StatefulWidget {
-  final VideoController controller;
   final Widget bottomControls;
   final Widget topControls;
-  final Map<String, dynamic> episode;
-  final Future<void> Function(int, Stream) refreshPage;
-  final Future<void> Function(int) updateWatchProgress;
   final bool Function() isControlsLocked;
   final void Function() hideControlsOnTimeout;
-  final Future<void> Function(String) playAnotherEpisode;
-  final String preferredServer;
-  final bool isControlsVisible;
-  final void Function(bool) toggleControls;
 
   const Controls({
     super.key,
-    required this.controller,
     required this.bottomControls,
     required this.topControls,
-    required this.episode,
-    required this.refreshPage,
-    required this.updateWatchProgress,
     required this.isControlsLocked,
     required this.hideControlsOnTimeout,
-    required this.playAnotherEpisode,
-    required this.preferredServer,
-    required this.isControlsVisible,
-    required this.toggleControls,
   });
 
   @override
@@ -45,212 +28,25 @@ class Controls extends StatefulWidget {
 }
 
 class _ControlsState extends State<Controls> {
-  late VideoController _controller;
-
   bool startedLoadingNext = false;
 
-  int currentEpIndex = 0;
-  bool preloadStarted = false;
   bool calledAutoNext = false;
 
   @override
   void initState() {
     super.initState();
-
-    WakelockPlus.enable();
-    wakelockEnabled = true;
-    debugPrint("wakelock enabled");
-
-    currentEpIndex = widget.episode['currentEpIndex'];
-
-    _controller = widget.controller;
-
-    finalEpisodeReached = currentEpIndex + 1 >= widget.episode['epLinks'].length;
-
     //this widget will only be open when the video is initialised. so to hide the controls, call it first
     widget.hideControlsOnTimeout();
-
-    //append the listener
-    _controller.addListener(playerEventListener);
   }
 
-  List<Stream> currentSources = [];
-  List<Stream> preloadedSources = [];
-
-  IconData? playPause;
-
-  String currentTime = "0:00";
-  String maxTime = "0:00";
-
-  int selectedQuality = 0;
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
   int? megaSkipDuration = currentUserSettings?.megaSkipDuration ?? 85;
 
-  int sliderValue = 0;
-
-  bool buffering = false;
-  bool finalEpisodeReached = false;
-  bool wakelockEnabled = false;
-
-  //exactly! its the event listener function so that i dont have to reload the whole fkn watch page to see any changes
-  void playerEventListener() async {
-    //manage currentEpIndex and clear preloads if the index changed
-    if (currentEpIndex != widget.episode['currentEpIndex']) {
-      preloadedSources = [];
-      preloadStarted = false;
-      currentEpIndex = widget.episode['currentEpIndex'];
-    }
-
-    //hide the controls on timeout if visible
-    if (widget.isControlsVisible) {
-      widget.hideControlsOnTimeout();
-    }
-
-    //managing the UI updation
-    if (mounted)
-      setState(() {
-        int duration = ((_controller.duration ?? 0) / 1000).toInt();
-        int val = ((_controller.position ?? 0) / 1000).toInt();
-        sliderValue = val;
-        playPause = (_controller.isPlaying ?? false) ? Icons.pause_rounded : Icons.play_arrow_rounded;
-        currentTime = getFormattedTime(val);
-        maxTime = getFormattedTime(duration);
-        buffering = _controller.isBuffering ?? true;
-      });
-
-    if ((_controller.isPlaying ?? false) && !wakelockEnabled) {
-      WakelockPlus.enable();
-      wakelockEnabled = true;
-      debugPrint("wakelock enabled");
-    } else if (!(_controller.isPlaying ?? false) && wakelockEnabled) {
-      WakelockPlus.disable();
-      wakelockEnabled = false;
-      debugPrint("wakelock disabled");
-    }
-
-    //play the loaded episode if equal to duration
-    if (!finalEpisodeReached &&
-        _controller.duration != null &&
-        (_controller.position ?? 0) / 1000 == (_controller.duration ?? 0) / 1000) {
-      if (_controller.isPlaying ?? false) {
-        await _controller.pause();
-      }
-      await playPreloadedEpisode();
-    }
-
-    //calculate the percentage
-    final currentByTotal = (_controller.position ?? 0) / (_controller.duration ?? 0);
-    if (currentByTotal * 100 >= 75 && !preloadStarted && (_controller.isPlaying ?? false)) {
-      print("====================== above 75% ======================");
-      print("when position= ${(_controller.position ?? 0) / 1000}, duration= ${(_controller.duration ?? 0) / 1000} ");
-      preloadNextEpisode();
-      widget.updateWatchProgress(currentEpIndex);
-    }
-  }
-
   //probably redundant function. might remove later
-  void updateCurrentEpIndex(int updatedIndex) {
-    currentEpIndex = updatedIndex;
-    sliderValue = 0;
-  }
-
-
-  Future<void> playPreloadedEpisode() async {
-    //just return if episode ended and next video is being loaded or the episode is the last one
-    if (currentEpIndex + 1 >= widget.episode['epLinks'].length || calledAutoNext) {
-      return;
-    }
-    calledAutoNext = true;
-    if (preloadedSources.isNotEmpty) {
-      currentEpIndex = currentEpIndex + 1;
-
-      //try to get the preferred source otherwise use the first source from the list
-      final preferredServerLink = preloadedSources.where((source) => source.server == widget.preferredServer).toList();
-      print("${preferredServerLink[0].server}");
-      final src = preferredServerLink.length != 0 ? preferredServerLink[0] : preloadedSources[0];
-
-      widget.refreshPage(currentEpIndex, src);
-      await playVideo(src.link);
-    } else {
-      showModalBottomSheet(
-        context: context,
-        backgroundColor: appTheme.modalSheetBackgroundColor,
-        builder: (context) {
-          return CustomControlsBottomSheet(
-            getEpisodeSources: widget.episode['getEpisodeSources'],
-            currentSources: currentSources,
-            playVideo: playVideo,
-            next: true,
-            epLinks: widget.episode['epLinks'],
-            currentEpIndex: currentEpIndex,
-            refreshPage: widget.refreshPage,
-            updateCurrentEpIndex: updateCurrentEpIndex,
-          );
-        },
-      );
-    }
-  }
-
-  Future preloadNextEpisode() async {
-    if (currentEpIndex + 1 == widget.episode['epLinks'].length) {
-      print("final ep");
-      finalEpisodeReached = true;
-      preloadStarted = true; //to make sure this funcion doesnt get called over and over again if the last ep is reached
-      return;
-    }
-    preloadStarted = true;
-    preloadedSources = [];
-    final index = currentEpIndex + 1 == widget.episode['epLinks'].length ? null : currentEpIndex + 1;
-    if (index == null) {
-      print("On the final episode. No preloads available");
-      return;
-    }
-    List<Stream> srcs = [];
-    //its actually the getStreams function!
-    await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index], (list, finished) {
-      srcs = srcs + list;
-      if (finished) {
-        preloadedSources = srcs;
-        print("[PlAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
-      }
-    });
-  }
-
-  /**Play the video */
-  Future<void> playVideo(String url, {bool preserveProgress = false}) async {
-    preloadedSources = [];
-    await widget.playAnotherEpisode(url);
-    preloadStarted = false;
-    calledAutoNext = false;
-  }
-
-  Future getEpisodeSources(bool nextEpisode) async {
-    if ((currentEpIndex == 0 && !nextEpisode) ||
-        (currentEpIndex + 1 > widget.episode['epLinks'].length && nextEpisode)) {
-      throw new Exception("Index too low or too high. Item not found!");
-    }
-    currentSources = [];
-    final index = nextEpisode ? currentEpIndex + 1 : currentEpIndex - 1;
-    final srcs = await widget.episode['getEpisodeSources'](widget.episode['epLinks'][index]);
-    if (mounted)
-      setState(() {
-        currentSources = srcs;
-      });
-  }
-
-  void fastForward(int seekDuration) async {
-    if (((_controller.position ?? 0) / 1000 + seekDuration) <= 0) {
-      _controller.seekTo(Duration(seconds: 0));
-      return;
-    } else {
-      if (((_controller.position ?? 0) ~/ 1000 + seekDuration) >= (_controller.duration ?? 0) ~/ 1000) {
-        _controller.seekTo(Duration(milliseconds: (_controller.duration ?? 0) - 500));
-        return;
-      }
-      _controller.seekTo(Duration(seconds: (_controller.position ?? 0) ~/ 1000 + seekDuration));
-      return;
-    }
-  }
+  // void updateCurrentEpIndex(int updatedIndex) {
+  //   provider.state;
+  //   // sliderValue = 0;
+  // }
 
   @override
   void dispose() {
@@ -267,56 +63,51 @@ class _ControlsState extends State<Controls> {
     print(event);
     switch (event.logicalKey) {
       case LogicalKeyboardKey.mediaPlayPause:
-      case LogicalKeyboardKey.space:
-        _controller.isPlaying ?? false
-            ? {_controller.pause(), widget.toggleControls(!widget.isControlsVisible)}
-            : _controller.play();
-        break;
       case LogicalKeyboardKey.mediaPause:
-        _controller.pause();
+        provider.controller.pause();
         break;
       case LogicalKeyboardKey.mediaPlay:
-        _controller.play();
+        provider.controller.play();
         break;
       case LogicalKeyboardKey.mediaTrackNext:
-        if (currentEpIndex + 1 == widget.episode['epLinks'].length) return;
-        playPreloadedEpisode();
+        if (provider.state.currentEpIndex + 1 == provider.episode['epLinks'].length) return;
+        provider.playPreloadedEpisode();
         break;
       case LogicalKeyboardKey.mediaTrackPrevious:
-        if (currentEpIndex == 0) return;
+        if (provider.state.currentEpIndex == 0) return;
         showModalBottomSheet(
             isScrollControlled: true,
             backgroundColor: appTheme.modalSheetBackgroundColor,
             context: context,
             builder: (BuildContext context) {
               return CustomControlsBottomSheet(
-                getEpisodeSources: widget.episode['getEpisodeSources'],
-                currentSources: currentSources,
-                currentEpIndex: currentEpIndex,
-                playVideo: playVideo,
+                getEpisodeSources: provider.episode['getEpisodeSources'],
+                currentSources: provider.state.currentSources,
+                currentEpIndex: provider.state.currentEpIndex,
+                playVideo: provider.playVideo,
                 next: false,
-                refreshPage: widget.refreshPage,
-                epLinks: widget.episode['epLinks'],
-                updateCurrentEpIndex: updateCurrentEpIndex,
-                preferredServer: widget.preferredServer,
+                refreshPage: provider.refreshPage,
+                epLinks: provider.episode['epLinks'],
+                updateCurrentEpIndex: provider.updateCurrentEpIndex,
+                preferredServer: provider.preferredServer,
               );
             });
         break;
       case LogicalKeyboardKey.mediaFastForward:
-        fastForward(skipDuration ?? 10);
+        provider.fastForward(skipDuration ?? 10);
         break;
       case LogicalKeyboardKey.mediaRewind:
-        fastForward(-(skipDuration ?? 10));
+        provider.fastForward(-(skipDuration ?? 10));
         break;
-      case LogicalKeyboardKey.select:
-        {
-          // if (!widget.isControlsVisible) {
-          widget.toggleControls(!widget.isControlsVisible);
-          widget.hideControlsOnTimeout();
-          // }
-          break;
-        }
-        case LogicalKeyboardKey.f11:
+      // case LogicalKeyboardKey.select:
+      //   {
+      //     // if (!widget.isControlsVisible) {
+      //     widget.toggleControls(!widget.isControlsVisible);
+      //     widget.hideControlsOnTimeout();
+      //     // }
+      //     break;
+      //   }
+      // case LogicalKeyboardKey.f11:
 
       // case LogicalKeyboardKey.arrowUp:
       // case LogicalKeyboardKey.arrowDown:
@@ -333,8 +124,11 @@ class _ControlsState extends State<Controls> {
     }
   }
 
+  late ControlsProvider provider;
+
   @override
   Widget build(BuildContext context) {
+    provider = context.watch<ControlsProvider>();
     return KeyboardListener(
       focusNode: _fn,
       autofocus: true,
@@ -366,7 +160,7 @@ class _ControlsState extends State<Controls> {
                                 Row(
                                   children: [
                                     Text(
-                                      currentTime,
+                                      provider.state.currentTime,
                                       style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
                                     ),
                                     const Text(
@@ -374,7 +168,7 @@ class _ControlsState extends State<Controls> {
                                       style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
                                     ),
                                     Text(
-                                      maxTime,
+                                      provider.state.maxTime,
                                       style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
                                     ),
                                   ],
@@ -391,51 +185,36 @@ class _ControlsState extends State<Controls> {
                                   ignoring: widget.isControlsLocked(),
                                   child: Container(
                                     child: SliderTheme(
-                                        data: SliderThemeData(
-                                            trackHeight: 1.3,
-                                            thumbColor: appTheme.accentColor,
-                                            activeTrackColor: appTheme.accentColor,
-                                            inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
-                                            secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
-                                            thumbShape: widget.isControlsLocked() ? SliderComponentShape.noThumb : RoundSliderThumbShape(enabledThumbRadius: 6),
-                                            trackShape: EdgeToEdgeTrackShape(),
-                                            overlayShape: SliderComponentShape.noThumb),
-                                        child: Slider(
-                                          value: sliderValue.toDouble(),
-                                          secondaryTrackValue: _controller.buffered?.toDouble(),
-                                          onChanged: (val) {
-                                            setState(() {
-                                              sliderValue = val.toInt();
-                                              _controller.seekTo(Duration(seconds: val.toInt()));
-                                            });
-                                          },
-                                          onChangeStart: (value) {
-                                            _controller.pause();
-                                          },
-                                          onChangeEnd: (value) {
-                                            _controller.play();
-                                          },
-                                          min: 0,
-                                          max: (_controller.duration ?? 0) / 1000,
-                                        )
-                                        //  BetterPlayerMaterialVideoProgressBar(
-                                        //   _controller,
-                                        //   widget.controller,
-                                        //   onDragStart: () {
-                                        //     widget.controller.pause();
-                                        //   },
-                                        //   onDragEnd: () {
-                                        //     widget.controller.play();
-                                        //   },
-                                        //   colors: BetterPlayerProgressColors(
-                                        //     playedColor: appTheme.accentColor,
-                                        //     handleColor:
-                                        //         widget.isControlsLocked() ? Colors.transparent : appTheme.accentColor,
-                                        //     bufferedColor: Color.fromARGB(255, 167, 167, 167),
-                                        //     backgroundColor: Color.fromARGB(255, 94, 94, 94),
-                                        //   ),
-                                        // ),
-                                        ),
+                                      data: SliderThemeData(
+                                          trackHeight: 1.3,
+                                          thumbColor: appTheme.accentColor,
+                                          activeTrackColor: appTheme.accentColor,
+                                          inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
+                                          secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
+                                          thumbShape: widget.isControlsLocked()
+                                              ? SliderComponentShape.noThumb
+                                              : RoundSliderThumbShape(enabledThumbRadius: 6),
+                                          trackShape: EdgeToEdgeTrackShape(),
+                                          overlayShape: SliderComponentShape.noThumb),
+                                      child: Slider(
+                                        value: provider.state.sliderValue.toDouble(),
+                                        secondaryTrackValue: provider.controller.buffered?.toDouble(),
+                                        onChanged: (val) {
+                                          setState(() {
+                                            // provider.state = provider.state.copyWith();
+                                            provider.controller.seekTo(Duration(seconds: val.toInt()));
+                                          });
+                                        },
+                                        onChangeStart: (value) {
+                                          provider.controller.pause();
+                                        },
+                                        onChangeEnd: (value) {
+                                          provider.controller.play();
+                                        },
+                                        min: 0,
+                                        max: (provider.controller.duration ?? 0) / 1000,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -458,7 +237,7 @@ class _ControlsState extends State<Controls> {
   ElevatedButton megaSkipButton() {
     return ElevatedButton(
       onPressed: () {
-        fastForward(megaSkipDuration!);
+        provider.fastForward(megaSkipDuration!);
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color.fromARGB(68, 0, 0, 0),
@@ -498,7 +277,7 @@ class _ControlsState extends State<Controls> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          if (buffering)
+          if (provider.state.buffering)
             Container(
               width: 40,
               height: 40,
@@ -529,22 +308,23 @@ class _ControlsState extends State<Controls> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () async {
-                  if (currentEpIndex == 0) return floatingSnackBar(context, "Already on the first episode");
+                  if (provider.state.currentEpIndex == 0)
+                    return floatingSnackBar(context, "Already on the first episode");
                   showModalBottomSheet(
                       isScrollControlled: true,
                       backgroundColor: appTheme.modalSheetBackgroundColor,
                       context: context,
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
-                          getEpisodeSources: widget.episode['getEpisodeSources'],
-                          currentSources: currentSources,
-                          currentEpIndex: currentEpIndex,
-                          playVideo: playVideo,
+                          getEpisodeSources: provider.episode['getEpisodeSources'],
+                          currentSources: provider.state.currentSources,
+                          currentEpIndex: provider.state.currentEpIndex,
+                          playVideo: provider.playVideo,
                           next: false,
-                          refreshPage: widget.refreshPage,
-                          epLinks: widget.episode['epLinks'],
-                          updateCurrentEpIndex: updateCurrentEpIndex,
-                          preferredServer: widget.preferredServer,
+                          refreshPage: provider.refreshPage,
+                          epLinks: provider.episode['epLinks'],
+                          updateCurrentEpIndex: provider.updateCurrentEpIndex,
+                          preferredServer: provider.preferredServer,
                         );
                       });
                 },
@@ -565,7 +345,7 @@ class _ControlsState extends State<Controls> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () {
-                  fastForward(skipDuration != null ? -skipDuration! : -10);
+                  provider.fastForward(skipDuration != null ? -skipDuration! : -10);
                 },
                 child: Icon(
                   Icons.fast_rewind_rounded,
@@ -577,7 +357,7 @@ class _ControlsState extends State<Controls> {
           ),
           Container(
             // padding: EdgeInsets.only(left: 35, right: 35),
-            child: !buffering
+            child: !provider.state.buffering
                 ? Material(
                     color: Colors.transparent,
                     child: Container(
@@ -587,17 +367,19 @@ class _ControlsState extends State<Controls> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
-                          if (_controller.isPlaying ?? false) {
-                            playPause = Icons.play_arrow_rounded;
-                            _controller.pause();
+                          if (provider.state.playerState == PlayerState.playing) {
+                            // playPause = Icons.play_arrow_rounded;
+                            provider.controller.pause();
                           } else {
-                            playPause = Icons.pause_rounded;
-                            _controller.play();
+                            // playPause = Icons.pause_rounded;
+                            provider.controller.play();
                           }
                           setState(() {});
                         },
                         child: Icon(
-                          playPause,
+                          provider.state.playerState == PlayerState.playing
+                              ? Icons.pause_rounded
+                              : Icons.play_arrow_rounded,
                           color: Colors.white,
                           size: 45,
                         ),
@@ -623,7 +405,7 @@ class _ControlsState extends State<Controls> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () {
-                  fastForward(skipDuration ?? 10);
+                  provider.fastForward(skipDuration ?? 10);
                 },
                 child: Icon(
                   Icons.fast_forward_rounded,
@@ -646,11 +428,11 @@ class _ControlsState extends State<Controls> {
                 borderRadius: BorderRadius.circular(10),
                 onTap: () async {
                   //get next episode sources!
-                  if (currentEpIndex + 1 == widget.episode['epLinks'].length)
+                  if (provider.state.currentEpIndex + 1 == provider.episode['epLinks'].length)
                     return floatingSnackBar(context, "You are already in the final episode!");
-                  if (preloadedSources.isNotEmpty) {
+                  if (provider.state.preloadedSources.isNotEmpty) {
                     print("from preload");
-                    playPreloadedEpisode();
+                    provider.playPreloadedEpisode();
                   } else
                     showModalBottomSheet(
                       isScrollControlled: true,
@@ -658,15 +440,15 @@ class _ControlsState extends State<Controls> {
                       context: context,
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
-                          getEpisodeSources: widget.episode['getEpisodeSources'],
-                          currentSources: currentSources,
-                          currentEpIndex: currentEpIndex,
-                          playVideo: playVideo,
+                          getEpisodeSources: provider.episode['getEpisodeSources'],
+                          currentSources: provider.state.currentSources,
+                          currentEpIndex: provider.state.currentEpIndex,
+                          playVideo: provider.playVideo,
                           next: true,
-                          refreshPage: widget.refreshPage,
-                          epLinks: widget.episode['epLinks'],
-                          updateCurrentEpIndex: updateCurrentEpIndex,
-                          preferredServer: widget.preferredServer,
+                          refreshPage: provider.refreshPage,
+                          epLinks: provider.episode['epLinks'],
+                          updateCurrentEpIndex: provider.updateCurrentEpIndex,
+                          preferredServer: provider.preferredServer,
                         );
                       },
                     );

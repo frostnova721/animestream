@@ -41,3 +41,9 @@ enum SecureStorageKey {
 
   const SecureStorageKey(this.value);
 }
+
+enum PlayerState {
+  playing,
+  paused,
+  buffering,
+}

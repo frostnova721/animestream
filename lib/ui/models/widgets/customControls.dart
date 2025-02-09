@@ -13,6 +13,7 @@ class Controls extends StatefulWidget {
   final Widget bottomControls;
   final Widget topControls;
   final bool Function() isControlsLocked;
+  final bool isControlsVisible;
   final void Function() hideControlsOnTimeout;
 
   const Controls({
@@ -21,6 +22,7 @@ class Controls extends StatefulWidget {
     required this.topControls,
     required this.isControlsLocked,
     required this.hideControlsOnTimeout,
+    required this.isControlsVisible,
   });
 
   @override
@@ -37,6 +39,13 @@ class _ControlsState extends State<Controls> {
     super.initState();
     //this widget will only be open when the video is initialised. so to hide the controls, call it first
     widget.hideControlsOnTimeout();
+    context.read<ControlsProvider>().controller.addListener(controlHiderListener);
+  }
+
+  void controlHiderListener() {
+    if(widget.isControlsVisible) {
+      widget.hideControlsOnTimeout();
+    }
   }
 
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
@@ -100,13 +109,14 @@ class _ControlsState extends State<Controls> {
         provider.fastForward(-(skipDuration ?? 10));
         break;
       // case LogicalKeyboardKey.select:
-      //   {
-      //     // if (!widget.isControlsVisible) {
-      //     widget.toggleControls(!widget.isControlsVisible);
-      //     widget.hideControlsOnTimeout();
-      //     // }
-      //     break;
-      //   }
+        // {
+          // if (!provider.isControlsVisible) {
+          // widget.toggleControls(!provider.isControlsVisible);
+          // widget.hideControlsOnTimeout();
+          // }
+          // break;
+        // }
+        // }
       // case LogicalKeyboardKey.f11:
 
       // case LogicalKeyboardKey.arrowUp:

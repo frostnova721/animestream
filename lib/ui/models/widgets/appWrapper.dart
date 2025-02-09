@@ -14,7 +14,7 @@ class AppWrapper extends StatelessWidget {
     return Scaffold(
       appBar: (defaultTargetPlatform == TargetPlatform.windows && !Provider.of<ThemeProvider>(context).isFullScreen)
           ? PreferredSize(
-              preferredSize: const Size(double.maxFinite, 34),
+              preferredSize: const Size(double.maxFinite, 33),
               child: Row(
                 // backgroundColor: Colors.black,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -99,7 +99,7 @@ class _WindowButtonState extends State<WindowButton> {
         onTap: widget.onClick,
         child: Container(
           width: 45,
-          height: 30,
+          height: 33,
           alignment: Alignment.center,
           color: hovered ? widget.hoverColor : Colors.transparent,
           child: Icon(

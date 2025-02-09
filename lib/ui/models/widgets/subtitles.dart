@@ -1,14 +1,14 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/data/preferences.dart';
-import 'package:animestream/ui/models/extensions.dart';
-import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:flutter/material.dart';
 
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/subtitleParsers.dart';
+import 'package:animestream/core/data/preferences.dart';
+import 'package:animestream/ui/models/extensions.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/watchPageUtil.dart';
 
 class Subtitle {
   final Duration start;
@@ -21,6 +21,9 @@ class Subtitle {
     required this.end,
     required this.start,
   });
+
+  @override
+  String toString() => 'Subtitle(start: $start, end: $end, dialogue: $dialogue)';
 }
 
 class SubtitleSettings {
@@ -170,7 +173,7 @@ class _SubViewerState extends State<SubViewer> {
   @override
   void initState() {
     super.initState();
-    widget.controller.addListener(_updateSubtitle);
+     widget.controller.addListener(_updateSubtitle);
     initiateSubs().then((_) {
       loadSubs();
       print("subs initialized");
@@ -194,10 +197,11 @@ class _SubViewerState extends State<SubViewer> {
 
   void loadSubs() async {
     try {
+      print("loading ${widget.format.name} subs");
       switch (widget.format) {
         case SubtitleFormat.ASS:
           subs = await Subtitleparsers().parseAss(widget.subtitleSource);
-          case SubtitleFormat.VTT:
+        case SubtitleFormat.VTT:
           subs = await Subtitleparsers().parseVtt(widget.subtitleSource);
         // default:
         // throw Exception("Not implemented!");
@@ -214,20 +218,41 @@ class _SubViewerState extends State<SubViewer> {
     }
   }
 
+  int lastLineIndex = 0;
+
   void _updateSubtitle() {
     final currentPosition = widget.controller.position;
 
-    if(currentPosition == null) return;
+    if (currentPosition == null || subs.isEmpty) return;
+
+    int i = lastLineIndex;
 
     // Find the subtitle matching the current time
-    for (var subtitle in subs) {
-      if (currentPosition >= subtitle.start.inMilliseconds && currentPosition <= subtitle.end.inMilliseconds) {
-        if (mounted)
-          setState(() {
-            activeLine = subtitle.dialogue;
-          });
-        return;
+    // Search forward if we're past the current subtitle
+    if (i < subs.length && currentPosition > subs[i].end.inMilliseconds) {
+      while (i < subs.length && currentPosition > subs[i].end.inMilliseconds) {
+        i++;
       }
+    }
+    // Search backward if we're before the current subtitle
+    else if (i > 0 && currentPosition < subs[i].start.inMilliseconds) {
+      while (i > 0 && currentPosition < subs[i].start.inMilliseconds) {
+        i--;
+      }
+    }
+
+    lastLineIndex = i;
+
+    // Check if we're within the current subtitle's time range
+    if (i < subs.length &&
+        currentPosition >= subs[i].start.inMilliseconds &&
+        currentPosition <= subs[i].end.inMilliseconds) {
+      if (mounted) {
+        setState(() {
+          activeLine = subs[i].dialogue;
+        });
+      }
+      return;
     }
 
     //clear line when nothings there!
@@ -255,6 +280,7 @@ class _SubViewerState extends State<SubViewer> {
   Widget build(BuildContext context) {
     ///uncomment the bottom line to reflect changes on refresh while tryin to edit the [SubtitleSettings]
     // settings = SubtitleSettings();
+
     return settingsInited
         ? Container(
             alignment: Alignment.bottomCenter,
@@ -273,5 +299,11 @@ class _SubViewerState extends State<SubViewer> {
             ),
           )
         : SizedBox();
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(_updateSubtitle);
+    super.dispose();
   }
 }

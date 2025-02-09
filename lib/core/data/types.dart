@@ -20,6 +20,7 @@ class SettingsModal {
   final Databases? database;
   final bool? enableSuperSpeeds;
   final bool? useQueuedDownloads;
+  final bool? useFramelessWindow;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -37,7 +38,8 @@ class SettingsModal {
     this.downloadPath,
     this.database,
     this.enableSuperSpeeds,
-    this.useQueuedDownloads
+    this.useQueuedDownloads,
+    this.useFramelessWindow,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -58,6 +60,7 @@ class SettingsModal {
       database: DatabaseFromString.getDb(map['database'] ?? "anilist"),
       enableSuperSpeeds: map['enableSuperSpeeds'] ?? false,
       useQueuedDownloads: map['useQueuedDownloads'] ?? false,
+      useFramelessWindow: map['useFramelessWindow'] ?? true,
     );
   }
 

@@ -37,7 +37,6 @@ class Watch extends StatefulWidget {
 }
 
 class _WatchState extends State<Watch> with TickerProviderStateMixin {
-  // late BetterPlayerController controller;
   late VideoController controller;
 
   Timer? _controlsTimer;
@@ -102,9 +101,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     currentEpIndex = info.episodeNumber - 1;
     epLinks = widget.episodes;
 
-    showSubs = info.streamInfo.subtitle != null;
-
     controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+
+    showSubs = info.streamInfo.subtitle != null;
 
     //try to get the qualities. play with the default link if qualities arent available
     try {
@@ -278,15 +277,12 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
         body: Stack(
           children: [
             Player(controller),
-            if (info.streamInfo.subtitle != null
-                // && controller.videoPlayerController != null
-                &&
-                showSubs)
+            if (info.streamInfo.subtitle != null && showSubs)
               SubViewer(
-                  // controller: controller.videoPlayerController!,
-                  controller: controller,
-                  format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
-                  subtitleSource: info.streamInfo.subtitle!),
+                controller: controller,
+                format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
+                subtitleSource: info.streamInfo.subtitle!,
+              ),
             AnimatedOpacity(
               opacity: _visible ? 1.0 : 0.0,
               duration: const Duration(milliseconds: 150),
@@ -304,6 +300,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     'getEpisodeSources': getEpisodeSources,
                                     'epLinks': epLinks,
                                     'currentEpIndex': currentEpIndex,
+                                    'showTitle': info.animeTitle,
                                   },
                                   preferredServer: info.streamInfo.server,
                                   updateWatchProgress: updateWatchProgress,
@@ -316,15 +313,10 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     topControls: topControls(),
                                     isControlsLocked: isControlsLocked,
                                     hideControlsOnTimeout: hideControlsOnTimeout,
+                                    isControlsVisible: _visible,
                                   )
                                 : Desktopcontrols(
                                     controller: controller,
-                                    episode: {
-                                      'getEpisodeSources': getEpisodeSources,
-                                      'epLinks': epLinks,
-                                      'currentEpIndex': currentEpIndex,
-                                      'showTitle': info.animeTitle,
-                                    },
                                     refreshPage: refreshPage,
                                     updateWatchProgress: updateWatchProgress,
                                   ))
@@ -517,7 +509,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                           onPressed: () async {
                                             final src = qualities[index]['link']!;
                                             selectedQuality = qualities[index]['quality'] ?? '720';
-                                            changeQuality(src, controller.position ?? 0 * 100);
+                                            changeQuality(src, (controller.position ?? 0) ~/ 1000);
                                             Navigator.pop(context);
                                           },
                                           style: ElevatedButton.styleFrom(
@@ -806,8 +798,9 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
           widget.info.id.toString(), {currentEpIndex + 1: ((controller.position ?? 0) / controller.duration!) * 100});
     }
     print("[PLAYER] SAVED WATCH DURATION");
-    controller.dispose();
+    // controller.dispose();
     _controlsTimer?.cancel();
+
     super.dispose();
   }
 }

@@ -1,4 +1,5 @@
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
@@ -57,8 +58,8 @@ class ControlsProvider with ChangeNotifier {
     _state = _state.copyWith(
       sliderValue: val,
       playerState: (_controller.isPlaying ?? false) ? PlayerState.playing : PlayerState.paused,
-      currentTime: _getFormattedTime(val),
-      maxTime: _getFormattedTime(duration),
+      currentTime: getFormattedTime(val),
+      maxTime: getFormattedTime(duration),
       buffering: _controller.isBuffering ?? true,
     );
 
@@ -166,20 +167,8 @@ class ControlsProvider with ChangeNotifier {
     }
   }
 
-  String _getFormattedTime(int timeInSeconds) {
-    final hours = timeInSeconds ~/ 3600;
-    final minutes = (timeInSeconds % 3600) ~/ 60;
-    final seconds = timeInSeconds % 60;
-
-    if (hours > 0) {
-      return '${hours.toString()}:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-    return '${minutes.toString()}:${seconds.toString().padLeft(2, '0')}';
-  }
-
   void updateCurrentEpIndex(int updatedIndex) {
-    _state = _state.copyWith(currentEpIndex: updatedIndex);
-    // sliderValue = 0;
+    _state = _state.copyWith(currentEpIndex: updatedIndex, sliderValue: 0);
   }
 
   @override

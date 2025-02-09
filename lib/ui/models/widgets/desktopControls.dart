@@ -1,5 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/ui/models/playerUtils.dart';
+import 'package:animestream/ui/models/controlsProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/theme/themeProvider.dart';
@@ -7,20 +7,17 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
 import 'package:window_size/window_size.dart';
 
 class Desktopcontrols extends StatefulWidget {
   final VideoController controller;
-  final Map<String, dynamic> episode;
   final Future<void> Function(int, Stream) refreshPage;
   final Future<void> Function(int) updateWatchProgress;
 
   const Desktopcontrols({
     super.key,
     required this.controller,
-    required this.episode,
     required this.refreshPage,
     required this.updateWatchProgress,
   });
@@ -30,81 +27,20 @@ class Desktopcontrols extends StatefulWidget {
 }
 
 class _DesktopcontrolsState extends State<Desktopcontrols> {
-  late VideoController controller;
+  // late VideoController controller;
 
   @override
   void initState() {
     super.initState();
-
-    controller = widget.controller;
-    controller.addListener(playerEventListener);
   }
 
-  void playerEventListener() async {
-    //manage currentEpIndex and clear preloads if the index changed
-    // if (currentEpIndex != widget.episode['currentEpIndex']) {
-    //   preloadedSources = [];
-    //   preloadStarted = false;
-    //   currentEpIndex = widget.episode['currentEpIndex'];
-    // }
-
-    //hide the controls on timeout if visible
-    // if (widget.isControlsVisible) {
-    //   widget.hideControlsOnTimeout();
-    // }
-
-    //managing the UI updation
-    if (mounted)
-      setState(() {
-        int duration = ((controller.duration ?? 0) / 1000).toInt();
-        int val = ((controller.position ?? 0) / 1000).toInt();
-        sliderValue = val;
-        // playPause = (controller.isPlaying ?? false) ? Icons.pause_rounded : Icons.play_arrow_rounded;
-        currentTime = getFormattedTime(val);
-        maxTime = getFormattedTime(duration);
-        buffering = controller.isBuffering ?? true;
-      });
-
-    if ((controller.isPlaying ?? false) && !wakelockEnabled) {
-      WakelockPlus.enable();
-      wakelockEnabled = true;
-      debugPrint("wakelock enabled");
-    } else if (!(controller.isPlaying ?? false) && wakelockEnabled) {
-      WakelockPlus.disable();
-      wakelockEnabled = false;
-      debugPrint("wakelock disabled");
-    }
-
-    //play the loaded episode if equal to duration
-    // if (!finalEpisodeReached &&
-    //     controller.duration != null &&
-    //     (controller.position ?? 0) / 1000 == (controller.duration ?? 0) / 1000) {
-    //   if (controller.isPlaying ?? false) {
-    //     await controller.pause();
-    //   }
-    // await playPreloadedEpisode();
-    // }
-
-    // calculate the percentage
-    // final currentByTotal = (controller.position ?? 0) / (controller.duration ?? 0);
-    // if (currentByTotal * 100 >= 75 && !preloadStarted && (controller.isPlaying ?? false)) {
-    //   print("====================== above 75% ======================");
-    //   print("when position= ${(controller.position ?? 0) / 1000}, duration= ${(controller.duration ?? 0) / 1000} ");
-    // preloadNextEpisode();
-    // widget.updateWatchProgress(currentEpIndex);
-    // }
-  }
+  late ControlsProvider provider;
 
   final _fn = FocusNode();
 
-  String currentTime = "0:00";
-  String maxTime = "0:00";
-
-  int sliderValue = 0;
-
   bool isFullScreen = false;
-  bool wakelockEnabled = false;
-  bool buffering = true;
+
+  bool isInitiallyMaximized = false;
 
   Offset prevPos = Offset.zero; // The offset of window before entering fullscreen
 
@@ -117,7 +53,11 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
     switch (key.logicalKey) {
       case LogicalKeyboardKey.space:
         {
-          (controller.isPlaying ?? false) ? controller.pause() : controller.play();
+          (provider.controller.isPlaying ?? false) ? provider.controller.pause() : provider.controller.play();
+          break;
+        }
+      case LogicalKeyboardKey.f11:
+        {
           break;
         }
     }
@@ -125,8 +65,8 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
 
   Future<void> setFullScreen(bool fs) async {
     if (fs) {
-      final docked = await windowManager.isDocked();
-      if (docked != null) await windowManager.undock();
+      isInitiallyMaximized = await windowManager.isMaximized();
+      await windowManager.unmaximize();
       final info = await getCurrentScreen();
       prevPos = await windowManager.getPosition();
       prevSize = await windowManager.getSize();
@@ -140,14 +80,19 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
         );
       }
     } else {
-      await windowManager.setPosition(prevPos);
-      await windowManager.setSize(prevSize);
+      if (isInitiallyMaximized) {
+        windowManager.maximize();
+      } else {
+        await windowManager.setPosition(prevPos);
+        await windowManager.setSize(prevSize);
+      }
     }
-    Provider.of<ThemeProvider>(context, listen: false).isFullScreen = fs;
+    if (mounted) Provider.of<ThemeProvider>(context, listen: false).isFullScreen = fs;
   }
 
   @override
   Widget build(BuildContext context) {
+    provider = context.watch<ControlsProvider>();
     return KeyboardListener(
         focusNode: _fn,
         onKeyEvent: keyListener,
@@ -173,11 +118,11 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Episode ${widget.episode['currentEpIndex'] + 1}",
+                              "Episode ${provider.state.currentEpIndex + 1}",
                               style: TextStyle(fontSize: 35),
                             ),
                             Text(
-                              widget.episode['showTitle'],
+                              provider.episode['showTitle'] ?? "no title",
                               style: TextStyle(fontSize: 17),
                             ),
                           ],
@@ -215,9 +160,10 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(currentTime),
+                        Text(provider.state.currentTime),
                         SliderTheme(
                           data: SliderThemeData(
+                            activeTrackColor: appTheme.accentColor,
                               trackHeight: 1,
                               thumbShape: RoundedRectangularThumbShape(width: 2, height: 15),
                               overlayColor: Colors.white.withAlpha(20),
@@ -228,17 +174,17 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
                               child: Slider(
-                                value: sliderValue.toDouble(),
+                                value: provider.state.sliderValue.toDouble(),
                                 onChanged: (val) {
-                                  controller.seekTo(Duration(seconds: val.toInt()));
+                                  provider.controller.seekTo(Duration(seconds: val.toInt()));
                                 },
                                 min: 0,
-                                max: (controller.duration ?? 0) / 1000,
+                                max: (provider.controller.duration ?? 0) / 1000,
                               ),
                             ),
                           ),
                         ),
-                        Text(maxTime),
+                        Text(provider.state.maxTime),
                       ],
                     ),
                   ),
@@ -255,11 +201,15 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             padding: const EdgeInsets.only(left: 5, right: 5),
                             child: IconButton(
                                 onPressed: () {
-                                  (controller.isPlaying ?? false) ? controller.pause() : controller.play();
+                                  (provider.controller.isPlaying ?? false)
+                                      ? provider.controller.pause()
+                                      : provider.controller.play();
                                   setState(() {});
                                 },
                                 icon: makeIcon(
-                                    (controller.isPlaying ?? false) ? Icons.pause_sharp : Icons.play_arrow_sharp,
+                                    (provider.controller.isPlaying ?? false)
+                                        ? Icons.pause_sharp
+                                        : Icons.play_arrow_sharp,
                                     customSize: 50)),
                           ),
                           IconButton(onPressed: () {}, icon: makeIcon(Icons.skip_next_outlined)),
@@ -315,14 +265,14 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     Container(),
                     GridView.builder(
                       // shrinkWrap: true,
-                      itemCount: widget.episode['epLinks'].length ?? 0,
+                      itemCount: provider.episode['epLinks'].length ?? 0,
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
                       itemBuilder: (context, index) {
                         return InkWell(
                           onTap: () {},
                           child: Container(
                             decoration: BoxDecoration(
-                              color: index == widget.episode['currentEpIndex']
+                              color: index == provider.state.currentEpIndex
                                   ? appTheme.accentColor
                                   : appTheme.backgroundSubColor,
                               borderRadius: BorderRadius.circular(10),
@@ -332,10 +282,9 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             child: Text(
                               index.toString(),
                               style: TextStyle(
-                                color: index == widget.episode['currentEpIndex']
-                                    ? appTheme.onAccent
-                                    : appTheme.textMainColor,
-                                    fontWeight: FontWeight.bold,
+                                color:
+                                    index == provider.state.currentEpIndex ? appTheme.onAccent : appTheme.textMainColor,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
@@ -362,6 +311,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
 
   @override
   void dispose() {
+    setFullScreen(false);
     super.dispose();
   }
 }

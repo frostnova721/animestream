@@ -20,36 +20,52 @@ class Player extends StatelessWidget {
 }
 
 abstract class VideoController {
-  // play and pause
+
+  /// Play the paused media
   Future<void> play();
+  
+  /// Pause the currently playing media
   Future<void> pause();
 
   // initiate a source
   Future<void> initiateVideo(String url, {Map<String, String>? headers = null});
 
+  /// Retuns the Widget of the player
   Widget getWidget();
 
-  // seek
+  /// Seek the media to a particular position
   Future<void> seekTo(Duration duration);
 
+  /// Set the playback speeds.
+  /// upto 2x for windows & 10x for android
   Future<void> setSpeed(double speed);
 
+  /// Set volume of the media.
+  /// Range: 0 to 1
   Future<void> setVolume(double volume);
 
   void dispose();
 
+  /// Add a listener for videoplayer controller
   void addListener(VoidCallback cb);
+
+  void removeListener(VoidCallback cb);
 
   void setFit(BoxFit fit);
 
+  /// Playing state of the VideoPlayer
   bool? get isPlaying;
 
+  /// Buffering state of the VideoPlayer
   bool? get isBuffering;
 
+  /// Position of the video in milliseconds
   int? get position;
 
+  /// Total duration of the video in milliseconds
   int? get duration;
 
+  /// Buffered duration, in milliseconds. Returns null for windows
   int? get buffered;
 }
 
@@ -132,6 +148,11 @@ class BetterPlayerWrapper implements VideoController {
   Future<void> setVolume(double volume) {
     return controller.setVolume(volume);
   }
+  
+  @override
+  void removeListener(VoidCallback cb) {
+    return controller.videoPlayerController?.removeListener(cb);
+  }
 }
 
 class VideoPlayerWindowsWrapper implements VideoController {
@@ -151,6 +172,7 @@ class VideoPlayerWindowsWrapper implements VideoController {
     await controller.play();
   }
 
+ 
   @override
   bool? get isBuffering => controller.value.isBuffering;
 
@@ -210,6 +232,11 @@ class VideoPlayerWindowsWrapper implements VideoController {
   @override
   Future<void> setVolume(double volume) {
     return controller.setVolume(volume);
+  }
+  
+  @override
+  void removeListener(VoidCallback cb) {
+    return controller.removeListener(cb);
   }
 }
 

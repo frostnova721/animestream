@@ -37,12 +37,6 @@ void main(List<String> args) async {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    if (Platform.isWindows) {
-      await windowManager.ensureInitialized();
-      await windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
-      await windowManager.setAsFrameless();
-    }
-
     final Directory dir = await getApplicationDocumentsDirectory();
 
     await Hive.initFlutter(dir.path);
@@ -50,6 +44,15 @@ void main(List<String> args) async {
     await loadAndAssignSettings();
 
     await migrateToSecureStorage();
+
+    if (Platform.isWindows) {
+      await windowManager.ensureInitialized();
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
+
+      if (currentUserSettings?.useFramelessWindow ?? true) await windowManager.setAsFrameless();
+      
+      await windowManager.setResizable(true);
+    }
 
     AnimeOnsen().checkAndUpdateToken();
 

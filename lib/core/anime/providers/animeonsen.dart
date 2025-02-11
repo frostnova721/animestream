@@ -68,12 +68,12 @@ class AnimeOnsen extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<Stream> p1, bool p2) update) async {
+  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
     final animeId = episodeId.split("+")[1];
     final episodeNumber = episodeId.split("+")[0];
     final baseUrl = "https://cdn.animeonsen.xyz/video/mp4-dash/${animeId}/${episodeNumber}/manifest.mpd";
     final subtitleUrl = "https://api.animeonsen.xyz/v4/subtitles/${animeId}/en-US/${episodeNumber}";
-    final result = Stream(
+    final result = VideoStream(
         quality: "single",
         link: baseUrl,
         isM3u8: false,
@@ -112,7 +112,7 @@ class AnimeOnsen extends AnimeProvider {
   }
   
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
      throw UnimplementedError();
   }
 }

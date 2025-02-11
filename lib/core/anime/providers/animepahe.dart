@@ -58,7 +58,7 @@ class AnimePahe extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String episodeUrl, Function(List<Stream> list, bool) update) async {
+  Future<void> getStreams(String episodeUrl, Function(List<VideoStream> list, bool) update) async {
     return await getDownloadSources(episodeUrl, update);
     // final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
     // final document = html.parse(data.body);
@@ -98,7 +98,7 @@ class AnimePahe extends AnimeProvider {
     // });
   }
 
-  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream> list, bool) update) async {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> list, bool) update) async {
     final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
     final document = html.parse(data.body);
     final downloadQualities = document.querySelectorAll('div#pickDownload > a');
@@ -120,7 +120,7 @@ class AnimePahe extends AnimeProvider {
       downloadLink.then((val) {
         returns++;
         update([
-          Stream(
+          VideoStream(
             quality: e['quality']! + " [${e['size']}]",
             server: e['server'] ?? "unknown",
             link: val,

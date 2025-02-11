@@ -4,7 +4,7 @@
 // import 'package:html/parser.dart';
 
 // class RyukExtractor extends AnimeExtractor {
-//   Future<List<Stream>> extract(String streamUrl) async {
+//   Future<List<VideoStream>> extract(String streamUrl) async {
 //     final res = await fetch(streamUrl);
 //     String streamLink = '';
 //     final doc = parse(res);
@@ -20,7 +20,7 @@
 //       throw new Exception("ERR_COULDNT_EXTRACT_RYUK_STREAM");
 //     }
 //     return [
-//       Stream(
+//       VideoStream(
 //         quality: "multi-quality",
 //         link: streamLink,
 //         isM3u8: streamLink.endsWith(".m3u8"),

@@ -59,7 +59,7 @@ class GogoAnime extends AnimeProvider {
     return src[0]['src'] ?? '';
   }
 
-  Future<void> getStreams(String episodeId, Function(List<Stream>, bool) update) async {
+  Future<void> getStreams(String episodeId, Function(List<VideoStream>, bool) update) async {
     //get link of all listed servers from gogoanime
     final servers = await getAllServerLinks(episodeId);
 
@@ -167,7 +167,7 @@ class GogoAnime extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
     throw UnimplementedError();
   }
 }

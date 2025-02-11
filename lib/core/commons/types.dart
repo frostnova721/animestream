@@ -1,7 +1,7 @@
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/types.dart';
 
-class Stream {
+class VideoStream {
   final String quality;
   final String link;
   final bool isM3u8;
@@ -11,7 +11,7 @@ class Stream {
   final bool backup;
   final Map<String, String>? customHeaders;
 
-  Stream(
+  VideoStream(
       {required this.quality,
       required this.link,
       required this.isM3u8,
@@ -48,7 +48,7 @@ class ServerSelectionBottomSheetContentData {
 class WatchPageInfo {
   int episodeNumber;
   final String animeTitle;
-  Stream streamInfo;
+  VideoStream streamInfo;
   int id;
   List<AlternateDatabaseId> altDatabases;
   double? lastWatchDuration;

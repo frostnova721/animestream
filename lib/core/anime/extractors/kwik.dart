@@ -4,7 +4,7 @@ import 'package:http/http.dart';
 import 'package:html/parser.dart' as html;
 
 class Kwik extends AnimeExtractor {
-  Future<List<Stream>> extract(String streamUrl, {String? quality, String? server}) async {
+  Future<List<VideoStream>> extract(String streamUrl, {String? quality, String? server}) async {
     final res = await get(Uri.parse(streamUrl), headers: {'referer': 'https://animepahe.ru/'});
     final doc = html.parse(res.body);
     String? streamLink;
@@ -21,7 +21,7 @@ class Kwik extends AnimeExtractor {
 
     if (streamLink == null) throw new Exception("UNABLE TO EXTRACT KWIK STREAM");
 
-    return [Stream(quality: quality ?? "single", link: streamLink!, isM3u8: streamLink!.endsWith("m3u8"), server: server ?? "Kwik", backup: false)];
+    return [VideoStream(quality: quality ?? "single", link: streamLink!, isM3u8: streamLink!.endsWith("m3u8"), server: server ?? "Kwik", backup: false)];
   }
 }
 

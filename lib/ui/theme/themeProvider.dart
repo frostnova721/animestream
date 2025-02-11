@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
 import 'package:flutter/material.dart';
+import 'package:window_manager/window_manager.dart';
+import 'package:window_size/window_size.dart';
 
 class ThemeProvider with ChangeNotifier {
   AnimeStreamTheme _theme = appTheme;
@@ -90,5 +94,41 @@ class ThemeProvider with ChangeNotifier {
 
   void justRefresh() {
     notifyListeners();
+  }
+
+  bool _isInitiallyMaximized = false;
+
+  Offset _prevPos = Offset.zero; // The offset of window before entering fullscreen
+
+  // The size of window before entering fullscreen, set to 1280x720 just as a placeholder value
+  // and will be overriden once fullscreen is entered!
+  Size _prevSize = Size(1280, 720);
+
+  Future<void> setFullScreen(bool fs) async {
+    if (Platform.isAndroid) return;
+    if (fs) {
+      _isInitiallyMaximized = await windowManager.isMaximized();
+      await windowManager.unmaximize();
+      final info = await getCurrentScreen();
+      _prevPos = await windowManager.getPosition();
+      _prevSize = await windowManager.getSize();
+      if (info != null) {
+        await windowManager.setPosition(Offset.zero);
+        await windowManager.setSize(
+          Size(
+            info.frame.width / info.scaleFactor,
+            info.frame.height / info.scaleFactor,
+          ),
+        );
+      }
+    } else {
+      if (_isInitiallyMaximized) {
+        windowManager.maximize();
+      } else {
+        await windowManager.setPosition(_prevPos);
+        await windowManager.setSize(_prevSize);
+      }
+    }
+    isFullScreen = fs;
   }
 }

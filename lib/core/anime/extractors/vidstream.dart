@@ -15,7 +15,7 @@ class Vidstream extends AnimeExtractor {
 
   final baseUrl = "https://gogoanime3.net";
 
-  Future<List<Stream>> extract(String streamLink) async {
+  Future<List<VideoStream>> extract(String streamLink) async {
     if(streamLink.isEmpty) {
       throw new Exception("ERR_EMPTY_STREAM_LINK");
     }
@@ -39,12 +39,12 @@ class Vidstream extends AnimeExtractor {
     
     final parsed = json.decode(dec);
 
-    List<Stream> qualityList = [];
+    List<VideoStream> qualityList = [];
 
     if(parsed['source'] == null && parsed['source_bk'] == null) throw new Exception("No stream found");
 
     for(final src in parsed['source']) {
-      qualityList.add(Stream(
+      qualityList.add(VideoStream(
         quality: "multi-quality",
         link: src['file'],
         isM3u8: src['file'].endsWith(".m3u8"),
@@ -54,7 +54,7 @@ class Vidstream extends AnimeExtractor {
     }
 
     // for(final src in parsed['source_bk']) {
-    //   qualityList.add(Stream(
+    //   qualityList.add(VideoStream(
     //     quality: "multi-quality",
     //     link: src['file'],
     //     isM3u8: src['file'].endsWith(".m3u8"),

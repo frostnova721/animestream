@@ -30,7 +30,7 @@ class ServerSelectionBottomSheet extends StatefulWidget {
 }
 
 class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> {
-  List<Stream> streamSources = [];
+  List<VideoStream> streamSources = [];
   List<Map<String, String>> qualities = [];
 
   getStreams({bool directElseBlock = false}) async {

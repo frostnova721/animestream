@@ -69,7 +69,7 @@ class Gojo extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String epLink, Function(List<Stream> list, bool isFinished) update) async {
+  Future<void> getStreams(String epLink, Function(List<VideoStream> list, bool isFinished) update) async {
     final linkSplit = epLink.split("+");
 
     final List<Future<Response>> futures = [];
@@ -100,7 +100,7 @@ class Gojo extends AnimeProvider {
 
       sources?.forEach((i) => update(
             [
-              Stream(
+              VideoStream(
                 quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
                 link: i['url'],
                 isM3u8: i['url'].endsWith('.m3u8'),
@@ -117,7 +117,7 @@ class Gojo extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
     // TODO: implement getDownloadSources
     throw UnimplementedError();
   }

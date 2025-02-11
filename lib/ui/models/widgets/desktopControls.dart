@@ -1,4 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/controlsProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
@@ -7,12 +8,10 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
-import 'package:window_size/window_size.dart';
 
 class Desktopcontrols extends StatefulWidget {
   final VideoController controller;
-  final Future<void> Function(int, Stream) refreshPage;
+  final Future<void> Function(int, VideoStream) refreshPage;
   final Future<void> Function(int) updateWatchProgress;
 
   const Desktopcontrols({
@@ -32,21 +31,14 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
   @override
   void initState() {
     super.initState();
+    isFullScreen = context.read<ThemeProvider>().isFullScreen;
   }
 
   late ControlsProvider provider;
 
   final _fn = FocusNode();
 
-  bool isFullScreen = false;
-
-  bool isInitiallyMaximized = false;
-
-  Offset prevPos = Offset.zero; // The offset of window before entering fullscreen
-
-  // The size of window before entering fullscreen, set to 1280x720 just as a placeholder value
-  // and will be overriden once fullscreen is entered!
-  Size prevSize = Size(1280, 720);
+  late bool isFullScreen;
 
   void keyListener(KeyEvent key) {
     if (key is KeyUpEvent) return;
@@ -58,36 +50,18 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
         }
       case LogicalKeyboardKey.f11:
         {
+          isFullScreen = !isFullScreen;
+          context.read<ThemeProvider>().setFullScreen(isFullScreen);
           break;
         }
+        case LogicalKeyboardKey.arrowLeft: {
+          provider.fastForward(-(currentUserSettings?.skipDuration ?? 15));
+          break;
+        }
+        case LogicalKeyboardKey.arrowRight: {
+          provider.fastForward((currentUserSettings?.skipDuration ?? 15));
+        }
     }
-  }
-
-  Future<void> setFullScreen(bool fs) async {
-    if (fs) {
-      isInitiallyMaximized = await windowManager.isMaximized();
-      await windowManager.unmaximize();
-      final info = await getCurrentScreen();
-      prevPos = await windowManager.getPosition();
-      prevSize = await windowManager.getSize();
-      if (info != null) {
-        await windowManager.setPosition(Offset.zero);
-        await windowManager.setSize(
-          Size(
-            info.frame.width / info.scaleFactor,
-            info.frame.height / info.scaleFactor,
-          ),
-        );
-      }
-    } else {
-      if (isInitiallyMaximized) {
-        windowManager.maximize();
-      } else {
-        await windowManager.setPosition(prevPos);
-        await windowManager.setSize(prevSize);
-      }
-    }
-    if (mounted) Provider.of<ThemeProvider>(context, listen: false).isFullScreen = fs;
   }
 
   @override
@@ -163,13 +137,13 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                         Text(provider.state.currentTime),
                         SliderTheme(
                           data: SliderThemeData(
-                            activeTrackColor: appTheme.accentColor,
+                              activeTrackColor: appTheme.accentColor,
                               trackHeight: 1,
                               thumbShape: RoundedRectangularThumbShape(width: 2, height: 15),
                               overlayColor: Colors.white.withAlpha(20),
                               inactiveTrackColor: appTheme.textSubColor,
                               secondaryActiveTrackColor: appTheme.textMainColor,
-                              overlayShape: RoundSliderOverlayShape(overlayRadius: 15)),
+                              overlayShape: RoundSliderOverlayShape(overlayRadius: 10)),
                           child: Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
@@ -189,10 +163,12 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     ),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    // mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Row(
-                        children: [IconButton(onPressed: () {}, icon: makeIcon(Icons.high_quality_outlined))],
+                      Expanded(
+                        child: Row(
+                          children: [IconButton(onPressed: () {}, icon: makeIcon(Icons.high_quality_outlined))],
+                        ),
                       ),
                       Row(
                         children: [
@@ -215,17 +191,43 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           IconButton(onPressed: () {}, icon: makeIcon(Icons.skip_next_outlined)),
                         ],
                       ),
-                      Row(
-                        children: [
-                          IconButton(onPressed: () {}, icon: makeIcon(Icons.subtitles)),
-                          IconButton(
-                              onPressed: () {
-                                isFullScreen = !isFullScreen;
-                                setFullScreen(isFullScreen);
-                                setState(() {});
-                              },
-                              icon: makeIcon(isFullScreen ? Icons.fullscreen_exit_sharp : Icons.fullscreen_sharp)),
-                        ],
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            // The volume icon and slider
+                            makeIcon(Icons.volume_up_sharp),
+                            Padding(
+                              padding: const EdgeInsets.only(right: 10),
+                              child: SliderTheme(
+                                data: SliderThemeData(
+                                  activeTrackColor: appTheme.accentColor,
+                                  trackHeight: 1,
+                                  thumbShape: RoundedRectangularThumbShape(width: 2, height: 15),
+                                  overlayColor: Colors.white.withAlpha(20),
+                                  inactiveTrackColor: appTheme.textSubColor,
+                                  secondaryActiveTrackColor: appTheme.textMainColor,
+                                  overlayShape: RoundSliderOverlayShape(overlayRadius: 15),
+                                ),
+                                child: Slider(
+                                  value: provider.controller.volume ?? 0,
+                                  onChanged: (value) => provider.controller.setVolume(value),
+                                  min: 0,
+                                  max: 1,
+                                ),
+                              ),
+                            ),
+
+                            IconButton(onPressed: () {}, icon: makeIcon(Icons.subtitles)),
+                            IconButton(
+                                onPressed: () {
+                                  isFullScreen = !isFullScreen;
+                                  context.read<ThemeProvider>().setFullScreen(isFullScreen);
+                                  setState(() {});
+                                },
+                                icon: makeIcon(isFullScreen ? Icons.fullscreen_exit_sharp : Icons.fullscreen_sharp)),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -269,7 +271,25 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                       gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
                       itemBuilder: (context, index) {
                         return InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            Navigator.pop(context);
+                            showDialog(
+                                context: context,
+                                builder: (context) {
+                                  return CustomControlsBottomSheet(
+                                      getEpisodeSources: provider.episode['getEpisodeSources'],
+                                      currentSources: [],
+                                      playVideo: provider.playVideo,
+                                      next: false,
+                                      epLinks: provider.episode['epLinks'],
+                                      currentEpIndex: provider.state.currentEpIndex,
+                                      refreshPage: provider.refreshPage,
+                                      updateCurrentEpIndex: provider.updateCurrentEpIndex,
+                                      customIndex: index,
+                                      preferredServer: provider.preferredServer,
+                                      );
+                                });
+                          },
                           child: Container(
                             decoration: BoxDecoration(
                               color: index == provider.state.currentEpIndex
@@ -280,7 +300,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             alignment: Alignment.center,
                             margin: EdgeInsets.all(3),
                             child: Text(
-                              index.toString(),
+                              (index + 1).toString(),
                               style: TextStyle(
                                 color:
                                     index == provider.state.currentEpIndex ? appTheme.onAccent : appTheme.textMainColor,
@@ -311,7 +331,6 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
 
   @override
   void dispose() {
-    setFullScreen(false);
     super.dispose();
   }
 }

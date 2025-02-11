@@ -67,6 +67,9 @@ abstract class VideoController {
 
   /// Buffered duration, in milliseconds. Returns null for windows
   int? get buffered;
+
+  // Volume level, a value between 0 and 1 
+  double? get volume;
 }
 
 class BetterPlayerWrapper implements VideoController {
@@ -102,6 +105,9 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   int? get buffered => controller.videoPlayerController?.value.buffered.lastOrNull?.end.inSeconds;
+
+  @override
+  double? get volume => controller.videoPlayerController?.value.volume;
 
   @override
   Future<void> pause() {
@@ -238,6 +244,9 @@ class VideoPlayerWindowsWrapper implements VideoController {
   void removeListener(VoidCallback cb) {
     return controller.removeListener(cb);
   }
+  
+  @override
+  double? get volume => controller.value.volume;
 }
 
 // un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26 for android

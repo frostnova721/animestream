@@ -13,14 +13,14 @@ abstract class AnimeProvider {
    * The link format returned in the [getAnimeEpisodeLink] method should be
    * parsed in this method
    */
-  Future<void> getStreams(String episodeId, Function(List<Stream>, bool) update);
+  Future<void> getStreams(String episodeId, Function(List<VideoStream>, bool) update);
 
   /**
    * The link format returned in the [getAnimeEpisodeLink] method should be
    * parsed in this method
    * 
-   * This method should return a list of [Stream] objects containing direct download
+   * This method should return a list of [VideoStream] objects containing direct download
    * links to the episode
    */
-  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream>, bool) update);
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream>, bool) update);
 }

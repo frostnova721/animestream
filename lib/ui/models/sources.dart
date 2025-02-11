@@ -90,12 +90,12 @@ Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link, 
   return qualities;
 }
 
-Future<void> getDownloadSources(String source, String episodeUrl, Function(List<Stream>, bool) updateFunction) async {
+Future<void> getDownloadSources(String source, String episodeUrl, Function(List<VideoStream>, bool) updateFunction) async {
   final streams = await getClass(source).getDownloadSources(episodeUrl, updateFunction);
   return streams;
 }
 
-Future<void> getStreams(String source, String episodeId, Function(List<Stream>, bool) updateFunction) async {
+Future<void> getStreams(String source, String episodeId, Function(List<VideoStream>, bool) updateFunction) async {
   final streams = await getClass(source).getStreams(episodeId, updateFunction);
   return streams;
 }

@@ -50,7 +50,7 @@ class _InfoState extends State<Info> {
   MediaStatus? mediaListStatus;
 
   List<String> epLinks = [];
-  List<Stream> streamSources = [];
+  List<VideoStream> streamSources = [];
   List<Map<String, String>> qualities = [];
   List<List<Map<String, dynamic>>> visibleEpList = [];
   List<AlternateDatabaseId> altDatabases = [];

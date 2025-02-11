@@ -5,7 +5,7 @@ import '../../commons/types.dart';
 import '../../commons/utils.dart';
 
 class StreamWish extends AnimeExtractor {
-  Future<List<Stream>> extract(String streamUrl) async {
+  Future<List<VideoStream>> extract(String streamUrl) async {
     if (streamUrl.isEmpty) {
       throw new Exception("ERR_EMPTY_STREAM_LINK");
     }
@@ -44,7 +44,7 @@ class StreamWish extends AnimeExtractor {
       if (streamLink.isEmpty)
         throw new Exception("Couldnt get any $serverName streams");
       return [
-        Stream(
+        VideoStream(
             server: serverName,
             link: streamLink,
             quality: "multi-quality",
@@ -73,7 +73,7 @@ class StreamWish extends AnimeExtractor {
     //   });
     //   if(streamLink.isEmpty) throw new Exception("Couldnt get any alions streams");
     //   return [
-    //     Stream(
+    //     VideoStream(
     //       quality: "multi-quality",
     //       link: streamLink,
     //       isM3u8: streamLink.endsWith('.m3u8'),

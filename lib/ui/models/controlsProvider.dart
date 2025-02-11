@@ -11,9 +11,11 @@ class ControlsProvider with ChangeNotifier {
   final Map<String, dynamic> episode;
   final String preferredServer;
   final Function(int) updateWatchProgress;
-  final Function(int, Stream) refreshPage;
+  final Function(int, VideoStream) refreshPage;
   final Function(String) playAnotherEpisode;
+  List<Map<String, String>> qualities;
   bool calledAutoNext = false;
+  List<VideoStream> servers;
 
   ControlsProvider({
     required VideoController controller,
@@ -22,6 +24,8 @@ class ControlsProvider with ChangeNotifier {
     required this.updateWatchProgress,
     required this.refreshPage,
     required this.playAnotherEpisode,
+    required this.qualities,
+    required this.servers,
   })  : _controller = controller,
         _state = VideoPlayerState(
           currentEpIndex: episode['currentEpIndex'],
@@ -132,7 +136,7 @@ class ControlsProvider with ChangeNotifier {
 
     _state = _state.copyWith(preloadStarted: true, preloadedSources: []);
 
-    List<Stream> srcs = [];
+    List<VideoStream> srcs = [];
     await episode['getEpisodeSources'](
       episode['epLinks'][_state.currentEpIndex + 1],
       (list, finished) {
@@ -154,6 +158,7 @@ class ControlsProvider with ChangeNotifier {
     calledAutoNext = false;
   }
 
+  /// Fast forward n seconds
   void fastForward(int seekDuration) async {
     final currentPosition = (_controller.position ?? 0) ~/ 1000;
     final duration = (_controller.duration ?? 0) ~/ 1000;
@@ -186,10 +191,10 @@ class VideoPlayerState {
   final bool buffering;
   final PlayerState playerState;
   final bool wakelockEnabled;
-  final List<Stream> preloadedSources;
+  final List<VideoStream> preloadedSources;
   final bool preloadStarted;
   final bool finalEpisodeReached;
-  final List<Stream> currentSources;
+  final List<VideoStream> currentSources;
 
   VideoPlayerState({
     required this.currentEpIndex,
@@ -213,10 +218,10 @@ class VideoPlayerState {
     bool? buffering,
     PlayerState? playerState,
     bool? wakelockEnabled,
-    List<Stream>? preloadedSources,
+    List<VideoStream>? preloadedSources,
     bool? preloadStarted,
     bool? finalEpisodeReached,
-    List<Stream>? currentSources,
+    List<VideoStream>? currentSources,
   }) {
     return VideoPlayerState(
       currentEpIndex: currentEpIndex ?? this.currentEpIndex,

@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
 class CustomControlsBottomSheet extends StatefulWidget {
-  final Function(String, Function(List<Stream>, bool)) getEpisodeSources;
-  final List<Stream> currentSources;
+  final Function(String, Function(List<VideoStream>, bool)) getEpisodeSources;
+  final List<VideoStream> currentSources;
   final Future<void> Function(String, {bool preserveProgress}) playVideo;
   final bool next;
   final int currentEpIndex;
@@ -36,7 +36,7 @@ class CustomControlsBottomSheet extends StatefulWidget {
 }
 
 class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
-  List<Stream> currentSources = [];
+  List<VideoStream> currentSources = [];
   int currentEpIndex = 0;
 
   bool _isLoading = true;

@@ -33,7 +33,7 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<Stream> p1, bool p2) update) async {
+  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
     final epIdSplit = episodeId.split("+");
     final epId = epIdSplit[0].split(",");
     final servers = epIdSplit[1].split(",");
@@ -73,7 +73,7 @@ class AniPlay extends AnimeProvider {
         if (stream != null) {
           serversFetched++;
           update([
-            Stream(
+            VideoStream(
               quality: "multi-quality",
               link: stream['url'],
               isM3u8: stream['url'].endsWith(".m3u8"),
@@ -83,11 +83,11 @@ class AniPlay extends AnimeProvider {
           ], serversFetched == servers.length);
         } else {
           //just add all the available streams if couldnt find any default quality ones
-          final List<Stream> srcs = [];
+          final List<VideoStream> srcs = [];
           serversFetched++;
           for (final str in parsed) {
             try {
-              srcs.add(Stream(
+              srcs.add(VideoStream(
                 quality: str['quality'] ?? "unknown",
                 link: str['url'],
                 isM3u8: str['url'].endsWith(".m3u8"),
@@ -150,7 +150,7 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<Stream> p1, bool p2) update) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
      throw UnimplementedError();
   }
 }

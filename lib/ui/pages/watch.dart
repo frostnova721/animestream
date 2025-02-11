@@ -16,6 +16,7 @@ import 'package:animestream/ui/models/widgets/desktopControls.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
+import 'package:animestream/ui/theme/themeProvider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -154,7 +155,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     return controlsLocked;
   }
 
-  Future<void> refreshPage(int episodeIndex, Stream streamInfo) async {
+  Future<void> refreshPage(int episodeIndex, VideoStream streamInfo) async {
     print('refreshing $episodeIndex');
     info.streamInfo = streamInfo;
     qualities = [];
@@ -182,7 +183,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
     );
   }
 
-  Future getEpisodeSources(String epLink, Function(List<Stream>, bool) cb) async {
+  Future getEpisodeSources(String epLink, Function(List<VideoStream>, bool) cb) async {
     await getStreams(widget.selectedSource, epLink, cb);
   }
 
@@ -267,65 +268,73 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        toggleControls(!_visible);
-        hideControlsOnTimeout();
+    return PopScope( //need this popscope to exit the fs
+      canPop: true,
+      onPopInvokedWithResult: (didPop, result) async {
+        await context.read<ThemeProvider>().setFullScreen(false);
       },
-      child: Scaffold(
-        backgroundColor: Colors.black,
-        body: Stack(
-          children: [
-            Player(controller),
-            if (info.streamInfo.subtitle != null && showSubs)
-              SubViewer(
-                controller: controller,
-                format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
-                subtitleSource: info.streamInfo.subtitle!,
-              ),
-            AnimatedOpacity(
-              opacity: _visible ? 1.0 : 0.0,
-              duration: const Duration(milliseconds: 150),
-              child: Stack(
-                children: [
-                  IgnorePointer(ignoring: true, child: overlay()),
-                  IgnorePointer(
-                    ignoring: !_visible,
-                    child: initialised
-                        // ? Container()
-                        ? ChangeNotifierProvider(
-                            create: (context) => ControlsProvider(
-                                  controller: controller,
-                                  episode: {
-                                    'getEpisodeSources': getEpisodeSources,
-                                    'epLinks': epLinks,
-                                    'currentEpIndex': currentEpIndex,
-                                    'showTitle': info.animeTitle,
-                                  },
-                                  preferredServer: info.streamInfo.server,
-                                  updateWatchProgress: updateWatchProgress,
-                                  refreshPage: refreshPage,
-                                  playAnotherEpisode: playAnotherEpisode,
-                                ),
-                            child: Platform.isAndroid
-                                ? Controls(
-                                    bottomControls: bottomControls(),
-                                    topControls: topControls(),
-                                    isControlsLocked: isControlsLocked,
-                                    hideControlsOnTimeout: hideControlsOnTimeout,
-                                    isControlsVisible: _visible,
-                                  )
-                                : Desktopcontrols(
+      child: GestureDetector(
+        onTap: () {
+          toggleControls(!_visible);
+          hideControlsOnTimeout();
+        },
+        child: Scaffold(
+          backgroundColor: Colors.black,
+          body: Stack(
+            children: [
+              Player(controller),
+              if (info.streamInfo.subtitle != null && showSubs)
+                SubViewer(
+                  controller: controller,
+                  format: info.streamInfo.subtitleFormat ?? SubtitleFormat.ASS,
+                  subtitleSource: info.streamInfo.subtitle!,
+                ),
+              AnimatedOpacity(
+                opacity: _visible ? 1.0 : 0.0,
+                duration: const Duration(milliseconds: 150),
+                child: Stack(
+                  children: [
+                    IgnorePointer(ignoring: true, child: overlay()),
+                    IgnorePointer(
+                      ignoring: !_visible,
+                      child: initialised
+                          // ? Container()
+                          ? ChangeNotifierProvider(
+                              create: (context) => ControlsProvider(
                                     controller: controller,
-                                    refreshPage: refreshPage,
+                                    qualities: qualities,
+                                    servers: [],
+                                    episode: {
+                                      'getEpisodeSources': getEpisodeSources,
+                                      'epLinks': epLinks,
+                                      'currentEpIndex': currentEpIndex,
+                                      'showTitle': info.animeTitle,
+                                    },
+                                    preferredServer: info.streamInfo.server,
                                     updateWatchProgress: updateWatchProgress,
-                                  ))
-                        : Container(),
-                  ),
-                ],
+                                    refreshPage: refreshPage,
+                                    playAnotherEpisode: playAnotherEpisode,
+                                  ),
+                              child: Platform.isAndroid
+                                  ? Controls(
+                                      bottomControls: bottomControls(),
+                                      topControls: topControls(),
+                                      isControlsLocked: isControlsLocked,
+                                      hideControlsOnTimeout: hideControlsOnTimeout,
+                                      isControlsVisible: _visible,
+                                    )
+                                  : Desktopcontrols(
+                                      controller: controller,
+                                      refreshPage: refreshPage,
+                                      updateWatchProgress: updateWatchProgress,
+                                    ))
+                          : Container(),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -394,7 +403,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                       builder: (BuildContext context) => AlertDialog(
                         backgroundColor: Colors.black,
                         contentTextStyle: TextStyle(color: Colors.white),
-                        title: Text("Stream info", style: TextStyle(color: appTheme.accentColor)),
+                        title: Text("VideoStream info", style: TextStyle(color: appTheme.accentColor)),
                         content: Text(
                           //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
                           "Aspect Ratio: 16:9 (probably) \nServer: ${widget.selectedSource} \nSource: ${info.streamInfo.server} ${info.streamInfo.backup ? "\(backup\)" : ''}",

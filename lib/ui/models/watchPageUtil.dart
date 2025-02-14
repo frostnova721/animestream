@@ -68,8 +68,11 @@ abstract class VideoController {
   /// Buffered duration, in milliseconds. Returns null for windows
   int? get buffered;
 
-  // Volume level, a value between 0 and 1 
+  /// Volume level, a value between 0 and 1 
   double? get volume;
+
+  /// Url of currently playing media
+  String? get activeMediaUrl;
 }
 
 class BetterPlayerWrapper implements VideoController {
@@ -108,6 +111,9 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   double? get volume => controller.videoPlayerController?.value.volume;
+  
+  @override
+  String? get activeMediaUrl => controller.betterPlayerDataSource?.url;
 
   @override
   Future<void> pause() {
@@ -190,6 +196,9 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   int? get duration => controller.value.duration.inMilliseconds;
+
+  @override
+  String? get activeMediaUrl => controller.dataSource;
 
   @override
   Future<void> pause() {

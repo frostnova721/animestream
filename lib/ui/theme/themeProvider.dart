@@ -106,28 +106,32 @@ class ThemeProvider with ChangeNotifier {
 
   Future<void> setFullScreen(bool fs) async {
     if (Platform.isAndroid) return;
-    if (fs) {
-      _isInitiallyMaximized = await windowManager.isMaximized();
-      await windowManager.unmaximize();
-      final info = await getCurrentScreen();
-      _prevPos = await windowManager.getPosition();
-      _prevSize = await windowManager.getSize();
-      if (info != null) {
-        await windowManager.setPosition(Offset.zero);
-        await windowManager.setSize(
-          Size(
-            info.frame.width / info.scaleFactor,
-            info.frame.height / info.scaleFactor,
-          ),
-        );
+    if (currentUserSettings?.useFramelessWindow ?? true) {
+      if (fs) {
+        _isInitiallyMaximized = await windowManager.isMaximized();
+        await windowManager.unmaximize();
+        final info = await getCurrentScreen();
+        _prevPos = await windowManager.getPosition();
+        _prevSize = await windowManager.getSize();
+        if (info != null) {
+          await windowManager.setPosition(Offset.zero);
+          await windowManager.setSize(
+            Size(
+              info.frame.width / info.scaleFactor,
+              info.frame.height / info.scaleFactor,
+            ),
+          );
+        }
+      } else {
+        if (_isInitiallyMaximized) {
+          windowManager.maximize();
+        } else {
+          await windowManager.setPosition(_prevPos);
+          await windowManager.setSize(_prevSize);
+        }
       }
     } else {
-      if (_isInitiallyMaximized) {
-        windowManager.maximize();
-      } else {
-        await windowManager.setPosition(_prevPos);
-        await windowManager.setSize(_prevSize);
-      }
+      await windowManager.setFullScreen(fs); // Using default fs cus the border messes with the sizing
     }
     isFullScreen = fs;
   }

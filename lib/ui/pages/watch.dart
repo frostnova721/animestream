@@ -227,7 +227,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
       int? seekTime = currentTime;
       if (skipTolastWatched) {
         //calculate seconds from stored watched percentage
-        seekTime = (((info.lastWatchDuration! * (controller.duration ?? 1)) / 100) / 1000).toInt();
+        seekTime = ((((info.lastWatchDuration ?? 0) * (controller.duration ?? 1)) / 100) / 1000).toInt();
       }
       if (skipTolastWatched) print("last watch: ${seekTime}");
       if (seekTime != null) await controller.seekTo(Duration(seconds: seekTime));
@@ -268,7 +268,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope( //need this popscope to exit the fs
+    return PopScope(
+      //need this popscope to exit the fs
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         await context.read<ThemeProvider>().setFullScreen(false);
@@ -314,6 +315,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                                     updateWatchProgress: updateWatchProgress,
                                     refreshPage: refreshPage,
                                     playAnotherEpisode: playAnotherEpisode,
+                                    changeQuality: changeQuality
                                   ),
                               child: Platform.isAndroid
                                   ? Controls(

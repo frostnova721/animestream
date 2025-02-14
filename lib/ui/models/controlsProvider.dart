@@ -12,10 +12,11 @@ class ControlsProvider with ChangeNotifier {
   final String preferredServer;
   final Function(int) updateWatchProgress;
   final Function(int, VideoStream) refreshPage;
-  final Function(String) playAnotherEpisode;
+  final Function(String, { bool preserveProgress }) playAnotherEpisode;
   List<Map<String, String>> qualities;
   bool calledAutoNext = false;
   List<VideoStream> servers;
+  final Future<void> Function(String, int?) changeQuality;
 
   ControlsProvider({
     required VideoController controller,
@@ -26,6 +27,7 @@ class ControlsProvider with ChangeNotifier {
     required this.playAnotherEpisode,
     required this.qualities,
     required this.servers,
+    required this.changeQuality,
   })  : _controller = controller,
         _state = VideoPlayerState(
           currentEpIndex: episode['currentEpIndex'],
@@ -151,7 +153,7 @@ class ControlsProvider with ChangeNotifier {
 
   Future<void> playVideo(String url, {bool preserveProgress = false}) async {
     _state = _state.copyWith(preloadedSources: [], sliderValue: 0);
-    await playAnotherEpisode(url);
+    await playAnotherEpisode(url, preserveProgress: preserveProgress);
     _state = _state.copyWith(
       preloadStarted: false,
     );

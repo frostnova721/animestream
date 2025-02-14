@@ -54,11 +54,13 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
           context.read<ThemeProvider>().setFullScreen(isFullScreen);
           break;
         }
-        case LogicalKeyboardKey.arrowLeft: {
+      case LogicalKeyboardKey.arrowLeft:
+        {
           provider.fastForward(-(currentUserSettings?.skipDuration ?? 15));
           break;
         }
-        case LogicalKeyboardKey.arrowRight: {
+      case LogicalKeyboardKey.arrowRight:
+        {
           provider.fastForward((currentUserSettings?.skipDuration ?? 15));
         }
     }
@@ -243,78 +245,142 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
     return Dialog(
       clipBehavior: Clip.antiAlias,
       alignment: Alignment.centerRight,
-      child: Container(
-        height: mq.height / 1.5,
-        width: mq.width / 3.5,
-        color: appTheme.modalSheetBackgroundColor,
-        padding: EdgeInsets.all(15),
-        child: DefaultTabController(
-          length: 2,
-          child: Column(
-            children: [
-              TabBar(tabs: [
-                Tab(
-                  icon: Icon(Icons.folder_open_outlined),
-                ),
-                Tab(
-                  icon: Icon(Icons.tv_rounded),
-                )
-              ]),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 15),
-                  child: TabBarView(children: [
-                    Container(),
-                    GridView.builder(
-                      // shrinkWrap: true,
-                      itemCount: provider.episode['epLinks'].length ?? 0,
-                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
-                      itemBuilder: (context, index) {
-                        return InkWell(
-                          onTap: () {
-                            Navigator.pop(context);
-                            showDialog(
-                                context: context,
-                                builder: (context) {
-                                  return CustomControlsBottomSheet(
-                                      getEpisodeSources: provider.episode['getEpisodeSources'],
-                                      currentSources: [],
-                                      playVideo: provider.playVideo,
-                                      next: false,
-                                      epLinks: provider.episode['epLinks'],
-                                      currentEpIndex: provider.state.currentEpIndex,
-                                      refreshPage: provider.refreshPage,
-                                      updateCurrentEpIndex: provider.updateCurrentEpIndex,
-                                      customIndex: index,
-                                      preferredServer: provider.preferredServer,
-                                      );
-                                });
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                              color: index == provider.state.currentEpIndex
-                                  ? appTheme.accentColor
-                                  : appTheme.backgroundSubColor,
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            alignment: Alignment.center,
-                            margin: EdgeInsets.all(3),
-                            child: Text(
-                              (index + 1).toString(),
-                              style: TextStyle(
-                                color:
-                                    index == provider.state.currentEpIndex ? appTheme.onAccent : appTheme.textMainColor,
-                                fontWeight: FontWeight.bold,
+      child: StatefulBuilder(
+        builder: (context, setState) => Container(
+          height: mq.height / 1.5,
+          width: mq.width / 3.5,
+          color: appTheme.modalSheetBackgroundColor,
+          padding: EdgeInsets.all(15),
+          child: DefaultTabController(
+            length: 3,
+            child: Column(
+              children: [
+                TabBar(tabs: [
+                     Tab(
+                    icon: Icon(Icons.hd_outlined),
+                  ),
+                  Tab(
+                    icon: Icon(Icons.folder_open_outlined),
+                  ),
+                  Tab(
+                    icon: Icon(Icons.tv_rounded),
+                  ),
+                ]),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 15),
+                    child: TabBarView(
+                      children: [
+                         ListView.builder(
+                          itemCount: provider.qualities.length,
+                          itemBuilder: (context, index) {
+                            return MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await provider.changeQuality(provider.qualities[index]['link']!, (provider.controller.position ?? 0) ~/ 1000);
+                                  setState((){});
+                                },
+                                child: Container(
+                                  color: provider.qualities[index]['link'] == provider.controller.activeMediaUrl
+                                      ? appTheme.accentColor : null,
+                                      height: 40,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "${provider.qualities[index]['quality']}${provider.qualities[index]['quality'] == 'default' ? "" : 'p'}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: provider.qualities[index]['link'] == provider.controller.activeMediaUrl
+                                          ? appTheme.onAccent
+                                          : appTheme.textMainColor,
+                                      fontFamily: "Poppins",
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
-                        );
-                      },
-                    )
-                  ]),
+                            );
+                          },
+                        ),
+                        ListView.builder(
+                          itemCount: provider.servers.length,
+                          itemBuilder: (context, index) {
+                            return MouseRegion(
+                              cursor: SystemMouseCursors.click,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  await provider.playVideo(provider.servers[index].link, preserveProgress: true);
+                                  setState((){});
+                                },
+                                child: Container(
+                                  color:  appTheme.accentColor,
+                                      height: 40,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "${provider.servers[index].server}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: appTheme.textMainColor,
+                                      fontFamily: "Poppins",
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        GridView.builder(
+                          // shrinkWrap: true,
+                          itemCount: provider.episode['epLinks'].length ?? 0,
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
+                          itemBuilder: (context, index) {
+                            return InkWell(
+                              onTap: () {
+                                Navigator.pop(context);
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return CustomControlsBottomSheet(
+                                        getEpisodeSources: provider.episode['getEpisodeSources'],
+                                        currentSources: [],
+                                        playVideo: provider.playVideo,
+                                        next: false,
+                                        epLinks: provider.episode['epLinks'],
+                                        currentEpIndex: provider.state.currentEpIndex,
+                                        refreshPage: provider.refreshPage,
+                                        updateCurrentEpIndex: provider.updateCurrentEpIndex,
+                                        customIndex: index,
+                                        preferredServer: provider.preferredServer,
+                                      );
+                                    });
+                              },
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color: index == provider.state.currentEpIndex
+                                      ? appTheme.accentColor
+                                      : appTheme.backgroundSubColor,
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                alignment: Alignment.center,
+                                margin: EdgeInsets.all(3),
+                                child: Text(
+                                  (index + 1).toString(),
+                                  style: TextStyle(
+                                    color: index == provider.state.currentEpIndex
+                                        ? appTheme.onAccent
+                                        : appTheme.textMainColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

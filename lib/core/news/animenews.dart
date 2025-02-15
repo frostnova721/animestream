@@ -4,7 +4,7 @@ import "package:html/parser.dart" as html;
 class AnimeNews {
   final String _baseUrl = 'https://animenewsnetwork.com';
 
-  Future getDetaildNews(String url) async {
+  Future getDetailedNews(String url) async {
     final res = await fetch(url);
     final document = html.parse(res);
     final pageTitle = document.querySelector("div#page-title > h1#page_header")?.text.replaceAll(RegExp(r'News'), '').replaceAll(r'\n| {2,}', '').trim();

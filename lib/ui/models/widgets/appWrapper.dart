@@ -1,4 +1,6 @@
-import 'package:animestream/ui/theme/themeProvider.dart';
+import 'dart:ui';
+
+import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:fluentui_system_icons/fluentui_system_icons.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -15,44 +17,46 @@ class AppWrapper extends StatelessWidget {
       appBar: (defaultTargetPlatform == TargetPlatform.windows && !Provider.of<ThemeProvider>(context).isFullScreen)
           ? PreferredSize(
               preferredSize: const Size(double.maxFinite, 33),
-              child: Row(
-                // backgroundColor: Colors.black,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: DragToMoveArea(
-                      child: Container(
-                          // child: Row(
-                          //   children: [
-                          //   ],
-                          // ),
-                          ),
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: DragToMoveArea(
+                        child: Container(
+                            // child: Row(
+                            //   children: [
+                            //   ],
+                            // ),
+                            ),
+                      ),
                     ),
-                  ),
-                  Row(
-                    children: [
-                      WindowButton(
-                        onClick: () => windowManager.minimize(),
-                        icon: FluentIcons.subtract_16_regular,
-                        // hoverColor: ,
-                      ),
-                      WindowButton(
-                        onClick: () async {
-                          await windowManager.isMaximized() ? windowManager.unmaximize() : windowManager.maximize();
-                        },
-                        icon: FluentIcons.maximize_16_regular,
-                      ),
-                      WindowButton(
-                        onClick: () => windowManager.close(),
-                        hoverColor: const Color.fromARGB(255, 230, 37, 23),
-                        icon: FluentIcons.dismiss_16_regular,
-                      ),
-                    ],
-                  ),
-                ],
+                    Row(
+                      children: [
+                        WindowButton(
+                          onClick: () => windowManager.minimize(),
+                          icon: FluentIcons.subtract_16_regular,
+                          // hoverColor: ,
+                        ),
+                        WindowButton(
+                          onClick: () async {
+                            await windowManager.isMaximized() ? windowManager.unmaximize() : windowManager.maximize();
+                          },
+                          icon: FluentIcons.maximize_16_regular,
+                        ),
+                        WindowButton(
+                          onClick: () => windowManager.close(),
+                          hoverColor: const Color.fromARGB(255, 230, 37, 23),
+                          icon: FluentIcons.dismiss_16_regular,
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             )
           : null,
+      // extendBodyBehindAppBar: true, //should i?
       body: Navigator(
         onGenerateRoute: (settings) {
           Widget page = firstPage;

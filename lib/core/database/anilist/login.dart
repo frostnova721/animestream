@@ -74,16 +74,11 @@ class AniListLogin extends DatabaseLogin {
 
   Future<bool> isAnilistLoggedIn() async {
     String? token;
-    try {
-      token = await getSecureVal(SecureStorageKey.anilistToken);
-    } catch (err) {
-      //why not
-      token = await getSecureVal(SecureStorageKey.anilistToken);
-    }
+    token = await getSecureVal(SecureStorageKey.anilistToken);
     if (token != null) return true;
     return false;
   }
-  
+
   @override
   Future<void>? refreshToken() {
     return null; //the access token is permanent

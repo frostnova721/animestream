@@ -6,7 +6,8 @@ import 'package:animestream/core/commons/types.dart';
 class CustomControlsBottomSheet extends StatefulWidget {
   final Function(String, Function(List<VideoStream>, bool)) getEpisodeSources;
   final List<VideoStream> currentSources;
-  final Future<void> Function(String, {bool preserveProgress}) playVideo;
+  final Future<void> Function(String, {bool preserveProgress, VideoStream? currentSource, List<VideoStream>? sources})
+      playVideo;
   final bool next;
   final int currentEpIndex;
   final List<String> epLinks;
@@ -66,7 +67,10 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
     final srcs = await widget.getEpisodeSources(widget.epLinks[index!], (list, finished) {
       if (list.length > 0) {
         if (list[0].server == widget.preferredServer && !alreadyCalledaSource) {
-          widget.playVideo(list[0].link, preserveProgress: widget.preserveProgress);
+          widget.playVideo(list[0].link,
+              preserveProgress: widget.preserveProgress,
+              currentSource: list[0],
+              sources: currentSources.isEmpty ? list : currentSources);
           currentEpIndex = index;
           widget.refreshPage(currentEpIndex, list[0]);
           widget.updateCurrentEpIndex(currentEpIndex);

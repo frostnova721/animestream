@@ -12,10 +12,11 @@ class ControlsProvider with ChangeNotifier {
   final String preferredServer;
   final Function(int) updateWatchProgress;
   final Function(int, VideoStream) refreshPage;
-  final Function(String, { bool preserveProgress }) playAnotherEpisode;
+  final Function(String, {bool preserveProgress}) playAnotherEpisode;
   List<Map<String, String>> qualities;
   bool calledAutoNext = false;
-  List<VideoStream> servers;
+  final List<VideoStream> servers;
+  VideoStream currentServer;
   final Future<void> Function(String, int?) changeQuality;
 
   ControlsProvider({
@@ -28,6 +29,7 @@ class ControlsProvider with ChangeNotifier {
     required this.qualities,
     required this.servers,
     required this.changeQuality,
+    required this.currentServer,
   })  : _controller = controller,
         _state = VideoPlayerState(
           currentEpIndex: episode['currentEpIndex'],
@@ -40,7 +42,8 @@ class ControlsProvider with ChangeNotifier {
           preloadedSources: [],
           preloadStarted: false,
           finalEpisodeReached: false,
-          currentSources: [],
+          currentSource: currentServer,
+          sources: servers,
         ) {
     _controller.addListener(_playerEventListener);
   }
@@ -151,12 +154,15 @@ class ControlsProvider with ChangeNotifier {
     );
   }
 
-  Future<void> playVideo(String url, {bool preserveProgress = false}) async {
-    _state = _state.copyWith(preloadedSources: [], sliderValue: 0);
-    await playAnotherEpisode(url, preserveProgress: preserveProgress);
+  Future<void> playVideo(String url, {bool preserveProgress = false, VideoStream? currentSource, List<VideoStream>? sources}) async {
     _state = _state.copyWith(
+      preloadedSources: [],
+      sliderValue: 0,
       preloadStarted: false,
+      currentSource: currentSource,
+      sources: sources,
     );
+    playAnotherEpisode(url, preserveProgress: preserveProgress);
     calledAutoNext = false;
   }
 
@@ -196,7 +202,8 @@ class VideoPlayerState {
   final List<VideoStream> preloadedSources;
   final bool preloadStarted;
   final bool finalEpisodeReached;
-  final List<VideoStream> currentSources;
+  final VideoStream currentSource;
+  final List<VideoStream> sources;
 
   VideoPlayerState({
     required this.currentEpIndex,
@@ -209,7 +216,8 @@ class VideoPlayerState {
     required this.preloadedSources,
     required this.preloadStarted,
     required this.finalEpisodeReached,
-    required this.currentSources,
+    required this.currentSource,
+    required this.sources,
   });
 
   VideoPlayerState copyWith({
@@ -223,7 +231,8 @@ class VideoPlayerState {
     List<VideoStream>? preloadedSources,
     bool? preloadStarted,
     bool? finalEpisodeReached,
-    List<VideoStream>? currentSources,
+    VideoStream? currentSource,
+    List<VideoStream>? sources,
   }) {
     return VideoPlayerState(
       currentEpIndex: currentEpIndex ?? this.currentEpIndex,
@@ -236,7 +245,8 @@ class VideoPlayerState {
       preloadedSources: preloadedSources ?? this.preloadedSources,
       preloadStarted: preloadStarted ?? this.preloadStarted,
       finalEpisodeReached: finalEpisodeReached ?? this.finalEpisodeReached,
-      currentSources: currentSources ?? this.currentSources,
+      currentSource: currentSource ?? this.currentSource,
+      sources: sources ?? this.sources,
     );
   }
 }

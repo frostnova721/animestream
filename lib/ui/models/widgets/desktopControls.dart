@@ -1,9 +1,9 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/controlsProvider.dart';
+import 'package:animestream/ui/models/providers/controlsProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
-import 'package:animestream/ui/theme/themeProvider.dart';
+import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -256,7 +256,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
             child: Column(
               children: [
                 TabBar(tabs: [
-                     Tab(
+                  Tab(
                     icon: Icon(Icons.hd_outlined),
                   ),
                   Tab(
@@ -271,20 +271,22 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     padding: const EdgeInsets.only(top: 15),
                     child: TabBarView(
                       children: [
-                         ListView.builder(
+                        ListView.builder(
                           itemCount: provider.qualities.length,
                           itemBuilder: (context, index) {
                             return MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: GestureDetector(
                                 onTap: () async {
-                                  await provider.changeQuality(provider.qualities[index]['link']!, (provider.controller.position ?? 0) ~/ 1000);
-                                  setState((){});
+                                  await provider.changeQuality(
+                                      provider.qualities[index]['link']!, (provider.controller.position ?? 0) ~/ 1000);
+                                  setState(() {});
                                 },
                                 child: Container(
                                   color: provider.qualities[index]['link'] == provider.controller.activeMediaUrl
-                                      ? appTheme.accentColor : null,
-                                      height: 40,
+                                      ? appTheme.accentColor
+                                      : null,
+                                  height: 40,
                                   alignment: Alignment.center,
                                   child: Text(
                                     "${provider.qualities[index]['quality']}${provider.qualities[index]['quality'] == 'default' ? "" : 'p'}",
@@ -302,24 +304,33 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           },
                         ),
                         ListView.builder(
-                          itemCount: provider.servers.length,
+                          itemCount: provider.state.sources.length,
                           itemBuilder: (context, index) {
+                            final sources = provider.state.sources;
+                            final current = provider.state.currentSource;
+
                             return MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: GestureDetector(
                                 onTap: () async {
-                                  await provider.playVideo(provider.servers[index].link, preserveProgress: true);
-                                  setState((){});
+                                  await provider.playVideo(provider.servers[index].link, preserveProgress: true, currentSource: sources[index]);
+                                  setState(() {});
                                 },
                                 child: Container(
-                                  color:  appTheme.accentColor,
-                                      height: 40,
+                                  color: sources[index].server == current.server &&
+                                          sources[index].quality == current.quality
+                                      ? appTheme.accentColor
+                                      : null,
+                                  height: 40,
                                   alignment: Alignment.center,
                                   child: Text(
-                                    "${provider.servers[index].server}",
+                                    "${sources[index].server} | ${sources[index].quality}",
                                     style: TextStyle(
                                       fontSize: 18,
-                                      color: appTheme.textMainColor,
+                                      color: sources[index].server == current.server &&
+                                          sources[index].quality == current.quality
+                                      ? appTheme.onAccent
+                                      : appTheme.textMainColor,
                                       fontFamily: "Poppins",
                                     ),
                                   ),

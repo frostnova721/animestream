@@ -6,7 +6,7 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/controlsProvider.dart';
+import 'package:animestream/ui/models/providers/controlsProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 
 class Controls extends StatefulWidget {
@@ -43,7 +43,7 @@ class _ControlsState extends State<Controls> {
   }
 
   void controlHiderListener() {
-    if(widget.isControlsVisible) {
+    if (widget.isControlsVisible) {
       widget.hideControlsOnTimeout();
     }
   }
@@ -91,7 +91,7 @@ class _ControlsState extends State<Controls> {
             builder: (BuildContext context) {
               return CustomControlsBottomSheet(
                 getEpisodeSources: provider.episode['getEpisodeSources'],
-                currentSources: provider.state.currentSources,
+                currentSources: [provider.state.currentSource],
                 currentEpIndex: provider.state.currentEpIndex,
                 playVideo: provider.playVideo,
                 next: false,
@@ -109,14 +109,14 @@ class _ControlsState extends State<Controls> {
         provider.fastForward(-(skipDuration ?? 10));
         break;
       // case LogicalKeyboardKey.select:
-        // {
-          // if (!provider.isControlsVisible) {
-          // widget.toggleControls(!provider.isControlsVisible);
-          // widget.hideControlsOnTimeout();
-          // }
-          // break;
-        // }
-        // }
+      // {
+      // if (!provider.isControlsVisible) {
+      // widget.toggleControls(!provider.isControlsVisible);
+      // widget.hideControlsOnTimeout();
+      // }
+      // break;
+      // }
+      // }
       // case LogicalKeyboardKey.f11:
 
       // case LogicalKeyboardKey.arrowUp:
@@ -327,7 +327,7 @@ class _ControlsState extends State<Controls> {
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
                           getEpisodeSources: provider.episode['getEpisodeSources'],
-                          currentSources: provider.state.currentSources,
+                          currentSources: [provider.state.currentSource],
                           currentEpIndex: provider.state.currentEpIndex,
                           playVideo: provider.playVideo,
                           next: false,
@@ -451,7 +451,7 @@ class _ControlsState extends State<Controls> {
                       builder: (BuildContext context) {
                         return CustomControlsBottomSheet(
                           getEpisodeSources: provider.episode['getEpisodeSources'],
-                          currentSources: provider.state.currentSources,
+                          currentSources: [provider.state.currentSource],
                           currentEpIndex: provider.state.currentEpIndex,
                           playVideo: provider.playVideo,
                           next: true,

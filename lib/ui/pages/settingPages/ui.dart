@@ -7,7 +7,7 @@ import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
-import 'package:animestream/ui/theme/themeProvider.dart';
+import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
 import 'package:device_info_plus/device_info_plus.dart';

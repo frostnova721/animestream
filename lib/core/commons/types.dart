@@ -52,6 +52,7 @@ class WatchPageInfo {
   int id;
   List<AlternateDatabaseId> altDatabases;
   double? lastWatchDuration;
+  List<VideoStream> allStreams;
 
   WatchPageInfo({
     required this.id,
@@ -60,6 +61,7 @@ class WatchPageInfo {
     required this.streamInfo,
     required this.altDatabases,
     required this.lastWatchDuration,
+    this.allStreams = const [],
   });
 }
 

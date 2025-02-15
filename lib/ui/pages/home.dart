@@ -105,7 +105,6 @@ class _HomeState extends State<Home> {
               buildHeader("Home", context, afterNavigation: () {
                 if (mounted) setState(() {});
               }),
-              // if (storedUserData != null)
               AnimatedSwitcher(
                 duration: Duration(milliseconds: 400),
                 child: storedUserData != null

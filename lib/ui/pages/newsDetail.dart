@@ -21,7 +21,7 @@ class _NewsDetailsState extends State<NewsDetails> {
   }
 
   Future getDetailedNews() async {
-    final res = await AnimeNews().getDetaildNews(widget.url);
+    final res = await AnimeNews().getDetailedNews(widget.url);
     if (mounted)
       setState(() {
         news = res;

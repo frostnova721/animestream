@@ -6,7 +6,7 @@ import "package:html/parser.dart" as html;
 import "package:encrypt/encrypt.dart";
 import "package:animestream/core/commons/types.dart";
 
-class Vidstream extends AnimeExtractor {
+class GogoVidstream extends AnimeExtractor {
   final keys = {
     'key': Key.fromUtf8('37911490979715163134003223491201'),
     'secondKey': Key.fromUtf8('54674138327930866480207815084989'),

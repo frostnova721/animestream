@@ -209,6 +209,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                             animeTitle: widget.bottomSheetContentData.title,
                             episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
                             streamInfo: streamSources[index],
+                            allStreams: streamSources,
                             id: widget.bottomSheetContentData.id,
                             altDatabases: widget.altDatabases,
                             lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,

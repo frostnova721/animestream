@@ -7,7 +7,7 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/lastWatchDuration.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/controlsProvider.dart';
+import 'package:animestream/ui/models/providers/controlsProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/customControls.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -16,7 +16,7 @@ import 'package:animestream/ui/models/widgets/desktopControls.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/player.dart';
-import 'package:animestream/ui/theme/themeProvider.dart';
+import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -197,7 +197,7 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
   }
 
   /** to play the next or prev episode */
-  Future<void> playAnotherEpisode(String link, {bool preserveProgress = false}) async {
+  Future<void> playAnotherEpisode(String link, {bool preserveProgress = false, VideoStream? currentSource, List<VideoStream>? sources}) async {
     try {
       toggleControls(true); //show the controls ig
       await controller.pause();
@@ -304,7 +304,8 @@ class _WatchState extends State<Watch> with TickerProviderStateMixin {
                               create: (context) => ControlsProvider(
                                     controller: controller,
                                     qualities: qualities,
-                                    servers: [],
+                                    servers: widget.info.allStreams,
+                                    currentServer: info.streamInfo,
                                     episode: {
                                       'getEpisodeSources': getEpisodeSources,
                                       'epLinks': epLinks,

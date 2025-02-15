@@ -1,7 +1,6 @@
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/aniplay.dart';
-import 'package:animestream/core/anime/providers/gogoanime.dart';
 import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -10,7 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
 final List<String> sources = [
-  "gogoanime",
+  // "gogoanime", RIP, you shall rest here till the end of this app's life!
   "animepahe",
   "animeonsen",
   "aniplay",
@@ -24,8 +23,8 @@ final List<String> unDownloadableSources = [
 
 AnimeProvider getClass(String source) {
   switch (source) {
-    case "gogoanime":
-      return GogoAnime();
+    // case "gogoanime":
+      // return GogoAnime();  :(
     case "animepahe":
       return AnimePahe();
     case "animeonsen":

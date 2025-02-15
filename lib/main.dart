@@ -24,7 +24,7 @@ import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/mainNav.dart';
-import 'package:animestream/ui/theme/themeProvider.dart';
+import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
 import 'package:window_manager/window_manager.dart';

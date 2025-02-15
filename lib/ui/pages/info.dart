@@ -100,7 +100,7 @@ class _InfoState extends State<Info> {
 
   Future getInfo(int id) async {
     try {
-      if (currentUserSettings?.database == Databases.anilist) {
+      if (currentUserSettings?.database == Databases.anilist && await AniListLogin().isAnilistLoggedIn()) {
         //fetch ids from simkl and save em
         try {
           DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
@@ -909,7 +909,8 @@ class _InfoState extends State<Info> {
                       selectedSource: selectedSource,
                       title: data.title['english'] ?? data.title['romaji'] ?? '',
                       id: widget.id,
-                      cover: data.cover),
+                      cover: data.cover,
+                      ),
                   type: Type.watch,
                   getWatched: getWatched,
                 );

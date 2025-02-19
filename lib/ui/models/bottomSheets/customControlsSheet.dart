@@ -1,35 +1,22 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/providers/playerDataProvider.dart';
+import 'package:animestream/ui/models/providers/playerProvider.dart';
+import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/types.dart';
 
 class CustomControlsBottomSheet extends StatefulWidget {
-  final Function(String, Function(List<VideoStream>, bool)) getEpisodeSources;
-  final List<VideoStream> currentSources;
-  final Future<void> Function(String, {bool preserveProgress, VideoStream? currentSource, List<VideoStream>? sources})
-      playVideo;
-  final bool next;
-  final int currentEpIndex;
-  final List<String> epLinks;
-  final Function refreshPage;
-  final Function(int) updateCurrentEpIndex;
-  final bool preserveProgress;
-  final int? customIndex;
-  final String? preferredServer;
+  /// The index of episode to switch
+  final int index;
+  final PlayerDataProvider dataProvider;
+  final PlayerProvider playerProvider;
 
   const CustomControlsBottomSheet({
     super.key,
-    required this.getEpisodeSources,
-    required this.currentSources,
-    required this.playVideo,
-    required this.next,
-    required this.epLinks,
-    required this.currentEpIndex,
-    required this.refreshPage,
-    required this.updateCurrentEpIndex,
-    this.preserveProgress = false,
-    this.customIndex,
-    this.preferredServer = null,
+    required this.index,
+    required this.dataProvider,
+    required this.playerProvider,
   });
 
   @override
@@ -38,57 +25,66 @@ class CustomControlsBottomSheet extends StatefulWidget {
 
 class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
   List<VideoStream> currentSources = [];
-  int currentEpIndex = 0;
+  // int currentEpIndex = 0;
+
+  late int index;
 
   bool _isLoading = true;
+
+  late PlayerProvider pp;
+  late PlayerDataProvider dp;
 
   @override
   void initState() {
     super.initState();
-    currentEpIndex = widget.currentEpIndex;
 
-    //I think this line is useless
-    currentSources = widget.currentSources;
+    index = widget.index;
+    pp = widget.playerProvider;
+    dp = widget.dataProvider;
 
-    getSources(widget.next);
+    getSources();
   }
 
-  Future getSources(bool nextEpisode) async {
-    if ((currentEpIndex == 0 && !nextEpisode) || (currentEpIndex + 1 >= widget.epLinks.length && nextEpisode)) {
+  Future getSources() async {
+    if ((index <= 0) || (index >= dp.epLinks.length)) {
       throw new Exception("Index too low or too high. Item not found!");
     }
-    currentSources = [];
+
     bool alreadyCalledaSource = false;
-    final index = widget.customIndex != null
-        ? widget.customIndex
-        : nextEpisode
-            ? currentEpIndex + 1
-            : currentEpIndex - 1;
-    final srcs = await widget.getEpisodeSources(widget.epLinks[index!], (list, finished) {
-      if (list.length > 0) {
-        if (list[0].server == widget.preferredServer && !alreadyCalledaSource) {
-          widget.playVideo(list[0].link,
-              preserveProgress: widget.preserveProgress,
-              currentSource: list[0],
-              sources: currentSources.isEmpty ? list : currentSources);
-          currentEpIndex = index;
-          widget.refreshPage(currentEpIndex, list[0]);
-          widget.updateCurrentEpIndex(currentEpIndex);
-          Navigator.pop(context);
-          alreadyCalledaSource = true;
-          return;
+
+    if (index == dp.state.currentEpIndex) {
+      currentSources = dp.state.streams;
+      _isLoading = false;
+    } else {
+      await getStreams(dp.selectedSource, dp.epLinks[index], (list, finished) {
+        if (list.length > 0) {
+          if (mounted)
+            setState(() {
+              if (finished) _isLoading = false;
+              currentSources += list;
+            });
+          print("got one!");
+          dp.updateStreams(currentSources);
+          if (list[0].server == dp.state.currentStream.server &&
+              !alreadyCalledaSource &&
+              index != dp.state.currentEpIndex) {
+            dp.updateCurrentStream(
+              list[0],
+            );
+            Navigator.pop(context);
+            alreadyCalledaSource = true;
+            play();
+          }
         }
-      }
-      if (mounted)
-        setState(() {
-          if (finished) _isLoading = false;
-          currentSources = currentSources + list;
-        });
-    });
-    if (mounted)
-      setState(() {
-        currentSources = srcs ?? [];
       });
+    }
+  }
+
+  void play() {
+    dp.extractCurrentStreamQualities();
+    final q = dp.getPreferredQualityStreamFromQualities();
+    pp.playVideo(q['link']!, currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
+    dp.update(dp.state.copyWith(currentQuality: q, currentEpIndex: index, preloadStarted: false, preloadedSources: []));
   }
 
   @override
@@ -155,15 +151,14 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
           ),
           child: ElevatedButton(
             onPressed: () {
-              widget.playVideo(currentSources[index].link, preserveProgress: widget.preserveProgress);
-              currentEpIndex = widget.customIndex != null
-                  ? widget.customIndex!
-                  : widget.next
-                      ? currentEpIndex + 1
-                      : currentEpIndex - 1;
-              widget.refreshPage(currentEpIndex, currentSources[index]);
-              widget.updateCurrentEpIndex(currentEpIndex);
+              dp.update(
+                dp.state.copyWith(
+                  currentStream: currentSources[index],
+                  streams: currentSources,
+                ),
+              );
               Navigator.pop(context);
+              play();
             },
             style: ElevatedButton.styleFrom(
               elevation: 0,

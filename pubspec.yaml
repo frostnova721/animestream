@@ -24,7 +24,7 @@ dependencies:
   
   # Core utils
   path_provider: ^2.0.11
-  awesome_notifications: ^0.9.2
+  awesome_notifications: ^0.10.0
   package_info_plus: ^8.0.0
   permission_handler: ^11.3.1
   device_info_plus: ^10.1.0

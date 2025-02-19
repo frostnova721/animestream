@@ -44,7 +44,10 @@ class _InfoState extends State<Info> {
 
   late DatabaseInfo data;
 
-  String selectedSource = currentUserSettings?.preferredProvider ?? sources[0];
+  // Pick a source from the source list if it exists. select first available source if that source is removed
+  String selectedSource = sources.contains(currentUserSettings?.preferredProvider)
+      ? currentUserSettings?.preferredProvider ?? sources[0]
+      : sources[0];
   String? foundName;
 
   MediaStatus? mediaListStatus;
@@ -788,7 +791,6 @@ class _InfoState extends State<Info> {
               ),
             ),
 
-            //needs to store progress :(
             if (lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched] != null)
               Container(
                 width: 285 * ((lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched] ?? 0) / 100)
@@ -902,15 +904,15 @@ class _InfoState extends State<Info> {
                 return ServerSelectionBottomSheet(
                   altDatabases: altDatabases,
                   bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                      totalEpisodes: data.episodes,
-                      epLinks: epLinks,
-                      lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                      selectedSource: selectedSource,
-                      title: data.title['english'] ?? data.title['romaji'] ?? '',
-                      id: widget.id,
-                      cover: data.cover,
-                      ),
+                    totalEpisodes: data.episodes,
+                    epLinks: epLinks,
+                    lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
+                    episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                    selectedSource: selectedSource,
+                    title: data.title['english'] ?? data.title['romaji'] ?? '',
+                    id: widget.id,
+                    cover: data.cover,
+                  ),
                   type: Type.watch,
                   getWatched: getWatched,
                 );

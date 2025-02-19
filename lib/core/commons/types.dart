@@ -21,6 +21,11 @@ class VideoStream {
       this.subtitle = null, 
       this.customHeaders = null,
       });
+
+  @override
+  String toString() {
+    return 'VideoStream(quality: $quality, link: $link, isM3u8: $isM3u8, subtitle: $subtitle, subtitleFormat: $subtitleFormat, server: $server, backup: $backup, customHeaders: $customHeaders)';
+  }
 }
 
 class ServerSelectionBottomSheetContentData {

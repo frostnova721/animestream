@@ -1,24 +1,18 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
-import 'package:animestream/ui/models/providers/controlsProvider.dart';
-import 'package:animestream/ui/models/watchPageUtil.dart';
+import 'package:animestream/ui/models/providers/playerDataProvider.dart';
+import 'package:animestream/ui/models/providers/playerProvider.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class Desktopcontrols extends StatefulWidget {
-  final VideoController controller;
-  final Future<void> Function(int, VideoStream) refreshPage;
-  final Future<void> Function(int) updateWatchProgress;
 
   const Desktopcontrols({
     super.key,
-    required this.controller,
-    required this.refreshPage,
-    required this.updateWatchProgress,
   });
 
   @override
@@ -34,7 +28,8 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
     isFullScreen = context.read<ThemeProvider>().isFullScreen;
   }
 
-  late ControlsProvider provider;
+  late PlayerProvider provider;
+  late PlayerDataProvider dataProvider;
 
   final _fn = FocusNode();
 
@@ -68,7 +63,8 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
 
   @override
   Widget build(BuildContext context) {
-    provider = context.watch<ControlsProvider>();
+    provider = context.watch<PlayerProvider>();
+    dataProvider = context.watch<PlayerDataProvider>();
     return KeyboardListener(
         focusNode: _fn,
         onKeyEvent: keyListener,
@@ -94,11 +90,11 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Episode ${provider.state.currentEpIndex + 1}",
+                              "Episode ${dataProvider.state.currentEpIndex + 1}",
                               style: TextStyle(fontSize: 35),
                             ),
                             Text(
-                              provider.episode['showTitle'] ?? "no title",
+                              dataProvider.showTitle,
                               style: TextStyle(fontSize: 17),
                             ),
                           ],
@@ -136,7 +132,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(provider.state.currentTime),
+                        Text(dataProvider.state.currentTimeStamp),
                         SliderTheme(
                           data: SliderThemeData(
                               activeTrackColor: appTheme.accentColor,
@@ -150,7 +146,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
                               child: Slider(
-                                value: provider.state.sliderValue.toDouble(),
+                                value: dataProvider.state.sliderValue.toDouble(),
                                 onChanged: (val) {
                                   provider.controller.seekTo(Duration(seconds: val.toInt()));
                                 },
@@ -160,7 +156,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             ),
                           ),
                         ),
-                        Text(provider.state.maxTime),
+                        Text(dataProvider.state.maxTimeStamp),
                       ],
                     ),
                   ),
@@ -174,7 +170,20 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                       ),
                       Row(
                         children: [
-                          IconButton(onPressed: () {}, icon: makeIcon(Icons.skip_previous_outlined)),
+                          IconButton(
+                              onPressed: () {
+                                if (dataProvider.state.currentEpIndex == 0)
+                                  return floatingSnackBar(context, "Already on the first episode");
+                                showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return Container();
+                                      // CustomControlsBottomSheet(
+                                      // index: ,
+                                      // );
+                                    });
+                              },
+                              icon: makeIcon(Icons.skip_previous_outlined)),
                           Padding(
                             padding: const EdgeInsets.only(left: 5, right: 5),
                             child: IconButton(
@@ -190,7 +199,26 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                         : Icons.play_arrow_sharp,
                                     customSize: 50)),
                           ),
-                          IconButton(onPressed: () {}, icon: makeIcon(Icons.skip_next_outlined)),
+                          IconButton(
+                              onPressed: () {
+                                if (dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length)
+                                  return floatingSnackBar(context, "You are already in the final episode!");
+                                if (dataProvider.state.preloadedSources.isNotEmpty) {
+                                  print("from preload");
+                                  provider.playPreloadedEpisode(dataProvider);
+                                } else
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return CustomControlsBottomSheet(
+                                        index: dataProvider.state.currentEpIndex + 1,
+                                        dataProvider: dataProvider,
+                                        playerProvider: provider,
+                                      );
+                                    },
+                                  );
+                              },
+                              icon: makeIcon(Icons.skip_next_outlined)),
                         ],
                       ),
                       Expanded(
@@ -272,27 +300,29 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     child: TabBarView(
                       children: [
                         ListView.builder(
-                          itemCount: provider.qualities.length,
+                          itemCount: dataProvider.state.qualities.length,
                           itemBuilder: (context, index) {
                             return MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: GestureDetector(
                                 onTap: () async {
-                                  await provider.changeQuality(
-                                      provider.qualities[index]['link']!, (provider.controller.position ?? 0) ~/ 1000);
-                                  setState(() {});
+                                  dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
+                                  provider.playVideo(dataProvider.state.qualities[index]['link']!,
+                                      currentStream: dataProvider.state.currentStream);
                                 },
                                 child: Container(
-                                  color: provider.qualities[index]['link'] == provider.controller.activeMediaUrl
-                                      ? appTheme.accentColor
-                                      : null,
+                                  color:
+                                      dataProvider.state.qualities[index]['link'] == provider.controller.activeMediaUrl
+                                          ? appTheme.accentColor
+                                          : null,
                                   height: 40,
                                   alignment: Alignment.center,
                                   child: Text(
-                                    "${provider.qualities[index]['quality']}${provider.qualities[index]['quality'] == 'default' ? "" : 'p'}",
+                                    "${dataProvider.state.qualities[index]['quality']}",
                                     style: TextStyle(
                                       fontSize: 18,
-                                      color: provider.qualities[index]['link'] == provider.controller.activeMediaUrl
+                                      color: dataProvider.state.qualities[index]['link'] ==
+                                              provider.controller.activeMediaUrl
                                           ? appTheme.onAccent
                                           : appTheme.textMainColor,
                                       fontFamily: "Poppins",
@@ -304,16 +334,20 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           },
                         ),
                         ListView.builder(
-                          itemCount: provider.state.sources.length,
+                          itemCount: dataProvider.state.streams.length,
                           itemBuilder: (context, index) {
-                            final sources = provider.state.sources;
-                            final current = provider.state.currentSource;
+                            final sources = dataProvider.state.streams;
+                            final current = dataProvider.state.currentStream;
 
                             return MouseRegion(
                               cursor: SystemMouseCursors.click,
                               child: GestureDetector(
                                 onTap: () async {
-                                  await provider.playVideo(provider.servers[index].link, preserveProgress: true, currentSource: sources[index]);
+                                  dataProvider.updateCurrentStream(dataProvider.state.streams[index]);
+                                  await dataProvider.extractCurrentStreamQualities();
+                                  final q = dataProvider.getPreferredQualityStreamFromQualities();
+                                  await provider.playVideo(q['link']!,
+                                      preserveProgress: true, currentStream: dataProvider.state.streams[index]);
                                   setState(() {});
                                 },
                                 child: Container(
@@ -328,9 +362,9 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                     style: TextStyle(
                                       fontSize: 18,
                                       color: sources[index].server == current.server &&
-                                          sources[index].quality == current.quality
-                                      ? appTheme.onAccent
-                                      : appTheme.textMainColor,
+                                              sources[index].quality == current.quality
+                                          ? appTheme.onAccent
+                                          : appTheme.textMainColor,
                                       fontFamily: "Poppins",
                                     ),
                                   ),
@@ -341,7 +375,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                         ),
                         GridView.builder(
                           // shrinkWrap: true,
-                          itemCount: provider.episode['epLinks'].length ?? 0,
+                          itemCount: dataProvider.epLinks.length,
                           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
                           itemBuilder: (context, index) {
                             return InkWell(
@@ -350,23 +384,24 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 showDialog(
                                     context: context,
                                     builder: (context) {
-                                      return CustomControlsBottomSheet(
-                                        getEpisodeSources: provider.episode['getEpisodeSources'],
-                                        currentSources: [],
-                                        playVideo: provider.playVideo,
-                                        next: false,
-                                        epLinks: provider.episode['epLinks'],
-                                        currentEpIndex: provider.state.currentEpIndex,
-                                        refreshPage: provider.refreshPage,
-                                        updateCurrentEpIndex: provider.updateCurrentEpIndex,
-                                        customIndex: index,
-                                        preferredServer: provider.preferredServer,
-                                      );
+                                      return Container();
+                                      // CustomControlsBottomSheet(
+                                      //   getEpisodeSources: dataProvider.episode['getEpisodeSources'],
+                                      //   currentSources: [],
+                                      //   playVideo: dataProvider.playVideo,
+                                      //   next: false,
+                                      //   epLinks: dataProvider.episode['epLinks'],
+                                      //   currentEpIndex: dataProvider.state.currentEpIndex,
+                                      //   refreshPage: dataProvider.refreshPage,
+                                      //   updateCurrentEpIndex: dataProvider.updateCurrentEpIndex,
+                                      //   customIndex: index,
+                                      //   preferredServer: dataProvider.preferredServer,
+                                      // );
                                     });
                               },
                               child: Container(
                                 decoration: BoxDecoration(
-                                  color: index == provider.state.currentEpIndex
+                                  color: index == dataProvider.state.currentEpIndex
                                       ? appTheme.accentColor
                                       : appTheme.backgroundSubColor,
                                   borderRadius: BorderRadius.circular(10),
@@ -376,7 +411,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 child: Text(
                                   (index + 1).toString(),
                                   style: TextStyle(
-                                    color: index == provider.state.currentEpIndex
+                                    color: index == dataProvider.state.currentEpIndex
                                         ? appTheme.onAccent
                                         : appTheme.textMainColor,
                                     fontWeight: FontWeight.bold,

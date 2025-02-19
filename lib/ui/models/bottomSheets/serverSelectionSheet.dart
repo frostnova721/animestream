@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
@@ -5,11 +7,15 @@ import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/types.dart';
+import 'package:animestream/ui/models/providers/playerDataProvider.dart';
+import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/ui/models/sources.dart' as srcs;
+import 'package:provider/provider.dart';
 
 class ServerSelectionBottomSheet extends StatefulWidget {
   final ServerSelectionBottomSheetContentData bottomSheetContentData;
@@ -200,21 +206,41 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                       totalEpisodes: widget.bottomSheetContentData.totalEpisodes,
                       alternateDatabases: widget.altDatabases,
                     );
+                    final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => Watch(
-                          selectedSource: widget.bottomSheetContentData.selectedSource,
-                          info: WatchPageInfo(
-                            animeTitle: widget.bottomSheetContentData.title,
-                            episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
-                            streamInfo: streamSources[index],
-                            allStreams: streamSources,
-                            id: widget.bottomSheetContentData.id,
-                            altDatabases: widget.altDatabases,
-                            lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,
+                        builder: (context) => MultiProvider(
+                          providers: [
+                            ChangeNotifierProvider(
+                              create: (context) => PlayerDataProvider(
+                                  initialStreams: streamSources, initialStream: streamSources[index],
+                                  epLinks: widget.bottomSheetContentData.epLinks,
+                                  showTitle: widget.bottomSheetContentData.title,
+                                  showId: widget.bottomSheetContentData.id,
+                                  selectedSource: widget.bottomSheetContentData.selectedSource,
+                                  startIndex: widget.bottomSheetContentData.episodeIndex,
+                                  altDatabases: widget.altDatabases,
+                                  lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,
+                                  ),
+                            ),
+                            ChangeNotifierProvider(
+                              create: (context) => PlayerProvider(controller),
+                            ),
+                          ],
+                          child: Watch(
+                            controller: controller,
+                            // info: WatchPageInfo(
+                            //   animeTitle: widget.bottomSheetContentData.title,
+                            //   episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
+                            //   streamInfo: streamSources[index],
+                            //   allStreams: streamSources,
+                            //   id: widget.bottomSheetContentData.id,
+                            //   altDatabases: widget.altDatabases,
+                            //   lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,
+                            // ),
+                            // episodes: widget.bottomSheetContentData.epLinks,
                           ),
-                          episodes: widget.bottomSheetContentData.epLinks,
                         ),
                       ),
                     ).then((value) {

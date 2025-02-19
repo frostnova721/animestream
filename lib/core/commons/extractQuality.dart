@@ -36,7 +36,7 @@ Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<Stri
     final Map<String, String> obj = {
       'link': links[i],
       'resolution': resolutions[i],
-      'quality': resolutions[i].split('x')[1],
+      'quality': resolutions[i].split('x')[1] + "p",
     };
     grouped.add(obj);
   }

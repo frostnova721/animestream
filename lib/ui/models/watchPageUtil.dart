@@ -73,6 +73,9 @@ abstract class VideoController {
 
   /// Url of currently playing media
   String? get activeMediaUrl;
+
+  /// Initialisation status of player
+  bool? get isInitialized;
 }
 
 class BetterPlayerWrapper implements VideoController {
@@ -114,6 +117,9 @@ class BetterPlayerWrapper implements VideoController {
   
   @override
   String? get activeMediaUrl => controller.betterPlayerDataSource?.url;
+
+  @override
+  bool? get isInitialized => controller.isVideoInitialized();
 
   @override
   Future<void> pause() {
@@ -199,6 +205,12 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   String? get activeMediaUrl => controller.dataSource;
+   
+  @override
+  double? get volume => controller.value.volume;
+  
+  @override
+  bool? get isInitialized => controller.value.isInitialized;
 
   @override
   Future<void> pause() {
@@ -253,9 +265,6 @@ class VideoPlayerWindowsWrapper implements VideoController {
   void removeListener(VoidCallback cb) {
     return controller.removeListener(cb);
   }
-  
-  @override
-  double? get volume => controller.value.volume;
 }
 
 // un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26 for android

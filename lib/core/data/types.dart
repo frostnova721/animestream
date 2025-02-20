@@ -82,6 +82,7 @@ class SettingsModal {
       'database': database?.name,
       'enableSuperSpeeds': enableSuperSpeeds,
       'useQueuedDownloads': useQueuedDownloads,
+      'useFramelessWindow': useFramelessWindow,
     };
   }
 }

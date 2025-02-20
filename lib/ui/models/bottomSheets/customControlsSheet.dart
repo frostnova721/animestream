@@ -81,10 +81,18 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
   }
 
   void play() {
-    dp.extractCurrentStreamQualities();
-    final q = dp.getPreferredQualityStreamFromQualities();
-    pp.playVideo(q['link']!, currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
-    dp.update(dp.state.copyWith(currentQuality: q, currentEpIndex: index, preloadStarted: false, preloadedSources: []));
+    dp.extractCurrentStreamQualities().then((val) {
+      final q = dp.getPreferredQualityStreamFromQualities();
+      pp.playVideo(q['link']!,
+          currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
+      dp.update(dp.state.copyWith(
+        currentQuality: q,
+        currentEpIndex: index,
+        preloadStarted: false,
+        preloadedSources: [],
+        sliderValue: index == dp.state.currentEpIndex ? null : 0,
+      ));
+    });
   }
 
   @override

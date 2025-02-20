@@ -182,6 +182,9 @@ class VideoPlayerWindowsWrapper implements VideoController {
   Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
     //kill the player and create a new instance :)
     await controller.dispose();
+
+    // wait some time for proper disposal.
+    await Future.delayed(Duration(milliseconds: 100));
     controller = WinVideoPlayerController.network(url);
     await controller.initialize();
     for(final listener in _listeners) {

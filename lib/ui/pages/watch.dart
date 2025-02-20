@@ -144,6 +144,39 @@ class _WatchState extends State<Watch> {
   // This is required to avoid *controller is not initiate error*
   bool isInitiated = false;
 
+  // Just a smol logic to handle taps since gesture dectector doesnt do the job with double taps
+  Timer? _tapTimer;
+  int lastTapTime = 0;
+  final int doubleTapThreshold = 200; // in ms
+
+  void _handleTap() {
+    if(!Platform.isWindows) return _handleSingleTap();
+    int now = DateTime.now().millisecondsSinceEpoch;
+    
+    if (now - lastTapTime <= doubleTapThreshold) {
+      _handleDoubleTap();
+      lastTapTime = 0; // Reset
+    } else {
+      _handleSingleTap();
+    }
+    
+    lastTapTime = now;
+  }
+
+  void _handleSingleTap() {
+    final playerProvider = context.read<PlayerProvider>();
+    playerProvider.toggleControlsVisibility();
+    if (!playerProvider.state.controlsVisible) {
+      _controlsTimer?.cancel();
+      _controlsTimer = null;
+    }
+  }
+
+  void _handleDoubleTap() {
+    final themeProvider = context.read<ThemeProvider>();
+    themeProvider.setFullScreen(!themeProvider.isFullScreen);
+  }
+
   @override
   Widget build(BuildContext context) {
     final playerProvider = context.watch<PlayerProvider>();
@@ -159,17 +192,11 @@ class _WatchState extends State<Watch> {
       },
       child: Scaffold(
         body: GestureDetector(
-          onTap: () {
-            playerProvider.toggleControlsVisibility();
-            if (!playerProvider.state.controlsVisible) {
-              _controlsTimer?.cancel();
-              _controlsTimer = null;
-            }
-          },
+          onTap: _handleTap,
           child: Stack(
             children: [
               Player(controller),
-              if (playerProvider.state.showSubs)
+              if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
                 SubViewer(
                   controller: controller,
                   format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
@@ -181,7 +208,10 @@ class _WatchState extends State<Watch> {
                 child: Stack(
                   children: [
                     IgnorePointer(ignoring: true, child: overlay()),
-                    if (isInitiated) IgnorePointer(ignoring: !playerProvider.state.controlsVisible, child: Platform.isWindows ? Desktopcontrols() : Controls()),
+                    if (isInitiated)
+                      IgnorePointer(
+                          ignoring: !playerProvider.state.controlsVisible,
+                          child: Platform.isWindows ? Desktopcontrols() : Controls()),
                   ],
                 ),
               ),
@@ -227,6 +257,8 @@ class _WatchState extends State<Watch> {
       //store the exact percentage of watched
       print("[PLAYER] SAVED WATCH DURATION");
       controller.dispose();
+      _controlsTimer?.cancel();
+      _tapTimer?.cancel();
       // _controlsTimer?.cancel();
 
       super.dispose();

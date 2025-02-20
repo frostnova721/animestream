@@ -512,7 +512,7 @@ class _ControlsState extends State<Controls> {
                     return floatingSnackBar(context, "You are already in the final episode!");
                   if (dataProvider.state.preloadedSources.isNotEmpty) {
                     print("from preload");
-                    // provider.playPreloadedEpisode();
+                    provider.playPreloadedEpisode(dataProvider);
                   } else
                     showSheet(
                       context,

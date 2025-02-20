@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
@@ -10,7 +12,6 @@ import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class Desktopcontrols extends StatefulWidget {
-
   const Desktopcontrols({
     super.key,
   });
@@ -25,7 +26,6 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
   @override
   void initState() {
     super.initState();
-    isFullScreen = context.read<ThemeProvider>().isFullScreen;
   }
 
   late PlayerProvider provider;
@@ -33,20 +33,25 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
 
   final _fn = FocusNode();
 
-  late bool isFullScreen;
-
   void keyListener(KeyEvent key) {
     if (key is KeyUpEvent) return;
     switch (key.logicalKey) {
       case LogicalKeyboardKey.space:
+      case LogicalKeyboardKey.mediaPlayPause:
         {
           (provider.controller.isPlaying ?? false) ? provider.controller.pause() : provider.controller.play();
           break;
         }
+      case LogicalKeyboardKey.mediaPlay:
+        provider.controller.play();
+        break;
+      case LogicalKeyboardKey.mediaPause:
+        provider.controller.pause();
+        break;
       case LogicalKeyboardKey.f11:
         {
-          isFullScreen = !isFullScreen;
-          context.read<ThemeProvider>().setFullScreen(isFullScreen);
+          final tp = context.read<ThemeProvider>();
+          tp.setFullScreen(!tp.isFullScreen);
           break;
         }
       case LogicalKeyboardKey.arrowLeft:
@@ -165,7 +170,18 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     children: [
                       Expanded(
                         child: Row(
-                          children: [IconButton(onPressed: () {}, icon: makeIcon(Icons.high_quality_outlined))],
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (BuildContext context) {
+                                      return sideBox();
+                                    },
+                                  );
+                                },
+                                icon: makeIcon(Icons.high_quality_outlined))
+                          ],
                         ),
                       ),
                       Row(
@@ -240,22 +256,31 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   overlayShape: RoundSliderOverlayShape(overlayRadius: 15),
                                 ),
                                 child: Slider(
-                                  value: provider.controller.volume ?? 0,
-                                  onChanged: (value) => provider.controller.setVolume(value),
+                                  value: provider.state.volume,
+                                  onChanged: (value) {
+                                    final expVol = pow(value, 3).toDouble();
+                                    provider.controller.setVolume(expVol);
+                                    provider.updateVolume(value);
+                                  },
                                   min: 0,
                                   max: 1,
                                 ),
                               ),
                             ),
 
-                            IconButton(onPressed: () {}, icon: makeIcon(Icons.subtitles)),
                             IconButton(
                                 onPressed: () {
-                                  isFullScreen = !isFullScreen;
-                                  context.read<ThemeProvider>().setFullScreen(isFullScreen);
-                                  setState(() {});
+                                  provider.toggleSubs();
                                 },
-                                icon: makeIcon(isFullScreen ? Icons.fullscreen_exit_sharp : Icons.fullscreen_sharp)),
+                                icon: makeIcon(provider.state.showSubs ? Icons.subtitles : Icons.subtitles_outlined)),
+                            IconButton(
+                                onPressed: () {
+                                  final tp = context.read<ThemeProvider>();
+                                  tp.setFullScreen(!tp.isFullScreen);
+                                },
+                                icon: makeIcon(context.select<ThemeProvider, bool>((prov) => prov.isFullScreen)
+                                    ? Icons.fullscreen_exit_sharp
+                                    : Icons.fullscreen_sharp)),
                           ],
                         ),
                       ),
@@ -268,7 +293,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
         ));
   }
 
-  Widget sideBox() {
+  Widget sideBox({int initialIndex = 0}) {
     final mq = MediaQuery.sizeOf(context);
     return Dialog(
       clipBehavior: Clip.antiAlias,
@@ -281,152 +306,168 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
           padding: EdgeInsets.all(15),
           child: DefaultTabController(
             length: 3,
-            child: Column(
-              children: [
-                TabBar(tabs: [
-                  Tab(
-                    icon: Icon(Icons.hd_outlined),
+            initialIndex: initialIndex,
+            child: Builder(builder: (context) {
+              const textStyle = TextStyle(fontWeight: FontWeight.bold);
+              return Column(
+                children: [
+                  TabBar(
+                    onTap: (value) => setState(() {}),
+                    tabs: [
+                      Tab(
+                        child: DefaultTabController.of(context).index == 0
+                            ? Text(
+                                "Qualities",
+                                style: textStyle,
+                              )
+                            : Icon(Icons.hd_outlined),
+                      ),
+                      Tab(
+                        child: DefaultTabController.of(context).index == 1
+                            ? Text(
+                                "Servers",
+                                style: textStyle,
+                              )
+                            : Icon(Icons.folder_open_outlined),
+                      ),
+                      Tab(
+                        child: DefaultTabController.of(context).index == 2
+                            ? Text(
+                                "Episodes",
+                                style: textStyle,
+                              )
+                            : Icon(Icons.tv_rounded),
+                      ),
+                    ],
                   ),
-                  Tab(
-                    icon: Icon(Icons.folder_open_outlined),
-                  ),
-                  Tab(
-                    icon: Icon(Icons.tv_rounded),
-                  ),
-                ]),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 15),
-                    child: TabBarView(
-                      children: [
-                        ListView.builder(
-                          itemCount: dataProvider.state.qualities.length,
-                          itemBuilder: (context, index) {
-                            return MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                  provider.playVideo(dataProvider.state.qualities[index]['link']!,
-                                      currentStream: dataProvider.state.currentStream);
-                                },
-                                child: Container(
-                                  color:
-                                      dataProvider.state.qualities[index]['link'] == provider.controller.activeMediaUrl
-                                          ? appTheme.accentColor
-                                          : null,
-                                  height: 40,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "${dataProvider.state.qualities[index]['quality']}",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: dataProvider.state.qualities[index]['link'] ==
-                                              provider.controller.activeMediaUrl
-                                          ? appTheme.onAccent
-                                          : appTheme.textMainColor,
-                                      fontFamily: "Poppins",
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(top: 15),
+                      child: TabBarView(
+                        children: [
+                          ListView.builder(
+                            itemCount: dataProvider.state.qualities.length,
+                            itemBuilder: (context, index) {
+                              return MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.translucent,
+                                  onTap: () async {
+                                    dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
+                                    provider.playVideo(dataProvider.state.qualities[index]['link']!,
+                                        currentStream: dataProvider.state.currentStream, preserveProgress: true);
+                                    setState(() {});
+                                  },
+                                  child: Container(
+                                    color: dataProvider.state.qualities[index]['link'] ==
+                                            dataProvider.state.currentQuality['link']
+                                        ? appTheme.accentColor
+                                        : null,
+                                    height: 40,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "${dataProvider.state.qualities[index]['quality']}",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: dataProvider.state.qualities[index]['link'] ==
+                                                dataProvider.state.currentQuality['link']
+                                            ? appTheme.onAccent
+                                            : appTheme.textMainColor,
+                                        fontFamily: "Poppins",
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                        ListView.builder(
-                          itemCount: dataProvider.state.streams.length,
-                          itemBuilder: (context, index) {
-                            final sources = dataProvider.state.streams;
-                            final current = dataProvider.state.currentStream;
+                              );
+                            },
+                          ),
+                          ListView.builder(
+                            itemCount: dataProvider.state.streams.length,
+                            itemBuilder: (context, index) {
+                              final sources = dataProvider.state.streams;
+                              final current = dataProvider.state.currentStream;
 
-                            return MouseRegion(
-                              cursor: SystemMouseCursors.click,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  dataProvider.updateCurrentStream(dataProvider.state.streams[index]);
-                                  await dataProvider.extractCurrentStreamQualities();
-                                  final q = dataProvider.getPreferredQualityStreamFromQualities();
-                                  await provider.playVideo(q['link']!,
-                                      preserveProgress: true, currentStream: dataProvider.state.streams[index]);
-                                  setState(() {});
-                                },
-                                child: Container(
-                                  color: sources[index].server == current.server &&
-                                          sources[index].quality == current.quality
-                                      ? appTheme.accentColor
-                                      : null,
-                                  height: 40,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    "${sources[index].server} | ${sources[index].quality}",
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      color: sources[index].server == current.server &&
-                                              sources[index].quality == current.quality
-                                          ? appTheme.onAccent
-                                          : appTheme.textMainColor,
-                                      fontFamily: "Poppins",
+                              return MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    dataProvider.updateCurrentStream(dataProvider.state.streams[index]);
+                                    await dataProvider.extractCurrentStreamQualities();
+                                    final q = dataProvider.getPreferredQualityStreamFromQualities();
+                                    await provider.playVideo(q['link']!,
+                                        preserveProgress: true, currentStream: dataProvider.state.streams[index]);
+                                    setState(() {});
+                                  },
+                                  child: Container(
+                                    color: sources[index].server == current.server &&
+                                            sources[index].quality == current.quality
+                                        ? appTheme.accentColor
+                                        : null,
+                                    height: 40,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "${sources[index].server} | ${sources[index].quality}",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: sources[index].server == current.server &&
+                                                sources[index].quality == current.quality
+                                            ? appTheme.onAccent
+                                            : appTheme.textMainColor,
+                                        fontFamily: "Poppins",
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                        GridView.builder(
-                          // shrinkWrap: true,
-                          itemCount: dataProvider.epLinks.length,
-                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
-                          itemBuilder: (context, index) {
-                            return InkWell(
-                              onTap: () {
-                                Navigator.pop(context);
-                                showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return Container();
-                                      // CustomControlsBottomSheet(
-                                      //   getEpisodeSources: dataProvider.episode['getEpisodeSources'],
-                                      //   currentSources: [],
-                                      //   playVideo: dataProvider.playVideo,
-                                      //   next: false,
-                                      //   epLinks: dataProvider.episode['epLinks'],
-                                      //   currentEpIndex: dataProvider.state.currentEpIndex,
-                                      //   refreshPage: dataProvider.refreshPage,
-                                      //   updateCurrentEpIndex: dataProvider.updateCurrentEpIndex,
-                                      //   customIndex: index,
-                                      //   preferredServer: dataProvider.preferredServer,
-                                      // );
-                                    });
-                              },
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: index == dataProvider.state.currentEpIndex
-                                      ? appTheme.accentColor
-                                      : appTheme.backgroundSubColor,
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                alignment: Alignment.center,
-                                margin: EdgeInsets.all(3),
-                                child: Text(
-                                  (index + 1).toString(),
-                                  style: TextStyle(
+                              );
+                            },
+                          ),
+                          GridView.builder(
+                            // shrinkWrap: true,
+                            itemCount: dataProvider.epLinks.length,
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 70),
+                            itemBuilder: (context, index) {
+                              return InkWell(
+                                onTap: () {
+                                  Navigator.pop(context);
+                                  showDialog(
+                                      context: context,
+                                      builder: (context) {
+                                        return CustomControlsBottomSheet(
+                                          index: index,
+                                          dataProvider: dataProvider,
+                                          playerProvider: provider,
+                                        );
+                                      });
+                                },
+                                child: Container(
+                                  decoration: BoxDecoration(
                                     color: index == dataProvider.state.currentEpIndex
-                                        ? appTheme.onAccent
-                                        : appTheme.textMainColor,
-                                    fontWeight: FontWeight.bold,
+                                        ? appTheme.accentColor
+                                        : appTheme.backgroundSubColor,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  alignment: Alignment.center,
+                                  margin: EdgeInsets.all(3),
+                                  child: Text(
+                                    (index + 1).toString(),
+                                    style: TextStyle(
+                                      color: index == dataProvider.state.currentEpIndex
+                                          ? appTheme.onAccent
+                                          : appTheme.textMainColor,
+                                      fontWeight: FontWeight.bold,
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
           ),
         ),
       ),

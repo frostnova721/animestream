@@ -30,25 +30,11 @@ class _ControlsState extends State<Controls> {
   @override
   void initState() {
     super.initState();
-    //this widget will only be open when the video is initialised. so to hide the controls, call it first
-    // widget.hideControlsOnTimeout();
-    // context.read<ControlsProvider>().controller.addListener(controlHiderListener);
   }
 
-  // void controlHiderListener() {
-  //   if (widget.isControlsVisible) {
-  //     widget.hideControlsOnTimeout();
-  //   }
-  // }
 
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
   int? megaSkipDuration = currentUserSettings?.megaSkipDuration ?? 85;
-
-  //probably redundant function. might remove later
-  // void updateCurrentEpIndex(int updatedIndex) {
-  //   provider.state;
-  //   // sliderValue = 0;
-  // }
 
   @override
   void dispose() {
@@ -102,7 +88,6 @@ class _ControlsState extends State<Controls> {
         {
           if (!provider.state.controlsVisible) {
             provider.toggleControlsVisibility();
-            // widget.hideControlsOnTimeout();
           }
         }
 

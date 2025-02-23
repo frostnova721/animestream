@@ -1,6 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
+
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/lastWatchDuration.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -12,15 +16,11 @@ import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/customControls.dart';
 import 'package:animestream/ui/models/widgets/desktopControls.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 
 class Watch extends StatefulWidget {
   final VideoController controller;
   const Watch({
     super.key,
-    // required this.selectedSource,
     required this.controller,
   });
 
@@ -54,7 +54,9 @@ class _WatchState extends State<Watch> {
 
     final q = dataProvider.getPreferredQualityStreamFromQualities();
 
-    await controller.initiateVideo(q['link']!, // TODO: Change to preferred quality
+    dataProvider.updateCurrentQuality(q);
+
+    await controller.initiateVideo(q['link']!,
         headers: dataProvider.state.currentStream.customHeaders);
 
     // Seek to last watched part
@@ -150,16 +152,16 @@ class _WatchState extends State<Watch> {
   final int doubleTapThreshold = 200; // in ms
 
   void _handleTap() {
-    if(!Platform.isWindows) return _handleSingleTap();
+    if (!Platform.isWindows) return _handleSingleTap();
     int now = DateTime.now().millisecondsSinceEpoch;
-    
+
     if (now - lastTapTime <= doubleTapThreshold) {
       _handleDoubleTap();
       lastTapTime = 0; // Reset
     } else {
       _handleSingleTap();
     }
-    
+
     lastTapTime = now;
   }
 
@@ -191,6 +193,7 @@ class _WatchState extends State<Watch> {
         await context.read<ThemeProvider>().setFullScreen(false);
       },
       child: Scaffold(
+        backgroundColor: Colors.black,
         body: GestureDetector(
           onTap: _handleTap,
           child: Stack(
@@ -256,10 +259,10 @@ class _WatchState extends State<Watch> {
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
       print("[PLAYER] SAVED WATCH DURATION");
+      controller.removeListener(_listener);
       controller.dispose();
       _controlsTimer?.cancel();
       _tapTimer?.cancel();
-      // _controlsTimer?.cancel();
 
       super.dispose();
     }

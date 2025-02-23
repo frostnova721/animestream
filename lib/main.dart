@@ -49,7 +49,8 @@ void main(List<String> args) async {
       await windowManager.ensureInitialized();
       await windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
 
-      if (currentUserSettings?.useFramelessWindow ?? true) await windowManager.setAsFrameless();
+      // No frameless for now!
+      // if (currentUserSettings?.useFramelessWindow ?? true) await windowManager.setAsFrameless();
       
       await windowManager.setResizable(true);
     }

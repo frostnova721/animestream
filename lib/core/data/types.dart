@@ -60,7 +60,7 @@ class SettingsModal {
       database: DatabaseFromString.getDb(map['database'] ?? "anilist"),
       enableSuperSpeeds: map['enableSuperSpeeds'] ?? false,
       useQueuedDownloads: map['useQueuedDownloads'] ?? false,
-      useFramelessWindow: map['useFramelessWindow'] ?? true,
+      useFramelessWindow: map['useFramelessWindow'] ?? false,
     );
   }
 

@@ -96,43 +96,43 @@ class ThemeProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  bool _isInitiallyMaximized = false;
+  // bool _isInitiallyMaximized = false;
 
-  Offset _prevPos = Offset.zero; // The offset of window before entering fullscreen
+  // Offset _prevPos = Offset.zero; // The offset of window before entering fullscreen
 
   // The size of window before entering fullscreen, set to 1280x720 just as a placeholder value
   // and will be overriden once fullscreen is entered!
-  Size _prevSize = Size(1280, 720);
+  // Size _prevSize = Size(1280, 720);
 
   Future<void> setFullScreen(bool fs) async {
     if (Platform.isAndroid) return;
-    if (currentUserSettings?.useFramelessWindow ?? true) {
-      if (fs) {
-        _isInitiallyMaximized = await windowManager.isMaximized();
-        await windowManager.unmaximize();
-        final info = await getCurrentScreen();
-        _prevPos = await windowManager.getPosition();
-        _prevSize = await windowManager.getSize();
-        if (info != null) {
-          await windowManager.setPosition(Offset.zero);
-          await windowManager.setSize(
-            Size(
-              info.frame.width / info.scaleFactor,
-              info.frame.height / info.scaleFactor,
-            ),
-          );
-        }
-      } else {
-        if (_isInitiallyMaximized) {
-          windowManager.maximize();
-        } else {
-          await windowManager.setPosition(_prevPos);
-          await windowManager.setSize(_prevSize);
-        }
-      }
-    } else {
+    // if (currentUserSettings?.useFramelessWindow ?? true) {
+    //   if (fs) {
+    //     _isInitiallyMaximized = await windowManager.isMaximized();
+    //     await windowManager.unmaximize();
+    //     final info = await getCurrentScreen();
+    //     _prevPos = await windowManager.getPosition();
+    //     _prevSize = await windowManager.getSize();
+    //     if (info != null) {
+    //       await windowManager.setPosition(Offset.zero);
+    //       await windowManager.setSize(
+    //         Size(
+    //           info.frame.width / info.scaleFactor,
+    //           info.frame.height / info.scaleFactor,
+    //         ),
+    //       );
+    //     }
+    //   } else {
+    //     if (_isInitiallyMaximized) {
+    //       windowManager.maximize();
+    //     } else {
+    //       await windowManager.setPosition(_prevPos);
+    //       await windowManager.setSize(_prevSize);
+    //     }
+    //   }
+    // } else {
       await windowManager.setFullScreen(fs); // Using default fs cus the border messes with the sizing
-    }
+    // }
     isFullScreen = fs;
   }
 }

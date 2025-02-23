@@ -207,6 +207,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                       alternateDatabases: widget.altDatabases,
                     );
                     final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+
                     Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -230,16 +231,6 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                           ],
                           child: Watch(
                             controller: controller,
-                            // info: WatchPageInfo(
-                            //   animeTitle: widget.bottomSheetContentData.title,
-                            //   episodeNumber: widget.bottomSheetContentData.episodeIndex + 1,
-                            //   streamInfo: streamSources[index],
-                            //   allStreams: streamSources,
-                            //   id: widget.bottomSheetContentData.id,
-                            //   altDatabases: widget.altDatabases,
-                            //   lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,
-                            // ),
-                            // episodes: widget.bottomSheetContentData.epLinks,
                           ),
                         ),
                       ),

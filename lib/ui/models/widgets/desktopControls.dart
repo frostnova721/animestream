@@ -193,10 +193,11 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
-                                      return Container();
-                                      // CustomControlsBottomSheet(
-                                      // index: ,
-                                      // );
+                                      return CustomControlsBottomSheet(
+                                        index: dataProvider.state.currentEpIndex - 1,
+                                        dataProvider: dataProvider,
+                                        playerProvider: provider,
+                                      );
                                     });
                               },
                               icon: makeIcon(Icons.skip_previous_outlined)),

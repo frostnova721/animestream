@@ -45,7 +45,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
     navbarTranslucency = currentUserSettings?.navbarTranslucency ?? 0.6;
     darkMode = currentUserSettings?.darkMode ?? true;
     materialTheme = currentUserSettings?.materialTheme ?? false;
-    borderlessWindow = currentUserSettings?.useFramelessWindow ?? true;
+    // borderlessWindow = currentUserSettings?.useFramelessWindow ?? true;
   }
 
   // Future<void> setThemeMode(bool isDark) async {
@@ -67,7 +67,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   late bool isAboveAndroid12;
   late bool materialTheme;
   late bool useNewHomeScreen;
-  late bool borderlessWindow;
+  // late bool borderlessWindow;
 
   @override
   Widget build(BuildContext context) {
@@ -172,20 +172,20 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             },
                             description: "Full black background",
                           ),
-                          if (Platform.isWindows)
-                            _toggleItem(
-                                "Borderless Window",
-                                description: "*Resizing window will be affected",
-                                borderlessWindow, () async {
-                              setState(() {
-                                borderlessWindow = !borderlessWindow;
-                              });
-                              if (borderlessWindow)
-                                windowManager.setAsFrameless();
-                              else
-                                windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
-                              await Settings().writeSettings(SettingsModal(useFramelessWindow: borderlessWindow));
-                            }),
+                          // if (Platform.isWindows)
+                          //   _toggleItem(
+                          //       "Borderless Window",
+                          //       description: "*Resizing window will be affected",
+                          //       borderlessWindow, () async {
+                          //     setState(() {
+                          //       borderlessWindow = !borderlessWindow;
+                          //     });
+                          //     if (borderlessWindow)
+                          //       windowManager.setAsFrameless();
+                          //     else
+                          //       windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
+                          //     await Settings().writeSettings(SettingsModal(useFramelessWindow: borderlessWindow));
+                          //   }),
                           if (Platform.isAndroid)
                             _sliderItem("Navbar Transparency", navbarTranslucency,
                                 min: 0,

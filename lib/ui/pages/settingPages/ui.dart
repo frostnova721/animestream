@@ -13,7 +13,6 @@ import 'package:animestream/ui/theme/types.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:window_manager/window_manager.dart';
 
 class ThemeSetting extends StatefulWidget {
   const ThemeSetting({super.key});

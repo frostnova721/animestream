@@ -107,7 +107,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                       ),
                     ],
                   ),
-
+        
                   //top right
                   Row(
                     children: [
@@ -268,7 +268,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 ),
                               ),
                             ),
-
+        
                             IconButton(
                                 onPressed: () {
                                   provider.toggleSubs();

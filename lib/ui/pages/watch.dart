@@ -56,8 +56,7 @@ class _WatchState extends State<Watch> {
 
     dataProvider.updateCurrentQuality(q);
 
-    await controller.initiateVideo(q['link']!,
-        headers: dataProvider.state.currentStream.customHeaders);
+    await controller.initiateVideo(q['link']!, headers: dataProvider.state.currentStream.customHeaders);
 
     // Seek to last watched part
     await controller.seekTo(Duration(
@@ -143,6 +142,8 @@ class _WatchState extends State<Watch> {
 
   Timer? _controlsTimer = null;
 
+  Timer? pointerHideTimer = null;
+
   // This is required to avoid *controller is not initiate error*
   bool isInitiated = false;
 
@@ -179,6 +180,8 @@ class _WatchState extends State<Watch> {
     themeProvider.setFullScreen(!themeProvider.isFullScreen);
   }
 
+  bool hidePointer = false;
+
   @override
   Widget build(BuildContext context) {
     final playerProvider = context.watch<PlayerProvider>();
@@ -194,31 +197,57 @@ class _WatchState extends State<Watch> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: GestureDetector(
-          onTap: _handleTap,
-          child: Stack(
-            children: [
-              Player(controller),
-              if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
-                SubViewer(
-                  controller: controller,
-                  format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
-                  subtitleSource: playerDataProvider.state.currentStream.subtitle!,
-                ),
-              AnimatedOpacity(
-                duration: Duration(milliseconds: 150),
-                opacity: playerProvider.state.controlsVisible ? 1 : 0,
-                child: Stack(
-                  children: [
-                    IgnorePointer(ignoring: true, child: overlay()),
-                    if (isInitiated)
-                      IgnorePointer(
-                          ignoring: !playerProvider.state.controlsVisible,
-                          child: Platform.isWindows ? Desktopcontrols() : Controls()),
-                  ],
-                ),
+        body: Listener(
+          onPointerHover: (event) {
+            // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
+            if (playerProvider.state.controlsVisible) return;
+            if (hidePointer) {
+              setState(() {
+                hidePointer = false;
+              });
+            }
+            pointerHideTimer?.cancel();
+            pointerHideTimer = Timer(Duration(seconds: 3), () {
+              print("Hiding pointer...");
+              if (mounted)
+                setState(() {
+                  hidePointer = true;
+                  pointerHideTimer = null;
+                });
+            });
+          },
+          child: MouseRegion(
+            cursor: playerProvider.state.controlsVisible || !hidePointer
+                ? SystemMouseCursors.basic
+                : SystemMouseCursors.none,
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _handleTap,
+              child: Stack(
+                children: [
+                  Player(controller),
+                  if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
+                    SubViewer(
+                      controller: controller,
+                      format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
+                      subtitleSource: playerDataProvider.state.currentStream.subtitle!,
+                    ),
+                  AnimatedOpacity(
+                    duration: Duration(milliseconds: 150),
+                    opacity: playerProvider.state.controlsVisible ? 1 : 0,
+                    child: Stack(
+                      children: [
+                        IgnorePointer(ignoring: true, child: overlay()),
+                        if (isInitiated)
+                          IgnorePointer(
+                              ignoring: !playerProvider.state.controlsVisible,
+                              child: Platform.isWindows ? Desktopcontrols() : Controls()),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

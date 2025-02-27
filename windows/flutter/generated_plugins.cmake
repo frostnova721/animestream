@@ -13,7 +13,6 @@ list(APPEND FLUTTER_PLUGIN_LIST
   url_launcher_windows
   video_player_win
   window_manager
-  window_size
   window_to_front
 )
 

@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:animestream/core/data/lastWatchDuration.dart';
+import 'package:animestream/ui/pages/info/infoDesktop.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -268,6 +271,8 @@ class _InfoState extends State<Info> {
 
   @override
   Widget build(BuildContext context) {
+    if (Platform.isWindows || MediaQuery.orientationOf(context) == Orientation.landscape)
+      return InfoDesktop(id: widget.id);
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: infoLoadError
@@ -790,7 +795,6 @@ class _InfoState extends State<Info> {
                 ),
               ),
             ),
-
             if (lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched] != null)
               Container(
                 width: 285 * ((lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched] ?? 0) / 100)

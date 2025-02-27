@@ -20,10 +20,9 @@ class Player extends StatelessWidget {
 }
 
 abstract class VideoController {
-
   /// Play the paused media
   Future<void> play();
-  
+
   /// Pause the currently playing media
   Future<void> pause();
 
@@ -68,7 +67,7 @@ abstract class VideoController {
   /// Buffered duration, in milliseconds. Returns null for windows
   int? get buffered;
 
-  /// Volume level, a value between 0 and 1 
+  /// Volume level, a value between 0 and 1
   double? get volume;
 
   /// Url of currently playing media
@@ -114,7 +113,7 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   double? get volume => controller.videoPlayerController?.value.volume;
-  
+
   @override
   String? get activeMediaUrl => controller.betterPlayerDataSource?.url;
 
@@ -161,12 +160,12 @@ class BetterPlayerWrapper implements VideoController {
   void setFit(BoxFit fit) {
     return controller.setOverriddenFit(fit);
   }
-  
+
   @override
   Future<void> setVolume(double volume) {
     return controller.setVolume(volume);
   }
-  
+
   @override
   void removeListener(VoidCallback cb) {
     return controller.videoPlayerController?.removeListener(cb);
@@ -180,6 +179,7 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
+    final vol = controller.value.volume;
     //kill the player and create a new instance :)
     await controller.dispose();
 
@@ -187,13 +187,13 @@ class VideoPlayerWindowsWrapper implements VideoController {
     await Future.delayed(Duration(milliseconds: 100));
     controller = WinVideoPlayerController.network(url);
     await controller.initialize();
-    for(final listener in _listeners) {
+    for (final listener in _listeners) {
       controller.addListener(listener);
     }
+    await controller.setVolume(vol); //Restore the previously set volume
     await controller.play();
   }
 
- 
   @override
   bool? get isBuffering => controller.value.isBuffering;
 
@@ -208,10 +208,10 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   String? get activeMediaUrl => controller.dataSource;
-   
+
   @override
   double? get volume => controller.value.volume;
-  
+
   @override
   bool? get isInitialized => controller.value.isInitialized;
 
@@ -258,12 +258,12 @@ class VideoPlayerWindowsWrapper implements VideoController {
   void setFit(BoxFit fit) {
     return;
   }
-  
+
   @override
   Future<void> setVolume(double volume) {
     return controller.setVolume(volume);
   }
-  
+
   @override
   void removeListener(VoidCallback cb) {
     return controller.removeListener(cb);

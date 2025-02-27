@@ -148,7 +148,11 @@ class PlayerProvider extends ChangeNotifier {
 
       await dataProvider.extractCurrentStreamQualities();
 
-      controller.initiateVideo(dataProvider.getPreferredQualityStreamFromQualities()['link']!, headers: src.customHeaders);
+      final q = dataProvider.getPreferredQualityStreamFromQualities();
+
+      dataProvider.updateCurrentQuality(q);
+
+      controller.initiateVideo(q['link']!, headers: src.customHeaders);
     } else {
       // showModalBottomSheet(
       //   context: context,

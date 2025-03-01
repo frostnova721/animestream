@@ -197,55 +197,58 @@ class _WatchState extends State<Watch> {
       },
       child: Scaffold(
         backgroundColor: Colors.black,
-        body: Listener(
-          onPointerHover: (event) {
-            // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
-            if (playerProvider.state.controlsVisible) return;
-            if (hidePointer) {
-              setState(() {
-                hidePointer = false;
-              });
-            }
-            pointerHideTimer?.cancel();
-            pointerHideTimer = Timer(Duration(seconds: 3), () {
-              print("Hiding pointer...");
-              if (mounted)
+        body: Padding(
+          padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
+          child: Listener(
+            onPointerHover: (event) {
+              // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
+              if (playerProvider.state.controlsVisible) return;
+              if (hidePointer) {
                 setState(() {
-                  hidePointer = true;
-                  pointerHideTimer = null;
+                  hidePointer = false;
                 });
-            });
-          },
-          child: MouseRegion(
-            cursor: playerProvider.state.controlsVisible || !hidePointer
-                ? SystemMouseCursors.basic
-                : SystemMouseCursors.none,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: _handleTap,
-              child: Stack(
-                children: [
-                  Player(controller),
-                  if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
-                    SubViewer(
-                      controller: controller,
-                      format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
-                      subtitleSource: playerDataProvider.state.currentStream.subtitle!,
+              }
+              pointerHideTimer?.cancel();
+              pointerHideTimer = Timer(Duration(seconds: 3), () {
+                print("Hiding pointer...");
+                if (mounted)
+                  setState(() {
+                    hidePointer = true;
+                    pointerHideTimer = null;
+                  });
+              });
+            },
+            child: MouseRegion(
+              cursor: playerProvider.state.controlsVisible || !hidePointer
+                  ? SystemMouseCursors.basic
+                  : SystemMouseCursors.none,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: _handleTap,
+                child: Stack(
+                  children: [
+                    Player(controller),
+                    if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
+                      SubViewer(
+                        controller: controller,
+                        format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
+                        subtitleSource: playerDataProvider.state.currentStream.subtitle!,
+                      ),
+                    AnimatedOpacity(
+                      duration: Duration(milliseconds: 150),
+                      opacity: playerProvider.state.controlsVisible ? 1 : 0,
+                      child: Stack(
+                        children: [
+                          IgnorePointer(ignoring: true, child: overlay()),
+                          if (isInitiated)
+                            IgnorePointer(
+                                ignoring: !playerProvider.state.controlsVisible,
+                                child: Platform.isWindows ? Desktopcontrols() : Controls()),
+                        ],
+                      ),
                     ),
-                  AnimatedOpacity(
-                    duration: Duration(milliseconds: 150),
-                    opacity: playerProvider.state.controlsVisible ? 1 : 0,
-                    child: Stack(
-                      children: [
-                        IgnorePointer(ignoring: true, child: overlay()),
-                        if (isInitiated)
-                          IgnorePointer(
-                              ignoring: !playerProvider.state.controlsVisible,
-                              child: Platform.isWindows ? Desktopcontrols() : Controls()),
-                      ],
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

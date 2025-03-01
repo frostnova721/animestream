@@ -1,4 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:flutter/material.dart';
 
 class AnimeStreamNavDestination {
@@ -23,7 +24,7 @@ class AnimeStreamNavDestination {
 
 class AnimeStreamNavRail extends StatefulWidget {
   final List<AnimeStreamNavDestination> destinations;
-  final AnimeStreamNavRailController controller;
+  final AnimeStreamBottomBarController controller;
   final int initialIndex;
   const AnimeStreamNavRail({
     super.key,
@@ -88,24 +89,4 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
           }),
     );
   }
-}
-
-class AnimeStreamNavRailController {
-  final int length;
-  final List<int> nonViewIndices;
-  // late int currentIndex;
-
-  ValueNotifier<int> currentIndexNotifier;
-
-  int get currentIndex => currentIndexNotifier.value;
-
-  set currentIndex(int index) {
-    if (!nonViewIndices.contains(index)) currentIndexNotifier.value = index;
-  }
-
-  AnimeStreamNavRailController({
-    required this.length,
-    this.nonViewIndices = const [],
-    // this.currentIndex = 0,
-  }) : currentIndexNotifier = ValueNotifier<int>(0);
 }

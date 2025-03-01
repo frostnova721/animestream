@@ -14,7 +14,7 @@ class CommonInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
-     return Row(
+    return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         ClipRRect(
@@ -88,15 +88,32 @@ class CommonInfo extends StatelessWidget {
     );
   }
 
-  InkWell _button({required void Function() onClick, required Widget child}) {
-    return InkWell(
-      onTap: onClick,
-      child: Container(
-        child: child,
-        padding: EdgeInsets.fromLTRB(20, 5, 20, 5),
-        decoration:
-            BoxDecoration(border: Border.all(color: appTheme.accentColor), borderRadius: BorderRadius.circular(10)),
-      ),
+  Widget _button({required void Function() onClick, required Widget child}) {
+    final ValueNotifier<bool> hovered = ValueNotifier(false);
+    return ValueListenableBuilder<bool>(
+      valueListenable: hovered,
+      builder: (context, value, _) {
+        return MouseRegion(
+          onEnter: (event) => hovered.value = true,
+          onExit: (event) => hovered.value = false,
+          cursor: SystemMouseCursors.click,
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: BoxDecoration(
+                border: Border.all(
+                  color: hovered.value ? appTheme.textMainColor : appTheme.accentColor,
+                ),
+                borderRadius: BorderRadius.circular(10)),
+            child: GestureDetector(
+              onTap: onClick,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 5, 20, 5),
+                child: child,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

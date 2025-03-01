@@ -181,22 +181,42 @@ class _BottomBarViewState extends State<BottomBarView> {
     if (widget.children.length < 2) {
       throw Exception("BottomBarView requires at least 2 children");
     }
-    if (widget.controller.length != widget.children.length) {
+    if ((widget.controller.length - widget.controller.nonViewIndices.length) != widget.children.length) {
       throw Exception("Index out of bounds");
     }
+
+    // Generate list based on available views
+    List<int> viewIndices = List.generate(widget.controller.length, (i) => i)
+        .where((i) => !widget.controller.nonViewIndices.contains(i))
+        .toList();
+
+    final activeViewIndex = viewIndices.indexOf(widget.controller.currentIndex);
+
+    if (activeViewIndex == -1)
+      throw Exception(
+        [
+          "The index of active views recieved as -1.",
+          "This usually means that you have only provided a non view buttons to controller"
+        ].join(" "),
+      );
+
     // return widget.children[widget.controller.currentIndex];
     return AnimatedSwitcher(
       duration: Duration(milliseconds: 200),
       transitionBuilder: (Widget child, Animation<double> animation) {
-        return FadeTransition(opacity: animation, child: child,);
+        return FadeTransition(
+          opacity: animation,
+          child: child,
+        );
       },
-      child: widget.children[widget.controller.currentIndex],
+      child: widget.children[activeViewIndex],
     );
   }
 }
 
 class AnimeStreamBottomBarController {
   final int length;
+  final List<int> nonViewIndices;
   // late int currentIndex;
 
   ValueNotifier<int> currentIndexNotifier;
@@ -204,11 +224,12 @@ class AnimeStreamBottomBarController {
   int get currentIndex => currentIndexNotifier.value;
 
   set currentIndex(int index) {
-    currentIndexNotifier.value = index;
+    if (!nonViewIndices.contains(index)) currentIndexNotifier.value = index;
   }
 
   AnimeStreamBottomBarController({
     required this.length,
+    this.nonViewIndices = const [],
     // this.currentIndex = 0,
   }) : currentIndexNotifier = ValueNotifier<int>(0);
 }

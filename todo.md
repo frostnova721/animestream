@@ -4,4 +4,4 @@
 - episodes in tile mode
 - sub/dub toggle (far away plan)
 - fix playpreloaded episode function!!!!
-- add window title
+- add window title (low priority)

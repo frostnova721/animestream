@@ -2,7 +2,7 @@ enum SettingKey { megaSkipDuration, skipDuration }
 
 enum RequestType { recentlyUpdatedAnime, media, mutate }
 
-enum Type { watch, download }
+enum ServerSheetType { watch, download }
 
 enum MediaStatus { CURRENT, PLANNING, COMPLETED, DROPPED, PAUSED }
 

@@ -32,6 +32,7 @@ class InfoSection extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start, // Align the row contents to the top
                 children: [
                   Column(
+                    // crossAxisAlignment: CrossAxisAlignment.start, // Puts the stuff to more left
                     children: [
                       CommonInfo(
                         provider: provider,

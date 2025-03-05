@@ -6,11 +6,12 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/database/types.dart';
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
+import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
@@ -18,17 +19,15 @@ import 'package:animestream/ui/models/sources.dart' as srcs;
 import 'package:provider/provider.dart';
 
 class ServerSelectionBottomSheet extends StatefulWidget {
-  final ServerSelectionBottomSheetContentData bottomSheetContentData;
-  final Type type;
-  final Function? getWatched;
-  final List<AlternateDatabaseId> altDatabases;
+  final InfoProvider provider;
+  final ServerSheetType type;
+  final int episodeIndex;
 
   const ServerSelectionBottomSheet({
     super.key,
-    required this.bottomSheetContentData,
+    required this.provider,
+    required this.episodeIndex,
     required this.type,
-    required this.altDatabases,
-    this.getWatched,
   });
 
   @override
@@ -39,21 +38,21 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   List<VideoStream> streamSources = [];
   List<Map<String, String>> qualities = [];
 
-  getStreams({bool directElseBlock = false}) async {
+  getStreams(InfoProvider provider, {bool directElseBlock = false}) async {
     streamSources = [];
-    if (widget.type == Type.download && !directElseBlock) {
+    if (widget.type == ServerSheetType.download && !directElseBlock) {
       try {
         await srcs.getDownloadSources(
-          widget.bottomSheetContentData.selectedSource,
-          widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex],
+          widget.provider.selectedSource,
+          widget.provider.epLinks[widget.episodeIndex],
           (list, finished) {
             if (mounted)
               setState(() {
                 if (finished) {
-                  _isLoading = widget.type == Type.download ? true : false;
+                  _isLoading = widget.type == ServerSheetType.download ? true : false;
                 }
                 streamSources = streamSources + list;
-                if (widget.type == Type.download) {
+                if (widget.type == ServerSheetType.download) {
                   list.forEach((element) async {
                     qualities.add({
                       'link': element.link,
@@ -71,19 +70,19 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
         );
       } catch (err) {
         if (err is UnimplementedError) {
-          getStreams(directElseBlock: true);
+          getStreams(provider, directElseBlock: true);
         }
       }
     } else {
-      await srcs.getStreams(widget.bottomSheetContentData.selectedSource,
-          widget.bottomSheetContentData.epLinks[widget.bottomSheetContentData.episodeIndex], (list, finished) {
+      await srcs.getStreams(widget.provider.selectedSource, widget.provider.epLinks[widget.episodeIndex],
+          (list, finished) {
         if (mounted)
           setState(() {
             if (finished) {
-              _isLoading = widget.type == Type.download ? true : false;
+              _isLoading = widget.type == ServerSheetType.download ? true : false;
             }
             streamSources = streamSources + list;
-            if (widget.type == Type.download) {
+            if (widget.type == ServerSheetType.download) {
               list.forEach((element) async {
                 if (element.quality == "multi-quality") {
                   await getQualities(element.link, element.server, element.backup);
@@ -124,7 +123,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   @override
   void initState() {
     super.initState();
-    getStreams();
+    getStreams(widget.provider);
   }
 
   bool _isLoading = true;
@@ -183,7 +182,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   }
 
   ListView _list() {
-    return widget.type == Type.watch
+    final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
+    return widget.type == ServerSheetType.watch
         ? ListView.builder(
             padding: EdgeInsets.zero,
             shrinkWrap: true,
@@ -199,31 +199,41 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 child: ElevatedButton(
                   onPressed: () async {
                     await storeWatching(
-                      widget.bottomSheetContentData.title,
-                      widget.bottomSheetContentData.cover,
-                      widget.bottomSheetContentData.id,
-                      widget.bottomSheetContentData.episodeIndex,
-                      totalEpisodes: widget.bottomSheetContentData.totalEpisodes,
-                      alternateDatabases: widget.altDatabases,
+                      title,
+                      widget.provider.data.cover,
+                      widget.provider.id,
+                      widget.episodeIndex,
+                      totalEpisodes: widget.provider.data.episodes,
+                      alternateDatabases: widget.provider.altDatabases,
                     );
                     final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
 
-                    Navigator.push(
-                      context,
+                    final provider = widget.provider;
+                    final navigatorState =
+                        (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
+
+                    Navigator.pop(context, true);
+
+                    navigatorState
+                        ?.push(
                       MaterialPageRoute(
                         builder: (context) => MultiProvider(
                           providers: [
                             ChangeNotifierProvider(
                               create: (context) => PlayerDataProvider(
-                                  initialStreams: streamSources, initialStream: streamSources[index],
-                                  epLinks: widget.bottomSheetContentData.epLinks,
-                                  showTitle: widget.bottomSheetContentData.title,
-                                  showId: widget.bottomSheetContentData.id,
-                                  selectedSource: widget.bottomSheetContentData.selectedSource,
-                                  startIndex: widget.bottomSheetContentData.episodeIndex,
-                                  altDatabases: widget.altDatabases,
-                                  lastWatchDuration: widget.bottomSheetContentData.lastWatchDuration,
-                                  ),
+                                initialStreams: streamSources,
+                                initialStream: streamSources[index],
+                                epLinks: provider.epLinks,
+                                showTitle: title,
+                                showId: provider.id,
+                                selectedSource: provider.selectedSource,
+                                startIndex: widget.episodeIndex,
+                                altDatabases: provider.altDatabases,
+                                lastWatchDuration: provider.lastWatchedDurationMap?[
+                                    provider.watched < provider.epLinks.length
+                                        ? provider.watched + 1
+                                        : provider.watched],
+                              ),
                             ),
                             ChangeNotifierProvider(
                               create: (context) => PlayerProvider(controller),
@@ -234,9 +244,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                           ),
                         ),
                       ),
-                    ).then((value) {
-                      widget.getWatched!();
-                      Navigator.of(context).pop(true);
+                    )
+                        .then((value) {
+                      provider.getWatched();
                     });
                   },
                   style: ElevatedButton.styleFrom(
@@ -299,8 +309,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 onPressed: () {
                   if (currentUserSettings?.useQueuedDownloads ?? false) {
                     Downloader()
-                        .addToQueue(qualities[ind]['link']!,
-                            "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}",
+                        .addToQueue(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
                             parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
                         .onError((err, st) {
                       print(err);
@@ -309,8 +318,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                     });
                   } else {
                     Downloader()
-                        .download(qualities[ind]['link']!,
-                            "${widget.bottomSheetContentData.title}_Ep_${widget.bottomSheetContentData.episodeIndex + 1}",
+                        .download(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
                             parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
                         .onError((err, st) {
                       print(err);

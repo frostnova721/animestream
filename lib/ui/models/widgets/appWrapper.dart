@@ -12,6 +12,8 @@ class AppWrapper extends StatelessWidget {
   final Widget firstPage;
   const AppWrapper({super.key, required this.firstPage});
 
+  static final navKey = GlobalKey<NavigatorState>();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -58,6 +60,7 @@ class AppWrapper extends StatelessWidget {
           : null,
       extendBodyBehindAppBar: true, //should i?
       body: Navigator(
+        key: navKey,
         onGenerateRoute: (settings) {
           Widget page = firstPage;
           return MaterialPageRoute(builder: (context) => page);

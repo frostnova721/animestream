@@ -66,7 +66,7 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
                       else if (!isNonNavButton) controller.currentIndex = index;
                     },
                     child: AnimatedContainer(
-                      duration: Duration(milliseconds: 150),
+                      duration: Duration(milliseconds: widget.controller.animDuration),
                       height: 50,
                       width: 50,
                       decoration: BoxDecoration(

@@ -131,3 +131,10 @@ class UserPreferencesModal {
     }
   }
 }
+
+class AnimeSpecificPreference {
+  final Map? lastWatchDuration;
+  final String? manualSearchQuery;
+
+  AnimeSpecificPreference({required this.lastWatchDuration, required this.manualSearchQuery});
+}

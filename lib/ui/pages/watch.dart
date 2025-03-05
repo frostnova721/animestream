@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/data/lastWatchDuration.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/playerUtils.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';

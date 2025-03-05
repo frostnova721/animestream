@@ -37,11 +37,6 @@ class AnimeStreamBottomBar extends StatefulWidget {
 }
 
 class _AnimeStreamBottomBarState extends State<AnimeStreamBottomBar> {
-  // @override
-  // void initState() {
-  //   super.initState();
-  // }
-
   @override
   void initState() {
     super.initState();
@@ -91,7 +86,7 @@ class _AnimeStreamBottomBarState extends State<AnimeStreamBottomBar> {
                         alignment: Alignment.bottomCenter,
                       );
                     },
-                    duration: Duration(milliseconds: 200),
+                    duration: Duration(milliseconds: widget.controller.animDuration),
                     child: isSelected
                         ? Text(
                             e.title,
@@ -105,7 +100,7 @@ class _AnimeStreamBottomBarState extends State<AnimeStreamBottomBar> {
             ),
             // if (isSelected)
             AnimatedSwitcher(
-              duration: Duration(milliseconds: 200),
+              duration: Duration(milliseconds: widget.controller.animDuration),
               transitionBuilder: (child, animation) {
                 return SlideTransition(
                     position: animation.drive(Tween<Offset>(begin: Offset(0, 1), end: Offset(0, 0))), child: child);
@@ -202,7 +197,8 @@ class _BottomBarViewState extends State<BottomBarView> {
 
     // return widget.children[widget.controller.currentIndex];
     return AnimatedSwitcher(
-      duration: Duration(milliseconds: 200),
+      duration: Duration(milliseconds: widget.controller.animDuration),
+      reverseDuration: Duration(milliseconds: widget.controller.animDuration),
       transitionBuilder: (Widget child, Animation<double> animation) {
         return FadeTransition(
           opacity: animation,
@@ -217,6 +213,7 @@ class _BottomBarViewState extends State<BottomBarView> {
 class AnimeStreamBottomBarController {
   final int length;
   final List<int> nonViewIndices;
+  final int animDuration;
   // late int currentIndex;
 
   ValueNotifier<int> currentIndexNotifier;
@@ -230,6 +227,6 @@ class AnimeStreamBottomBarController {
   AnimeStreamBottomBarController({
     required this.length,
     this.nonViewIndices = const [],
-    // this.currentIndex = 0,
+    this.animDuration = 200,
   }) : currentIndexNotifier = ValueNotifier<int>(0);
 }

@@ -1,5 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/data/manualSearches.dart';
+import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:flutter/material.dart';
 
@@ -90,6 +90,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
     return Container(
       padding: EdgeInsets.only(right: 15, left: 15, top: 10, bottom: MediaQuery.of(context).padding.bottom),
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           Container(
             height: 45,

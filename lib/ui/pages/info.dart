@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:animestream/core/data/lastWatchDuration.dart';
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/pages/info/infoDesktop.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +10,6 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
-import 'package:animestream/core/data/manualSearches.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -24,6 +23,7 @@ import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:provider/provider.dart';
 
 class Info extends StatefulWidget {
   final int id;
@@ -95,7 +95,7 @@ class _InfoState extends State<Info> {
       });
     }
     final item = await getAnimeWatchProgress(widget.id, mediaListStatus);
-    await getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDurationMap = it ?? {});
+    // await getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDurationMap = it ?? {});
     watched = item == 0 ? 0 : item;
     started = item == 0 ? false : true;
 
@@ -242,9 +242,9 @@ class _InfoState extends State<Info> {
     foundName = null;
     _epSearcherror = false;
     try {
-      final manualSearchQuery = await getManualSearchQuery('${widget.id}');
+      // final manualSearchQuery = await getManualSearchQuery('${widget.id}');
       String searchTitle = data.title['english'] ?? data.title['romaji'] ?? '';
-      if (manualSearchQuery != null) searchTitle = manualSearchQuery;
+      // if (manualSearchQuery != null) searchTitle = manualSearchQuery;
       await search(searchTitle);
     } catch (err) {
       print(err.toString());
@@ -273,6 +273,7 @@ class _InfoState extends State<Info> {
   Widget build(BuildContext context) {
     if (Platform.isWindows || MediaQuery.orientationOf(context) == Orientation.landscape)
       return InfoDesktop(id: widget.id);
+    final provider = context.watch<InfoProvider>();
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: infoLoadError
@@ -367,12 +368,7 @@ class _InfoState extends State<Info> {
                                         backgroundColor: appTheme.modalSheetBackgroundColor,
                                         showDragHandle: true,
                                         builder: (context) => MediaListStatusBottomSheet(
-                                          status: mediaListStatus,
-                                          id: widget.id,
-                                          refreshListStatus: refreshListStatus,
-                                          totalEpisodes: data.episodes ?? 0,
-                                          episodesWatched: watched,
-                                          otherIds: altDatabases,
+                                          provider: provider,
                                         ),
                                       );
                                     },
@@ -743,19 +739,9 @@ class _InfoState extends State<Info> {
             context: context,
             builder: (BuildContext context) {
               return ServerSelectionBottomSheet(
-                altDatabases: altDatabases,
-                bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                  totalEpisodes: data.episodes,
-                  epLinks: epLinks,
-                  episodeIndex: watched,
-                  selectedSource: selectedSource,
-                  title: data.title['english'] ?? data.title['romaji'] ?? '',
-                  id: widget.id,
-                  cover: data.cover,
-                  lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                ),
-                type: Type.watch,
-                getWatched: getWatched,
+                provider: context.read<InfoProvider>(),
+                episodeIndex: watched,
+                type: ServerSheetType.watch,
               );
             },
           ).then((val) {
@@ -854,7 +840,7 @@ class _InfoState extends State<Info> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(
-                        Type.values.length,
+                        ServerSheetType.values.length,
                         (ind) => Container(
                           width: double.infinity,
                           child: ElevatedButton(
@@ -871,25 +857,15 @@ class _InfoState extends State<Info> {
                                 backgroundColor: appTheme.modalSheetBackgroundColor,
                                 builder: (BuildContext context) {
                                   return ServerSelectionBottomSheet(
-                                    altDatabases: altDatabases,
-                                    bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                                      epLinks: epLinks,
-                                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                                      selectedSource: selectedSource,
-                                      title: data.title['english'] ?? data.title['romaji'] ?? '',
-                                      id: widget.id,
-                                      cover: data.cover,
-                                      lastWatchDuration:
-                                          lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                                    ),
-                                    type: Type.values[ind],
-                                    getWatched: getWatched,
+                                    provider: context.read<InfoProvider>(),
+                                    episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                    type: ServerSheetType.values[ind],
                                   );
                                 },
                               );
                             },
                             child: Text(
-                              Type.values[ind].name,
+                              ServerSheetType.values[ind].name,
                               style: TextStyle(fontFamily: "Poppins", fontSize: 18),
                             ),
                           ),
@@ -906,19 +882,9 @@ class _InfoState extends State<Info> {
               backgroundColor: appTheme.modalSheetBackgroundColor,
               builder: (context) {
                 return ServerSelectionBottomSheet(
-                  altDatabases: altDatabases,
-                  bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                    totalEpisodes: data.episodes,
-                    epLinks: epLinks,
-                    lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                    episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                    selectedSource: selectedSource,
-                    title: data.title['english'] ?? data.title['romaji'] ?? '',
-                    id: widget.id,
-                    cover: data.cover,
-                  ),
-                  type: Type.watch,
-                  getWatched: getWatched,
+                  provider: context.read<InfoProvider>(),
+                  episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                  type: ServerSheetType.watch,
                 );
               }).then((val) {
             if (val == true) {
@@ -973,19 +939,9 @@ class _InfoState extends State<Info> {
                   backgroundColor: appTheme.modalSheetBackgroundColor,
                   builder: (context) {
                     return ServerSelectionBottomSheet(
-                      altDatabases: altDatabases,
-                      bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                        totalEpisodes: data.episodes,
-                        epLinks: epLinks,
-                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                        selectedSource: selectedSource,
-                        title: data.title['english'] ?? data.title['romaji'] ?? '',
-                        id: widget.id,
-                        lastWatchDuration: lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                        cover: data.cover,
-                      ),
-                      type: Type.watch,
-                      getWatched: getWatched,
+                      provider: context.read<InfoProvider>(),
+                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                      type: ServerSheetType.watch,
                     );
                   }).then((val) {
                 if (val == true) {
@@ -1031,18 +987,9 @@ class _InfoState extends State<Info> {
                                   backgroundColor: appTheme.modalSheetBackgroundColor,
                                   builder: (BuildContext context) {
                                     return ServerSelectionBottomSheet(
-                                      altDatabases: altDatabases,
-                                      bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                                        epLinks: epLinks,
-                                        episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                                        selectedSource: selectedSource,
-                                        title: data.title['english'] ?? data.title['romaji'] ?? '',
-                                        id: widget.id,
-                                        lastWatchDuration:
-                                            lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                                        cover: data.cover,
-                                      ),
-                                      type: Type.download,
+                                      provider: context.read<InfoProvider>(),
+                                      episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                      type: ServerSheetType.download,
                                     );
                                   },
                                 );
@@ -1112,20 +1059,9 @@ class _InfoState extends State<Info> {
                         backgroundColor: appTheme.modalSheetBackgroundColor,
                         builder: (context) {
                           return ServerSelectionBottomSheet(
-                            altDatabases: altDatabases,
-                            bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                              totalEpisodes: data.episodes,
-                              epLinks: epLinks,
-                              episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                              selectedSource: selectedSource,
-                              title: data.title['english'] ?? data.title['romaji'] ?? '',
-                              id: widget.id,
-                              cover: data.cover,
-                              lastWatchDuration:
-                                  lastWatchedDurationMap?[watched < epLinks.length ? watched + 1 : watched],
-                            ),
-                            type: Type.watch,
-                            getWatched: getWatched,
+                            provider: context.read<InfoProvider>(),
+                            episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                            type: ServerSheetType.watch,
                           );
                         });
                   },
@@ -1177,17 +1113,9 @@ class _InfoState extends State<Info> {
                                       isScrollControlled: true,
                                       builder: (BuildContext context) {
                                         return ServerSelectionBottomSheet(
-                                          altDatabases: altDatabases,
-                                          bottomSheetContentData: ServerSelectionBottomSheetContentData(
-                                            epLinks: epLinks,
-                                            episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
-                                            selectedSource: selectedSource,
-                                            title: data.title['english'] ?? data.title['romaji'] ?? '',
-                                            id: widget.id,
-                                            cover: data.cover,
-                                            lastWatchDuration: null,
-                                          ),
-                                          type: Type.download,
+                                          provider: context.read<InfoProvider>(),
+                                          episodeIndex: visibleEpList[currentPageIndex][index]['realIndex'],
+                                          type: ServerSheetType.download,
                                         );
                                       },
                                     );
@@ -1235,7 +1163,7 @@ class _InfoState extends State<Info> {
             child: Column(
               children: [
                 _buildInfoItems(
-                  _infoLeft('Type'),
+                  _infoLeft('ServerSheetType'),
                   _infoRight(data.type.toLowerCase()),
                 ),
                 _buildInfoItems(

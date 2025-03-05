@@ -1,4 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -55,7 +56,21 @@ class CommonInfo extends StatelessWidget {
                     Padding(
                       padding: EdgeInsets.only(right: 20),
                       child: _button(
-                        onClick: () {},
+                        onClick: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                              backgroundColor: appTheme.backgroundColor,
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+                                width: size.width / 3,
+                                child: MediaListStatusBottomSheet(
+                                  provider: provider,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
                         child: Text(
                           "${provider.mediaListStatus?.name ?? "UNTRACKED"}",
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
@@ -63,7 +78,21 @@ class CommonInfo extends StatelessWidget {
                       ),
                     ),
                     _button(
-                      onClick: () {},
+                      onClick: () {
+                        showDialog(
+                            context: context,
+                            builder: (context) => Dialog(
+                              backgroundColor: appTheme.backgroundColor,
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+                                width: size.width / 3,
+                                child: MediaListStatusBottomSheet(
+                                  provider: provider,
+                                ),
+                              ),
+                            ),
+                          );
+                      },
                       child: Row(
                         children: [
                           Text("${provider.watched}", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28)),

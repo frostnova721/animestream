@@ -1,27 +1,16 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/database/handler/syncHandler.dart';
-import 'package:animestream/core/database/types.dart';
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 
 class MediaListStatusBottomSheet extends StatefulWidget {
-  final MediaStatus? status;
-  final int id;
-  final Function(String, int) refreshListStatus;
-  final int totalEpisodes;
-  final int episodesWatched;
-  final List<AlternateDatabaseId> otherIds;
+  final InfoProvider provider;
 
   const MediaListStatusBottomSheet({
     super.key,
-    required this.status,
-    required this.id,
-    required this.refreshListStatus,
-    required this.totalEpisodes,
-    required this.episodesWatched,
-    required this.otherIds,
+    required this.provider,
   });
 
   @override
@@ -33,7 +22,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
   void initState() {
     super.initState();
     itemList = makeItemList();
-    textEditingController.value = TextEditingValue(text: "${widget.episodesWatched}");
+    textEditingController.value = TextEditingValue(text: "${widget.provider.watched}");
   }
 
   final List<String> statuses = ["PLANNING", "CURRENT", "DROPPED", "COMPLETED"];
@@ -65,14 +54,14 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
   }
 
   String getInitialSelection() {
-    if (widget.status == null) {
+    if (widget.provider.mediaListStatus == null) {
       initialSelection = itemList[0].value;
       print("set initial to $initialSelection");
       return itemList[0].value;
     } else {
-      initialSelection = widget.status!.name;
+      initialSelection = widget.provider.mediaListStatus!.name;
       selectedValue = initialSelection;
-      return widget.status!.name;
+      return widget.provider.mediaListStatus!.name;
     }
   }
 
@@ -83,6 +72,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
 
   @override
   Widget build(BuildContext context) {
+    final provider = widget.provider;
     return SingleChildScrollView(
       child: Container(
         padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 20, right: 20),
@@ -171,10 +161,10 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                           child: TextField(
                             controller: textEditingController,
                             onChanged: (value) => {
-                              if (value.isNotEmpty && int.parse(value) > widget.totalEpisodes)
+                              if (value.isNotEmpty && int.parse(value) > (provider.data.episodes ?? 0))
                                 {
                                   textEditingController.value = TextEditingValue(
-                                    text: "${widget.totalEpisodes}",
+                                    text: "${provider.data.episodes ?? 0}",
                                   ),
                                 }
                             },
@@ -197,7 +187,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                           ),
                         ),
                         Text(
-                          "/ ${widget.totalEpisodes}",
+                          "/ ${provider.data.episodes ?? 0}",
                           style: TextStyle(
                             color: appTheme.textMainColor,
                             fontFamily: "Rubik",
@@ -210,11 +200,11 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                       onPressed: () {
                         final currentNumber = int.parse(
                             textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
-                        if (currentNumber + 1 >= widget.totalEpisodes) {
+                        if (currentNumber + 1 >= (provider.data.episodes ?? 0)) {
                           menuController.value = TextEditingValue(text: "COMPLETED");
                           selectedValue = "COMPLETED";
                         }
-                        if (currentNumber + 1 > widget.totalEpisodes) return;
+                        if (currentNumber + 1 > (provider.data.episodes ?? 0)) return;
                         textEditingController.value = TextEditingValue(text: "${currentNumber + 1}");
                       },
                       icon: Icon(
@@ -274,18 +264,18 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     ),
                     onPressed: () {
                       final int progress = int.parse(textEditingController.value.text);
-                      if (selectedValue != null || progress != widget.episodesWatched || widget.status == null) {
+                      if (selectedValue != null || progress != provider.watched || provider.mediaListStatus == null) {
                         SyncHandler()
                             .mutateAnimeList(
-                          id: widget.id,
+                          id: provider.id,
                           status: assignItemEnum(selectedValue ?? initialSelection!),
                           previousStatus: assignItemEnum(initialSelection),
                           progress: progress,
-                          otherIds: widget.otherIds,
+                          otherIds: provider.altDatabases
                         )
                             .then((value) {
                           initialSelection = selectedValue ?? initialSelection;
-                          widget.refreshListStatus(selectedValue ?? initialSelection!, progress);
+                          provider.refreshListStatus(selectedValue ?? initialSelection!, progress);
                           floatingSnackBar(context, "The list has been updated!");
                           if (mounted) {
                             Navigator.of(context).pop();

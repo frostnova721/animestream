@@ -2,8 +2,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
-import 'package:animestream/core/data/lastWatchDuration.dart';
-import 'package:animestream/core/data/manualSearches.dart';
+import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -25,6 +24,7 @@ class InfoProvider extends ChangeNotifier {
       ? currentUserSettings?.preferredProvider ?? sources[0]
       : sources[0];
   String? _foundName;
+  String? _manualSearchQuery;
 
   MediaStatus? _mediaListStatus;
 
@@ -37,6 +37,9 @@ class InfoProvider extends ChangeNotifier {
   int _currentPageIndex = 0;
   int _watched = 1;
   int _viewMode = 0;
+
+  // Index of episode selected
+  int? _selectedEpisodeToLoadStreams;
 
   Map? _lastWatchedDurationMap = {};
 
@@ -61,11 +64,13 @@ class InfoProvider extends ChangeNotifier {
   int get viewMode => _viewMode;
   int get currentPageIndex => _currentPageIndex;
   int get viewModeIndexLength => 3;
+  int? get selectedEpisodeToLoadStreams => _selectedEpisodeToLoadStreams;
 
   List<VideoStream> get streamSources => _streamSources;
   List<Map<String, String>> get qualities => _qualities;
   List<List<Map<String, dynamic>>> get visibleEpList => _visibleEpList;
-  // List<AlternateDatabaseId> _altDatabases = [];
+  List<AlternateDatabaseId> get altDatabases => _altDatabases;
+  List<String> get epLinks => _epLinks;
 
   MediaStatus? get mediaListStatus => _mediaListStatus;
 
@@ -76,11 +81,30 @@ class InfoProvider extends ChangeNotifier {
 
   bool _initCalled = false;
 
+  set selectedSource(String val) {
+    _selectedSource = val;
+    notifyListeners();
+  }
+
+  set selectedEpisodeToLoadStreams(int? newIndex) {
+    _selectedEpisodeToLoadStreams = newIndex;
+    notifyListeners();
+  }
+
   /// Called in the init state
   void init() async {
     if (_initCalled) throw Exception("The initialization was already done");
     _initCalled = true;
     await _getInfo(id);
+
+    // Load manualsearch query and last watch
+    await getAnimeSpecificPreference(id.toString()).then((it) {
+      _lastWatchedDurationMap = it?.lastWatchDuration ?? {};
+      _manualSearchQuery = it?.manualSearchQuery;
+    });
+
+    await getEpisodes();
+    await getWatched();
   }
 
   /// Fetch preferences
@@ -101,7 +125,6 @@ class InfoProvider extends ChangeNotifier {
       _started = false;
     }
     final item = await getAnimeWatchProgress(id, _mediaListStatus);
-    await getLastWatchedDuration(id.toString()).then((it) => _lastWatchedDurationMap = it ?? {});
     _watched = item == 0 ? 0 : item;
     _started = item != 0;
 
@@ -172,7 +195,7 @@ class InfoProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> search(String query) async {
+  Future<void> _search(String query) async {
     final sr = await searchInSource(selectedSource, query);
     //to find a exact match
     List<Map<String, String?>> match = sr
@@ -184,6 +207,7 @@ class InfoProvider extends ChangeNotifier {
     final links = await getAnimeEpisodes(selectedSource, match[0]['alias']!);
     paginate(links);
     _foundName = match[0]['name'];
+    print(foundName == query);
     notifyListeners();
   }
 
@@ -191,14 +215,16 @@ class InfoProvider extends ChangeNotifier {
     _foundName = null;
     _epSearcherror = false;
     try {
-      final manualSearchQuery = await getManualSearchQuery('$id');
       String searchTitle = data.title['english'] ?? data.title['romaji'] ?? '';
-      if (manualSearchQuery != null) searchTitle = manualSearchQuery;
-      await search(searchTitle);
+      if (_manualSearchQuery != null) {
+        searchTitle = _manualSearchQuery!;
+      }
+      await _search(searchTitle);
+      notifyListeners();
     } catch (err) {
       print(err.toString());
       try {
-        await search(data.title['romaji'] ?? '');
+        await _search(data.title['romaji'] ?? '');
       } catch (err) {
         print(err.toString());
         _epSearcherror = true;
@@ -225,22 +251,28 @@ class InfoProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> getQualities() async {
-    List<Map<String, String>> mainList = [];
-    for (int i = 0; i < _streamSources.length; i++) {
-      final list = await generateQualitiesForMultiQuality(_streamSources[i].link);
-      list.forEach((element) {
-        element['server'] = "${_streamSources[i].server} ${_streamSources[i].backup ? "• backup" : ""}";
-        mainList.add(element);
-      });
-    }
-    _qualities = mainList;
+  void refreshListStatus(String status, int progress) {
+    _mediaListStatus = assignItemEnum(status);
+    _watched = progress;
+    notifyListeners();
   }
 
-  Future getEpisodeSources(String epLink) async {
-    _streamSources = [];
-    await getStreams(selectedSource, epLink, (list, finished) {
-      if (finished) _streamSources = _streamSources + list;
-    });
-  }
+  // Future<void> getQualities() async {
+  //   List<Map<String, String>> mainList = [];
+  //   for (int i = 0; i < _streamSources.length; i++) {
+  //     final list = await generateQualitiesForMultiQuality(_streamSources[i].link);
+  //     list.forEach((element) {
+  //       element['server'] = "${_streamSources[i].server} ${_streamSources[i].backup ? "• backup" : ""}";
+  //       mainList.add(element);
+  //     });
+  //   }
+  //   _qualities = mainList;
+  // }
+
+  // Future getEpisodeSources(String epLink) async {
+  //   _streamSources = [];
+  //   await getStreams(selectedSource, epLink, (list, finished) {
+  //     if (finished) _streamSources = _streamSources + list;
+  //   });
+  // }
 }

@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/infoSection.dart';
@@ -22,7 +23,7 @@ class _InfoDesktopState extends State<InfoDesktop> {
 
   final pageScrollController = ScrollController();
 
-  final viewController = AnimeStreamBottomBarController(length: 3, nonViewIndices: [0]);
+  final viewController = AnimeStreamBottomBarController(length: 3, nonViewIndices: [0], animDuration: 00);
 
   @override
   Widget build(BuildContext context) {
@@ -96,6 +97,7 @@ class _InfoDesktopState extends State<InfoDesktop> {
                           ),
                         ],
                       ),
+                      
                     ],
                   ),
                 ),
@@ -105,5 +107,91 @@ class _InfoDesktopState extends State<InfoDesktop> {
         },
       ),
     );
+  }
+}
+
+class SourceSelectionDialog extends StatefulWidget {
+  final List<VideoStream> sources;
+
+  SourceSelectionDialog({required this.sources});
+
+  @override
+  _SourceSelectionDialogState createState() => _SourceSelectionDialogState();
+}
+
+class _SourceSelectionDialogState extends State<SourceSelectionDialog> {
+  bool isExpanded = false; // Track window state
+
+  @override
+  Widget build(BuildContext context) {
+     double width = MediaQuery.of(context).size.width * (isExpanded ? 0.6 : 0.3);
+    double height = isExpanded ? 500 : 200; // Adjust size
+    return  Dialog(
+      backgroundColor: Colors.black87,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: AnimatedContainer(
+        duration: Duration(milliseconds: 300),
+        width: width,
+        height: height,
+        padding: EdgeInsets.all(15),
+        child: Column(
+          children: [
+            // Title Bar
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Available Sources",
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
+                ),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: Icon(isExpanded ? Icons.fullscreen_exit : Icons.fullscreen, color: Colors.white),
+                      onPressed: () => setState(() => isExpanded = !isExpanded),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.white),
+                      onPressed: () => Navigator.pop(context),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            SizedBox(height: 10),
+
+            // List of Sources
+            Expanded(
+              child: ListView.builder(
+                itemCount: widget.sources.length,
+                itemBuilder: (context, index) {
+                  final source = widget.sources[index];
+
+                  return ListTile(
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    tileColor: Colors.grey[900],
+                    leading: Icon(Icons.video_collection, color: Colors.white),
+                    title: Text(source.server, style: TextStyle(color: Colors.white)),
+                    subtitle: Text("${source.quality} - ${source.subtitleFormat}", style: TextStyle(color: Colors.grey)),
+                    trailing: isExpanded
+                        ? ElevatedButton(
+                            onPressed: () {
+                              // Play or load source
+                            },
+                            child: Text("Play"),
+                          )
+                        : null,
+                    onTap: () {
+                      if (!isExpanded) setState(() => isExpanded = true);
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );;
   }
 }

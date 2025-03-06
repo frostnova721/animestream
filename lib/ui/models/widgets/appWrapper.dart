@@ -22,7 +22,7 @@ class AppWrapper extends StatelessWidget {
               preferredSize: const Size(double.maxFinite, 33),
               child: ClipRRect(
                 child: Container(
-                  color: appTheme.backgroundColor.withAlpha(150),
+                  color: Provider.of<ThemeProvider>(context).titleBarColor ?? appTheme.backgroundColor.withAlpha(150),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                     child: Row(

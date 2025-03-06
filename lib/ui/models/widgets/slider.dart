@@ -113,7 +113,7 @@ class RoundedRectangularThumbShape extends SliderComponentShape {
     context.canvas.drawRRect(
         RRect.fromRectAndRadius(strokeRect, Radius.circular(radius)),
         Paint()
-          ..color = appTheme.textMainColor
+          ..color = sliderTheme.thumbColor ?? appTheme.textMainColor
           ..style = PaintingStyle.stroke
           ..strokeWidth = 3);
   }

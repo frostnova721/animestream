@@ -3,5 +3,5 @@
 - add more sources [...]
 - episodes in tile mode
 - sub/dub toggle (far away plan)
-- fix playpreloaded episode function!!!!
 - add window title (low priority)
+- dialog for watch section

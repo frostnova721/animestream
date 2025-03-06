@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -48,6 +49,9 @@ class _WatchState extends State<Watch> {
   }
 
   void _initialize() async {
+    /// Set black title bar
+   context.read<ThemeProvider>().setTitlebarColor(appTheme.backgroundColor);
+
     final dataProvider = context.read<PlayerDataProvider>();
 
     await dataProvider.extractCurrentStreamQualities();
@@ -193,7 +197,9 @@ class _WatchState extends State<Watch> {
         // save the last watched duration
         addLastWatchedDuration(playerDataProvider.showId.toString(),
             {playerDataProvider.state.currentEpIndex + 1: ((controller.position ?? 0) / controller.duration!) * 100});
-        await context.read<ThemeProvider>().setFullScreen(false);
+        await context.read<ThemeProvider>()
+          ..setFullScreen(false)
+          ..setTitlebarColor(null);
       },
       child: Scaffold(
         backgroundColor: Colors.black,

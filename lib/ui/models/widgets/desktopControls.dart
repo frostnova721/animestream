@@ -96,18 +96,18 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           children: [
                             Text(
                               "Episode ${dataProvider.state.currentEpIndex + 1}",
-                              style: TextStyle(fontSize: 35),
+                              style: TextStyle(fontSize: 35, color: Colors.white),
                             ),
                             Text(
                               dataProvider.showTitle,
-                              style: TextStyle(fontSize: 17),
+                              style: TextStyle(fontSize: 17, color: Colors.white),
                             ),
                           ],
                         ),
                       ),
                     ],
                   ),
-        
+
                   //top right
                   Row(
                     children: [
@@ -137,21 +137,26 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(dataProvider.state.currentTimeStamp),
+                        Text(
+                          dataProvider.state.currentTimeStamp,
+                          style: TextStyle(color: Colors.white),
+                        ),
                         SliderTheme(
                           data: SliderThemeData(
                               activeTrackColor: appTheme.accentColor,
                               trackHeight: 1,
                               thumbShape: RoundedRectangularThumbShape(width: 2, height: 15),
+                              thumbColor: Colors.white,
                               overlayColor: Colors.white.withAlpha(20),
                               inactiveTrackColor: appTheme.textSubColor,
-                              secondaryActiveTrackColor: appTheme.textMainColor,
+                              secondaryActiveTrackColor: Colors.white,
                               overlayShape: RoundSliderOverlayShape(overlayRadius: 10)),
                           child: Expanded(
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
                               child: Slider(
                                 value: dataProvider.state.sliderValue.toDouble(),
+                                thumbColor: Colors.white,
                                 onChanged: (val) {
                                   provider.controller.seekTo(Duration(seconds: val.toInt()));
                                 },
@@ -161,7 +166,10 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                             ),
                           ),
                         ),
-                        Text(dataProvider.state.maxTimeStamp),
+                        Text(
+                          dataProvider.state.maxTimeStamp,
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ],
                     ),
                   ),
@@ -253,7 +261,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   thumbShape: RoundedRectangularThumbShape(width: 2, height: 15),
                                   overlayColor: Colors.white.withAlpha(20),
                                   inactiveTrackColor: appTheme.textSubColor,
-                                  secondaryActiveTrackColor: appTheme.textMainColor,
+                                  secondaryActiveTrackColor: Colors.white,
                                   overlayShape: RoundSliderOverlayShape(overlayRadius: 15),
                                 ),
                                 child: Slider(
@@ -268,7 +276,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 ),
                               ),
                             ),
-        
+
                             IconButton(
                                 onPressed: () {
                                   provider.toggleSubs();
@@ -452,9 +460,8 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   child: Text(
                                     (index + 1).toString(),
                                     style: TextStyle(
-                                      color: index == dataProvider.state.currentEpIndex
-                                          ? appTheme.onAccent
-                                          : appTheme.textMainColor,
+                                      color:
+                                          index == dataProvider.state.currentEpIndex ? appTheme.onAccent : appTheme.textMainColor,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

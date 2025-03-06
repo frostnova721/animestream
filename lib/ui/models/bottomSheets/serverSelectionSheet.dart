@@ -12,6 +12,7 @@ import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
+import 'package:animestream/ui/models/widgets/sourceTile.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
@@ -110,7 +111,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
     final List<dynamic> list = await getQualityStreams(link);
     list.forEach((element) {
       element['server'] = "${server} ${backup ? "- backup" : ""}";
-      element['quality'] = "${element['quality']}p";
+      element['quality'] = element['quality'] == "default" ? "default" : "${element['quality']}p";
       mainList.add(element);
     });
     // if (mounted)
@@ -127,6 +128,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   }
 
   bool _isLoading = true;
+
+  int? hoveredIndex;
 
   @override
   Widget build(BuildContext context) {
@@ -184,127 +187,70 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   ListView _list() {
     final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
     return widget.type == ServerSheetType.watch
-        ? ListView.builder(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            // physics: NeverScrollableScrollPhysics(),
-            itemCount: streamSources.length,
-            itemBuilder: (context, index) {
-              return Container(
-                margin: EdgeInsets.only(top: 15),
-                decoration: BoxDecoration(
-                  color: Color.fromARGB(255, 37, 34, 49),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: ElevatedButton(
-                  onPressed: () async {
-                    await storeWatching(
-                      title,
-                      widget.provider.data.cover,
-                      widget.provider.id,
-                      widget.episodeIndex,
-                      totalEpisodes: widget.provider.data.episodes,
-                      alternateDatabases: widget.provider.altDatabases,
-                    );
-                    final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+        ?   ListView.builder(
+      padding: EdgeInsets.symmetric(vertical: 10, horizontal: Platform.isAndroid ? 10 : 15),
+      shrinkWrap: true,
+      itemCount: streamSources.length,
+      itemBuilder: (context, index) {
+        final source = streamSources[index];
 
-                    final provider = widget.provider;
-                    final navigatorState =
-                        (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
+        return SourceTile(source: source, onTap: () async {
+          await storeWatching(
+                title,
+                widget.provider.data.cover,
+                widget.provider.id,
+                widget.episodeIndex,
+                totalEpisodes: widget.provider.data.episodes,
+                alternateDatabases: widget.provider.altDatabases,
+              );
 
-                    Navigator.pop(context, true);
+              final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+              final provider = widget.provider;
+              final navigatorState = (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
 
-                    navigatorState
-                        ?.push(
-                      MaterialPageRoute(
-                        builder: (context) => MultiProvider(
-                          providers: [
-                            ChangeNotifierProvider(
-                              create: (context) => PlayerDataProvider(
-                                initialStreams: streamSources,
-                                initialStream: streamSources[index],
-                                epLinks: provider.epLinks,
-                                showTitle: title,
-                                showId: provider.id,
-                                selectedSource: provider.selectedSource,
-                                startIndex: widget.episodeIndex,
-                                altDatabases: provider.altDatabases,
-                                lastWatchDuration: provider.lastWatchedDurationMap?[
-                                    provider.watched < provider.epLinks.length
-                                        ? provider.watched + 1
-                                        : provider.watched],
-                              ),
-                            ),
-                            ChangeNotifierProvider(
-                              create: (context) => PlayerProvider(controller),
-                            ),
-                          ],
-                          child: Watch(
-                            controller: controller,
-                          ),
+              Navigator.pop(context, true);
+
+              navigatorState?.push(
+                MaterialPageRoute(
+                  builder: (context) => MultiProvider(
+                    providers: [
+                      ChangeNotifierProvider(
+                        create: (context) => PlayerDataProvider(
+                          initialStreams: streamSources,
+                          initialStream: streamSources[index],
+                          epLinks: provider.epLinks,
+                          showTitle: title,
+                          showId: provider.id,
+                          selectedSource: provider.selectedSource,
+                          startIndex: widget.episodeIndex,
+                          altDatabases: provider.altDatabases,
+                          lastWatchDuration: provider.lastWatchedDurationMap?[
+                              provider.watched < provider.epLinks.length
+                                  ? provider.watched + 1
+                                  : provider.watched],
                         ),
                       ),
-                    )
-                        .then((value) {
-                      provider.getWatched();
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    elevation: 0,
-                    backgroundColor: appTheme.backgroundSubColor,
-                    padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            streamSources[index].server,
-                            style: TextStyle(
-                              fontFamily: "NotoSans",
-                              fontSize: 17,
-                              color: appTheme.accentColor,
-                            ),
-                          ),
-                          if (streamSources[index].backup)
-                            Text(
-                              " • backup",
-                              style: TextStyle(
-                                fontFamily: "NotoSans",
-                                fontSize: 14,
-                                color: Colors.grey[500],
-                              ),
-                            )
-                        ],
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(top: 5),
-                        child: Text(
-                          streamSources[index].quality,
-                          style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik"),
-                        ),
+                      ChangeNotifierProvider(
+                        create: (context) => PlayerProvider(controller),
                       ),
                     ],
+                    child: Watch(
+                      controller: controller,
+                    ),
                   ),
                 ),
-              );
-            },
-          )
+              ).then((value) {
+                provider.getWatched();
+              });
+        },);
+      },
+    )
         : ListView.builder(
             itemCount: qualities.length,
             shrinkWrap: true,
             // physics: NeverScrollableScrollPhysics(),
             itemBuilder: (BuildContext context, ind) => Container(
-              margin: EdgeInsets.only(top: 15),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
+              margin: EdgeInsets.only(top: 10),
               child: ElevatedButton(
                 onPressed: () {
                   if (currentUserSettings?.useQueuedDownloads ?? false) {
@@ -334,7 +280,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   backgroundColor: appTheme.backgroundSubColor,
                   padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Column(
@@ -382,5 +328,3 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
     super.dispose();
   }
 }
-
-//long name lol

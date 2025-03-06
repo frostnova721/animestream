@@ -31,7 +31,7 @@ if(keystorePropertiesFile.exists()) {
 
 android {
     namespace "app.animestream"
-    compileSdkVersion 34
+    compileSdkVersion 35
     ndkVersion flutter.ndkVersion
 
     compileOptions {

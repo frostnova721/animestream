@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/handler/handler.dart';
@@ -45,7 +46,7 @@ class _SearchState extends State<Search> {
       );
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches.add(
-          Cards(context: context).animeCard(id, title, image, rating: ele.rating),
+          Cards(context: context).animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
         );
       }
     });

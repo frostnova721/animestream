@@ -86,6 +86,26 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set viewMode(int newIndex) {
+    _viewMode = newIndex;
+    notifyListeners();
+  }
+
+  set foundName(String? val) {
+    _foundName = val;
+    notifyListeners();
+  }
+
+  set epSearcherror(bool val) {
+    _epSearcherror = val;
+    notifyListeners();
+  }
+
+  set currentPageIndex(int val) {
+    _currentPageIndex = val;
+    notifyListeners();
+  }
+
   set selectedEpisodeToLoadStreams(int? newIndex) {
     _selectedEpisodeToLoadStreams = newIndex;
     notifyListeners();
@@ -136,6 +156,7 @@ class InfoProvider extends ChangeNotifier {
   Future<void> _getInfo(int id) async {
     try {
       if (currentUserSettings?.database == Databases.anilist && await AniListLogin().isAnilistLoggedIn()) {
+        _loggedIn = true;
         //fetch ids from simkl and save em
         try {
           DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {

@@ -32,10 +32,24 @@ Downloading: sometimes the downloads may be stuck at 100%. This is just a UI bug
 
 ## Building
 
-To build the apk from the source code, simply run the command below:
+- Clone the repo
+
+- Install required packages:
+
+```cmd
+flutter pub get
+```
+
+- To build the apk from the source code, simply run the command below:
 
 ```cmd
 flutter build apk
+```
+
+- To build application for windows, run the following command:
+
+```cmd
+flutter build windows
 ```
 
 PS: Your machine needs to have flutter installed. [Install flutter](https://docs.flutter.dev/get-started/install)

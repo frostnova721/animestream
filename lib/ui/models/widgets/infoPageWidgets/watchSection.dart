@@ -5,7 +5,6 @@ import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/commonInfo.dart';
-import 'package:animestream/ui/pages/info/infoDesktop.dart';
 import 'package:flutter/material.dart';
 
 class WatchSection extends StatelessWidget {
@@ -50,7 +49,6 @@ class WatchSection extends StatelessWidget {
                 children: [
                   _sourceSection(context, isSideWidget: true),
                   _continueWatching(context),
-                  if (provider.selectedEpisodeToLoadStreams != null) _selectedEpisodeBox()
                 ],
               ),
             ),
@@ -122,7 +120,7 @@ class WatchSection extends StatelessWidget {
                             padding: EdgeInsets.only(bottom: 15),
                             alignment: Alignment.bottomCenter,
                             child: Text(
-                              "Continue Watching",
+                              "${provider.started ? 'Continue' : 'Start'} Watching",
                               style: TextStyle(fontFamily: "Rubik"),
                             )),
                       ],
@@ -140,38 +138,6 @@ class WatchSection extends StatelessWidget {
         ],
       ),
     );
-  }
-
-  Container _selectedEpisodeBox() {
-    return Container(
-      child: SourceSelectionDialog(sources: provider.streamSources),
-        // margin: EdgeInsets.only(left: 50, top: 30),
-        // padding: EdgeInsets.all(15),
-        // decoration: BoxDecoration(
-        //   borderRadius: BorderRadius.circular(15),
-        //   color: appTheme.backgroundSubColor,
-        // ),
-        // child: Column(
-        //   mainAxisSize: MainAxisSize.min,
-        //   children: [
-        //     Text("Sources: Episode ${provider.selectedEpisodeToLoadStreams! + 1}"),
-        //     ListView.builder(
-        //       itemCount: provider.streamSources.length,
-        //       shrinkWrap: true,
-        //       itemBuilder: (context, index) {
-        //         final stream = provider.streamSources[index];
-        //         return Column(
-        //           mainAxisSize: MainAxisSize.min,
-        //           children: [
-        //             Text(stream.server),
-        //             Text(stream.quality),
-        //           ],
-        //         );
-        //       },
-        //     ),
-        //   ],
-        // ),
-        );
   }
 
   Container _episodes() {
@@ -199,10 +165,102 @@ class WatchSection extends StatelessWidget {
                       style: _textStyle(),
                     ),
                     if (provider.visibleEpList.isNotEmpty)
-                      Container(
-                        child: Text("${provider.visibleEpList[provider.currentPageIndex].first['realIndex'] + 1}" +
-                            "- ${provider.visibleEpList[provider.currentPageIndex].last['realIndex'] + 1}"),
+                      Row(
+                        children: [
+                          IconButton.outlined(
+                            onPressed: () {
+                              if (provider.currentPageIndex == 0) return;
+                              provider.currentPageIndex -= 1;
+                            },
+                            icon: Icon(
+                              Icons.arrow_back_ios_rounded,
+                              color: appTheme.textMainColor,
+                            ),
+                            style: ButtonStyle(
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 10),
+                            child: GestureDetector(
+                              onTap: () {
+                                // TODO: SHOW PAGES BOX
+                              },
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                decoration:
+                                    BoxDecoration(color: appTheme.accentColor, borderRadius: BorderRadius.circular(10)),
+                                child: Text(
+                                  "${provider.visibleEpList[provider.currentPageIndex].first['realIndex'] + 1}" +
+                                      "- ${provider.visibleEpList[provider.currentPageIndex].last['realIndex'] + 1}",
+                                  style: TextStyle(color: appTheme.onAccent, fontWeight: FontWeight.bold, fontSize: 17),
+                                ),
+                              ),
+                            ),
+                          ),
+                          IconButton.outlined(
+                            onPressed: () {
+                              if (provider.currentPageIndex >= provider.visibleEpList.length - 1) return;
+                              provider.currentPageIndex += 1;
+                            },
+                            icon: Icon(
+                              Icons.arrow_forward_ios_rounded,
+                              color: appTheme.textMainColor,
+                            ),
+                            style: ButtonStyle(
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
+                    Row(
+                      children: [
+                        IconButton(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                  provider.viewMode == 0 ? appTheme.accentColor : Colors.transparent),
+                            ),
+                            onPressed: () {
+                              provider.viewMode = 0;
+                            },
+                            icon: Icon(
+                              Icons.view_list,
+                              color: provider.viewMode == 0 ? appTheme.onAccent : appTheme.textMainColor,
+                            )),
+                        IconButton(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                  provider.viewMode == 1 ? appTheme.accentColor : Colors.transparent),
+                            ),
+                            onPressed: () {
+                              provider.viewMode = 1;
+                            },
+                            icon: Icon(
+                              Icons.grid_view_sharp,
+                              color: provider.viewMode == 1 ? appTheme.onAccent : appTheme.textMainColor,
+                            )),
+                        IconButton(
+                            style: ButtonStyle(
+                              backgroundColor: WidgetStatePropertyAll(
+                                  provider.viewMode == 2 ? appTheme.accentColor : Colors.transparent),
+                            ),
+                            onPressed: () {
+                              provider.viewMode = 2;
+                            },
+                            icon: Icon(
+                              Icons.grid_on_sharp,
+                              color: provider.viewMode == 2 ? appTheme.onAccent : appTheme.textMainColor,
+                            )),
+                      ],
+                    )
                   ],
                 ),
                 Expanded(
@@ -400,11 +458,21 @@ class WatchSection extends StatelessWidget {
                             padding: EdgeInsets.all(20),
                             width: size.width / 3,
                             child: ManualSearchSheet(
-                                searchString: title, source: provider.selectedSource, anilistId: provider.id.toString()),
+                                searchString: title,
+                                source: provider.selectedSource,
+                                anilistId: provider.id.toString()),
                           ),
                         );
                       },
-                    );
+                    ).then((result) async {
+                      if (result == null) return;
+                      provider.epSearcherror = false;
+                      provider.foundName = null;
+                      final links = await getAnimeEpisodes(provider.selectedSource, result['alias']);
+
+                      provider.paginate(links);
+                      provider.foundName = result['name'];
+                    });
                   },
                   child: Text(
                     "Manual search",

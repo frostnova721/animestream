@@ -28,6 +28,10 @@ class ThemeProvider with ChangeNotifier {
 
   String get windowTitle => _windowTitle;
 
+  Color? _titleBarColor = null;
+
+  Color? get titleBarColor => _titleBarColor;
+
   set windowTitle(String newTitle) {
     _windowTitle = newTitle;
     notifyListeners();
@@ -64,6 +68,11 @@ class ThemeProvider with ChangeNotifier {
 
   set themeItem(ThemeItem ti) {
     activeThemeItem = ti;
+  }
+
+  void setTitlebarColor(Color? color) {
+    _titleBarColor = color;
+    notifyListeners();
   }
 
   void applyTheme(AnimeStreamTheme t) {

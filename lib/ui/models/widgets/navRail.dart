@@ -38,7 +38,6 @@ class AnimeStreamNavRail extends StatefulWidget {
 }
 
 class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
-
   @override
   void initState() {
     super.initState();
@@ -57,31 +56,43 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
                 itemBuilder: (context, index) {
                   final item = widget.destinations[index];
                   final controller = widget.controller;
-                  final isNonNavButton =controller.nonViewIndices.contains(index);
+                  final isNonNavButton = controller.nonViewIndices.contains(index);
 
-                  return GestureDetector(
-                    onTap: () {
-                      if (item.onClick != null)
-                        return item.onClick?.call();
-                      else if (!isNonNavButton) controller.currentIndex = index;
-                    },
-                    child: AnimatedContainer(
-                      duration: Duration(milliseconds: widget.controller.animDuration),
-                      height: 50,
-                      width: 50,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: currentIndex == index && !isNonNavButton
-                            ? (item.selectedColor ?? appTheme.accentColor)
-                            : (item.unselectedColor ?? appTheme.backgroundSubColor),
-                      ),
-                      margin: EdgeInsets.all(5),
-                      child: Icon(
-                        item.icon,
-                        size: 30,
-                        color: currentIndex == index && !isNonNavButton
-                            ? (item.selectedIconColor ?? appTheme.onAccent)
-                            : (item.unselectedIconColor ?? appTheme.textMainColor),
+                  final hovered = ValueNotifier(false);
+
+                  return MouseRegion(
+                    onEnter: (_) => hovered.value = true,
+                    onExit: (_) => hovered.value = false,
+                    cursor: SystemMouseCursors.click,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (item.onClick != null)
+                          return item.onClick?.call();
+                        else if (!isNonNavButton) controller.currentIndex = index;
+                      },
+                      child: ValueListenableBuilder(
+                        valueListenable: hovered,
+                        builder: (context, value, child) {
+                          return AnimatedContainer(
+                            duration: Duration(milliseconds: widget.controller.animDuration),
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: currentIndex == index && !isNonNavButton
+                                  ? (item.selectedColor ?? appTheme.accentColor)
+                                  : value ? appTheme.backgroundSubColor.withAlpha(150)  : (item.unselectedColor ?? appTheme.backgroundSubColor),
+                            ),
+                            margin: EdgeInsets.all(5),
+                            child: Icon(
+                              item.icon,
+                              size: 30,
+                              color: currentIndex == index && !isNonNavButton
+                                  ? (item.selectedIconColor ?? appTheme.onAccent)
+                                  : (item.unselectedIconColor ?? appTheme.textMainColor),
+                            ),
+                          );
+                        },
                       ),
                     ),
                   );

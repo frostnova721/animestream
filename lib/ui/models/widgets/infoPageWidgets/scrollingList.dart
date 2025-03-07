@@ -45,7 +45,7 @@ class ScrollingList {
   }
 
   static SizedBox animeCards(
-      BuildContext context, int splitWidth, ScrollController controller, List<DatabaseRelatedRecommendation> list) {
+      BuildContext context, int splitWidth, ScrollController controller, String title, List<DatabaseRelatedRecommendation> list) {
     final size = MediaQuery.sizeOf(context);
     return SizedBox(
       width: size.width / (size.width > splitWidth ? 1.75 : 1.3),
@@ -59,7 +59,7 @@ class ScrollingList {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  "Recommended",
+                  title,
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
                 _scrollButtons(controller),
@@ -76,7 +76,7 @@ class ScrollingList {
               itemBuilder: (context, index) {
                 final it = list[index];
                 return Cards(context: context).animeCard(it.id, it.title['english'] ?? it.title['romaji']!, it.cover,
-                    isMobile: !Platform.isWindows, rating: it.rating);
+                    isMobile: !Platform.isWindows, rating: it.rating, subText: it.relationType);
               },
             ),
           ),

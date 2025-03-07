@@ -562,7 +562,7 @@ class _InfoMobileState extends State<InfoMobile> {
   }
 
   Container _searchStatus() {
-    dynamic text = "searching: ${provider.data.title['english'] ?? provider.data.title['romaji'] ?? ''}";
+    String text = "searching: ${provider.data.title['english'] ?? provider.data.title['romaji'] ?? ''}";
     if (provider.foundName != null) {
       text = "found: ${provider.foundName}";
     } else if (provider.epSearcherror) {

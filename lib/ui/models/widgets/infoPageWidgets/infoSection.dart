@@ -19,6 +19,7 @@ class InfoSection extends StatelessWidget {
   Widget build(BuildContext context) {
     final recommendationScrollController = ScrollController();
     final charactersScrollController = ScrollController();
+    // final relatedScrollController = ScrollController();
 
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -157,8 +158,9 @@ class InfoSection extends StatelessWidget {
                             unconstrainedWidth: true, padLeft: false, context: context),
                       ScrollingList.character(
                           context, splitWidth, charactersScrollController, provider.data.characters),
+                          // ScrollingList.animeCards(context, splitWidth, relatedScrollController, "Related", provider.data.related), // Not elegant!
                       ScrollingList.animeCards(
-                          context, splitWidth, recommendationScrollController, provider.data.recommended),
+                          context, splitWidth, recommendationScrollController, "Recommended", provider.data.recommended),
                     ],
                   ), // Yeah put stuff in this column
                 ],

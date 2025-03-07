@@ -561,6 +561,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.5.3"
+  inno_bundle:
+    dependency: "direct dev"
+    description:
+      name: inno_bundle
+      sha256: e9d0ab41a82157da42ebd4206bda22ed04bf096a6e7d416c79d79201c388d563
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.8.0"
   intl:
     dependency: transitive
     description:

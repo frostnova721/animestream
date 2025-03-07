@@ -42,37 +42,37 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
               Navigator.of(context).pop(item);
             },
             child: Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Container(
+                    height: 140,
+                    width: 100,
+                    margin: EdgeInsets.only(bottom: 5),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
+                    child: Image.network(
+                      item['imageUrl'] ?? '',
+                      fit: BoxFit.cover,
                       height: 140,
                       width: 100,
-                      margin: EdgeInsets.only(bottom: 5),
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20)),
-                      child: Image.network(
-                        item['imageUrl'] ?? '',
-                        fit: BoxFit.cover,
-                        height: 140,
-                        width: 100,
-                      ),
                     ),
-                    Text(
-                      item['name'] ?? item['alias'] ?? '',
-                      style: TextStyle(
-                        color: appTheme.textMainColor,
-                        fontFamily: 'NotoSans',
-                        fontWeight: FontWeight.w600,
-                        fontSize: 14,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 2,
-                      textAlign: TextAlign.left,
-                    )
-                  ],
-                ),
+                  ),
+                  Text(
+                    item['name'] ?? item['alias'] ?? '',
+                    style: TextStyle(
+                      color: appTheme.textMainColor,
+                      fontFamily: 'NotoSans',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    maxLines: 2,
+                    textAlign: TextAlign.left,
+                  )
+                ],
               ),
+            ),
           ),
         );
       }
@@ -127,7 +127,9 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
             child: Container(
               // height: 350,
               // margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-              padding: EdgeInsets.only(top: 10,),
+              padding: EdgeInsets.only(
+                top: 10,
+              ),
               child: searching
                   ? Center(
                       child: CircularProgressIndicator(
@@ -147,13 +149,13 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                           ),
                         )
                       : GridView.builder(
-                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3, childAspectRatio: 100 / 160, mainAxisSpacing: 15),
+                          gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 130, mainAxisSpacing: 15,crossAxisSpacing: 15, mainAxisExtent: 190),
                           itemCount: searchResults.length,
                           shrinkWrap: true,
                           padding: EdgeInsets.only(left: 5, right: 5, top: 10),
                           itemBuilder: (context, index) {
-                            return searchResults[index];
+                            return MouseRegion(cursor: SystemMouseCursors.click, child: searchResults[index]);
                           },
                         ),
             ),

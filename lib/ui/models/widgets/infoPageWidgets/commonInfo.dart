@@ -73,7 +73,8 @@ class CommonInfo extends StatelessWidget {
                         },
                         child: Text(
                           "${provider.mediaListStatus?.name ?? "UNTRACKED"}",
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 28),
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 28,
+                          ),
                         ),
                       ),
                     ),

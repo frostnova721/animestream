@@ -4,6 +4,7 @@ import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/commonInfo.dart';
 import 'package:flutter/material.dart';
 
@@ -31,12 +32,18 @@ class WatchSection extends StatelessWidget {
                       CommonInfo(
                         provider: provider,
                       ),
+                      // if (size.width < splitWidth)
+                      //   Container(
+                      //     width: size.width / 2,
+                      //     child: Row(
+                      //       children: [_sourceSection(context), _continueWatchingBodyWidget(context)],
+                      //     ),
+                      //   ),
                       _episodes(),
                     ],
                   ),
                 ],
               ),
-              if (size.width < splitWidth) Container()
             ],
           ),
         ),
@@ -56,6 +63,26 @@ class WatchSection extends StatelessWidget {
       ],
     );
   }
+
+  // Container _continueWatchingBodyWidget(BuildContext context) {
+  //   return Container(
+  //     child: InkWell(
+  //       child: Container(
+  //         decoration: BoxDecoration(
+  //           image: DecorationImage(
+  //               image: CachedNetworkImageProvider(
+  //                 provider.data.banner ?? provider.data.cover,
+  //               ),
+  //               fit: BoxFit.cover),
+  //         ),
+  //         child: Center(
+  //           child: Text(
+  //               "Continue Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}"),
+  //         ),
+  //       ),
+  //     ),
+  //   );
+  // }
 
   Container _continueWatching(BuildContext context) {
     final ValueNotifier<bool> hovered = ValueNotifier(false);
@@ -131,7 +158,7 @@ class WatchSection extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(top: 15),
             child: Text(
-              "Episode ${provider.watched + 1}",
+              "Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}",
               style: _textStyle().copyWith(fontSize: 20),
             ),
           ),
@@ -157,115 +184,165 @@ class WatchSection extends StatelessWidget {
           : Column(
               spacing: 30,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      "Episode",
-                      style: _textStyle(),
-                    ),
-                    if (provider.visibleEpList.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "Episode",
+                        style: _textStyle(),
+                      ),
+                      if (provider.visibleEpList.isNotEmpty)
+                        Row(
+                          children: [
+                            IconButton.outlined(
+                              onPressed: () {
+                                if (provider.currentPageIndex == 0) return;
+                                provider.currentPageIndex -= 1;
+                              },
+                              icon: Icon(
+                                Icons.arrow_back_ios_rounded,
+                                color: appTheme.textMainColor,
+                              ),
+                              style: ButtonStyle(
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  showDialog(
+                                      context: AppWrapper.navKey.currentContext!,
+                                      builder: (ctx) => Dialog(
+                                            backgroundColor: appTheme.backgroundColor,
+                                            child: Container(
+                                              width: size.width / 3,
+                                              height: size.height / 2,
+                                              alignment: Alignment.center,
+                                              padding: EdgeInsets.all(30),
+                                              child: GridView(
+                                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                                  maxCrossAxisExtent: 100,
+                                                  mainAxisExtent: 75,
+                                                  mainAxisSpacing: 20,
+                                                  crossAxisSpacing: 20,
+                                                ),
+                                                children: List.generate(
+                                                    provider.visibleEpList.length,
+                                                    (ind) => GestureDetector(
+                                                          onTap: () {
+                                                            provider.currentPageIndex = ind;
+                                                            Navigator.of(ctx).pop();
+                                                          },
+                                                          child: Container(
+                                                            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                                                            decoration: BoxDecoration(
+                                                                color: provider.currentPageIndex == ind
+                                                                    ? appTheme.accentColor
+                                                                    : appTheme.backgroundSubColor,
+                                                                borderRadius: BorderRadius.circular(10)),
+                                                            alignment: Alignment.center,
+                                                            child: Text(
+                                                              "${provider.visibleEpList[ind].first['realIndex'] + 1}" +
+                                                                  "- ${provider.visibleEpList[ind].last['realIndex'] + 1}",
+                                                              style: TextStyle(
+                                                                color: provider.currentPageIndex == ind
+                                                                    ? appTheme.onAccent
+                                                                    : appTheme.textMainColor,
+                                                                fontWeight: FontWeight.bold,
+                                                                fontSize: 17,
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        )),
+                                              ),
+                                            ),
+                                          ));
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                                  decoration: BoxDecoration(
+                                      color: appTheme.accentColor, borderRadius: BorderRadius.circular(10)),
+                                  child: Text(
+                                    "${provider.visibleEpList[provider.currentPageIndex].first['realIndex'] + 1}" +
+                                        "- ${provider.visibleEpList[provider.currentPageIndex].last['realIndex'] + 1}",
+                                    style:
+                                        TextStyle(color: appTheme.onAccent, fontWeight: FontWeight.bold, fontSize: 17),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            IconButton.outlined(
+                              onPressed: () {
+                                if (provider.currentPageIndex >= provider.visibleEpList.length - 1) return;
+                                provider.currentPageIndex += 1;
+                              },
+                              icon: Icon(
+                                Icons.arrow_forward_ios_rounded,
+                                color: appTheme.textMainColor,
+                              ),
+                              style: ButtonStyle(
+                                shape: WidgetStatePropertyAll(
+                                  RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       Row(
                         children: [
-                          IconButton.outlined(
-                            onPressed: () {
-                              if (provider.currentPageIndex == 0) return;
-                              provider.currentPageIndex -= 1;
-                            },
-                            icon: Icon(
-                              Icons.arrow_back_ios_rounded,
-                              color: appTheme.textMainColor,
-                            ),
-                            style: ButtonStyle(
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                          IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                    provider.viewMode == 0 ? appTheme.accentColor : Colors.transparent),
                               ),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 10),
-                            child: GestureDetector(
-                              onTap: () {
-                                // TODO: SHOW PAGES BOX
+                              onPressed: () {
+                                provider.viewMode = 0;
                               },
-                              child: Container(
-                                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                                decoration:
-                                    BoxDecoration(color: appTheme.accentColor, borderRadius: BorderRadius.circular(10)),
-                                child: Text(
-                                  "${provider.visibleEpList[provider.currentPageIndex].first['realIndex'] + 1}" +
-                                      "- ${provider.visibleEpList[provider.currentPageIndex].last['realIndex'] + 1}",
-                                  style: TextStyle(color: appTheme.onAccent, fontWeight: FontWeight.bold, fontSize: 17),
-                                ),
+                              icon: Icon(
+                                Icons.view_list,
+                                color: provider.viewMode == 0 ? appTheme.onAccent : appTheme.textMainColor,
+                              )),
+                          IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                    provider.viewMode == 1 ? appTheme.accentColor : Colors.transparent),
                               ),
-                            ),
-                          ),
-                          IconButton.outlined(
-                            onPressed: () {
-                              if (provider.currentPageIndex >= provider.visibleEpList.length - 1) return;
-                              provider.currentPageIndex += 1;
-                            },
-                            icon: Icon(
-                              Icons.arrow_forward_ios_rounded,
-                              color: appTheme.textMainColor,
-                            ),
-                            style: ButtonStyle(
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                              onPressed: () {
+                                provider.viewMode = 1;
+                              },
+                              icon: Icon(
+                                Icons.grid_view_sharp,
+                                color: provider.viewMode == 1 ? appTheme.onAccent : appTheme.textMainColor,
+                              )),
+                          IconButton(
+                              style: ButtonStyle(
+                                backgroundColor: WidgetStatePropertyAll(
+                                    provider.viewMode == 2 ? appTheme.accentColor : Colors.transparent),
                               ),
-                            ),
-                          ),
+                              onPressed: () {
+                                provider.viewMode = 2;
+                              },
+                              icon: Icon(
+                                Icons.grid_on_sharp,
+                                color: provider.viewMode == 2 ? appTheme.onAccent : appTheme.textMainColor,
+                              )),
                         ],
-                      ),
-                    Row(
-                      children: [
-                        IconButton(
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStatePropertyAll(
-                                  provider.viewMode == 0 ? appTheme.accentColor : Colors.transparent),
-                            ),
-                            onPressed: () {
-                              provider.viewMode = 0;
-                            },
-                            icon: Icon(
-                              Icons.view_list,
-                              color: provider.viewMode == 0 ? appTheme.onAccent : appTheme.textMainColor,
-                            )),
-                        IconButton(
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStatePropertyAll(
-                                  provider.viewMode == 1 ? appTheme.accentColor : Colors.transparent),
-                            ),
-                            onPressed: () {
-                              provider.viewMode = 1;
-                            },
-                            icon: Icon(
-                              Icons.grid_view_sharp,
-                              color: provider.viewMode == 1 ? appTheme.onAccent : appTheme.textMainColor,
-                            )),
-                        IconButton(
-                            style: ButtonStyle(
-                              backgroundColor: WidgetStatePropertyAll(
-                                  provider.viewMode == 2 ? appTheme.accentColor : Colors.transparent),
-                            ),
-                            onPressed: () {
-                              provider.viewMode = 2;
-                            },
-                            icon: Icon(
-                              Icons.grid_on_sharp,
-                              color: provider.viewMode == 2 ? appTheme.onAccent : appTheme.textMainColor,
-                            )),
-                      ],
-                    )
-                  ],
+                      )
+                    ],
+                  ),
                 ),
                 Expanded(
                   child: provider.visibleEpList.isEmpty
-                      ? Container(child: Text("No episodes!"))
+                      ? Center(child: Text("No episodes!"))
                       : GridView.builder(
                           itemCount: provider.visibleEpList[provider.currentPageIndex].length,
                           gridDelegate:
@@ -393,8 +470,13 @@ class WatchSection extends StatelessWidget {
   }
 
   Container _sourceSection(BuildContext context, {bool isSideWidget = false}) {
+    String sourceMatchString = "Searching... ";
+    if (provider.foundName != null) {
+      sourceMatchString =
+          "Matching title ${(provider.foundName == provider.data.title['english']) || (provider.foundName == provider.data.title['romaji']) ? "found" : "not found"}. ";
+    }
     return Container(
-      margin: EdgeInsets.only(left: isSideWidget ? 50 : 0, bottom: 30),
+      margin: EdgeInsets.only(top: isSideWidget ? 0 : 50, left: isSideWidget ? 50 : 0, bottom: isSideWidget ? 30 : 0),
       padding: EdgeInsets.all(15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -409,7 +491,7 @@ class WatchSection extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Temporary. will be replaced later (Hopeflly)
+              // Temporary. will be replaced later (Hopefully)
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 margin: EdgeInsets.symmetric(vertical: 15),
@@ -442,8 +524,7 @@ class WatchSection extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             // mainAxisSize: MainAxisSize.min,
             children: [
-              Text(
-                  "Matching title ${(provider.foundName == provider.data.title['english']) || (provider.foundName == provider.data.title['romaji']) ? "found" : "not found"}. "),
+              Text(sourceMatchString),
               MouseRegion(
                 cursor: SystemMouseCursors.click,
                 child: GestureDetector(
@@ -457,6 +538,7 @@ class WatchSection extends StatelessWidget {
                           child: Container(
                             padding: EdgeInsets.all(20),
                             width: size.width / 3,
+                            height: size.height / 2,
                             child: ManualSearchSheet(
                                 searchString: title,
                                 source: provider.selectedSource,

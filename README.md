@@ -40,6 +40,10 @@ Downloading: sometimes the downloads may be stuck at 100%. This is just a UI bug
 flutter pub get
 ```
 
+- Setup signing keystore file for android and store them in `android/app/` directory
+
+- Setup key.properties in `android/` directory
+
 - To build the apk from the source code, simply run the command below:
 
 ```cmd
@@ -50,6 +54,12 @@ flutter build apk
 
 ```cmd
 flutter build windows
+```
+
+- To package the windows application as a setup, run:
+
+```cmd
+dart run inno_bundle:build --release
 ```
 
 PS: Your machine needs to have flutter installed. [Install flutter](https://docs.flutter.dev/get-started/install)

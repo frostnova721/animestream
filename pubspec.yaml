@@ -67,9 +67,17 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.13.1
+  inno_bundle: ^0.8.0
 
 dependency_overrides:
   win32: ^5.2.0
+
+inno_bundle:
+  id: "59cae0c0-fb9d-11ef-b95e-5f3937b12ea5"
+  publisher: "FrostNova"
+  name: "animestream"
+  languages:
+    - english
 
 flutter_native_splash:
   android: true
@@ -82,7 +90,6 @@ flutter_native_splash:
 
   android_12:
     image: "lib/assets/icons/logo_foreground_splash.png"
-#     image_dark: "lib/assets/icons/logo_foreground_splash.png"
 
 flutter_launcher_icons:
   android: true

@@ -6,6 +6,7 @@ import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/commonInfo.dart';
+import 'package:animestream/ui/models/widgets/infoPageWidgets/episodeGrid.dart';
 import 'package:flutter/material.dart';
 
 class WatchSection extends StatelessWidget {
@@ -343,126 +344,7 @@ class WatchSection extends StatelessWidget {
                 Expanded(
                   child: provider.visibleEpList.isEmpty
                       ? Center(child: Text("No episodes!"))
-                      : GridView.builder(
-                          itemCount: provider.visibleEpList[provider.currentPageIndex].length,
-                          gridDelegate:
-                              SliverGridDelegateWithMaxCrossAxisExtent(maxCrossAxisExtent: 350, mainAxisExtent: 150),
-                          itemBuilder: (context, index) {
-                            final ValueNotifier<bool> hovered = ValueNotifier<bool>(false);
-                            return Container(
-                              margin: EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: appTheme.backgroundColor,
-                                borderRadius: BorderRadius.circular(15),
-                              ),
-                              child: GestureDetector(
-                                onTap: () {
-                                  provider.selectedEpisodeToLoadStreams = index;
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) {
-                                      return Dialog(
-                                        backgroundColor: appTheme.backgroundColor,
-                                        child: Container(
-                                          padding: EdgeInsets.all(20),
-                                          width: size.width / 3,
-                                          child: ServerSelectionBottomSheet(
-                                            provider: provider,
-                                            episodeIndex: index,
-                                            type: ServerSheetType.watch,
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  );
-                                },
-                                child: MouseRegion(
-                                  onEnter: (event) => hovered.value = true,
-                                  onExit: (event) => hovered.value = false,
-                                  child: ValueListenableBuilder(
-                                    valueListenable: hovered,
-                                    builder: (context, value, child) {
-                                      // Subject to change
-                                      return Row(
-                                        spacing: 5,
-                                        children: [
-                                          Container(
-                                            clipBehavior: Clip.antiAlias,
-                                            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-                                            margin: EdgeInsets.all(10),
-                                            child: Stack(
-                                              alignment: Alignment.center,
-                                              children: [
-                                                Image.network(
-                                                  provider.data.cover,
-                                                  fit: BoxFit.cover,
-                                                  opacity: AlwaysStoppedAnimation(hovered.value ? 0.4 : 1),
-                                                ),
-                                                if (hovered.value)
-                                                  Center(
-                                                      child: Icon(
-                                                    Icons.play_arrow_rounded,
-                                                    size: 35,
-                                                  ))
-                                              ],
-                                            ),
-                                          ),
-                                          Column(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                "Episode ${provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1}",
-                                                style: _textStyle().copyWith(fontSize: 20),
-                                              ),
-                                              Row(
-                                                children: [
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(top: 15),
-                                                    child: IconButton.outlined(
-                                                      onPressed: () {
-                                                        showDialog(
-                                                          context: context,
-                                                          builder: (context) {
-                                                            return Dialog(
-                                                              backgroundColor: appTheme.backgroundColor,
-                                                              child: Container(
-                                                                padding: EdgeInsets.all(20),
-                                                                width: size.width / 3,
-                                                                child: ServerSelectionBottomSheet(
-                                                                  provider: provider,
-                                                                  episodeIndex: index,
-                                                                  type: ServerSheetType.download,
-                                                                ),
-                                                              ),
-                                                            );
-                                                          },
-                                                        );
-                                                      },
-                                                      icon: Icon(
-                                                        Icons.download,
-                                                        color: appTheme.textMainColor,
-                                                      ),
-                                                      style: ButtonStyle(
-                                                        shape: WidgetStatePropertyAll(
-                                                          RoundedRectangleBorder(
-                                                              borderRadius: BorderRadius.circular(10)),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  )
-                                                ],
-                                              )
-                                            ],
-                                          )
-                                        ],
-                                      );
-                                    },
-                                  ),
-                                ),
-                              ),
-                            );
-                          },
-                        ),
+                      : InfoPageEpisodeGrid(provider: provider, size: size),
                 ),
               ],
             ),

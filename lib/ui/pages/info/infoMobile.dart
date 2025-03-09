@@ -936,7 +936,7 @@ class _InfoMobileState extends State<InfoMobile> {
             child: Column(
               children: [
                 _buildInfoItems(
-                  _infoLeft('ServerSheetType'),
+                  _infoLeft('Type'),
                   _infoRight(provider.data.type.toLowerCase()),
                 ),
                 _buildInfoItems(

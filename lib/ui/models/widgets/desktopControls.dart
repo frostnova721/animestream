@@ -33,7 +33,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
 
   final _fn = FocusNode();
 
-  void keyListener(KeyEvent key) {
+  void keyListener(KeyEvent key) async {
     if (key is KeyUpEvent) return;
     switch (key.logicalKey) {
       case LogicalKeyboardKey.space:
@@ -54,17 +54,46 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
           tp.setFullScreen(!tp.isFullScreen);
           break;
         }
+
+        // Seeking
       case LogicalKeyboardKey.arrowLeft:
         {
-          provider.fastForward(-(currentUserSettings?.skipDuration ?? 15));
+          await provider.fastForward(-(currentUserSettings?.skipDuration ?? 15));
           break;
         }
       case LogicalKeyboardKey.arrowRight:
         {
-          provider.fastForward((currentUserSettings?.skipDuration ?? 15));
+          await provider.fastForward((currentUserSettings?.skipDuration ?? 15));
+          break;
+        }
+
+        // Volume controls
+      case LogicalKeyboardKey.keyM:
+        {
+          if (provider.state.volume != 0) {
+            restorableVolume = provider.state.volume;
+            provider.updateVolume(0.0);
+          } else {
+            provider.updateVolume(restorableVolume);
+          }
+          break;
+        }
+      case LogicalKeyboardKey.arrowUp:
+        {
+          final vol = provider.state.volume + 0.2;
+          provider.updateVolume(vol.clamp(0, 1));
+          break;
+        }
+      case LogicalKeyboardKey.arrowDown:
+        {
+          final vol = provider.state.volume - 0.2;
+          provider.updateVolume(vol.clamp(0, 1));
+          break;
         }
     }
   }
+
+  double restorableVolume = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +280,16 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
                             // The volume icon and slider
-                            makeIcon(Icons.volume_up_sharp),
+                            InkWell(
+                                onTap: () {
+                                  if (provider.state.volume != 0) {
+                                    restorableVolume = provider.state.volume;
+                                    provider.updateVolume(0.0);
+                                  } else {
+                                    provider.updateVolume(restorableVolume);
+                                  }
+                                },
+                                child: makeIcon(Icons.volume_up_sharp)),
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: SliderTheme(
@@ -460,8 +498,9 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   child: Text(
                                     (index + 1).toString(),
                                     style: TextStyle(
-                                      color:
-                                          index == dataProvider.state.currentEpIndex ? appTheme.onAccent : appTheme.textMainColor,
+                                      color: index == dataProvider.state.currentEpIndex
+                                          ? appTheme.onAccent
+                                          : appTheme.textMainColor,
                                       fontWeight: FontWeight.bold,
                                     ),
                                   ),

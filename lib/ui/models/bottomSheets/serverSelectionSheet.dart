@@ -240,7 +240,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   ),
                 ),
               ).then((value) {
-                provider.getWatched();
+                provider.getWatched(refreshLastWatchDuration: true);
               });
         },);
       },

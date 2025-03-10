@@ -477,7 +477,6 @@ class _InfoMobileState extends State<InfoMobile> {
         left: 20,
         right: 20,
       ),
-      padding: EdgeInsets.only(left: 20, right: 20),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25),
         border: Border.all(color: appTheme.accentColor),
@@ -509,53 +508,56 @@ class _InfoMobileState extends State<InfoMobile> {
             }
           });
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 325,
-              height: 80,
-              child: Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '${provider.started ? 'Continue' : 'Start'} from:',
-                      style: TextStyle(
-                        color: appTheme.textMainColor,
-                        fontFamily: "Rubik",
-                        fontSize: 14,
+        child: Padding(
+          padding: EdgeInsets.only(left: 20, right: 20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 325,
+                height: 80,
+                child: Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        '${provider.started ? 'Continue' : 'Start'} from:',
+                        style: TextStyle(
+                          color: appTheme.textMainColor,
+                          fontFamily: "Rubik",
+                          fontSize: 14,
+                        ),
                       ),
-                    ),
-                    Text(
-                      'Episode ${provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched}',
-                      style: TextStyle(
-                        color: appTheme.textMainColor,
-                        fontFamily: "Rubik",
-                        fontSize: 17,
+                      Text(
+                        'Episode ${provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched}',
+                        style: TextStyle(
+                          color: appTheme.textMainColor,
+                          fontFamily: "Rubik",
+                          fontSize: 17,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
-            ),
-            if (provider.lastWatchedDurationMap?[
-                    provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] !=
-                null)
-              Container(
-                width: 285 *
-                    ((provider.lastWatchedDurationMap?[
-                                provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
-                            0) /
-                        100) as double,
-                height: 1.8,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  color: appTheme.textMainColor,
-                ),
-              )
-          ],
+              if (provider.lastWatchedDurationMap?[
+                      provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] !=
+                  null)
+                Container(
+                  width: 285 *
+                      ((provider.lastWatchedDurationMap?[
+                                  provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+                              0) /
+                          100) as double,
+                  height: 1.8,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    color: appTheme.textMainColor,
+                  ),
+                )
+            ],
+          ),
         ),
       ),
     );

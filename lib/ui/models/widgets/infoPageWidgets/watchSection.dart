@@ -7,6 +7,7 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/commonInfo.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/episodeGrid.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class WatchSection extends StatelessWidget {
@@ -33,13 +34,16 @@ class WatchSection extends StatelessWidget {
                       CommonInfo(
                         provider: provider,
                       ),
-                      // if (size.width < splitWidth)
-                      //   Container(
-                      //     width: size.width / 2,
-                      //     child: Row(
-                      //       children: [_sourceSection(context), _continueWatchingBodyWidget(context)],
-                      //     ),
-                      //   ),
+                      if (size.width < splitWidth)
+                        Container(
+                          width: size.width / 2,
+                          margin: EdgeInsets.only(top: 50),
+                          child: Row(
+                            spacing: 20,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [_sourceSection(context), Expanded(child: _continueWatchingBodyWidget(context))],
+                          ),
+                        ),
                       _episodes(),
                     ],
                   ),
@@ -65,25 +69,76 @@ class WatchSection extends StatelessWidget {
     );
   }
 
-  // Container _continueWatchingBodyWidget(BuildContext context) {
-  //   return Container(
-  //     child: InkWell(
-  //       child: Container(
-  //         decoration: BoxDecoration(
-  //           image: DecorationImage(
-  //               image: CachedNetworkImageProvider(
-  //                 provider.data.banner ?? provider.data.cover,
-  //               ),
-  //               fit: BoxFit.cover),
-  //         ),
-  //         child: Center(
-  //           child: Text(
-  //               "Continue Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}"),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  // }
+  Container _continueWatchingBodyWidget(BuildContext context) {
+    return Container(
+      height: 100,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        image: DecorationImage(
+          image: CachedNetworkImageProvider(provider.data.banner ?? provider.data.cover),
+          fit: BoxFit.cover,
+          opacity: 0.5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        splashFactory: NoSplash.splashFactory,
+        overlayColor: WidgetStateProperty.all(Colors.transparent),
+        onTap: () {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return Dialog(
+                backgroundColor: appTheme.backgroundColor,
+                child: Container(
+                  padding: EdgeInsets.all(20),
+                  width: size.width / 3,
+                  child: ServerSelectionBottomSheet(
+                    provider: provider,
+                    episodeIndex: provider.watched,
+                    type: ServerSheetType.watch,
+                  ),
+                ),
+              );
+            },
+          );
+        },
+        child: Stack(
+          children: [
+            Center(
+              child: Text(
+                "Continue: Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}",
+                style: TextStyle(fontWeight: FontWeight.bold, color: appTheme.textMainColor, fontSize: 18),
+              ),
+            ),
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Container(
+                width: double.infinity,
+                height: 5,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(5),
+                  color: Colors.grey[700],
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: (provider.lastWatchedDurationMap?[
+                                provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched]) / 100 ??
+                            0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: appTheme.accentColor,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   Container _continueWatching(BuildContext context) {
     final ValueNotifier<bool> hovered = ValueNotifier(false);
@@ -358,7 +413,7 @@ class WatchSection extends StatelessWidget {
           "Matching title ${(provider.foundName == provider.data.title['english']) || (provider.foundName == provider.data.title['romaji']) ? "found" : "not found"}. ";
     }
     return Container(
-      margin: EdgeInsets.only(top: isSideWidget ? 0 : 50, left: isSideWidget ? 50 : 0, bottom: isSideWidget ? 30 : 0),
+      margin: EdgeInsets.only(left: isSideWidget ? 50 : 0, bottom: isSideWidget ? 30 : 0),
       padding: EdgeInsets.all(15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),
@@ -366,10 +421,11 @@ class WatchSection extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Text(
-            "Source",
-            style: _textStyle(),
-          ),
+          if (isSideWidget)
+            Text(
+              "Source",
+              style: _textStyle(),
+            ),
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -379,24 +435,22 @@ class WatchSection extends StatelessWidget {
                 margin: EdgeInsets.symmetric(vertical: 15),
                 decoration: BoxDecoration(
                     border: Border.all(color: appTheme.textMainColor), borderRadius: BorderRadius.circular(10)),
-                child: DropdownButton<String>(
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                    color: appTheme.textMainColor,
-                  ),
-                  underline: SizedBox.shrink(),
-                  padding: EdgeInsets.all(0),
-                  onChanged: (val) {
-                    if (val != null) provider.selectedSource = val;
-                    provider.getEpisodes();
-                  },
-                  value: provider.selectedSource,
-                  items: List.generate(
-                    sources.length,
-                    (ind) => DropdownMenuItem(
-                      child: Text(sources[ind]),
-                      value: sources[ind],
-                    ),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    icon: Icon(Icons.arrow_drop_down, color: appTheme.textMainColor),
+                    value: provider.selectedSource,
+                    onChanged: (val) {
+                      if (val != null) {
+                        provider.selectedSource = val;
+                        provider.getEpisodes();
+                      }
+                    },
+                    items: sources
+                        .map((source) => DropdownMenuItem(
+                              value: source,
+                              child: Text(source),
+                            ))
+                        .toList(),
                   ),
                 ),
               )

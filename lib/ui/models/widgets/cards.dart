@@ -156,7 +156,7 @@ class Cards {
     bool isAnime = true,
     String? subText = null,
     double? rating = null,
-    bool isMobile = true,
+    bool? isMobile,
     void Function()? afterNavigation,
   }) {
     if (context == null) throw Exception("NO CONTEXT PROVIDED TO BUILD CARDS");
@@ -171,7 +171,7 @@ class Cards {
       isAnime: isAnime,
       subText: subText,
       rating: rating,
-      isMobile: isMobile,
+      isMobile: isMobile ?? Platform.isAndroid,
     );
   }
 

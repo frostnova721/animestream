@@ -137,4 +137,7 @@ class AnimeSpecificPreference {
   final String? manualSearchQuery;
 
   AnimeSpecificPreference({required this.lastWatchDuration, required this.manualSearchQuery});
+
+  @override
+  String toString() => 'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery)';
 }

@@ -42,7 +42,7 @@ class _SearchState extends State<Search> {
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
       final id = ele.id;
       results.add(
-        Cards(context: context).animeCard(id, title, image, rating: ele.rating),
+        Cards(context: context).animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
       );
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches.add(
@@ -155,11 +155,11 @@ class _SearchState extends State<Search> {
             GridView.builder(
               padding: EdgeInsets.zero,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 140,
-                mainAxisExtent: 230,
+                maxCrossAxisExtent: 180,
+                mainAxisExtent: Platform.isAndroid ? 220 : 260,
                   // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
-                  childAspectRatio: 120 / 230, //set as width and height of each child container
+                  childAspectRatio: 120 / 220, //set as width and height of each child container
                   mainAxisSpacing: 15),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),

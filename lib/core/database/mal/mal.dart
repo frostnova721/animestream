@@ -20,27 +20,28 @@ class MAL extends Database {
 
   static Map<String, String>? headers = null;
   
-  static Future<Map<String, String>> getHeader() async {
-    if(headers != null) return headers!;
+  static Future<Map<String, String>> getHeader({bool refreshHeaders = false}) async {
+    if(headers != null && !refreshHeaders) return headers!;
     final token = await getSecureVal(SecureStorageKey.malToken);
     final map = {
-      // 'Content-Type': "",
       'Authorization': "Bearer ${token}",
     };
     headers = map;
     return map;
   }
 
-  Future<String> fetch(String url, {int recallAttempt = 0 }) async {
+  Future<String> fetch(String url, {int recallAttempt = 0, bool refreshHeaders = false }) async {
 
     if(recallAttempt > 2) throw Exception("MAX RECALL DEPTH LIMIT REACHED!");
 
-    final headers = await getHeader();
+    final headers = await getHeader(refreshHeaders: refreshHeaders);
     final res = await get(Uri.parse(url), headers: headers);
+
+    print(res.statusCode);
 
     if(res.statusCode == 401) {
       await MALLogin().refreshToken();
-      return await fetch(url, recallAttempt: recallAttempt++);
+      return await fetch(url, recallAttempt: recallAttempt+1, refreshHeaders: true);
     }
 
     //might have to remove this!

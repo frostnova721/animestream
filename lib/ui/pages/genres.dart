@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
@@ -30,7 +32,7 @@ class _GenresPageState extends State<GenresPage> {
     }
   }
 
-  void getList({bool lazyLoaded = false}) async {
+  Future<void> getList({bool lazyLoaded = false}) async {
     if (lazyLoaded) {
       _isLazyLoading = true;
       currentLoadedPage++;
@@ -62,6 +64,7 @@ class _GenresPageState extends State<GenresPage> {
             e.cover,
             ongoing: e.status == "RELEASING",
             rating: e.rating,
+            isMobile: Platform.isAndroid,
           ),
         );
       });
@@ -182,7 +185,9 @@ class _GenresPageState extends State<GenresPage> {
                                         ),
                                         ElevatedButton(
                                           onPressed: () {
-                                            getList();
+                                            getList().then((_) {
+                                              if(Platform.isWindows) getList(lazyLoaded: true);
+                                            });
                                             Navigator.of(context).pop();
                                           },
                                           style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
@@ -244,7 +249,7 @@ class _GenresPageState extends State<GenresPage> {
                                   'Apply filters to discover animes!',
                                   style:
                                       TextStyle(color: appTheme.textMainColor, fontFamily: "NunitoSans", fontSize: 16),
-                                      textAlign: TextAlign.center,
+                                  textAlign: TextAlign.center,
                                 ),
                         ),
                       )
@@ -253,8 +258,8 @@ class _GenresPageState extends State<GenresPage> {
                           GridView.builder(
                             physics: NeverScrollableScrollPhysics(),
                             gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: 140,
-                                mainAxisExtent: 230,
+                                maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+                                mainAxisExtent: Platform.isAndroid ? 220 : 260,
                                 // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                                 childAspectRatio: 120 / 220,
                                 mainAxisSpacing: 10),

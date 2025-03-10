@@ -139,7 +139,7 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getWatched() async {
+  Future<void> getWatched({ bool refreshLastWatchDuration = false }) async {
     if (await AniListLogin().isAnilistLoggedIn()) if (_mediaListStatus == null) {
       _watched = 0;
       _started = false;
@@ -149,6 +149,10 @@ class InfoProvider extends ChangeNotifier {
     _started = item != 0;
 
     _currentPageIndex = watched ~/ 25; //index increases when the episodes are >24
+
+    if(refreshLastWatchDuration) {
+      _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
+    }
 
     notifyListeners();
   }

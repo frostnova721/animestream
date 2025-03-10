@@ -3,35 +3,48 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:hive/hive.dart';
 
-/// Retruns the duration on last watched episode in seconds
+/// Retruns an object of [AnimeSpecificPreference] if it exists!
 Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) async {
   //just handle anilist
   if (currentUserSettings?.database != Databases.anilist) return null;
 
-  final Map<dynamic, dynamic> lastWatch = await getVal(HiveKey.lastWatchDuration, boxName: "animeInfo") ?? {};
+var box = await Hive.openBox("animeInfo");
+  if (!box.isOpen) {
+    box = await Hive.openBox("animeInfo");
+  }
+
+  Map<dynamic, dynamic>? lastWatchDuration;
+  String? manualSearchString;
+
+  final Map<dynamic, dynamic> lastWatch = await box.get(HiveKey.lastWatchDuration.name) ?? {};
   if (lastWatch.isEmpty) {
     print("EMPTY MAP 'lastWatchDuration'");
-    return null;
   }
-  final Map<dynamic, dynamic>? lastWatchDuration = lastWatch[anilistId] ?? null;
 
-  final Map<dynamic, dynamic> manualSearchQuery = await getVal(HiveKey.manualSearches, boxName: "animeInfo") ?? {};
-  if (manualSearchQuery.isEmpty) {
+  lastWatchDuration = lastWatch[anilistId] ?? null;
+
+  Map<dynamic, dynamic>? manualSearchQuery = await box.get(HiveKey.manualSearches.name);
+  if (manualSearchQuery?.isEmpty ?? true) {
     print("EMPTY MAP 'manualSearches'");
-    return null;
-  }
-  final manualSearchString = manualSearchQuery[anilistId] ?? '';
-  if (manualSearchString.isEmpty) {
-    print("NO QUERY FOR ALTERNATE SEARCHING");
-    return null;
   }
 
+  manualSearchString = manualSearchQuery?[anilistId] ?? '';
+  if (manualSearchString?.isEmpty ?? true) {
+    print("NO QUERY FOR ALTERNATE SEARCHING");
+    manualSearchString = null;
+  }
+  
+  await box.close();
+  
   return AnimeSpecificPreference(lastWatchDuration: lastWatchDuration, manualSearchQuery: manualSearchString);
 }
 
 Future<void> addLastWatchedDuration(String anilistId, Map<int, double> item) async {
   Map<dynamic, dynamic> map = await getVal(HiveKey.lastWatchDuration, boxName: "animeInfo") ?? {};
+
+  print(map);
 
   map[anilistId] = item;
 

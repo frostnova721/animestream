@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
@@ -331,8 +333,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
         ),
         child: GridView.builder(
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-            maxCrossAxisExtent: 140,
-            mainAxisExtent: 230,
+              maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+              mainAxisExtent: Platform.isAndroid ? 220 : 260,
               // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
               childAspectRatio: 120 / 220,
               mainAxisSpacing: 10),

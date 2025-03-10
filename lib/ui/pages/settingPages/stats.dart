@@ -34,7 +34,7 @@ class _UserStatsState extends State<UserStats> {
         timeSpent = convertMinutes(res.minutesWatched);
       });
     } catch (err) {
-      if (currentUserSettings?.showErrors == true) {
+      if (currentUserSettings?.showErrors ?? false) {
         floatingSnackBar(context, err.toString());
       }
     }

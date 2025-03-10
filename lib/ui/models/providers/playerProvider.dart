@@ -83,6 +83,7 @@ class PlayerProvider extends ChangeNotifier {
 
   void updateVolume(double vol) {
     _state = _state.copyWith(volume: vol);
+    _controller.setVolume(vol);
     notifyListeners();
   }
 

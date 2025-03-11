@@ -74,7 +74,7 @@ class _GenresPageState extends State<GenresPage> {
       });
     } catch (err) {
       if (currentUserSettings?.showErrors ?? false) {
-        floatingSnackBar(context, err.toString());
+        floatingSnackBar( err.toString());
       }
     }
   }

@@ -61,9 +61,9 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                 //   Settings()
                                 //       .writeSettings(SettingsModal(isDev: !(currentUserSettings?.isDev ?? false)));
                                 //   if (currentUserSettings?.isDev ?? false)
-                                //     floatingSnackBar(context, "-+-+-+Leaving dev mode+-+-+-");
+                                //     floatingSnackBar( "-+-+-+Leaving dev mode+-+-+-");
                                 //   else
-                                //     floatingSnackBar(context, "-+-+-+Accessing dev mode+-+-+-");
+                                //     floatingSnackBar( "-+-+-+Accessing dev mode+-+-+-");
                                 // }
                               },
                               onLongPress: () => setState(() {
@@ -109,7 +109,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                       onLongPress: () async {
                                         await Clipboard.setData(
                                             ClipboardData(text: "https://github.com/frostnova721/animestream"));
-                                        floatingSnackBar(context, "link has been copied to clipboard");
+                                        floatingSnackBar( "link has been copied to clipboard");
                                       },
                                       onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream")),
                                       child: Text(

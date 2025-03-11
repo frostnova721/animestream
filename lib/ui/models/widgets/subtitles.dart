@@ -211,7 +211,7 @@ class _SubViewerState extends State<SubViewer> {
       });
     } catch (err) {
       print(err.toString());
-      floatingSnackBar(context, "Couldnt load the subtitles!");
+      floatingSnackBar( "Couldnt load the subtitles!");
       setState(() {
         areSubsLoading = false;
       });

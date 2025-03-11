@@ -88,7 +88,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               () async {
                             //the package just wont work if <android 12!!!
                             if (!isAboveAndroid12)
-                              return floatingSnackBar(context, "Android 12 or greater is required");
+                              return floatingSnackBar( "Android 12 or greater is required");
                             materialTheme = !materialTheme;
                             await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
                             setState(() {});
@@ -164,7 +164,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                       modalSheetBackgroundColor: thm.theme.modalSheetBackgroundColor,
                                       onAccent: thm.theme.onAccent)
                                   : thm.lightVariant;
-                              // floatingSnackBar(context, "All set! restart the app to apply the theme");
+                              // floatingSnackBar( "All set! restart the app to apply the theme");
                               // });
                               Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                               setState(() {});

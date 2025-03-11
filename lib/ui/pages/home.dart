@@ -84,7 +84,7 @@ class _HomeState extends State<Home> {
     } catch (err) {
       print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        floatingSnackBar(context, err.toString());
+        floatingSnackBar( err.toString());
       if (mounted)
         setState(() {
           refreshing = false;

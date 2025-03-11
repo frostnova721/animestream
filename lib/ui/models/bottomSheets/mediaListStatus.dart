@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/database/handler/syncHandler.dart';
@@ -72,239 +74,370 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
 
   @override
   Widget build(BuildContext context) {
-    final provider = widget.provider;
-    return SingleChildScrollView(
-      child: Container(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom, left: 20, right: 20),
-        width: double.infinity,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Column(
-              children: [
-                DropdownMenu(
-                  controller: menuController,
-                  onSelected: (value) => {
-                    if (value != initialSelection) selectedValue = value,
-                  },
-                  menuStyle: MenuStyle(
-                    backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
-                    shape: WidgetStatePropertyAll(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                        side: BorderSide(
-                          width: 1,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ),
-                  textStyle: TextStyle(
-                    color: appTheme.textMainColor,
-                    fontFamily: "Poppins",
-                  ),
-                  inputDecorationTheme: InputDecorationTheme(
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide(width: 1, color: appTheme.textMainColor),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderSide: BorderSide(
-                        width: 1,
-                        color: appTheme.textMainColor,
-                      ),
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    contentPadding: EdgeInsets.only(left: 20, right: 20),
-                  ),
-                  width: 300,
-                  label: Text(
-                    "status",
-                    style: TextStyle(color: appTheme.textMainColor, fontFamily: "Poppins"),
-                  ),
-                  initialSelection: getInitialSelection(),
-                  dropdownMenuEntries: itemList,
-                ),
-                Container(
-                  padding: EdgeInsets.only(top: 20, bottom: 20),
-                  child: Text(
-                    "Progress",
-                    style: TextStyle(
-                      color: appTheme.textMainColor,
-                      fontFamily: "Rubik",
-                      fontSize: 22,
-                    ),
-                  ),
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      onPressed: () {
-                        final currentNumber = int.parse(
-                            textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
-                        if (currentNumber < 1) return;
-                        textEditingController.value = TextEditingValue(text: "${currentNumber - 1}");
-                      },
-                      icon: Icon(
-                        Icons.remove_circle_outline_rounded,
-                        color: appTheme.textMainColor,
-                        size: 35,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          padding: EdgeInsets.only(right: 10),
-                          height: 50,
-                          width: 100,
-                          child: TextField(
-                            controller: textEditingController,
-                            onChanged: (value) => {
-                              if (value.isNotEmpty && int.parse(value) > (provider.data.episodes ?? 0))
-                                {
-                                  textEditingController.value = TextEditingValue(
-                                    text: "${provider.data.episodes ?? 0}",
-                                  ),
-                                }
-                            },
-                            keyboardType: TextInputType.number,
-                            textAlign: TextAlign.end,
-                            decoration: InputDecoration(
-                              contentPadding: EdgeInsets.only(top: 5, bottom: 5, left: 10, right: 10),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  color: appTheme.textMainColor,
-                                ),
-                              ),
-                            ),
-                            style: TextStyle(
-                              color: appTheme.textMainColor,
-                              fontFamily: "Rubik",
-                              fontSize: 20,
-                            ),
-                            autocorrect: false,
-                          ),
-                        ),
-                        Text(
-                          "/ ${provider.data.episodes ?? 0}",
-                          style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontFamily: "Rubik",
-                            fontSize: 20,
-                          ),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      onPressed: () {
-                        final currentNumber = int.parse(
-                            textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
-                        if (currentNumber + 1 >= (provider.data.episodes ?? 0)) {
-                          menuController.value = TextEditingValue(text: "COMPLETED");
-                          selectedValue = "COMPLETED";
-                        }
-                        if (currentNumber + 1 > (provider.data.episodes ?? 0)) return;
-                        textEditingController.value = TextEditingValue(text: "${currentNumber + 1}");
-                      },
-                      icon: Icon(
-                        Icons.add_circle_outline_rounded,
-                        color: appTheme.textMainColor,
-                        size: 35,
-                      ),
-                    )
-                  ],
-                )
-              ],
+  final provider = widget.provider;
+  final isDialog = MediaQuery.of(context).size.width > 600;
+  
+  // Thanks Claude for the design!!!
+  return Container(
+    padding: EdgeInsets.only(
+      bottom: MediaQuery.of(context).viewInsets.bottom,
+      left: 24,
+      right: 24,
+      top: isDialog ? 16 : 24,
+    ),
+    decoration: BoxDecoration(
+      color: appTheme.backgroundColor,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(isDialog ? 16 : 24),
+        topRight: Radius.circular(isDialog ? 16 : 24),
+        bottomLeft: Radius.circular(isDialog ? 16 : 0),
+        bottomRight: Radius.circular(isDialog ? 16 : 0),
+      ),
+      boxShadow: isDialog ? [
+        BoxShadow(
+          color: Colors.black.withAlpha(51),
+          blurRadius: 20,
+          offset: Offset(0, 5),
+        )
+      ] : null,
+    ),
+    width: isDialog ? min(500, MediaQuery.of(context).size.width * 0.85) : double.infinity,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        
+        // Title
+        Padding(
+          padding: EdgeInsets.only(bottom: 20, top: isDialog ? 8 : 0),
+          child: Text(
+            "Update Progress",
+            style: TextStyle(
+              color: appTheme.textMainColor,
+              fontFamily: "Rubik",
+              fontSize: 24,
+              fontWeight: FontWeight.w600,
             ),
-            Padding(
-              padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom + 10, top: 50),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+          ),
+        ),
+        
+        // Status Dropdown
+        Text(
+          "Status",
+          style: TextStyle(
+            color: appTheme.textMainColor.withAlpha(204),
+            fontFamily: "Poppins",
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: appTheme.textMainColor.withAlpha(13),
+                blurRadius: 8,
+                offset: Offset(0, 2),
+              )
+            ],
+          ),
+          child: DropdownMenu(
+            controller: menuController,
+            onSelected: (value) {
+              if (value != initialSelection) selectedValue = value;
+            },
+            menuStyle: MenuStyle(
+              backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
+              shape: WidgetStatePropertyAll(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    width: 1,
+                    color: appTheme.textMainColor.withAlpha(51),
+                  ),
+                ),
+              ),
+              elevation: WidgetStatePropertyAll(8),
+              padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8)),
+            ),
+            textStyle: TextStyle(
+              color: appTheme.textMainColor,
+              fontFamily: "Poppins",
+              fontSize: 16,
+            ),
+            inputDecorationTheme: InputDecorationTheme(
+              filled: true,
+              fillColor: appTheme.backgroundColor,
+              border: OutlineInputBorder(
+                borderSide: BorderSide(width: 1, color: appTheme.textMainColor.withAlpha(51)),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  width: 1,
+                  color: appTheme.textMainColor.withAlpha(51),
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(
+                  width: 1.5,
+                  color: appTheme.accentColor,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            ),
+            width: double.infinity,
+            initialSelection: getInitialSelection(),
+            dropdownMenuEntries: itemList,
+          ),
+        ),
+        
+        // Progress Section
+        const SizedBox(height: 24),
+        Text(
+          "Progress",
+          style: TextStyle(
+            color: appTheme.textMainColor.withAlpha(204),
+            fontFamily: "Poppins",
+            fontSize: 16,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+          decoration: BoxDecoration(
+            color: appTheme.backgroundColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: appTheme.textMainColor.withAlpha(25),
+              width: 1,
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _ProgressButton(
+                icon: Icons.remove_rounded,
+                onPressed: () {
+                  final currentNumber = int.parse(
+                    textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
+                  if (currentNumber < 1) return;
+                  textEditingController.value = TextEditingValue(text: "${currentNumber - 1}");
+                },
+                color: appTheme.textMainColor,
+                backgroundColor: appTheme.textMainColor.withAlpha(25),
+              ),
+              Row(
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 20),
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        // padding: EdgeInsets.zero,
-                        backgroundColor: appTheme.accentColor,
-                        side: BorderSide(
-                          color: appTheme.accentColor,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
+                  Container(
+                    height: 48,
+                    width: 80,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: appTheme.backgroundColor,
+                      border: Border.all(
+                        color: appTheme.textMainColor.withAlpha(51),
+                        width: 1,
                       ),
-                      onPressed: () {
-                        Navigator.of(context).pop();
+                    ),
+                    child: TextField(
+                      controller: textEditingController,
+                      onChanged: (value) {
+                        if (value.isNotEmpty && int.parse(value) > (provider.data.episodes ?? 0)) {
+                          textEditingController.value = TextEditingValue(
+                            text: "${provider.data.episodes ?? 0}",
+                          );
+                        }
                       },
-                      child: Padding(
-                        padding: const EdgeInsets.only(bottom: 0),
-                        child: Text(
-                          "cancel",
-                          style: TextStyle(
-                            color: appTheme.onAccent,
-                            fontFamily: "Poppins",
-                            fontSize: 22,
-                          ),
-                        ),
+                      keyboardType: TextInputType.number,
+                      textAlign: TextAlign.center,
+                      decoration: InputDecoration(
+                        contentPadding: EdgeInsets.zero,
+                        border: InputBorder.none,
                       ),
+                      style: TextStyle(
+                        color: appTheme.textMainColor,
+                        fontFamily: "Rubik",
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                      ),
+                      autocorrect: false,
                     ),
                   ),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: appTheme.accentColor,
-                      side: BorderSide(
-                        color: appTheme.accentColor,
-                      ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                    ),
-                    onPressed: () {
-                      final int progress = int.parse(textEditingController.value.text);
-                      if (selectedValue != null || progress != provider.watched || provider.mediaListStatus == null) {
-                        SyncHandler()
-                            .mutateAnimeList(
-                          id: provider.id,
-                          status: assignItemEnum(selectedValue ?? initialSelection!),
-                          previousStatus: assignItemEnum(initialSelection),
-                          progress: progress,
-                          otherIds: provider.altDatabases
-                        )
-                            .then((value) {
-                          initialSelection = selectedValue ?? initialSelection;
-                          provider.refreshListStatus(selectedValue ?? initialSelection!, progress);
-                          floatingSnackBar(context, "The list has been updated!");
-                          if (mounted) {
-                            Navigator.of(context).pop();
-                          }
-                        });
-                      }
-                    },
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
                     child: Text(
-                      "save",
+                      "of ${provider.data.episodes ?? 0}",
                       style: TextStyle(
-                        color: appTheme.onAccent,
-                        fontFamily: "Poppins",
-                        fontSize: 22,
+                        color: appTheme.textMainColor.withAlpha(178),
+                        fontFamily: "Rubik",
+                        fontSize: 16,
                       ),
                     ),
                   ),
                 ],
               ),
-            )
-          ],
+              _ProgressButton(
+                icon: Icons.add_rounded,
+                onPressed: () {
+                  final currentNumber = int.parse(
+                    textEditingController.value.text.isEmpty ? "0" : textEditingController.value.text);
+                  if (currentNumber + 1 >= (provider.data.episodes ?? 0)) {
+                    menuController.value = TextEditingValue(text: "COMPLETED");
+                    selectedValue = "COMPLETED";
+                  }
+                  if (currentNumber + 1 > (provider.data.episodes ?? 0)) return;
+                  textEditingController.value = TextEditingValue(text: "${currentNumber + 1}");
+                },
+                color: appTheme.textMainColor,
+                backgroundColor: appTheme.textMainColor.withAlpha(25),
+              )
+            ],
+          ),
         ),
-      ),
-    );
-  }
-
+        
+        // Buttons
+        Padding(
+          padding: EdgeInsets.only(
+            top: 32, 
+            bottom: isDialog ? 8 : MediaQuery.of(context).padding.bottom + 16
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: _ActionButton(
+                  label: "Cancel",
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  backgroundColor: appTheme.textMainColor.withAlpha(25),
+                  textColor: appTheme.textMainColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _ActionButton(
+                  label: "Save",
+                  onPressed: () {
+                    final int progress = int.parse(textEditingController.value.text);
+                    if (selectedValue != null || progress != provider.watched || provider.mediaListStatus == null) {
+                      SyncHandler()
+                          .mutateAnimeList(
+                        id: provider.id,
+                        status: assignItemEnum(selectedValue ?? initialSelection!),
+                        previousStatus: assignItemEnum(initialSelection),
+                        progress: progress,
+                        otherIds: provider.altDatabases
+                      )
+                          .then((value) {
+                        initialSelection = selectedValue ?? initialSelection;
+                        provider.refreshListStatus(selectedValue ?? initialSelection!, progress);
+                        floatingSnackBar("The list has been updated!");
+                        if (mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      });
+                    }
+                  },
+                  backgroundColor: appTheme.accentColor,
+                  textColor: appTheme.onAccent,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
   @override
   void dispose() {
     textEditingController.dispose();
     menuController.dispose();
     super.dispose();
+  }
+}
+
+
+// Helper class for + and - buttons
+class _ProgressButton extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onPressed;
+  final Color color;
+  final Color backgroundColor;
+
+  const _ProgressButton({
+    required this.icon,
+    required this.onPressed,
+    required this.color,
+    required this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onPressed,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 24,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// Helper class for action buttons
+class _ActionButton extends StatelessWidget {
+  final String label;
+  final VoidCallback onPressed;
+  final Color backgroundColor;
+  final Color textColor;
+
+  const _ActionButton({
+    required this.label,
+    required this.onPressed,
+    required this.backgroundColor,
+    required this.textColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: backgroundColor,
+        foregroundColor: textColor,
+        padding: EdgeInsets.symmetric(vertical: 14),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 0,
+      ),
+      onPressed: onPressed,
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: "Poppins",
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
   }
 }

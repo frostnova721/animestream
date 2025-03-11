@@ -10,6 +10,7 @@ import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:flutter/material.dart';
 
@@ -139,7 +140,7 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> getWatched({ bool refreshLastWatchDuration = false }) async {
+  Future<void> getWatched({bool refreshLastWatchDuration = false}) async {
     if (await AniListLogin().isAnilistLoggedIn()) if (_mediaListStatus == null) {
       _watched = 0;
       _started = false;
@@ -150,7 +151,7 @@ class InfoProvider extends ChangeNotifier {
 
     _currentPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
-    if(refreshLastWatchDuration) {
+    if (refreshLastWatchDuration) {
       _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
     }
 
@@ -175,7 +176,7 @@ class InfoProvider extends ChangeNotifier {
           });
         } catch (err) {
           if (currentUserSettings?.showErrors ?? false) {
-            // floatingSnackBar(context, "Couldnt fetch simkl data");
+            // floatingSnackBar( "Couldnt fetch simkl data");
           }
         }
       }
@@ -190,7 +191,7 @@ class InfoProvider extends ChangeNotifier {
     } catch (err) {
       print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        // floatingSnackBar(context, err.toString());
+        // floatingSnackBar( err.toString());
         _infoLoadError = true;
       notifyListeners();
       rethrow;
@@ -255,7 +256,7 @@ class InfoProvider extends ChangeNotifier {
         _epSearcherror = true;
         notifyListeners();
         if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) {
-          // floatingSnackBar(context, err.toString());
+          floatingSnackBar(err.toString());
         }
       }
     }
@@ -281,23 +282,4 @@ class InfoProvider extends ChangeNotifier {
     _watched = progress;
     notifyListeners();
   }
-
-  // Future<void> getQualities() async {
-  //   List<Map<String, String>> mainList = [];
-  //   for (int i = 0; i < _streamSources.length; i++) {
-  //     final list = await generateQualitiesForMultiQuality(_streamSources[i].link);
-  //     list.forEach((element) {
-  //       element['server'] = "${_streamSources[i].server} ${_streamSources[i].backup ? "• backup" : ""}";
-  //       mainList.add(element);
-  //     });
-  //   }
-  //   _qualities = mainList;
-  // }
-
-  // Future getEpisodeSources(String epLink) async {
-  //   _streamSources = [];
-  //   await getStreams(selectedSource, epLink, (list, finished) {
-  //     if (finished) _streamSources = _streamSources + list;
-  //   });
-  // }
 }

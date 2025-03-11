@@ -126,7 +126,7 @@ Future<void> loadAndAssignSettings() async {
 class AnimeStream extends StatefulWidget {
   const AnimeStream({super.key});
 
-  static final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static final navigatorKey = GlobalKey<NavigatorState>();
   @override
   State<AnimeStream> createState() => _AnimeStreamState();
 }

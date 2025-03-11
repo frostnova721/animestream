@@ -386,7 +386,7 @@ class _ControlsState extends State<Controls> {
                 borderRadius: BorderRadius.circular(10),
                 onTap: () async {
                   if (dataProvider.state.currentEpIndex == 0)
-                    return floatingSnackBar(context, "Already on the first episode");
+                    return floatingSnackBar( "Already on the first episode");
                   showSheet(
                     context,
                     CustomControlsBottomSheet(
@@ -494,7 +494,7 @@ class _ControlsState extends State<Controls> {
                 onTap: () async {
                   //get next episode sources!
                   if (dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length)
-                    return floatingSnackBar(context, "You are already in the final episode!");
+                    return floatingSnackBar( "You are already in the final episode!");
                   if (dataProvider.state.preloadedSources.isNotEmpty) {
                     print("from preload");
                     provider.playPreloadedEpisode(dataProvider);

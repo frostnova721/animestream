@@ -1134,7 +1134,7 @@ class _InfoMobileState extends State<InfoMobile> {
           return GestureDetector(
             onTap: () {
               if (item.type.toLowerCase() != "anime") {
-                return floatingSnackBar(context, 'Mangas/Novels arent supported');
+                return floatingSnackBar( 'Mangas/Novels arent supported');
               }
 
               //only navigate if the list is being built by characterCard method.
@@ -1246,10 +1246,10 @@ class _InfoMobileState extends State<InfoMobile> {
                                     img,
                                     (provider.data.title['english'] ?? provider.data.title['romaji'] ?? "anime") +
                                         "_Banner");
-                                floatingSnackBar(context, "Succesfully saved to your downloads folder!");
+                                floatingSnackBar( "Succesfully saved to your downloads folder!");
                                 Navigator.of(context).pop();
                               } catch (err) {
-                                floatingSnackBar(context, "Couldnt save the image!");
+                                floatingSnackBar( "Couldnt save the image!");
                               }
                             },
                             style: ElevatedButton.styleFrom(

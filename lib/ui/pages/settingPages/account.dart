@@ -243,13 +243,13 @@ class _AccountSettingState extends State<AccountSetting> {
                         }),
                       );
                     });
-                  floatingSnackBar(context, "Logged out successfully!");
+                  floatingSnackBar( "Logged out successfully!");
                 }, usermodal: getUserModal(databaseName.toLowerCase()))
               : _loginCard(context, onLogin: () {
                   setState(() {
                     onLogin().then((logged) {
                       if (logged) {
-                        floatingSnackBar(context, "Login successful!");
+                        floatingSnackBar( "Login successful!");
                         Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                       }
                       //replace the page with itself to avoid recalling the functions in initState to update the user data
@@ -260,7 +260,7 @@ class _AccountSettingState extends State<AccountSetting> {
                         ),
                       );
                     }).onError((err, st) {
-                      floatingSnackBar(context, "Login failed! Try again");
+                      floatingSnackBar( "Login failed! Try again");
                       print(err.toString());
                       print(st.toString());
                     });

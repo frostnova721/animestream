@@ -4,7 +4,9 @@ import "package:html/parser.dart" as html;
 class AnimeNews {
   final String _baseUrl = 'https://animenewsnetwork.com';
 
-  Future getDetailedNews(String url) async {
+  final String _cdnUrl = 'https://cdn.animenewsnetwork.com';
+
+  Future<Map<String, String?>> getDetailedNews(String url) async {
     final res = await fetch(url);
     final document = html.parse(res);
     final pageTitle = document.querySelector("div#page-title > h1#page_header")?.text.replaceAll(RegExp(r'News'), '').replaceAll(r'\n| {2,}', '').trim();
@@ -15,8 +17,8 @@ class AnimeNews {
       caption.remove();
     }
     final details = document.querySelector('div.text-zone.easyread-width > div.KonaBody > div.meat');
-    final image = details?.querySelector('figure > img')?.attributes['data-src'] != null ? 'https://cdn.animenewsnetwork.com' + (details?.querySelector('figure > img')?.attributes['data-src'] ?? '') : null;
-    final List texts = [];
+    final image = details?.querySelector('figure > img')?.attributes['data-src'] != null ? _cdnUrl + (details?.querySelector('figure > img')?.attributes['data-src'] ?? '') : null;
+    final List<String> texts = [];
     details?.children.forEach((element) { 
       texts.add(element.text.trim());
     }); 
@@ -29,14 +31,14 @@ class AnimeNews {
     };
   }
 
-  Future getNewses() async {
+  Future<List<Map<String, String?>>> getNewses() async {
     final url = _baseUrl + '/news';
     final res = await fetch(url);
     final document = html.parse(res);
-    final List newses = [];
+    final List<Map<String, String?>> newses = [];
     document.querySelectorAll('.herald.box.news.t-news').forEach((element) { 
       final src = element.querySelector('.thumbnail')?.attributes['data-src'];
-      final image = src != null ? 'https://cdn.animenewsnetwork.com' + src : null;
+      final image = src != null ? _cdnUrl + src : null;
       final wrapDiv = element.querySelector('.wrap > div');
       final titleElement = wrapDiv?.querySelector('h3')?.children[0] ?? null;
       final ref = titleElement?.attributes['href'] != null ? url + (titleElement?.attributes['href'] ?? '') : null; 

@@ -55,7 +55,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   loadDiscoverItems(),
                 })
             .catchError((err) {
-          floatingSnackBar(context, "couldnt load user profile");
+          floatingSnackBar( "couldnt load user profile");
           loadListsForHome();
           loadDiscoverItems();
 
@@ -170,8 +170,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     } catch (err) {
       print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        floatingSnackBar(context, err.toString(), waitForPreviousToFinish: true);
-      floatingSnackBar(context, "couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
+        floatingSnackBar( err.toString(), waitForPreviousToFinish: true);
+      floatingSnackBar( "couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
       if (mounted)
         setState(() {
           homePageError = true;
@@ -336,7 +336,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         //exit the app if back is pressed again within 3 sec window
         if (popInvoked) return await SystemNavigator.pop();
 
-        floatingSnackBar(context, "Hit back once again to exit the app");
+        floatingSnackBar( "Hit back once again to exit the app");
         popInvoked = true;
         popTimeoutWindow();
       },

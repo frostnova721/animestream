@@ -1,6 +1,6 @@
-
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/mal/types.dart';
 import 'package:http/http.dart';
@@ -18,11 +18,20 @@ class MALMutation extends DatabaseMutation {
       ...(await MAL.getHeader()),
       'Content-Type': 'application/x-www-form-urlencoded',
     };
-    await put(
+    final res = await put(
       Uri.parse(url),
       headers: header,
       body: body,
-    ); 
+    );
+    if (res.statusCode == 401) {
+      // Retry after refreshing token
+      await MALLogin().refreshToken();
+      await put(
+        Uri.parse(url),
+        headers: header,
+        body: body,
+      );
+    }
     return MALMutationResult();
   }
 

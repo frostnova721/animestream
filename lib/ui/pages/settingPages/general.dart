@@ -105,7 +105,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         print("Path set to: $dir");
                         await Settings().writeSettings(SettingsModal(downloadPath: dir));
                         setState(() {});
-                        floatingSnackBar(context, "might need to provide 'allow access to all files' while downloading!");
+                        floatingSnackBar( "might need to provide 'allow access to all files' while downloading!");
                       },
                       child: Container(
                         padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),

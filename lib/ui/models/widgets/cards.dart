@@ -198,7 +198,7 @@ class Cards {
       child: InkWell(
         focusColor: appTheme.textSubColor,
         onTap: () {
-          if (!isAnime) return floatingSnackBar(context!, "Mangas/Novels arent supported");
+          if (!isAnime) return floatingSnackBar("Mangas/Novels arent supported");
           if (shouldNavigate)
             Navigator.of(context!)
                 .push(
@@ -406,7 +406,7 @@ class _AnimeCardState extends State<AnimeCard> {
         hoverColor: Colors.transparent,
         overlayColor: WidgetStatePropertyAll(Colors.transparent),
         onTap: () {
-          if (!widget.isAnime) return floatingSnackBar(context, "Manga or Novels aren't supported");
+          if (!widget.isAnime) return floatingSnackBar("Manga or Novels aren't supported");
           if (widget.shouldNavigate)
             Navigator.of(context)
                 .push(

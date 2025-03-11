@@ -1,9 +1,13 @@
+import "package:animestream/main.dart";
+import "package:animestream/ui/models/widgets/appWrapper.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
-dynamic floatingSnackBar(BuildContext context, String message, {int? duration, bool waitForPreviousToFinish = false}) {
+void floatingSnackBar(String message, {int? duration, bool waitForPreviousToFinish = false}) {
+  // Pick main app context if available (will be available for android) and appWrapper's for windows 
+  final context = AnimeStream.navigatorKey.currentContext ?? AppWrapper.navKey.currentContext!;
   if (!waitForPreviousToFinish) ScaffoldMessenger.of(context).removeCurrentSnackBar();
-  return ScaffoldMessenger.of(context).showSnackBar(
+  ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
       content: Center(
         child: Text(message, style: TextStyle(fontFamily: "NotoSans", color: Colors.white, fontSize: 14)),

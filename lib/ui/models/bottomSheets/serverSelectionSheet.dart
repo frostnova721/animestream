@@ -260,7 +260,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                         .onError((err, st) {
                       print(err);
                       print(st);
-                      floatingSnackBar(context, "$err");
+                      floatingSnackBar( "$err");
                     });
                   } else {
                     Downloader()
@@ -269,11 +269,11 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                         .onError((err, st) {
                       print(err);
                       print(st);
-                      floatingSnackBar(context, "$err");
+                      floatingSnackBar( "$err");
                     });
                   }
                   Navigator.of(context).pop();
-                  floatingSnackBar(context, "Downloading the episode to your downloads folder");
+                  floatingSnackBar( "Downloading the episode to your downloads folder");
                 },
                 style: ElevatedButton.styleFrom(
                   elevation: 0,

@@ -226,7 +226,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           IconButton(
                               onPressed: () {
                                 if (dataProvider.state.currentEpIndex == 0)
-                                  return floatingSnackBar(context, "Already on the first episode");
+                                  return floatingSnackBar( "Already on the first episode");
                                 showDialog(
                                     context: context,
                                     builder: (BuildContext context) {
@@ -256,7 +256,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           IconButton(
                               onPressed: () {
                                 if (dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length)
-                                  return floatingSnackBar(context, "You are already in the final episode!");
+                                  return floatingSnackBar( "You are already in the final episode!");
                                 if (dataProvider.state.preloadedSources.isNotEmpty) {
                                   print("from preload");
                                   provider.playPreloadedEpisode(dataProvider);

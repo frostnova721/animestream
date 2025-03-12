@@ -36,7 +36,7 @@ class InfoProvider extends ChangeNotifier {
   List<AlternateDatabaseId> _altDatabases = [];
 
   int _currentPageIndex = 0;
-  int _watched = 1;
+  int _watched = 0;
   int _viewMode = 0;
 
   // Index of episode selected
@@ -260,6 +260,12 @@ class InfoProvider extends ChangeNotifier {
         }
       }
     }
+  }
+
+  void clearLastWatchDuration() async {
+    await addLastWatchedDuration(id.toString(), {});
+    _lastWatchedDurationMap = {};
+    notifyListeners();
   }
 
   IconData getTrackerIcon() {

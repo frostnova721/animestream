@@ -23,9 +23,14 @@ class MALMutation extends DatabaseMutation {
       headers: header,
       body: body,
     );
+    print(res.statusCode);
     if (res.statusCode == 401) {
       // Retry after refreshing token
       await MALLogin().refreshToken();
+      final header = {
+        ...(await MAL.getHeader(refreshHeaders: true)),
+        'Content-Type': 'application/x-www-form-urlencoded',
+      };
       await put(
         Uri.parse(url),
         headers: header,

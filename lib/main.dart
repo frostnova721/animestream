@@ -126,6 +126,10 @@ Future<void> loadAndAssignSettings() async {
 class AnimeStream extends StatefulWidget {
   const AnimeStream({super.key});
 
+  static 
+final GlobalKey<ScaffoldMessengerState> snackbarKey =
+    GlobalKey<ScaffoldMessengerState>();
+
   static final navigatorKey = GlobalKey<NavigatorState>();
   @override
   State<AnimeStream> createState() => _AnimeStreamState();
@@ -251,6 +255,7 @@ class _AnimeStreamState extends State<AnimeStream> {
 
         return MaterialApp(
           title: 'Animestream',
+          scaffoldMessengerKey: AnimeStream.snackbarKey,
           theme: ThemeData(
             useMaterial3: true,
             brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,

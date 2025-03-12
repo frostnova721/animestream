@@ -124,7 +124,7 @@ class _InfoMobileState extends State<InfoMobile> {
                                     onPressed: () {
                                       showModalBottomSheet(
                                         context: context,
-                                        backgroundColor: appTheme.modalSheetBackgroundColor,
+                                        backgroundColor: appTheme.backgroundColor,
                                         showDragHandle: true,
                                         builder: (context) => MediaListStatusBottomSheet(
                                           provider: provider,
@@ -489,6 +489,24 @@ class _InfoMobileState extends State<InfoMobile> {
       child: InkWell(
         customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         focusColor: appTheme.textSubColor,
+        onLongPress: () {
+          showDialog(context: context, builder: (context) {
+            return AlertDialog(
+              actions: [
+                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("No")),
+                TextButton(onPressed: () {
+                  provider.clearLastWatchDuration();
+                  Navigator.pop(context);
+                }, child: Text("Yes"))
+              ],
+              content: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text("Clear watch progress for this episode?"),
+              ),
+              )
+            ;
+          });
+        },
         onTap: () async {
           showModalBottomSheet(
             isScrollControlled: true,

@@ -1,13 +1,13 @@
+import "dart:io";
+
 import "package:animestream/main.dart";
-import "package:animestream/ui/models/widgets/appWrapper.dart";
 import "package:flutter/material.dart";
 import "package:flutter/services.dart";
 
 void floatingSnackBar(String message, {int? duration, bool waitForPreviousToFinish = false}) {
-  // Pick main app context if available (will be available for android) and appWrapper's for windows 
-  final context = AnimeStream.navigatorKey.currentContext ?? AppWrapper.navKey.currentContext!;
-  if (!waitForPreviousToFinish) ScaffoldMessenger.of(context).removeCurrentSnackBar();
-  ScaffoldMessenger.of(context).showSnackBar(
+  final isWindows = Platform.isWindows;
+  if (!waitForPreviousToFinish) AnimeStream.snackbarKey.currentState?.removeCurrentSnackBar();
+  AnimeStream.snackbarKey.currentState?.showSnackBar(
     SnackBar(
       content: Center(
         child: Text(message, style: TextStyle(fontFamily: "NotoSans", color: Colors.white, fontSize: 14)),
@@ -16,7 +16,8 @@ void floatingSnackBar(String message, {int? duration, bool waitForPreviousToFini
       backgroundColor: Color.fromARGB(244, 26, 26, 26),
       behavior: SnackBarBehavior.floating,
       dismissDirection: DismissDirection.down,
-      margin: EdgeInsets.only(bottom: 40, left: 20, right: 20),
+      margin:isWindows ? null : EdgeInsets.only(bottom: 40, left: 20, right: 20),
+      width: isWindows ? MediaQuery.of(AnimeStream.snackbarKey.currentState!.context).size.width / 5 : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),
   );

@@ -208,7 +208,7 @@ class InfoSection extends StatelessWidget {
   Container _tagsNgenresBuilder(String title, List<dynamic> list,
       {bool unconstrainedWidth = false, bool synopsis = false, bool padLeft = true, required BuildContext context}) {
     return Container(
-      margin: EdgeInsets.only(left: padLeft ? 50 : 0, bottom: 30),
+      margin: EdgeInsets.only(left: padLeft ? 85 : 0, bottom: 30),
       padding: EdgeInsets.all(15),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(15),

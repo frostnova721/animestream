@@ -106,14 +106,13 @@ class InfoPageEpisodeGrid extends StatelessWidget {
                 height: 90,
                 width: double.infinity,
                 padding: EdgeInsets.all(5),
-                  //  color: Colors.black,
                
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.network(
                     provider.data.cover,
                     fit: BoxFit.cover,
-                    color: hovered.value ? Colors.black.withAlpha(100) : null, // Dim on hover
+                    color: hovered.value ? Colors.black.withAlpha(100) : null,
                     colorBlendMode: BlendMode.darken,
                   ),
                 ),
@@ -122,12 +121,11 @@ class InfoPageEpisodeGrid extends StatelessWidget {
               AnimatedOpacity(
                 duration: Duration(milliseconds: 100),
                 opacity: hovered.value ? 1 : 0,
-                child: Icon(Icons.play_circle_fill_rounded, size: 35,))
+                child: Icon(Icons.play_circle_fill_rounded, size: 35, color: appTheme.backgroundColor,))
             ],
           ),
           Container(
             padding: EdgeInsets.symmetric(horizontal: 5),
-            // color: Colors.black,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -136,7 +134,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: appTheme.textMainColor,
                   ),
                 ),
                 IconButton(
@@ -164,7 +162,6 @@ class InfoPageEpisodeGrid extends StatelessWidget {
 
     return Stack(
       children: [
-        // Episode Thumbnail
         Container(
           margin: EdgeInsets.all(8),
           child: ClipRRect(

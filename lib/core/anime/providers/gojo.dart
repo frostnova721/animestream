@@ -23,7 +23,7 @@ class Gojo extends AnimeProvider {
       sr.add({
         'name': item.title['english'] ?? item.title['romaji'] ?? '',
         'alias': item.id.toString(),
-        'cover': item.cover,
+        'imageUrl': item.cover,
       });
     }
 

@@ -23,6 +23,8 @@ class _SourceTileState extends State<SourceTile> {
       padding: EdgeInsets.only(bottom: 10),
       child: InkWell(
         onTap: widget.onTap,
+        splashColor: Colors.transparent,
+        splashFactory: NoSplash.splashFactory,
         onHover: (val) {
           setState(() => hovered = val);
         },

@@ -61,6 +61,7 @@ dependencies:
 
   # Misc
   flutter_native_splash: ^2.4.0
+  # dart_eval: ^0.7.10 not now atleast
   # window_size: ^0.1.0
 
 dev_dependencies:

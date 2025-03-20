@@ -185,17 +185,20 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   }
 
   ListView _list() {
-    final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
-    return widget.type == ServerSheetType.watch
-        ?   ListView.builder(
-      padding: EdgeInsets.symmetric(vertical: 10, horizontal: Platform.isAndroid ? 10 : 15),
-      shrinkWrap: true,
-      itemCount: streamSources.length,
-      itemBuilder: (context, index) {
-        final source = streamSources[index];
-
-        return SourceTile(source: source, onTap: () async {
-          await storeWatching(
+  final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
+  
+  return widget.type == ServerSheetType.watch
+    ? ListView.builder(
+        padding: EdgeInsets.symmetric(vertical: 10, horizontal: Platform.isAndroid ? 10 : 15),
+        shrinkWrap: true,
+        itemCount: streamSources.length,
+        itemBuilder: (context, index) {
+          final source = streamSources[index];
+          
+          return SourceTile(
+            source: source,
+            onTap: () async {
+              await storeWatching(
                 title,
                 widget.provider.data.cover,
                 widget.provider.id,
@@ -242,86 +245,86 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               ).then((value) {
                 provider.getWatched(refreshLastWatchDuration: true);
               });
-        },);
-      },
-    )
-        : ListView.builder(
-            itemCount: qualities.length,
-            shrinkWrap: true,
-            // physics: NeverScrollableScrollPhysics(),
-            itemBuilder: (BuildContext context, ind) => Container(
-              margin: EdgeInsets.only(top: 10),
-              child: ElevatedButton(
-                onPressed: () {
-                  if (currentUserSettings?.useQueuedDownloads ?? false) {
-                    Downloader()
-                        .addToQueue(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
-                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
-                        .onError((err, st) {
-                      print(err);
-                      print(st);
-                      floatingSnackBar( "$err");
-                    });
-                  } else {
-                    Downloader()
-                        .download(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
-                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
-                        .onError((err, st) {
-                      print(err);
-                      print(st);
-                      floatingSnackBar( "$err");
-                    });
-                  }
-                  Navigator.of(context).pop();
-                  floatingSnackBar( "Downloading the episode to your downloads folder");
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: appTheme.backgroundSubColor,
-                  padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
+            },
+          );
+        },
+      )
+    : ListView.builder(
+        itemCount: qualities.length,
+        shrinkWrap: true,
+        itemBuilder: (BuildContext context, ind) => Container(
+          margin: EdgeInsets.only(top: 10),
+          child: ElevatedButton(
+            onPressed: () {
+              if (currentUserSettings?.useQueuedDownloads ?? false) {
+                Downloader()
+                    .addToQueue(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
+                        parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                    .onError((err, st) {
+                  print(err);
+                  print(st);
+                  floatingSnackBar("$err");
+                });
+              } else {
+                Downloader()
+                    .download(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
+                        parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                    .onError((err, st) {
+                  print(err);
+                  print(st);
+                  floatingSnackBar("$err");
+                });
+              }
+              Navigator.of(context).pop();
+              floatingSnackBar("Downloading the episode to your downloads folder");
+            },
+            style: ElevatedButton.styleFrom(
+              elevation: 0,
+              backgroundColor: appTheme.backgroundSubColor,
+              padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Row(
-                            children: [
-                              Text(
-                                "${qualities[ind]['server']}",
-                                style: TextStyle(
-                                  color: appTheme.accentColor,
-                                  fontSize: 18,
-                                  fontFamily: "Rubik",
-                                ),
-                              ),
-                              Text(
-                                "• ${qualities[ind]['quality']}",
-                                style: TextStyle(
-                                  color: appTheme.textMainColor,
-                                  fontSize: 18,
-                                  fontFamily: "Rubik",
-                                ),
-                              ),
-                            ],
+                    Padding(
+                      padding: EdgeInsets.only(top: 5),
+                      child: Row(
+                        children: [
+                          Text(
+                            "${qualities[ind]['server']}",
+                            style: TextStyle(
+                              color: appTheme.accentColor,
+                              fontSize: 18,
+                              fontFamily: "Rubik",
+                            ),
                           ),
-                        ),
-                      ],
+                          Text(
+                            "• ${qualities[ind]['quality']}",
+                            style: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontSize: 18,
+                              fontFamily: "Rubik",
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
-              ),
+              ],
             ),
-          );
-  }
+          ),
+        ),
+      );
+}
 
   @override
   void dispose() {

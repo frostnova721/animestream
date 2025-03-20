@@ -126,6 +126,7 @@ class _InfoMobileState extends State<InfoMobile> {
                                         context: context,
                                         backgroundColor: appTheme.backgroundColor,
                                         showDragHandle: true,
+                                        isScrollControlled: true,
                                         builder: (context) => MediaListStatusBottomSheet(
                                           provider: provider,
                                         ),
@@ -497,11 +498,11 @@ class _InfoMobileState extends State<InfoMobile> {
                 TextButton(onPressed: () {
                   provider.clearLastWatchDuration();
                   Navigator.pop(context);
-                }, child: Text("Yes"))
+                }, child: Text("Yes"), style: TextButton.styleFrom(backgroundColor: appTheme.accentColor, foregroundColor: appTheme.onAccent),)
               ],
               content: Padding(
                 padding: const EdgeInsets.all(10),
-                child: Text("Clear watch progress for this episode?"),
+                child: Text("Clear watch progress for this episode?", style: TextStyle(fontSize: 15),),
               ),
               )
             ;
@@ -620,41 +621,58 @@ class _InfoMobileState extends State<InfoMobile> {
               showDragHandle: true,
               context: context,
               builder: (ctx) => Container(
+                width: double.infinity,
                     padding: EdgeInsets.only(left: 20, right: 20, bottom: MediaQuery.paddingOf(ctx).bottom),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
-                      children: List.generate(
-                        ServerSheetType.values.length,
-                        (ind) => Container(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                                backgroundColor: appTheme.accentColor,
-                                foregroundColor: appTheme.backgroundColor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                            onPressed: () async {
-                              Navigator.of(ctx).pop();
-                              showModalBottomSheet(
-                                showDragHandle: true,
-                                isScrollControlled: true,
-                                context: context,
-                                backgroundColor: appTheme.modalSheetBackgroundColor,
-                                builder: (BuildContext context) {
-                                  return ServerSelectionBottomSheet(
-                                    provider: provider,
-                                    episodeIndex: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'],
-                                    type: ServerSheetType.values[ind],
-                                  );
-                                },
-                              );
-                            },
-                            child: Text(
-                              ServerSheetType.values[ind].name,
-                              style: TextStyle(fontFamily: "Poppins", fontSize: 18),
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      spacing: 16,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Text("Select Action", style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),),
+                        ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: List.generate(
+                            ServerSheetType.values.length,
+                            (ind) => Expanded(
+                              child: Container(
+                                padding: EdgeInsets.symmetric(horizontal: 5),
+                                child: ElevatedButton(
+                                  style: ElevatedButton.styleFrom(
+                                      backgroundColor: appTheme.accentColor,
+                                      foregroundColor: appTheme.backgroundColor,
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+                                  onPressed: () async {
+                                    Navigator.of(ctx).pop();
+                                    showModalBottomSheet(
+                                      showDragHandle: true,
+                                      isScrollControlled: true,
+                                      context: context,
+                                      backgroundColor: appTheme.modalSheetBackgroundColor,
+                                      builder: (BuildContext context) {
+                                        return ServerSelectionBottomSheet(
+                                          provider: provider,
+                                          episodeIndex: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'],
+                                          type: ServerSheetType.values[ind],
+                                        );
+                                      },
+                                    );
+                                  },
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(vertical: 16),
+                                    child: Text(
+                                      ServerSheetType.values[ind].name,
+                                      style: TextStyle(fontFamily: "Poppins", fontSize: 18),
+                                    ),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ));
         },

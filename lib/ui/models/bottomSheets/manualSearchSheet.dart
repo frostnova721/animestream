@@ -150,7 +150,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                         )
                       : GridView.builder(
                           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                              maxCrossAxisExtent: 130, mainAxisSpacing: 15,crossAxisSpacing: 15, mainAxisExtent: 190),
+                              maxCrossAxisExtent: 130, mainAxisSpacing: 15, crossAxisSpacing: 15, mainAxisExtent: 190),
                           itemCount: searchResults.length,
                           shrinkWrap: true,
                           padding: EdgeInsets.only(left: 5, right: 5, top: 10),

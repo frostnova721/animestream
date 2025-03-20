@@ -87,22 +87,6 @@ class WatchSection extends StatelessWidget {
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: appTheme.backgroundSubColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(30),
-            blurRadius: 15,
-            offset: Offset(0, 5),
-            spreadRadius: 1,
-          ),
-        ],
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            appTheme.backgroundSubColor,
-            appTheme.backgroundSubColor.withAlpha(204),
-          ],
-        ),
       ),
       child: provider.foundName == null
           ? Center(

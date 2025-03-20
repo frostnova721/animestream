@@ -75,7 +75,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
   @override
   Widget build(BuildContext context) {
     final provider = widget.provider;
-    final isDialog = MediaQuery.of(context).size.width > 600;
+    final isDialog = MediaQuery.of(context).size.width > 800;
 
     // Thanks Claude for the design!!!
     return Container(
@@ -137,13 +137,6 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: appTheme.textMainColor.withAlpha(13),
-                    blurRadius: 8,
-                    offset: Offset(0, 2),
-                  )
-                ],
               ),
               child: DropdownMenu(
                 controller: menuController,
@@ -210,9 +203,9 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                 fontWeight: FontWeight.w500,
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 12),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
               decoration: BoxDecoration(
                 color: appTheme.backgroundColor,
                 borderRadius: BorderRadius.circular(16),

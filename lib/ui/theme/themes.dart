@@ -130,6 +130,26 @@ final mochaLight = AnimeStreamTheme(
   onAccent: Color(0xff261E18),
 );
 
+final sakuraDark = AnimeStreamTheme(
+  accentColor: Color(0xFFFF8FAB),
+  backgroundColor: Color(0xFF1A1A1A),
+  backgroundSubColor: Color(0xFF332A2D),
+  textMainColor: Color(0xFFF8F8F8),
+  textSubColor: Color(0xFFBBBBBB),
+  modalSheetBackgroundColor: Color(0xFF2D2D2D),
+  onAccent: Color(0xFF333333),
+);
+
+final sakuraLight = AnimeStreamTheme(
+  accentColor: Color(0xFFF06292),
+  backgroundColor: Color(0xFFFFF8F8),
+  backgroundSubColor: Color(0xFFFCE4EC),
+  textMainColor: Color(0xFF333333),
+  textSubColor: Color(0xFF767676),
+  modalSheetBackgroundColor: Color(0xFFFCECEF),
+  onAccent: Color(0xFFFFFFFF),
+);
+
 /** List of available themes.
  *
 The theme list in UI screen is generated from this list */
@@ -139,7 +159,8 @@ List<ThemeItem> availableThemes = [
   ThemeItem(id: 03, name: "Cold Purple", theme: coldPurple, lightVariant: coldPurpleLight),
   ThemeItem(id: 04, name: "Hot Pink", theme: hotPink, lightVariant: hotPinkLight),
   ThemeItem(id: 05, name: "Amethyst", theme: amethyst, lightVariant: amethystLight),
-  ThemeItem(id: 06, name: "Mocha", theme: mocha, lightVariant: mochaLight)
+  ThemeItem(id: 06, name: "Mocha", theme: mocha, lightVariant: mochaLight),
+  ThemeItem(id: 07, name: "Sakura", theme: sakuraDark, lightVariant: sakuraLight),
 ];
 
 ThemeModeValues lightModeValues = ThemeModeValues(

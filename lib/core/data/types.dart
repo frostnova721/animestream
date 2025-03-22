@@ -56,7 +56,7 @@ class SettingsModal {
       darkMode: map['darkMode'] ?? true,
       materialTheme: map['materialTheme'] ?? false,
       isDev: map['isDev'] ?? false,
-      downloadPath: map['downloadPath'] ?? '/storage/emulated/0/Download/animestream',
+      downloadPath: map['downloadPath'], // No default value since we can assign them at runtime according to OS
       database: DatabaseFromString.getDb(map['database'] ?? "anilist"),
       enableSuperSpeeds: map['enableSuperSpeeds'] ?? false,
       useQueuedDownloads: map['useQueuedDownloads'] ?? false,

@@ -121,11 +121,11 @@ class InfoPageEpisodeGrid extends StatelessWidget {
               AnimatedOpacity(
                 duration: Duration(milliseconds: 100),
                 opacity: hovered.value ? 1 : 0,
-                child: Icon(Icons.play_circle_fill_rounded, size: 35, color: appTheme.backgroundColor,))
+                child: Icon(Icons.play_circle_fill_rounded, size: 35, color: appTheme.textMainColor,))
             ],
           ),
           Container(
-            padding: EdgeInsets.symmetric(horizontal: 5),
+            padding: EdgeInsets.symmetric(horizontal: 8),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

@@ -61,10 +61,7 @@ Future<void> addLastWatchedDuration(String anilistId, Map<int, double> item) asy
 
 Future<void> addManualSearchQuery(String anilistId, String searchTerm) async {
   Map<dynamic, dynamic> map = await getVal(HiveKey.manualSearches, boxName: "animeInfo") ?? {};
-  // if (map == null) map = {};
-
   map[anilistId] = searchTerm;
-
   Map<dynamic, dynamic> filteredMap = map;
 
   if (map.length > 40) {

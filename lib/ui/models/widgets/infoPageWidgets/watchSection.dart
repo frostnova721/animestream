@@ -34,6 +34,7 @@ class WatchSection extends StatelessWidget {
                       if (size.width < splitWidth)
                         Container(
                           width: size.width / 2,
+                          constraints: BoxConstraints(maxWidth: 650),
                           margin: EdgeInsets.only(top: 50),
                           child: Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,7 +82,7 @@ class WatchSection extends StatelessWidget {
 
   Widget buildEpisodesContainer(BuildContext context) {
     return Container(
-      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 20).copyWith(top: 50),
+      margin: EdgeInsets.symmetric(vertical: 20).copyWith(top: 50),
       height: (size.height / 1.75),
       width: size.width / (size.width > splitWidth ? 1.75 : 1.3),
       decoration: BoxDecoration(

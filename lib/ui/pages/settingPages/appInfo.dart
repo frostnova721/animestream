@@ -1,5 +1,6 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -70,16 +71,32 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                 iconPressed = !iconPressed;
                                 showToast("wooosh!!");
                               }),
-                              child: Container(
-                                  padding: EdgeInsets.only(right: 25),
-                                  child: Image.asset(
-                                    // iconPressed
-                                    //     ? 'lib/assets/icons/logo_monochrome.png'
-                                    'lib/assets/icons/logo_foreground.png',
-                                    color: iconPressed ? appTheme.textMainColor : null,
-                                    height: 100,
-                                    width: 100,
-                                  )),
+                              child: ContextMenu(
+                                menuItems: [
+                                  ContextMenuItem(
+                                      icon: Icons.open_in_new,
+                                      label: "Open secret link",
+                                      onClick: () async {
+                                        // HEHE WHY NOT
+                                        if (await canLaunchUrl(
+                                            Uri.parse("https://www.youtube.com/watch?v=dQw4w9WgXcQ"))) {
+                                          launchUrl(
+                                            Uri.parse("https://www.youtube.com/watch?v=dQw4w9WgXcQ&autoplay=1"),
+                                          );
+                                        }
+                                      })
+                                ],
+                                child: Container(
+                                    padding: EdgeInsets.only(right: 25),
+                                    child: Image.asset(
+                                      // iconPressed
+                                      //     ? 'lib/assets/icons/logo_monochrome.png'
+                                      'lib/assets/icons/logo_foreground.png',
+                                      color: iconPressed ? appTheme.textMainColor : null,
+                                      height: 100,
+                                      width: 100,
+                                    )),
+                              ),
                             ),
                             Column(
                               crossAxisAlignment: CrossAxisAlignment.center,
@@ -109,7 +126,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                       onLongPress: () async {
                                         await Clipboard.setData(
                                             ClipboardData(text: "https://github.com/frostnova721/animestream"));
-                                        floatingSnackBar( "link has been copied to clipboard");
+                                        floatingSnackBar("link has been copied to clipboard");
                                       },
                                       onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream")),
                                       child: Text(

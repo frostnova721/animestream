@@ -1,6 +1,9 @@
 import 'dart:ui';
 
+import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
+import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/infoSection.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/watchSection.dart';
@@ -74,21 +77,35 @@ class _InfoDesktopState extends State<InfoDesktop> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(
-                          height: 270,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(15),
-                          ),
-                          clipBehavior: Clip.antiAlias,
-                          margin: EdgeInsets.all(15).copyWith(top: 15 + MediaQuery.paddingOf(context).top),
-                          child: ImageFiltered(
-                            imageFilter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
-                            child: Opacity(
-                              opacity: 0.9,
-                              child: CachedNetworkImage(
-                                imageUrl: provider.data.banner ?? provider.data.cover,
-                                fit: BoxFit.cover,
-                                width: double.infinity,
+                        ContextMenu(
+                          menuItems: [
+                            ContextMenuItem(icon: Icons.download, label: "Download", onClick: () async {
+                              final img = provider.data.banner ?? provider.data.cover;
+                              final title = provider.data.title;
+                              try {
+                              await Downloader().downloadImage(img, "${title['english'] ?? title['romaji'] ?? "unknown"}-Banner");
+                              floatingSnackBar("Image has been saved!");
+                              } catch(err) {
+                                floatingSnackBar("Couldnt download image");
+                              }
+                            },)
+                          ],
+                          child: Container(
+                            height: 270,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            margin: EdgeInsets.all(15).copyWith(top: 15 + MediaQuery.paddingOf(context).top),
+                            child: ImageFiltered(
+                              imageFilter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
+                              child: Opacity(
+                                opacity: 0.9,
+                                child: CachedNetworkImage(
+                                  imageUrl: provider.data.banner ?? provider.data.cover,
+                                  fit: BoxFit.cover,
+                                  width: double.infinity,
+                                ),
                               ),
                             ),
                           ),

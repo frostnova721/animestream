@@ -33,7 +33,7 @@ class SourceSideWidget extends StatelessWidget {
 
     return Container(
       margin: EdgeInsets.only(
-        left: 50,
+        left: 60,
       ),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),

@@ -15,7 +15,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     return Container(
-      margin: EdgeInsets.only(left: 50, top: 20, bottom: 20),
+      margin: EdgeInsets.only(left: 60, top: 20, bottom: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -32,8 +32,6 @@ class ContinueWatchingSideBox extends StatelessWidget {
               ),
             ),
           ),
-
-          // Main Card
           Container(
             // width: 350,
             decoration: BoxDecoration(
@@ -133,8 +131,6 @@ class ContinueWatchingSideBox extends StatelessWidget {
                             ),
                           ),
                         ),
-
-                        // Play Button Overlay
                         Positioned.fill(
                           child: Container(
                             decoration: BoxDecoration(
@@ -164,8 +160,6 @@ class ContinueWatchingSideBox extends StatelessWidget {
                             ),
                           ),
                         ),
-
-                        // Episode Info Overlay
                         Positioned(
                           bottom: 0,
                           left: 0,
@@ -213,14 +207,11 @@ class ContinueWatchingSideBox extends StatelessWidget {
                     ),
                   ),
                 ),
-
-                // Progress Section
                 Padding(
                   padding: EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Title & Progress
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -251,10 +242,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                           ),
                         ],
                       ),
-
                       SizedBox(height: 15),
-
-                      // Progress Bar
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(
                           begin: 0,
@@ -269,7 +257,6 @@ class ContinueWatchingSideBox extends StatelessWidget {
                         builder: (context, value, _) {
                           return Stack(
                             children: [
-                              // Background
                               Container(
                                 height: 8,
                                 width: double.infinity,
@@ -278,7 +265,6 @@ class ContinueWatchingSideBox extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              // Foreground
                               Container(
                                 height: 8,
                                 width: 350 * value,
@@ -305,10 +291,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                           );
                         },
                       ),
-
                       SizedBox(height: 20),
-
-                      // Call to action button
                       Container(
                         width: double.infinity,
                         child: ElevatedButton(
@@ -489,7 +472,6 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // Progress label
                             Padding(
                               padding: EdgeInsets.only(bottom: 8),
                               child: Row(
@@ -523,11 +505,8 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                                 ],
                               ),
                             ),
-
-                            // Progress bar
                             Stack(
                               children: [
-                                // Background
                                 Container(
                                   height: 10,
                                   width: double.infinity,
@@ -536,7 +515,6 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                // Foreground
                                 Container(
                                   height: 10,
                                   width: size.width / 5 * value, // This value is roughly the size of bar
@@ -568,7 +546,6 @@ class ContinueWatchingBodyBox extends StatelessWidget {
 
                     SizedBox(height: 24),
 
-                    // Call to action button
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -590,8 +567,6 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                           },
                         ),
                         style: ElevatedButton.styleFrom(
-                          // primary: appTheme.accentColor,
-                          // onPrimary: appTheme.onAccent,
                           padding: EdgeInsets.symmetric(vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),

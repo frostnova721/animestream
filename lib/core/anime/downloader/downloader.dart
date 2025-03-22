@@ -80,7 +80,8 @@ class Downloader {
       throw Exception("Couldnt download image due to lack of permission!");
     }
 
-    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream';
+    final basePath = currentUserSettings?.downloadPath ??
+        (Platform.isWindows ? (await getDownloadsDirectory())!.path : '/storage/emulated/0/Download/animestream');
     final downPath = await Directory(basePath);
 
     String finalPath;
@@ -147,7 +148,7 @@ class Downloader {
     final item = downloadQueue.first;
     downloadQueue.removeFirst();
     downloadItems.add(DownloadingItem(id: item.id, downloading: true));
-    
+
     try {
       await download(
         item.streamLink!,
@@ -161,18 +162,19 @@ class Downloader {
     } finally {
       print("Cancelling");
       cancelDownload(item.id);
-      
+
       // Process next item (if available)
       if (downloadQueue.isNotEmpty) {
         _processQueue();
       }
     }
-  
+
     // _isProcessingQueue = false;
   }
 
   Future<String> makeDirectory({required String fileName, bool isImage = false, String? extension = null}) async {
-    final basePath = currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream';
+    final basePath = currentUserSettings?.downloadPath ??
+        (Platform.isWindows ? (await getDownloadsDirectory())!.path : '/storage/emulated/0/Download/animestream');
 
     final downPath = await Directory(basePath);
     String finalPath;
@@ -203,7 +205,8 @@ class Downloader {
     return finalPath;
   }
 
-  Future<void> download(String streamLink, String fileName, {int retryAttempts = 5, int parallelBatches = 5, int? id = null}) async {
+  Future<void> download(String streamLink, String fileName,
+      {int retryAttempts = 5, int parallelBatches = 5, int? id = null}) async {
     final permission = await checkPermission();
     if (!permission) {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
@@ -216,9 +219,9 @@ class Downloader {
 
     // //generate an id for the downloading item and add it to the queue(list)
     int? downloadId = id;
-    if(downloadId == null) {
-    downloadId = generateId();
-    Downloader.downloadItems.add(DownloadingItem(id: downloadId, downloading: true));
+    if (downloadId == null) {
+      downloadId = generateId();
+      Downloader.downloadItems.add(DownloadingItem(id: downloadId, downloading: true));
     }
 
     if (!streamLink.contains(".m3u8")) {
@@ -251,6 +254,7 @@ class Downloader {
           return;
         }
 
+        // calculate batch's length
         final batchEnd = (i + parallelDownloadsBatchSize < segmentsFiltered.length)
             ? i + parallelDownloadsBatchSize
             : segmentsFiltered.length;

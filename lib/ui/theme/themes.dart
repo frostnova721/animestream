@@ -88,25 +88,25 @@ final coldPurpleLight = AnimeStreamTheme(
   onAccent: Colors.white,
 );
 
-/**Midnight Blooom */
+/**Amethyst*/
 final amethyst = AnimeStreamTheme(
-  accentColor: Color(0xff522b5b),
-  backgroundColor: Color.fromARGB(255, 26, 17, 26),
-  backgroundSubColor: Color.fromARGB(255, 148, 88, 120),
-  textMainColor: Color(0xfffbe4d8),
-  textSubColor: Color(0xffdfb6b2),
-  modalSheetBackgroundColor: Color(0xff190019),
-  onAccent: Color(0xfffbe4d8),
+  accentColor: Color(0xff6a3b76),
+  backgroundColor: Color(0xff1a1119),
+  backgroundSubColor: Color.fromARGB(255, 65, 37, 53),
+  textMainColor: Color(0xfffdf0e6),    // Slightly softened white
+  textSubColor: Color(0xffe7c3bf),
+  modalSheetBackgroundColor: Color(0xff1e0620),
+  onAccent: Color(0xfffbf0e8),
 );
 
 final amethystLight = AnimeStreamTheme(
-  accentColor: Color(0xff522b5b),
-  backgroundColor: Color(0xfffbe4d8),
-  backgroundSubColor: Color.fromARGB(255, 206, 150, 180),
-  textMainColor: Color(0xff190019),
-  textSubColor: Color.fromARGB(255, 80, 65, 64),
-  modalSheetBackgroundColor: Color(0xfffbe4d8),
-  onAccent: Color(0xfffbe4d8),
+  accentColor: Color(0xff6a3b76),
+  backgroundColor: Color(0xfff9efea),
+  backgroundSubColor: Color(0xffbb8da3),
+  textMainColor: Color(0xff2a1a2a),
+  textSubColor: Color(0xff645055),
+  modalSheetBackgroundColor: Color(0xfff4e9e4),
+  onAccent: Color(0xfff9efea),
 );
 
 /**Rizzling Coffee */

@@ -82,7 +82,7 @@ class _NewsState extends State<News> {
                         child: Container(
                           decoration: BoxDecoration(color: Colors.transparent),
                           padding: EdgeInsets.only(top: 5, left: 10, right: 10),
-                          child: Cards().NewsCard(newses[index]['title'], newses[index]['image'], newses[index]['date'],
+                          child: Cards.NewsCard(newses[index]['title'], newses[index]['image'], newses[index]['date'],
                               newses[index]['time']),
                         ),
                       ),

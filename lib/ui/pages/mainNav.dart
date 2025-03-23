@@ -13,6 +13,7 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/home.dart';
 import 'package:animestream/ui/pages/search.dart';
@@ -130,7 +131,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
               watchedEpisodeCount: item.watchProgress),
         );
         thisSeason.add(
-          Cards(context: context).animeCard(
+          Cards.animeCard(
             item.id,
             item.title['english'] ?? item.title['romaji'] ?? '',
             item.cover,
@@ -202,7 +203,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     recentlyUpdatedListData.forEach((elem) {
       recentlyUpdatedList.add(
-        Cards(context: context).animeCard(
+        Cards.animeCard(
           elem.id,
           elem.title['english'] ?? elem.title['romaji'] ?? '',
           elem.cover,
@@ -214,7 +215,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     recommendedList.clear();
     recommendedListData.forEach((item) {
-      recommendedList.add(Cards(context: context).animeCard(
+      recommendedList.add(Cards.animeCard(
         item.id,
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
@@ -225,7 +226,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     thisSeason.clear();
     thisSeasonData.forEach((item) {
-      thisSeason.add(Cards(context: context).animeCard(
+      thisSeason.add(Cards.animeCard(
         item.id,
         item.title['english'] ?? item.title['romaji'] ?? '',
         item.cover,
@@ -250,7 +251,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     recommendedListData = list;
     for (final item in list) {
       recommendedList.add(
-        Cards(context: context).animeCard(
+        Cards.animeCard(
           item.id,
           item.title['english'] ?? item.title['romaji'] ?? '',
           item.cover,
@@ -271,7 +272,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         ids.add(elem.id);
         recentlyUpdatedListData.add(elem);
         recentlyUpdatedList.add(
-          Cards(context: context).animeCard(
+          Cards.animeCard(
             elem.id,
             elem.title['english'] ?? elem.title['romaji'] ?? '',
             elem.cover,

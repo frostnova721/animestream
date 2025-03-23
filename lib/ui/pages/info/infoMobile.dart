@@ -672,6 +672,7 @@ class _InfoMobileState extends State<InfoMobile> {
                             ),
                           ),
                         ),
+                        SizedBox.shrink()
                       ],
                     ),
                   ));
@@ -1096,7 +1097,7 @@ class _InfoMobileState extends State<InfoMobile> {
                       final character = provider.data.characters[index];
                       return Container(
                         width: 130,
-                        child: Cards().characterCard(
+                        child: Cards.characterCard(
                           character['name'],
                           character['role'],
                           character['image'],
@@ -1187,10 +1188,10 @@ class _InfoMobileState extends State<InfoMobile> {
             child: Container(
                 width: 130,
                 child: recommended
-                    ? Cards(context: context).animeCard(
+                    ? Cards.animeCard(
                         item.id, item.title['english'] ?? item.title['romaji'] ?? "", item.cover,
                         rating: item.rating)
-                    : Cards().characterCard(
+                    : Cards.characterCard(
                         item.title['english'] ?? item.title['romaji'] ?? "",
                         recommended ? item.type : item.relationType!,
                         item.cover,

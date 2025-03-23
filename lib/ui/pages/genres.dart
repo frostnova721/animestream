@@ -4,6 +4,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/core/commons/genresAndTags.dart';
@@ -58,7 +59,7 @@ class _GenresPageState extends State<GenresPage> {
       );
       res.forEach((e) {
         searchResultsAsWidgets.add(
-          Cards(context: context).animeCard(
+          Cards.animeCard(
             e.id,
             e.title['english'] ?? e.title['romaji'] ?? '',
             e.cover,

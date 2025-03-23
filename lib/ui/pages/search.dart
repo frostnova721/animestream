@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
+import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:animestream/ui/models/widgets/header.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
@@ -42,11 +43,11 @@ class _SearchState extends State<Search> {
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
       final id = ele.id;
       results.add(
-        Cards(context: context).animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
+        Cards.animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
       );
       if (query.toLowerCase() == title.toLowerCase()) {
         exactMatches.add(
-          Cards(context: context).animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
+          Cards.animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
         );
       }
     });

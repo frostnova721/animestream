@@ -35,7 +35,7 @@ class ScrollingList {
               controller: controller,
               itemBuilder: (context, index) {
                 final it = list[index];
-                return Cards().characterCard(it['name'], it['role'], it['image']);
+                return Cards.characterCard(it['name'], it['role'], it['image']);
               },
             ),
           ),
@@ -75,7 +75,7 @@ class ScrollingList {
               scrollDirection: Axis.horizontal,
               itemBuilder: (context, index) {
                 final it = list[index];
-                return Cards(context: context).animeCard(it.id, it.title['english'] ?? it.title['romaji']!, it.cover,
+                return Cards.animeCard(it.id, it.title['english'] ?? it.title['romaji']!, it.cover,
                     isMobile: !Platform.isWindows, rating: it.rating, subText: it.relationType);
               },
             ),

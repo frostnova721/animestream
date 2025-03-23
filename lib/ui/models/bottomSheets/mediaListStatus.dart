@@ -420,6 +420,7 @@ class _ActionButton extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
+        shadowColor: Colors.transparent,
         elevation: 0,
       ),
       onPressed: onPressed,

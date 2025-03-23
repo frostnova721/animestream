@@ -5,6 +5,7 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
+import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:flutter/material.dart';
 
 class AnimeLists extends StatefulWidget {
@@ -55,7 +56,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       if (element.name == "Watching") {
         element.list.forEach((item) {
           watchingList.add(
-            Cards(context: context).animeCard(
+            Cards.animeCard(
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
@@ -67,7 +68,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       if (element.name == "Planning") {
         element.list.forEach((item) {
           plannedList.add(
-            Cards(context: context).animeCard(
+            Cards.animeCard(
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
@@ -79,7 +80,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       if (element.name == "Dropped") {
         element.list.forEach((item) {
           droppedList.add(
-            Cards(context: context).animeCard(
+            Cards.animeCard(
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
@@ -91,7 +92,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       if (element.name == "Completed") {
         element.list.forEach((item) {
           completedList.add(
-            Cards(context: context).animeCard(
+            Cards.animeCard(
               item.id,
               item.title['english'] ?? item.title['romaji'] ?? '',
               item.coverImage,
@@ -107,7 +108,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     final list = await AnilistQueries().getUserAnimeList(storedUserData!.name);
     if (list.isEmpty) throw new Exception("List is empty lil bro!");
     rawAnimeList = list;
-    sort(SortType.TopRated);
+    sort(SortType.RecentlyUpdated);
     setState(() {
       dataLoaded = true;
     });
@@ -131,7 +132,6 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
         });
 
       case SortType.RecentlyUpdated:
-        //not working as expected. the rawAnimeList is getting modified :(
         return setState(() {
           final List<UserAnimeList> recentlyUpdatedList = copyRawAnimeList(true);
           injectToCorrespondingList(recentlyUpdatedList);
@@ -159,7 +159,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     final List<UserAnimeList> cloneList = [];
     for (final list in rawAnimeList) {
       cloneList.add(UserAnimeList(
-        list: reverse ? list.list.reversed.toList() : list.list,
+        list: reverse ? List.from(list.list.reversed) : List.from(list.list),
         name: list.name,
         status: list.status,
       ));
@@ -218,7 +218,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           return [
                             sortOptionButton("A-Z", SortType.AtoZ),
                             sortOptionButton("Top rated", SortType.TopRated),
-                            // sortOptionButton("Recent",SortType.RecentlyUpdated), // aint workin' :(
+                            sortOptionButton("Recent",SortType.RecentlyUpdated),
                           ];
                         },
                         icon: Icon(
@@ -315,7 +315,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       onTap: () => sort(sortType),
       child: Text(
         label,
-        style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans-Bold", fontSize: 16),
+        style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans", fontSize: 16,),
       ),
     );
   }

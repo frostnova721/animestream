@@ -346,7 +346,7 @@ class SourceBodyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ignore: unused_local_variable
+    // ignore: unused_local_variable cus it is used!
     String sourceMatchString = "Searching... ";
     IconData statusIcon;
     Color statusColor;
@@ -446,7 +446,6 @@ class SourceBodyWidget extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Source Dropdown
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -498,7 +497,6 @@ class SourceBodyWidget extends StatelessWidget {
                           ],
                         ),
                       ),
-                      // Dropdown
                       Container(
                         width: double.infinity,
                         decoration: BoxDecoration(
@@ -506,14 +504,6 @@ class SourceBodyWidget extends StatelessWidget {
                           border: Border.all(
                             color: appTheme.textMainColor.withAlpha(60),
                             width: 1,
-                          ),
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              appTheme.backgroundSubColor.withAlpha(127),
-                              appTheme.backgroundSubColor,
-                            ],
                           ),
                         ),
                         child: DropdownButtonHideUnderline(
@@ -578,10 +568,7 @@ class SourceBodyWidget extends StatelessWidget {
                       ),
                     ],
                   ),
-
                   SizedBox(height: 16),
-
-                  // Manual Search Button
                   Container(
                     width: double.infinity,
                     child: ElevatedButton.icon(

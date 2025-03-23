@@ -97,7 +97,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                                   begin: Alignment.topCenter,
                                   end: Alignment.bottomCenter,
                                   colors: [
-                                    Colors.black.withAlpha(179),
+                                    Colors.black.withAlpha(150),
                                     Colors.black.withAlpha(230),
                                   ],
                                 ).createShader(rect);

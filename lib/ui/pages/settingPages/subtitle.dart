@@ -35,7 +35,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
   }
 
   void readSubSettings() async {
-    UserPreferences().getUserPreferences().then((value) {
+    UserPreferences.getUserPreferences().then((value) {
       setState(() {
         settings = value.subtitleSettings ?? SubtitleSettings();
         initialised = true;
@@ -44,7 +44,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
   }
 
   Future<void> saveSubSettings() async {
-    await UserPreferences().saveUserPreferences(UserPreferencesModal(subtitleSettings: settings));
+    await UserPreferences.saveUserPreferences(UserPreferencesModal(subtitleSettings: settings));
     print("Sub preference saved!");
   }
 

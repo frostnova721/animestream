@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
+import 'package:animestream/ui/models/widgets/infoPageWidgets/scrollingList.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -35,6 +37,11 @@ class _DiscoverState extends State<Discover> {
     super.initState();
     _pageController.addListener(onScroll);
   }
+
+  final recentlyUpdatedScrollController = ScrollController(),
+      thisSeasonScrollController = ScrollController(),
+      recommendedScrollController = ScrollController();
+
   int currentPage = 0;
   final PageController _pageController = PageController();
   Timer? timer;
@@ -113,7 +120,7 @@ class _DiscoverState extends State<Discover> {
                       height: 75,
                       width: 150,
                       decoration: BoxDecoration(
-                        // color: appTheme.backgroundSubColor,
+                        // color: Colors.black,
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
                             image: AssetImage(
@@ -148,7 +155,7 @@ class _DiscoverState extends State<Discover> {
                       height: 75,
                       width: 150,
                       decoration: BoxDecoration(
-                        // color: appTheme.backgroundSubColor,
+                        // color: Colors.black,
                         borderRadius: BorderRadius.circular(20),
                         image: DecorationImage(
                             image: AssetImage(
@@ -174,12 +181,12 @@ class _DiscoverState extends State<Discover> {
                 ),
               ],
             ),
-            _itemTitle("Recently updated"),
-            _scrollList(widget.recentlyUpdatedList),
-            _itemTitle("This season"),
-            _scrollList(widget.thisSeason),
-            _itemTitle("Recommended"),
-            _scrollList(widget.recommendedList),
+            _itemTitle("Recently updated", recentlyUpdatedScrollController),
+            _scrollList(widget.recentlyUpdatedList, recentlyUpdatedScrollController),
+            _itemTitle("This season", thisSeasonScrollController),
+            _scrollList(widget.thisSeason, thisSeasonScrollController),
+            _itemTitle("Recommended", recommendedScrollController),
+            _scrollList(widget.recommendedList, recommendedScrollController),
             footSpace(),
           ],
         ),
@@ -323,12 +330,13 @@ class _DiscoverState extends State<Discover> {
         });
   }
 
-  Container _scrollList(List<AnimeCard> list) {
+  Container _scrollList(List<AnimeCard> list, ScrollController controller) {
     return Container(
       height: (list.firstOrNull?.isMobile ?? true) ? 220 : 265,
       padding: EdgeInsets.only(left: 10, right: 10),
       child: list.length > 0
           ? ListView.builder(
+              controller: controller,
               padding: EdgeInsets.zero,
               itemCount: list.length,
               scrollDirection: Axis.horizontal,
@@ -342,13 +350,21 @@ class _DiscoverState extends State<Discover> {
     );
   }
 
-  Container _itemTitle(String title) {
+  Container _itemTitle(String title, ScrollController controller) {
     return Container(
       alignment: Alignment.centerLeft,
       padding: EdgeInsets.only(top: 25, left: 25, right: 25, bottom: 20),
-      child: Text(
-        title,
-        style: basicTextStyle("Rubik", 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: basicTextStyle("Rubik", 20),
+          ),
+          if(Platform.isWindows)
+          ScrollingList.scrollButtons(controller)
+          else SizedBox.shrink()
+        ],
       ),
     );
   }

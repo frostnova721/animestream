@@ -9,13 +9,13 @@ import 'package:provider/provider.dart';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/watching.dart';
-import 'package:animestream/ui/models/playerUtils.dart';
+import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
-import 'package:animestream/ui/models/widgets/customControls.dart';
-import 'package:animestream/ui/models/widgets/desktopControls.dart';
+import 'package:animestream/ui/models/widgets/player/customControls.dart';
+import 'package:animestream/ui/models/widgets/player/desktopControls.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 
 class Watch extends StatefulWidget {
@@ -50,7 +50,7 @@ class _WatchState extends State<Watch> {
 
   void _initialize() async {
     /// Set black title bar
-   context.read<ThemeProvider>().setTitlebarColor(appTheme.backgroundColor);
+    context.read<ThemeProvider>().setTitlebarColor(appTheme.backgroundColor);
 
     final dataProvider = context.read<PlayerDataProvider>();
 
@@ -195,8 +195,9 @@ class _WatchState extends State<Watch> {
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         // save the last watched duration
+        final double watchPercentage = isInitiated ? ((controller.position ?? 0) / controller.duration!) : 0;
         addLastWatchedDuration(playerDataProvider.showId.toString(),
-            {playerDataProvider.state.currentEpIndex + 1: ((controller.position ?? 0) / controller.duration!) * 100});
+            {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100});
         await context.read<ThemeProvider>()
           ..setFullScreen(false)
           ..setTitlebarColor(null);
@@ -240,19 +241,31 @@ class _WatchState extends State<Watch> {
                         format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
                         subtitleSource: playerDataProvider.state.currentStream.subtitle!,
                       ),
-                    AnimatedOpacity(
-                      duration: Duration(milliseconds: 150),
-                      opacity: playerProvider.state.controlsVisible ? 1 : 0,
-                      child: Stack(
-                        children: [
-                          IgnorePointer(ignoring: true, child: overlay()),
-                          if (isInitiated)
+                    isInitiated ?
+                      AnimatedOpacity(
+                        duration: Duration(milliseconds: 150),
+                        opacity: playerProvider.state.controlsVisible ? 1 : 0,
+                        child: Stack(
+                          children: [
+                            IgnorePointer(ignoring: true, child: overlay()),
                             IgnorePointer(
                                 ignoring: !playerProvider.state.controlsVisible,
                                 child: Platform.isWindows ? Desktopcontrols() : Controls()),
+                          ],
+                        ),
+                      )
+                      : Platform.isWindows ? Column(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 10,left: 10),
+                            child: IconButton(onPressed: () => Navigator.pop(context), icon: Icon(Icons.arrow_back, color: Colors.white, size: 35,)),
+                          ),
+                          PlayerLoadingWidget(),
+                          SizedBox.shrink()
                         ],
-                      ),
-                    ),
+                      ) : Container(),
                   ],
                 ),
               ),

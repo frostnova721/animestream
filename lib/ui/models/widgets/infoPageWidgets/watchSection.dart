@@ -1,6 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
-import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/commonInfo.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/continueBoxes.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/episodeGrid.dart';
@@ -182,6 +181,9 @@ class WatchSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: IconButton(
+                                  style: IconButton.styleFrom(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                                  ),
                                   onPressed: () {
                                     if (provider.currentPageIndex == 0) return;
                                     provider.currentPageIndex -= 1;
@@ -198,7 +200,7 @@ class WatchSection extends StatelessWidget {
                               GestureDetector(
                                 onTap: () {
                                   showDialog(
-                                    context: AppWrapper.navKey.currentContext!,
+                                    context: context,
                                     builder: (ctx) => Dialog(
                                       backgroundColor: appTheme.backgroundColor,
                                       shape: RoundedRectangleBorder(
@@ -329,6 +331,9 @@ class WatchSection extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: IconButton(
+                                  style: IconButton.styleFrom(
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
+                                  ),
                                   onPressed: () {
                                     if (provider.currentPageIndex >= provider.visibleEpList.length - 1) return;
                                     provider.currentPageIndex += 1;
@@ -410,6 +415,7 @@ class WatchSection extends StatelessWidget {
   }
 
   Widget _buildViewModeButton(int mode, IconData icon) {
+    // provider.viewMode;
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 2, vertical: 3),
       decoration: BoxDecoration(

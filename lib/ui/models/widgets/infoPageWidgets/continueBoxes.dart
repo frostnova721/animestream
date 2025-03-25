@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 
 class ContinueWatchingSideBox extends StatelessWidget {
   final InfoProvider provider;
-  const ContinueWatchingSideBox({
+  ContinueWatchingSideBox({
     super.key,
     required this.provider,
   });
+
+  final ValueNotifier<bool> notif = ValueNotifier<bool>(false);
 
   @override
   Widget build(BuildContext context) {
@@ -58,6 +60,8 @@ class ContinueWatchingSideBox extends StatelessWidget {
               children: [
                 MouseRegion(
                   cursor: SystemMouseCursors.click,
+                  onEnter: (event) => notif.value = true,
+                  onExit: (event) => notif.value = false,
                   child: GestureDetector(
                     onTap: () {
                       showDialog(
@@ -81,30 +85,29 @@ class ContinueWatchingSideBox extends StatelessWidget {
                         },
                       );
                     },
-                    child: Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            topRight: Radius.circular(20),
-                          ),
-                          child: Container(
-                            height: 180,
-                            width: double.infinity,
-                            child: ShaderMask(
-                              shaderCallback: (rect) {
-                                return LinearGradient(
-                                  begin: Alignment.topCenter,
-                                  end: Alignment.bottomCenter,
-                                  colors: [
-                                    Colors.black.withAlpha(150),
-                                    Colors.black.withAlpha(230),
-                                  ],
-                                ).createShader(rect);
-                              },
-                              blendMode: BlendMode.darken,
+                    child: ValueListenableBuilder(
+                      valueListenable: notif,
+                      builder: (context, hovered, child) => Stack(
+                        children: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              topRight: Radius.circular(20),
+                            ),
+                            child: Container(
+                              height: 180,
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                backgroundBlendMode: BlendMode.colorBurn,
+                                gradient:
+                                    LinearGradient(begin: Alignment.topCenter, end: Alignment.bottomCenter, colors: [
+                                  Colors.black.withAlpha(150),
+                                  Colors.black.withAlpha(230),
+                                ]),
+                              ),
                               child: Image.network(
                                 provider.data.banner ?? provider.data.cover,
+                                opacity: AlwaysStoppedAnimation(0.5),
                                 fit: BoxFit.cover,
                                 errorBuilder: (context, error, stackTrace) => Container(
                                   color: appTheme.backgroundSubColor.withAlpha(127),
@@ -130,80 +133,85 @@ class ContinueWatchingSideBox extends StatelessWidget {
                               ),
                             ),
                           ),
-                        ),
-                        Positioned.fill(
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20),
-                              ),
-                            ),
-                            child: Center(
-                              child: Container(
-                                width: 70,
-                                height: 70,
-                                decoration: BoxDecoration(
-                                  color: appTheme.accentColor.withAlpha(51),
-                                  shape: BoxShape.circle,
-                                  border: Border.all(
-                                    color: appTheme.accentColor.withAlpha(127),
-                                    width: 2,
-                                  ),
+                          Positioned.fill(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                  topLeft: Radius.circular(20),
+                                  topRight: Radius.circular(20),
                                 ),
-                                child: Icon(
-                                  Icons.play_arrow_rounded,
-                                  color: Colors.white,
-                                  size: 45,
+                              ),
+                              child: Center(
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 150),
+                                  width: 70,
+                                  height: 70,
+                                  decoration: BoxDecoration(
+                                    color: !hovered
+                                        ? appTheme.textMainColor.withAlpha(51)
+                                        : appTheme.accentColor.withAlpha(51),
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
+                                      color: !hovered
+                                          ? appTheme.textMainColor.withAlpha(51)
+                                          : appTheme.accentColor.withAlpha(127),
+                                      width: 2,
+                                    ),
+                                  ),
+                                  child: Icon(
+                                    Icons.play_arrow_rounded,
+                                    color: Colors.white,
+                                    size: 45,
+                                  ),
                                 ),
                               ),
                             ),
                           ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          left: 0,
-                          right: 0,
-                          child: Container(
-                            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  Colors.transparent,
-                                  Colors.black.withAlpha(179),
+                          Positioned(
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            child: Container(
+                              padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.topCenter,
+                                  end: Alignment.bottomCenter,
+                                  colors: [
+                                    Colors.transparent,
+                                    Colors.black.withAlpha(179),
+                                  ],
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "${provider.started ? 'Continue' : 'Start'}",
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontFamily: "Poppins",
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 0.3,
+                                    ),
+                                  ),
+                                  SizedBox(height: 4),
+                                  Text(
+                                    "Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}",
+                                    style: TextStyle(
+                                      color: Colors.white.withAlpha(204),
+                                      fontFamily: "Poppins",
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${provider.started ? 'Continue' : 'Start'}",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontFamily: "Poppins",
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    letterSpacing: 0.3,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  "Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}",
-                                  style: TextStyle(
-                                    color: Colors.white.withAlpha(204),
-                                    fontFamily: "Poppins",
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -292,56 +300,6 @@ class ContinueWatchingSideBox extends StatelessWidget {
                         },
                       ),
                       SizedBox(height: 20),
-                      Container(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-                              builder: (context) {
-                                return Dialog(
-                                  backgroundColor: appTheme.backgroundColor,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Container(
-                                    padding: EdgeInsets.all(20),
-                                    width: size.width / 3,
-                                    child: ServerSelectionBottomSheet(
-                                      provider: provider,
-                                      episodeIndex: provider.watched,
-                                      type: ServerSheetType.watch,
-                                    ),
-                                  ),
-                                );
-                              },
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            padding: EdgeInsets.symmetric(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            elevation: 2,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Icon(Icons.play_circle_filled_rounded, size: 18),
-                              SizedBox(width: 8),
-                              Text(
-                                "Watch",
-                                style: TextStyle(
-                                  fontFamily: "Poppins",
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                  letterSpacing: 0.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -367,7 +325,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                 provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
             0)
         .toInt();
-        final size = MediaQuery.sizeOf(context);
+    final size = MediaQuery.sizeOf(context);
 
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 16),
@@ -543,9 +501,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                         );
                       },
                     ),
-
                     SizedBox(height: 24),
-
                     Container(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -571,7 +527,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 2,
+                          elevation: 1,
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,

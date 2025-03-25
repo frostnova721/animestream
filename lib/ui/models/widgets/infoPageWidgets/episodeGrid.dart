@@ -78,7 +78,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
       padding: EdgeInsets.all(8),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: hovered.value ? appTheme.textMainColor.withAlpha(30) : appTheme.backgroundSubColor,
+        color: hovered.value ? appTheme.backgroundColor : appTheme.backgroundSubColor,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Text(

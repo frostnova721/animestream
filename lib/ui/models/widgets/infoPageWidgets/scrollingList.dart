@@ -23,7 +23,7 @@ class ScrollingList {
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
               ),
-              _scrollButtons(controller),
+              scrollButtons(controller),
             ],
           ),
           Container(
@@ -62,7 +62,7 @@ class ScrollingList {
                   title,
                   style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
                 ),
-                _scrollButtons(controller),
+                scrollButtons(controller),
               ],
             ),
           ),
@@ -85,7 +85,7 @@ class ScrollingList {
     );
   }
 
-  static Row _scrollButtons(ScrollController controller) {
+  static Row scrollButtons(ScrollController controller) {
     final scrollOffset = 500;
     return Row(
       spacing: 15,

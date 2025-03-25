@@ -1,7 +1,6 @@
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
@@ -143,7 +142,7 @@ class _InfoMobileState extends State<InfoMobile> {
                                       padding: EdgeInsets.zero,
                                     ),
                                     child: Icon(
-                                      provider.getTrackerIcon(),
+                                      InfoProvider.getTrackerIcon(provider.mediaListStatus),
                                       color: appTheme.accentColor,
                                       size: 28,
                                     ),
@@ -306,8 +305,6 @@ class _InfoMobileState extends State<InfoMobile> {
                               onPressed: () {
                                 setState(() {
                                   provider.viewMode = (provider.viewMode + 1) % provider.viewModeIndexLength;
-                                  UserPreferences().saveUserPreferences(UserPreferencesModal(
-                                      episodesViewMode: UserPreferencesModal.getViewModeEnum(provider.viewMode)));
                                 });
                               },
                               icon: Icon(

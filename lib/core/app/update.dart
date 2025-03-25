@@ -39,7 +39,8 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   }
   if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
     print("[UPDATE-CHECK] UPDATE AVAILABLE!!!");
-    final apkItem = releasesRes['assets'].where((item) => item['name'] == "app-release.apk").toList();
+    final List<dynamic> apkItem = releasesRes['assets'].where((item) => item['name'] == (Platform.isAndroid ? "app-release.apk" : "animestream-x86_64.exe")).toList();
+    if(apkItem.isEmpty) return null;
     final downloadLink = apkItem[0]['browser_download_url'];
     return UpdateCheckResult(
       latestVersion: latestVersion,

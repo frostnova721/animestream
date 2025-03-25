@@ -189,7 +189,7 @@ class _SubViewerState extends State<SubViewer> {
   bool settingsInited = false;
 
   Future<void> initiateSubs() async {
-    settings = (await UserPreferences().getUserPreferences()).subtitleSettings ?? SubtitleSettings();
+    settings = (await UserPreferences.getUserPreferences()).subtitleSettings ?? SubtitleSettings();
     setState(() {
       settingsInited = true;
     });

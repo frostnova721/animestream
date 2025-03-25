@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:animestream/ui/models/playerUtils.dart';
+import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 // import 'package:av_media_player/player.dart';
 // import 'package:av_media_player/widget.dart';
 import 'package:better_player/better_player.dart';

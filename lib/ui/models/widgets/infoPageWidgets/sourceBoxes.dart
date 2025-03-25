@@ -287,7 +287,7 @@ class SourceSideWidget extends StatelessWidget {
                             ),
                             style: ElevatedButton.styleFrom(
                               // backgroundColor: appTheme.backgroundColor,
-                              elevation: 2,
+                              elevation: 1,
                               padding: EdgeInsets.symmetric(
                                 horizontal: 20,
                                 vertical: 14,
@@ -618,7 +618,7 @@ class SourceBodyWidget extends StatelessWidget {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        elevation: 2,
+                        elevation: 1,
                         padding: EdgeInsets.symmetric(
                           horizontal: 20,
                           vertical: 14,

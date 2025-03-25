@@ -234,6 +234,7 @@ class _SearchState extends State<Search> {
 
   @override
   void dispose() {
+    textEditingController.dispose();
     debounce?.cancel();
     super.dispose();
   }

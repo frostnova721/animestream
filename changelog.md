@@ -21,3 +21,4 @@
 - Fixed padding for discover and search title in respective pages
 - Fixed mal token refreshing
 - Fixed account screen stuck on loading
+- Fixed a small memory leak from search page (very smol)

@@ -89,6 +89,11 @@ class InfoProvider extends ChangeNotifier {
 
   set viewMode(int newIndex) {
     _viewMode = newIndex;
+    UserPreferences.saveUserPreferences(
+      UserPreferencesModal(
+        episodesViewMode: UserPreferencesModal.getViewModeEnum(newIndex),
+      ),
+    );
     notifyListeners();
   }
 
@@ -124,13 +129,14 @@ class InfoProvider extends ChangeNotifier {
       _manualSearchQuery = it?.manualSearchQuery;
     });
 
+    loadPreferences();
     await getEpisodes();
     await getWatched();
   }
 
   /// Fetch preferences
   Future<void> loadPreferences() async {
-    final preferences = await UserPreferences().getUserPreferences();
+    final preferences = await UserPreferences.getUserPreferences();
     _viewMode = UserPreferencesModal.getViewModeIndex(preferences.episodesViewMode ?? EpisodeViewModes.tile);
 
     //load TV stuff
@@ -268,7 +274,7 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  IconData getTrackerIcon() {
+  static IconData getTrackerIcon(MediaStatus? mediaListStatus) {
     switch (mediaListStatus?.name) {
       case "CURRENT":
         return Icons.movie_outlined;

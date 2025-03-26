@@ -181,7 +181,7 @@ class _AnimeCardState extends State<AnimeCard> {
                             size: 13,
                           ),
                           Text(
-                            " ${widget.rating ?? '00'}",
+                            " ${widget.rating ?? '??'}",
                             style: TextStyle(
                               fontSize: 14,
                               color: appTheme.onAccent,

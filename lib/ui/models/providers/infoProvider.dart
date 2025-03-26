@@ -225,6 +225,7 @@ class InfoProvider extends ChangeNotifier {
       }
       visibleEpList.add(pageOne);
     }
+      _currentPageIndex = _currentPageIndex >= _visibleEpList.length ? 0 : watched ~/ 25 ; 
   }
 
   Future<void> _search(String query) async {

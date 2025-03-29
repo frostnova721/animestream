@@ -49,7 +49,7 @@ class _AccountSettingState extends State<AccountSetting> {
         }));
       }
 
-      if(malLoggedIn) {
+      if (malLoggedIn) {
         futures.add(MALLogin().getUserProfile().then((res) {
           malu = res;
         }));
@@ -243,13 +243,13 @@ class _AccountSettingState extends State<AccountSetting> {
                         }),
                       );
                     });
-                  floatingSnackBar( "Logged out successfully!");
+                  floatingSnackBar("Logged out successfully!");
                 }, usermodal: getUserModal(databaseName.toLowerCase()))
               : _loginCard(context, onLogin: () {
                   setState(() {
                     onLogin().then((logged) {
                       if (logged) {
-                        floatingSnackBar( "Login successful!");
+                        floatingSnackBar("Login successful!");
                         Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                       }
                       //replace the page with itself to avoid recalling the functions in initState to update the user data
@@ -260,7 +260,7 @@ class _AccountSettingState extends State<AccountSetting> {
                         ),
                       );
                     }).onError((err, st) {
-                      floatingSnackBar( "Login failed! Try again");
+                      floatingSnackBar("Login failed! Try again");
                       print(err.toString());
                       print(st.toString());
                     });
@@ -327,25 +327,29 @@ class _AccountSettingState extends State<AccountSetting> {
         Navigator.of(context).push(MaterialPageRoute(builder: (context) => UserStats(userModal: usermodal!)));
       },
       child: ClipRRect(
-        clipBehavior: Clip.hardEdge,
+        clipBehavior: Clip.antiAlias,
         borderRadius: BorderRadius.circular(25),
-        child: Container(
-          height: 150,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            image: DecorationImage(
-              image: usermodal?.banner != null
-                  ? NetworkImage(usermodal!.banner!)
-                  : AssetImage('lib/assets/images/profile_banner.jpg') //such a nice image!
-                      as ImageProvider,
-              fit: BoxFit.cover,
-              opacity: 0.75,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            ImageFiltered(
+              imageFilter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5),
+              child: Container(
+                height: 150,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(25),
+                  image: DecorationImage(
+                    image: usermodal?.banner != null
+                        ? NetworkImage(usermodal!.banner!)
+                        : AssetImage('lib/assets/images/profile_banner.jpg') //such a nice image!
+                            as ImageProvider,
+                    fit: BoxFit.cover,
+                    opacity: 0.75,
+                  ),
+                ),
+              ),
             ),
-          ),
-          // alignment: Alignment.bottomCenter,
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 2.5, sigmaY: 2.5,),
-            child: Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 CircleAvatar(
@@ -393,7 +397,7 @@ class _AccountSettingState extends State<AccountSetting> {
                 ),
               ],
             ),
-          ),
+          ],
         ),
       ),
     );

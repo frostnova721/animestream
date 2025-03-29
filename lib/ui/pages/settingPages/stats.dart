@@ -27,10 +27,10 @@ class _UserStatsState extends State<UserStats> {
   Future<void> fetchUserStats() async {
     try {
       final res = await AnilistQueries().getUserStats(user.name);
-      final genreRes = await AnilistQueries().getGenreThumbnail(res.genres[0].genre);
+      final genreRes =  res.genres.isNotEmpty ? await AnilistQueries().getGenreThumbnail(res.genres[0].genre) : [];
       setState(() {
         stats = res;
-        genreThumbnail = genreRes.length > 0 ? genreRes[Random().nextInt(genreRes.length)] : null;
+        genreThumbnail = genreRes.isNotEmpty ? genreRes[Random().nextInt(genreRes.length)] : null;
         timeSpent = convertMinutes(res.minutesWatched);
       });
     } catch (err) {
@@ -224,7 +224,7 @@ class _UserStatsState extends State<UserStats> {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(
-                                        "${stats!.genres[0].genre}",
+                                        "${stats!.genres.firstOrNull?.genre}",
                                         style: textStyle(35, fontFamily: "Poppins", bold: true),
                                       ),
                                       Row(
@@ -234,7 +234,7 @@ class _UserStatsState extends State<UserStats> {
                                             style: textStyle(18, bold: true),
                                           ),
                                           Text(
-                                            "${stats!.genres[0].count}",
+                                            "${stats!.genres.firstOrNull?.count}",
                                             style: textStyle(17),
                                           ),
                                         ],
@@ -246,7 +246,7 @@ class _UserStatsState extends State<UserStats> {
                                             style: textStyle(18, bold: true),
                                           ),
                                           Text(
-                                            "${stats!.genres[0].minutesWatched} min",
+                                            "${stats!.genres.firstOrNull?.minutesWatched} min",
                                             style: textStyle(17),
                                           ),
                                         ],

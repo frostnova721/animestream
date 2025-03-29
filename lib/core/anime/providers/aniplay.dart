@@ -50,7 +50,7 @@ class AniPlay extends AnimeProvider {
       final resFuture = post(Uri.parse(link),
           headers: {
             "Content-Type": "application/json",
-            'Next-Action': "5dbcd21c7c276c4d15f8de29d9ef27aef5ea4a5e",
+            'Next-Action': "7f11490e43dca1ed90fcb5b90bac1e5714a3e11232",
           },
           body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
       resFuture.onError((e, st) {
@@ -131,9 +131,9 @@ class AniPlay extends AnimeProvider {
         headers: {
           'Referer': l,
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': "f3422af67c84852f5e63d50e1f51718f1c0225c4",
+          'Next-Action': "7f07777b5f74e3edb312e0b718a560f9d3ad21aeba",
         },
-        body: "[\"$id\",true,false]");
+        body: "[\"$id\",false,false]");
     final split = res.body.split('1:')[1];
     final List<dynamic> parsed = jsonDecode(split);
 

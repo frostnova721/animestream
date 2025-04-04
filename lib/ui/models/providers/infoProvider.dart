@@ -182,7 +182,7 @@ class InfoProvider extends ChangeNotifier {
           });
         } catch (err) {
           if (currentUserSettings?.showErrors ?? false) {
-            // floatingSnackBar( "Couldnt fetch simkl data");
+            floatingSnackBar( "Couldnt fetch simkl data");
           }
         }
       }

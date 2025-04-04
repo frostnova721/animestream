@@ -136,7 +136,7 @@ final sakuraDark = AnimeStreamTheme(
   backgroundSubColor: Color(0xFF332A2D),
   textMainColor: Color(0xFFF8F8F8),
   textSubColor: Color(0xFFBBBBBB),
-  modalSheetBackgroundColor: Color(0xFF2D2D2D),
+  modalSheetBackgroundColor: Color.fromARGB(255, 31, 31, 31),
   onAccent: Color(0xFF333333),
 );
 

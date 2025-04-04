@@ -5,6 +5,7 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -87,7 +88,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       });
                       writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
                     }, description: "*download 2x items per batch"),
-                    toggleItem("Queued Downloads", useQueuedDownloads,description: "Download items one by one" ,() {
+                    toggleItem("Queued downloads", useQueuedDownloads, description: "Download items one by one", () {
                       setState(() {
                         useQueuedDownloads = !useQueuedDownloads;
                         writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
@@ -96,16 +97,16 @@ class _GeneralSettingState extends State<GeneralSetting> {
                     InkWell(
                       onTap: () async {
                         String? dir;
-                        if(Platform.isWindows) {
+                        if (Platform.isWindows) {
                           dir = await FilePickerWindows().getDirectoryPath();
                         } else {
-                         dir = await FilePickerIO().getDirectoryPath();
+                          dir = await FilePickerIO().getDirectoryPath();
                         }
-                        if(dir == null) return;
+                        if (dir == null) return;
                         print("Path set to: $dir");
                         await Settings().writeSettings(SettingsModal(downloadPath: dir));
                         setState(() {});
-                        floatingSnackBar( "might need to provide 'allow access to all files' while downloading!");
+                        floatingSnackBar("might need to provide 'allow access to all files' while downloading!");
                       },
                       child: Container(
                         padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
@@ -132,53 +133,89 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         ),
                       ),
                     ),
-                    Container(
-                      padding: EdgeInsets.only(top: 20, bottom: 10, left: 20, right: 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Default provider",
-                            style: textStyle(),
-                          ),
-                          Container(
-                            alignment: Alignment.center,
-                            padding: EdgeInsets.only(top: 20),
-                            child: DropdownMenu(
-                              enableSearch: false,                     
-                                width: MediaQuery.of(context).size.width - 80,
-                                label: Text(
-                                  "providers",
-                                  style: TextStyle(
-                                      color: appTheme.textMainColor, fontSize: 18, fontWeight: FontWeight.bold),
-                                ),
-                                leadingIcon: Icon(
-                                  Icons.source_rounded,
-                                  color: appTheme.textMainColor,
-                                ),
-                                initialSelection: currentUserSettings?.preferredProvider ?? sources[0],
-                                onSelected: (val) async {
-                                  writeSettings(SettingsModal(preferredProvider: val));
-                                },
-                                textStyle: TextStyle(
-                                    fontFamily: "NotoSans",
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: appTheme.textMainColor),
-                                menuStyle: MenuStyle(
-                                    backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
-                                    shape: WidgetStatePropertyAll(
-                                        RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)))),
-                                dropdownMenuEntries: getSourceDropdownList()),
-                          )
-                        ],
-                      ),
-                    ),
+                    ClickableItem(
+                      onTap: () {
+                        showModalBottomSheet(
+                          context: context,
+                          showDragHandle: true,
+                          isScrollControlled: true,
+                          builder: (context) => _providerSheet(context),
+                        );
+                      },
+                      label: "Default provider",
+                      description: currentUserSettings?.preferredProvider,
+                      suffixIcon: Icon(Icons.navigate_next_rounded),
+                    )
                   ],
                 ),
               ),
             )
           : Container(),
+    );
+  }
+
+  StatefulBuilder _providerSheet(BuildContext context) {
+    return StatefulBuilder(
+      builder: (context, setcState) => 
+       Container(
+        padding: const EdgeInsets.only(
+          top: 10,
+          left: 20,
+          right: 20,
+        ),
+        margin: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                "Select Provider",
+                style: textStyle().copyWith(fontSize: 23),
+                textAlign: TextAlign.left,
+              ),
+            ),
+            ListView.builder(
+                shrinkWrap: true,
+                itemCount: sources.length,
+                itemBuilder: (context, index) {
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: sources[index] == currentUserSettings?.preferredProvider
+                          ? appTheme.accentColor
+                          : appTheme.backgroundSubColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () async {
+                          await writeSettings(SettingsModal(preferredProvider: sources[index]));
+                          setState(() {});
+                          setcState((){});
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          child: Text(
+                            sources[index],
+                            style: textStyle().copyWith(
+                              color: sources[index] == currentUserSettings?.preferredProvider
+                                  ? appTheme.onAccent
+                                  : appTheme.textMainColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -16,7 +16,7 @@ void floatingSnackBar(String message, {int? duration, bool waitForPreviousToFini
       backgroundColor: Color.fromARGB(244, 26, 26, 26),
       behavior: SnackBarBehavior.floating,
       dismissDirection: DismissDirection.down,
-      margin:isWindows ? null : EdgeInsets.only(bottom: 40, left: 20, right: 20),
+      margin: isWindows ? null : EdgeInsets.only(bottom: 40, left: 20, right: 20),
       width: isWindows ? MediaQuery.of(AnimeStream.snackbarKey.currentState!.context).size.width / 5 : null,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     ),

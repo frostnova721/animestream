@@ -33,7 +33,6 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   void initState() {
     super.initState();
     isTv().then((value) => tv = value);
-    
 
     //check for app updates & show prompt
     checkForUpdates().then((data) => {
@@ -56,7 +55,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   loadDiscoverItems(),
                 })
             .catchError((err) {
-          floatingSnackBar( "couldnt load user profile");
+          floatingSnackBar("couldnt load user profile");
           loadListsForHome();
           loadDiscoverItems();
 
@@ -171,8 +170,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     } catch (err) {
       print(err);
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        floatingSnackBar( err.toString(), waitForPreviousToFinish: true);
-      floatingSnackBar( "couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
+        floatingSnackBar(err.toString(), waitForPreviousToFinish: true);
+      floatingSnackBar("couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
       if (mounted)
         setState(() {
           homePageError = true;
@@ -215,24 +214,14 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     recommendedList.clear();
     recommendedListData.forEach((item) {
-      recommendedList.add(Cards.animeCard(
-        item.id,
-        item.title['english'] ?? item.title['romaji'] ?? '',
-        item.cover,
-        rating: item.rating,
-        isMobile: isMobile
-      ));
+      recommendedList.add(Cards.animeCard(item.id, item.title['english'] ?? item.title['romaji'] ?? '', item.cover,
+          rating: item.rating, isMobile: isMobile));
     });
 
     thisSeason.clear();
     thisSeasonData.forEach((item) {
-      thisSeason.add(Cards.animeCard(
-        item.id,
-        item.title['english'] ?? item.title['romaji'] ?? '',
-        item.cover,
-        rating: item.rating,
-        isMobile: isMobile
-      ));
+      thisSeason.add(Cards.animeCard(item.id, item.title['english'] ?? item.title['romaji'] ?? '', item.cover,
+          rating: item.rating, isMobile: isMobile));
     });
 
     setState(() {});
@@ -334,10 +323,15 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, res) async {
+        if (_barController.currentIndex != 0) {
+          _barController.currentIndex = 0;
+          return;
+        }
+
         //exit the app if back is pressed again within 3 sec window
         if (popInvoked) return await SystemNavigator.pop();
 
-        floatingSnackBar( "Hit back once again to exit the app");
+        floatingSnackBar("Hit back once again to exit the app");
         popInvoked = true;
         popTimeoutWindow();
       },
@@ -348,10 +342,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   NavigationRail(
                     onDestinationSelected: (value) {
                       _barController.currentIndex = value;
-                      setState(() {
-
-                        // tabController.animateTo(value);
-                      });
+                      setState(() {});
                     },
                     backgroundColor: appTheme.backgroundColor,
                     elevation: 1,
@@ -410,34 +401,37 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   }
 
   Widget _bottomBar(BuildContext context, double blurSigmaValue) {
-    // if (useNewBottomBar) {
-      return Stack(children: [
+    return Stack(
+      children: [
         BottomBarView(
           controller: _barController,
           children: [
             Home(
               key: ValueKey("0"),
-                recentlyWatched: recentlyWatched,
-                currentlyAiring: currentlyAiring,
-                dataLoaded: homeDataLoaded,
-                error: homePageError,
-                updateWatchedList: updateWatchedList,
-                planned: plannedList,
-              ),
-              Discover(
-                key: ValueKey("1"),
-                thisSeason: thisSeason,
-                recentlyUpdatedList: recentlyUpdatedList,
-                recommendedList: recommendedList,
-                trendingList: trendingList,
-              ),
-              Search(key: ValueKey("2"),),
+              recentlyWatched: recentlyWatched,
+              currentlyAiring: currentlyAiring,
+              dataLoaded: homeDataLoaded,
+              error: homePageError,
+              updateWatchedList: updateWatchedList,
+              planned: plannedList,
+            ),
+            Discover(
+              key: ValueKey("1"),
+              thisSeason: thisSeason,
+              recentlyUpdatedList: recentlyUpdatedList,
+              recommendedList: recommendedList,
+              trendingList: trendingList,
+            ),
+            Search(
+              key: ValueKey("2"),
+            ),
           ],
         ),
         AnimeStreamBottomBar(
           controller: _barController,
           accentColor: appTheme.accentColor,
-          backgroundColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
+          backgroundColor:
+              appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
           borderRadius: 10,
           items: [
             BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
@@ -453,6 +447,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             BottomBarItem(title: 'Search', icon: Icon(Icons.search)),
           ],
         )
-      ],);
+      ],
+    );
   }
 }

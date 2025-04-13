@@ -144,7 +144,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       },
                       label: "Default provider",
                       description: currentUserSettings?.preferredProvider,
-                      suffixIcon: Icon(Icons.navigate_next_rounded),
+                      suffixIcon: Icon(Icons.arrow_drop_down),
                     )
                   ],
                 ),

@@ -10,6 +10,7 @@ import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
+import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -175,7 +176,7 @@ class _InfoMobileState extends State<InfoMobile> {
                   ],
                 )
               : Center(
-                  child: CircularProgressIndicator(
+                  child: AnimeStreamLoading(
                     color: appTheme.accentColor,
                   ),
                 ),
@@ -297,6 +298,24 @@ class _InfoMobileState extends State<InfoMobile> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
+                          InkWell(
+                            onTap: () => provider.preferDubs = !provider.preferDubs,
+                            child: Container(
+                              margin: EdgeInsets.all(2),
+                              width: 40,
+                              height: 25,
+                              alignment: Alignment.center,
+                              padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(6),
+                                color: appTheme.textMainColor
+                              ),
+                              child: Text(provider.preferDubs ? "dub" : "sub", style: TextStyle(
+                                color: appTheme.backgroundColor,
+                                fontWeight: FontWeight.bold
+                              )),
+                            ),
+                          ),
                           Padding(
                             padding: const EdgeInsets.only(right: 10),
                             child: IconButton(
@@ -488,22 +507,31 @@ class _InfoMobileState extends State<InfoMobile> {
         customBorder: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
         focusColor: appTheme.textSubColor,
         onLongPress: () {
-          showDialog(context: context, builder: (context) {
-            return AlertDialog(
-              actions: [
-                TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("No")),
-                TextButton(onPressed: () {
-                  provider.clearLastWatchDuration();
-                  Navigator.pop(context);
-                }, child: Text("Yes"), style: TextButton.styleFrom(backgroundColor: appTheme.accentColor, foregroundColor: appTheme.onAccent),)
-              ],
-              content: Padding(
-                padding: const EdgeInsets.all(10),
-                child: Text("Clear watch progress for this episode?", style: TextStyle(fontSize: 15),),
-              ),
-              )
-            ;
-          });
+          showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  actions: [
+                    TextButton(onPressed: () => Navigator.of(context).pop(), child: Text("No")),
+                    TextButton(
+                      onPressed: () {
+                        provider.clearLastWatchDuration();
+                        Navigator.pop(context);
+                      },
+                      child: Text("Yes"),
+                      style: TextButton.styleFrom(
+                          backgroundColor: appTheme.accentColor, foregroundColor: appTheme.onAccent),
+                    )
+                  ],
+                  content: Padding(
+                    padding: const EdgeInsets.all(10),
+                    child: Text(
+                      "Clear watch progress for this episode?",
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ),
+                );
+              });
         },
         onTap: () async {
           showModalBottomSheet(
@@ -562,8 +590,9 @@ class _InfoMobileState extends State<InfoMobile> {
                   null)
                 Container(
                   width: 285 *
-                      ((provider.lastWatchedDurationMap?[
-                                  provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+                      ((provider.lastWatchedDurationMap?[provider.watched < provider.epLinks.length
+                                  ? provider.watched + 1
+                                  : provider.watched] ??
                               0) /
                           100) as double,
                   height: 1.8,
@@ -618,7 +647,7 @@ class _InfoMobileState extends State<InfoMobile> {
               showDragHandle: true,
               context: context,
               builder: (ctx) => Container(
-                width: double.infinity,
+                    width: double.infinity,
                     padding: EdgeInsets.only(left: 20, right: 20, bottom: MediaQuery.paddingOf(ctx).bottom),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
@@ -627,7 +656,10 @@ class _InfoMobileState extends State<InfoMobile> {
                       children: [
                         Padding(
                           padding: const EdgeInsets.only(left: 8.0),
-                          child: Text("Select Action", style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),),
+                          child: Text(
+                            "Select Action",
+                            style: TextStyle(fontSize: 23, fontWeight: FontWeight.bold),
+                          ),
                         ),
                         Row(
                           mainAxisSize: MainAxisSize.min,
@@ -651,7 +683,8 @@ class _InfoMobileState extends State<InfoMobile> {
                                       builder: (BuildContext context) {
                                         return ServerSelectionBottomSheet(
                                           provider: provider,
-                                          episodeIndex: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'],
+                                          episodeIndex: provider.visibleEpList[provider.currentPageIndex][index]
+                                              ['realIndex'],
                                           type: ServerSheetType.values[ind],
                                         );
                                       },
@@ -1168,7 +1201,7 @@ class _InfoMobileState extends State<InfoMobile> {
           return GestureDetector(
             onTap: () {
               if (item.type.toLowerCase() != "anime") {
-                return floatingSnackBar( 'Mangas/Novels arent supported');
+                return floatingSnackBar('Mangas/Novels arent supported');
               }
 
               //only navigate if the list is being built by characterCard method.
@@ -1185,8 +1218,7 @@ class _InfoMobileState extends State<InfoMobile> {
             child: Container(
                 width: 130,
                 child: recommended
-                    ? Cards.animeCard(
-                        item.id, item.title['english'] ?? item.title['romaji'] ?? "", item.cover,
+                    ? Cards.animeCard(item.id, item.title['english'] ?? item.title['romaji'] ?? "", item.cover,
                         rating: item.rating)
                     : Cards.characterCard(
                         item.title['english'] ?? item.title['romaji'] ?? "",
@@ -1280,10 +1312,10 @@ class _InfoMobileState extends State<InfoMobile> {
                                     img,
                                     (provider.data.title['english'] ?? provider.data.title['romaji'] ?? "anime") +
                                         "_Banner");
-                                floatingSnackBar( "Succesfully saved to your downloads folder!");
+                                floatingSnackBar("Succesfully saved to your downloads folder!");
                                 Navigator.of(context).pop();
                               } catch (err) {
-                                floatingSnackBar( "Couldnt save the image!");
+                                floatingSnackBar("Couldnt save the image!");
                               }
                             },
                             style: ElevatedButton.styleFrom(

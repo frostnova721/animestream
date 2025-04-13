@@ -61,6 +61,7 @@ dependencies:
 
   # Misc
   flutter_native_splash: ^2.4.0
+  dart_eval: ^0.7.10
   # dart_eval: ^0.7.10 not now atleast
   # window_size: ^0.1.0
 
@@ -120,7 +121,7 @@ flutter:
     - lib/assets/images/chisato.jpeg
     - lib/assets/images/mitsuha.jpg
     - lib/assets/images/profile_banner.jpg
-    - lib/assets/images/chisato_AI.png
+    - lib/assets/images/chisato_AI.jpg
     - .env
 
   fonts:

@@ -144,6 +144,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                           onPressed: () {
                             showDialog(
                               context: context,
+                              useRootNavigator: false,
                               builder: (context) {
                                 return sideBox();
                               },
@@ -212,6 +213,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 onPressed: () {
                                   showDialog(
                                     context: context,
+                                    useRootNavigator: false,
                                     builder: (BuildContext context) {
                                       return sideBox();
                                     },
@@ -229,6 +231,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   return floatingSnackBar( "Already on the first episode");
                                 showDialog(
                                     context: context,
+                                    useRootNavigator: false,
                                     builder: (BuildContext context) {
                                       return CustomControlsBottomSheet(
                                         index: dataProvider.state.currentEpIndex - 1,
@@ -263,6 +266,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 } else
                                   showDialog(
                                     context: context,
+                                    useRootNavigator: false,
                                     builder: (BuildContext context) {
                                       return CustomControlsBottomSheet(
                                         index: dataProvider.state.currentEpIndex + 1,
@@ -478,6 +482,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   Navigator.pop(context);
                                   showDialog(
                                       context: context,
+                                      useRootNavigator: false,
                                       builder: (context) {
                                         return CustomControlsBottomSheet(
                                           index: index,

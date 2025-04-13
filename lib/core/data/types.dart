@@ -90,13 +90,15 @@ class SettingsModal {
 class UserPreferencesModal {
   final EpisodeViewModes? episodesViewMode;
   final SubtitleSettings? subtitleSettings;
+  final bool? preferDubs;
 
-  UserPreferencesModal({this.episodesViewMode, this.subtitleSettings});
+  UserPreferencesModal({this.episodesViewMode, this.subtitleSettings, this.preferDubs});
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(
       episodesViewMode: getViewModeEnum(map['episodesViewMode'] ?? 0),
       subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings'] ?? SubtitleSettings().toMap()),
+      preferDubs: map['preferDubs'] ?? false,
     );
   }
 
@@ -104,6 +106,7 @@ class UserPreferencesModal {
     return {
       'episodesViewMode': getViewModeIndex(episodesViewMode ?? EpisodeViewModes.list),
       'subtitleSettings': subtitleSettings?.toMap() ?? SubtitleSettings().toMap(),
+      'preferDubs': preferDubs ?? false,
     };
   }
 

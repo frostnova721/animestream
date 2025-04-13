@@ -85,7 +85,7 @@ class RoundedRectangularThumbShape extends SliderComponentShape {
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
-    return Size(width, 10);
+    return Size(width, 38);
   }
 
   @override

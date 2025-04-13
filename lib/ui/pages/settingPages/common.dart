@@ -96,16 +96,12 @@ InkWell toggleItem(
   bool value,
   void Function() onTapFunction, {
   String? description = null,
+  EdgeInsets? customPadding = const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
 }) {
   return InkWell(
     onTap: onTapFunction,
     child: Container(
-      padding: EdgeInsets.only(
-        left: 20,
-        right: 20,
-        top: 10,
-        bottom: 10
-      ),
+      padding: customPadding,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -130,6 +126,7 @@ InkWell toggleItem(
             },
             activeColor: appTheme.backgroundColor,
             activeTrackColor: appTheme.accentColor,
+            inactiveTrackColor: appTheme.backgroundColor,
           )
         ],
       ),

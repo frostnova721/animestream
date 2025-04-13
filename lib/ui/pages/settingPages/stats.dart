@@ -5,6 +5,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 
@@ -101,7 +102,7 @@ class _UserStatsState extends State<UserStats> {
                             child: CircleAvatar(
                               backgroundImage: user.avatar != null
                                   ? NetworkImage(user.avatar!)
-                                  : AssetImage('lib/assets/images/chisato_AI.png') as ImageProvider,
+                                  : AssetImage('lib/assets/images/chisato_AI.jpg') as ImageProvider,
                               backgroundColor: Colors.grey,
                               radius: 50,
                             ),
@@ -335,7 +336,7 @@ class _UserStatsState extends State<UserStats> {
               ),
             )
           : Center(
-              child: CircularProgressIndicator(
+              child: AnimeStreamLoading(
                 color: appTheme.accentColor,
               ),
             ),

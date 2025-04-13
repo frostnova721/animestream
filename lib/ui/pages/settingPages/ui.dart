@@ -84,7 +84,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
+                          toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
+                          customPadding: EdgeInsets.all(10),
                               () async {
                             //the package just wont work if <android 12!!!
                             if (!isAboveAndroid12)
@@ -144,7 +145,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               ],
                             ),
                           ),
-                          _toggleItem(
+                          toggleItem(
                             "AMOLED Background",
                             AMOLEDBackgroundEnabled,
                             () async {
@@ -169,6 +170,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               Provider.of<ThemeProvider>(context, listen: false).justRefresh();
                               setState(() {});
                             },
+                            customPadding: EdgeInsets.all(10),
                             description: "Full black background",
                           ),
                           // if (Platform.isWindows)
@@ -355,47 +357,6 @@ class _ThemeSettingState extends State<ThemeSetting> {
     return Container(
       padding: EdgeInsets.only(top: 15, bottom: 15),
       child: child,
-    );
-  }
-
-  InkWell _toggleItem(String label, bool value, void Function() onTapFunction, {String? description = null}) {
-    return InkWell(
-      onTap: onTapFunction,
-      child: item(
-        child: Container(
-          padding: EdgeInsets.only(
-            left: 10,
-            right: 10,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: textStyle(),
-                  ),
-                  if (description != null)
-                    Text(
-                      description,
-                      style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
-                    ),
-                ],
-              ),
-              Switch(
-                value: value,
-                onChanged: (val) {
-                  onTapFunction();
-                },
-                activeColor: appTheme.backgroundColor,
-                activeTrackColor: appTheme.accentColor,
-              )
-            ],
-          ),
-        ),
-      ),
     );
   }
 

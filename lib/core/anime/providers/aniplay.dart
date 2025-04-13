@@ -6,6 +6,9 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
 class AniPlay extends AnimeProvider {
+
+  final String providerName = "aniplay";
+
   static const baseUrl = "https://aniplaynow.live";
 
   @override

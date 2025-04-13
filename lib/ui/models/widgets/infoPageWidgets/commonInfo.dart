@@ -63,6 +63,7 @@ class CommonInfo extends StatelessWidget {
                           }
                           showDialog(
                             context: context,
+                            useRootNavigator: false,
                             builder: (context) => Dialog(
                               backgroundColor: appTheme.backgroundColor,
                               child: Container(
@@ -89,6 +90,7 @@ class CommonInfo extends StatelessWidget {
                           }
                         showDialog(
                             context: context,
+                            useRootNavigator: false,
                             builder: (context) => Dialog(
                               backgroundColor: appTheme.backgroundColor,
                               child: Container(

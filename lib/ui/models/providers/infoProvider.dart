@@ -50,6 +50,7 @@ class InfoProvider extends ChangeNotifier {
   bool _dataLoaded = false;
   bool _infoPage = true;
   bool _infoLoadError = false;
+  bool _preferDubs = false;
 
   // Getters
   bool get infoLoadError => _infoLoadError;
@@ -58,6 +59,7 @@ class InfoProvider extends ChangeNotifier {
   bool get loggedIn => _loggedIn;
   bool get dataLoaded => _dataLoaded;
   bool get infoPage => _infoPage;
+  bool get preferDubs => _preferDubs;
 
   Map? get lastWatchedDurationMap => _lastWatchedDurationMap;
 
@@ -117,6 +119,16 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set preferDubs(bool val) {
+    _preferDubs = val;
+    UserPreferences.saveUserPreferences(
+      UserPreferencesModal(
+        preferDubs: val,
+      ),
+    );
+    notifyListeners();
+  }
+
   /// Called in the init state
   void init() async {
     if (_initCalled) throw Exception("The initialization was already done");
@@ -138,6 +150,7 @@ class InfoProvider extends ChangeNotifier {
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences.getUserPreferences();
     _viewMode = UserPreferencesModal.getViewModeIndex(preferences.episodesViewMode ?? EpisodeViewModes.tile);
+    _preferDubs = preferences.preferDubs ?? false;
 
     //load TV stuff
     if (await isTv()) {
@@ -155,7 +168,9 @@ class InfoProvider extends ChangeNotifier {
     _watched = item == 0 ? 0 : item;
     _started = item != 0;
 
-    _currentPageIndex = watched ~/ 25; //index increases when the episodes are >24
+    final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
+
+    _currentPageIndex = supposedPageIndex >= visibleEpList.length ? visibleEpList.length-1 : supposedPageIndex; 
 
     if (refreshLastWatchDuration) {
       _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
@@ -186,8 +201,7 @@ class InfoProvider extends ChangeNotifier {
           }
         }
       }
-
-      // getLastWatchedDuration(widget.id.toString()).then((it) => lastWatchedDurationMap = it ?? {}); // retrieve the last watch duration
+      
       final info = await DatabaseHandler().getAnimeInfo(id);
       _altDatabases = info.alternateDatabases;
       _dataLoaded = true;

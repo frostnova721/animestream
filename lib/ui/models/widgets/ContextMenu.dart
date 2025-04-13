@@ -54,7 +54,7 @@ class _ContextMenuState extends State<ContextMenu> {
                             ),
                           ],
                         ),
-                        height: (widget.menuItems.length * 40) + 8 + (widget.header != null ? 50 : 0), //add the padding
+                        height: (widget.menuItems.length * 40) + 10 + (widget.header != null ? 50 : 0), //add the padding
                         width: width,
                         child: Column(
                           children: [

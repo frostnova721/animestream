@@ -1,6 +1,9 @@
 import 'package:animestream/core/commons/types.dart';
 
 abstract class AnimeProvider {
+  /**Name of the provider */
+  String get providerName;
+
   //should provide search results with keys: name, image, alias
   Future<List<Map<String, String?>>> search(String query);
 

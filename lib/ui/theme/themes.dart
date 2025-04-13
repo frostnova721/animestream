@@ -93,7 +93,7 @@ final amethyst = AnimeStreamTheme(
   accentColor: Color(0xff6a3b76),
   backgroundColor: Color(0xff1a1119),
   backgroundSubColor: Color.fromARGB(255, 65, 37, 53),
-  textMainColor: Color(0xfffdf0e6),    // Slightly softened white
+  textMainColor: Color(0xfffdf0e6), // Slightly softened white
   textSubColor: Color(0xffe7c3bf),
   modalSheetBackgroundColor: Color(0xff1e0620),
   onAccent: Color(0xfffbf0e8),
@@ -130,6 +130,7 @@ final mochaLight = AnimeStreamTheme(
   onAccent: Color(0xff261E18),
 );
 
+/**Sakura */
 final sakuraDark = AnimeStreamTheme(
   accentColor: Color(0xFFFF8FAB),
   backgroundColor: Color(0xFF1A1A1A),
@@ -150,6 +151,26 @@ final sakuraLight = AnimeStreamTheme(
   onAccent: Color(0xFFFFFFFF),
 );
 
+final neonGreen = AnimeStreamTheme(
+  accentColor: Color(0xff27e9b5),
+  backgroundColor: Color(0xff051824),
+  modalSheetBackgroundColor: Color(0xff162936),
+  backgroundSubColor: Color(0xff2a3e4d),
+  textMainColor: Color(0xffffffff),
+  textSubColor: Color(0xffb0b8c1),
+  onAccent: Colors.black,
+);
+
+final neonGreenLight = AnimeStreamTheme(
+  accentColor: Color(0xff00c896),
+  backgroundColor: Color(0xfff5f9fc),
+  modalSheetBackgroundColor: Color(0xffffffff),
+  backgroundSubColor: Color(0xffe0eaf2),
+  textMainColor: Color(0xff102a39),
+  textSubColor: Color(0xff5d717f),
+  onAccent: Colors.white,
+);
+
 /** List of available themes.
  *
 The theme list in UI screen is generated from this list */
@@ -161,6 +182,7 @@ List<ThemeItem> availableThemes = [
   ThemeItem(id: 05, name: "Amethyst", theme: amethyst, lightVariant: amethystLight),
   ThemeItem(id: 06, name: "Mocha", theme: mocha, lightVariant: mochaLight),
   ThemeItem(id: 07, name: "Sakura", theme: sakuraDark, lightVariant: sakuraLight),
+  ThemeItem(id: 08, name: "Neon Green", theme: neonGreen, lightVariant: neonGreenLight)
 ];
 
 ThemeModeValues lightModeValues = ThemeModeValues(

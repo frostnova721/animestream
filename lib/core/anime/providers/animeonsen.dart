@@ -115,4 +115,8 @@ class AnimeOnsen extends AnimeProvider {
   Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
      throw UnimplementedError();
   }
+  
+  @override
+  // TODO: implement providerName
+  String get providerName => "animeonsen";
 }

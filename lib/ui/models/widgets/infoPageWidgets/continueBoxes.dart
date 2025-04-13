@@ -66,6 +66,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                     onTap: () {
                       showDialog(
                         context: context,
+                        useRootNavigator: false,
                         builder: (context) {
                           return Dialog(
                             backgroundColor: appTheme.backgroundColor,
@@ -332,6 +333,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
       child: GestureDetector(
         onTap: () => showDialog(
           context: context,
+          useRootNavigator: false,
           builder: (context) {
             return Dialog(
               backgroundColor: appTheme.backgroundColor,
@@ -507,6 +509,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                       child: ElevatedButton(
                         onPressed: () => showDialog(
                           context: context,
+                          useRootNavigator: false,
                           builder: (context) {
                             return Dialog(
                               backgroundColor: appTheme.backgroundColor,

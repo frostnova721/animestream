@@ -209,7 +209,7 @@ class _HomeState extends State<Home> {
               CircleAvatar(
                 backgroundImage: storedUserData!.avatar != null
                     ? NetworkImage(storedUserData!.avatar!)
-                    : AssetImage('lib/assets/images/chisato_AI.png') as ImageProvider,
+                    : AssetImage('lib/assets/images/chisato_AI.jpg') as ImageProvider,
               ),
               Padding(
                 padding: EdgeInsets.only(left: 10),

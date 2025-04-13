@@ -36,6 +36,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
               provider.selectedEpisodeToLoadStreams = index;
               showDialog(
                 context: context,
+                useRootNavigator: false,
                 builder: (context) {
                   return Dialog(
                     backgroundColor: appTheme.backgroundColor,
@@ -248,6 +249,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
   void _showDownloadDialog(BuildContext context, InfoProvider provider, int index) {
     showDialog(
       context: context,
+      useRootNavigator: false,
       builder: (context) {
         return Dialog(
           backgroundColor: appTheme.backgroundColor,

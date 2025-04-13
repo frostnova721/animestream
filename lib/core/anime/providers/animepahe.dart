@@ -7,6 +7,10 @@ import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 
 class AnimePahe extends AnimeProvider {
+
+  @override
+  String providerName = "animepahe";
+
   final _headers = {
     'Cookie': "__ddg1=;__ddg2_=",
     'referer': "https://animepahe.ru/",

@@ -244,6 +244,7 @@ class SourceSideWidget extends StatelessWidget {
                               final title = provider.data.title['english'] ?? provider.data.title['romaji'] ?? "no bs";
                               showDialog(
                                 context: context,
+                                useRootNavigator: false,
                                 builder: (context) {
                                   return Dialog(
                                     backgroundColor: appTheme.backgroundColor,
@@ -576,6 +577,7 @@ class SourceBodyWidget extends StatelessWidget {
                         final title = provider.data.title['english'] ?? provider.data.title['romaji'] ?? "no bs";
                         showDialog(
                           context: context,
+                          useRootNavigator: false,
                           builder: (context) {
                             return Dialog(
                               backgroundColor: appTheme.backgroundColor,

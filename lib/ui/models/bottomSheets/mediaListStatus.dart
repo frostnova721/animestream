@@ -244,7 +244,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                         child: TextField(
                           controller: textEditingController,
                           onChanged: (value) {
-                            if (value.isNotEmpty && int.parse(value) > (provider.data.episodes ?? 0)) {
+                            if (value.isNotEmpty && int.parse(value) > (provider.data.episodes ?? 9999)) {
                               textEditingController.value = TextEditingValue(
                                 text: "${provider.data.episodes ?? 0}",
                               );

@@ -15,6 +15,8 @@ final headers = {
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
+  final String providerName = "gojo";
+  
   @override
   Future<List<Map<String, String>>> search(String query) async {
     final res = await Anilist().search(query);

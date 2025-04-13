@@ -201,6 +201,7 @@ class WatchSection extends StatelessWidget {
                                 onTap: () {
                                   showDialog(
                                     context: context,
+                                    useRootNavigator: false,
                                     builder: (ctx) => Dialog(
                                       backgroundColor: appTheme.backgroundColor,
                                       shape: RoundedRectangleBorder(

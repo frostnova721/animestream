@@ -32,7 +32,6 @@ class _ControlsState extends State<Controls> {
     super.initState();
   }
 
-
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
   int? megaSkipDuration = currentUserSettings?.megaSkipDuration ?? 85;
 
@@ -58,7 +57,8 @@ class _ControlsState extends State<Controls> {
         provider.controller.play();
         break;
       case LogicalKeyboardKey.mediaTrackNext:
-        if (dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length) return;
+        if (dataProvider.state.currentEpIndex + 1 ==
+            dataProvider.epLinks.length) return;
         provider.playPreloadedEpisode(dataProvider);
         break;
       case LogicalKeyboardKey.mediaTrackPrevious:
@@ -66,7 +66,9 @@ class _ControlsState extends State<Controls> {
         showSheet(
             context,
             CustomControlsBottomSheet(
-                index: dataProvider.state.currentEpIndex - 1, dataProvider: dataProvider, playerProvider: provider));
+                index: dataProvider.state.currentEpIndex - 1,
+                dataProvider: dataProvider,
+                playerProvider: provider));
         break;
       case LogicalKeyboardKey.mediaFastForward:
         provider.fastForward(skipDuration ?? 10);
@@ -92,7 +94,8 @@ class _ControlsState extends State<Controls> {
         }
 
       default:
-        print("Unhandled key: ${event.logicalKey.keyLabel} (${event.logicalKey.keyId}) type: ${event.deviceType.name}");
+        print(
+            "Unhandled key: ${event.logicalKey.keyLabel} (${event.logicalKey.keyId}) type: ${event.deviceType.name}");
     }
   }
 
@@ -112,7 +115,8 @@ class _ControlsState extends State<Controls> {
           double LRpadding = 30;
           if (orientation == Orientation.portrait) LRpadding = 10;
           return Padding(
-            padding: EdgeInsets.only(top: 15, left: LRpadding, right: LRpadding, bottom: 5),
+            padding: EdgeInsets.only(
+                top: 15, left: LRpadding, right: LRpadding, bottom: 5),
             child: Column(
               children: [
                 Expanded(
@@ -121,7 +125,9 @@ class _ControlsState extends State<Controls> {
                     children: [
                       topControls(),
                       Expanded(
-                        child: dataProvider.state.controlsLocked ? lockedCenterControls() : centerControls(context),
+                        child: dataProvider.state.controlsLocked
+                            ? lockedCenterControls()
+                            : centerControls(context),
                       ),
                       Expanded(
                         child: Column(
@@ -135,20 +141,28 @@ class _ControlsState extends State<Controls> {
                                   children: [
                                     Text(
                                       dataProvider.state.currentTimeStamp,
-                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'NunitoSans'),
                                     ),
                                     const Text(
                                       " / ",
-                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'NunitoSans'),
                                     ),
                                     Text(
                                       dataProvider.state.maxTimeStamp,
-                                      style: TextStyle(color: Colors.white, fontFamily: 'NunitoSans'),
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontFamily: 'NunitoSans'),
                                     ),
                                   ],
                                 ),
                                 if (megaSkipDuration != null)
-                                  dataProvider.state.controlsLocked ? Container() : megaSkipButton(),
+                                  dataProvider.state.controlsLocked
+                                      ? Container()
+                                      : megaSkipButton(),
                               ],
                             ),
                             Container(
@@ -162,21 +176,32 @@ class _ControlsState extends State<Controls> {
                                       data: SliderThemeData(
                                           trackHeight: 1.3,
                                           thumbColor: appTheme.accentColor,
-                                          activeTrackColor: appTheme.accentColor,
-                                          inactiveTrackColor: Color.fromARGB(255, 121, 121, 121),
-                                          secondaryActiveTrackColor: Color.fromARGB(255, 167, 167, 167),
-                                          thumbShape: dataProvider.state.controlsLocked
+                                          activeTrackColor:
+                                              appTheme.accentColor,
+                                          inactiveTrackColor: Color.fromARGB(
+                                              255, 121, 121, 121),
+                                          secondaryActiveTrackColor:
+                                              Color.fromARGB(
+                                                  255, 167, 167, 167),
+                                          thumbShape: dataProvider
+                                                  .state.controlsLocked
                                               ? SliderComponentShape.noThumb
-                                              : RoundSliderThumbShape(enabledThumbRadius: 6),
+                                              : RoundSliderThumbShape(
+                                                  enabledThumbRadius: 6),
                                           trackShape: EdgeToEdgeTrackShape(),
-                                          overlayShape: SliderComponentShape.noThumb),
+                                          overlayShape:
+                                              SliderComponentShape.noThumb),
                                       child: Slider(
-                                        value: dataProvider.state.sliderValue.toDouble(),
-                                        secondaryTrackValue: provider.controller.buffered?.toDouble(),
+                                        value: dataProvider.state.sliderValue
+                                            .toDouble(),
+                                        secondaryTrackValue: provider
+                                            .controller.buffered
+                                            ?.toDouble(),
                                         onChanged: (val) {
                                           setState(() {
                                             // provider.state = provider.state.copyWith();
-                                            provider.controller.seekTo(Duration(seconds: val.toInt()));
+                                            provider.controller.seekTo(
+                                                Duration(seconds: val.toInt()));
                                           });
                                         },
                                         onChangeStart: (value) {
@@ -186,7 +211,9 @@ class _ControlsState extends State<Controls> {
                                           provider.controller.play();
                                         },
                                         min: 0,
-                                        max: (provider.controller.duration ?? 0) / 1000,
+                                        max: (provider.controller.duration ??
+                                                0) /
+                                            1000,
                                       ),
                                     ),
                                   ),
@@ -294,7 +321,8 @@ class _ControlsState extends State<Controls> {
                           Container(
                             padding: const EdgeInsets.only(left: 20, top: 5),
                             alignment: Alignment.topLeft,
-                            child: Text("Episode ${dataProvider.state.currentEpIndex + 1}",
+                            child: Text(
+                                "Episode ${dataProvider.state.currentEpIndex + 1}",
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'NotoSans',
@@ -329,7 +357,8 @@ class _ControlsState extends State<Controls> {
                       builder: (BuildContext context) => AlertDialog(
                         backgroundColor: Colors.black,
                         contentTextStyle: TextStyle(color: Colors.white),
-                        title: Text("VideoStream info", style: TextStyle(color: appTheme.accentColor)),
+                        title: Text("VideoStream info",
+                            style: TextStyle(color: appTheme.accentColor)),
                         content: Text(
                           //Resolution: ${qualities.where((element) => element['link'] == currentQualityLink).toList()[0]?? ['resolution'] ?? ''}   idk
                           "Aspect Ratio: 16:9 (probably) \nServer: ${dataProvider.state.preferredServer} \nSource: ${dataProvider.state.currentStream.server} ${dataProvider.state.currentStream.backup ? "\(backup\)" : ''}",
@@ -345,7 +374,19 @@ class _ControlsState extends State<Controls> {
               if (!dataProvider.state.controlsLocked)
                 IconButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting()));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => PlayerSetting())).then((val) {
+                      dataProvider.initSubsettings();
+                      // Restore View state (subtitle screen may change the view type)
+                      SystemChrome.setEnabledSystemUIMode(
+                          SystemUiMode.immersiveSticky);
+                      SystemChrome.setPreferredOrientations([
+                        DeviceOrientation.landscapeLeft,
+                        DeviceOrientation.landscapeRight,
+                      ]);
+                    });
                   },
                   tooltip: "Player settings",
                   icon: Icon(
@@ -358,7 +399,9 @@ class _ControlsState extends State<Controls> {
                   dataProvider.toggleControlsLock();
                 },
                 icon: Icon(
-                  !dataProvider.state.controlsLocked ? Icons.lock_open_rounded : Icons.lock_rounded,
+                  !dataProvider.state.controlsLocked
+                      ? Icons.lock_open_rounded
+                      : Icons.lock_rounded,
                   color: Colors.white,
                 ),
               ),
@@ -386,7 +429,7 @@ class _ControlsState extends State<Controls> {
                 borderRadius: BorderRadius.circular(10),
                 onTap: () async {
                   if (dataProvider.state.currentEpIndex == 0)
-                    return floatingSnackBar( "Already on the first episode");
+                    return floatingSnackBar("Already on the first episode");
                   showSheet(
                     context,
                     CustomControlsBottomSheet(
@@ -413,7 +456,8 @@ class _ControlsState extends State<Controls> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(10),
                 onTap: () {
-                  provider.fastForward(skipDuration != null ? -skipDuration! : -10);
+                  provider
+                      .fastForward(skipDuration != null ? -skipDuration! : -10);
                 },
                 child: Icon(
                   Icons.fast_rewind_rounded,
@@ -435,7 +479,8 @@ class _ControlsState extends State<Controls> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(10),
                         onTap: () {
-                          if (provider.state.playerState == PlayerState.playing) {
+                          if (provider.state.playerState ==
+                              PlayerState.playing) {
                             // playPause = Icons.play_arrow_rounded;
                             provider.controller.pause();
                           } else {
@@ -493,8 +538,10 @@ class _ControlsState extends State<Controls> {
                 borderRadius: BorderRadius.circular(10),
                 onTap: () async {
                   //get next episode sources!
-                  if (dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length)
-                    return floatingSnackBar( "You are already in the final episode!");
+                  if (dataProvider.state.currentEpIndex + 1 ==
+                      dataProvider.epLinks.length)
+                    return floatingSnackBar(
+                        "You are already in the final episode!");
                   if (dataProvider.state.preloadedSources.isNotEmpty) {
                     print("from preload");
                     provider.playPreloadedEpisode(dataProvider);
@@ -576,42 +623,58 @@ class BottomControls extends StatelessWidget {
                                     padding: const EdgeInsets.only(bottom: 10),
                                     child: Text(
                                       "Choose Quality",
-                                      style:
-                                          TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 20),
+                                      style: TextStyle(
+                                          color: appTheme.textMainColor,
+                                          fontFamily: "Rubik",
+                                          fontSize: 20),
                                     ),
                                   ),
                                   ListView.builder(
-                                    itemCount: dataProvider.state.qualities.length,
+                                    itemCount:
+                                        dataProvider.state.qualities.length,
                                     shrinkWrap: true,
                                     physics: NeverScrollableScrollPhysics(),
                                     itemBuilder: (BuildContext context, index) {
                                       return Container(
-                                        padding: EdgeInsets.only(left: 25, right: 25),
+                                        padding: EdgeInsets.only(
+                                            left: 25, right: 25),
                                         child: ElevatedButton(
                                           onPressed: () async {
-                                            final src = dataProvider.state.qualities[index]['link']!;
+                                            final src = dataProvider.state
+                                                .qualities[index]['link']!;
                                             // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
-                                            dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
+                                            dataProvider.updateCurrentQuality(
+                                                dataProvider
+                                                    .state.qualities[index]);
                                             playerProvider.playVideo(src,
-                                                currentStream: dataProvider.state.currentStream,
+                                                currentStream: dataProvider
+                                                    .state.currentStream,
                                                 preserveProgress: true);
                                             Navigator.pop(context);
                                           },
                                           style: ElevatedButton.styleFrom(
                                             shape: RoundedRectangleBorder(
-                                              borderRadius: BorderRadius.circular(10),
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
                                               // side: BorderSide(color: Colors.white)
                                             ),
-                                            backgroundColor: dataProvider.state.qualities[index]['link'] ==
-                                                    dataProvider.state.currentQuality['link']
+                                            backgroundColor: dataProvider.state
+                                                            .qualities[index]
+                                                        ['link'] ==
+                                                    dataProvider.state
+                                                        .currentQuality['link']
                                                 ? appTheme.accentColor
                                                 : appTheme.backgroundSubColor,
                                           ),
                                           child: Text(
                                             "${dataProvider.state.qualities[index]['quality']}",
                                             style: TextStyle(
-                                              color: dataProvider.state.qualities[index]['link'] ==
-                                                      dataProvider.state.currentQuality['link']
+                                              color: dataProvider.state
+                                                              .qualities[index]
+                                                          ['link'] ==
+                                                      dataProvider.state
+                                                              .currentQuality[
+                                                          'link']
                                                   ? Colors.black
                                                   : appTheme.accentColor,
                                               fontFamily: "Poppins",
@@ -657,7 +720,8 @@ class BottomControls extends StatelessWidget {
                           backgroundColor: appTheme.modalSheetBackgroundColor,
                           context: context,
                           builder: (context) => Container(
-                            padding: EdgeInsets.only(left: 20, right: 20, top: 15),
+                            padding:
+                                EdgeInsets.only(left: 20, right: 20, top: 15),
                             height: MediaQuery.of(context).size.height - 80,
                             child: Column(
                               children: [
@@ -669,33 +733,45 @@ class BottomControls extends StatelessWidget {
                                   ),
                                 ),
                                 Container(
-                                  height: MediaQuery.of(context).size.height - 150,
+                                  height:
+                                      MediaQuery.of(context).size.height - 150,
                                   child: GridView.builder(
                                     itemCount: dataProvider.epLinks.length,
-                                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                        crossAxisCount: 2, childAspectRatio: 4),
+                                    gridDelegate:
+                                        SliverGridDelegateWithFixedCrossAxisCount(
+                                            crossAxisCount: 2,
+                                            childAspectRatio: 4),
                                     shrinkWrap: true,
-                                    padding: EdgeInsets.only(left: 10, right: 10),
+                                    padding:
+                                        EdgeInsets.only(left: 10, right: 10),
                                     itemBuilder: (context, index) {
                                       return GestureDetector(
                                         onTap: () {
                                           Navigator.pop(context);
-                                          if (index == dataProvider.state.currentEpIndex) return;
-                                          sheet2(index, context, playerProvider, dataProvider);
+                                          if (index ==
+                                              dataProvider.state.currentEpIndex)
+                                            return;
+                                          sheet2(index, context, playerProvider,
+                                              dataProvider);
                                         },
                                         child: Container(
                                           margin: EdgeInsets.all(5),
                                           height: 50,
                                           decoration: BoxDecoration(
-                                              color: index == dataProvider.state.currentEpIndex
+                                              color: index ==
+                                                      dataProvider
+                                                          .state.currentEpIndex
                                                   ? appTheme.accentColor
                                                   : appTheme.backgroundSubColor,
-                                              borderRadius: BorderRadius.circular(12)),
+                                              borderRadius:
+                                                  BorderRadius.circular(12)),
                                           alignment: Alignment.center,
                                           child: Text(
                                             "Episode ${index + 1}",
                                             style: TextStyle(
-                                              color: index == dataProvider.state.currentEpIndex
+                                              color: index ==
+                                                      dataProvider
+                                                          .state.currentEpIndex
                                                   ? appTheme.backgroundColor
                                                   : appTheme.textMainColor,
                                               fontFamily: "Rubik",
@@ -729,7 +805,8 @@ class BottomControls extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (context) {
-                            return playBackSpeedDialog(context, playerProvider, dataProvider);
+                            return playBackSpeedDialog(
+                                context, playerProvider, dataProvider);
                           },
                         );
                       },
@@ -745,7 +822,9 @@ class BottomControls extends StatelessWidget {
                         },
                         tooltip: "Subtitles",
                         icon: Icon(
-                          !playerProvider.state.showSubs ? Icons.subtitles_outlined : Icons.subtitles_rounded,
+                          !playerProvider.state.showSubs
+                              ? Icons.subtitles_outlined
+                              : Icons.subtitles_rounded,
                           color: Colors.white,
                         )),
                     IconButton(
@@ -780,7 +859,8 @@ class BottomControls extends StatelessWidget {
     );
   }
 
-  Widget playBackSpeedDialog(BuildContext context, PlayerProvider pp, PlayerDataProvider dp) {
+  Widget playBackSpeedDialog(
+      BuildContext context, PlayerProvider pp, PlayerDataProvider dp) {
     final playbackSpeeds = pp.playbackSpeeds;
     return Container(
       height: MediaQuery.of(context).size.height / 2,
@@ -792,7 +872,10 @@ class BottomControls extends StatelessWidget {
             padding: const EdgeInsets.only(bottom: 10),
             child: Text(
               "Speed",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),
+              style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: "Rubik"),
             ),
           ),
           StatefulBuilder(
@@ -866,7 +949,8 @@ class EdgeToEdgeTrackShape extends RoundedRectSliderTrackShape {
   }) {
     final double trackHeight = sliderTheme.trackHeight ?? 2.0;
     final double trackWidth = parentBox.size.width;
-    final double trackTop = offset.dy + (parentBox.size.height - trackHeight) / 2;
+    final double trackTop =
+        offset.dy + (parentBox.size.height - trackHeight) / 2;
     return Rect.fromLTWH(offset.dx, trackTop, trackWidth, trackHeight);
   }
 }

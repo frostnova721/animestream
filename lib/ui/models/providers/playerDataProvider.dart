@@ -1,6 +1,8 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/commons/types.dart';
@@ -43,25 +45,43 @@ class PlayerDataProvider extends ChangeNotifier {
 
   PlayerDataProviderState get state => _state;
 
+  late SubtitleSettings subtitleSettings;
+
+  void initSubsettings() => UserPreferences.getUserPreferences().then((val) {
+        subtitleSettings = val.subtitleSettings ?? SubtitleSettings();
+        _state = _state.copyWith(subsInited: true);
+        notifyListeners();
+      });
+
   /// Get and store the qualities available for the current stream
   Future<void> extractCurrentStreamQualities() async {
     final url = _state.currentStream.link;
     final headers = _state.currentStream.customHeaders;
     if (url.contains(".m3u8")) {
-      final qualities = await generateQualitiesForMultiQuality(url, customHeaders: headers);
+      final qualities =
+          await generateQualitiesForMultiQuality(url, customHeaders: headers);
       _state = _state.copyWith(qualities: qualities);
       notifyListeners();
     } else {
       _state = _state.copyWith(
         qualities: [
-          {'link': url, 'resolution': 'default', 'quality': _state.currentStream.quality}
+          {
+            'link': url,
+            'resolution': 'default',
+            'quality': _state.currentStream.quality
+          }
         ],
       );
     }
   }
 
   Map<String, String> getPreferredQualityStreamFromQualities() {
-    return _state.qualities.where((it) => it['quality'] == (currentUserSettings?.preferredQuality ?? '720p')).firstOrNull ?? _state.qualities[0];
+    return _state.qualities
+            .where((it) =>
+                it['quality'] ==
+                (currentUserSettings?.preferredQuality ?? '720p'))
+            .firstOrNull ??
+        _state.qualities[0];
   }
 
   /// Update the state of current quality
@@ -90,7 +110,8 @@ class PlayerDataProvider extends ChangeNotifier {
 
   /// Update the state of currentEpIndex
   void updateCurrentEpIndex(int newIndex) {
-    _state = _state.copyWith(currentEpIndex: newIndex, preloadStarted: false, preloadedSources: []);
+    _state = _state.copyWith(
+        currentEpIndex: newIndex, preloadStarted: false, preloadedSources: []);
     notifyListeners();
   }
 
@@ -120,14 +141,17 @@ class PlayerDataProvider extends ChangeNotifier {
     // Just return if its the last episode!
     if (_state.currentEpIndex + 1 >= epLinks.length) {
       _state = _state.copyWith(
-        preloadStarted: true, // setting to true to avoid unwanted repeated calls 
+        preloadStarted:
+            true, // setting to true to avoid unwanted repeated calls
       );
       return;
     }
 
     _state = _state.copyWith(preloadStarted: true, preloadedSources: []);
 
-    final index = _state.currentEpIndex + 1 == epLinks.length ? null : _state.currentEpIndex + 1;
+    final index = _state.currentEpIndex + 1 == epLinks.length
+        ? null
+        : _state.currentEpIndex + 1;
     if (index == null) {
       print("On the final episode. No preloads available");
       return;
@@ -141,6 +165,10 @@ class PlayerDataProvider extends ChangeNotifier {
         print("[PlAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
       }
     });
+  }
+
+  void updateSubtitleSettings(SubtitleSettings settings) {
+    subtitleSettings = settings;
   }
 
   /// Update any value from state
@@ -163,6 +191,7 @@ class PlayerDataProviderState {
   final String maxTimeStamp;
   final String preferredServer;
   final int sliderValue;
+  final bool subsInited;
 
   PlayerDataProviderState({
     required this.streams,
@@ -177,6 +206,7 @@ class PlayerDataProviderState {
     required this.maxTimeStamp,
     required this.preferredServer,
     required this.sliderValue,
+    this.subsInited = false,
   });
 
   PlayerDataProviderState copyWith({
@@ -194,6 +224,7 @@ class PlayerDataProviderState {
     String? maxTimeStamp,
     String? preferredServer,
     int? sliderValue,
+    bool? subsInited,
   }) {
     return PlayerDataProviderState(
       streams: streams ?? this.streams,
@@ -208,6 +239,7 @@ class PlayerDataProviderState {
       maxTimeStamp: maxTimeStamp ?? this.maxTimeStamp,
       preferredServer: preferredServer ?? this.preferredServer,
       sliderValue: sliderValue ?? this.sliderValue,
+      subsInited: subsInited ?? this.subsInited,
     );
   }
 }

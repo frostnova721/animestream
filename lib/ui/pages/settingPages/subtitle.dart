@@ -3,6 +3,7 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
+import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -72,11 +73,11 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
       fontSize: settings.fontSize,
       fontFamily: settings.fontFamily ?? "Rubik",
       color: settings.textColor,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.4,
+      fontWeight: settings.bold ? FontWeight.w700 : FontWeight.w500,
+      letterSpacing: -0.2,
       // wordSpacing: 1,
       fontFamilyFallback: ["Poppins"],
-      // backgroundColor: settings.backgroundColor.withValues(alpha: settings.backgroundTransparency),
+      // backgroundColor: widget.settings.backgroundColor.withValues(alpha: widget.settings.backgroundTransparency),
     );
   }
 
@@ -210,6 +211,12 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                     ],
                                   ),
                                 ),
+                                toggleItem("Bold", settings.bold, () {
+                                  setState(() {
+                                    settings = settings.copyWith(bold: !settings.bold);
+                                    saveSubSettings();
+                                  });
+                                }),
                                 _itemTitle("Font Size"),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40),
@@ -242,8 +249,8 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                       saveSubSettings();
                                     },
                                     min: 0,
-                                    max: 1.5,
-                                    divisions: 15,
+                                    max: 2,
+                                    divisions: 20,
                                   ),
                                 ),
                                 _itemTitle("Background Opacity"),

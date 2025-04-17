@@ -66,6 +66,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
   if (Platform.isWindows || await isTv()) {
     return showDialog(
         context: context,
+        useRootNavigator: false,
         builder: (context) => AlertDialog(
               content: Container(
                 width: MediaQuery.sizeOf(context).width / 3,

@@ -1,11 +1,8 @@
 import 'package:animestream/core/anime/providers/bridge.dart';
 import 'package:animestream/core/anime/providers/registers/html.dart';
 import 'package:animestream/core/anime/providers/registers/http.dart';
-import 'package:animestream/core/anime/providers/type/element.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:dart_eval/dart_eval.dart';
-import 'package:flutter/cupertino.dart';
-
 void run() async {
 
   final ps = '''

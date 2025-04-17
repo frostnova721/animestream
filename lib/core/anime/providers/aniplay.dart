@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
 class AniPlay extends AnimeProvider {
-
   final String providerName = "aniplay";
 
   static const baseUrl = "https://aniplaynow.live";
@@ -36,7 +36,8 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
+  Future<void> getStreams(
+      String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
     final epIdSplit = episodeId.split("+");
     final epId = epIdSplit[0].split(",");
     final servers = epIdSplit[1].split(",");
@@ -53,9 +54,10 @@ class AniPlay extends AnimeProvider {
       final resFuture = post(Uri.parse(link),
           headers: {
             "Content-Type": "application/json",
-            'Next-Action': "7f11490e43dca1ed90fcb5b90bac1e5714a3e11232",
+            'Next-Action': "7f702090c0d779331a0b55e1ee0cfea85ff4cb963a",
           },
-          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
+          body:
+              "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
       resFuture.onError((e, st) {
         print(e.toString());
         return Response("", 401);
@@ -71,8 +73,13 @@ class AniPlay extends AnimeProvider {
           return;
         }
 
+        final List<Map<String, dynamic>>? subtitleArr = List.castFrom(jsonDecode(split)['subtitles']);
+        final subtitleItem = subtitleArr?.where((st) => st['lang'] == "English").firstOrNull; // We only need english
+
         //choosing this since the quality is changeable in the default
-        final stream = parsed.where((element) => element['quality'] == "default").firstOrNull;
+        final stream = parsed
+            .where((element) => element['quality'] == "default")
+            .firstOrNull;
         if (stream != null) {
           serversFetched++;
           update([
@@ -90,12 +97,16 @@ class AniPlay extends AnimeProvider {
           serversFetched++;
           for (final str in parsed) {
             try {
+              final yukiHeader = {"Referer":"https://megacloud.club/"};
               srcs.add(VideoStream(
                 quality: str['quality'] ?? "unknown",
                 link: str['url'],
                 isM3u8: str['url'].endsWith(".m3u8"),
                 server: it,
                 backup: (str['quality'] ?? "") == "backup",
+                customHeaders: it == "yuki" ? yukiHeader : null,
+                subtitle:subtitleItem?['url'],
+                subtitleFormat: (subtitleItem?['url'].endsWith("vtt") ?? true) ? SubtitleFormat.VTT : SubtitleFormat.ASS
               ));
             } catch (err) {
               print(err);
@@ -134,9 +145,9 @@ class AniPlay extends AnimeProvider {
         headers: {
           'Referer': l,
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': "7f07777b5f74e3edb312e0b718a560f9d3ad21aeba",
+          'Next-Action': "7f328d44382d74f2942c42d0bc9915b2d510628a02",
         },
-        body: "[\"$id\",false,false]");
+        body: "[\"$id\",true,false]");
     final split = res.body.split('1:')[1];
     final List<dynamic> parsed = jsonDecode(split);
 
@@ -153,7 +164,8 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
-     throw UnimplementedError();
+  Future<void> getDownloadSources(
+      String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
+    throw UnimplementedError();
   }
 }

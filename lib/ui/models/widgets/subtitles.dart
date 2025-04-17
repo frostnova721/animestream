@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/subtitleParsers.dart';
-import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/ui/models/extensions.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
@@ -14,7 +13,6 @@ class Subtitle {
   final Duration start;
   final Duration end;
   final String dialogue;
-  // final String
 
   Subtitle({
     required this.dialogue,
@@ -23,7 +21,8 @@ class Subtitle {
   });
 
   @override
-  String toString() => 'Subtitle(start: $start, end: $end, dialogue: $dialogue)';
+  String toString() =>
+      'Subtitle(start: $start, end: $end, dialogue: $dialogue)';
 }
 
 class SubtitleSettings {
@@ -38,36 +37,41 @@ class SubtitleSettings {
   final double bottomMargin;
   final double backgroundTransparency;
 
+  final bool bold;
+
   SubtitleSettings({
     this.backgroundColor = Colors.black,
     this.backgroundTransparency = 0,
-    this.bottomMargin = 35,
-    this.fontSize = 25,
+    this.bottomMargin = 30,
+    this.fontSize = 24,
     this.strokeColor = Colors.black,
     this.strokeWidth = 1.1,
     this.textColor = Colors.white,
     this.fontFamily = "Rubik",
+    this.bold = false,
   });
 
   SubtitleSettings copyWith({
-    Color? backgroundColor,
     Color? textColor,
     Color? strokeColor,
-    double? fontSize,
+    Color? backgroundColor,
+    String? fontFamily,
     double? strokeWidth,
+    double? fontSize,
     double? bottomMargin,
     double? backgroundTransparency,
-    String? fontFamily,
+    bool? bold,
   }) {
     return SubtitleSettings(
-      backgroundColor: backgroundColor ?? this.backgroundColor,
-      backgroundTransparency: backgroundTransparency ?? this.backgroundTransparency,
-      bottomMargin: bottomMargin ?? this.bottomMargin,
-      fontFamily: fontFamily ?? this.fontFamily,
-      fontSize: fontSize ?? this.fontSize,
-      strokeColor: strokeColor ?? this.strokeColor,
-      strokeWidth: strokeWidth ?? this.strokeWidth,
       textColor: textColor ?? this.textColor,
+      strokeColor: strokeColor ?? this.strokeColor,
+      backgroundColor: backgroundColor ?? this.backgroundColor,
+      fontFamily: fontFamily ?? this.fontFamily,
+      strokeWidth: strokeWidth ?? this.strokeWidth,
+      fontSize: fontSize ?? this.fontSize,
+      bottomMargin: bottomMargin ?? this.bottomMargin,
+      backgroundTransparency: backgroundTransparency ?? this.backgroundTransparency,
+      bold: bold ?? this.bold,
     );
   }
 
@@ -81,19 +85,22 @@ class SubtitleSettings {
       'fontSize': fontSize,
       'bottomMargin': bottomMargin,
       'backgroundTransparency': backgroundTransparency,
+      'bold': bold,
     };
   }
 
   factory SubtitleSettings.fromMap(Map<dynamic, dynamic> map) {
     return SubtitleSettings(
-      textColor: Color(map['textColor'] as int),
-      strokeColor: Color(map['strokeColor'] as int),
-      backgroundColor: Color(map['backgroundColor'] as int),
-      fontFamily: map['fontFamily'] != null ? map['fontFamily'] as String : null,
-      strokeWidth: map['strokeWidth'] as double,
-      fontSize: map['fontSize'] as double,
-      bottomMargin: map['bottomMargin'] as double,
-      backgroundTransparency: map['backgroundTransparency'] as double,
+      textColor: Color(map['textColor'] as int? ?? Colors.white.toInt()),
+      strokeColor: Color(map['strokeColor'] as int? ?? Colors.black.toInt()),
+      backgroundColor: Color((map['backgroundColor'] ?? Colors.black.toInt()) as int),
+      fontFamily:
+          map['fontFamily'] != null ? map['fontFamily'] as String : "Rubik",
+      strokeWidth: (map['strokeWidth'] ?? 1.1) as double,
+      fontSize: (map['fontSize'] ?? 24) as double,
+      bottomMargin: (map['bottomMargin'] ?? 30) as double,
+      backgroundTransparency: (map['backgroundTransparency'] ?? 0) as double,
+      bold: (map['bold'] ?? false) as bool,
     );
   }
 
@@ -127,16 +134,7 @@ class SubtitleText extends StatelessWidget {
       color: backgroundColor.withAlpha((backgroundTransparency * 255).toInt()),
       child: Stack(
         children: [
-          //the actual text
-          Text(
-            text,
-            style: style.copyWith(shadows: [
-              Shadow(color: Colors.black, blurRadius: 4.5),
-            ]),
-            textAlign: TextAlign.center,
-          ),
-
-          //the stroke of that text since the flutter doesnt have it :(
+           //the stroke of that text since the flutter doesnt have it :(
           Text(
             text,
             style: style.copyWith(
@@ -145,6 +143,15 @@ class SubtitleText extends StatelessWidget {
                 ..color = strokeColor
                 ..strokeWidth = strokeWidth,
             ),
+            textAlign: TextAlign.center,
+          ),
+
+          //the actual text
+          Text(
+            text,
+            style: style.copyWith(shadows: [
+              Shadow(color: Colors.black, blurRadius: 3.5, offset: Offset(1, 1)),
+            ],),
             textAlign: TextAlign.center,
           ),
         ],
@@ -157,12 +164,14 @@ class SubViewer extends StatefulWidget {
   final VideoController controller;
   final String subtitleSource;
   final SubtitleFormat format;
+  final SubtitleSettings settings;
 
   const SubViewer({
     super.key,
     required this.controller,
     required this.format,
     required this.subtitleSource,
+    required this.settings,
   });
 
   @override
@@ -173,27 +182,15 @@ class _SubViewerState extends State<SubViewer> {
   @override
   void initState() {
     super.initState();
-     widget.controller.addListener(_updateSubtitle);
-    initiateSubs().then((_) {
-      loadSubs();
-      print("subs initialized");
-    });
+    widget.controller.addListener(_updateSubtitle);
+    loadSubs();
+    print("subs initialized");
   }
 
   List<Subtitle> subs = [];
 
-  late SubtitleSettings settings;
-
   String activeLine = "";
   bool areSubsLoading = true;
-  bool settingsInited = false;
-
-  Future<void> initiateSubs() async {
-    settings = (await UserPreferences.getUserPreferences()).subtitleSettings ?? SubtitleSettings();
-    setState(() {
-      settingsInited = true;
-    });
-  }
 
   void loadSubs() async {
     try {
@@ -211,7 +208,7 @@ class _SubViewerState extends State<SubViewer> {
       });
     } catch (err) {
       print(err.toString());
-      floatingSnackBar( "Couldnt load the subtitles!");
+      floatingSnackBar("Couldnt load the subtitles!");
       setState(() {
         areSubsLoading = false;
       });
@@ -265,40 +262,36 @@ class _SubViewerState extends State<SubViewer> {
   //i tried to make it beautiful! okay???
   TextStyle subTextStyle() {
     return TextStyle(
-      fontSize: settings.fontSize,
-      fontFamily: settings.fontFamily ?? "Rubik",
-      color: settings.textColor,
-      fontWeight: FontWeight.w700,
-      letterSpacing: -0.4,
+      fontSize: widget.settings.fontSize,
+      fontFamily: widget.settings.fontFamily ?? "Rubik",
+      color: widget.settings.textColor,
+      fontWeight: widget.settings.bold ? FontWeight.w700 : FontWeight.w500,
+      letterSpacing: -0.2,
       // wordSpacing: 1,
       fontFamilyFallback: ["Poppins"],
-      // backgroundColor: settings.backgroundColor.withValues(alpha: settings.backgroundTransparency),
+      // backgroundColor: widget.settings.backgroundColor.withValues(alpha: widget.settings.backgroundTransparency),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    ///uncomment the bottom line to reflect changes on refresh while tryin to edit the [SubtitleSettings]
-    // settings = SubtitleSettings();
 
-    return settingsInited
-        ? Container(
+    return Container(
             alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(bottom: settings.bottomMargin),
+            margin: EdgeInsets.only(bottom: widget.settings.bottomMargin),
             child: Container(
               width: MediaQuery.of(context).size.width / 1.6,
               alignment: Alignment.bottomCenter,
               child: SubtitleText(
                 text: activeLine,
                 style: subTextStyle(),
-                strokeColor: settings.strokeColor,
-                strokeWidth: settings.strokeWidth,
-                backgroundColor: settings.backgroundColor,
-                backgroundTransparency: settings.backgroundTransparency,
+                strokeColor: widget.settings.strokeColor,
+                strokeWidth: widget.settings.strokeWidth,
+                backgroundColor: widget.settings.backgroundColor,
+                backgroundTransparency: widget.settings.backgroundTransparency,
               ),
             ),
-          )
-        : SizedBox();
+          );
   }
 
   @override

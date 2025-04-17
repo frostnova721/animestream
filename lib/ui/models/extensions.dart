@@ -10,6 +10,7 @@ extension ColorExtensions on Color {
     return "${alpha.toRadixString(16).padLeft(2,'0')}${red.toRadixString(16).padLeft(2,'0')}${green.toRadixString(16).padLeft(2,'0')}${blue.toRadixString(16).padLeft(2,'0')}";
   }
 
+  /**Returns the integer representation of the color */
   int toInt() {
     final alpha = (this.a * 255).toInt();
     final red = (this.r * 255).toInt();

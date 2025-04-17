@@ -51,7 +51,7 @@ class AnimeCardExtended extends StatelessWidget {
         child: InkWell(
           focusColor: appTheme.textSubColor,
           onTap: () async {
-            return run();
+            // return run();
             if (!isAnime) return floatingSnackBar("Mangas/Novels arent supported");
             if (shouldNavigate)
               Navigator.of(context)

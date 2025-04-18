@@ -67,6 +67,8 @@ class Gojo extends AnimeProvider {
 
     final links = grp.values.map((it) => it.join("+")).toList();
 
+    print(links);
+
     return links;
   }
 

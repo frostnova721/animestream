@@ -92,6 +92,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
         preloadedSources: [],
         sliderValue: index == dp.state.currentEpIndex ? null : 0,
       ));
+      // dp.updateDiscordPresence();
     });
   }
 

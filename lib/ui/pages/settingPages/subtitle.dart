@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
@@ -70,7 +72,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   TextStyle subTextStyle() {
     return TextStyle(
-      fontSize: settings.fontSize,
+      fontSize: Platform.isWindows ? settings.fontSize * 1.5 : settings.fontSize,
       fontFamily: settings.fontFamily ?? "Rubik",
       color: settings.textColor,
       fontWeight: settings.bold ? FontWeight.w700 : FontWeight.w500,

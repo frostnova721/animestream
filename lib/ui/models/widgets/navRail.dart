@@ -11,7 +11,7 @@ class AnimeStreamNavDestination {
   final Color? unselectedIconColor;
   final VoidCallback? onClick;
 
-  AnimeStreamNavDestination({
+  const AnimeStreamNavDestination({
     required this.icon,
     required this.label,
     this.selectedColor,
@@ -26,11 +26,13 @@ class AnimeStreamNavRail extends StatefulWidget {
   final List<AnimeStreamNavDestination> destinations;
   final AnimeStreamBottomBarController controller;
   final int initialIndex;
+  final bool shouldExpand;
   const AnimeStreamNavRail({
     super.key,
     required this.destinations,
     required this.controller,
     required this.initialIndex,
+    this.shouldExpand = false,
   });
 
   @override
@@ -44,10 +46,17 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
     widget.controller.currentIndex = widget.initialIndex;
   }
 
+  final Set<int> hoveredIndices = {};
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 60,
+    final shouldCollapse = (MediaQuery.sizeOf(context).width < 1200);
+    return Container(
+      width: MediaQuery.sizeOf(context).width < 1200 || !widget.shouldExpand ? 60 : MediaQuery.sizeOf(context).width ,
+      constraints: BoxConstraints(
+      minWidth: 60,
+      maxWidth: 220
+      ),
       child: ValueListenableBuilder(
           valueListenable: widget.controller.currentIndexNotifier,
           builder: (context, currentIndex, child) {
@@ -58,11 +67,15 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
                   final controller = widget.controller;
                   final isNonNavButton = controller.nonViewIndices.contains(index);
 
-                  final hovered = ValueNotifier(false);
+                  final hovered = hoveredIndices.contains(index);
 
                   return MouseRegion(
-                    onEnter: (_) => hovered.value = true,
-                    onExit: (_) => hovered.value = false,
+                    onEnter: (_) => setState(() {
+                      hoveredIndices.add(index);
+                    }), 
+                    onExit: (_) => setState(() {
+                      hoveredIndices.remove(index);
+                    }),
                     cursor: SystemMouseCursors.click,
                     child: GestureDetector(
                       onTap: () {
@@ -70,29 +83,42 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
                           return item.onClick?.call();
                         else if (!isNonNavButton) controller.currentIndex = index;
                       },
-                      child: ValueListenableBuilder(
-                        valueListenable: hovered,
-                        builder: (context, value, child) {
-                          return AnimatedContainer(
-                            duration: Duration(milliseconds: widget.controller.animDuration),
-                            height: 50,
-                            width: 50,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: currentIndex == index && !isNonNavButton
-                                  ? (item.selectedColor ?? appTheme.accentColor)
-                                  : value ? appTheme.backgroundSubColor.withAlpha(150)  : (item.unselectedColor ?? appTheme.backgroundSubColor),
-                            ),
-                            margin: EdgeInsets.all(5),
-                            child: Icon(
-                              item.icon,
-                              size: 30,
-                              color: currentIndex == index && !isNonNavButton
-                                  ? (item.selectedIconColor ?? appTheme.onAccent)
-                                  : (item.unselectedIconColor ?? appTheme.textMainColor),
-                            ),
-                          );
-                        },
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: widget.controller.animDuration),
+                        height: 50,
+                        // width: 50,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                          color: currentIndex == index && !isNonNavButton
+                              ? (item.selectedColor ?? appTheme.accentColor)
+                              : hovered ? appTheme.backgroundSubColor.withAlpha(150)  : (item.unselectedColor ?? appTheme.backgroundSubColor),
+                        ),
+                        margin: EdgeInsets.all(5),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment:shouldCollapse ? MainAxisAlignment.center : MainAxisAlignment.start,
+                            children: [
+                              Icon(
+                                item.icon,
+                                size: 30,
+                                color: currentIndex == index && !isNonNavButton
+                                    ? (item.selectedIconColor ?? appTheme.onAccent)
+                                    : (item.unselectedIconColor ?? appTheme.textMainColor),
+                              ),
+                              if(!shouldCollapse && widget.shouldExpand)
+                              Padding(
+                                padding: const EdgeInsets.only(left: 10),
+                                child: Text(widget.destinations[index].label, style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: currentIndex == index && !isNonNavButton
+                                      ? (item.selectedIconColor ?? appTheme.onAccent)
+                                      : (item.unselectedIconColor ?? appTheme.textMainColor),
+                                ),),
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   );

@@ -48,6 +48,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool receivePreReleases = false;
   bool fasterDownloads = false;
   bool useQueuedDownloads = false;
+  bool enableDiscordPresence = false;
 
   @override
   Widget build(BuildContext context) {
@@ -145,7 +146,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       label: "Default provider",
                       description: currentUserSettings?.preferredProvider,
                       suffixIcon: Icon(Icons.arrow_drop_down),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -156,8 +157,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
 
   StatefulBuilder _providerSheet(BuildContext context) {
     return StatefulBuilder(
-      builder: (context, setcState) => 
-       Container(
+      builder: (context, setcState) => Container(
         padding: const EdgeInsets.only(
           top: 10,
           left: 20,
@@ -196,7 +196,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         onTap: () async {
                           await writeSettings(SettingsModal(preferredProvider: sources[index]));
                           setState(() {});
-                          setcState((){});
+                          setcState(() {});
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),

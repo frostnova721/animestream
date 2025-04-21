@@ -161,6 +161,7 @@ class InfoSection extends StatelessWidget {
                           // ScrollingList.animeCards(context, splitWidth, relatedScrollController, "Related", provider.data.related), // Notto ereganto!
                       ScrollingList.animeCards(
                           context, splitWidth, recommendationScrollController, "Recommended", provider.data.recommended),
+                          SizedBox(height: 16,)
                     ],
                   ), // Yeah put stuff in this column
                 ],

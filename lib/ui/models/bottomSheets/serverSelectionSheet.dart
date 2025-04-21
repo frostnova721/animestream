@@ -225,6 +225,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                           initialStream: streamSources[index],
                           epLinks: provider.epLinks,
                           showTitle: title,
+                          coverImageUrl: widget.provider.data.cover,
                           showId: provider.id,
                           selectedSource: provider.selectedSource,
                           startIndex: widget.episodeIndex,

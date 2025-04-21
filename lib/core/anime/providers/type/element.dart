@@ -3,11 +3,11 @@ import 'dart:collection';
 import 'package:dart_eval/dart_eval_bridge.dart';
 import 'package:dart_eval/dart_eval_extensions.dart';
 import 'package:dart_eval/stdlib/core.dart';
-import 'package:html/dom.dart' as dom;
+import 'package:html/dom.dart';
 import 'package:source_span/src/file.dart';
 
-class $Element implements $Instance {
-  static final $type = BridgeTypeSpec("package:html/dom.dart", "Element").ref;
+class $Element implements $Instance, Element {
+  static final $type = BridgeTypeSpec("package:html/dart", "Element").ref;
 
   static final $declaration = BridgeClassDef(BridgeClassType($type),
       constructors: {
@@ -30,9 +30,12 @@ class $Element implements $Instance {
           BridgeFunctionDef(returns: CoreTypes.bool.ref.annotate),
         ),
       },
+      getters: {
+        'children': BridgeMethodDef(BridgeFunctionDef(returns: CoreTypes.list.refWith([$Element.$type]).annotate))
+      },
       wrap: true);
 
-  final dom.Element $value;
+  final Element $value;
 
   $Element.wrap(this.$value)
       : attributes = $value.attributes,
@@ -47,7 +50,6 @@ class $Element implements $Instance {
       case 'querySelector':
         return $Function((Runtime runtime, $Value? target, List<$Value?> args) {
           final selector = args[0]!.$value as String;
-          print(selector);
           final result = $value.querySelector(selector);
           if (result == null) return $null();
           return $Element.wrap(result);
@@ -65,9 +67,11 @@ class $Element implements $Instance {
       case 'innerHtml':
         return $String($value.innerHtml);
       case 'contains':
-        return $Function((runtime, target, args) => $bool($value.contains(args[0]! as dom.Node)));
+        return $Function((runtime, target, args) => $bool($value.contains(args[0]! as Node)));
       case 'hasContent':
-        return $Function((runtime, target, args) => $bool($value.hasContent()),);
+        return $Function(
+          (runtime, target, args) => $bool($value.hasContent()),
+        );
       case 'className':
         return $String($value.className);
       default:
@@ -81,7 +85,7 @@ class $Element implements $Instance {
     throw UnimplementedError("Element properties are immutable or require special handling.");
   }
 
-  dom.Element get $reified => $value;
+  Element get $reified => $value;
 
   String get outerHtml => $value.outerHtml;
 
@@ -105,31 +109,31 @@ class $Element implements $Instance {
 
   String id;
 
-  dom.Node? parentNode;
+  Node? parentNode;
 
   FileSpan? sourceSpan;
 
-  void append(dom.Node node) => throw UnimplementedError();
+  void append(Node node) => throw UnimplementedError();
 
   LinkedHashMap<Object, FileSpan>? get attributeSpans => $value.attributeSpans;
 
   LinkedHashMap<Object, FileSpan>? get attributeValueSpans => $value.attributeValueSpans;
 
-  List<dom.Element> get children => $value.children;
+  List<Element> get children => $value.children;
 
-  dom.CssClassSet get classes => throw UnimplementedError();
+  CssClassSet get classes => throw UnimplementedError();
 
-  dom.Element clone(bool deep) {
+  Element clone(bool deep) {
     return $value.clone(deep);
   }
 
-  bool contains(dom.Node node) => $value.contains(node);
+  bool contains(Node node) => $value.contains(node);
 
-  dom.Node? get firstChild => throw UnimplementedError();
+  Node? get firstChild => throw UnimplementedError();
 
-  List<dom.Element> getElementsByClassName(String classNames) => $value.getElementsByClassName(classNames);
+  List<Element> getElementsByClassName(String classNames) => $value.getElementsByClassName(classNames);
 
-  List<dom.Element> getElementsByTagName(String localName) => $value.getElementsByTagName(localName);
+  List<Element> getElementsByTagName(String localName) => $value.getElementsByTagName(localName);
 
   bool hasChildNodes() {
     return $value.hasChildNodes();
@@ -137,29 +141,29 @@ class $Element implements $Instance {
 
   bool hasContent() => $value.hasContent();
 
-  void insertBefore(dom.Node node, dom.Node? refNode) => $value.insertBefore(node, refNode);
+  void insertBefore(Node node, Node? refNode) => $value.insertBefore(node, refNode);
 
   String? get localName => $value.localName;
 
   String? get namespaceUri => $value.namespaceUri;
 
-  dom.Element? get nextElementSibling => $value.nextElementSibling;
+  Element? get nextElementSibling => $value.nextElementSibling;
 
   int get nodeType => $value.nodeType;
 
-  dom.NodeList get nodes => throw UnimplementedError();
+  NodeList get nodes => throw UnimplementedError();
 
-  dom.Element? get parent => $value.parent;
+  Element? get parent => $value.parent;
 
-  dom.Element? get previousElementSibling => $value.previousElementSibling;
+  Element? get previousElementSibling => $value.previousElementSibling;
 
-  dom.Element? querySelector(String selector) => $value.querySelector(selector);
+  Element? querySelector(String selector) => $value.querySelector(selector);
 
-  List<dom.Element> querySelectorAll(String selector) => $value.querySelectorAll(selector);
+  List<Element> querySelectorAll(String selector) => $value.querySelectorAll(selector);
 
-  dom.Node remove() => $value.remove();
+  Node remove() => $value.remove();
 
-  void reparentChildren(dom.Node newParent) => $value.reparentChildren(newParent);
+  void reparentChildren(Node newParent) => $value.reparentChildren(newParent);
 
-  dom.Node replaceWith(dom.Node otherNode) => $value.replaceWith(otherNode);
+  Node replaceWith(Node otherNode) => $value.replaceWith(otherNode);
 }

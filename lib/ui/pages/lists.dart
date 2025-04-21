@@ -4,8 +4,10 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
+import 'package:animestream/ui/models/widgets/navRail.dart';
 import 'package:flutter/material.dart';
 
 class AnimeLists extends StatefulWidget {
@@ -28,6 +30,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   List<AnimeCard> completedList = [];
   List<AnimeCard> droppedList = [];
   List<UserAnimeList> rawAnimeList = [];
+
+  final railController = AnimeStreamBottomBarController(length: 4);
 
   List<AnimeCard> getSelectedTabView(int tabIndex) {
     switch (tabIndex) {
@@ -218,7 +222,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           return [
                             sortOptionButton("A-Z", SortType.AtoZ),
                             sortOptionButton("Top rated", SortType.TopRated),
-                            sortOptionButton("Recent",SortType.RecentlyUpdated),
+                            sortOptionButton("Recent", SortType.RecentlyUpdated),
                           ];
                         },
                         icon: Icon(
@@ -229,72 +233,105 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  Container(
-                    margin: EdgeInsets.only(top: 10),
-                    child: TabBar(
-                      tabAlignment: TabAlignment.center,
-                      isScrollable: true,
-                      controller: tabController,
-                      indicatorColor: appTheme.accentColor,
-                      overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.3)),
-                      labelColor: appTheme.textMainColor,
-                      unselectedLabelColor: appTheme.textSubColor,
-                      labelStyle: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontFamily: "NotoSans",
+                  if (!Platform.isWindows)
+                    Container(
+                      margin: EdgeInsets.only(top: 10),
+                      child: TabBar(
+                        tabAlignment: TabAlignment.center,
+                        isScrollable: true,
+                        controller: tabController,
+                        indicatorColor: appTheme.accentColor,
+                        overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.3)),
+                        labelColor: appTheme.textMainColor,
+                        unselectedLabelColor: appTheme.textSubColor,
+                        labelStyle: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontFamily: "NotoSans",
+                        ),
+                        tabs: [
+                          Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            child: Text(
+                              "Watching (${watchingList.length})",
+                              style: _textStyle(),
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            child: Text(
+                              "Planning (${plannedList.length})",
+                              style: _textStyle(),
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            child: Text(
+                              "Dropped (${droppedList.length})",
+                              style: _textStyle(),
+                            ),
+                          ),
+                          Container(
+                            alignment: Alignment.center,
+                            height: 50,
+                            child: Text(
+                              "Completed (${completedList.length})",
+                              style: _textStyle(),
+                            ),
+                          ),
+                        ],
                       ),
-                      tabs: [
-                        Container(
-                          alignment: Alignment.center,
-                          height: 50,
-                          child: Text(
-                            "Watching (${watchingList.length})",
-                            style: _textStyle(),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          height: 50,
-                          child: Text(
-                            "Planning (${plannedList.length})",
-                            style: _textStyle(),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          height: 50,
-                          child: Text(
-                            "Dropped (${droppedList.length})",
-                            style: _textStyle(),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          height: 50,
-                          child: Text(
-                            "Completed (${completedList.length})",
-                            style: _textStyle(),
-                          ),
-                        ),
+                    ),
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if(Platform.isWindows)
+                        AnimeStreamNavRail(
+                            shouldExpand: true,
+                            destinations: [
+                              const AnimeStreamNavDestination(icon: Icons.movie, label: "Watching"),
+                              const AnimeStreamNavDestination(icon: Icons.calendar_month, label: "Planned"),
+                              const AnimeStreamNavDestination(icon: Icons.highlight_off_outlined, label: "Dropped"),
+                              const AnimeStreamNavDestination(icon: Icons.task_alt_rounded, label: "Completed")
+                            ],
+                            controller: railController,
+                            initialIndex: 0),
+                        getSelectedTabView(tabController.index).length == 0
+                            //this wouldnt be shown! ik
+                            ? Center(
+                                child: Text(
+                                  "Such a void!",
+                                  style: TextStyle(
+                                    color: appTheme.textSubColor,
+                                    fontFamily: "NunitoSans",
+                                    fontSize: 14,
+                                  ),
+                                ),
+                              )
+                            : Expanded(
+                                child: Platform.isWindows
+                                    ? Container(
+                                      margin: EdgeInsets.all(12),
+                                      padding: EdgeInsets.only(bottom: 22, top: 5, right: 10, left: 10),
+                                      decoration: BoxDecoration(
+                                      color: appTheme.backgroundSubColor.withAlpha(175),
+                                      borderRadius: BorderRadius.circular(20)
+                                      ),
+                                      child: BottomBarView(
+                                          children:
+                                              List.generate(tabController.length, (index) => itemGrid(context, index)),
+                                          controller: railController),
+                                    )
+                                    : TabBarView(
+                                        controller: tabController,
+                                        children:
+                                            List.generate(tabController.length, (index) => itemGrid(context, index))),
+                              ),
                       ],
                     ),
-                  ),
-                  Expanded(
-                    child: getSelectedTabView(tabController.index).length == 0
-                        //this wouldnt be shown! ik
-                        ? Center(
-                            child: Text(
-                              "Such a void!",
-                              style: TextStyle(
-                                color: appTheme.textSubColor,
-                                fontFamily: "NunitoSans",
-                                fontSize: 14,
-                              ),
-                            ),
-                          )
-                        : TabBarView(
-                            controller: tabController,
-                            children: List.generate(tabController.length, (index) => itemGrid(context, index))),
                   ),
                   // )
                 ],
@@ -315,7 +352,11 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
       onTap: () => sort(sortType),
       child: Text(
         label,
-        style: TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans", fontSize: 16,),
+        style: TextStyle(
+          color: appTheme.textMainColor,
+          fontFamily: "NotoSans",
+          fontSize: 16,
+        ),
       ),
     );
   }
@@ -332,6 +373,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           right: 10,
         ),
         child: GridView.builder(
+          shrinkWrap: true,
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
               mainAxisExtent: Platform.isAndroid ? 220 : 260,

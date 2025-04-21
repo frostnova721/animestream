@@ -32,6 +32,9 @@ class $Document implements $Instance {
       'body': BridgeMethodDef(
         BridgeFunctionDef(returns: BridgeTypeAnnotation($Element.$type, nullable: true)),
         isStatic: false,
+      ),
+      'children': BridgeMethodDef(
+        BridgeFunctionDef(returns: CoreTypes.list.refWith([$Element.$type]).annotate)
       )
     },
     wrap: true,

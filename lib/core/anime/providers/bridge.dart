@@ -16,9 +16,10 @@ class $AnimeProvider$bridge with $Bridge<AnimeProvider> implements AnimeProvider
     },
     methods: {
       'search': BridgeFunctionDef(
-        returns: $AnimeProvider$bridge.$type.annotate,
+        returns: CoreTypes.list.refWith([CoreTypes.map.ref]).annotate,
         params: ['query'.param(CoreTypes.string.ref.annotate)],
       ).asMethod,
+      // 'getAnimeEpisodeLink': BridgeFunctionDef(returns: CoreTypes.list.ref.annotate, ).asMethod,
     },
     getters: {
       'providerName': BridgeMethodDef(isStatic: false, BridgeFunctionDef(returns: CoreTypes.string.ref.annotate)),

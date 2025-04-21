@@ -12,6 +12,7 @@ class PlayerDataProvider extends ChangeNotifier {
   PlayerDataProviderState _state;
   List<String> epLinks;
   String showTitle; // Title of the anime
+  String? coverImageUrl;
   int showId; // Id of the anime
   String selectedSource;
   int startIndex; // Index of episode to start from
@@ -28,6 +29,7 @@ class PlayerDataProvider extends ChangeNotifier {
     required this.startIndex,
     required this.altDatabases,
     required this.lastWatchDuration,
+    this.coverImageUrl, // just for presence updation
   }) : _state = PlayerDataProviderState(
           streams: initialStreams,
           currentStream: initialStream,
@@ -58,18 +60,13 @@ class PlayerDataProvider extends ChangeNotifier {
     final url = _state.currentStream.link;
     final headers = _state.currentStream.customHeaders;
     if (url.contains(".m3u8")) {
-      final qualities =
-          await generateQualitiesForMultiQuality(url, customHeaders: headers);
+      final qualities = await generateQualitiesForMultiQuality(url, customHeaders: headers);
       _state = _state.copyWith(qualities: qualities);
       notifyListeners();
     } else {
       _state = _state.copyWith(
         qualities: [
-          {
-            'link': url,
-            'resolution': 'default',
-            'quality': _state.currentStream.quality
-          }
+          {'link': url, 'resolution': 'default', 'quality': _state.currentStream.quality}
         ],
       );
     }
@@ -77,9 +74,7 @@ class PlayerDataProvider extends ChangeNotifier {
 
   Map<String, String> getPreferredQualityStreamFromQualities() {
     return _state.qualities
-            .where((it) =>
-                it['quality'] ==
-                (currentUserSettings?.preferredQuality ?? '720p'))
+            .where((it) => it['quality'] == (currentUserSettings?.preferredQuality ?? '720p'))
             .firstOrNull ??
         _state.qualities[0];
   }
@@ -110,8 +105,7 @@ class PlayerDataProvider extends ChangeNotifier {
 
   /// Update the state of currentEpIndex
   void updateCurrentEpIndex(int newIndex) {
-    _state = _state.copyWith(
-        currentEpIndex: newIndex, preloadStarted: false, preloadedSources: []);
+    _state = _state.copyWith(currentEpIndex: newIndex, preloadStarted: false, preloadedSources: []);
     notifyListeners();
   }
 
@@ -141,17 +135,14 @@ class PlayerDataProvider extends ChangeNotifier {
     // Just return if its the last episode!
     if (_state.currentEpIndex + 1 >= epLinks.length) {
       _state = _state.copyWith(
-        preloadStarted:
-            true, // setting to true to avoid unwanted repeated calls
+        preloadStarted: true, // setting to true to avoid unwanted repeated calls
       );
       return;
     }
 
     _state = _state.copyWith(preloadStarted: true, preloadedSources: []);
 
-    final index = _state.currentEpIndex + 1 == epLinks.length
-        ? null
-        : _state.currentEpIndex + 1;
+    final index = _state.currentEpIndex + 1 == epLinks.length ? null : _state.currentEpIndex + 1;
     if (index == null) {
       print("On the final episode. No preloads available");
       return;
@@ -167,6 +158,7 @@ class PlayerDataProvider extends ChangeNotifier {
     });
   }
 
+  /// Update subtitle settings
   void updateSubtitleSettings(SubtitleSettings settings) {
     subtitleSettings = settings;
   }
@@ -176,6 +168,26 @@ class PlayerDataProvider extends ChangeNotifier {
     _state = newState;
     notifyListeners();
   }
+
+  // Future<void> updateDiscordPresence() async {
+  //   if (!(currentUserSettings?.enableDiscordPresence ?? false)) return;
+  //   return FlutterDiscordRPC.instance.setActivity(
+  //       activity: RPCActivity(
+  //     activityType: ActivityType.watching,
+  //     details: showTitle,
+  //     state: "Episode ${state.currentEpIndex + 1}",
+  //     timestamps: RPCTimestamps(start: DateTime.now().millisecondsSinceEpoch),
+  //     assets: RPCAssets(
+  //       largeText: coverImageUrl != null ? showTitle : null,
+  //       largeImage: coverImageUrl,
+  //     ),
+  //   ));
+  // }
+
+  // void clearDiscordPresence() {
+  //   if (!(currentUserSettings?.enableDiscordPresence ?? false)) return;
+  //   FlutterDiscordRPC.instance.clearActivity();
+  // }
 }
 
 class PlayerDataProviderState {

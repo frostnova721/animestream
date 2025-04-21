@@ -51,7 +51,7 @@ void main(List<String> args) async {
 
       // No frameless for now!
       // if (currentUserSettings?.useFramelessWindow ?? true) await windowManager.setAsFrameless();
-      
+
       await windowManager.setResizable(true);
     }
 
@@ -60,6 +60,10 @@ void main(List<String> args) async {
     NotificationService().init();
 
     await dotenv.load(fileName: ".env");
+
+    // if (currentUserSettings?.enableDiscordPresence ?? false) {
+    //   await FlutterDiscordRPC.initialize("1362858832266657812");
+    // }
 
     runApp(
       ChangeNotifierProvider(
@@ -126,9 +130,7 @@ Future<void> loadAndAssignSettings() async {
 class AnimeStream extends StatefulWidget {
   const AnimeStream({super.key});
 
-  static 
-final GlobalKey<ScaffoldMessengerState> snackbarKey =
-    GlobalKey<ScaffoldMessengerState>();
+  static final GlobalKey<ScaffoldMessengerState> snackbarKey = GlobalKey<ScaffoldMessengerState>();
 
   static final navigatorKey = GlobalKey<NavigatorState>();
   @override
@@ -156,12 +158,21 @@ class _AnimeStreamState extends State<AnimeStream> {
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
 
+    // if (currentUserSettings?.enableDiscordPresence ?? false)
+      // FlutterDiscordRPC.instance.connect(autoRetry: true, retryDelay: Duration(seconds: 10));
+
     super.initState();
   }
 
   @override
   void dispose() {
     _sub?.cancel();
+
+    // if (currentUserSettings?.enableDiscordPresence ?? false) {
+    //   FlutterDiscordRPC.instance.clearActivity();
+    //   FlutterDiscordRPC.instance.disconnect();
+    //   FlutterDiscordRPC.instance.dispose();
+    // }
     super.dispose();
   }
 

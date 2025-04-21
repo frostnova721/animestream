@@ -83,6 +83,9 @@ class WatchSection extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 20).copyWith(top: 50),
       height: (size.height / 1.75),
+      constraints: BoxConstraints(
+        minHeight: 600,
+      ),
       width: size.width / (size.width > splitWidth ? 1.75 : 1.3),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),

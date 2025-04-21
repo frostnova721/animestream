@@ -64,18 +64,16 @@ class _WatchState extends State<Watch> {
 
     dataProvider.updateCurrentQuality(q);
 
-    await controller.initiateVideo(q['link']!,
-        headers: dataProvider.state.currentStream.customHeaders);
+    await controller.initiateVideo(q['link']!, headers: dataProvider.state.currentStream.customHeaders);
+
+    final lastWatchDuration = (((dataProvider.lastWatchDuration ?? 0) / 100) * (controller.duration ?? 1)).toInt();
+
+    // await dataProvider.updateDiscordPresence();
 
     // Seek to last watched part
-    await controller.seekTo(Duration(
-        milliseconds: (((dataProvider.lastWatchDuration ?? 0) / 100) *
-                (controller.duration ?? 1))
-            .toInt())); //percentage to value
+    await controller.seekTo(Duration(milliseconds: lastWatchDuration)); //percentage to value
 
-    context
-        .read<PlayerProvider>()
-        .toggleSubs(action: dataProvider.state.currentStream.subtitle != null);
+    context.read<PlayerProvider>().toggleSubs(action: dataProvider.state.currentStream.subtitle != null);
 
     // Placed here for safety. placing it above might cause issues with custom controls functions
     setState(() {
@@ -117,11 +115,8 @@ class _WatchState extends State<Watch> {
 
     playerProvider.handleWakelock(); // Yes, it handles wakelock state
 
-    final currentByTotal =
-        (controller.position ?? 0) / (controller.duration ?? 0);
-    if (currentByTotal * 100 >= 75 &&
-        !dataProvider.state.preloadStarted &&
-        (controller.isPlaying ?? false)) {
+    final currentByTotal = (controller.position ?? 0) / (controller.duration ?? 0);
+    if (currentByTotal * 100 >= 75 && !dataProvider.state.preloadStarted && (controller.isPlaying ?? false)) {
       dataProvider.preloadNextEpisode();
       updateWatching(
         dataProvider.showId,
@@ -131,14 +126,12 @@ class _WatchState extends State<Watch> {
       );
     }
 
-    final finalEpReached =
-        dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length;
+    final finalEpReached = dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length;
 
     //play the loaded episode if equal to duration
     if (!finalEpReached &&
         controller.duration != null &&
-        (controller.position ?? 0) / 1000 ==
-            (controller.duration ?? 0) / 1000) {
+        (controller.position ?? 0) / 1000 == (controller.duration ?? 0) / 1000) {
       if (controller.isPlaying ?? false) {
         controller.pause();
       }
@@ -208,15 +201,13 @@ class _WatchState extends State<Watch> {
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         // save the last watched duration
-        final double watchPercentage = isInitiated
-            ? ((controller.position ?? 0) / controller.duration!)
-            : 0;
-        addLastWatchedDuration(playerDataProvider.showId.toString(), {
-          playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100
-        });
+        final double watchPercentage = isInitiated ? ((controller.position ?? 0) / controller.duration!) : 0;
+        addLastWatchedDuration(
+            playerDataProvider.showId.toString(), {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100});
         await context.read<ThemeProvider>()
           ..setFullScreen(false)
           ..setTitlebarColor(null);
+        // playerDataProvider.clearDiscordPresence();
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -251,43 +242,33 @@ class _WatchState extends State<Watch> {
                 child: Stack(
                   children: [
                     Player(controller),
-                    if (playerProvider.state.showSubs &&
-                        playerDataProvider.state.currentStream.subtitle != null)
+                    if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
                       SubViewer(
                         controller: controller,
-                        format: playerDataProvider
-                                .state.currentStream.subtitleFormat ??
-                            SubtitleFormat.ASS,
-                        subtitleSource:
-                            playerDataProvider.state.currentStream.subtitle!,
+                        format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
+                        subtitleSource: playerDataProvider.state.currentStream.subtitle!,
                         settings: playerDataProvider.subtitleSettings,
                       ),
                     isInitiated
                         ? AnimatedOpacity(
                             duration: Duration(milliseconds: 150),
-                            opacity:
-                                playerProvider.state.controlsVisible ? 1 : 0,
+                            opacity: playerProvider.state.controlsVisible ? 1 : 0,
                             child: Stack(
                               children: [
                                 IgnorePointer(ignoring: true, child: overlay()),
                                 IgnorePointer(
-                                    ignoring:
-                                        !playerProvider.state.controlsVisible,
-                                    child: Platform.isWindows
-                                        ? Desktopcontrols()
-                                        : Controls()),
+                                    ignoring: !playerProvider.state.controlsVisible,
+                                    child: Platform.isWindows ? Desktopcontrols() : Controls()),
                               ],
                             ),
                           )
                         : Platform.isWindows
                             ? Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Padding(
-                                    padding: const EdgeInsets.only(
-                                        top: 10, left: 10),
+                                    padding: const EdgeInsets.only(top: 10, left: 10),
                                     child: IconButton(
                                         onPressed: () => Navigator.pop(context),
                                         icon: Icon(
@@ -340,11 +321,8 @@ class _WatchState extends State<Watch> {
   @override
   void dispose() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.portraitUp,
-      DeviceOrientation.landscapeRight,
-      DeviceOrientation.landscapeLeft
-    ]);
+    SystemChrome.setPreferredOrientations(
+        [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
       print("[PLAYER] SAVED WATCH DURATION");

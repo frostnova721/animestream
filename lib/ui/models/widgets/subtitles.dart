@@ -1,5 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 
@@ -262,7 +263,7 @@ class _SubViewerState extends State<SubViewer> {
   //i tried to make it beautiful! okay???
   TextStyle subTextStyle() {
     return TextStyle(
-      fontSize: widget.settings.fontSize,
+      fontSize: Platform.isWindows ? widget.settings.fontSize * 1.5 : widget.settings.fontSize,
       fontFamily: widget.settings.fontFamily ?? "Rubik",
       color: widget.settings.textColor,
       fontWeight: widget.settings.bold ? FontWeight.w700 : FontWeight.w500,

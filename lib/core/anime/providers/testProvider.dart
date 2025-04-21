@@ -9,6 +9,7 @@ void run() async {
 import 'package:test/main.dart';
 import 'package:http/http.dart';
 import 'package:html/parser.dart';
+import 'package:html/dom.dart';
 
 class TP extends AnimeProvider {
 
@@ -33,8 +34,8 @@ class TP extends AnimeProvider {
   @override
   Future<List<Map<String, String?>>> search(String query) async {
     // final res = await get(Uri.parse("https://icey-api.vercel.app/pin/search?q=anime"), headers: {"hey": "hey"});
-    final doc = parse('<html><body><div class="hi"></div><div class="hello"></div></body></html>');
-    print(doc.body.querySelector(".hello"));
+    final doc = parse('<html><body><div class="hi"><p class="hm">diddied!</p></div><div class="hello"><p class="text">HEY there!</p></div></body></html>');
+    print(doc.body.querySelector(".hi").children[1]);
     return [];
   }
   

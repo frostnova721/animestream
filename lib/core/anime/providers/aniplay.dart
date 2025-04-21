@@ -36,8 +36,7 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(
-      String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
+  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
     final epIdSplit = episodeId.split("+");
     final epId = epIdSplit[0].split(",");
     final servers = epIdSplit[1].split(",");
@@ -54,10 +53,9 @@ class AniPlay extends AnimeProvider {
       final resFuture = post(Uri.parse(link),
           headers: {
             "Content-Type": "application/json",
-            'Next-Action': "7f702090c0d779331a0b55e1ee0cfea85ff4cb963a",
+            'Next-Action': "7ff1ccbdc8a401729246ca9dcb12ffd2e4982f6358",
           },
-          body:
-              "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
+          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
       resFuture.onError((e, st) {
         print(e.toString());
         return Response("", 401);
@@ -73,13 +71,11 @@ class AniPlay extends AnimeProvider {
           return;
         }
 
-        final List<Map<String, dynamic>>? subtitleArr = List.castFrom(jsonDecode(split)['subtitles']);
+        final List<Map<String, dynamic>>? subtitleArr = List.castFrom(jsonDecode(split)?['subtitles'] ?? []);
         final subtitleItem = subtitleArr?.where((st) => st['lang'] == "English").firstOrNull; // We only need english
 
         //choosing this since the quality is changeable in the default
-        final stream = parsed
-            .where((element) => element['quality'] == "default")
-            .firstOrNull;
+        final stream = parsed.where((element) => element['quality'] == "default").firstOrNull;
         if (stream != null) {
           serversFetched++;
           update([
@@ -97,7 +93,7 @@ class AniPlay extends AnimeProvider {
           serversFetched++;
           for (final str in parsed) {
             try {
-              final yukiHeader = {"Referer":"https://megacloud.club/"};
+              final yukiHeader = {"Referer": "https://megacloud.club/"};
               srcs.add(VideoStream(
                 quality: str['quality'] ?? "unknown",
                 link: str['url'],
@@ -105,8 +101,12 @@ class AniPlay extends AnimeProvider {
                 server: it,
                 backup: (str['quality'] ?? "") == "backup",
                 customHeaders: it == "yuki" ? yukiHeader : null,
-                subtitle:subtitleItem?['url'],
-                subtitleFormat: (subtitleItem?['url'].endsWith("vtt") ?? true) ? SubtitleFormat.VTT : SubtitleFormat.ASS
+                subtitle: subtitleItem?['url'],
+                subtitleFormat: subtitleItem != null
+                    ? subtitleItem['url'].endsWith("vtt")
+                        ? SubtitleFormat.VTT
+                        : SubtitleFormat.ASS
+                    : null,
               ));
             } catch (err) {
               print(err);
@@ -145,7 +145,7 @@ class AniPlay extends AnimeProvider {
         headers: {
           'Referer': l,
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': "7f328d44382d74f2942c42d0bc9915b2d510628a02",
+          'Next-Action': "7f1704775b57ff066fd6966596ea217e51b66e3d1c",
         },
         body: "[\"$id\",true,false]");
     final split = res.body.split('1:')[1];
@@ -164,8 +164,7 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(
-      String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
     throw UnimplementedError();
   }
 }

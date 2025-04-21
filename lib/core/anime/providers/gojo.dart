@@ -67,8 +67,6 @@ class Gojo extends AnimeProvider {
 
     final links = grp.values.map((it) => it.join("+")).toList();
 
-    print(links);
-
     return links;
   }
 
@@ -80,8 +78,10 @@ class Gojo extends AnimeProvider {
 
     //only select with even indexes (odd ones have providers)
     final listWithOnlyIds = linkSplit.where((item) => linkSplit.indexOf(item) % 2 == 0).toList();
+    int i = 0;
     listWithOnlyIds.forEach((it) {
-      final providerIndex = linkSplit.indexOf(it) + 1;
+      final providerIndex = linkSplit.indexOf(it, i) + 1;
+      i = providerIndex;
       final url =
           "$apiUrl/tiddies?provider=${linkSplit[providerIndex]}&id=178100&num=${listWithOnlyIds.indexOf(it) + 1}&subType=sub&watchId=$it&dub_id=null";
       final res = get(Uri.parse(url), headers: headers);

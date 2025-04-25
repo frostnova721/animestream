@@ -1,5 +1,5 @@
 import 'package:animestream/core/anime/extractors/type.dart';
-import 'package:animestream/core/commons/types.dart';
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:http/http.dart';
 import 'package:html/parser.dart' as html;
 

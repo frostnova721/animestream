@@ -2,6 +2,7 @@ import 'dart:collection';
 
 import 'package:dart_eval/dart_eval_bridge.dart';
 import 'package:dart_eval/dart_eval_extensions.dart';
+import 'package:dart_eval/stdlib/collection.dart';
 import 'package:dart_eval/stdlib/core.dart';
 import 'package:html/dom.dart';
 import 'package:source_span/src/file.dart';
@@ -9,41 +10,60 @@ import 'package:source_span/src/file.dart';
 class $Element implements $Instance, Element {
   static final $type = BridgeTypeSpec("package:html/dart", "Element").ref;
 
-  static final $declaration = BridgeClassDef(BridgeClassType($type),
-      constructors: {
-        '': BridgeConstructorDef(
-          BridgeFunctionDef(
-            returns: BridgeTypeAnnotation($type),
-          ),
+  static final $declaration = BridgeClassDef(
+    BridgeClassType($type),
+    constructors: {
+      '': BridgeConstructorDef(
+        BridgeFunctionDef(
+          returns: BridgeTypeAnnotation($type),
         ),
-      },
-      methods: {
-        'querySelector': BridgeMethodDef(
-          BridgeFunctionDef(
-            returns: BridgeTypeAnnotation($Element.$type, nullable: true),
-            params: [
-              BridgeParameter('selector', CoreTypes.string.ref.annotate, false),
-            ],
-          ),
-        ),
-        'hasContent': BridgeMethodDef(
-          BridgeFunctionDef(returns: CoreTypes.bool.ref.annotate),
-        ),
-      },
-      getters: {
-        'children': BridgeMethodDef(BridgeFunctionDef(returns: CoreTypes.list.refWith([$Element.$type]).annotate))
-      },
-      wrap: true);
+      ),
+    },
+    methods: {
+      'querySelector': BridgeFunctionDef(
+        returns: BridgeTypeAnnotation($Element.$type, nullable: true),
+        params: [
+          BridgeParameter('selector', CoreTypes.string.ref.annotate, false),
+        ],
+      ).asMethod,
+      'querySelectorAll': BridgeFunctionDef(
+        returns: CoreTypes.list.refWith([$Element.$type]).annotate,
+        params: [
+          BridgeParameter('selector', CoreTypes.string.ref.annotate, false),
+        ],
+      ).asMethod,
+      'hasContent': BridgeFunctionDef(returns: CoreTypes.bool.ref.annotate).asMethod,
+      'getElementsByTagName': BridgeFunctionDef(
+        returns: CoreTypes.list.refWith([$Element.$type]).annotate,
+        params: [
+          BridgeParameter('selector', CoreTypes.string.ref.annotate, false),
+        ],
+      ).asMethod,
+      'getElementsByClassName': BridgeFunctionDef(
+        returns: CoreTypes.list.refWith([$Element.$type]).annotate,
+        params: [
+          BridgeParameter('selector', CoreTypes.string.ref.annotate, false),
+        ],
+      ).asMethod,
+    },
+    getters: {
+      'children': BridgeMethodDef(BridgeFunctionDef(returns: CoreTypes.list.refWith([$Element.$type]).annotate)),
+      'innerHtml': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
+      'outerHtml': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
+      'id': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
+      'className': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
+      'localName': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
+      'text': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
+      'nextElementSibling': BridgeFunctionDef(returns: $Element.$type.annotateNullable).asMethod,
+      'attributes': BridgeFunctionDef(returns: CollectionTypes.linkedHashMap.ref.annotate).asMethod,
+      'parent': BridgeFunctionDef(returns: $Element.$type.annotateNullable).asMethod,
+    },
+    wrap: true,
+  );
 
   final Element $value;
 
-  $Element.wrap(this.$value)
-      : attributes = $value.attributes,
-        className = $value.className,
-        id = $value.id,
-        endSourceSpan = $value.endSourceSpan,
-        parentNode = $value.parentNode,
-        sourceSpan = $value.sourceSpan;
+  $Element.wrap(this.$value);
 
   $Value? $getProperty(Runtime runtime, String identifier) {
     switch (identifier) {
@@ -74,6 +94,28 @@ class $Element implements $Instance, Element {
         );
       case 'className':
         return $String($value.className);
+      case 'id':
+        return $String($value.id);
+      case 'text':
+        return $String($value.text);
+      case 'localName':
+        return $value.localName != null ? $String($value.localName!) : null;
+      case "getElementsByClassName":
+        return $Function((Runtime runtime, $Value? target, List<$Value?> args) {
+          final classNames = args[0]!.$value as String;
+          final results = $value.getElementsByClassName(classNames);
+          return $List.wrap(results.map($Element.wrap).toList());
+        });
+      case "getElementsByTagName":
+        return $Function((Runtime runtime, $Value? target, List<$Value?> args) {
+          final tag = args[0]!.$value as String;
+          final results = $value.getElementsByTagName(tag);
+          return $List.wrap(results.map($Element.wrap).toList());
+        });
+      case "attributes":
+        return $LinkedHashMap.wrap($value.attributes);
+      case 'parent':
+        return $value.parent != null ? $Element.wrap($value.parent!) : null;
       default:
         return null;
     }
@@ -101,17 +143,17 @@ class $Element implements $Instance, Element {
     $value.text = value;
   }
 
-  LinkedHashMap<Object, String> attributes;
+  LinkedHashMap<Object, String> get attributes => $value.attributes;
 
-  String className;
+  String get className => $value.className;
 
   FileSpan? endSourceSpan;
 
-  String id;
+  String get id => $value.id;
 
-  Node? parentNode;
+  Node? get parentNode => $value.parentNode;
 
-  FileSpan? sourceSpan;
+  FileSpan? get sourceSpan => $value.sourceSpan;
 
   void append(Node node) => throw UnimplementedError();
 
@@ -166,4 +208,29 @@ class $Element implements $Instance, Element {
   void reparentChildren(Node newParent) => $value.reparentChildren(newParent);
 
   Node replaceWith(Node otherNode) => $value.replaceWith(otherNode);
+
+  @override
+  set attributes(LinkedHashMap<Object, String> _attributes) {
+    $value.attributes = _attributes;
+  }
+
+  @override
+  set className(String value) {
+    $value.className = value;
+  }
+
+  @override
+  set id(String value) {
+    $value.id = value;
+  }
+
+  @override
+  set parentNode(Node? _parentNode) {
+    $value.parentNode = _parentNode;
+  }
+
+  @override
+  set sourceSpan(FileSpan? _sourceSpan) {
+    $value.sourceSpan = _sourceSpan;
+  }
 }

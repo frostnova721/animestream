@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
@@ -12,11 +12,11 @@ class AniPlay extends AnimeProvider {
   static const baseUrl = "https://aniplaynow.live";
 
   @override
-  Future<List<String>> getAnimeEpisodeLink(String aliasId) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
     final serversAndEps = await _getAllServerLinks(aliasId.split('\$')[0]);
     //it is a map!, but dart says its not a map :(
     final List<dynamic> eps = serversAndEps[0]['episodes'];
-    final List<String> epIds = [];
+    final List<Map<String, dynamic>> details = [];
     for (int i = 0; i < eps.length; i++) {
       //string which contains the servers
       String serverString = "";
@@ -29,14 +29,22 @@ class AniPlay extends AnimeProvider {
       });
 
       //here we give em as "episodeId+servers+anilistId"
-      epIds.add("$idString+$serverString+$aliasId+${eps[i]['number']}");
+      details.add({
+        'episodeLink': "$idString+$serverString+$aliasId+${eps[i]['number']}",
+        'episodeNumber': eps[i]['number'],
+        'episodeTitle': (eps[i]["title"]?.isEmpty ?? true) ? null : eps[i]["title"],
+        'thumbnail': (eps[i]['img']?.isEmpty ?? true) ? null : eps[i]["img"],
+        'hasDub': eps[i]['hasDub'] ?? false,
+        'isFiller': eps[i]['isFiller'] ?? false,
+      });
     }
 
-    return epIds;
+    return details;
   }
 
   @override
-  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update) async {
+  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update,
+      {bool dub = false, String? metadata}) async {
     final epIdSplit = episodeId.split("+");
     final epId = epIdSplit[0].split(",");
     final servers = epIdSplit[1].split(",");
@@ -53,9 +61,9 @@ class AniPlay extends AnimeProvider {
       final resFuture = post(Uri.parse(link),
           headers: {
             "Content-Type": "application/json",
-            'Next-Action': "7ff1ccbdc8a401729246ca9dcb12ffd2e4982f6358",
+            'Next-Action': "7f56d3175d4abc2bde60a5dd3b64c25ba1f9b1a39a",
           },
-          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"sub\"]");
+          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"${dub ? 'dub' : 'sub'}\"]");
       resFuture.onError((e, st) {
         print(e.toString());
         return Response("", 401);
@@ -92,6 +100,7 @@ class AniPlay extends AnimeProvider {
           final List<VideoStream> srcs = [];
           serversFetched++;
           for (final str in parsed) {
+            if (str['url'] == null) continue;
             try {
               final yukiHeader = {"Referer": "https://megacloud.club/"};
               srcs.add(VideoStream(
@@ -104,8 +113,8 @@ class AniPlay extends AnimeProvider {
                 subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
                     ? subtitleItem['url'].endsWith("vtt")
-                        ? SubtitleFormat.VTT
-                        : SubtitleFormat.ASS
+                        ? SubtitleFormat.VTT.name
+                        : SubtitleFormat.ASS.name
                     : null,
               ));
             } catch (err) {
@@ -145,7 +154,7 @@ class AniPlay extends AnimeProvider {
         headers: {
           'Referer': l,
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': "7f1704775b57ff066fd6966596ea217e51b66e3d1c",
+          'Next-Action': "7fd497d29b50e7263fd58c8b4873b458476172233a",
         },
         body: "[\"$id\",true,false]");
     final split = res.body.split('1:')[1];
@@ -164,7 +173,7 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update, {bool dub = false, String? metadata}) {
     throw UnimplementedError();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/database/types.dart';
@@ -5,12 +6,11 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 import 'package:flutter/material.dart';
 
-import 'package:animestream/core/commons/types.dart';
 
 /// Handle the state of player. manages datas like quality, servers etc..
 class PlayerDataProvider extends ChangeNotifier {
   PlayerDataProviderState _state;
-  List<String> epLinks;
+  List<EpisodeDetails> epLinks;
   String showTitle; // Title of the anime
   String? coverImageUrl;
   int showId; // Id of the anime
@@ -149,7 +149,7 @@ class PlayerDataProvider extends ChangeNotifier {
     }
     List<VideoStream> srcs = [];
     //its actually the getStreams function!
-    await getStreams(selectedSource, epLinks[index], (list, finished) {
+    await getStreams(selectedSource, epLinks[index].episodeLink, (list, finished) {
       srcs = srcs + list;
       if (finished) {
         _state = _state.copyWith(preloadedSources: srcs);

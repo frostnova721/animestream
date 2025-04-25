@@ -1,32 +1,5 @@
-import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/database/types.dart';
-
-class VideoStream {
-  final String quality;
-  final String link;
-  final bool isM3u8;
-  final String? subtitle;
-  final SubtitleFormat? subtitleFormat;
-  final String server;
-  final bool backup;
-  final Map<String, String>? customHeaders;
-
-  VideoStream(
-      {required this.quality,
-      required this.link,
-      required this.isM3u8,
-      required this.server,
-      required this.backup,
-      this.subtitleFormat = null,
-      this.subtitle = null, 
-      this.customHeaders = null,
-      });
-
-  @override
-  String toString() {
-    return 'VideoStream(quality: $quality, link: $link, isM3u8: $isM3u8, subtitle: $subtitle, subtitleFormat: $subtitleFormat, server: $server, backup: $backup, customHeaders: $customHeaders)';
-  }
-}
 
 class ServerSelectionBottomSheetContentData {
   final int episodeIndex;

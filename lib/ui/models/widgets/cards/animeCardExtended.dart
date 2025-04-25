@@ -1,12 +1,11 @@
 import 'dart:ui';
 
-import 'package:animestream/core/anime/providers/testProvider.dart';
-import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/pages/info.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/pages/info.dart';
 
 class AnimeCardExtended extends StatelessWidget {
   final int id;
@@ -51,7 +50,6 @@ class AnimeCardExtended extends StatelessWidget {
         child: InkWell(
           focusColor: appTheme.textSubColor,
           onTap: () async {
-            // return run();
             if (!isAnime) return floatingSnackBar("Mangas/Novels arent supported");
             if (shouldNavigate)
               Navigator.of(context)

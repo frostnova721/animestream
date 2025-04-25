@@ -114,7 +114,6 @@ flutter:
   assets:
     - lib/assets/images/search.png
     - lib/assets/images/broken_heart.png
-    - lib/assets/images/shines.png
     - lib/assets/images/check.png
     - lib/assets/images/ghost.png
     - lib/assets/icons/logo_foreground.png

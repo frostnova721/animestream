@@ -1,6 +1,6 @@
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/preferences.dart';
@@ -29,7 +29,7 @@ class InfoProvider extends ChangeNotifier {
 
   MediaStatus? _mediaListStatus;
 
-  List<String> _epLinks = [];
+  List<EpisodeDetails> _epLinks = [];
   List<VideoStream> _streamSources = [];
   List<Map<String, String>> _qualities = [];
   List<List<Map<String, dynamic>>> _visibleEpList = [];
@@ -73,7 +73,7 @@ class InfoProvider extends ChangeNotifier {
   List<Map<String, String>> get qualities => _qualities;
   List<List<Map<String, dynamic>>> get visibleEpList => _visibleEpList;
   List<AlternateDatabaseId> get altDatabases => _altDatabases;
-  List<String> get epLinks => _epLinks;
+  List<EpisodeDetails> get epLinks => _epLinks;
 
   MediaStatus? get mediaListStatus => _mediaListStatus;
 
@@ -126,6 +126,7 @@ class InfoProvider extends ChangeNotifier {
         preferDubs: val,
       ),
     );
+    paginate(epLinks);
     notifyListeners();
   }
 
@@ -170,7 +171,7 @@ class InfoProvider extends ChangeNotifier {
 
     final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
-    _currentPageIndex = supposedPageIndex >= visibleEpList.length ? visibleEpList.length-1 : supposedPageIndex; 
+    _currentPageIndex = supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex;
 
     if (refreshLastWatchDuration) {
       _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
@@ -197,11 +198,11 @@ class InfoProvider extends ChangeNotifier {
           });
         } catch (err) {
           if (currentUserSettings?.showErrors ?? false) {
-            floatingSnackBar( "Couldnt fetch simkl data");
+            floatingSnackBar("Couldnt fetch simkl data");
           }
         }
       }
-      
+
       final info = await DatabaseHandler().getAnimeInfo(id);
       _altDatabases = info.alternateDatabases;
       _dataLoaded = true;
@@ -218,7 +219,7 @@ class InfoProvider extends ChangeNotifier {
     }
   }
 
-  void paginate(List<String> links) {
+  void paginate(List<EpisodeDetails> links) {
     _visibleEpList = [];
     _epLinks = links;
     if (_epLinks.length > 24) {
@@ -227,8 +228,12 @@ class InfoProvider extends ChangeNotifier {
       for (int h = 0; h < totalPages; h++) {
         List<Map<String, dynamic>> page = [];
         for (int i = 0; i < 24 && remainingItems > 0; i++) {
+          if (_preferDubs && !(_epLinks[(h * 24) + i].hasDub ?? false)) {
+            remainingItems--;
+          } else {
           page.add({'realIndex': (h * 24) + i, 'epLink': _epLinks[(h * 24) + i]});
           remainingItems--;
+          }
         }
         visibleEpList.add(page);
       }
@@ -239,7 +244,7 @@ class InfoProvider extends ChangeNotifier {
       }
       visibleEpList.add(pageOne);
     }
-      _currentPageIndex = _currentPageIndex >= _visibleEpList.length ? 0 : watched ~/ 25 ; 
+    _currentPageIndex = _currentPageIndex >= _visibleEpList.length ? 0 : watched ~/ 25;
   }
 
   Future<void> _search(String query) async {

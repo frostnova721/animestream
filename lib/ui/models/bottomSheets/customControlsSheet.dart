@@ -1,10 +1,10 @@
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
-import 'package:animestream/core/commons/types.dart';
 
 class CustomControlsBottomSheet extends StatefulWidget {
   /// The index of episode to switch
@@ -56,7 +56,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       currentSources = dp.state.streams;
       _isLoading = false;
     } else {
-      await getStreams(dp.selectedSource, dp.epLinks[index], (list, finished) {
+      await getStreams(dp.selectedSource, dp.epLinks[index].episodeLink, (list, finished) {
         if (list.length > 0) {
           if (mounted)
             setState(() {

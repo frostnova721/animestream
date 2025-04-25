@@ -1,9 +1,9 @@
 import 'dart:io';
 
 import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
@@ -45,7 +45,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
       try {
         await srcs.getDownloadSources(
           widget.provider.selectedSource,
-          widget.provider.epLinks[widget.episodeIndex],
+          widget.provider.epLinks[widget.episodeIndex].episodeLink,
           (list, finished) {
             if (mounted)
               setState(() {
@@ -75,7 +75,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
         }
       }
     } else {
-      await srcs.getStreams(widget.provider.selectedSource, widget.provider.epLinks[widget.episodeIndex],
+      await srcs.getStreams(widget.provider.selectedSource, widget.provider.epLinks[widget.episodeIndex].episodeLink,
+      dub: provider.preferDubs,
+      metadata: provider.epLinks[widget.episodeIndex].metadata,
           (list, finished) {
         if (mounted)
           setState(() {

@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:flutter/material.dart';
 

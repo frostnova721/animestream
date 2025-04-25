@@ -2,11 +2,11 @@ import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/aniplay.dart';
 import 'package:animestream/core/anime/providers/gojo.dart';
+import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:flutter/material.dart';
-import 'package:animestream/core/commons/types.dart';
 
 final List<String> sources = [
   // "gogoanime", RIP, you shall rest here till the end of this app's life!
@@ -69,21 +69,14 @@ Future<List<Map<String, String?>>> searchInSource(String source, String query) a
   return searchResults;
 }
 
-Future<List<String>> getAnimeEpisodes(String source, String link) async {
-  final info = await getClass(source).getAnimeEpisodeLink(link);
+Future<List<EpisodeDetails>> getAnimeEpisodes(String source, String link, { bool dub = false}) async {
+  final info = await getClass(source).getAnimeEpisodeLink(link, dub: dub);
 
-  //should be list of strings
-  return info;
-  // final int episodes = info['episodes'];
-  // List<String> episodeLinks = [];
-  // for (int i = 1; i <= episodes; i++) {
-  //   episodeLinks.add("${info['link']}$i");
-  // }
-  // return episodeLinks;
+  // should be list of map corresponding to values of [EpisodeList]
+  return info.map((e) => EpisodeDetails.fromMap(e)).toList();
 }
 
 Future<List<Map<String, String>>> generateQualitiesForMultiQuality(String link, { Map<String, String>? customHeaders = null}) async {
-  // final qualities = await Vidstream().generateQualityStreams(link);
   if (!link.contains(".m3u8")) return [];
   final qualities = await getQualityStreams(link, customHeader: customHeaders);
   return qualities;
@@ -94,7 +87,7 @@ Future<void> getDownloadSources(String source, String episodeUrl, Function(List<
   return streams;
 }
 
-Future<void> getStreams(String source, String episodeId, Function(List<VideoStream>, bool) updateFunction) async {
-  final streams = await getClass(source).getStreams(episodeId, updateFunction);
+Future<void> getStreams(String source, String episodeId, void Function(List<VideoStream>, bool) updateFunction, { bool dub = false, String? metadata}) async {
+  final streams = await getClass(source).getStreams(episodeId, updateFunction, dub: dub, metadata: metadata);
   return streams;
 }

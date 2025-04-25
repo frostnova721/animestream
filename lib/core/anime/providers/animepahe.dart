@@ -1,13 +1,12 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
-import 'package:animestream/core/commons/types.dart';
 import 'package:http/http.dart' as http;
 import 'package:html/parser.dart' as html;
 
 class AnimePahe extends AnimeProvider {
-
   @override
   String providerName = "animepahe";
 
@@ -34,7 +33,7 @@ class AnimePahe extends AnimeProvider {
   }
 
   @override
-  Future<List<String>> getAnimeEpisodeLink(String session) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String session, {bool dub = false}) async {
     List list = [];
     final String url = "https://animepahe.ru/api?m=release&id=$session&sort=episode_asc`";
     final data = await http.get(Uri.parse(url), headers: _headers);
@@ -51,19 +50,31 @@ class AnimePahe extends AnimeProvider {
 
     list = list.expand((item) => item).toList();
 
-    final List<String> episodeLinks = [];
+    final List<Map<String, dynamic>> episodeLinks = [];
 
     for (int i = 0; i < list.length; i++) {
       final episodeLink = "https://animepahe.ru/play/$session/${list[i]['session']}";
-      episodeLinks.add(episodeLink);
+      final String? thumbnail = list[i]['snapshot'];
+      final filler = list[i]['filler'] != 0;
+      final String? title = ((list[i]['title'] as String?)?.isEmpty ?? true) ? null : list[i]['title'];
+      final bool? dub = list[i]['audio'] != 'jpn';
+      episodeLinks.add({
+        'episodeLink': episodeLink,
+        'episodeNumber': list.length - i,
+        'thumbnail': thumbnail,
+        'episodeTitle': title,
+        'isFiller': filler,
+        'hasDub': dub,
+      });
     }
 
     return episodeLinks.reversed.toList();
   }
 
   @override
-  Future<void> getStreams(String episodeUrl, Function(List<VideoStream> list, bool) update) async {
-    return await getDownloadSources(episodeUrl, update);
+  Future<void> getStreams(String episodeUrl, Function(List<VideoStream> list, bool) update,
+      {bool dub = false, String? metadata}) async {
+    return await getDownloadSources(episodeUrl, update, dub: dub, metadata: metadata);
     // final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
     // final document = html.parse(data.body);
     // final streams = document.querySelectorAll('div#resolutionMenu > button');
@@ -102,7 +113,8 @@ class AnimePahe extends AnimeProvider {
     // });
   }
 
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> list, bool) update) async {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> list, bool) update,
+      {bool dub = false, String? metadata}) async {
     final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
     final document = html.parse(data.body);
     final downloadQualities = document.querySelectorAll('div#pickDownload > a');
@@ -119,34 +131,40 @@ class AnimePahe extends AnimeProvider {
     final totalStreams = links.length;
     int returns = 0;
 
-    links.forEach((e) {
-      final downloadLink = extractDownloadLink(e['link'] ?? '');
+    for (final e in links) {
+      final isDub = e['quality']?.toLowerCase().contains('eng') ?? false;
+      if (isDub != dub) {
+        returns++;
+        if (returns == totalStreams) update([], totalStreams == returns);
+        continue;
+      }
+      final downloadLink = _extractDownloadLink(e['link'] ?? '');
       downloadLink.then((val) {
         returns++;
-        update([
-          VideoStream(
-            quality: e['quality']! + " [${e['size']}]",
-            server: e['server'] ?? "unknown",
-            link: val,
-            isM3u8: val.contains(".m3u8"),
-            backup: false,
-            subtitle: null,
-            subtitleFormat: null,
-          ),
-        ], returns == totalStreams);
+          update([
+            VideoStream(
+              quality: e['quality']! + " [${e['size']}]",
+              server: e['server'] ?? "unknown",
+              link: val,
+              isM3u8: val.contains(".m3u8"),
+              backup: false,
+              subtitle: null,
+              subtitleFormat: null,
+            ),
+          ], returns == totalStreams);
       }).catchError((error) {
         print(error);
         returns++;
         update([], returns == totalStreams);
       });
-    });
+    }
   }
 
-  final map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
+  final _map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
 
-  int getString(List<String> content, int s1) {
+  int _getString(List<String> content, int s1) {
     final s2 = 10;
-    final slice = map.substring(0, s2);
+    final slice = _map.substring(0, s2);
     int acc = 0;
     content.reversed.toList().asMap().forEach((index, c) {
       acc += (RegExp(r'\d').hasMatch(c) ? int.parse(c) : 0) * pow(s1, index).toInt();
@@ -159,7 +177,7 @@ class AnimePahe extends AnimeProvider {
     return int.parse(k);
   }
 
-  String decrypt(String fullKey, String key, int v1, int v2) {
+  String _decrypt(String fullKey, String key, int v1, int v2) {
     String r = "";
     int i = 0;
     while (i < fullKey.length) {
@@ -171,13 +189,13 @@ class AnimePahe extends AnimeProvider {
       for (int j = 0; j < key.length; j++) {
         s = s.replaceAll(RegExp(key[j]), j.toString());
       }
-      r += String.fromCharCode(getString(s.split(""), v2) - v1);
+      r += String.fromCharCode(_getString(s.split(""), v2) - v1);
       i++;
     }
     return r;
   }
 
-  Future<String> extractDownloadLink(String downloadLink) async {
+  Future<String> _extractDownloadLink(String downloadLink) async {
     if (downloadLink == '') throw new Exception("Invalid download link");
     final redirectRegex = RegExp(r'\("href","(.*?)"\)');
     final paramRegex = RegExp(r'\("(\w+)",\d+,"(\w+)",(\d+),(\d+),(\d+)\)');
@@ -188,7 +206,7 @@ class AnimePahe extends AnimeProvider {
     final scripts = html.parse(resp.body).querySelectorAll('script');
     String? kwikLink;
     scripts.forEach((e) {
-      if(kwikLink != null) return;
+      if (kwikLink != null) return;
       if (e != '') {
         final match = redirectRegex.allMatches(e.innerHtml);
         if (match.isNotEmpty) {
@@ -207,7 +225,7 @@ class AnimePahe extends AnimeProvider {
     final v1 = int.parse(match.group(3)!);
     final v2 = int.parse(match.group(4)!);
 
-    final decrypted = decrypt(fullKey, key, v1, v2);
+    final decrypted = _decrypt(fullKey, key, v1, v2);
     final postUrl = urlRegex.firstMatch(decrypted)!.group(1);
     final token = tokenRegex.firstMatch(decrypted)!.group(1);
 

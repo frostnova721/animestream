@@ -58,7 +58,7 @@ class CommonInfo extends StatelessWidget {
                       padding: EdgeInsets.only(right: 20),
                       child: _button(
                         onClick: () {
-                          if(!provider.loggedIn) {
+                          if (!provider.loggedIn) {
                             return floatingSnackBar("Login to anilist!");
                           }
                           showDialog(
@@ -78,30 +78,32 @@ class CommonInfo extends StatelessWidget {
                         },
                         child: Text(
                           "${provider.mediaListStatus?.name ?? "UNTRACKED"}",
-                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 28,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 28,
                           ),
                         ),
                       ),
                     ),
                     _button(
                       onClick: () {
-                        if(!provider.loggedIn) {
-                            return floatingSnackBar("Login to anilist!");
-                          }
+                        if (!provider.loggedIn) {
+                          return floatingSnackBar("Login to anilist!");
+                        }
                         showDialog(
-                            context: context,
-                            useRootNavigator: false,
-                            builder: (context) => Dialog(
-                              backgroundColor: appTheme.backgroundColor,
-                              child: Container(
-                                padding: EdgeInsets.all(20),
-                                width: size.width / 3,
-                                child: MediaListStatusBottomSheet(
-                                  provider: provider,
-                                ),
+                          context: context,
+                          useRootNavigator: false,
+                          builder: (context) => Dialog(
+                            backgroundColor: appTheme.backgroundColor,
+                            child: Container(
+                              padding: EdgeInsets.all(20),
+                              width: size.width / 3,
+                              child: MediaListStatusBottomSheet(
+                                provider: provider,
                               ),
                             ),
-                          );
+                          ),
+                        );
                       },
                       child: Row(
                         children: [

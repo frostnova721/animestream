@@ -27,6 +27,14 @@ class $Document implements $Instance {
           ],
         ),
       ),
+      'querySelectorAll': BridgeMethodDef(
+        BridgeFunctionDef(
+          returns: BridgeTypeAnnotation(CoreTypes.list.refWith([$Element.$type])),
+          params: [
+            BridgeParameter('selector', BridgeTypeAnnotation(BridgeTypeRef(CoreTypes.string)), false),
+          ],
+        ),
+      ),
     },
     getters: {
       'body': BridgeMethodDef(

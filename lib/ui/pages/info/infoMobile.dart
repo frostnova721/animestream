@@ -285,14 +285,20 @@ class _InfoMobileState extends State<InfoMobile> {
             children: [
               Container(
                 height: 45,
-                child: Stack(
+                margin: EdgeInsets.only(bottom: 10),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        _categoryTitle("Episodes"),
-                      ],
-                    ),
+                    Container(
+                        padding: EdgeInsets.only(left: 20),
+                        child: Text(
+                          "Episodes",
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Rubik",
+                          ),
+                        )),
                     if (provider.foundName != null)
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -306,14 +312,10 @@ class _InfoMobileState extends State<InfoMobile> {
                               height: 25,
                               alignment: Alignment.center,
                               padding: EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(6),
-                                color: appTheme.textMainColor
-                              ),
-                              child: Text(provider.preferDubs ? "dub" : "sub", style: TextStyle(
-                                color: appTheme.backgroundColor,
-                                fontWeight: FontWeight.bold
-                              )),
+                              decoration:
+                                  BoxDecoration(borderRadius: BorderRadius.circular(6), color: appTheme.textMainColor),
+                              child: Text(provider.preferDubs ? "dub" : "sub",
+                                  style: TextStyle(color: appTheme.backgroundColor, fontWeight: FontWeight.bold)),
                             ),
                           ),
                           Padding(

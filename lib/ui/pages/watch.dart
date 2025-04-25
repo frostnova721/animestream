@@ -245,7 +245,8 @@ class _WatchState extends State<Watch> {
                     if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
                       SubViewer(
                         controller: controller,
-                        format: playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS,
+                        format: SubtitleFormat.fromName(
+                            playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
                         subtitleSource: playerDataProvider.state.currentStream.subtitle!,
                         settings: playerDataProvider.subtitleSettings,
                       ),

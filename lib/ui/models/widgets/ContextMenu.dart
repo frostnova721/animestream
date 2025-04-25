@@ -39,13 +39,15 @@ class _ContextMenuState extends State<ContextMenu> {
                   left: pos.dx + width > MediaQuery.of(context).size.width ? pos.dx - width : pos.dx,
                   child: ClipRRect(
                     clipBehavior: Clip.antiAlias,
-                    borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(8),
                     child: BackdropFilter(
-                      filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+                      filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
                       child: Container(
                         padding: EdgeInsets.all(4),
                         decoration: BoxDecoration(
-                          color: appTheme.textMainColor.withAlpha(30),
+                          border: Border.all(color: appTheme.textSubColor.withAlpha(70)),
+                          borderRadius: BorderRadius.circular(8),
+                          color: appTheme.textMainColor.withAlpha(18),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withAlpha(150),
@@ -54,7 +56,8 @@ class _ContextMenuState extends State<ContextMenu> {
                             ),
                           ],
                         ),
-                        height: (widget.menuItems.length * 40) + 10 + (widget.header != null ? 50 : 0), //add the padding
+                        height:
+                            (widget.menuItems.length * 40) + 12 + (widget.header != null ? 50 : 0), //add the padding
                         width: width,
                         child: Column(
                           children: [
@@ -89,7 +92,7 @@ class _ContextMenuState extends State<ContextMenu> {
                                   return Container(
                                     height: 1,
                                     margin: EdgeInsets.symmetric(horizontal: 20),
-                                    color: appTheme.textSubColor.withAlpha(100),
+                                    color: appTheme.textSubColor.withAlpha(70),
                                   );
                                 },
                                 itemCount: widget.menuItems.length,

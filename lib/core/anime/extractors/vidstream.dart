@@ -1,10 +1,10 @@
 import "dart:convert";
 
 import "package:animestream/core/anime/extractors/type.dart";
+import "package:animestream/core/anime/providers/types.dart";
 import "package:http/http.dart";
 import "package:html/parser.dart" as html;
 import "package:encrypt/encrypt.dart";
-import "package:animestream/core/commons/types.dart";
 
 class GogoVidstream extends AnimeExtractor {
   final keys = {
@@ -53,16 +53,6 @@ class GogoVidstream extends AnimeExtractor {
       ));
     }
 
-    // for(final src in parsed['source_bk']) {
-    //   qualityList.add(VideoStream(
-    //     quality: "multi-quality",
-    //     link: src['file'],
-    //     isM3u8: src['file'].endsWith(".m3u8"),
-    //     server: "vidstreaming",
-    //     backup: true
-    //   ));
-    // }
-
     return qualityList;
   }
 
@@ -102,26 +92,6 @@ class GogoVidstream extends AnimeExtractor {
     final String link = doc.querySelector("iframe")?.attributes['src'] ?? '';
     if (link.length == 0) return null;
     return link;
-  }
-
-  Future<List<Map<String, String>>> generateQualityStreams(String multiQualityLink) async {
-    final List<Map<String, String>> qualityArray = [];
-    final streamMetadata = await fetch(multiQualityLink);
-    final regex = RegExp(r'RESOLUTION=(\d+x\d+),NAME="([^"]+)"\n([^#]+)');
-    final matchedData = regex.allMatches(streamMetadata);
-    if(matchedData.isEmpty) throw new Exception("No matches in the stream");
-    for(final match in matchedData) {
-      final item = match.group(0) ?? '';
-      String edit = item.trim().replaceAll(RegExp(r'\n\s+|,|\n'), ' ');
-      edit = edit.replaceAll(RegExp(r'RESOLUTION=|NAME='), '');
-      final editParts = edit.split(' ');
-      qualityArray.add({
-        'resolution': editParts[0],
-        'quality': editParts[1].replaceAll('"', ''),
-        'link': '${multiQualityLink.split('/').sublist(0, multiQualityLink.split('/').length - 1).join('/')}/${editParts[2]}'
-      });
-    }
-    return qualityArray;
   }
 }
 

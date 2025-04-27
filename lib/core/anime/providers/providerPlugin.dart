@@ -7,7 +7,6 @@ import 'package:animestream/core/anime/providers/type/videoStream.dart';
 import 'package:dart_eval/dart_eval.dart';
 
 class ProviderPlugin {
-
   late Compiler _compiler;
 
   ProviderPlugin() {
@@ -16,7 +15,7 @@ class ProviderPlugin {
 
   void _setupCompiler() {
     _compiler = Compiler();
-    
+
     _compiler.defineBridgeClass($AnimeProvider$bridge.$declaration);
     _compiler.defineBridgeClass($VideoStream.$declaration);
 
@@ -25,7 +24,6 @@ class ProviderPlugin {
   }
 
   AnimeProvider getProvider(String provider) {
-
     final program = ProviderManager().getProviderCode(provider);
 
     final pgm = _compiler.compile({

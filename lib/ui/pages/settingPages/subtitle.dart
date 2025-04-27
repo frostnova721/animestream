@@ -251,8 +251,8 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                       saveSubSettings();
                                     },
                                     min: 0,
-                                    max: 2,
-                                    divisions: 20,
+                                    max: 6,
+                                    divisions: 10,
                                   ),
                                 ),
                                 _itemTitle("Background Opacity"),

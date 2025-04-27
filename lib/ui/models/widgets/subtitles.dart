@@ -22,8 +22,7 @@ class Subtitle {
   });
 
   @override
-  String toString() =>
-      'Subtitle(start: $start, end: $end, dialogue: $dialogue)';
+  String toString() => 'Subtitle(start: $start, end: $end, dialogue: $dialogue)';
 }
 
 class SubtitleSettings {
@@ -46,7 +45,7 @@ class SubtitleSettings {
     this.bottomMargin = 30,
     this.fontSize = 24,
     this.strokeColor = Colors.black,
-    this.strokeWidth = 1.1,
+    this.strokeWidth = 2,
     this.textColor = Colors.white,
     this.fontFamily = "Rubik",
     this.bold = false,
@@ -95,8 +94,7 @@ class SubtitleSettings {
       textColor: Color(map['textColor'] as int? ?? Colors.white.toInt()),
       strokeColor: Color(map['strokeColor'] as int? ?? Colors.black.toInt()),
       backgroundColor: Color((map['backgroundColor'] ?? Colors.black.toInt()) as int),
-      fontFamily:
-          map['fontFamily'] != null ? map['fontFamily'] as String : "Rubik",
+      fontFamily: map['fontFamily'] != null ? map['fontFamily'] as String : "Rubik",
       strokeWidth: (map['strokeWidth'] ?? 1.1) as double,
       fontSize: (map['fontSize'] ?? 24) as double,
       bottomMargin: (map['bottomMargin'] ?? 30) as double,
@@ -135,7 +133,7 @@ class SubtitleText extends StatelessWidget {
       color: backgroundColor.withAlpha((backgroundTransparency * 255).toInt()),
       child: Stack(
         children: [
-           //the stroke of that text since the flutter doesnt have it :(
+          //the stroke of that text since the flutter doesnt have it :(
           Text(
             text,
             style: style.copyWith(
@@ -150,9 +148,11 @@ class SubtitleText extends StatelessWidget {
           //the actual text
           Text(
             text,
-            style: style.copyWith(shadows: [
-              Shadow(color: Colors.black, blurRadius: 3.5, offset: Offset(1, 1)),
-            ],),
+            style: style.copyWith(
+              shadows: [
+                Shadow(color: Colors.black, blurRadius: 3.5, offset: Offset(1, 1)),
+              ],
+            ),
             textAlign: TextAlign.center,
           ),
         ],
@@ -276,23 +276,22 @@ class _SubViewerState extends State<SubViewer> {
 
   @override
   Widget build(BuildContext context) {
-
     return Container(
-            alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(bottom: widget.settings.bottomMargin),
-            child: Container(
-              width: MediaQuery.of(context).size.width / 1.6,
-              alignment: Alignment.bottomCenter,
-              child: SubtitleText(
-                text: activeLine,
-                style: subTextStyle(),
-                strokeColor: widget.settings.strokeColor,
-                strokeWidth: widget.settings.strokeWidth,
-                backgroundColor: widget.settings.backgroundColor,
-                backgroundTransparency: widget.settings.backgroundTransparency,
-              ),
-            ),
-          );
+      alignment: Alignment.bottomCenter,
+      margin: EdgeInsets.only(bottom: widget.settings.bottomMargin),
+      child: Container(
+        width: MediaQuery.of(context).size.width / 1.6,
+        alignment: Alignment.bottomCenter,
+        child: SubtitleText(
+          text: activeLine,
+          style: subTextStyle(),
+          strokeColor: widget.settings.strokeColor,
+          strokeWidth: widget.settings.strokeWidth,
+          backgroundColor: widget.settings.backgroundColor,
+          backgroundTransparency: widget.settings.backgroundTransparency,
+        ),
+      ),
+    );
   }
 
   @override

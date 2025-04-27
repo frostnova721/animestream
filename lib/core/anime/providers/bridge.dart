@@ -24,6 +24,18 @@ class $AnimeProvider$bridge with $Bridge<AnimeProvider> implements AnimeProvider
         CoreTypes.list.refWith([CoreTypes.map.ref])
       ]).annotate)
           .asMethod,
+      'getStreams': BridgeFunctionDef(returns: BridgeTypeAnnotation(CoreTypes.voidType.ref), params: [
+        'episodeId'.param(CoreTypes.string.ref.annotate),
+        'update'.param(CoreTypes.function.ref.annotate),
+        'dub'.paramOptional(CoreTypes.bool.ref.annotate),
+        'metadata'.paramOptional(CoreTypes.string.ref.annotate),
+      ]).asMethod,
+      'getDownloadSources': BridgeFunctionDef(returns: BridgeTypeAnnotation(CoreTypes.voidType.ref), params: [
+        'episodeId'.param(CoreTypes.string.ref.annotate),
+        'update'.param(CoreTypes.function.ref.annotate),
+        'dub'.paramOptional(CoreTypes.bool.ref.annotate),
+        'metadata'.paramOptional(CoreTypes.string.ref.annotate),
+      ]).asMethod,
     },
     getters: {
       'providerName': BridgeMethodDef(isStatic: false, BridgeFunctionDef(returns: CoreTypes.string.ref.annotate)),
@@ -62,8 +74,9 @@ class $AnimeProvider$bridge with $Bridge<AnimeProvider> implements AnimeProvider
   }
 
   @override
-  Future<void> getDownloadSources(String episodeId, Function(List<VideoStream> p1, bool p2) update, {bool dub = false, String? metadata}) async {
-     return await $_invoke("getStreams", [
+  Future<void> getDownloadSources(String episodeId, Function(List<VideoStream> p1, bool p2) update,
+      {bool dub = false, String? metadata}) async {
+    return await $_invoke("getStreams", [
       $String(episodeId),
       $Function((Runtime runtime, $Value? target, List<$Value?> args) {
         final list = args[0] as $List;

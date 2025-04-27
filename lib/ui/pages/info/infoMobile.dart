@@ -1,3 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
@@ -12,9 +16,6 @@ import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/info.dart';
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class InfoMobile extends StatefulWidget {
   const InfoMobile({super.key});
@@ -922,7 +923,7 @@ class _InfoMobileState extends State<InfoMobile> {
                               end: Alignment.centerRight,
                             ).createShader(bounds),
                             child: Image.network(
-                              provider.data.cover,
+                              provider.visibleEpList[provider.currentPageIndex][index]['epLink'].thumbnail ?? provider.data.cover,
                               fit: BoxFit.cover,
                               width: 165,
                             ),
@@ -944,6 +945,8 @@ class _InfoMobileState extends State<InfoMobile> {
                                 fontFamily: "Poppins",
                                 fontSize: 18,
                               ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                             if (!unDownloadableSources.contains(provider.selectedSource))
                               Container(

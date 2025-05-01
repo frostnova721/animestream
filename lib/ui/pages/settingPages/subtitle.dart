@@ -110,6 +110,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                         onPressed: () => Navigator.of(context).pop(),
                         icon: Icon(
                           Icons.arrow_back_rounded,
+                          color: appTheme.textMainColor,
                           size: 35,
                         ),
                       )
@@ -123,6 +124,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                 icon: Icon(
                                   Icons.arrow_back_rounded,
                                   size: 35,
+                                  color: appTheme.textMainColor,
                                 ),
                               ),
                             ],

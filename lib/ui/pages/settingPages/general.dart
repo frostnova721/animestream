@@ -7,6 +7,7 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/pages/settingPages/plugin.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -146,6 +147,12 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       label: "Default provider",
                       description: currentUserSettings?.preferredProvider,
                       suffixIcon: Icon(Icons.arrow_drop_down),
+                    ),
+                    ClickableItem(onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PluginPage()));
+                    }, label: "Manage Providers",
+                    description: "Add or remove providers",
+                    suffixIcon: Icon(Icons.navigate_next_rounded),
                     ),
                   ],
                 ),

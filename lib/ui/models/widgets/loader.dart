@@ -97,7 +97,7 @@ class _SimpleAnimePainter extends CustomPainter {
       ..color = color.withAlpha((128 * centerPulseFactor).toInt().clamp(0, 255))
       ..style = PaintingStyle.fill;
     
-    canvas.drawCircle(center, radius * 0.2 * centerPulseFactor, centerPaint);
+    canvas.drawCircle(center, radius * 0.25 * centerPulseFactor, centerPaint);
     
     final ringPaint = Paint()
       ..color = color.withAlpha(76)

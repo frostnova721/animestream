@@ -1,6 +1,5 @@
 import 'dart:ui';
 
-import 'package:animestream/core/anime/providers/providerPlugin.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -51,19 +50,6 @@ class AnimeCardExtended extends StatelessWidget {
         child: InkWell(
           focusColor: appTheme.textSubColor,
           onTap: () async {
-            final pp = ProviderPlugin().getProvider("animepahe");
-            // print("Provider OK");
-            // final sr = await pp.search("oreshura");
-            // print(sr);
-            // print("SEARCH OK");
-            // final epl = await pp.getAnimeEpisodeLink(sr[0]['alias']!);
-            // print(epl);
-            // print("EPISODE LINK OK");
-            final str = await pp.getStreams("https://animepahe.ru/play/8ad50145-a1af-1ae7-728e-9ead3e3c6ff1/60d256743082299c9c015df870eeb274368e22cde0ee194bb7d6c8cb784d83d0",
-             (a,b) => print(a));
-            
-
-            return;
             if (!isAnime) return floatingSnackBar("Mangas/Novels arent supported");
             if (shouldNavigate)
               Navigator.of(context)

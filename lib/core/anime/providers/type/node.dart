@@ -7,6 +7,7 @@ import 'package:dart_eval/stdlib/core.dart';
 import 'package:html/dom.dart';
 import 'package:source_span/src/file.dart';
 
+// Redundant asf. However....
 class $Node implements Node, $Instance {
   @override
   final Node $value;

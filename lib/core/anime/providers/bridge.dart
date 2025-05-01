@@ -1,13 +1,12 @@
 import 'package:animestream/core/anime/providers/transformer.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
-import 'package:animestream/core/anime/providers/type/videoStream.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:dart_eval/dart_eval_bridge.dart';
 import 'package:dart_eval/dart_eval_extensions.dart';
 import 'package:dart_eval/stdlib/core.dart';
 
 class $AnimeProvider$bridge with $Bridge<AnimeProvider> implements AnimeProvider {
-  static final $type = BridgeTypeSpec("package:test/main.dart", "AnimeProvider").ref;
+  static final $type = BridgeTypeSpec("package:provins/classes.dart", "AnimeProvider").ref;
 
   static final $declaration = BridgeClassDef(
     BridgeClassType($type, isAbstract: true),
@@ -74,19 +73,21 @@ class $AnimeProvider$bridge with $Bridge<AnimeProvider> implements AnimeProvider
   }
 
   @override
-  Future<void> getDownloadSources(String episodeId, Function(List<VideoStream> p1, bool p2) update,
+  Future<void> getDownloadSources(String episodeId, void Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) async {
-    return await $_invoke("getStreams", [
+    $Value? _update(Runtime runtime, $Value? target, List<$Value?> args) {
+      final streams = (runtime.args[3] as $List).$value.cast<VideoStream>();
+      final finished = (runtime.args[4] as $bool).$value;
+      // print(streams);
+      update(streams, finished);
+      return $null();
+    }
+
+    final updateWrapped = $Function(_update);
+
+    return await $_invoke("getDownloadSources", [
       $String(episodeId),
-      $Function((Runtime runtime, $Value? target, List<$Value?> args) {
-        final list = args[0] as $List;
-        final finished = (args[1] as $bool).$value;
-        final List<VideoStream> streams = list.$value.cast<$VideoStream>().map((s) => s.$value).toList();
-
-        update(streams, finished);
-
-        return $null();
-      }),
+      updateWrapped,
       $bool(dub),
       metadata != null ? $String(metadata) : $null(),
     ]);
@@ -95,18 +96,19 @@ class $AnimeProvider$bridge with $Bridge<AnimeProvider> implements AnimeProvider
   @override
   Future<void> getStreams(String episodeId, void Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) async {
-    //  throw UnimplementedError("Get streams not implemented!");
+    $Value? _update(Runtime runtime, $Value? target, List<$Value?> args) {
+      final streams = (runtime.args[3] as $List).$value.cast<VideoStream>();
+      final finished = (runtime.args[4] as $bool).$value;
+      // print(streams);
+      update(streams, finished);
+      return $null();
+    }
+
+    final updateWrapped = $Function(_update);
+
     return await $_invoke("getStreams", [
       $String(episodeId),
-      $Function((Runtime runtime, $Value? target, List<$Value?> args) {
-        final list = args[0] as $List;
-        final finished = (args[1] as $bool).$value;
-        final List<VideoStream> streams = list.$value.cast<$VideoStream>().map((s) => s.$value).toList();
-
-        update(streams, finished);
-
-        return $null();
-      }),
+      updateWrapped,
       $bool(dub),
       metadata != null ? $String(metadata) : $null(),
     ]);

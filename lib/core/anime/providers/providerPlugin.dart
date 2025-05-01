@@ -23,15 +23,18 @@ class ProviderPlugin {
     _compiler.addPlugin(HtmlPlugin());
   }
 
-  AnimeProvider getProvider(String provider) {
-    final program = ProviderManager().getProviderCode(provider);
+  Future<AnimeProvider?> getProvider(String provider) async {
+    final program = await ProviderManager().getSavedProviderCode(provider);
+
+    if(program == null) return null;
 
     final pgm = _compiler.compile({
       'test': {"main.dart": program}
     });
 
     final runtime = Runtime.ofProgram(pgm);
-    runtime.registerBridgeFunc("package:test/main.dart", "AnimeProvider.", $AnimeProvider$bridge.$new, isBridge: true);
+    runtime.registerBridgeFunc("package:provins/classes.dart", "AnimeProvider.", $AnimeProvider$bridge.$new, isBridge: true);
+    runtime.registerBridgeFunc("package:provins/classes.dart", "VideoStream.", $VideoStream.$new, isBridge: false);
     runtime.addPlugin(HttpPlugin());
     runtime.addPlugin(HtmlPlugin());
     final AnimeProvider res = runtime.executeLib("package:test/main.dart", "createProvider");

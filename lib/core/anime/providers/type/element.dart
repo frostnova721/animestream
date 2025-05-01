@@ -55,7 +55,7 @@ class $Element implements $Instance, Element {
       'localName': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
       'text': BridgeFunctionDef(returns: CoreTypes.string.ref.annotate).asMethod,
       'nextElementSibling': BridgeFunctionDef(returns: $Element.$type.annotateNullable).asMethod,
-      'attributes': BridgeFunctionDef(returns: CollectionTypes.linkedHashMap.ref.annotate).asMethod,
+      'attributes': BridgeFunctionDef(returns: CollectionTypes.linkedHashMap.refWith([CoreTypes.string.ref, CoreTypes.string.ref]).annotate).asMethod,
       'parent': BridgeFunctionDef(returns: $Element.$type.annotateNullable).asMethod,
     },
     wrap: true,
@@ -113,7 +113,10 @@ class $Element implements $Instance, Element {
           return $List.wrap(results.map($Element.wrap).toList());
         });
       case "attributes":
-        return $LinkedHashMap.wrap($value.attributes);
+        final attrMap = $value.attributes;
+        final mapEntries = attrMap.map((k,v) => $MapEntry.wrap(MapEntry($String(k.toString()), $String(v))));
+        final converted = $LinkedHashMap.wrap(LinkedHashMap.from(mapEntries));
+        return converted;
       case 'parent':
         return $value.parent != null ? $Element.wrap($value.parent!) : null;
       default:

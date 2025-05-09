@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/providers/providerDetails.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
@@ -20,10 +21,11 @@ class InfoProvider extends ChangeNotifier {
 
   late DatabaseInfo _data;
 
-  // Pick a source from the source list if it exists. select first available source if that source is removed
-  String _selectedSource = sources.contains(currentUserSettings?.preferredProvider)
-      ? currentUserSettings?.preferredProvider ?? sources[0]
-      : sources[0];
+  final sourceManager = SourceManager();
+
+  // Will be set in _init()
+  late ProviderDetails _selectedSource;
+
   String? _foundName;
   String? _manualSearchQuery;
 
@@ -78,14 +80,17 @@ class InfoProvider extends ChangeNotifier {
   MediaStatus? get mediaListStatus => _mediaListStatus;
 
   String? get foundName => _foundName;
-  String get selectedSource => _selectedSource;
+
+  ProviderDetails get selectedSource => _selectedSource;
 
   DatabaseInfo get data => _data;
 
   bool _initCalled = false;
 
-  set selectedSource(String val) {
+  set selectedSource(ProviderDetails val) {
     _selectedSource = val;
+    // we just using this condition for validation (too lazy to add a field for it)
+    sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0"; 
     notifyListeners();
   }
 
@@ -134,6 +139,14 @@ class InfoProvider extends ChangeNotifier {
   void init() async {
     if (_initCalled) throw Exception("The initialization was already done");
     _initCalled = true;
+
+    // Set up sources.
+    final sources = sourceManager.sources;
+    final matchedSource = sources.where((e) => e.identifier == currentUserSettings?.preferredProvider).firstOrNull;
+    selectedSource = matchedSource != null
+        ? matchedSource
+        : (sources.isEmpty ? sourceManager.inbuiltSources[0] : sources[0]);
+
     await _getInfo(id);
 
     // Load manualsearch query and last watch
@@ -231,8 +244,8 @@ class InfoProvider extends ChangeNotifier {
           if (_preferDubs && !(_epLinks[(h * 24) + i].hasDub ?? false)) {
             remainingItems--;
           } else {
-          page.add({'realIndex': (h * 24) + i, 'epLink': _epLinks[(h * 24) + i]});
-          remainingItems--;
+            page.add({'realIndex': (h * 24) + i, 'epLink': _epLinks[(h * 24) + i]});
+            remainingItems--;
           }
         }
         visibleEpList.add(page);
@@ -248,7 +261,7 @@ class InfoProvider extends ChangeNotifier {
   }
 
   Future<void> _search(String query) async {
-    final sr = await searchInSource(selectedSource, query);
+    final sr = await sourceManager.searchInSource(selectedSource.identifier, query);
     //to find a exact match
     List<Map<String, String?>> match = sr
         .where(
@@ -256,7 +269,7 @@ class InfoProvider extends ChangeNotifier {
         )
         .toList();
     if (match.isEmpty) match = sr;
-    final links = await getAnimeEpisodes(selectedSource, match[0]['alias']!);
+    final links = await sourceManager.getAnimeEpisodes(selectedSource.identifier, match[0]['alias']!);
     paginate(links);
     _foundName = match[0]['name'];
     print(foundName == query);

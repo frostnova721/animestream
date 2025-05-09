@@ -53,21 +53,27 @@ class _PluginPageState extends State<PluginPage> with TickerProviderStateMixin {
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  IconButton(
-                      onPressed: () => Navigator.pop(context),
-                      icon: Icon(
-                        Icons.arrow_back_rounded,
-                        color: appTheme.textMainColor,
-                        size: 28,
-                      )),
-                  Container(
-                    padding: EdgeInsets.only(left: 10, right: 20),
-                    child: Text(
-                      "Manage Providers",
-                      style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 20),
-                    ),
+                  Row(
+                    children: [
+                      IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: Icon(
+                            Icons.arrow_back_rounded,
+                            color: appTheme.textMainColor,
+                            size: 28,
+                          )),
+                      Container(
+                        padding: EdgeInsets.only(left: 10, right: 20),
+                        child: Text(
+                          "Manage Providers [Beta]",
+                          style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 20),
+                        ),
+                      ),
+                    ],
                   ),
+                  IconButton(onPressed: () {}, icon: Icon(Icons.science_sharp, size: 25, color: appTheme.textMainColor,))
                 ],
               ),
             ),
@@ -157,7 +163,7 @@ class _PluginPageState extends State<PluginPage> with TickerProviderStateMixin {
                       padding: const EdgeInsets.only(right: 10),
                       child: TextButton(
                         onPressed: () async {
-                          // item.code can indicate the install status. 
+                          // item.code can indicate the install status.
                           //since we are only storing the code when plugin is installed
                           if (item.code == null) {
                             try {

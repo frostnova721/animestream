@@ -404,7 +404,7 @@ class _InfoMobileState extends State<InfoMobile> {
             backgroundColor: appTheme.modalSheetBackgroundColor,
             builder: (context) => ManualSearchSheet(
               searchString: provider.data.title['english'] ?? provider.data.title['romaji'] ?? '',
-              source: provider.selectedSource,
+              source: provider.selectedSource.identifier,
               anilistId: provider.id.toString(),
             ),
           ).then((result) async {
@@ -413,7 +413,7 @@ class _InfoMobileState extends State<InfoMobile> {
               provider.epSearcherror = false;
               provider.foundName = null;
             });
-            final links = await getAnimeEpisodes(provider.selectedSource, result['alias']);
+            final links = await SourceManager().getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
             if (mounted)
               setState(() {
                 provider.paginate(links);
@@ -926,6 +926,7 @@ class _InfoMobileState extends State<InfoMobile> {
                               provider.visibleEpList[provider.currentPageIndex][index]['epLink'].thumbnail ?? provider.data.cover,
                               fit: BoxFit.cover,
                               width: 165,
+                              height: 110,
                             ),
                           ),
                         ),

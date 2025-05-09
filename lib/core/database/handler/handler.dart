@@ -16,7 +16,7 @@ class DatabaseHandler extends Database {
 
   Databases db = currentUserSettings?.database ?? Databases.anilist;
 
-  static Database getActiveDatabaseInstance(Databases dbs) {
+  static Database getDatabaseInstance(Databases dbs) {
     switch (dbs) {
       case Databases.anilist:
         return Anilist();
@@ -31,11 +31,11 @@ class DatabaseHandler extends Database {
 
   @override
   Future<List<DatabaseSearchResult>> search(String query) async {
-    return await getActiveDatabaseInstance(db).search(query);
+    return await getDatabaseInstance(db).search(query);
   }
 
   @override
   Future<DatabaseInfo> getAnimeInfo(int id) async {
-    return await getActiveDatabaseInstance(db).getAnimeInfo(id);
+    return await getDatabaseInstance(db).getAnimeInfo(id);
   }
 }

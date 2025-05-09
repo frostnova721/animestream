@@ -17,6 +17,7 @@ class AnimePahe extends AnimeProvider {
 
   @override
   Future<List<Map<String, String?>>> search(String query) async {
+    query = query.replaceAll("-", "");
     final String url = "https://animepahe.ru/api?m=search&q=$query";
     final res = await http.get(Uri.parse(url), headers: _headers);
     final Map<String, dynamic> decoded = json.decode(res.body);

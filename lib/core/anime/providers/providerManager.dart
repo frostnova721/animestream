@@ -42,7 +42,7 @@ class ProviderManager {
   Future<List<ProviderDetails>> fetchProvidersRepo() async {
     final availableProviders = await get(Uri.parse(_indexUrl));
     final List<dynamic> jsoned = jsonDecode(availableProviders.body) as List<dynamic>;
-    final List<Map<String, String?>> mapped = jsoned.map((e) => Map.from(e as Map).cast<String, String?>()).toList();
+    final List<Map<String, dynamic>> mapped = jsoned.map((e) => Map.from(e as Map).cast<String, dynamic>()).toList();
     final classed = mapped.map((e) => ProviderDetails.fromMap(e)).toList();
     return classed;
   }

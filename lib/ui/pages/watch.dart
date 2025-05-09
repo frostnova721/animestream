@@ -50,7 +50,7 @@ class _WatchState extends State<Watch> {
 
   void _initialize() async {
     /// Set black title bar
-    context.read<ThemeProvider>().setTitlebarColor(appTheme.backgroundColor);
+    context.read<AppProvider>().setTitlebarColor(appTheme.backgroundColor);
 
     final dataProvider = context.read<PlayerDataProvider>();
 
@@ -186,7 +186,7 @@ class _WatchState extends State<Watch> {
   }
 
   void _handleDoubleTap() {
-    final themeProvider = context.read<ThemeProvider>();
+    final themeProvider = context.read<AppProvider>();
     themeProvider.setFullScreen(!themeProvider.isFullScreen);
   }
 
@@ -204,7 +204,7 @@ class _WatchState extends State<Watch> {
         final double watchPercentage = isInitiated ? ((controller.position ?? 0) / controller.duration!) : 0;
         addLastWatchedDuration(
             playerDataProvider.showId.toString(), {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100});
-        await context.read<ThemeProvider>()
+        await context.read<AppProvider>()
           ..setFullScreen(false)
           ..setTitlebarColor(null);
         // playerDataProvider.clearDiscordPresence();

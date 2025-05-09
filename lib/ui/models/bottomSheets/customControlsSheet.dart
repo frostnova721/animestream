@@ -56,7 +56,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       currentSources = dp.state.streams;
       _isLoading = false;
     } else {
-      await getStreams(dp.selectedSource, dp.epLinks[index].episodeLink, (list, finished) {
+      await SourceManager().getStreams(dp.selectedSource, dp.epLinks[index].episodeLink, (list, finished) {
         if (list.length > 0) {
           if (mounted)
             setState(() {

@@ -197,7 +197,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
     final episode = provider.visibleEpList[provider.currentPageIndex][index]['epLink'] as EpisodeDetails;
     final episodeNumber = episode.episodeNumber;
     final thumbnail = episode.thumbnail ?? provider.data.cover;
-    final title = episode.episodeTitle != null ? "$episodeNumber: ${episode.episodeTitle}" : 'Episode $episodeNumber';
+    final title = episode.episodeTitle != null && episode.episodeTitle!.isNotEmpty ? "$episodeNumber: ${episode.episodeTitle}" : 'Episode $episodeNumber';
     final isFiller = episode.isFiller ?? false;
 
     return MouseRegion(

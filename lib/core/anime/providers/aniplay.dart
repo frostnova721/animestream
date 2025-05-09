@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/data/misc.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
@@ -51,6 +52,7 @@ class AniPlay extends AnimeProvider {
     final anilistId = epIdSplit[2].split("\$")[0];
     // final malId = epIdSplit[2].split("\$")[1];
     final epNum = epIdSplit[3];
+    final keys = await _extractKeys(baseUrl);
 
     int serversFetched = 0;
 
@@ -58,10 +60,11 @@ class AniPlay extends AnimeProvider {
       final link = getWatchUrl(it, epNum, anilistId);
       final itIndex = servers.indexOf(it);
       final currentServersEpId = epId[itIndex];
+      
       final resFuture = post(Uri.parse(link),
           headers: {
             "Content-Type": "application/json",
-            'Next-Action': "7f56d3175d4abc2bde60a5dd3b64c25ba1f9b1a39a",
+            'Next-Action': keys['getSources'] ?? '',
           },
           body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"${dub ? 'dub' : 'sub'}\"]");
       resFuture.onError((e, st) {
@@ -149,12 +152,13 @@ class AniPlay extends AnimeProvider {
   }
 
   Future<List<dynamic>> _getAllServerLinks(String id) async {
-    final l = "https://aniplaynow.live/anime/info/" + id;
+    final l = "$baseUrl/anime/info/" + id;
+    final keys = await _extractKeys(baseUrl);
     final res = await post(Uri.parse(l),
         headers: {
           'Referer': l,
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': "7fd497d29b50e7263fd58c8b4873b458476172233a",
+          'Next-Action': keys['getEpisodes'] ?? "",
         },
         body: "[\"$id\",true,false]");
     final split = res.body.split('1:')[1];
@@ -173,7 +177,57 @@ class AniPlay extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update, {bool dub = false, String? metadata}) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
+      {bool dub = false, String? metadata}) {
     throw UnimplementedError();
+  }
+
+  Future<Map<String, String>> _extractKeys(String baseUrl) async {
+    final prefs = await getMiscVal("aniplayTokens") as List<String>? ?? ["", "0"];
+    final storedKeys = prefs[0];
+    final storedTimestamp = int.tryParse(prefs[1]) ?? 0;
+    final nowTs = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+
+    if (nowTs - storedTimestamp < 60 * 60 && storedKeys.contains(baseUrl)) {
+      return Map<String, String>.from(json.decode(storedKeys));
+    }
+
+    final randomAnimeUrl = "$baseUrl/anime/watch/1";
+    final res1 = await get(Uri.parse(randomAnimeUrl));
+    final body1 = res1.body;
+
+    final sKey = "/_next/static/chunks/app/(user)/(media)/";
+    final eKey = '"';
+    final start = body1.indexOf(sKey);
+    if (start == -1) throw Exception("Start key not found");
+
+    final jsSlugStart = start + sKey.length;
+    final jsSlugEnd = body1.indexOf(eKey, jsSlugStart);
+    final jsSlug = body1.substring(jsSlugStart, jsSlugEnd);
+
+    final jsUrl = "$baseUrl$sKey$jsSlug";
+    final res2 = await get(Uri.parse(jsUrl));
+    final body2 = res2.body;
+
+    final regex = RegExp(
+      r'\(0,\w+\.createServerReference\)\("([a-f0-9]+)",\w+\.callServer,void 0,\w+\.findSourceMapURL,"(getSources|getEpisodes)"\)',
+      multiLine: true,
+    );
+
+    final matches = regex.allMatches(body2);
+    final keysMap = <String, String>{};
+
+    for (final match in matches) {
+      final hashId = match.group(1)!;
+      final functionName = match.group(2)!;
+      keysMap[functionName] = hashId;
+    }
+
+    keysMap["baseUrl"] = baseUrl;
+
+    final newKeys = json.encode(keysMap);
+    await storeMiscVal("aniplayTokens", [newKeys, nowTs.toString()]);
+
+    return keysMap;
   }
 }

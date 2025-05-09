@@ -54,8 +54,8 @@ class _ThemeSettingState extends State<ThemeSetting> {
   Future<void> applyTheme(int id) async {
     await setTheme(id);
     final theme = availableThemes.where((themeItem) => themeItem.id == id).toList()[0];
-    Provider.of<ThemeProvider>(context, listen: false).themeItem = theme;
-    Provider.of<ThemeProvider>(context, listen: false).applyTheme(darkMode ? theme.theme : theme.lightVariant);
+    Provider.of<AppProvider>(context, listen: false).themeItem = theme;
+    Provider.of<AppProvider>(context, listen: false).applyTheme(darkMode ? theme.theme : theme.lightVariant);
   }
 
   int? currentThemeId;
@@ -94,10 +94,10 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
                             setState(() {});
                             if (materialTheme) {
-                              return Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                              return Provider.of<AppProvider>(context, listen: false).justRefresh();
                             }
                             final t = availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0];
-                            Provider.of<ThemeProvider>(context, listen: false)
+                            Provider.of<AppProvider>(context, listen: false)
                                 .applyTheme(darkMode ? t.theme : t.lightVariant);
                           }),
                           _themes(),
@@ -131,7 +131,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                     darkMode = val.first;
                                     await Settings().writeSettings(SettingsModal(darkMode: darkMode));
 
-                                    await Provider.of<ThemeProvider>(context, listen: false).applyThemeMode(darkMode);
+                                    await Provider.of<AppProvider>(context, listen: false).applyThemeMode(darkMode);
                                     // await setThemeMode(val.first);
                                     setState(() {});
                                   },
@@ -167,7 +167,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   : thm.lightVariant;
                               // floatingSnackBar( "All set! restart the app to apply the theme");
                               // });
-                              Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                              Provider.of<AppProvider>(context, listen: false).justRefresh();
                               setState(() {});
                             },
                             customPadding: EdgeInsets.all(10),
@@ -202,7 +202,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   await Settings().writeSettings(
                                     SettingsModal(navbarTranslucency: navbarTranslucency),
                                   );
-                                  Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                                  Provider.of<AppProvider>(context, listen: false).justRefresh();
                                 }),
                         ],
                       )

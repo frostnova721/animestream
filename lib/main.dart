@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:app_links/app_links.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -59,6 +60,13 @@ void main(List<String> args) async {
 
     NotificationService().init();
 
+    /// Load sources. we adding inbuilt sources till migrated
+    final sm = SourceManager();
+
+    sm
+      ..addSources(sm.inbuiltSources)
+      ..loadProviders(clearBeforeLoading: false);
+
     await dotenv.load(fileName: ".env");
 
     // if (currentUserSettings?.enableDiscordPresence ?? false) {
@@ -67,7 +75,7 @@ void main(List<String> args) async {
 
     runApp(
       ChangeNotifierProvider(
-        create: (context) => ThemeProvider(),
+        create: (context) => AppProvider(),
         child: const AnimeStream(),
       ),
     );
@@ -159,7 +167,7 @@ class _AnimeStreamState extends State<AnimeStream> {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
 
     // if (currentUserSettings?.enableDiscordPresence ?? false)
-      // FlutterDiscordRPC.instance.connect(autoRetry: true, retryDelay: Duration(seconds: 10));
+    // FlutterDiscordRPC.instance.connect(autoRetry: true, retryDelay: Duration(seconds: 10));
 
     super.initState();
   }
@@ -252,7 +260,7 @@ class _AnimeStreamState extends State<AnimeStream> {
           // );
         }
 
-        final themeProvider = Provider.of<ThemeProvider>(context);
+        final themeProvider = Provider.of<AppProvider>(context);
 
         //set status bar icon brightness (some devices do this automatically, some dont!
         //so here it is for all of em!)

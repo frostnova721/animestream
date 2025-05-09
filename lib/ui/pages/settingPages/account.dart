@@ -250,7 +250,7 @@ class _AccountSettingState extends State<AccountSetting> {
                     onLogin().then((logged) {
                       if (logged) {
                         floatingSnackBar("Login successful!");
-                        Provider.of<ThemeProvider>(context, listen: false).justRefresh();
+                        Provider.of<AppProvider>(context, listen: false).justRefresh();
                       }
                       //replace the page with itself to avoid recalling the functions in initState to update the user data
                       Navigator.pushReplacement(

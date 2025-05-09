@@ -51,6 +51,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool useQueuedDownloads = false;
   bool enableDiscordPresence = false;
 
+  final sources = SourceManager().sources;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -191,7 +193,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                     margin: const EdgeInsets.symmetric(vertical: 5),
                     clipBehavior: Clip.hardEdge,
                     decoration: BoxDecoration(
-                      color: sources[index] == currentUserSettings?.preferredProvider
+                      color: sources[index].identifier == currentUserSettings?.preferredProvider
                           ? appTheme.accentColor
                           : appTheme.backgroundSubColor,
                       borderRadius: BorderRadius.circular(20),
@@ -201,16 +203,16 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () async {
-                          await writeSettings(SettingsModal(preferredProvider: sources[index]));
+                          await writeSettings(SettingsModal(preferredProvider: sources[index].identifier));
                           setState(() {});
                           setcState(() {});
                         },
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
                           child: Text(
-                            sources[index],
+                            sources[index].name,
                             style: textStyle().copyWith(
-                              color: sources[index] == currentUserSettings?.preferredProvider
+                              color: sources[index].identifier == currentUserSettings?.preferredProvider
                                   ? appTheme.onAccent
                                   : appTheme.textMainColor,
                             ),

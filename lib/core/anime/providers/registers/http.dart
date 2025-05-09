@@ -10,6 +10,9 @@ class HttpPlugin implements EvalPlugin {
 
   @override
   void configureForCompile(BridgeDeclarationRegistry registry) {
+
+    registry.defineBridgeClass($Response.$declaration);
+
     registry.defineBridgeTopLevelFunction(
       BridgeFunctionDeclaration(
         'package:http/http.dart',
@@ -29,7 +32,7 @@ class HttpPlugin implements EvalPlugin {
         BridgeFunctionDef(returns: CoreTypes.future.ref.annotate, params: [
           'url'.param(CoreTypes.uri.ref.annotate),
         ], namedParams: [
-          BridgeParameter('body', CoreTypes.map.ref.annotate, true),
+          BridgeParameter('body', CoreTypes.dynamic.ref.annotate, true),
           BridgeParameter("headers", CoreTypes.map.ref.annotate, true),
         ]),
       ),
@@ -44,7 +47,7 @@ class HttpPlugin implements EvalPlugin {
       (Runtime runtime, $Value? target, List<$Value?> args) {
         final uri = args[0]!.$value as Uri;
         final headers = (args[1]?.$value as Map<$Value, $Value>?)
-            ?.map((k, v) => MapEntry(k.$reified, v.$reified))
+            ?.map((k, v) => MapEntry(k.$value, v.$reified))
             .cast<String, String>();
         return $Future.wrap(http.get(uri, headers: headers).then((res) {
           return $Response.wrap(res);
@@ -58,9 +61,7 @@ class HttpPlugin implements EvalPlugin {
       (Runtime runtime, $Value? target, List<$Value?> args) {
         final uri = args[0]!.$value as Uri;
 
-        final body = (args[1]?.$value as Map<$Value, $Value>?)
-            ?.map((k, v) => MapEntry(k.$reified, v.$reified))
-            .cast<dynamic, dynamic>();
+        final body = args[1]?.$value;
 
         final headers = (args[2]?.$value as Map<$Value, $Value>?)
             ?.map((k, v) => MapEntry(k.$reified, v.$reified))

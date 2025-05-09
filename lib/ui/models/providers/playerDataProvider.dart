@@ -1,5 +1,6 @@
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/sources.dart';
@@ -60,7 +61,7 @@ class PlayerDataProvider extends ChangeNotifier {
     final url = _state.currentStream.link;
     final headers = _state.currentStream.customHeaders;
     if (url.contains(".m3u8")) {
-      final qualities = await generateQualitiesForMultiQuality(url, customHeaders: headers);
+      final qualities = await getQualityStreams(url, customHeader: headers);
       _state = _state.copyWith(qualities: qualities);
       notifyListeners();
     } else {
@@ -149,7 +150,7 @@ class PlayerDataProvider extends ChangeNotifier {
     }
     List<VideoStream> srcs = [];
     //its actually the getStreams function!
-    await getStreams(selectedSource, epLinks[index].episodeLink, (list, finished) {
+    await SourceManager().getStreams(selectedSource, epLinks[index].episodeLink, (list, finished) {
       srcs = srcs + list;
       if (finished) {
         _state = _state.copyWith(preloadedSources: srcs);

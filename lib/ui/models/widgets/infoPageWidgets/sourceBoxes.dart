@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/providers/providerDetails.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
@@ -111,7 +112,7 @@ class SourceSideWidget extends StatelessWidget {
                           child: DropdownButtonHideUnderline(
                             child: ButtonTheme(
                               alignedDropdown: true,
-                              child: DropdownButton<String>(
+                              child: DropdownButton<ProviderDetails>(
                                 isExpanded: true,
                                 menuMaxHeight: 300,
                                 icon: Container(
@@ -142,7 +143,7 @@ class SourceSideWidget extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                                 padding: EdgeInsets.symmetric(horizontal: 16),
-                                items: sources
+                                items: SourceManager().sources
                                     .map((source) => DropdownMenuItem(
                                           value: source,
                                           child: Padding(
@@ -158,7 +159,7 @@ class SourceSideWidget extends StatelessWidget {
                                                   ),
                                                 ),
                                                 SizedBox(width: 10),
-                                                Text(source),
+                                                Text(source.name),
                                               ],
                                             ),
                                           ),
@@ -257,7 +258,7 @@ class SourceSideWidget extends StatelessWidget {
                                       height: size.height / 2,
                                       child: ManualSearchSheet(
                                         searchString: title,
-                                        source: provider.selectedSource,
+                                        source: provider.selectedSource.identifier,
                                         anilistId: provider.id.toString(),
                                       ),
                                     ),
@@ -267,7 +268,7 @@ class SourceSideWidget extends StatelessWidget {
                                 if (result == null) return;
                                 provider.epSearcherror = false;
                                 provider.foundName = null;
-                                final links = await getAnimeEpisodes(provider.selectedSource, result['alias']);
+                                final links = await SourceManager().getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
 
                                 provider.paginate(links);
                                 provider.foundName = result['name'];
@@ -510,7 +511,7 @@ class SourceBodyWidget extends StatelessWidget {
                         child: DropdownButtonHideUnderline(
                           child: ButtonTheme(
                             alignedDropdown: true,
-                            child: DropdownButton<String>(
+                            child: DropdownButton<ProviderDetails>(
                               isExpanded: true,
                               menuMaxHeight: 300,
                               icon: Container(
@@ -541,7 +542,7 @@ class SourceBodyWidget extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              items: sources
+                              items: SourceManager().sources
                                   .map((source) => DropdownMenuItem(
                                         value: source,
                                         child: Padding(
@@ -557,7 +558,7 @@ class SourceBodyWidget extends StatelessWidget {
                                                 ),
                                               ),
                                               SizedBox(width: 10),
-                                              Text(source),
+                                              Text(source.name),
                                             ],
                                           ),
                                         ),
@@ -590,7 +591,7 @@ class SourceBodyWidget extends StatelessWidget {
                                 height: MediaQuery.of(context).size.height / 2,
                                 child: ManualSearchSheet(
                                   searchString: title,
-                                  source: provider.selectedSource,
+                                  source: provider.selectedSource.identifier,
                                   anilistId: provider.id.toString(),
                                 ),
                               ),
@@ -600,7 +601,7 @@ class SourceBodyWidget extends StatelessWidget {
                           if (result == null) return;
                           provider.epSearcherror = false;
                           provider.foundName = null;
-                          final links = await getAnimeEpisodes(provider.selectedSource, result['alias']);
+                          final links = await SourceManager().getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
 
                           provider.paginate(links);
                           provider.foundName = result['name'];

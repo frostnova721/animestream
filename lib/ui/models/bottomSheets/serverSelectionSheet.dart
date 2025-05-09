@@ -16,7 +16,7 @@ import 'package:animestream/ui/models/widgets/sourceTile.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
-import 'package:animestream/ui/models/sources.dart' as srcs;
+import 'package:animestream/ui/models/sources.dart';
 import 'package:provider/provider.dart';
 
 class ServerSelectionBottomSheet extends StatefulWidget {
@@ -39,12 +39,14 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   List<VideoStream> streamSources = [];
   List<Map<String, String>> qualities = [];
 
+  final src = SourceManager();
+
   getStreams(InfoProvider provider, {bool directElseBlock = false}) async {
     streamSources = [];
     if (widget.type == ServerSheetType.download && !directElseBlock) {
       try {
-        await srcs.getDownloadSources(
-          widget.provider.selectedSource,
+        await src.getDownloadSources(
+          widget.provider.selectedSource.identifier,
           widget.provider.epLinks[widget.episodeIndex].episodeLink,
           (list, finished) {
             if (mounted)
@@ -75,7 +77,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
         }
       }
     } else {
-      await srcs.getStreams(widget.provider.selectedSource, widget.provider.epLinks[widget.episodeIndex].episodeLink,
+      await src.getStreams(widget.provider.selectedSource.identifier, widget.provider.epLinks[widget.episodeIndex].episodeLink,
       dub: provider.preferDubs,
       metadata: provider.epLinks[widget.episodeIndex].metadata,
           (list, finished) {
@@ -229,7 +231,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                           showTitle: title,
                           coverImageUrl: widget.provider.data.cover,
                           showId: provider.id,
-                          selectedSource: provider.selectedSource,
+                          selectedSource: provider.selectedSource.identifier,
                           startIndex: widget.episodeIndex,
                           altDatabases: provider.altDatabases,
                           lastWatchDuration: provider.lastWatchedDurationMap?[

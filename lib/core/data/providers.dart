@@ -6,7 +6,7 @@ class ProvidersPreferences {
 
   Future<ProviderDetails?> getProvider(String identifier) async {
     final box = await Hive.openBox(_boxKey);
-    final Map<String, String?>? provider = (await box.get(identifier) as Map).cast();
+    final Map<String, dynamic>? provider = (await box.get(identifier) as Map).cast();
     await box.close();
     return ProviderDetails?.fromMap(provider!);
   }
@@ -14,7 +14,7 @@ class ProvidersPreferences {
   Future<List<ProviderDetails>> listAllProviders() async {
     final box = await Hive.openBox(_boxKey);
     final List<dynamic> providers = await box.values.toList();
-    final List<Map<String, String?>> mappedList = providers.map((it) => Map.from(it as Map).cast<String, String?>()).toList();
+    final List<Map<String, dynamic>> mappedList = providers.map((it) => Map.from(it as Map).cast<String, dynamic>()).toList();
     await box.close();
     return mappedList.map((e) => ProviderDetails.fromMap(e)).toList();
   }

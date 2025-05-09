@@ -19,3 +19,19 @@ extension ColorExtensions on Color {
     return (alpha << 24) | (red << 16) | (green << 8) | blue;
   }
 }
+
+extension StringExtensions on String {
+  String capitalize() {
+    if(this.length < 1) return "";
+    return this.replaceFirst(this[0], this[0].toUpperCase());
+  }
+
+  String capitalizeAllWords({String delimiter = " "}) {
+    final words = this.split(delimiter);
+    List<String> newString = [];
+    for(final word in words) {
+      newString.add(word.capitalize());
+    }
+    return newString.join(" ");
+  }
+}

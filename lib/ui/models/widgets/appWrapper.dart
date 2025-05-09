@@ -17,12 +17,12 @@ class AppWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: (defaultTargetPlatform == TargetPlatform.windows && !Provider.of<ThemeProvider>(context).isFullScreen)
+      appBar: (defaultTargetPlatform == TargetPlatform.windows && !Provider.of<AppProvider>(context).isFullScreen)
           ? PreferredSize(
               preferredSize: const Size(double.maxFinite, 33),
               child: ClipRRect(
                 child: Container(
-                  color: Provider.of<ThemeProvider>(context).titleBarColor ?? appTheme.backgroundColor.withAlpha(150),
+                  color: Provider.of<AppProvider>(context).titleBarColor ?? appTheme.backgroundColor.withAlpha(150),
                   child: BackdropFilter(
                     filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
                     child: Row(

@@ -1,6 +1,5 @@
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
-import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles.dart';
 
 class SettingsModal {
@@ -52,7 +51,7 @@ class SettingsModal {
       preferredQuality: map['preferredQuality'] ?? "720p",
       navbarTranslucency: map['navbarTranslucency'] ?? 1.0,
       fasterDownloads: map['fasterDownloads'] ?? false,
-      preferredProvider: map['preferredProvider'] ?? sources[0],
+      preferredProvider: map['preferredProvider'] ?? null,
       darkMode: map['darkMode'] ?? true,
       materialTheme: map['materialTheme'] ?? false,
       isDev: map['isDev'] ?? false,

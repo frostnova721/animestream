@@ -50,7 +50,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
         break;
       case LogicalKeyboardKey.f11:
         {
-          final tp = context.read<ThemeProvider>();
+          final tp = context.read<AppProvider>();
           tp.setFullScreen(!tp.isFullScreen);
           break;
         }
@@ -326,10 +326,10 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                 icon: makeIcon(provider.state.showSubs ? Icons.subtitles : Icons.subtitles_outlined)),
                             IconButton(
                                 onPressed: () {
-                                  final tp = context.read<ThemeProvider>();
+                                  final tp = context.read<AppProvider>();
                                   tp.setFullScreen(!tp.isFullScreen);
                                 },
-                                icon: makeIcon(context.select<ThemeProvider, bool>((prov) => prov.isFullScreen)
+                                icon: makeIcon(context.select<AppProvider, bool>((prov) => prov.isFullScreen)
                                     ? Icons.fullscreen_exit_sharp
                                     : Icons.fullscreen_sharp)),
                           ],

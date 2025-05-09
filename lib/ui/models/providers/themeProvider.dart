@@ -7,7 +7,8 @@ import 'package:animestream/ui/theme/types.dart';
 import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
-class ThemeProvider with ChangeNotifier {
+// Handles app wide settings (themes, plugin sources etc..)
+class AppProvider with ChangeNotifier {
   AnimeStreamTheme _theme = appTheme;
 
   bool _isDark = currentUserSettings?.darkMode ?? false;

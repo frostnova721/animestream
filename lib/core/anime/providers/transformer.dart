@@ -1,12 +1,10 @@
-import 'package:dart_eval/dart_eval_bridge.dart';
-import 'package:dart_eval/stdlib/core.dart';
 
 class TypeTransformer {
    static List<Map<String, String?>> transformToMap(List<dynamic> res) {
-     if (res is List<$Value?>) {
+     if (res is List<dynamic>) {
     List<Map<String, String?>> result = res.map((item) {
-      if (item is $Map<$Value, $Value?>) {
-        return item.$reified.cast<String, String?>();
+      if (item is Map<dynamic, dynamic>) {
+        return item.cast<String, String?>();
       } else {
         throw TypeError();
       }

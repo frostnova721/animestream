@@ -90,7 +90,7 @@ class InfoProvider extends ChangeNotifier {
   set selectedSource(ProviderDetails val) {
     _selectedSource = val;
     // we just using this condition for validation (too lazy to add a field for it)
-    sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0"; 
+    sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0";
     notifyListeners();
   }
 
@@ -143,9 +143,8 @@ class InfoProvider extends ChangeNotifier {
     // Set up sources.
     final sources = sourceManager.sources;
     final matchedSource = sources.where((e) => e.identifier == currentUserSettings?.preferredProvider).firstOrNull;
-    selectedSource = matchedSource != null
-        ? matchedSource
-        : (sources.isEmpty ? sourceManager.inbuiltSources[0] : sources[0]);
+    selectedSource =
+        matchedSource != null ? matchedSource : (sources.isEmpty ? sourceManager.inbuiltSources[0] : sources[0]);
 
     await _getInfo(id);
 
@@ -224,9 +223,8 @@ class InfoProvider extends ChangeNotifier {
       notifyListeners();
     } catch (err) {
       print(err);
-      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        // floatingSnackBar( err.toString());
-        _infoLoadError = true;
+      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) floatingSnackBar(err.toString());
+      _infoLoadError = true;
       notifyListeners();
       rethrow;
     }

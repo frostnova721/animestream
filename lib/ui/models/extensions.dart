@@ -34,4 +34,8 @@ extension StringExtensions on String {
     }
     return newString.join(" ");
   }
+
+  Uri? toUri() {
+    return Uri.tryParse(this);
+  }
 }

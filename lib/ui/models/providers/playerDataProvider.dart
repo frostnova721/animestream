@@ -50,6 +50,7 @@ class PlayerDataProvider extends ChangeNotifier {
 
   late SubtitleSettings subtitleSettings;
 
+  /// Call this to refresh/init subs settings
   void initSubsettings() => UserPreferences.getUserPreferences().then((val) {
         subtitleSettings = val.subtitleSettings ?? SubtitleSettings();
         _state = _state.copyWith(subsInited: true);
@@ -63,7 +64,6 @@ class PlayerDataProvider extends ChangeNotifier {
     if (url.contains(".m3u8")) {
       final qualities = await getQualityStreams(url, customHeader: headers);
       _state = _state.copyWith(qualities: qualities);
-      notifyListeners();
     } else {
       _state = _state.copyWith(
         qualities: [
@@ -71,6 +71,8 @@ class PlayerDataProvider extends ChangeNotifier {
         ],
       );
     }
+    notifyListeners();
+    print("Available Qualities: ${state.qualities}");
   }
 
   Map<String, String> getPreferredQualityStreamFromQualities() {

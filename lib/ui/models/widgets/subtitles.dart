@@ -38,6 +38,7 @@ class SubtitleSettings {
   final double backgroundTransparency;
 
   final bool bold;
+  final bool enableShadows;
 
   SubtitleSettings({
     this.backgroundColor = Colors.black,
@@ -49,6 +50,7 @@ class SubtitleSettings {
     this.textColor = Colors.white,
     this.fontFamily = "Rubik",
     this.bold = false,
+    this.enableShadows = true,
   });
 
   SubtitleSettings copyWith({
@@ -61,6 +63,7 @@ class SubtitleSettings {
     double? bottomMargin,
     double? backgroundTransparency,
     bool? bold,
+    bool? enableShadows,
   }) {
     return SubtitleSettings(
       textColor: textColor ?? this.textColor,
@@ -72,6 +75,7 @@ class SubtitleSettings {
       bottomMargin: bottomMargin ?? this.bottomMargin,
       backgroundTransparency: backgroundTransparency ?? this.backgroundTransparency,
       bold: bold ?? this.bold,
+      enableShadows: enableShadows ?? this.enableShadows,
     );
   }
 
@@ -86,21 +90,22 @@ class SubtitleSettings {
       'bottomMargin': bottomMargin,
       'backgroundTransparency': backgroundTransparency,
       'bold': bold,
+      'enableShadows': enableShadows,
     };
   }
 
   factory SubtitleSettings.fromMap(Map<dynamic, dynamic> map) {
     return SubtitleSettings(
-      textColor: Color(map['textColor'] as int? ?? Colors.white.toInt()),
-      strokeColor: Color(map['strokeColor'] as int? ?? Colors.black.toInt()),
-      backgroundColor: Color((map['backgroundColor'] ?? Colors.black.toInt()) as int),
-      fontFamily: map['fontFamily'] != null ? map['fontFamily'] as String : "Rubik",
-      strokeWidth: (map['strokeWidth'] ?? 1.1) as double,
-      fontSize: (map['fontSize'] ?? 24) as double,
-      bottomMargin: (map['bottomMargin'] ?? 30) as double,
-      backgroundTransparency: (map['backgroundTransparency'] ?? 0) as double,
-      bold: (map['bold'] ?? false) as bool,
-    );
+        textColor: Color(map['textColor'] as int? ?? Colors.white.toInt()),
+        strokeColor: Color(map['strokeColor'] as int? ?? Colors.black.toInt()),
+        backgroundColor: Color((map['backgroundColor'] ?? Colors.black.toInt()) as int),
+        fontFamily: map['fontFamily'] != null ? map['fontFamily'] as String : "Rubik",
+        strokeWidth: (map['strokeWidth'] ?? 1.1) as double,
+        fontSize: (map['fontSize'] ?? 24) as double,
+        bottomMargin: (map['bottomMargin'] ?? 30) as double,
+        backgroundTransparency: (map['backgroundTransparency'] ?? 0) as double,
+        bold: (map['bold'] ?? false) as bool,
+        enableShadows: (map['enableShadows'] ?? true) as bool);
   }
 
   String toJson() => json.encode(toMap());
@@ -116,6 +121,7 @@ class SubtitleText extends StatelessWidget {
   final Color backgroundColor;
   final double strokeWidth;
   final double backgroundTransparency;
+  final bool enableShadows;
 
   const SubtitleText({
     super.key,
@@ -125,6 +131,7 @@ class SubtitleText extends StatelessWidget {
     required this.strokeWidth,
     required this.backgroundColor,
     required this.backgroundTransparency,
+    this.enableShadows = true,
   });
 
   @override
@@ -149,9 +156,11 @@ class SubtitleText extends StatelessWidget {
           Text(
             text,
             style: style.copyWith(
-              shadows: [
-                Shadow(color: Colors.black, blurRadius: 3.5, offset: Offset(1, 1)),
-              ],
+              shadows: enableShadows
+                  ? [
+                      Shadow(color: Colors.black, blurRadius: 3.5, offset: Offset(1, 1)),
+                    ]
+                  : null,
             ),
             textAlign: TextAlign.center,
           ),
@@ -193,8 +202,14 @@ class _SubViewerState extends State<SubViewer> {
   String activeLine = "";
   bool areSubsLoading = true;
 
+  String? _loadedSubsUrl;
+
   void loadSubs() async {
     try {
+      setState(() {
+        areSubsLoading = true;
+      });
+      subs.clear(); // clear the old subs (if any)
       print("loading ${widget.format.name} subs");
       switch (widget.format) {
         case SubtitleFormat.ASS:
@@ -204,6 +219,8 @@ class _SubViewerState extends State<SubViewer> {
         // default:
         // throw Exception("Not implemented!");
       }
+      print(widget.subtitleSource);
+      _loadedSubsUrl = widget.subtitleSource; // for changing subs when episode changes
       setState(() {
         areSubsLoading = false;
       });
@@ -222,6 +239,8 @@ class _SubViewerState extends State<SubViewer> {
     final currentPosition = widget.controller.position;
 
     if (currentPosition == null || subs.isEmpty) return;
+
+    if (_loadedSubsUrl != widget.subtitleSource && !areSubsLoading) return loadSubs();
 
     int i = lastLineIndex;
 
@@ -283,12 +302,13 @@ class _SubViewerState extends State<SubViewer> {
         width: MediaQuery.of(context).size.width / 1.6,
         alignment: Alignment.bottomCenter,
         child: SubtitleText(
-          text: activeLine,
+          text: areSubsLoading ? "Loading Subs" : activeLine,
           style: subTextStyle(),
           strokeColor: widget.settings.strokeColor,
           strokeWidth: widget.settings.strokeWidth,
           backgroundColor: widget.settings.backgroundColor,
           backgroundTransparency: widget.settings.backgroundTransparency,
+          enableShadows: widget.settings.enableShadows,
         ),
       ),
     );

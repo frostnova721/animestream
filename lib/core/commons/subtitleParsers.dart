@@ -58,7 +58,7 @@ class ASSRIPPER {
     final parts = line.split(',');
     final start = Subtitleparsers.parseDuration(parts[1]);
     final end = Subtitleparsers.parseDuration(parts[2]);
-    final dialogue = parts.last.replaceAll(r"\N", "\n").trim();
+    final dialogue = line.split(",,").last.replaceAll(r"\N", "\n").trim();
 
     return Subtitle(dialogue: dialogue, end: end, start: start);
   }

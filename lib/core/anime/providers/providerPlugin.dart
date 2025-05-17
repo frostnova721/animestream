@@ -1,9 +1,12 @@
 import 'package:animestream/core/anime/providers/animeProvider.dart';
-import 'package:animestream/core/anime/providers/animepahe.dart';
+import 'package:animestream/core/anime/providers/apRemote.dart';
+import 'package:animestream/core/anime/providers/bridge.dart';
 import 'package:animestream/core/anime/providers/providerManager.dart';
+import 'package:animestream/core/anime/providers/registers/html.dart';
+import 'package:animestream/core/anime/providers/registers/http.dart';
+import 'package:d4rt/d4rt.dart';
 
 class ProviderPlugin {
-  late dynamic _compiler;
 
   ProviderPlugin() {
     _setupCompiler();
@@ -11,22 +14,29 @@ class ProviderPlugin {
 
   final Map<String, AnimeProvider> _compiledProviders = {};
 
-  void _setupCompiler() {
-    
-  }
+  void _setupCompiler() {}
 
-  Future<AnimeProvider?> getProvider(String provider, { String? testCode}) async {
-    if(provider.isEmpty && testCode == null) return null;
-    
+  Future<AnimeProvider?> getProvider(String provider, {String? testCode}) async {
+    if (provider.isEmpty && testCode == null) return null;
+
     final cachedProvider = _compiledProviders[provider];
-    if(cachedProvider != null) return cachedProvider; 
+    if (cachedProvider != null) return cachedProvider;
 
     print("Cache miss. compiling provider.");
 
     final program = testCode != null ? testCode : await ProviderManager().getSavedProviderCode(provider);
 
-    if(program == null) return null;
+    if (program == null) return null;
 
-    return AnimePahe();
+    final d4rt = D4rt();
+
+    d4rt.registerBridgedClass(AnimeProviderBridge.$bridger);
+    d4rt.registerBridgedClass(AnimeProviderBridge.videoStreamBridge);
+    HttpRegisters.register(d4rt);
+    HtmlRegister().register(d4rt);
+
+    await d4rt.execute(rc());
+
+    return APWrapper(d4rt);
   }
 }

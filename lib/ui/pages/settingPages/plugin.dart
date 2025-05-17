@@ -4,6 +4,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class PluginPage extends StatefulWidget {
@@ -34,6 +35,7 @@ class _PluginPageState extends State<PluginPage> with TickerProviderStateMixin {
       _installedProviders = saved;
     });
 
+    if(kDebugMode)
     _providerManager.fetchProvidersRepo().then((val) {
       final savedSet = saved.map((e) => e.identifier).toSet();
       val.removeWhere((it) => savedSet.contains(it.identifier));

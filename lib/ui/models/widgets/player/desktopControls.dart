@@ -5,8 +5,10 @@ import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
+import 'package:animestream/ui/pages/settingPages/subtitle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -319,11 +321,18 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                               ),
                             ),
 
-                            IconButton(
-                                onPressed: () {
-                                  provider.toggleSubs();
-                                },
-                                icon: makeIcon(provider.state.showSubs ? Icons.subtitles : Icons.subtitles_outlined)),
+                            ContextMenu(
+                              menuItems: [
+                                ContextMenuItem(icon: Icons.open_in_new, label: "Customize Subs", onClick: () {
+                                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SubtitleSettingPage())).then((v) => dataProvider.initSubsettings());
+                                })
+                              ],
+                              child: IconButton(
+                                  onPressed: () {
+                                    provider.toggleSubs();
+                                  },
+                                  icon: makeIcon(provider.state.showSubs ? Icons.subtitles : Icons.subtitles_outlined)),
+                            ),
                             IconButton(
                                 onPressed: () {
                                   final tp = context.read<AppProvider>();

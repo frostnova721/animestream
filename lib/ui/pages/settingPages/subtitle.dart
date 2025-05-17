@@ -147,6 +147,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                     strokeWidth: settings.strokeWidth,
                                     backgroundColor: settings.backgroundColor,
                                     backgroundTransparency: settings.backgroundTransparency,
+                                    enableShadows: settings.enableShadows,
                                   ),
                                 ),
                               ),
@@ -218,6 +219,12 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                 toggleItem("Bold", settings.bold, () {
                                   setState(() {
                                     settings = settings.copyWith(bold: !settings.bold);
+                                    saveSubSettings();
+                                  });
+                                }),
+                                toggleItem("Shadows", settings.enableShadows, () {
+                                  setState(() {
+                                    settings = settings.copyWith(enableShadows: !settings.enableShadows);
                                     saveSubSettings();
                                   });
                                 }),
@@ -327,6 +334,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
             strokeWidth: settings.strokeWidth,
             backgroundColor: settings.backgroundColor,
             backgroundTransparency: settings.backgroundTransparency,
+            enableShadows: settings.enableShadows,
           ),
         ),
       ),

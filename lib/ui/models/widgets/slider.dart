@@ -119,7 +119,6 @@ class RoundedRectangularThumbShape extends SliderComponentShape {
   }
 }
 
-/**Inspired design from saikou/dantotsu */
 //looks great ngl
 class MarginedTrack extends SliderTrackShape {
   const MarginedTrack();
@@ -204,10 +203,6 @@ class RoundedSliderValueIndicator extends SliderComponentShape {
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
     return Size(width, height);
   }
-
-  // String getValue(double value) {
-  //   return (min+(max-min)*value).toString();
-  // }
 
   @override
   void paint(

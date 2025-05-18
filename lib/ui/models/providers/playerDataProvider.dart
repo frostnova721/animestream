@@ -4,7 +4,7 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:animestream/ui/models/widgets/subtitles.dart';
+import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:flutter/material.dart';
 
 

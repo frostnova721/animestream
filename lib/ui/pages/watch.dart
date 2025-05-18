@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
+import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -16,7 +17,6 @@ import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/player/customControls.dart';
 import 'package:animestream/ui/models/widgets/player/desktopControls.dart';
-import 'package:animestream/ui/models/widgets/subtitles.dart';
 
 class Watch extends StatefulWidget {
   final VideoController controller;

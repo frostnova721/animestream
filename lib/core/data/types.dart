@@ -1,6 +1,6 @@
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
-import 'package:animestream/ui/models/widgets/subtitles.dart';
+import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 
 class SettingsModal {
   final int? skipDuration;

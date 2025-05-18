@@ -185,18 +185,24 @@ List<ThemeItem> availableThemes = [
   ThemeItem(id: 08, name: "Neon Green", theme: neonGreen, lightVariant: neonGreenLight)
 ];
 
-ThemeModeValues lightModeValues = ThemeModeValues(
+// Represents a generic light theme (used only for its values)
+AnimeStreamTheme lightModeValues = AnimeStreamTheme(
   textMainColor: Colors.black,
   textSubColor: Color.fromARGB(255, 61, 61, 61),
   backgroundColor: Colors.white,
   backgroundSubColor: Color.fromARGB(255, 179, 179, 179),
   modalSheetBackgroundColor: Colors.white,
+  accentColor: Colors.black, // ignore this field
+  onAccent: Colors.white
 );
 
-ThemeModeValues darkModeValues = ThemeModeValues(
+// Represents a generic dark theme (used only for its values)
+AnimeStreamTheme darkModeValues = AnimeStreamTheme(
   backgroundColor: Color.fromARGB(255, 24, 24, 24),
   backgroundSubColor: const Color.fromARGB(255, 36, 36, 36),
   textMainColor: Colors.white,
   textSubColor: Color.fromARGB(255, 180, 180, 180),
   modalSheetBackgroundColor: Color(0xff121212),
+  accentColor: Colors.black, // ignore this field
+  onAccent: Colors.white
 );

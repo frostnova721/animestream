@@ -87,6 +87,7 @@ void main(List<String> args) async {
   }
 }
 
+// Migrate if not already done, will be removed in future versions (if not discontinued)
 Future<void> migrateToSecureStorage() async {
   final token = await getVal(HiveKey.token);
   if (token != null) {

@@ -81,7 +81,12 @@ void main(List<String> args) async {
     );
   } catch (err) {
     debugPrint(err.toString());
-    Logger().writeLog(err.toString());
+
+    Logger()
+      ..addLog(err.toString())
+      ..addLog("state: Crashed")
+      ..writeLog();
+      
     print("[CRASH] logged the error to logs folder");
     rethrow;
   }

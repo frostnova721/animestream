@@ -14,6 +14,7 @@ class StreamWish extends AnimeExtractor {
     final res = await fetch(streamUrl);
     final doc = html.parse(res);
     String streamLink = '';
+    String? subtitles;
     String unpackedData = "";
     doc.querySelectorAll('script').forEach((element) {
       if (streamLink.isEmpty) {
@@ -22,6 +23,7 @@ class StreamWish extends AnimeExtractor {
           final link = regex.allMatches(element.innerHtml);
           if (link.isNotEmpty) {
             unpackedData = element.innerHtml;
+            // print(unpackedData);
             streamLink = link.firstOrNull?[1].toString() ?? '';
           } else {
             throw new Exception("WRONG FORMAT!");
@@ -32,11 +34,16 @@ class StreamWish extends AnimeExtractor {
           final matched = regex.firstMatch(html);
           if (matched != null) {
             final String data = JsUnpack(html).unpack();
+            // print(data);
             unpackedData = data;
             final dataMatch = RegExp(r'sources:\s*\[([\s\S]*?)\]').allMatches(data).firstOrNull?[1] ?? '';
             streamLink = dataMatch.replaceAll(RegExp(r'{|}|\"|file:'), '');
           }
         } finally {
+          final subtitleData = RegExp(r'tracks:\[([\s\S]*?)\]').allMatches(unpackedData).firstOrNull;
+          if (subtitleData != null) {
+            subtitles = _extractEnglishSubtitleLink(subtitleData[1] ?? "");
+          }
           final uri = Uri.tryParse(streamLink);
           if (uri == null || !uri.hasScheme) {
             final variables = streamLink.split("||");
@@ -64,12 +71,18 @@ class StreamWish extends AnimeExtractor {
         quality: "multi-quality",
         backup: false,
         isM3u8: streamLink.contains('.m3u8'),
-        customHeaders: headersOverrides ?? {
-          "Referer": streamUrl,
-          "Origin": "https://${Uri.parse(streamUrl).host}"
-        }
+        subtitle: subtitles,
+        subtitleFormat: subtitles != null ? subtitles!.endsWith(".vtt") ? "vtt" : "ass" : null,
+        customHeaders: headersOverrides ?? {"Referer": streamUrl, "Origin": "https://${Uri.parse(streamUrl).host}"},
       )
     ];
+  }
+
+  String? _extractEnglishSubtitleLink(String input) {
+    final regex = RegExp(r'\{[^}]*file\s*:\s*"([^"]+)"[^}]*label\s*:\s*"English"[^}]*kind\s*:\s*"captions"',
+        caseSensitive: false, multiLine: true);
+    final match = regex.firstMatch(input);
+    return match != null ? match.group(1) : null;
   }
 
   Map<String, String> _extractLinksObject(String input) {

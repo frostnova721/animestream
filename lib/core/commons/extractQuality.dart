@@ -9,19 +9,23 @@ String _makeBaseLink(String uri) {
 Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<String, String>? customHeader = null}) async {
   try {
   final content = (await get(Uri.parse(streamUrl), headers: customHeader)).body;
+  // print(content);
 
   List<String> links = [];
   List<String> resolutions = [];
 
-  final lines = content.split('\n\n')[0].split('\n');
+  List<String> lines = content.split("\n");
+  // lines = lines.where((it) => !it.startsWith("EXT-X-MEDIA")).toList().first.split("\n");
+
   final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
   for (final line in lines) {
     if (line.startsWith("#")) {
-      if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME'))
+      if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA"))
         continue;
       final match = regex.allMatches(line).first;
       resolutions.add(match.group(0)?.replaceAll("RESOLUTION=", '') ?? 'null');
     } else {
+      print(line);
       final linkPart = line.trim();
       if (linkPart.length > 1)
         links.add(linkPart.startsWith('http')

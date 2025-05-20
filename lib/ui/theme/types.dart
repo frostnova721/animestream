@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 class ThemeItem {
-  final String name;
-  final AnimeStreamTheme theme;
-  final AnimeStreamTheme lightVariant;
-  final int id;
+  final String name;                      // Theme's name
+  final AnimeStreamTheme theme;           // Dark variant of the theme
+  final AnimeStreamTheme lightVariant;    // Light variant of the theme
+  final int id;                           // Theme ID
 
   ThemeItem({
     required this.id,

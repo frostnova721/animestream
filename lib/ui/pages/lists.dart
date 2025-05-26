@@ -7,6 +7,7 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
+import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/models/widgets/navRail.dart';
 import 'package:flutter/material.dart';
 
@@ -338,7 +339,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
               )
             : Center(
                 child: Container(
-                  child: CircularProgressIndicator(
+                  child: AnimeStreamLoading(
                     color: appTheme.accentColor,
                   ),
                 ),

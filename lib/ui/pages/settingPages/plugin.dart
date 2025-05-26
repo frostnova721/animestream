@@ -50,7 +50,8 @@ class _PluginPageState extends State<PluginPage> with TickerProviderStateMixin {
     return Scaffold(
       body: Padding(
         padding: MediaQuery.paddingOf(context),
-        child: Column(
+        child: 
+        Column(
           children: [
             Padding(
               padding: const EdgeInsets.only(bottom: 10),
@@ -79,40 +80,43 @@ class _PluginPageState extends State<PluginPage> with TickerProviderStateMixin {
                 ],
               ),
             ),
-            TabBar(
-              controller: _tabController,
-              labelColor: appTheme.accentColor,
-              indicatorColor: appTheme.accentColor,
-              unselectedLabelColor: appTheme.textSubColor,
-              labelStyle: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontFamily: "NotoSans",
-              ),
-              // dividerHeight: 0,
-              // indicatorSize: TabBarIndicatorSize.tab,
-              tabs: [
-                Container(
-                    height: 50,
-                    alignment: Alignment.center,
-                    child: Text(
-                      "Installed",
-                      style: _textStyle(),
-                    )),
-                Container(height: 50, alignment: Alignment.center, child: Text("Available", style: _textStyle())),
-              ],
-            ),
-            Expanded(
-                child: TabBarView(
-              controller: _tabController,
-              children: [
-                _installedProviders == null
-                    ? Center(child: AnimeStreamLoading(color: appTheme.accentColor))
-                    : _list(_installedProviders!),
-                _availableProviders == null
-                    ? Center(child: AnimeStreamLoading(color: appTheme.accentColor))
-                    : _list(_availableProviders!),
-              ],
-            )),
+
+            Expanded(child: Center(child: Text("Should arrive soon!"),))
+            
+            // TabBar(
+            //   controller: _tabController,
+            //   labelColor: appTheme.accentColor,
+            //   indicatorColor: appTheme.accentColor,
+            //   unselectedLabelColor: appTheme.textSubColor,
+            //   labelStyle: TextStyle(
+            //     fontWeight: FontWeight.bold,
+            //     fontFamily: "NotoSans",
+            //   ),
+            //   // dividerHeight: 0,
+            //   // indicatorSize: TabBarIndicatorSize.tab,
+            //   tabs: [
+            //     Container(
+            //         height: 50,
+            //         alignment: Alignment.center,
+            //         child: Text(
+            //           "Installed",
+            //           style: _textStyle(),
+            //         )),
+            //     Container(height: 50, alignment: Alignment.center, child: Text("Available", style: _textStyle())),
+            //   ],
+            // ),
+            // Expanded(
+            //     child: TabBarView(
+            //   controller: _tabController,
+            //   children: [
+            //     _installedProviders == null
+            //         ? Center(child: AnimeStreamLoading(color: appTheme.accentColor))
+            //         : _list(_installedProviders!),
+            //     _availableProviders == null
+            //         ? Center(child: AnimeStreamLoading(color: appTheme.accentColor))
+            //         : _list(_availableProviders!),
+            //   ],
+            // )),
           ],
         ),
       ),
@@ -128,7 +132,7 @@ class _PluginPageState extends State<PluginPage> with TickerProviderStateMixin {
             itemBuilder: (context, index) {
               final item = data[index];
               return Container(
-                margin: EdgeInsets.symmetric(horizontal: 8),
+                margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
                 padding: EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),

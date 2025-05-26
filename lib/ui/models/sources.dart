@@ -3,7 +3,6 @@ import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/aniplay.dart';
 import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
-import 'package:animestream/core/anime/providers/hikari.dart';
 import 'package:animestream/core/anime/providers/providerDetails.dart';
 import 'package:animestream/core/anime/providers/providerManager.dart';
 import 'package:animestream/core/anime/providers/providerPlugin.dart';
@@ -21,7 +20,6 @@ class SourceManager {
     "AnimeOnsen",
     "Aniplay",
     "Gojo",
-    "Hikari",
   ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0")).toList();
 
   /// Used till complete migration to remote providers is complete.
@@ -110,8 +108,6 @@ AnimeProvider getClass(String source) {
       return AniPlay();
     case "gojo":
       return Gojo();
-    case "hikari":
-      return Hikari();
     default:
       throw new Exception("Invalid source");
   }

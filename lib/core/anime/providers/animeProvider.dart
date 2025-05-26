@@ -22,7 +22,7 @@ abstract class AnimeProvider {
    * The link format returned in the [getAnimeEpisodeLink] method should be
    * parsed in this method
    * 
-   * This method should return a list of [VideoStream] objects containing direct download
+   * This method should return a list of [VideoStream] objects through callbacks containing direct download
    * links to the episode
    */
   Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream>, bool) update, {bool dub = false, String? metadata});

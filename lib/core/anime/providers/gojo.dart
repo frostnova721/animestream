@@ -6,11 +6,11 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
-const String apiUrl = "https://backend.gojo.wtf/api/anime";
+const String apiUrl = "https://backend.gojo.live/api/anime";
 
 final headers = {
-  'Origin': 'https://gojo.wtf',
-  'Referer': 'https://gojo.wtf/',
+  'Origin': 'https://gojo.live',
+  'Referer': 'https://gojo.live/',
 };
 
 //use anilist for searching
@@ -139,7 +139,7 @@ class Gojo extends AnimeProvider {
                 backup: false,
                 subtitleFormat: SubtitleFormat.VTT.name,
                 customHeaders: headers,
-                subtitle: subtitles?.where((it) => it['lang'] == "English").firstOrNull?['url'] ??
+                subtitle: subtitles?.where((it) => it['lang'] == "English").firstOrNull?['url'] ?? //pick only english
                     subtitles?.firstOrNull?['url'],
               )
             ],
@@ -150,6 +150,7 @@ class Gojo extends AnimeProvider {
 
   @override
   Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update, {bool dub = false, String? metadata}) {
+    // download the stream
     throw UnimplementedError();
   }
 }

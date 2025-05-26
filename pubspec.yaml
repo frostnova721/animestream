@@ -63,7 +63,7 @@ dependencies:
   # Misc
   flutter_native_splash: ^2.4.0
   # window_size: ^0.1.0
-  d4rt: ^0.0.3
+  # d4rt: ^0.0.3
 
 dev_dependencies:
   flutter_test:

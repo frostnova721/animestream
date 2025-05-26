@@ -9,6 +9,7 @@ import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
@@ -173,7 +174,7 @@ class _AccountSettingState extends State<AccountSetting> {
                   ? Container(
                       padding: EdgeInsets.only(top: 30),
                       child: Center(
-                        child: CircularProgressIndicator(
+                        child: AnimeStreamLoading(
                           color: appTheme.accentColor,
                         ),
                       ),

@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
+import 'package:animestream/ui/theme/lime.dart';
 import 'package:app_links/app_links.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
@@ -86,7 +87,7 @@ void main(List<String> args) async {
       ..addLog(err.toString())
       ..addLog("state: Crashed")
       ..writeLog();
-      
+
     print("[CRASH] logged the error to logs folder");
     rethrow;
   }
@@ -110,7 +111,7 @@ Future<void> loadAndAssignSettings() async {
 
   //load and apply theme
   await getTheme().then((themeId) {
-    if (themeId > availableThemes.length) {
+    if (themeId > availableThemes.length || themeId < 1) {
       print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
       showToast("Failed to apply theme. Using default theme");
       setTheme(01);
@@ -119,7 +120,14 @@ Future<void> loadAndAssignSettings() async {
 
     final darkMode = currentUserSettings!.darkMode!;
 
-    final theme = availableThemes.where((theme) => theme.id == themeId).toList()[0];
+    ThemeItem? theme = availableThemes.where((theme) => theme.id == themeId).toList().firstOrNull;
+
+    if (theme == null) {
+      // Set default theme incase of any corruptions/issues n stuff
+      theme = LimeZest();
+      print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
+    }
+
     activeThemeItem = theme;
     if (darkMode) {
       appTheme = theme.theme;
@@ -137,7 +145,7 @@ Future<void> loadAndAssignSettings() async {
       );
     }
 
-    print("[STARTUP] Loaded theme of ID $themeId");
+    print("[STARTUP] Loaded theme of ID $themeId (${theme.name})");
   });
 }
 

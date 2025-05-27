@@ -124,6 +124,20 @@ flutter:
     - .env
 
   fonts:
+    - family: Arial
+      fonts:
+        - asset: lib/assets/fonts/ARIAL.ttf
+          style: normal
+          weight: 500
+        - asset: lib/assets/fonts/ARIALBD.ttf
+          weight: 700
+    - family: Helvetica
+      fonts:
+        - asset: lib/assets/fonts/Helvetica.ttf
+          style: normal
+          weight: 500
+        - asset: lib/assets/fonts/Helvetica-Bold.ttf
+          weight: 700
     - family: Rubik
       fonts:
         - asset: lib/assets/fonts/Rubik-Medium.ttf

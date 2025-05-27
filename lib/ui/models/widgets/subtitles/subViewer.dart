@@ -125,7 +125,7 @@ class _SubViewerState extends State<SubViewer> {
       fontFamily: widget.settings.fontFamily ?? "Rubik",
       color: widget.settings.textColor,
       fontWeight: widget.settings.bold ? FontWeight.w700 : FontWeight.w500,
-      letterSpacing: -0.2,
+      // letterSpacing: -0.2,
       // wordSpacing: 1,
       fontFamilyFallback: ["Poppins"],
       // backgroundColor: widget.settings.backgroundColor.withValues(alpha: widget.settings.backgroundTransparency),

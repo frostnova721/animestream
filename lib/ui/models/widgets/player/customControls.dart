@@ -752,14 +752,9 @@ class BottomControls extends StatelessWidget {
                         },
                         onLongPress: () {
                           Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (ctx) => SubtitleSettingPage()))
+                              .push(MaterialPageRoute(builder: (ctx) => SubtitleSettingPage(fromWatchPage: true,)))
                               .then((v) {
                             dataProvider.initSubsettings();
-                            SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-                            SystemChrome.setPreferredOrientations([
-                              DeviceOrientation.landscapeLeft,
-                              DeviceOrientation.landscapeRight,
-                            ]);
                           });
                         },
                         tooltip: "Subtitles",

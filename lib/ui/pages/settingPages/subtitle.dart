@@ -11,7 +11,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class SubtitleSettingPage extends StatefulWidget {
-  const SubtitleSettingPage({super.key});
+  final bool fromWatchPage;
+  const SubtitleSettingPage({super.key, this.fromWatchPage = false});
 
   @override
   State<SubtitleSettingPage> createState() => _SubtitleSettingPageState();
@@ -21,6 +22,12 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
   @override
   void initState() {
     super.initState();
+
+    if (widget.fromWatchPage) {
+      SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
 
     // SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     // SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -32,9 +39,14 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   @override
   void dispose() {
-    SystemChrome.setPreferredOrientations(
-        [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    if (widget.fromWatchPage) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     super.dispose();
   }
 
@@ -64,7 +76,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   int ind = 0;
 
-  final fonts = ["Rubik", "Poppins", "NotoSans", "NunitoSans"];
+  final fonts = ["Rubik", "Poppins", "NotoSans", "NunitoSans", "Arial", "Helvetica"];
 
   bool initialised = false;
   bool previewMode = false;
@@ -77,7 +89,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
       fontFamily: settings.fontFamily ?? "Rubik",
       color: settings.textColor,
       fontWeight: settings.bold ? FontWeight.w700 : FontWeight.w500,
-      letterSpacing: -0.2,
+      // letterSpacing: -0.2,
       // wordSpacing: 1,
       fontFamilyFallback: ["Poppins"],
       // backgroundColor: widget.settings.backgroundColor.withValues(alpha: widget.settings.backgroundTransparency),
@@ -175,7 +187,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                               children: [
                                 _itemTitle("Font Family"),
                                 SizedBox(
-                                  height: 170,
+                                  height: 220,
                                   child: GridView(
                                     padding: EdgeInsets.only(left: 10, right: 10, bottom: 20),
                                     physics: NeverScrollableScrollPhysics(),

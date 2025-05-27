@@ -46,7 +46,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
   }
 
   Future getSources() async {
-    if ((index <= 0) || (index >= dp.epLinks.length)) {
+    if ((index < 0) || (index >= dp.epLinks.length)) {
       throw new Exception("Index too low or too high. Item not found!");
     }
 

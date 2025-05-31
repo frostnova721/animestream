@@ -6,15 +6,18 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
-const String apiUrl = "https://backend.gojo.live/api/anime";
-
-final headers = {
-  'Origin': 'https://gojo.live',
-  'Referer': 'https://gojo.live/',
-};
-
 //use anilist for searching
 class Gojo extends AnimeProvider {
+  static const String apiUrl = "https://backend.gojo.live/api/anime";
+
+  final baseUrl = "https://gojo.live";
+
+  final headers = {
+    'Origin': 'https://gojo.live',
+    'Referer': 'https://gojo.live/',
+  };
+
+  @override
   final String providerName = "gojo";
 
   @override
@@ -59,7 +62,7 @@ class Gojo extends AnimeProvider {
           'id': id,
           'provider': provider,
           'filler': isFiller,
-          'img': (img?.isEmpty ?? true) ? null : img,
+          'img': (img?.isEmpty ?? true) ? null : img?.replaceAll("https://img.gojo.live/", ""),
           'title': (title?.isEmpty ?? true) ? null : title,
           'hasDub': hasDub
         };
@@ -90,6 +93,7 @@ class Gojo extends AnimeProvider {
         'thumbnail': match['img'],
         'episodeTitle': match['title'],
         'hasDub': match['hasDub'],
+        'metadata': "$aliasId+${ent.key}"
       };
     }).toList();
 
@@ -100,6 +104,14 @@ class Gojo extends AnimeProvider {
   Future<void> getStreams(String epLink, Function(List<VideoStream> list, bool isFinished) update,
       {bool dub = false, String? metadata}) async {
     final linkSplit = epLink.split("+");
+    if(metadata == null) throw Exception("Couldnt get streams, required field metadata recieved null.");
+
+    final mdsplit = metadata.split("+");
+
+    if(mdsplit.length < 2) throw Exception("id or episodeNumber missing!");
+
+    final id = mdsplit.first;
+    final epNum = mdsplit[1];
 
     final List<Future<Response>> futures = [];
 
@@ -110,7 +122,7 @@ class Gojo extends AnimeProvider {
       final providerIndex = linkSplit.indexOf(it, i) + 1;
       i = providerIndex;
       final url =
-          "$apiUrl/tiddies?provider=${linkSplit[providerIndex]}&id=178100&num=${listWithOnlyIds.indexOf(it) + 1}&subType=sub&watchId=$it&dub_id=null";
+          "$apiUrl/tiddies?provider=${linkSplit[providerIndex]}&id=$id&num=$epNum&subType=${dub ? "dub" : "sub"}&watchId=$it&dub_id=null";
       final res = get(Uri.parse(url), headers: headers);
       futures.add(res);
     });
@@ -126,8 +138,11 @@ class Gojo extends AnimeProvider {
       final List<dynamic>? sources = json?['sources'];
       final List<dynamic>? subtitles = json?['subtitles'];
 
-      final provider = item.request?.url.queryParameters['provider'] ?? '';
       doneSources++;
+
+      if(sources?.isEmpty == true) return update([], doneSources == totalSources);
+
+      final provider = item.request?.url.queryParameters['provider'] ?? '';
 
       sources?.forEach((i) => update(
             [
@@ -149,7 +164,8 @@ class Gojo extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update, {bool dub = false, String? metadata}) {
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
+      {bool dub = false, String? metadata}) {
     // download the stream
     throw UnimplementedError();
   }

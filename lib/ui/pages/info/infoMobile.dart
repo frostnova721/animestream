@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -865,6 +866,7 @@ class _InfoMobileState extends State<InfoMobile> {
     );
   }
 
+  /// The episode horizontal tiles
   GridView _episodes() {
     return GridView.builder(
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -923,10 +925,20 @@ class _InfoMobileState extends State<InfoMobile> {
                               end: Alignment.centerRight,
                             ).createShader(bounds),
                             child: Image.network(
-                              provider.visibleEpList[provider.currentPageIndex][index]['epLink'].thumbnail ?? provider.data.cover,
+                              provider.visibleEpList[provider.currentPageIndex][index]['epLink'].thumbnail ??
+                                  provider.data.cover,
                               fit: BoxFit.cover,
                               width: 165,
                               height: 110,
+                              errorBuilder: (context, error, stackTrace) {
+                                // Use the cover image incase of an error!
+                                return Image.network(
+                                  provider.data.cover,
+                                  fit: BoxFit.cover,
+                                  width: 165,
+                                  height: 110,
+                                );
+                              },
                             ),
                           ),
                         ),

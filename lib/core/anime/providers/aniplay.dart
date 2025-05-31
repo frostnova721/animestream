@@ -73,7 +73,7 @@ class AniPlay extends AnimeProvider {
       });
       resFuture.then((res) {
         final split = res.body.split('1:')[1];
-        final List<dynamic>? parsed = jsonDecode(split)['sources'];
+        final List<dynamic>? parsed = jsonDecode(split)?['sources'];
 
         if (parsed == null) {
           serversFetched++;

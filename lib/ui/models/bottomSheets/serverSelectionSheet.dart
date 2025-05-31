@@ -48,6 +48,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
         await src.getDownloadSources(
           widget.provider.selectedSource.identifier,
           widget.provider.epLinks[widget.episodeIndex].episodeLink,
+          dub: provider.preferDubs,
+          metadata: provider.epLinks[widget.episodeIndex].metadata,
           (list, finished) {
             if (mounted)
               setState(() {
@@ -77,14 +79,13 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
         }
       }
     } else {
-      await src.getStreams(widget.provider.selectedSource.identifier, widget.provider.epLinks[widget.episodeIndex].episodeLink,
-      dub: provider.preferDubs,
-      metadata: provider.epLinks[widget.episodeIndex].metadata,
-          (list, finished) {
+      await src.getStreams(
+          widget.provider.selectedSource.identifier, widget.provider.epLinks[widget.episodeIndex].episodeLink,
+          dub: provider.preferDubs, metadata: provider.epLinks[widget.episodeIndex].metadata, (list, finished) {
         if (mounted)
           setState(() {
             if (finished) {
-              _isLoading = widget.type == ServerSheetType.download ? true : false;
+              _isLoading = (widget.type == ServerSheetType.download) ? true : false;
             }
             streamSources = streamSources + list;
             if (widget.type == ServerSheetType.download) {
@@ -151,187 +152,189 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               style: textStyle().copyWith(fontSize: 23),
             ),
           ),
-          streamSources.isNotEmpty
-              ? _isLoading
-                  ? SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _list(),
-                          Container(
-                            padding: EdgeInsets.only(bottom: 10),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                color: appTheme.accentColor,
-                              ),
-                            ),
+          _isLoading
+              ? SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (streamSources.isNotEmpty) _list(),
+                      Container(
+                        padding: EdgeInsets.only(bottom: 10),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            color: appTheme.accentColor,
                           ),
-                        ],
+                        ),
                       ),
-                    )
-                  : Container(
+                    ],
+                  ),
+                )
+              : streamSources.isNotEmpty
+                  ? Container(
                       height: MediaQuery.of(context).orientation == Orientation.landscape
                           ? MediaQuery.of(context).size.height / 2
                           : MediaQuery.of(context).size.height / 3,
-                      child: _list())
-              : Container(
-                  height: 100,
-                  padding: EdgeInsets.only(bottom: 10, top: 20),
-                  child: Center(
-                    child: CircularProgressIndicator(
-                      color: appTheme.accentColor,
-                    ),
-                  ),
-                ),
+                      child: _list(),
+                    )
+                  : Container(
+                      height: 100,
+                      padding: EdgeInsets.only(bottom: 10, top: 20),
+                      child: Center(
+                        child: Text(
+                          "Woah! empty list of servers!",
+                          style: TextStyle(fontFamily: "Rubik", fontSize: 18),
+                        ),
+                      ),
+                    )
         ],
       ),
     );
   }
 
   ListView _list() {
-  final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
-  
-  return widget.type == ServerSheetType.watch
-    ? ListView.builder(
-        padding: EdgeInsets.symmetric(vertical: 10, horizontal: Platform.isAndroid ? 10 : 15),
-        shrinkWrap: true,
-        itemCount: streamSources.length,
-        itemBuilder: (context, index) {
-          final source = streamSources[index];
-          
-          return SourceTile(
-            source: source,
-            onTap: () async {
-                        // return print(streamSources[index]);
+    final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
 
-              await storeWatching(
-                title,
-                widget.provider.data.cover,
-                widget.provider.id,
-                widget.episodeIndex,
-                totalEpisodes: widget.provider.data.episodes,
-                alternateDatabases: widget.provider.altDatabases,
-              );
+    return widget.type == ServerSheetType.watch
+        ? ListView.builder(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: Platform.isAndroid ? 10 : 15),
+            shrinkWrap: true,
+            itemCount: streamSources.length,
+            itemBuilder: (context, index) {
+              final source = streamSources[index];
 
-              final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
-              final provider = widget.provider;
-              final navigatorState = (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
+              return SourceTile(
+                source: source,
+                onTap: () async {
+                  // return print(streamSources[index]);
 
-              Navigator.pop(context, true);
+                  await storeWatching(
+                    title,
+                    widget.provider.data.cover,
+                    widget.provider.id,
+                    widget.episodeIndex,
+                    totalEpisodes: widget.provider.data.episodes,
+                    alternateDatabases: widget.provider.altDatabases,
+                  );
 
-              navigatorState?.push(
-                MaterialPageRoute(
-                  builder: (context) => MultiProvider(
-                    providers: [
-                      ChangeNotifierProvider(
-                        create: (context) => PlayerDataProvider(
-                          initialStreams: streamSources,
-                          initialStream: streamSources[index],
-                          epLinks: provider.epLinks,
-                          showTitle: title,
-                          coverImageUrl: widget.provider.data.cover,
-                          showId: provider.id,
-                          selectedSource: provider.selectedSource.identifier,
-                          startIndex: widget.episodeIndex,
-                          altDatabases: provider.altDatabases,
-                          lastWatchDuration: provider.lastWatchedDurationMap?[
-                              provider.watched < provider.epLinks.length
-                                  ? provider.watched + 1
-                                  : provider.watched],
-                        ),
-                      ),
-                      ChangeNotifierProvider(
-                        create: (context) => PlayerProvider(controller),
-                      ),
-                    ],
-                    child: Watch(
-                      controller: controller,
-                    ),
-                  ),
-                ),
-              ).then((value) {
-                provider.getWatched(refreshLastWatchDuration: true);
-              });
-            },
-          );
-        },
-      )
-    : ListView.builder(
-        itemCount: qualities.length,
-        shrinkWrap: true,
-        itemBuilder: (BuildContext context, ind) => Container(
-          margin: EdgeInsets.only(top: 10),
-          child: ElevatedButton(
-            onPressed: () {
-              if (currentUserSettings?.useQueuedDownloads ?? false) {
-                Downloader()
-                    .addToQueue(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
-                        parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
-                    .onError((err, st) {
-                  print(err);
-                  print(st);
-                  floatingSnackBar("$err");
-                });
-              } else {
-                Downloader()
-                    .download(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
-                        parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
-                    .onError((err, st) {
-                  print(err);
-                  print(st);
-                  floatingSnackBar("$err");
-                });
-              }
-              Navigator.of(context).pop();
-              floatingSnackBar("Downloading the episode to your downloads folder");
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: appTheme.backgroundSubColor,
-              padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(top: 5),
-                      child: Row(
-                        children: [
-                          Text(
-                            "${qualities[ind]['server']}",
-                            style: TextStyle(
-                              color: appTheme.accentColor,
-                              fontSize: 18,
-                              fontFamily: "Rubik",
+                  final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+                  final provider = widget.provider;
+                  final navigatorState = (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
+
+                  Navigator.pop(context, true);
+
+                  navigatorState
+                      ?.push(
+                    MaterialPageRoute(
+                      builder: (context) => MultiProvider(
+                        providers: [
+                          ChangeNotifierProvider(
+                            create: (context) => PlayerDataProvider(
+                              initialStreams: streamSources,
+                              initialStream: streamSources[index],
+                              epLinks: provider.epLinks,
+                              showTitle: title,
+                              coverImageUrl: widget.provider.data.cover,
+                              showId: provider.id,
+                              selectedSource: provider.selectedSource.identifier,
+                              startIndex: widget.episodeIndex,
+                              altDatabases: provider.altDatabases,
+                              lastWatchDuration: provider.lastWatchedDurationMap?[
+                                  provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched],
                             ),
                           ),
-                          Text(
-                            "• ${qualities[ind]['quality']}",
-                            style: TextStyle(
-                              color: appTheme.textMainColor,
-                              fontSize: 18,
-                              fontFamily: "Rubik",
-                            ),
+                          ChangeNotifierProvider(
+                            create: (context) => PlayerProvider(controller),
                           ),
                         ],
+                        child: Watch(
+                          controller: controller,
+                        ),
                       ),
+                    ),
+                  )
+                      .then((value) {
+                    provider.getWatched(refreshLastWatchDuration: true);
+                  });
+                },
+              );
+            },
+          )
+        : ListView.builder(
+            itemCount: qualities.length,
+            shrinkWrap: true,
+            itemBuilder: (BuildContext context, ind) => Container(
+              margin: EdgeInsets.only(top: 10),
+              child: ElevatedButton(
+                onPressed: () {
+                  if (currentUserSettings?.useQueuedDownloads ?? false) {
+                    Downloader()
+                        .addToQueue(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
+                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                        .onError((err, st) {
+                      print(err);
+                      print(st);
+                      floatingSnackBar("$err");
+                    });
+                  } else {
+                    Downloader()
+                        .download(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
+                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                        .onError((err, st) {
+                      print(err);
+                      print(st);
+                      floatingSnackBar("$err");
+                    });
+                  }
+                  Navigator.of(context).pop();
+                  floatingSnackBar("Downloading the episode to your downloads folder");
+                },
+                style: ElevatedButton.styleFrom(
+                  elevation: 0,
+                  backgroundColor: appTheme.backgroundSubColor,
+                  padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(top: 5),
+                          child: Row(
+                            children: [
+                              Text(
+                                "${qualities[ind]['server']}",
+                                style: TextStyle(
+                                  color: appTheme.accentColor,
+                                  fontSize: 18,
+                                  fontFamily: "Rubik",
+                                ),
+                              ),
+                              Text(
+                                "• ${qualities[ind]['quality']}",
+                                style: TextStyle(
+                                  color: appTheme.textMainColor,
+                                  fontSize: 18,
+                                  fontFamily: "Rubik",
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ),
-      );
-}
+          );
+  }
 
   @override
   void dispose() {

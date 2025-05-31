@@ -108,16 +108,22 @@ class _HomeState extends State<Home> {
               AnimatedSwitcher(
                 duration: Duration(milliseconds: 400),
                 child: storedUserData != null
-                    ? Container(
-                        margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            _accountCard(),
-                            _listButton(),
-                          ],
+                    ? Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                          margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                          constraints: BoxConstraints(
+                            maxWidth: 450
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _accountCard(),
+                              _listButton(),
+                            ],
+                          ),
                         ),
-                      )
+                    )
                     : null,
               ),
               _titleAndList("Continue Watching", widget.recentlyWatched, showRefreshIndication: refreshing),
@@ -144,42 +150,44 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Container _listButton() {
-    return Container(
-      height: 60,
-      width: 140,
-      margin: EdgeInsets.only(left: 10),
-      child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          shadowColor: Colors.transparent,
-          backgroundColor: appTheme.backgroundSubColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        onPressed: () => Navigator.of(context)
-            .push(MaterialPageRoute(builder: (context) => AnimeLists()))
-            .then((val) => getLists(userName: storedUserData?.name)),
-        child: Container(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                Icons.folder_rounded,
-                color: appTheme.textMainColor,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 10),
-                child: Text(
-                  "Lists",
-                  style: TextStyle(
-                    color: appTheme.textMainColor,
-                    fontFamily: "Poppins",
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
+   _listButton() {
+    return Expanded(
+      flex: 4,
+      child: Container(
+        height: 60,
+        margin: EdgeInsets.only(left: 10),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            elevation: 0,
+            shadowColor: Colors.transparent,
+            backgroundColor: appTheme.backgroundSubColor,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: () => Navigator.of(context)
+              .push(MaterialPageRoute(builder: (context) => AnimeLists()))
+              .then((val) => getLists(userName: storedUserData?.name)),
+          child: Container(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.folder_rounded,
+                  color: appTheme.textMainColor,
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: Text(
+                    "Lists",
+                    style: TextStyle(
+                      color: appTheme.textMainColor,
+                      fontFamily: "Poppins",
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -187,41 +195,43 @@ class _HomeState extends State<Home> {
   }
 
   Widget _accountCard() {
-    return Material(
-      borderRadius: BorderRadius.circular(10),
-      clipBehavior: Clip.hardEdge,
-      color: appTheme.backgroundSubColor,
-      child: InkWell(
-        overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.1)),
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-            builder: (context) => UserStats(userModal: storedUserData!),
+    return Expanded(
+      flex: 6,
+      child: Material(
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.hardEdge,
+        color: appTheme.backgroundSubColor,
+        child: InkWell(
+          overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.1)),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => UserStats(userModal: storedUserData!),
+            ),
           ),
-        ),
-        child: Container(
-          decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
-          width: 200,
-          height: 60,
-          padding: EdgeInsets.all(10),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                backgroundImage: storedUserData!.avatar != null
-                    ? NetworkImage(storedUserData!.avatar!)
-                    : AssetImage('lib/assets/images/chisato_AI.jpg') as ImageProvider,
-              ),
-              Padding(
-                padding: EdgeInsets.only(left: 10),
-                child: Text(
-                  storedUserData!.name,
-                  style: TextStyle(
-                      fontFamily: "Poppins", fontSize: 16, fontWeight: FontWeight.bold, color: appTheme.textMainColor),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
+          child: Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            height: 60,
+            padding: EdgeInsets.all(10),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                CircleAvatar(
+                  backgroundImage: storedUserData!.avatar != null
+                      ? NetworkImage(storedUserData!.avatar!)
+                      : AssetImage('lib/assets/images/chisato_AI.jpg') as ImageProvider,
                 ),
-              ),
-            ],
+                Padding(
+                  padding: EdgeInsets.only(left: 10),
+                  child: Text(
+                    storedUserData!.name,
+                    style: TextStyle(
+                        fontFamily: "Poppins", fontSize: 16, fontWeight: FontWeight.bold, color: appTheme.textMainColor),
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 1,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

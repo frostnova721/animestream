@@ -233,6 +233,7 @@ class InfoProvider extends ChangeNotifier {
   void paginate(List<EpisodeDetails> links) {
     _visibleEpList = [];
     _epLinks = links;
+
     if (_epLinks.length > 24) {
       final totalPages = (_epLinks.length / 24).ceil();
       int remainingItems = _epLinks.length;
@@ -251,7 +252,8 @@ class InfoProvider extends ChangeNotifier {
     } else {
       List<Map<String, dynamic>> pageOne = [];
       for (int i = 0; i < _epLinks.length; i++) {
-        pageOne.add({'realIndex': i, 'epLink': _epLinks[i]});
+        if(preferDubs && (epLinks[i].hasDub ?? false) || !preferDubs)
+          pageOne.add({'realIndex': i, 'epLink': _epLinks[i]});
       }
       visibleEpList.add(pageOne);
     }

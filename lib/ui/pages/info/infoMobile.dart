@@ -440,54 +440,61 @@ class _InfoMobileState extends State<InfoMobile> {
   }
 
   Container _pages() {
-    return Container(
-      height: 35,
-      margin: EdgeInsets.only(bottom: 10, top: 10),
-      padding: EdgeInsets.only(left: 10, right: 10),
-      child: ListView.builder(
-        itemCount: provider.visibleEpList.length,
-        scrollDirection: Axis.horizontal,
-        shrinkWrap: true,
-        itemBuilder: (context, index) {
-          return Padding(
-            padding: const EdgeInsets.only(left: 10),
-            child: AnimatedContainer(
-              duration: Duration(milliseconds: 200),
-              clipBehavior: Clip.hardEdge,
-              decoration: BoxDecoration(
-                color: provider.currentPageIndex == index ? appTheme.accentColor : appTheme.backgroundColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    setState(() {
-                      provider.currentPageIndex = index;
-                    });
-                  },
-                  child: Container(
-                    padding: EdgeInsets.only(
-                      left: 10,
-                      right: 10,
+    return provider.visibleEpList[provider.currentPageIndex].isEmpty
+        ? Container(
+          margin: EdgeInsets.only(top: 40, bottom: 40),
+            child: Center(
+              child: Text("Oops. no items here!", style: TextStyle(fontFamily: "Rubik"),),
+            ),
+          )
+        : Container(
+            height: 35,
+            margin: EdgeInsets.only(bottom: 10, top: 10),
+            padding: EdgeInsets.only(left: 10, right: 10),
+            child: ListView.builder(
+              itemCount: provider.visibleEpList.length,
+              scrollDirection: Axis.horizontal,
+              shrinkWrap: true,
+              itemBuilder: (context, index) {
+                return Padding(
+                  padding: const EdgeInsets.only(left: 10),
+                  child: AnimatedContainer(
+                    duration: Duration(milliseconds: 200),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: provider.currentPageIndex == index ? appTheme.accentColor : appTheme.backgroundColor,
+                      borderRadius: BorderRadius.circular(10),
                     ),
-                    alignment: Alignment.center,
-                    child: Text(
-                      "${(index * 24) + 1} - ${(index * 24) + 24 > provider.epLinks.length ? provider.epLinks.length : (index * 24) + 24}",
-                      style: TextStyle(
-                        color: provider.currentPageIndex == index ? appTheme.onAccent : appTheme.textMainColor,
-                        fontFamily: 'NotoSans',
-                        fontWeight: FontWeight.bold,
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () {
+                          setState(() {
+                            provider.currentPageIndex = index;
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.only(
+                            left: 10,
+                            right: 10,
+                          ),
+                          alignment: Alignment.center,
+                          child: Text(
+                            "${(index * 24) + 1} - ${(index * 24) + 24 > provider.epLinks.length ? provider.epLinks.length : (index * 24) + 24}",
+                            style: TextStyle(
+                              color: provider.currentPageIndex == index ? appTheme.onAccent : appTheme.textMainColor,
+                              fontFamily: 'NotoSans',
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ),
+                );
+              },
             ),
           );
-        },
-      ),
-    );
   }
 
   Container _continueButton() {

@@ -8,13 +8,13 @@ import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
-  static const String apiUrl = "https://backend.gojo.live/api/anime";
+  static const String apiUrl = "https://backend.animetsu.cc/api/anime";
 
-  final baseUrl = "https://gojo.live";
+  final baseUrl = "https://animetsu.cc";
 
   final headers = {
-    'Origin': 'https://gojo.live',
-    'Referer': 'https://gojo.live/',
+    'Origin': 'https://animetsu.cc',
+    'Referer': 'https://animetsu.cc/',
   };
 
   @override
@@ -51,7 +51,7 @@ class Gojo extends AnimeProvider {
       final bool hasDub = it['hasDub'];
 
       final newSht = episodeList.map<Map<String, dynamic>>((item) {
-        final int epNum = item['number'];
+        final int epNum = item['number']?.toInt();
         final String id = "${item['id']}";
         final bool isFiller = item['isFiller'];
         final String? img = item['image'];
@@ -62,7 +62,7 @@ class Gojo extends AnimeProvider {
           'id': id,
           'provider': provider,
           'filler': isFiller,
-          'img': (img?.isEmpty ?? true) ? null : img?.replaceAll("https://img.gojo.live/", ""),
+          'img': (img?.isEmpty ?? true) ? null : img?.replaceAll(RegExp(r'https:\/\/img\.(?:animetsu|gojo)\.(?:cc|live)\/'), ""),
           'title': (title?.isEmpty ?? true) ? null : title,
           'hasDub': hasDub
         };

@@ -25,32 +25,67 @@ class UpdateCheckResult {
   });
 }
 
+/// Alright! the versioning is like: v?n.n.n(-stage?)
+/// n are the numbers. follows the scheme like super-major.okaish.minor (dependent on changes in quality)
+/// v is when the update is parsed from github api.
+/// stage can be alpha, beta, gamma(dev) (these are rare and arent present most time)
 Future<UpdateCheckResult?> checkForUpdates() async {
-  final releasesUrl = 'https://api.github.com/repos/frostnova721/animestream/releases';
-  final packageInfo = await PackageInfo.fromPlatform();
-  final releasesRes = json.decode(await fetch(releasesUrl))[0];
-  final String currentVersion = packageInfo.version;
-  final String latestVersion = releasesRes['tag_name'];
-  print("[UPDATE-CHECK] current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
-  final String description = releasesRes['body'];
-  final bool pre = releasesRes['prerelease'];
-  if (!currentUserSettings!.receivePreReleases! && pre) {
+  try {
+    final releasesUrl = 'https://api.github.com/repos/frostnova721/animestream/releases';
+    final packageInfo = await PackageInfo.fromPlatform();
+    final releasesRes = json.decode(await fetch(releasesUrl))[0];
+    final String currentVersion = packageInfo.version;
+    final String latestVersion = releasesRes['tag_name'];
+    print("[UPDATE-CHECK] current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
+    final String description = releasesRes['body'];
+    final bool pre = releasesRes['prerelease'];
+    if (!currentUserSettings!.receivePreReleases! && pre) {
+      return null;
+    }
+
+    bool triggerSheet = false; // Change this flag for triggering the sheet for debugging
+    int? currentVersionJoined, latestVersionJoined;
+
+    final latestVersionCode = latestVersion.replaceAll('v', '');
+    final versionNumber = latestVersionCode.split("-")[0];
+
+    try {
+      //in this block, we just trying to join the numbers (eg: 1.3.5 to 135)
+      latestVersionJoined = int.tryParse(versionNumber.split(".").join());
+
+      currentVersionJoined = int.tryParse(currentVersion.split('-').first.split('.').join());
+
+      if (latestVersionJoined == null || currentVersionJoined == null) {
+        print("[UPDATE-CHECK] Updation check failed. Got null integers from either $currentVersion or $versionNumber");
+        return null;
+      }
+    } catch (err) {
+      // old version check logic as a backup method!
+      if (currentVersion.split("-").firstOrNull != versionNumber) triggerSheet = true;
+    }
+
+    // we can assert not null since we do null check in try statement & the comparison wont occur if theres an issue
+    if (triggerSheet || (currentVersionJoined! < latestVersionJoined!)) {
+      print("[UPDATE-CHECK] UPDATE AVAILABLE!!!");
+      final List<dynamic> apkItem = releasesRes['assets']
+          .where((item) => item['name'] == (Platform.isAndroid ? "app-release.apk" : "animestream-x86_64.exe"))
+          .toList();
+      if (apkItem.isEmpty) return null;
+      final downloadLink = apkItem[0]['browser_download_url'];
+      return UpdateCheckResult(
+        latestVersion: latestVersion,
+        currentVersion: currentVersion,
+        preRelease: pre,
+        downloadLink: downloadLink,
+        description: description,
+      );
+    } else
+      return null;
+  } catch (err) {
+    // graceful quitting
+    print("[UPDATE-CHECK] Update check failed. \n$err");
     return null;
   }
-  if (currentVersion != latestVersion.replaceAll('v', '').split("-")[0]) {
-    print("[UPDATE-CHECK] UPDATE AVAILABLE!!!");
-    final List<dynamic> apkItem = releasesRes['assets'].where((item) => item['name'] == (Platform.isAndroid ? "app-release.apk" : "animestream-x86_64.exe")).toList();
-    if(apkItem.isEmpty) return null;
-    final downloadLink = apkItem[0]['browser_download_url'];
-    return UpdateCheckResult(
-      latestVersion: latestVersion,
-      currentVersion: currentVersion,
-      preRelease: pre,
-      downloadLink: downloadLink,
-      description: description,
-    );
-  } else
-    return null;
 }
 
 showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre) async {
@@ -59,7 +94,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
     return;
   }
 
-  if(kDebugMode) {
+  if (kDebugMode) {
     return;
   }
 

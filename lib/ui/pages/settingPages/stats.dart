@@ -28,7 +28,7 @@ class _UserStatsState extends State<UserStats> {
   Future<void> fetchUserStats() async {
     try {
       final res = await AnilistQueries().getUserStats(user.name);
-      final genreRes =  res.genres.isNotEmpty ? await AnilistQueries().getGenreThumbnail(res.genres[0].genre) : [];
+      final genreRes = res.genres.isNotEmpty ? await AnilistQueries().getGenreThumbnail(res.genres[0].genre) : [];
       setState(() {
         stats = res;
         genreThumbnail = genreRes.isNotEmpty ? genreRes[Random().nextInt(genreRes.length)] : null;
@@ -36,7 +36,7 @@ class _UserStatsState extends State<UserStats> {
       });
     } catch (err) {
       if (currentUserSettings?.showErrors ?? false) {
-        floatingSnackBar( err.toString());
+        floatingSnackBar(err.toString());
       }
     }
   }
@@ -76,8 +76,10 @@ class _UserStatsState extends State<UserStats> {
       appBar: AppBar(
         leading: IconButton(
           onPressed: () => Navigator.of(context).pop(),
-          icon: Icon(Icons.arrow_back_rounded,
-          color: appTheme.textMainColor,),
+          icon: Icon(
+            Icons.arrow_back_rounded,
+            color: appTheme.textMainColor,
+          ),
         ),
         backgroundColor: appTheme.backgroundColor,
         title: Text(
@@ -89,7 +91,6 @@ class _UserStatsState extends State<UserStats> {
           ? Container(
               padding: pagePadding(context).copyWith(top: 0),
               child: SingleChildScrollView(
-                physics: BouncingScrollPhysics(decelerationRate: ScrollDecelerationRate.fast),
                 child: Column(
                   children: [
                     Container(
@@ -202,126 +203,169 @@ class _UserStatsState extends State<UserStats> {
                             ),
                           ),
                           Container(
-                            padding: EdgeInsets.only(
-                              top: 20,
-                            ),
-                            child: Container(
-                              width: 400,
-                              height: 150,
-                              padding: EdgeInsets.only(left: 15, top: 10),
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(15),
-                                image: DecorationImage(
-                                    image: genreThumbnail != null
-                                        ? NetworkImage(genreThumbnail!)
-                                        : AssetImage('lib/assets/images/chisato.jpeg') as ImageProvider,
-                                    fit: BoxFit.cover,
-                                    opacity: 0.55),
-                              ),
-                              child: ClipRRect(
-                                child: BackdropFilter(
-                                  filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${stats!.genres.firstOrNull?.genre}",
-                                        style: textStyle(35, fontFamily: "Poppins", bold: true),
+                            padding: EdgeInsets.only(top: 20),
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                ImageFiltered(
+                                  imageFilter: ImageFilter.blur(sigmaX: 1.3, sigmaY: 1.3),
+                                  child: Container(
+                                    width: 400,
+                                    height: 150,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(15),
+                                      image: DecorationImage(
+                                        image: genreThumbnail != null
+                                            ? NetworkImage(genreThumbnail!)
+                                            : AssetImage('lib/assets/images/chisato.jpeg') as ImageProvider,
+                                        fit: BoxFit.cover,
+                                        opacity: 0.55,
                                       ),
-                                      Row(
-                                        children: [
-                                          Text(
-                                            "watched: ",
-                                            style: textStyle(18, bold: true),
+                                    ),
+                                  ),
+                                ),
+                                Positioned.fill(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(15),
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          stats?.genres.isNotEmpty == true
+                                              ? stats!.genres.first.genre
+                                              : "No Genre Data",
+                                          style: textStyle(35, fontFamily: "Poppins", bold: true),
+                                          overflow: TextOverflow.ellipsis,
+                                          maxLines: 1,
+                                        ),
+                                        SizedBox(height: 8),
+                                        if (stats?.genres.isNotEmpty == true) ...[
+                                          _buildStatRow(
+                                            "Watched: ",
+                                            "${stats!.genres.first.count}",
                                           ),
-                                          Text(
-                                            "${stats!.genres.firstOrNull?.count}",
-                                            style: textStyle(17),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          Text(
+                                          SizedBox(height: 4),
+                                          _buildStatRow(
                                             "Time spent: ",
-                                            style: textStyle(18, bold: true),
-                                          ),
-                                          Text(
-                                            "${stats!.genres.firstOrNull?.minutesWatched} min",
-                                            style: textStyle(17),
+                                            "${stats!.genres.first.minutesWatched} min",
                                           ),
                                         ],
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            margin: EdgeInsets.only(top: 35),
+                            decoration: BoxDecoration(
+                              // color: appTheme.backgroundSubColor,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(color: appTheme.textMainColor.withAlpha(30))
+                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.all(16),
+                                  decoration: BoxDecoration(
+                                    // color: appTheme.accentColor.withAlpha(30),
+                                    borderRadius: BorderRadius.only(
+                                      topLeft: Radius.circular(16),
+                                      topRight: Radius.circular(16),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        flex: 2,
+                                        child: Text(
+                                          "Genre",
+                                          style: textStyle(18, bold: true, fontFamily: "Rubik")
+                                              .copyWith(color: appTheme.accentColor),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          "Watched",
+                                          textAlign: TextAlign.center,
+                                          style: textStyle(18, bold: true, fontFamily: "Rubik")
+                                              .copyWith(color: appTheme.accentColor),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: Text(
+                                          "Minutes",
+                                          textAlign: TextAlign.right,
+                                          style: textStyle(18, bold: true, fontFamily: "Rubik")
+                                              .copyWith(color: appTheme.accentColor),
+                                        ),
                                       ),
                                     ],
                                   ),
                                 ),
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.only(top: 35),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                    alignment: Alignment.centerLeft,
-                                    width: (MediaQuery.of(context).size.width / 3 + 10) -
-                                        MediaQuery.of(context).padding.left,
-                                    child: Text(
-                                      "Genre",
-                                      style: textStyle(21, bold: true, fontFamily: "Rubik"),
-                                    )),
-                                Container(
-                                    alignment: Alignment.center,
-                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
-                                        MediaQuery.of(context).padding.left,
-                                    child: Text(
-                                      "Watched",
-                                      style: textStyle(21, bold: true, fontFamily: "Rubik"),
-                                    )),
-                                Container(
-                                    alignment: Alignment.centerRight,
-                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
-                                        MediaQuery.of(context).padding.left,
-                                    child: Text(
-                                      "Minutes",
-                                      style: textStyle(21, bold: true, fontFamily: "Rubik"),
-                                    ))
-                              ],
-                            ),
-                          ),
-                          ListView.builder(
-                            padding: EdgeInsets.only(top: 20),
-                            shrinkWrap: true,
-                            physics: NeverScrollableScrollPhysics(),
-                            itemCount: stats!.genres.length,
-                            itemBuilder: (context, index) => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Container(
-                                    alignment: Alignment.centerLeft,
-                                    width: (MediaQuery.of(context).size.width / 3 + 10) -
-                                        MediaQuery.of(context).padding.left,
-                                    child: Text(
-                                      "${stats!.genres[index].genre}",
-                                      style: textStyle(18, bold: true),
-                                    )),
-                                Container(
-                                    alignment: Alignment.center,
-                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
-                                        MediaQuery.of(context).padding.left,
-                                    child: Text(
-                                      "${stats!.genres[index].count}",
-                                      style: textStyle(18, bold: true),
-                                    )),
-                                Container(
-                                    alignment: Alignment.centerRight,
-                                    width: (MediaQuery.of(context).size.width / 3 - 20) -
-                                        MediaQuery.of(context).padding.left,
-                                    child: Text(
-                                      "${stats!.genres[index].minutesWatched}",
-                                      style: textStyle(18, bold: true),
-                                    ))
+                                ListView.builder(
+                                  shrinkWrap: true,
+                                  physics: NeverScrollableScrollPhysics(),
+                                  itemCount: stats?.genres.length ?? 0,
+                                  itemBuilder: (context, index) {
+                                    final genre = stats!.genres[index];
+                                    final isLast = index == stats!.genres.length - 1;
+
+                                    return Container(
+                                      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: isLast ? Colors.transparent : appTheme.textMainColor.withAlpha(30),
+                                            width: 1,
+                                          ),
+                                        ),
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          Expanded(
+                                            flex: 2,
+                                            child: Row(
+                                              children: [
+                                                Expanded(
+                                                  child: Text(
+                                                    genre.genre,
+                                                    style: textStyle(17, bold: true),
+                                                    overflow: TextOverflow.ellipsis,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                          Expanded(
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                                              decoration: BoxDecoration(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                "${genre.count}",
+                                                textAlign: TextAlign.center,
+                                                style: textStyle(17, bold: true),
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 8),
+                                          Expanded(
+                                            child: Text(
+                                              genre.minutesWatched.toString(),
+                                              textAlign: TextAlign.right,
+                                              style: textStyle(17, bold: true).copyWith(color: appTheme.textMainColor),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                ),
                               ],
                             ),
                           )
@@ -340,6 +384,22 @@ class _UserStatsState extends State<UserStats> {
                 color: appTheme.accentColor,
               ),
             ),
+    );
+  }
+
+  Widget _buildStatRow(String label, String value) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          label,
+          style: textStyle(18, bold: true),
+        ),
+        Text(
+          value,
+          style: textStyle(17),
+        ),
+      ],
     );
   }
 }

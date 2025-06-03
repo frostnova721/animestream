@@ -84,12 +84,10 @@ class _ThemeSettingState extends State<ThemeSetting> {
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          toggleItem("Material Theme", materialTheme, description: "wallpaper dependent theme",
-                          customPadding: EdgeInsets.all(10),
-                              () async {
+                          toggleItem("Material Theme", materialTheme,
+                              description: "wallpaper dependent theme", customPadding: EdgeInsets.all(10), () async {
                             //the package just wont work if <android 12!!!
-                            if (!isAboveAndroid12)
-                              return floatingSnackBar( "Android 12 or greater is required");
+                            if (!isAboveAndroid12) return floatingSnackBar("Android 12 or greater is required");
                             materialTheme = !materialTheme;
                             await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
                             setState(() {});
@@ -305,7 +303,6 @@ class _ThemeSettingState extends State<ThemeSetting> {
         showModalBottomSheet(
           context: context,
           isScrollControlled: true,
-          backgroundColor: appTheme.modalSheetBackgroundColor,
           showDragHandle: true,
           builder: (context) {
             return Container(
@@ -361,13 +358,18 @@ class _ThemeSettingState extends State<ThemeSetting> {
   }
 
   Widget _themeItem(String name, ThemeItem theme, context) {
+    bool isSelected = currentThemeId == theme.id;
     return AnimatedContainer(
       margin: EdgeInsets.only(top: 5, bottom: 5),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: currentThemeId == theme.id ? appTheme.accentColor : appTheme.backgroundSubColor,
-      ),
+          borderRadius: BorderRadius.circular(15),
+          color: isSelected ? appTheme.accentColor.withAlpha(150) : appTheme.backgroundSubColor,
+          border: Border.all(
+            color: isSelected ? theme.theme.accentColor : Colors.transparent,
+            width: 2,
+          ),
+          ),
       duration: Duration(milliseconds: 200),
       height: 60,
       child: Material(
@@ -379,7 +381,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
               setState(() {
                 currentThemeId = theme.id;
               });
-              Navigator.of(context).pop();
+              // Navigator.of(context).pop();
             }
           },
           child: Padding(
@@ -389,8 +391,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
               children: [
                 Text(
                   "$name",
-                  style: textStyle()
-                      .copyWith(color: currentThemeId == theme.id ? appTheme.onAccent : appTheme.textMainColor),
+                  style: textStyle().copyWith(color: isSelected ? appTheme.onAccent : appTheme.textMainColor),
                 ),
                 Container(
                   height: 40,

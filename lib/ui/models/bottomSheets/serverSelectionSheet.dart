@@ -238,6 +238,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                               selectedSource: provider.selectedSource.identifier,
                               startIndex: widget.episodeIndex,
                               altDatabases: provider.altDatabases,
+                              preferDubs: provider.preferDubs,
                               lastWatchDuration: provider.lastWatchedDurationMap?[
                                   provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched],
                             ),

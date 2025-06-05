@@ -4,6 +4,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/ui/models/popup.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -300,51 +301,50 @@ class _ThemeSettingState extends State<ThemeSetting> {
         color: appTheme.textMainColor,
       ),
       onTapFunction: () {
-        showModalBottomSheet(
+        showPopup(
           context: context,
-          isScrollControlled: true,
-          showDragHandle: true,
-          builder: (context) {
-            return Container(
-              // height: MediaQuery.of(context).orientation == Orientation.landscape
-              //     ? MediaQuery.of(context).size.height / 2 + 100
-              //     : MediaQuery.of(context).size.height / 3 + 100,
-              padding: EdgeInsets.only(
-                top: 10,
-                left: 20,
-                right: 20,
-              ),
-              margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(left: 10, bottom: 20),
-                    child: Text(
-                      "Select Theme",
-                      style: textStyle().copyWith(
-                        fontSize: 23,
-                      ),
+          isScrollControlledSheet: true,
+          showSheetHandle: true,
+          builder: (BuildContext context) => Container(
+            // height: MediaQuery.of(context).orientation == Orientation.landscape
+            //     ? MediaQuery.of(context).size.height / 2 + 100
+            //     : MediaQuery.of(context).size.height / 3 + 100,
+            width: Platform.isWindows ? MediaQuery.sizeOf(context).width /3 : null,
+            padding: EdgeInsets.only(
+              top: 10,
+              left: 20,
+              right: 20,
+            ),
+            margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Padding(
+                  padding: const EdgeInsets.only(left: 10, bottom: 20),
+                  child: Text(
+                    "Select Theme",
+                    style: textStyle().copyWith(
+                      fontSize: 23,
                     ),
                   ),
-                  Container(
-                    height: MediaQuery.of(context).orientation == Orientation.landscape
-                        ? MediaQuery.of(context).size.height / 2
-                        : MediaQuery.of(context).size.height / 3 + 120,
-                    child: ListView.builder(
-                      padding: EdgeInsets.zero,
-                      shrinkWrap: true,
-                      itemCount: availableThemes.length,
-                      itemBuilder: (context, index) {
-                        return _themeItem(availableThemes[index].name, availableThemes[index], context);
-                      },
-                    ),
+                ),
+                Container(
+                  height: MediaQuery.of(context).orientation == Orientation.landscape
+                      ? MediaQuery.of(context).size.height / 2
+                      : MediaQuery.of(context).size.height / 3 + 120,
+                  child: ListView.builder(
+                    padding: EdgeInsets.zero,
+                    shrinkWrap: true,
+                    itemCount: availableThemes.length,
+                    itemBuilder: (context, index) {
+                      return _themeItem(availableThemes[index].name, availableThemes[index], context);
+                    },
                   ),
-                ],
-              ),
-            );
-          },
+                ),
+              ],
+            ),
+          ),
         );
       },
     );
@@ -363,13 +363,13 @@ class _ThemeSettingState extends State<ThemeSetting> {
       margin: EdgeInsets.only(top: 5, bottom: 5),
       clipBehavior: Clip.hardEdge,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(15),
-          color: isSelected ? appTheme.accentColor.withAlpha(150) : appTheme.backgroundSubColor,
-          border: Border.all(
-            color: isSelected ? theme.theme.accentColor : Colors.transparent,
-            width: 2,
-          ),
-          ),
+        borderRadius: BorderRadius.circular(15),
+        color: isSelected ? appTheme.accentColor.withAlpha(150) : appTheme.backgroundSubColor,
+        border: Border.all(
+          color: isSelected ? theme.theme.accentColor : Colors.transparent,
+          width: 2,
+        ),
+      ),
       duration: Duration(milliseconds: 200),
       height: 60,
       child: Material(

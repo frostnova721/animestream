@@ -36,6 +36,7 @@ class _InfoDesktopState extends State<InfoDesktop> {
         children: [
           AnimeStreamNavRail(
             controller: viewController,
+            shouldExpand: true,
             initialIndex: 1,
             destinations: [
               AnimeStreamNavDestination(
@@ -97,15 +98,12 @@ class _InfoDesktopState extends State<InfoDesktop> {
                             ),
                             clipBehavior: Clip.antiAlias,
                             margin: EdgeInsets.all(15).copyWith(top: 15 + MediaQuery.paddingOf(context).top),
-                            child: ImageFiltered(
-                              imageFilter: ImageFilter.blur(sigmaX: 1.5, sigmaY: 1.5),
-                              child: Opacity(
-                                opacity: 0.9,
-                                child: CachedNetworkImage(
-                                  imageUrl: provider.data.banner ?? provider.data.cover,
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                ),
+                            child: Opacity(
+                              opacity: 0.9,
+                              child: CachedNetworkImage(
+                                imageUrl: provider.data.banner ?? provider.data.cover,
+                                fit: BoxFit.cover,
+                                width: double.infinity,
                               ),
                             ),
                           ),

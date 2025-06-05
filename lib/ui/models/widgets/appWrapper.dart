@@ -58,7 +58,7 @@ class AppWrapper extends StatelessWidget {
               ),
             )
           : null,
-      extendBodyBehindAppBar: true, //should i?
+      // extendBodyBehindAppBar: true, //should i?
       body: Navigator(
         key: navKey,
         onGenerateRoute: (settings) {

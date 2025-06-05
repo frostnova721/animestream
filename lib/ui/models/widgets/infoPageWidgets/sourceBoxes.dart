@@ -36,6 +36,7 @@ class SourceSideWidget extends StatelessWidget {
       margin: EdgeInsets.only(
         left: 60,
       ),
+      constraints: BoxConstraints(maxWidth: 400),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
         color: appTheme.backgroundSubColor,

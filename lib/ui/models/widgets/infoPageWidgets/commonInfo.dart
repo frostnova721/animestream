@@ -8,16 +8,19 @@ import 'package:flutter/material.dart';
 /// The Common part (cover, banner stuff)
 class CommonInfo extends StatelessWidget {
   final InfoProvider provider;
+  final int splitWidth;
   const CommonInfo({
     super.key,
     required this.provider,
+    required this.splitWidth,
   });
 
   @override
   Widget build(BuildContext context) {
+     final title = provider.data.title['english'] ?? provider.data.title['romaji'] ?? 'no title :(';
     final size = MediaQuery.sizeOf(context);
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
       children: [
         ClipRRect(
           borderRadius: BorderRadius.circular(15),
@@ -36,13 +39,13 @@ class CommonInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.end, // Push content to bottom
             children: [
               ConstrainedBox(
-                constraints: BoxConstraints(maxWidth: size.width / 2),
+                constraints: BoxConstraints(maxWidth: size.width > splitWidth ? size.width / 2.2 : (size.width / 1.6)),
                 child: Text(
-                  provider.data.title['english'] ?? provider.data.title['romaji'] ?? 'no title :(',
+                 title,
                   style: TextStyle(
                     fontFamily: "Rubik",
                     fontWeight: FontWeight.bold,
-                    fontSize: 45,
+                    fontSize: title.length > 70 ? 38 : 45,
                   ),
                   overflow: TextOverflow.ellipsis,
                   maxLines: 3,

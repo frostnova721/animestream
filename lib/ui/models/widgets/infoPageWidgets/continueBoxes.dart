@@ -18,6 +18,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     return Container(
       margin: EdgeInsets.only(left: 60, top: 20, bottom: 20),
+      constraints: BoxConstraints(maxWidth: 400),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

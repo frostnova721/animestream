@@ -16,45 +16,37 @@ class WatchSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Padding(
-          padding: EdgeInsets.only(left: size.width / 10, top: 30),
+          padding: EdgeInsets.only(top: 30, left: 15),
           child: Column(
             children: [
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start, // Align the row contents to the top
-                children: [
-                  Column(
+              CommonInfo(
+                provider: provider,
+                splitWidth: splitWidth,
+              ),
+              if (size.width < splitWidth)
+                Container(
+                  width: size.width / 2,
+                  constraints: BoxConstraints(maxWidth: 650),
+                  margin: EdgeInsets.only(top: 50),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      CommonInfo(
-                        provider: provider,
+                      Expanded(
+                        flex: 1,
+                        child: SourceBodyWidget(provider: provider),
                       ),
-                      if (size.width < splitWidth)
-                        Container(
-                          width: size.width / 2,
-                          constraints: BoxConstraints(maxWidth: 650),
-                          margin: EdgeInsets.only(top: 50),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Expanded(
-                                flex: 1,
-                                child: SourceBodyWidget(provider: provider),
-                              ),
-                              SizedBox(width: 16),
-                              Expanded(
-                                flex: 1,
-                                child: ContinueWatchingBodyBox(provider: provider,),
-                              ),
-                            ],
-                          ),
-                        ),
-                      buildEpisodesContainer(context),
+                      SizedBox(width: 16),
+                      Expanded(
+                        flex: 1,
+                        child: ContinueWatchingBodyBox(provider: provider,),
+                      ),
                     ],
                   ),
-                ],
-              ),
+                ),
+              buildEpisodesContainer(context),
             ],
           ),
         ),

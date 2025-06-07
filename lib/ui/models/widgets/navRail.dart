@@ -27,12 +27,14 @@ class AnimeStreamNavRail extends StatefulWidget {
   final AnimeStreamBottomBarController controller;
   final int initialIndex;
   final bool shouldExpand;
+  final bool autoCollapse;
   const AnimeStreamNavRail({
     super.key,
     required this.destinations,
     required this.controller,
     required this.initialIndex,
-    this.shouldExpand = false,
+    this.shouldExpand = false, // Expanded mode
+    this.autoCollapse = true, // Collapse under split width (1200)
   });
 
   @override
@@ -50,10 +52,13 @@ class _AnimeStreamNavRailState extends State<AnimeStreamNavRail> {
 
   @override
   Widget build(BuildContext context) {
-    final shouldCollapse = (MediaQuery.sizeOf(context).width < 1200);
+    final shouldCollapse = (MediaQuery.sizeOf(context).width < 1200) && widget.autoCollapse;
+
+    //
+    final double width = shouldCollapse || !widget.shouldExpand ? 60 : MediaQuery.sizeOf(context).width;
     return Container(
       margin: shouldCollapse ? null : EdgeInsets.only(left: 8),
-      width: MediaQuery.sizeOf(context).width < 1200 || !widget.shouldExpand ? 60 : MediaQuery.sizeOf(context).width,
+      width: width,
       constraints: BoxConstraints(minWidth: 60, maxWidth: 220),
       child: ValueListenableBuilder(
           valueListenable: widget.controller.currentIndexNotifier,

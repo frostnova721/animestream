@@ -1,130 +1,60 @@
-import "dart:async";
-import "dart:collection";
-import "dart:io";
-import "dart:typed_data";
+import 'dart:async';
+import 'dart:collection';
+import 'dart:io';
 
-import "package:encrypt/encrypt.dart";
-import "package:http/http.dart";
-import "package:path_provider/path_provider.dart";
-import "package:permission_handler/permission_handler.dart";
-import 'package:device_info_plus/device_info_plus.dart';
-
-import "package:animestream/core/anime/downloader/types.dart";
-import "package:animestream/core/app/runtimeDatas.dart";
-import "package:animestream/core/commons/utils.dart";
-import "package:animestream/ui/models/notification.dart";
-import "package:animestream/ui/models/snackBar.dart";
+import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
+import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/ui/models/notification.dart';
+import 'package:animestream/ui/models/snackBar.dart';
+import 'package:http/http.dart';
 
 class Downloader {
-  //list of downloading items
-  static List<DownloadingItem> downloadItems = [];
+  // Actively downloading items
+  static List<DownloadingItem> downloadingItems = [];
 
-  //queue of downloading items
+  // Queue of downloading items (for one by one downloads)
   static Queue<DownloadingItem> downloadQueue = Queue();
 
-  // check for storage permission and request for permission if permission isnt granted
-  Future<bool> checkPermission() async {
-    if (Platform.isWindows) return true;
-    final os = await DeviceInfoPlugin().androidInfo;
-    final sdkVer = os.version.sdkInt;
+  DownloaderHelper helper = DownloaderHelper();
 
-    Permission access;
-
-    if (sdkVer > 32) {
-      access = await Permission.manageExternalStorage;
-    } else {
-      access = await Permission.storage;
-    }
-
-    final status = await access.status;
-
-    if (status.isPermanentlyDenied) {
-      return false;
-    }
-
-    if (status.isDenied) {
-      showToast("Provide storage access to perform downloading, unneeded for default path!");
-      final req = await access.request();
-      if (req.isGranted) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      return true;
-    }
-  }
-
-  String _makeBaseLink(String uri) {
-    final split = uri.split('/');
-    split.removeLast();
-    return split.join('/');
-  }
-
+  // Cancel a download with its id
   void cancelDownload(int id) {
-    Downloader.downloadItems.removeWhere((item) => item.id == id);
+    Downloader.downloadingItems.removeWhere((item) => item.id == id);
     Downloader.downloadQueue.removeWhere((item) => item.id == id);
   }
 
-  int generateId() {
-    int maxId = Downloader.downloadItems.isNotEmpty
-        ? Downloader.downloadItems.map((item) => item.id).reduce((a, b) => a > b ? a : b)
-        : 0;
-    return maxId + 1;
-  }
-
   Future<void> downloadImage(String imageUrl, String fileName) async {
-    final permission = await checkPermission();
+    final permission = await helper.checkAndRequestPermission();
     if (!permission) {
       showToast("Permission denied! Grant access to storage");
       throw Exception("Couldnt download image due to lack of permission!");
     }
 
-    final basePath = currentUserSettings?.downloadPath ??
-        (Platform.isWindows ? (await getDownloadsDirectory())!.path : '/storage/emulated/0/Download/animestream');
-    final downPath = await Directory(basePath);
-
-    String finalPath;
-
-    final fileExtension = imageUrl.split('/').last.split(".").last.trim();
-    fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-
-    if (downPath.existsSync()) {
-      final directory = Directory("${downPath.path}/");
-      if (!(await directory.exists())) {
-        await directory.create(recursive: true);
-      }
-
-      finalPath = '${downPath.path}/${fileName}.${fileExtension}';
-    } else {
-      final externalStorage = await getExternalStorageDirectory();
-      final directory = Directory("${externalStorage?.path}/");
-      if (!(await directory.exists())) {
-        await directory.create(recursive: true);
-      }
-
-      finalPath = "${externalStorage?.path}/${fileName}.${fileExtension}";
-    }
     try {
-      final out = File(finalPath);
+      final ext = imageUrl.split('.').lastOrNull; // yeah usually
+      fileName =
+          fileName.substring(0, fileName.length - "-Banner".length); // jst to remove the banner from anime_name-banner
+      final outDir = await helper.makeDirectory(fileName: fileName, isImage: true, fileExtension: ext);
+      final out = File(outDir);
+      final imgData = (await get(Uri.parse(imageUrl))).bodyBytes;
+      await out.writeAsBytes(imgData);
 
-      final imageData = (await get(Uri.parse(imageUrl))).bodyBytes;
-      await out.writeAsBytes(imageData);
-
-      print("saved to ${out.path}");
-      return;
+      print("Saved image to ${out.path}");
     } catch (err) {
-      throw Exception("Couldnt download image. Reason: Something went wrong!");
+      throw Exception("Couldnt download image. $err");
     }
   }
 
+  /// Add a download item to queue
   Future<void> addToQueue(
     String streamLink,
     String fileName, {
     int retryAttempts = 5,
     int parallelBatches = 5,
+    Map<String, String> customHeaders = const {},
+    String? subsUrl,
   }) async {
-    final id = generateId();
+    final id = helper.generateId();
     final downloadItem = DownloadingItem(
       id: id,
       downloading: false,
@@ -132,31 +62,37 @@ class Downloader {
       fileName: fileName,
       retryAttempts: retryAttempts,
       parallelBatches: parallelBatches,
+      customHeaders: customHeaders,
+      subtitleUrl: subsUrl,
     );
 
     downloadQueue.add(downloadItem);
     print("[DOWNLOADER] Added download $id to queue. Queue size: ${downloadQueue.length}");
 
-    if (!downloadItems.any((item) => item.downloading)) {
+    if (!downloadingItems.any((item) => item.downloading)) {
       _processQueue();
     }
   }
 
+  /// download the items in queue
   Future<void> _processQueue() async {
     if (downloadQueue.isEmpty) return;
 
-    final item = downloadQueue.first;
-    downloadQueue.removeFirst();
-    downloadItems.add(DownloadingItem(id: item.id, downloading: true));
+    // Pick the job from queue
+    final item = downloadQueue.removeFirst();
 
+    // Represent its downloading state
+    downloadingItems.add(DownloadingItem(id: item.id, downloading: true));
+
+    // Yep! downloading that mofo
     try {
-      await download(
-        item.streamLink!,
-        item.fileName!,
-        retryAttempts: item.retryAttempts,
-        parallelBatches: item.parallelBatches,
-        id: item.id,
-      );
+      await download(item.streamLink!, item.fileName!,
+          retryAttempts: item.retryAttempts,
+          parallelBatches: item.parallelBatches,
+          id: item.id,
+          customHeaders: item.customHeaders,
+          subsUrl: item.subtitleUrl
+          );
     } catch (e) {
       print("[DOWNLOADER] Error processing download ${item.id}: $e");
     } finally {
@@ -168,51 +104,27 @@ class Downloader {
         _processQueue();
       }
     }
-
-    // _isProcessingQueue = false;
   }
 
-  Future<String> makeDirectory({required String fileName, bool isImage = false, String? extension = null}) async {
-    final basePath = currentUserSettings?.downloadPath ??
-        (Platform.isWindows ? (await getDownloadsDirectory())!.path : '/storage/emulated/0/Download/animestream');
-
-    final downPath = await Directory(basePath);
-    String finalPath;
-
-    fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '');
-
-    final ext = extension ?? (isImage ? "png" : "mp4");
-
-    final animeName = fileName.split("_").first;
-
-    if (downPath.existsSync()) {
-      final directory = Directory("${downPath.path}/$animeName");
-      if (!(await directory.exists())) {
-        await directory.create(recursive: true);
-      }
-
-      finalPath = '$basePath/$animeName/$fileName.$ext';
-    } else {
-      final externalStorage = await getExternalStorageDirectory();
-      final directory = Directory("${externalStorage?.path}/$animeName");
-      if (!(await directory.exists())) {
-        await directory.create(recursive: true);
-      }
-
-      finalPath = "${externalStorage?.path}/$animeName/$fileName.$ext";
-    }
-
-    return finalPath;
-  }
-
-  Future<void> download(String streamLink, String fileName,
-      {int retryAttempts = 5, int parallelBatches = 5, int? id = null}) async {
-    final permission = await checkPermission();
+  Future<void> download(
+    String streamLink,
+    String fileName, {
+    int retryAttempts = 5,
+    int parallelBatches = 5,
+    int? id = null,
+    Map<String, String> customHeaders = const {},
+    String? subsUrl,
+  }) async {
+    final permission = await helper.checkAndRequestPermission();
     if (!permission) {
       throw new Exception("ERR_NO_STORAGE_PERMISSION");
     }
 
-    final finalPath = await makeDirectory(fileName: fileName, extension: "mp4");
+    final finalPath = await helper.makeDirectory(fileName: fileName, fileExtension: "mp4");
+
+    // Download subtitles if available
+    if(subsUrl != null)
+    downloadSubs(subsUrl, fileName);
 
     final output = File(finalPath);
     final List<BufferItem> buffers = [];
@@ -220,17 +132,18 @@ class Downloader {
     // //generate an id for the downloading item and add it to the queue(list)
     int? downloadId = id;
     if (downloadId == null) {
-      downloadId = generateId();
-      Downloader.downloadItems.add(DownloadingItem(id: downloadId, downloading: true));
+      downloadId = helper.generateId();
+      Downloader.downloadingItems.add(DownloadingItem(id: downloadId, downloading: true));
     }
 
+    // Running on hopes n assumptions
     if (!streamLink.contains(".m3u8")) {
-      return await downloadMp4(streamLink, finalPath, fileName, downloadId);
+      return await downloadMp4(streamLink, finalPath, fileName, downloadId, customHeaders: customHeaders);
     }
 
     try {
-      final streamBaseLink = _makeBaseLink(streamLink);
-      final List<String> segments = await _getSegments(streamLink);
+      final streamBaseLink = helper.makeBaseLink(streamLink);
+      final List<String> segments = await helper.getSegments(streamLink, customHeaders: customHeaders);
       List<String> segmentsFiltered = [];
       segments.forEach(
         (element) {
@@ -241,7 +154,7 @@ class Downloader {
       final parallelDownloadsBatchSize = parallelBatches;
 
       for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
-        final downloading = Downloader.downloadItems.where((item) => item.id == downloadId).firstOrNull;
+        final downloading = Downloader.downloadingItems.where((item) => item.id == downloadId).firstOrNull;
 
         //send cancelled notification and clear the buffer
         if (downloading == null) {
@@ -272,10 +185,10 @@ class Downloader {
             fileName: "$fileName.mp4",
             path: finalPath,
           );
-          final res = await downloadSegmentWithRetries(uri, retryAttempts);
+          final res = await helper.downloadSegmentWithRetries(uri, retryAttempts);
           if (res.statusCode == 200) {
-            if (encryptionKey != null) {
-              buffers.add(BufferItem(index: segmentNumber, buffer: decryptSegment(res.bodyBytes)));
+            if (helper.encryptionKey != null) {
+              buffers.add(BufferItem(index: segmentNumber, buffer: helper.decryptSegment(res.bodyBytes)));
             } else
               buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
           } else
@@ -316,9 +229,12 @@ class Downloader {
     }
   }
 
-  Future<void> downloadMp4(String link, String filepath, String fileName, int downloadId) async {
+  Future<void> downloadMp4(String link, String filepath, String fileName, int downloadId,
+      {Map<String, String> customHeaders = const {}}) async {
     //we considering the file as mp4
     final req = Request("GET", Uri.parse(link));
+    // add the headers
+    req.headers.addAll(customHeaders);
     final res = await req.send();
     if (res.statusCode != 200) {
       throw Exception("Received response with status code ${res.statusCode}");
@@ -334,7 +250,7 @@ class Downloader {
     final completer = Completer<void>();
 
     subscription = res.stream.listen((chunk) {
-      if ((downloadItems.where((it) => it.id == downloadId).firstOrNull) == null) {
+      if ((downloadingItems.where((it) => it.id == downloadId).firstOrNull) == null) {
         subscription?.cancel();
         sink.close();
         file.deleteSync();
@@ -379,72 +295,10 @@ class Downloader {
     return completer.future;
   }
 
-  //The enc key [im assuming AES for animepahe cus thats the only use case for this in this app rn]
-  Uint8List? encryptionKey = null;
-
-  //download the segment
-  Future<Response> downloadSegment(String url) async {
-    try {
-      final res = await get(Uri.parse(url));
-      return res;
-    } catch (err) {
-      throw Exception("Failed to download segment: $err");
-    }
-  }
-
-  Uint8List decryptSegment(Uint8List buffer) {
-    try {
-      final encrypt = Encrypter(AES(Key(encryptionKey!), mode: AESMode.cbc));
-      final decryptedBuffer = encrypt.decryptBytes(Encrypted(buffer), iv: IV.fromLength(16));
-      return Uint8List.fromList(decryptedBuffer);
-    } catch (err) {
-      print("COULDNT DECRYPT A SEGMENT, KILLING THE DOWNLOAD");
-      print(err.toString());
-      rethrow;
-    }
-  }
-
-  Future<Response> downloadSegmentWithRetries(String url, int totalAttempts) async {
-    int currentAttempt = 0;
-    while (currentAttempt < totalAttempts) {
-      try {
-        currentAttempt++;
-        final res = await downloadSegment(url)
-            .timeout(Duration(seconds: 10), onTimeout: () => throw Exception("FAILED DOWNLOAD ATTEMPT"));
-        return res;
-      } catch (err) {
-        if (currentAttempt >= totalAttempts) {
-          throw Exception("NUMBER OF DOWNLOAD ATTEMPTS EXCEEDED, KILLING THE DOWNLOADS");
-        }
-      }
-    }
-    throw Exception("THIS SHOULD'NT BE THROWN");
-  }
-
-  Future<List<String>> _getSegments(String url) async {
-    final List<String> segments = [];
-    final res = await fetch(url);
-    final lines = res.split('\n');
-    for (final line in lines) {
-      if (!line.startsWith("#")) {
-        if (line.contains("EXT")) continue;
-        segments.add(line.trim());
-      } else {
-        //get the encryption key if it exists
-        if (encryptionKey == null && line.startsWith("#EXT-X-KEY:METHOD=")) {
-          final regex = RegExp(r'#EXT-X-KEY:METHOD=([^"]+),URI="([^"]+)"');
-          final match = regex.firstMatch(line);
-          if (match != null) {
-            if (match.group(1) == null || match.group(2) == null) {
-              print("[DOWNLOADER] COULDNT GET THE ENCRYPTION TYPE OR THE KEY");
-              continue;
-            }
-            print("[DOWNLOADER] Found encryption: ${match.group(1)}");
-            encryptionKey = (await get(Uri.parse(match.group(2)!))).bodyBytes;
-          }
-        }
-      }
-    }
-    return segments;
+  Future<void> downloadSubs(String url, String fileName) async {
+    final path = await helper.makeDirectory(fileName: fileName + "_subs", fileExtension: url.split(".").lastOrNull ?? "txt");
+    final file = File(path);
+    await file.writeAsString((await get(Uri.parse(url))).body);
+    return;
   }
 }

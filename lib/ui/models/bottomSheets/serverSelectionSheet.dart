@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:animestream/core/anime/downloader/downloader.dart';
@@ -41,7 +42,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
 
   final src = SourceManager();
 
-  getStreams(InfoProvider provider, {bool directElseBlock = false}) async {
+  Future<void> getStreams(InfoProvider provider, {bool directElseBlock = false}) async {
     streamSources = [];
     if (widget.type == ServerSheetType.download && !directElseBlock) {
       try {
@@ -90,8 +91,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
             streamSources = streamSources + list;
             if (widget.type == ServerSheetType.download) {
               list.forEach((element) async {
-                if (element.quality == "multi-quality") {
-                  await getQualities(element.link, element.server, element.backup);
+                // auto or multi quality would mean multiple qualities
+                if (element.quality == "multi-quality" || element.quality == "auto") {
+                  await getQualities(element);
                 } else {
                   qualities.add({
                     'link': element.link,
@@ -110,13 +112,14 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
     }
   }
 
-  Future<void> getQualities(String link, String server, bool backup) async {
+  Future<void> getQualities(VideoStream source) async {
     List<Map<String, String>> mainList = [];
 
-    final List<dynamic> list = await getQualityStreams(link);
+    final list = await getQualityStreams(source.link);
     list.forEach((element) {
-      element['server'] = "${server} ${backup ? "- backup" : ""}";
-      element['quality'] = element['quality'] == "default" ? "default" : "${element['quality']}p";
+      element['server'] = "${source.server} ${source.backup ? "- backup" : ""}";
+      element['subtitle'] = source.subtitle ?? "";
+      element['headers'] = jsonEncode(source.customHeaders ?? {});
       mainList.add(element);
     });
     // if (mounted)
@@ -267,10 +270,20 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               margin: EdgeInsets.only(top: 10),
               child: ElevatedButton(
                 onPressed: () {
+                  String? subs = qualities[ind]['subtitle'];
+                  subs = (subs?.isEmpty ?? true) ? null : subs;
+                  final mapped = jsonDecode(qualities[ind]['headers']!);
+                  Map<String, String> headers = Map.from(mapped).cast();
+
                   if (currentUserSettings?.useQueuedDownloads ?? false) {
                     Downloader()
-                        .addToQueue(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
-                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                        .addToQueue(
+                      qualities[ind]['link']!,
+                      "${title}_Ep_${widget.episodeIndex + 1}",
+                      parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5,
+                      customHeaders: headers,
+                      subsUrl: subs,
+                    )
                         .onError((err, st) {
                       print(err);
                       print(st);
@@ -278,8 +291,13 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                     });
                   } else {
                     Downloader()
-                        .download(qualities[ind]['link']!, "${title}_Ep_${widget.episodeIndex + 1}",
-                            parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5)
+                        .download(
+                      qualities[ind]['link']!,
+                      "${title}_Ep_${widget.episodeIndex + 1}",
+                      parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5,
+                      customHeaders: headers,
+                      subsUrl: subs,
+                    )
                         .onError((err, st) {
                       print(err);
                       print(st);

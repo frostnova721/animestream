@@ -25,7 +25,6 @@ Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<Stri
       final match = regex.allMatches(line).first;
       resolutions.add(match.group(0)?.replaceAll("RESOLUTION=", '') ?? 'null');
     } else {
-      print(line);
       final linkPart = line.trim();
       if (linkPart.length > 1)
         links.add(linkPart.startsWith('http')

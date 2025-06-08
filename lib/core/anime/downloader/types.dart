@@ -7,14 +7,18 @@ class DownloadingItem {
   final String? fileName;
   final int retryAttempts;
   final int parallelBatches;
+  final Map<String, String> customHeaders;
+  final String? subtitleUrl;
 
   DownloadingItem({
     required this.id,
     required this.downloading,
+    this.customHeaders = const {},
     this.streamLink,
     this.fileName,
     this.retryAttempts = 5,
     this.parallelBatches = 5,
+    this.subtitleUrl,
   });
 }
 

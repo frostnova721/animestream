@@ -48,3 +48,4 @@ flutter_*.png
 *.env.g.dart
 
 todo.md
+localChangelog.md

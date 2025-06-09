@@ -91,8 +91,7 @@ class Downloader {
           parallelBatches: item.parallelBatches,
           id: item.id,
           customHeaders: item.customHeaders,
-          subsUrl: item.subtitleUrl
-          );
+          subsUrl: item.subtitleUrl);
     } catch (e) {
       print("[DOWNLOADER] Error processing download ${item.id}: $e");
     } finally {
@@ -115,31 +114,43 @@ class Downloader {
     Map<String, String> customHeaders = const {},
     String? subsUrl,
   }) async {
-    final permission = await helper.checkAndRequestPermission();
-    if (!permission) {
-      throw new Exception("ERR_NO_STORAGE_PERMISSION");
-    }
 
-    final finalPath = await helper.makeDirectory(fileName: fileName, fileExtension: "mp4");
-
-    // Download subtitles if available
-    if(subsUrl != null)
-    downloadSubs(subsUrl, fileName);
-
-    final output = File(finalPath);
-    final List<BufferItem> buffers = [];
-
-    // //generate an id for the downloading item and add it to the queue(list)
+    //generate an id for the downloading item and add it to the queue(list)
     int? downloadId = id;
     if (downloadId == null) {
       downloadId = helper.generateId();
       Downloader.downloadingItems.add(DownloadingItem(id: downloadId, downloading: true));
     }
 
+    final permission = await helper.checkAndRequestPermission();
+    if (!permission) {
+      cancelDownload(downloadId);
+      throw new Exception("ERR_NO_STORAGE_PERMISSION");
+    }
+
+    final finalPath = await helper.makeDirectory(fileName: fileName, fileExtension: "mp4");
+
+    // Download subtitles if available
+    if (subsUrl != null) downloadSubs(subsUrl, fileName);
+
+    final output = File(finalPath);
+
+    String? mime;
+
+    if (!streamLink.contains(RegExp(r'\.(mp4|mkv|avi|webm|m3u8|m3u)', caseSensitive: false))) {
+      mime = await helper.getMimeType(streamLink, customHeaders);
+    }
+
     // Running on hopes n assumptions
-    if (!streamLink.contains(".m3u8")) {
+    if ((mime != null && !mime.contains(RegExp(r'mpegurl', caseSensitive: false))) ||
+        streamLink.contains(RegExp(r'\.(mp4|mkv|avi|webm)', caseSensitive: false))) {
       return await downloadMp4(streamLink, finalPath, fileName, downloadId, customHeaders: customHeaders);
     }
+
+    print("Assuming its a stream!");
+
+    // open the write mode
+    final out = await output.openWrite();
 
     try {
       final streamBaseLink = helper.makeBaseLink(streamLink);
@@ -154,16 +165,19 @@ class Downloader {
       final parallelDownloadsBatchSize = parallelBatches;
 
       for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
+        final List<BufferItem> buffers = [];
+
         final downloading = Downloader.downloadingItems.where((item) => item.id == downloadId).firstOrNull;
 
-        //send cancelled notification and clear the buffer
+        //send cancelled notification and delete the file
         if (downloading == null) {
           await NotificationService().pushBasicNotification(
             downloadId,
             "Download Cancelled",
             "The download ($fileName) has been cancelled.",
           );
-          buffers.clear();
+          await out.close();
+          await output.delete();
           return;
         }
 
@@ -173,11 +187,13 @@ class Downloader {
             : segmentsFiltered.length;
         final batches = segmentsFiltered.sublist(i, batchEnd);
 
+        print("[DOWNLOADER]<${downloadId}> fetching segments [$i-$batchEnd of ${segments.length - 1}]");
+
         final futures = batches.map((segment) async {
           final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
-          print("[DOWNLOADER]<${downloadId}> fetching segment [$segmentNumber/${segments.length - 1}]");
 
+          // Update download progress thru the notification
           NotificationService().updateNotificationProgressBar(
             id: downloadId!,
             currentStep: segmentNumber,
@@ -185,31 +201,37 @@ class Downloader {
             fileName: "$fileName.mp4",
             path: finalPath,
           );
-          final res = await helper.downloadSegmentWithRetries(uri, retryAttempts);
+
+          final res = await helper.downloadSegmentWithRetries(uri, retryAttempts, customHeaders: customHeaders);
+
           if (res.statusCode == 200) {
             if (helper.encryptionKey != null) {
               buffers.add(BufferItem(index: segmentNumber, buffer: helper.decryptSegment(res.bodyBytes)));
-            } else
+            } else {
               buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
+            }
           } else
             throw new Exception("ERR_REQ_FAILED");
         });
 
         //wait till whole batch is downloaded
         await Future.wait(futures);
+
+        //sort the buffers
+        buffers.sort((a, b) => a.index.compareTo(b.index));
+
+        // Write the downloaded buffers
+        for (final b in buffers) out.add(b.buffer);
       }
 
-      //sort the buffers
-      buffers.sort((a, b) => a.index.compareTo(b.index));
+      print("[DOWNLOADER]<$downloadId> Download compelete!");
 
-      print("[DOWNLOADER] writing file to disk...");
-
-      //write the data after full download.
-      final out = await output.openWrite();
-      for (final buffer in buffers) {
-        out.add(buffer.buffer);
-      }
-      print("[DOWNLOADER] succesfully written the file to disk");
+      // send the completion notification
+      NotificationService().downloadCompletionNotification(
+        id: downloadId,
+        fileName: "$fileName.mp4",
+        path: finalPath,
+      );
 
       cancelDownload(downloadId); //remove the download from the active list
 
@@ -217,14 +239,14 @@ class Downloader {
     } catch (err) {
       print(err);
 
-      //send download failed notification
+      //send download failed notification & cleanup
       await NotificationService().pushBasicNotification(
         downloadId,
         "Download failed",
         "The download has been cancelled.",
       );
       cancelDownload(downloadId);
-      buffers.clear();
+      await out.close();
       if (await output.exists()) output.delete();
     }
   }
@@ -267,7 +289,7 @@ class Downloader {
       final progress = (downloadedBytes / totalSize * 100).toInt();
 
       if (progress > lastProgress) {
-        print("[DOWNLOADER]<$downloadId> Progress: $progress%");
+        print("[DOWNLOADER]<$downloadId> Progress: ${progress}%");
 
         NotificationService().updateNotificationProgressBar(
           id: downloadId,
@@ -282,6 +304,7 @@ class Downloader {
     }, onDone: () async {
       await sink.close();
       print("[DOWNLOADER] succesfully written the file to disk");
+      NotificationService().downloadCompletionNotification(fileName: fileName, path: filepath, id: downloadId);
       cancelDownload(downloadId);
       completer.complete();
     }, onError: (err) {
@@ -296,7 +319,8 @@ class Downloader {
   }
 
   Future<void> downloadSubs(String url, String fileName) async {
-    final path = await helper.makeDirectory(fileName: fileName + "_subs", fileExtension: url.split(".").lastOrNull ?? "txt");
+    final path =
+        await helper.makeDirectory(fileName: fileName + "_subs", fileExtension: url.split(".").lastOrNull ?? "txt");
     final file = File(path);
     await file.writeAsString((await get(Uri.parse(url))).body);
     return;

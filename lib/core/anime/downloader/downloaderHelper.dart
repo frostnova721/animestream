@@ -66,7 +66,8 @@ class DownloaderHelper {
 
     final ext = fileExtension ?? (isImage ? "png" : "mp4");
 
-    final animeName = fileName.split("_").first;
+    // split the anime name
+    final animeName = fileName.replaceAll(RegExp(r'\s+ep\s*\d+\s*$', caseSensitive: false), '').trim();
 
     if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/$animeName");
@@ -92,9 +93,9 @@ class DownloaderHelper {
   Uint8List? encryptionKey = null;
 
   //download the segment
-  Future<Response> downloadSegment(String url) async {
+  Future<Response> downloadSegment(String url, {Map<String, String> customHeaders = const {}}) async {
     try {
-      final res = await get(Uri.parse(url));
+      final res = await get(Uri.parse(url), headers: customHeaders);
       return res;
     } catch (err) {
       throw Exception("Failed to download segment: $err");
@@ -113,12 +114,12 @@ class DownloaderHelper {
     }
   }
 
-  Future<Response> downloadSegmentWithRetries(String url, int totalAttempts) async {
+  Future<Response> downloadSegmentWithRetries(String url, int totalAttempts, {Map<String, String> customHeaders = const {}}) async {
     int currentAttempt = 0;
     while (currentAttempt < totalAttempts) {
       try {
         currentAttempt++;
-        final res = await downloadSegment(url)
+        final res = await downloadSegment(url, customHeaders: customHeaders)
             .timeout(Duration(seconds: 10), onTimeout: () => throw Exception("FAILED DOWNLOAD ATTEMPT"));
         return res;
       } catch (err) {
@@ -149,7 +150,7 @@ class DownloaderHelper {
               continue;
             }
             print("[DOWNLOADER] Found encryption: ${match.group(1)}");
-            encryptionKey = (await get(Uri.parse(match.group(2)!))).bodyBytes;
+            encryptionKey = (await get(Uri.parse(match.group(2)!), headers: customHeaders)).bodyBytes;
           }
         }
       }
@@ -162,4 +163,16 @@ class DownloaderHelper {
     split.removeLast();
     return split.join('/');
   }
+
+  Future<String?> getMimeType(String url, Map<String, String> headers) async {
+  final client = HttpClient();
+  try {
+    final request = await client.headUrl(Uri.parse(url));
+    headers.forEach((k,v) => request.headers.set(k, v));
+    final res = await request.close();
+    return res.headers.contentType?.mimeType;
+  } finally {
+    client.close();
+  }
+}
 }

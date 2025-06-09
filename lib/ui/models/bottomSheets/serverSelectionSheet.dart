@@ -98,7 +98,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   qualities.add({
                     'link': element.link,
                     'server': "${element.server}  ${element.backup ? "- backup" : ""}",
-                    'quality': "${element.quality}"
+                    'quality': "${element.quality}",
+                    'headers': jsonEncode(element.customHeaders ?? {}),
+                    'subtitle': element.subtitle ?? "",
                   });
                 }
               });
@@ -272,15 +274,20 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 onPressed: () {
                   String? subs = qualities[ind]['subtitle'];
                   subs = (subs?.isEmpty ?? true) ? null : subs;
-                  final mapped = jsonDecode(qualities[ind]['headers']!);
+                  // print(qualities[ind]);
+                  final mapped = jsonDecode(qualities[ind]['headers'] ?? "{}");
                   Map<String, String> headers = Map.from(mapped).cast();
+
+                  final fileName = "${title} Ep ${widget.episodeIndex + 1}";
+                  final parallelBatches = (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5;
+                  final streamLink =  qualities[ind]['link']!;
 
                   if (currentUserSettings?.useQueuedDownloads ?? false) {
                     Downloader()
                         .addToQueue(
-                      qualities[ind]['link']!,
-                      "${title}_Ep_${widget.episodeIndex + 1}",
-                      parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5,
+                     streamLink,
+                      fileName,
+                      parallelBatches: parallelBatches,
                       customHeaders: headers,
                       subsUrl: subs,
                     )
@@ -292,9 +299,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   } else {
                     Downloader()
                         .download(
-                      qualities[ind]['link']!,
-                      "${title}_Ep_${widget.episodeIndex + 1}",
-                      parallelBatches: (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5,
+                      streamLink,
+                      fileName,
+                      parallelBatches: parallelBatches,
                       customHeaders: headers,
                       subsUrl: subs,
                     )

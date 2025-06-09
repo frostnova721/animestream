@@ -9,7 +9,6 @@ String _makeBaseLink(String uri) {
 Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<String, String>? customHeader = null}) async {
   try {
   final content = (await get(Uri.parse(streamUrl), headers: customHeader)).body;
-  // print(content);
 
   List<String> links = [];
   List<String> resolutions = [];

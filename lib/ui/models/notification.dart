@@ -28,20 +28,19 @@ class NotificationService {
       ],
     );
     bool isNotifAllowed = await AwesomeNotifications().isNotificationAllowed();
-    if (!isNotifAllowed)
-      AwesomeNotifications().requestPermissionToSendNotifications();
+    if (!isNotifAllowed) AwesomeNotifications().requestPermissionToSendNotifications();
   }
 
   pushBasicNotification(int id, String title, String content) {
     AwesomeNotifications().createNotification(
       content: NotificationContent(
-          id: id,
-          channelKey: "animestream",
-          title: title,
-          body: content,
-          backgroundColor: appTheme.accentColor,
-          // autoDismissible: false
-          ),
+        id: id,
+        channelKey: "animestream",
+        title: title,
+        body: content,
+        backgroundColor: appTheme.accentColor,
+        // autoDismissible: false
+      ),
     );
   }
 
@@ -56,64 +55,60 @@ class NotificationService {
     required String fileName,
     required String path,
   }) async {
-    if (currentStep < maxStep) {
-      int progress = ((currentStep / maxStep) * 100).round();
-      await AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: id,
-            channelKey: 'animestream',
-            title: 'Downloading $fileName ($progress%)',
-            body: 'The file is being downloaded',
-            category: NotificationCategory.Progress,
-            payload: {
-              'path': path,
-              'id': id.toString(),
-            },
-            notificationLayout: NotificationLayout.ProgressBar,
-            progress: progress.toDouble(),
-            locked: true,
-            backgroundColor: appTheme.accentColor,
-          ),
-          actionButtons: [
-            NotificationActionButton(key: "cancel", label: "cancel")
-          ]);
-    } else {
-      await AwesomeNotifications().createNotification(
-          content: NotificationContent(
-            id: id,
-            channelKey: 'animestream',
-            title: 'Download finished',
-            body: '$fileName has been downloaded succesfully!',
-            payload: {
-              'path': path,
-              'id': id.toString(),
-            },
-            locked: false,
-            backgroundColor: appTheme.accentColor,
-          ),
-          actionButtons: [
-            NotificationActionButton(key: "open_file", label: "open")
-          ]);
-    }
+    int progress = ((currentStep / maxStep) * 100).round();
+    await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: id,
+          channelKey: 'animestream',
+          title: 'Downloading $fileName ($progress%)',
+          body: 'The file is being downloaded',
+          category: NotificationCategory.Progress,
+          payload: {
+            'path': path,
+            'id': id.toString(),
+          },
+          notificationLayout: NotificationLayout.ProgressBar,
+          progress: progress.toDouble(),
+          locked: true,
+          backgroundColor: appTheme.accentColor,
+        ),
+        actionButtons: [NotificationActionButton(key: "cancel", label: "cancel")]);
+  }
+
+  Future<void> downloadCompletionNotification({
+    required int id,
+    required String fileName,
+    required String path,
+  }) async {
+    await AwesomeNotifications().createNotification(
+        content: NotificationContent(
+          id: id,
+          channelKey: 'animestream',
+          title: 'Download finished',
+          body: '$fileName has been downloaded succesfully!',
+          payload: {
+            'path': path,
+            'id': id.toString(),
+          },
+          locked: false,
+          backgroundColor: appTheme.accentColor,
+        ),
+        actionButtons: [NotificationActionButton(key: "open_file", label: "open")]);
   }
 }
 
 class NotificationController {
   @pragma("vm:entry-point")
-  static Future<void> onNotificationCreatedMethod(
-      ReceivedNotification receivedNotification) async {}
+  static Future<void> onNotificationCreatedMethod(ReceivedNotification receivedNotification) async {}
 
   @pragma("vm:entry-point")
-  static Future<void> onNotificationDisplayedMethod(
-      ReceivedNotification receivedNotification) async {}
+  static Future<void> onNotificationDisplayedMethod(ReceivedNotification receivedNotification) async {}
 
   @pragma("vm:entry-point")
-  static Future<void> onDismissActionReceivedMethod(
-      ReceivedAction receivedAction) async {}
+  static Future<void> onDismissActionReceivedMethod(ReceivedAction receivedAction) async {}
 
   @pragma("vm:entry-point")
-  static Future<void> onActionReceivedMethod(
-      ReceivedAction receivedAction) async {
+  static Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
     if (receivedAction.buttonKeyPressed == 'cancel') {
       final id = receivedAction.payload!['id']!;
       NotificationService().removeNotification(int.parse(id));

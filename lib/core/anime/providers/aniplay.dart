@@ -107,7 +107,7 @@ class AniPlay extends AnimeProvider {
             try {
               final yukiHeader = {"Referer": "https://megacloud.club/"};
               srcs.add(VideoStream(
-                quality: str['quality'] ?? "unknown",
+                quality: "multi-quality", // yeah most times (assumptions...)
                 link: str['url'],
                 isM3u8: str['url'].endsWith(".m3u8"),
                 server: it,

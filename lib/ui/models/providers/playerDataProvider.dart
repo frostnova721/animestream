@@ -6,6 +6,7 @@ import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
 
 /// Handle the state of player. manages datas like quality, servers etc..
 class PlayerDataProvider extends ChangeNotifier {
@@ -62,7 +63,14 @@ class PlayerDataProvider extends ChangeNotifier {
   Future<void> extractCurrentStreamQualities() async {
     final url = _state.currentStream.link;
     final headers = _state.currentStream.customHeaders;
-    if (url.contains(".m3u8")) {
+    String? mime;
+    if(!url.contains(RegExp(r'\.(mkv|mp4|mov|webm|dash|m3u|m3u8)', caseSensitive: false))) {
+      //get mime if none is mentioned
+      final headRes = await head(Uri.parse(url), headers: headers);
+      mime = headRes.headers['content-type'];
+      print(mime);
+    }
+    if (url.contains(".m3u8") || (mime != null && mime.contains("mpegurl"))) { // text/plain usually means its m3u8 or dash
       final qualities = await getQualityStreams(url, customHeader: headers);
       _state = _state.copyWith(qualities: qualities);
     } else {

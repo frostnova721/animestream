@@ -6,6 +6,7 @@ import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:flutter/widgets.dart';
 import 'package:http/http.dart';
 
 class Downloader {
@@ -17,10 +18,28 @@ class Downloader {
 
   DownloaderHelper helper = DownloaderHelper();
 
+  // Notifier to draw downloads page UI
+  static final ValueNotifier<int> downloadCount = ValueNotifier(downloadingItems.length);
+
   // Cancel a download with its id
-  void cancelDownload(int id) {
+  static void cancelDownload(int id) {
     Downloader.downloadingItems.removeWhere((item) => item.id == id);
     Downloader.downloadQueue.removeWhere((item) => item.id == id);
+    downloadCount.value--;
+  }
+
+  // Mock a download for specified duration
+  void mockDownload(DownloadingItem item, Duration dur) async {
+    // downloadingItems.clear();
+    downloadingItems.add(item);
+    downloadCount.value++;
+    final steps = 50;
+    for (int i = 0; i <= steps; i++) {
+      await Future.delayed(Duration(milliseconds: dur.inMilliseconds ~/ steps));
+      item.progress = ((i / steps) * 100).toInt();
+    }
+    downloadingItems.removeWhere((it) => it.id == item.id);
+    downloadCount.value--;
   }
 
   Future<void> downloadImage(String imageUrl, String fileName) async {
@@ -81,12 +100,14 @@ class Downloader {
     // Pick the job from queue
     final item = downloadQueue.removeFirst();
 
+    item.downloading = true;
+
     // Represent its downloading state
-    downloadingItems.add(DownloadingItem(id: item.id, downloading: true));
+    downloadingItems.add(item);
 
     // Yep! downloading that mofo
     try {
-      await download(item.streamLink!, item.fileName!,
+      await download(item.streamLink!, item.fileName,
           retryAttempts: item.retryAttempts,
           parallelBatches: item.parallelBatches,
           id: item.id,
@@ -114,13 +135,20 @@ class Downloader {
     Map<String, String> customHeaders = const {},
     String? subsUrl,
   }) async {
-
     //generate an id for the downloading item and add it to the queue(list)
     int? downloadId = id;
     if (downloadId == null) {
       downloadId = helper.generateId();
-      Downloader.downloadingItems.add(DownloadingItem(id: downloadId, downloading: true));
+      Downloader.downloadingItems.add(DownloadingItem(
+        id: downloadId,
+        downloading: true,
+        fileName: fileName,
+        customHeaders: customHeaders,
+      ));
     }
+
+    // Notify a ongoing download
+    downloadCount.value++;
 
     final permission = await helper.checkAndRequestPermission();
     if (!permission) {
@@ -139,6 +167,7 @@ class Downloader {
 
     if (!streamLink.contains(RegExp(r'\.(mp4|mkv|avi|webm|m3u8|m3u)', caseSensitive: false))) {
       mime = await helper.getMimeType(streamLink, customHeaders);
+      print("Got mime type: $mime");
     }
 
     // Running on hopes n assumptions
@@ -163,6 +192,8 @@ class Downloader {
       );
 
       final parallelDownloadsBatchSize = parallelBatches;
+
+      int lastUpdatedProgress = 0; // Dont notify if progress is same
 
       for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
         final List<BufferItem> buffers = [];
@@ -193,14 +224,22 @@ class Downloader {
           final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
           final segmentNumber = segments.indexOf(segment) + 1;
 
-          // Update download progress thru the notification
-          NotificationService().updateNotificationProgressBar(
-            id: downloadId!,
-            currentStep: segmentNumber,
-            maxStep: segments.length - 1,
-            fileName: "$fileName.mp4",
-            path: finalPath,
-          );
+          final progress = ((segmentNumber / segments.length) * 100).toInt();
+
+          if (progress > lastUpdatedProgress) {
+            // Update download progress thru the notification
+            NotificationService().updateNotificationProgressBar(
+              id: downloadId!,
+              currentStep: progress,
+              maxStep: 100,
+              fileName: "$fileName.mp4",
+              path: finalPath,
+            );
+
+            downloading.progress = progress;
+
+            lastUpdatedProgress = progress;
+          }
 
           final res = await helper.downloadSegmentWithRetries(uri, retryAttempts, customHeaders: customHeaders);
 
@@ -258,7 +297,7 @@ class Downloader {
     // add the headers
     req.headers.addAll(customHeaders);
     final res = await req.send();
-    if (res.statusCode != 200) {
+    if (!(res.statusCode >= 200 && res.statusCode < 300)) {
       throw Exception("Received response with status code ${res.statusCode}");
     }
     final totalSize = res.contentLength ?? -1;
@@ -266,13 +305,17 @@ class Downloader {
     final file = File(filepath);
     final sink = file.openWrite();
     int lastProgress = 0;
+    int lastPrintedProgress = 0; // to reduce console logs.
 
     StreamSubscription<List<int>>? subscription;
 
     final completer = Completer<void>();
 
     subscription = res.stream.listen((chunk) {
-      if ((downloadingItems.where((it) => it.id == downloadId).firstOrNull) == null) {
+
+      final downloading = (downloadingItems.where((it) => it.id == downloadId).firstOrNull);
+
+      if (downloading == null) {
         subscription?.cancel();
         sink.close();
         file.deleteSync();
@@ -289,7 +332,13 @@ class Downloader {
       final progress = (downloadedBytes / totalSize * 100).toInt();
 
       if (progress > lastProgress) {
-        print("[DOWNLOADER]<$downloadId> Progress: ${progress}%");
+        // just to reduce the logging from 100 to 10
+        if (progress >= lastPrintedProgress) {
+          print("[DOWNLOADER]<$downloadId> Progress: ${progress}%");
+          lastPrintedProgress += 10;
+        }
+
+        downloading.progress = progress;
 
         NotificationService().updateNotificationProgressBar(
           id: downloadId,
@@ -309,6 +358,7 @@ class Downloader {
       completer.complete();
     }, onError: (err) {
       print(err);
+      print("From media url: $link");
       NotificationService()
           .pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
       cancelDownload(downloadId);

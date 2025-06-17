@@ -112,7 +112,7 @@ class NotificationController {
     if (receivedAction.buttonKeyPressed == 'cancel') {
       final id = receivedAction.payload!['id']!;
       NotificationService().removeNotification(int.parse(id));
-      Downloader().cancelDownload(int.parse(id));
+      Downloader.cancelDownload(int.parse(id));
     }
     if (receivedAction.buttonKeyPressed == 'open_file') {
       OpenFile.open(receivedAction.payload?['path'], type: "video/mp4");

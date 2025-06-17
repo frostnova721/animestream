@@ -345,7 +345,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                       setState(() {});
                     },
                     backgroundColor: appTheme.backgroundColor,
-                    elevation: 1,indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    elevation: 1,
+                    indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     indicatorColor: appTheme.accentColor,
                     destinations: [
                       NavigationRailDestination(
@@ -353,16 +354,28 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                           Icons.home,
                           color: _barController.currentIndex == 0 ? appTheme.onAccent : appTheme.textMainColor,
                         ),
-                        label: Text("Home",style: TextStyle(fontSize: 18),),
+                        label: Text(
+                          "Home",
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
                       NavigationRailDestination(
-                        icon: Icon(Icons.auto_awesome, color: _barController.currentIndex == 1 ? appTheme.onAccent : appTheme.textMainColor,),
-                        label: Text("Discover",style: TextStyle(fontSize: 18),),
+                        icon: Icon(
+                          Icons.auto_awesome,
+                          color: _barController.currentIndex == 1 ? appTheme.onAccent : appTheme.textMainColor,
+                        ),
+                        label: Text(
+                          "Discover",
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
                       NavigationRailDestination(
                         icon: Icon(Icons.search_rounded,
                             color: _barController.currentIndex == 2 ? appTheme.onAccent : appTheme.textMainColor),
-                        label: Text("Search",style: TextStyle(fontSize: 18),),
+                        label: Text(
+                          "Search",
+                          style: TextStyle(fontSize: 18),
+                        ),
                       ),
                     ],
                     selectedIndex: _barController.currentIndex,
@@ -432,9 +445,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           borderRadius: 10,
           items: [
             BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
-            BottomBarItem(
-                title: 'Discover',
-                icon: Icon(Icons.auto_awesome)),
+            BottomBarItem(title: 'Discover', icon: Icon(Icons.auto_awesome)),
             BottomBarItem(title: 'Search', icon: Icon(Icons.search)),
           ],
         )

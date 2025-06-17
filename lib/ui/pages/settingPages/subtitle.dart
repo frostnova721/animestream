@@ -76,7 +76,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   int ind = 0;
 
-  final fonts = ["Rubik", "Poppins", "NotoSans", "NunitoSans", "Arial", "Helvetica"];
+  final fonts = ["Rubik", "Poppins", "NotoSans", "NunitoSans", "Inter", "OpenSans"];
 
   bool initialised = false;
   bool previewMode = false;

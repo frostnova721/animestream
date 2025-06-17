@@ -38,6 +38,7 @@ dependencies:
   hive: ^2.2.3
   hive_flutter: ^1.1.0
   flutter_secure_storage: ^9.2.2
+  flutter_svg: ^2.1.0
 
   # Media and player related
   open_file: ^3.5.10
@@ -58,12 +59,9 @@ dependencies:
       url: https://github.com/YuiHrsw/window_manager.git
       path: packages/window_manager
       ref: windows_fullscreen_fix
-  fluentui_system_icons: ^1.1.273
 
   # Misc
   flutter_native_splash: ^2.4.0
-  # window_size: ^0.1.0
-  # d4rt: ^0.0.3
 
 dev_dependencies:
   flutter_test:
@@ -118,25 +116,27 @@ flutter:
     - lib/assets/icons/logo_foreground.png
     - lib/assets/icons/logo_monochrome.png
     - lib/assets/images/chisato.jpeg
-    - lib/assets/images/mitsuha.jpg
     - lib/assets/images/profile_banner.jpg
     - lib/assets/images/chisato_AI.jpg
+    - lib/assets/images/fluent_max.svg
+    - lib/assets/images/fluent_min.svg
+    - lib/assets/images/fluent_close.svg
     - .env
 
   fonts:
-    - family: Arial
+    - family: Inter
       fonts:
-        - asset: lib/assets/fonts/ARIAL.ttf
+        - asset: lib/assets/fonts/inter-Regular.ttf
           style: normal
           weight: 500
-        - asset: lib/assets/fonts/ARIALBD.ttf
+        - asset: lib/assets/fonts/inter-Bold.ttf
           weight: 700
-    - family: Helvetica
+    - family: OpenSans
       fonts:
-        - asset: lib/assets/fonts/Helvetica.ttf
+        - asset: lib/assets/fonts/OpenSans-Regular.ttf
           style: normal
           weight: 500
-        - asset: lib/assets/fonts/Helvetica-Bold.ttf
+        - asset: lib/assets/fonts/OpenSans-Bold.ttf
           weight: 700
     - family: Rubik
       fonts:

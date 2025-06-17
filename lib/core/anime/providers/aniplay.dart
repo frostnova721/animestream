@@ -5,6 +5,7 @@ import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/misc.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
+import 'package:html/parser.dart';
 import 'package:http/http.dart';
 
 class AniPlay extends AnimeProvider {
@@ -52,41 +53,54 @@ class AniPlay extends AnimeProvider {
     final anilistId = epIdSplit[2].split("\$")[0];
     // final malId = epIdSplit[2].split("\$")[1];
     final epNum = epIdSplit[3];
-    final keys = await _extractKeys(baseUrl);
-
+    // final keys = await _extractKeys(baseUrl);
     int serversFetched = 0;
 
     servers.forEach((it) {
-      final link = getWatchUrl(it, epNum, anilistId);
       final itIndex = servers.indexOf(it);
       final currentServersEpId = epId[itIndex];
+      final link = getWatchUrl(it, epNum, anilistId, currentServersEpId);
       
-      final resFuture = post(Uri.parse(link),
+      final resFuture = get(Uri.parse(link),
           headers: {
-            "Content-Type": "application/json",
-            'Next-Action': keys['getSources'] ?? '',
+            "Content-Type": "text/plain;charset=UTF-8",
+            "Referer": "https://aniplaynow.live/anime/watch/$anilistId?host=$it&ep=$epNum&type=sub"
+            // 'Next-Action': keys['getSources'] ?? '',
           },
-          body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"${dub ? 'dub' : 'sub'}\"]");
+          );
+          // body: "[\"$anilistId\", \"$it\", \"${currentServersEpId}\", \"$epNum\", \"${dub ? 'dub' : 'sub'}\"]");
       resFuture.onError((e, st) {
         print(e.toString());
         return Response("", 401);
       });
       resFuture.then((res) {
-        final split = res.body.split('1:')[1];
-        final List<dynamic>? parsed = jsonDecode(split)?['sources'];
+        // final split = res.body.split('1:')[1];
+        final Map<dynamic, dynamic>? parsed = jsonDecode(res.body);
 
-        if (parsed == null) {
+        if(parsed == null) {
+          serversFetched++;
+          update([], serversFetched == servers.length);
+          return;
+        }
+
+        print(parsed['source']);
+
+        final List<Map<String, dynamic>>? sources = List.castFrom(parsed['sources']);
+        print(sources);
+
+        if (sources == null || sources.isEmpty) {
           serversFetched++;
           update([], serversFetched == servers.length);
 
           return;
         }
 
-        final List<Map<String, dynamic>>? subtitleArr = List.castFrom(jsonDecode(split)?['subtitles'] ?? []);
+        final List<Map<String, dynamic>>? subtitleArr = List.castFrom(parsed['subtitles'] ?? []);
+        final Map<String, String>? headers = Map.from(parsed['headers'] ?? {}).cast<String, String>();
         final subtitleItem = subtitleArr?.where((st) => st['lang'] == "English").firstOrNull; // We only need english
 
         //choosing this since the quality is changeable in the default
-        final stream = parsed.where((element) => element['quality'] == "default").firstOrNull;
+        final stream = sources.where((element) => element['quality'] == "default").firstOrNull;
         if (stream != null) {
           serversFetched++;
           update([
@@ -102,17 +116,16 @@ class AniPlay extends AnimeProvider {
           //just add all the available streams if couldnt find any default quality ones
           final List<VideoStream> srcs = [];
           serversFetched++;
-          for (final str in parsed) {
+          for (final str in sources) {
             if (str['url'] == null) continue;
             try {
-              final yukiHeader = {"Referer": "https://megacloud.club/"};
               srcs.add(VideoStream(
                 quality: "multi-quality", // yeah most times (assumptions...)
                 link: str['url'],
                 isM3u8: str['url'].endsWith(".m3u8"),
                 server: it,
                 backup: (str['quality'] ?? "") == "backup",
-                customHeaders: it == "yuki" ? yukiHeader : null,
+                customHeaders: it == "yuki" ? headers : null,
                 subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
                     ? subtitleItem['url'].endsWith("vtt")
@@ -132,8 +145,9 @@ class AniPlay extends AnimeProvider {
     return;
   }
 
-  String getWatchUrl(String server, String epnum, String anilistId) {
-    return "$baseUrl/anime/watch/$anilistId?ep=$epnum?host=${server}&type=sub";
+  String getWatchUrl(String server, String epnum, String anilistId, String epId) {
+    return "https://aniplaynow.live/api/anime/sources?id=$anilistId&provider=$server&epId=$epId&epNum=$epnum&subType=sub&cache=true";
+    // return "$baseUrl/anime/watch/$anilistId?ep=$epnum?host=${server}&type=sub";
   }
 
   @override
@@ -152,21 +166,23 @@ class AniPlay extends AnimeProvider {
   }
 
   Future<List<dynamic>> _getAllServerLinks(String id) async {
-    final l = "$baseUrl/anime/info/" + id;
-    final keys = await _extractKeys(baseUrl);
-    final res = await post(Uri.parse(l),
+    final l = "$baseUrl/api/anime/episodes?id=$id&releasing=true&refresh=false";
+    // final l = "$baseUrl/anime/info/" + id;
+    // final keys = await _extractKeys(baseUrl);
+    final res = await get(Uri.parse(l),
         headers: {
-          'Referer': l,
+          'Referer': "$baseUrl/anime/info/$id",
           "Content-Type": "text/plain;charset=UTF-8",
-          'Next-Action': keys['getEpisodes'] ?? "",
-        },
-        body: "[\"$id\",true,false]");
-    final split = res.body.split('1:')[1];
-    final List<dynamic> parsed = jsonDecode(split);
+          // 'Next-Action': keys['getEpisodes'] ?? "",
+        },);
+        // body: "[\"$id\",true,false]");
+    final Map<dynamic,dynamic> parsed = jsonDecode(res.body);
+
+    final List<dynamic> main = parsed['episodes'];
 
     final List<dynamic> servers = [];
 
-    for (final item in parsed) {
+    for (final item in main) {
       servers.add({
         'server': item['providerId'],
         'episodes': item['episodes'],

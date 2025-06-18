@@ -116,6 +116,7 @@ flutter:
     - lib/assets/icons/logo_foreground.png
     - lib/assets/icons/logo_monochrome.png
     - lib/assets/images/chisato.jpeg
+    - lib/assets/images/mitsuha.jpg
     - lib/assets/images/profile_banner.jpg
     - lib/assets/images/chisato_AI.jpg
     - lib/assets/images/fluent_max.svg

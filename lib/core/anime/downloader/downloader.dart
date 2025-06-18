@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
@@ -13,18 +12,16 @@ class Downloader {
   // Actively downloading items
   static List<DownloadingItem> downloadingItems = [];
 
-  // Queue of downloading items (for one by one downloads)
-  static Queue<DownloadingItem> downloadQueue = Queue();
-
   DownloaderHelper helper = DownloaderHelper();
 
   // Notifier to draw downloads page UI
-  static final ValueNotifier<int> downloadCount = ValueNotifier(downloadingItems.length);
+  static final ValueNotifier<int> downloadCount = ValueNotifier(0);
 
   // Cancel a download with its id
-  static void cancelDownload(int id) {
-    Downloader.downloadingItems.removeWhere((item) => item.id == id);
-    Downloader.downloadQueue.removeWhere((item) => item.id == id);
+  // Better idea: mark stuff completed so it can be retrieved later!
+  static void cancelDownload(int id, {bool markCancelled = true}) {
+    downloadingItems.removeWhere((it) => it.id == id);
+    // Downloader.downloadQueue.removeWhere((item) => item.id == id);
     downloadCount.value--;
   }
 
@@ -76,7 +73,7 @@ class Downloader {
     final id = helper.generateId();
     final downloadItem = DownloadingItem(
       id: id,
-      downloading: false,
+      status: DownloadStatus.queued,
       streamLink: streamLink,
       fileName: fileName,
       retryAttempts: retryAttempts,
@@ -85,43 +82,52 @@ class Downloader {
       subtitleUrl: subsUrl,
     );
 
-    downloadQueue.add(downloadItem);
-    print("[DOWNLOADER] Added download $id to queue. Queue size: ${downloadQueue.length}");
+    downloadingItems.add(downloadItem);
+    print("[DOWNLOADER] Added download $id to queue. Queue size: ${downloadingItems.length}");
 
-    if (!downloadingItems.any((item) => item.downloading)) {
+    if (!downloadingItems.any((item) => item.status == DownloadStatus.downloading)) {
       _processQueue();
     }
   }
 
   /// download the items in queue
   Future<void> _processQueue() async {
-    if (downloadQueue.isEmpty) return;
+    if (downloadingItems.isEmpty) return;
 
     // Pick the job from queue
-    final item = downloadQueue.removeFirst();
+    // final item = downloadQueue.removeFirst();
 
-    item.downloading = true;
+    // Pick the first queued item from list
+    final item = downloadingItems.firstWhere((it) => it.status == DownloadStatus.queued,
+        // fake an items with an invalid id
+        orElse: () => DownloadingItem(
+              id: 0,
+              status: DownloadStatus.failed,
+              fileName: "",
+            ));
 
-    // Represent its downloading state
-    downloadingItems.add(item);
+    if (item.id != 0) {
+      // set downloading
+      item.status = DownloadStatus.downloading;
 
-    // Yep! downloading that mofo
-    try {
-      await download(item.streamLink!, item.fileName,
-          retryAttempts: item.retryAttempts,
-          parallelBatches: item.parallelBatches,
-          id: item.id,
-          customHeaders: item.customHeaders,
-          subsUrl: item.subtitleUrl);
-    } catch (e) {
-      print("[DOWNLOADER] Error processing download ${item.id}: $e");
-    } finally {
-      print("Cancelling");
-      cancelDownload(item.id);
+      // Yep! downloading that mofo
+      try {
+        await download(item.streamLink!, item.fileName,
+            retryAttempts: item.retryAttempts,
+            parallelBatches: item.parallelBatches,
+            id: item.id,
+            customHeaders: item.customHeaders,
+            subsUrl: item.subtitleUrl);
+      } catch (e) {
+        print("[DOWNLOADER] Error processing download ${item.id}: $e");
+      } finally {
+        print("Cancelling");
+        cancelDownload(item.id);
 
-      // Process next item (if available)
-      if (downloadQueue.isNotEmpty) {
-        _processQueue();
+        // Process next item (if available)
+        if (downloadingItems.isNotEmpty) {
+          _processQueue();
+        }
       }
     }
   }
@@ -141,7 +147,7 @@ class Downloader {
       downloadId = helper.generateId();
       Downloader.downloadingItems.add(DownloadingItem(
         id: downloadId,
-        downloading: true,
+        status: DownloadStatus.downloading,
         fileName: fileName,
         customHeaders: customHeaders,
       ));
@@ -312,7 +318,6 @@ class Downloader {
     final completer = Completer<void>();
 
     subscription = res.stream.listen((chunk) {
-
       final downloading = (downloadingItems.where((it) => it.id == downloadId).firstOrNull);
 
       if (downloading == null) {

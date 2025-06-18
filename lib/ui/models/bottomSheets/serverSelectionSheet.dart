@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/anime/providers/types.dart';

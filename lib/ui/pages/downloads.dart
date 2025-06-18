@@ -25,7 +25,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(onPressed: () {
-        Downloader().mockDownload(DownloadingItem(id: Random().nextInt(100), downloading: false, fileName: "Apothe niggas sd sdf sdffg hgdr5t wersdsg sfdg Ep 1"), Duration(seconds: 60));
+        Downloader().mockDownload(DownloadingItem(id: Random().nextInt(100), status: DownloadStatus.downloading, fileName: "Apothe niggas sd sdf sdffg hgdr5t wersdsg sfdg Ep 1"), Duration(seconds: 60));
       }, child: Icon(Icons.run_circle_outlined),),
         appBar: AppBar(
           title: Text(
@@ -137,7 +137,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                   ValueListenableBuilder(
                     valueListenable: downloadingItem.progressNotifier,
                     builder: (context, value, child) {
-                      return downloadingItem.downloading ? LinearProgressIndicator(
+                      return downloadingItem.status == DownloadStatus.downloading ? LinearProgressIndicator(
                         value: downloadingItem.progress / 100
                       ) : Text("queued", style: TextStyle(fontFamily: "NunitoSans", fontSize: 14, color: appTheme.textSubColor),);
                     }

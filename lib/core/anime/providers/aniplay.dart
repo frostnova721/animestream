@@ -86,7 +86,6 @@ class AniPlay extends AnimeProvider {
         print(parsed['source']);
 
         final List<Map<String, dynamic>>? sources = List.castFrom(parsed['sources']);
-        print(sources);
 
         if (sources == null || sources.isEmpty) {
           serversFetched++;

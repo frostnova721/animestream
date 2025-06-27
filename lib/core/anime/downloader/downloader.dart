@@ -1,383 +1,200 @@
-import 'dart:async';
-import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
+import 'package:animestream/core/app/logging.dart';
+import 'package:animestream/core/commons/extensions.dart';
+import 'package:collection/collection.dart';
+
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/core/anime/downloader/downloaderCore.dart';
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
-import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/models/snackBar.dart';
-import 'package:flutter/widgets.dart';
-import 'package:http/http.dart';
+import 'package:animestream/core/app/runtimeDatas.dart';
 
+enum _DownloadType { stream, video, image }
+
+/// Manages the downloads, Isolates, Queueing
 class Downloader {
-  // Actively downloading items
-  static List<DownloadingItem> downloadingItems = [];
+  final DownloaderHelper _helper = DownloaderHelper();
 
-  DownloaderHelper helper = DownloaderHelper();
+  static final Map<int, Isolate> _isolates = {};
 
-  // Notifier to draw downloads page UI
-  static final ValueNotifier<int> downloadCount = ValueNotifier(0);
+  static final Map<int, ReceivePort> _receivePorts = {};
 
-  // Cancel a download with its id
-  // Better idea: mark stuff completed so it can be retrieved later!
-  static void cancelDownload(int id, {bool markCancelled = true}) {
-    downloadingItems.removeWhere((it) => it.id == id);
-    // Downloader.downloadQueue.removeWhere((item) => item.id == id);
-    downloadCount.value--;
+  /// Ports to send command to isolates
+  static final Map<int, SendPort> _isolatePorts = {};
+
+  /// The max concurrent downloads count
+  static const int MAX_DOWNLOADS_COUNT = 5;
+
+  /// The max batch size per stream (for segments)
+  static int MAX_STREAM_BATCH_SIZE = 5;
+
+  /// Count of Refetching failed segments
+  static int MAX_RETRY_ATTEMPTS = 5;
+
+  Future<void> startDownload(DownloadItem item) async {
+    // add the item to queue and wait for it to be processed
+    DownloadManager.enqueue(item);
+
+    _processQueue();
   }
 
-  // Mock a download for specified duration
-  void mockDownload(DownloadingItem item, Duration dur) async {
-    // downloadingItems.clear();
-    downloadingItems.add(item);
-    downloadCount.value++;
-    final steps = 50;
-    for (int i = 0; i <= steps; i++) {
-      await Future.delayed(Duration(milliseconds: dur.inMilliseconds ~/ steps));
-      item.progress = ((i / steps) * 100).toInt();
-    }
-    downloadingItems.removeWhere((it) => it.id == item.id);
-    downloadCount.value--;
-  }
+  // The heart of this class
+  Future<void> _processQueue() async {
+    final isFull = DownloadManager.downloadsCount.value >= MAX_DOWNLOADS_COUNT;
 
-  Future<void> downloadImage(String imageUrl, String fileName) async {
-    final permission = await helper.checkAndRequestPermission();
-    if (!permission) {
-      showToast("Permission denied! Grant access to storage");
-      throw Exception("Couldnt download image due to lack of permission!");
-    }
+    if (isFull) return; // ignore download request if batch is full
 
-    try {
-      final ext = imageUrl.split('.').lastOrNull; // yeah usually
-      fileName =
-          fileName.substring(0, fileName.length - "-Banner".length); // jst to remove the banner from anime_name-banner
-      final outDir = await helper.makeDirectory(fileName: fileName, isImage: true, fileExtension: ext);
-      final out = File(outDir);
-      final imgData = (await get(Uri.parse(imageUrl))).bodyBytes;
-      await out.writeAsBytes(imgData);
+    if (currentUserSettings?.useQueuedDownloads ?? false) {
+      // Pick next queued item and dont do anything if none left!
+      final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.status == DownloadStatus.queued);
+      if (item == null) return;
 
-      print("Saved image to ${out.path}");
-    } catch (err) {
-      throw Exception("Couldnt download image. $err");
+      // Dont download if active item is present
+      if (DownloadManager.downloadingItems.any((it) => it.status == DownloadStatus.downloading)) return;
+      item.status = DownloadStatus.downloading;
+      await _fireUpIsolate(item);
+    } else {
+      // Download items till tummy is filled (MAX_COUNT reached)
+      while (DownloadManager.downloadsCount.value < MAX_DOWNLOADS_COUNT) {
+        final next = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.isQueued);
+        if (next == null) break;
+        next.status = DownloadStatus.downloading;
+        await _fireUpIsolate(next);
+      }
     }
   }
 
-  /// Add a download item to queue
-  Future<void> addToQueue(
-    String streamLink,
-    String fileName, {
-    int retryAttempts = 5,
-    int parallelBatches = 5,
-    Map<String, String> customHeaders = const {},
-    String? subsUrl,
-  }) async {
-    final id = helper.generateId();
-    final downloadItem = DownloadingItem(
-      id: id,
-      status: DownloadStatus.queued,
-      streamLink: streamLink,
-      fileName: fileName,
-      retryAttempts: retryAttempts,
-      parallelBatches: parallelBatches,
-      customHeaders: customHeaders,
-      subtitleUrl: subsUrl,
+  Future<void> _fireUpIsolate(DownloadItem item) async {
+    final task = _cookTask(item);
+    Future<void> Function(DownloadTaskIsolate) downloadFunction;
+
+    final type = await _getDownloadType(item);
+
+    // Infer the type
+    switch (type) {
+      case _DownloadType.image:
+        downloadFunction = DownloaderCore.downloadImage;
+      case _DownloadType.video:
+        downloadFunction = DownloaderCore.downloadVideo;
+      case _DownloadType.stream:
+        downloadFunction = DownloaderCore.downloadStream;
+    }
+
+    // Run the downloading
+    final isolate = await Isolate.spawn(downloadFunction, task);
+    _isolates[item.id] = isolate;
+  }
+
+  Future<void> _cleanUp(int id) async {
+    // Close and remove isolate entry
+    _isolates[id]?.kill(priority: Isolate.immediate); // NUKE THAT F-
+    _isolates.remove(id);
+
+    // Close and remove port entry
+    _receivePorts[id]?.close();
+    _receivePorts.remove(id);
+
+    // Remove it from existence (list)
+    DownloadManager.dequeue(id);
+  }
+
+  Future<void> requestCancellation(int id) async {
+    _isolatePorts[id]?.send('cancel');
+    // hmm thinking of doing this, but since cancellation is requested
+    // and not really cancelled, should it be set as cancelled?
+    // DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id)?.status = DownloadStatus.cancelled;
+  }
+
+  Future<void> _handleMessage(dynamic msg) async {
+    if (!(msg is DownloadMessage)) return;
+    switch (msg.status) {
+      // Stuff for download state
+      case 'progress':
+        {
+          DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.progress = msg.progress;
+        }
+      case 'complete':
+        {
+          _cleanUp(msg.id);
+        }
+      case 'error':
+        {
+          _cleanUp(msg.id);
+          print("Welp, something went wrong..");
+          await Logger()
+            ..addLog("Download Manager: error on ${msg.id} ${msg.message}")
+            ..writeLog();
+        }
+      case 'fail':
+        {
+          _cleanUp(msg.id);
+          print("Download failed for ${msg.id}");
+        }
+      case 'cancel':
+        {
+          _cleanUp(msg.id);
+          print("Download cancelled for ${msg.id}");
+        }
+
+      // Non download state stuff
+      case 'port':
+        {
+          if (msg.extras.isNotEmpty && msg.extras.first is SendPort)
+            _isolatePorts[msg.id] = msg.extras.first as SendPort;
+        }
+
+      default:
+        {
+          throw Exception("What the f*ck is ${msg.status} supposed to mean? (Unknown status exception)");
+        }
+    }
+  }
+
+  DownloadTaskIsolate _cookTask(DownloadItem item) {
+    final rp = ReceivePort();
+
+    rp.listen(_handleMessage);
+
+    final rootIsolateToken = RootIsolateToken.instance!;
+
+    _receivePorts[item.id]?.close(); // close if already exists (JIC)
+    _receivePorts[item.id] = rp;
+
+    final task = DownloadTaskIsolate(
+      url: item.url,
+      fileName: item.fileName,
+      customHeaders: item.customHeaders,
+      retryAttempts: MAX_RETRY_ATTEMPTS,
+      parallelBatches: MAX_STREAM_BATCH_SIZE,
+      subsUrl: item.subtitleUrl,
+      sendPort: rp.sendPort,
+      id: item.id,
+      rootIsolateToken: rootIsolateToken,
     );
 
-    downloadingItems.add(downloadItem);
-    print("[DOWNLOADER] Added download $id to queue. Queue size: ${downloadingItems.length}");
-
-    if (!downloadingItems.any((item) => item.status == DownloadStatus.downloading)) {
-      _processQueue();
-    }
+    return task;
   }
 
-  /// download the items in queue
-  Future<void> _processQueue() async {
-    if (downloadingItems.isEmpty) return;
+  Future<_DownloadType> _getDownloadType(DownloadItem item) async {
+    final ext = _helper.extractVideoExtension(item.url);
+    final videoExtensions = ['mp4', 'mkv', 'avi', 'webm', 'flv'];
+    final streamExtensions = ['m3u8', 'm3u'];
 
-    // Pick the job from queue
-    // final item = downloadQueue.removeFirst();
-
-    // Pick the first queued item from list
-    final item = downloadingItems.firstWhere((it) => it.status == DownloadStatus.queued,
-        // fake an items with an invalid id
-        orElse: () => DownloadingItem(
-              id: 0,
-              status: DownloadStatus.failed,
-              fileName: "",
-            ));
-
-    if (item.id != 0) {
-      // set downloading
-      item.status = DownloadStatus.downloading;
-
-      // Yep! downloading that mofo
-      try {
-        await download(item.streamLink!, item.fileName,
-            retryAttempts: item.retryAttempts,
-            parallelBatches: item.parallelBatches,
-            id: item.id,
-            customHeaders: item.customHeaders,
-            subsUrl: item.subtitleUrl);
-      } catch (e) {
-        print("[DOWNLOADER] Error processing download ${item.id}: $e");
-      } finally {
-        print("Cancelling");
-        cancelDownload(item.id);
-
-        // Process next item (if available)
-        if (downloadingItems.isNotEmpty) {
-          _processQueue();
-        }
-      }
-    }
-  }
-
-  Future<void> download(
-    String streamLink,
-    String fileName, {
-    int retryAttempts = 5,
-    int parallelBatches = 5,
-    int? id = null,
-    Map<String, String> customHeaders = const {},
-    String? subsUrl,
-  }) async {
-    //generate an id for the downloading item and add it to the queue(list)
-    int? downloadId = id;
-    if (downloadId == null) {
-      downloadId = helper.generateId();
-      Downloader.downloadingItems.add(DownloadingItem(
-        id: downloadId,
-        status: DownloadStatus.downloading,
-        fileName: fileName,
-        customHeaders: customHeaders,
-      ));
+    if ((videoExtensions + streamExtensions).contains(ext)) {
+      if (videoExtensions.contains(ext)) return _DownloadType.video;
+      if (streamExtensions.contains(ext)) return _DownloadType.stream;
+      if (['webp', 'jpeg', 'jpg', 'png'].contains(ext)) return _DownloadType.image;
     }
 
-    // Notify a ongoing download
-    downloadCount.value++;
+    // Fallback (ik this is more precise, but dont wanna send a unnecessary request)
+    final mime = await _helper.getMimeType(item.url, item.customHeaders);
+    if (mime == null) throw Exception("Couldnt identify the media type.");
+    if (mime.contains("mpegurl")) return _DownloadType.stream;
+    if (mime.contains("video")) return _DownloadType.video;
+    if (mime.contains("image")) return _DownloadType.image;
 
-    final permission = await helper.checkAndRequestPermission();
-    if (!permission) {
-      cancelDownload(downloadId);
-      throw new Exception("ERR_NO_STORAGE_PERMISSION");
-    }
-
-    final finalPath = await helper.makeDirectory(fileName: fileName, fileExtension: "mp4");
-
-    // Download subtitles if available
-    if (subsUrl != null) downloadSubs(subsUrl, fileName);
-
-    final output = File(finalPath);
-
-    String? mime;
-
-    if (!streamLink.contains(RegExp(r'\.(mp4|mkv|avi|webm|m3u8|m3u)', caseSensitive: false))) {
-      mime = await helper.getMimeType(streamLink, customHeaders);
-      print("Got mime type: $mime");
-    }
-
-    // Running on hopes n assumptions
-    if ((mime != null && !mime.contains(RegExp(r'mpegurl', caseSensitive: false))) ||
-        streamLink.contains(RegExp(r'\.(mp4|mkv|avi|webm)', caseSensitive: false))) {
-      return await downloadMp4(streamLink, finalPath, fileName, downloadId, customHeaders: customHeaders);
-    }
-
-    print("Assuming its a stream!");
-
-    // open the write mode
-    final out = await output.openWrite();
-
-    try {
-      final streamBaseLink = helper.makeBaseLink(streamLink);
-      final List<String> segments = await helper.getSegments(streamLink, customHeaders: customHeaders);
-      List<String> segmentsFiltered = [];
-      segments.forEach(
-        (element) {
-          if (element.length != 0) segmentsFiltered.add(element);
-        },
-      );
-
-      final parallelDownloadsBatchSize = parallelBatches;
-
-      int lastUpdatedProgress = 0; // Dont notify if progress is same
-
-      for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
-        final List<BufferItem> buffers = [];
-
-        final downloading = Downloader.downloadingItems.where((item) => item.id == downloadId).firstOrNull;
-
-        //send cancelled notification and delete the file
-        if (downloading == null) {
-          await NotificationService().pushBasicNotification(
-            downloadId,
-            "Download Cancelled",
-            "The download ($fileName) has been cancelled.",
-          );
-          await out.close();
-          await output.delete();
-          return;
-        }
-
-        // calculate batch's length
-        final batchEnd = (i + parallelDownloadsBatchSize < segmentsFiltered.length)
-            ? i + parallelDownloadsBatchSize
-            : segmentsFiltered.length;
-        final batches = segmentsFiltered.sublist(i, batchEnd);
-
-        print("[DOWNLOADER]<${downloadId}> fetching segments [$i-$batchEnd of ${segments.length - 1}]");
-
-        final futures = batches.map((segment) async {
-          final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
-          final segmentNumber = segments.indexOf(segment) + 1;
-
-          final progress = ((segmentNumber / segments.length) * 100).toInt();
-
-          if (progress > lastUpdatedProgress) {
-            // Update download progress thru the notification
-            NotificationService().updateNotificationProgressBar(
-              id: downloadId!,
-              currentStep: progress,
-              maxStep: 100,
-              fileName: "$fileName.mp4",
-              path: finalPath,
-            );
-
-            downloading.progress = progress;
-
-            lastUpdatedProgress = progress;
-          }
-
-          final res = await helper.downloadSegmentWithRetries(uri, retryAttempts, customHeaders: customHeaders);
-
-          if (res.statusCode == 200) {
-            if (helper.encryptionKey != null) {
-              buffers.add(BufferItem(index: segmentNumber, buffer: helper.decryptSegment(res.bodyBytes)));
-            } else {
-              buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
-            }
-          } else
-            throw new Exception("ERR_REQ_FAILED");
-        });
-
-        //wait till whole batch is downloaded
-        await Future.wait(futures);
-
-        //sort the buffers
-        buffers.sort((a, b) => a.index.compareTo(b.index));
-
-        // Write the downloaded buffers
-        for (final b in buffers) out.add(b.buffer);
-      }
-
-      print("[DOWNLOADER]<$downloadId> Download compelete!");
-
-      // send the completion notification
-      NotificationService().downloadCompletionNotification(
-        id: downloadId,
-        fileName: "$fileName.mp4",
-        path: finalPath,
-      );
-
-      cancelDownload(downloadId); //remove the download from the active list
-
-      await out.close();
-    } catch (err) {
-      print(err);
-
-      //send download failed notification & cleanup
-      await NotificationService().pushBasicNotification(
-        downloadId,
-        "Download failed",
-        "The download has been cancelled.",
-      );
-      cancelDownload(downloadId);
-      await out.close();
-      if (await output.exists()) output.delete();
-    }
-  }
-
-  Future<void> downloadMp4(String link, String filepath, String fileName, int downloadId,
-      {Map<String, String> customHeaders = const {}}) async {
-    //we considering the file as mp4
-    final req = Request("GET", Uri.parse(link));
-    // add the headers
-    req.headers.addAll(customHeaders);
-    final res = await req.send();
-    if (!(res.statusCode >= 200 && res.statusCode < 300)) {
-      throw Exception("Received response with status code ${res.statusCode}");
-    }
-    final totalSize = res.contentLength ?? -1;
-    int downloadedBytes = 0;
-    final file = File(filepath);
-    final sink = file.openWrite();
-    int lastProgress = 0;
-    int lastPrintedProgress = 0; // to reduce console logs.
-
-    StreamSubscription<List<int>>? subscription;
-
-    final completer = Completer<void>();
-
-    subscription = res.stream.listen((chunk) {
-      final downloading = (downloadingItems.where((it) => it.id == downloadId).firstOrNull);
-
-      if (downloading == null) {
-        subscription?.cancel();
-        sink.close();
-        file.deleteSync();
-        NotificationService().pushBasicNotification(
-          downloadId,
-          "Download Cancelled",
-          "The download ($fileName) has been cancelled.",
-        );
-        return completer.complete();
-      }
-      sink.add(chunk);
-      downloadedBytes += chunk.length;
-
-      final progress = (downloadedBytes / totalSize * 100).toInt();
-
-      if (progress > lastProgress) {
-        // just to reduce the logging from 100 to 10
-        if (progress >= lastPrintedProgress) {
-          print("[DOWNLOADER]<$downloadId> Progress: ${progress}%");
-          lastPrintedProgress += 10;
-        }
-
-        downloading.progress = progress;
-
-        NotificationService().updateNotificationProgressBar(
-          id: downloadId,
-          currentStep: progress,
-          maxStep: 100,
-          fileName: "$fileName.mp4",
-          path: filepath,
-        );
-      }
-
-      lastProgress = progress;
-    }, onDone: () async {
-      await sink.close();
-      print("[DOWNLOADER] succesfully written the file to disk");
-      NotificationService().downloadCompletionNotification(fileName: fileName, path: filepath, id: downloadId);
-      cancelDownload(downloadId);
-      completer.complete();
-    }, onError: (err) {
-      print(err);
-      print("From media url: $link");
-      NotificationService()
-          .pushBasicNotification(downloadId, "Download Failed", "Something went wrong while fetching the file.");
-      cancelDownload(downloadId);
-      completer.completeError(err);
-    });
-
-    return completer.future;
-  }
-
-  Future<void> downloadSubs(String url, String fileName) async {
-    final path =
-        await helper.makeDirectory(fileName: fileName + "_subs", fileExtension: url.split(".").lastOrNull ?? "txt");
-    final file = File(path);
-    await file.writeAsString((await get(Uri.parse(url))).body);
-    return;
+    throw Exception("The file of recieved format downloading isnt supported!");
   }
 }

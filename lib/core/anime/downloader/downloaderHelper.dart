@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:device_info_plus/device_info_plus.dart';
@@ -45,19 +45,34 @@ class DownloaderHelper {
   }
 
   /// Generate id for the item
-  int generateId() {
-    int maxId = Downloader.downloadingItems.isNotEmpty
-        ? Downloader.downloadingItems
+  static int generateId() {
+    int maxId = DownloadManager.downloadingItems.isNotEmpty
+        ? DownloadManager.downloadingItems
             .map((item) => item.id) // get list of ids
             .reduce((a, b) => a > b ? a : b) // find the greatest number
         : 0;
     return maxId + 1;
   }
 
+  Future<String> getDownloadsPath() async {
+    String defDownloadPath; // just for windows
+
+    if (currentUserSettings?.downloadPath != null) {
+      return currentUserSettings!.downloadPath!;
+    } else {
+      try {
+        defDownloadPath = (await getDownloadsDirectory())!.path;
+      } catch (err) {
+        // Default fallback
+        defDownloadPath = '${Platform.environment['USERPROFILE']}\\Downloads';
+      }
+      return Platform.isWindows ? defDownloadPath : '/storage/emulated/0/Download/animestream';
+    }
+  }
+
   /// Make the directory for the file
   Future<String> makeDirectory({required String fileName, bool isImage = false, String? fileExtension = null}) async {
-    final basePath = currentUserSettings?.downloadPath ??
-        (Platform.isWindows ? (await getDownloadsDirectory())!.path : '/storage/emulated/0/Download/animestream');
+    final basePath = await getDownloadsPath();
 
     final downPath = await Directory(basePath);
     String finalPath;
@@ -114,7 +129,8 @@ class DownloaderHelper {
     }
   }
 
-  Future<Response> downloadSegmentWithRetries(String url, int totalAttempts, {Map<String, String> customHeaders = const {}}) async {
+  Future<Response> downloadSegmentWithRetries(String url, int totalAttempts,
+      {Map<String, String> customHeaders = const {}}) async {
     int currentAttempt = 0;
     while (currentAttempt < totalAttempts) {
       try {
@@ -150,7 +166,9 @@ class DownloaderHelper {
               continue;
             }
             print("[DOWNLOADER] Found encryption: ${match.group(1)}");
-            encryptionKey = (await get(Uri.parse(match.group(2)!), headers: customHeaders)).bodyBytes;
+            String keyLink = match.group(2)!;
+            keyLink = keyLink.startsWith("http") ? keyLink : makeBaseLink(url) + "/$keyLink";
+            encryptionKey = (await get(Uri.parse(keyLink), headers: customHeaders)).bodyBytes;
           }
         }
       }
@@ -165,14 +183,24 @@ class DownloaderHelper {
   }
 
   Future<String?> getMimeType(String url, Map<String, String> headers) async {
-  final client = HttpClient();
-  try {
-    final request = await client.headUrl(Uri.parse(url));
-    headers.forEach((k,v) => request.headers.set(k, v));
-    final res = await request.close();
-    return res.headers.contentType?.mimeType;
-  } finally {
-    client.close();
+    final client = HttpClient();
+    try {
+      final request = await client.headUrl(Uri.parse(url));
+      headers.forEach((k, v) => request.headers.set(k, v));
+      final res = await request.close();
+      return res.headers.contentType?.mimeType;
+    } finally {
+      client.close();
+    }
   }
+
+  // Small regex for getting usual extensions
+  String? extractVideoExtension(String url) {
+  final match = RegExp(r'\.([a-zA-Z0-9]+)(?:\?|#|$)').firstMatch(url);
+  if (match == null) return null;
+
+  final ext = match.group(1)?.toLowerCase();
+
+  return ext;
 }
 }

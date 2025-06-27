@@ -1,6 +1,4 @@
-import 'dart:ui';
-
-import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';
@@ -84,7 +82,7 @@ class _InfoDesktopState extends State<InfoDesktop> {
                               final img = provider.data.banner ?? provider.data.cover;
                               final title = provider.data.title;
                               try {
-                              await Downloader().downloadImage(img, "${title['english'] ?? title['romaji'] ?? "unknown"}-Banner");
+                              await DownloadManager().addDownloadTask(img, "${title['english'] ?? title['romaji'] ?? "unknown"}-Banner");
                               floatingSnackBar("Image has been saved!");
                               } catch(err) {
                                 floatingSnackBar("Couldnt download image");

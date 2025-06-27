@@ -3,9 +3,7 @@ import 'dart:convert';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/data/misc.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
-import 'package:html/parser.dart';
 import 'package:http/http.dart';
 
 class AniPlay extends AnimeProvider {
@@ -197,52 +195,52 @@ class AniPlay extends AnimeProvider {
     throw UnimplementedError();
   }
 
-  Future<Map<String, String>> _extractKeys(String baseUrl) async {
-    final prefs = await getMiscVal("aniplayTokens") as List<String>? ?? ["", "0"];
-    final storedKeys = prefs[0];
-    final storedTimestamp = int.tryParse(prefs[1]) ?? 0;
-    final nowTs = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+  // Future<Map<String, String>> _extractKeys(String baseUrl) async {
+  //   final prefs = await getMiscVal("aniplayTokens") as List<String>? ?? ["", "0"];
+  //   final storedKeys = prefs[0];
+  //   final storedTimestamp = int.tryParse(prefs[1]) ?? 0;
+  //   final nowTs = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    if (nowTs - storedTimestamp < 60 * 60 && storedKeys.contains(baseUrl)) {
-      return Map<String, String>.from(json.decode(storedKeys));
-    }
+  //   if (nowTs - storedTimestamp < 60 * 60 && storedKeys.contains(baseUrl)) {
+  //     return Map<String, String>.from(json.decode(storedKeys));
+  //   }
 
-    final randomAnimeUrl = "$baseUrl/anime/watch/1";
-    final res1 = await get(Uri.parse(randomAnimeUrl));
-    final body1 = res1.body;
+  //   final randomAnimeUrl = "$baseUrl/anime/watch/1";
+  //   final res1 = await get(Uri.parse(randomAnimeUrl));
+  //   final body1 = res1.body;
 
-    final sKey = "/_next/static/chunks/app/(user)/(media)/";
-    final eKey = '"';
-    final start = body1.indexOf(sKey);
-    if (start == -1) throw Exception("Start key not found");
+  //   final sKey = "/_next/static/chunks/app/(user)/(media)/";
+  //   final eKey = '"';
+  //   final start = body1.indexOf(sKey);
+  //   if (start == -1) throw Exception("Start key not found");
 
-    final jsSlugStart = start + sKey.length;
-    final jsSlugEnd = body1.indexOf(eKey, jsSlugStart);
-    final jsSlug = body1.substring(jsSlugStart, jsSlugEnd);
+  //   final jsSlugStart = start + sKey.length;
+  //   final jsSlugEnd = body1.indexOf(eKey, jsSlugStart);
+  //   final jsSlug = body1.substring(jsSlugStart, jsSlugEnd);
 
-    final jsUrl = "$baseUrl$sKey$jsSlug";
-    final res2 = await get(Uri.parse(jsUrl));
-    final body2 = res2.body;
+  //   final jsUrl = "$baseUrl$sKey$jsSlug";
+  //   final res2 = await get(Uri.parse(jsUrl));
+  //   final body2 = res2.body;
 
-    final regex = RegExp(
-      r'\(0,\w+\.createServerReference\)\("([a-f0-9]+)",\w+\.callServer,void 0,\w+\.findSourceMapURL,"(getSources|getEpisodes)"\)',
-      multiLine: true,
-    );
+  //   final regex = RegExp(
+  //     r'\(0,\w+\.createServerReference\)\("([a-f0-9]+)",\w+\.callServer,void 0,\w+\.findSourceMapURL,"(getSources|getEpisodes)"\)',
+  //     multiLine: true,
+  //   );
 
-    final matches = regex.allMatches(body2);
-    final keysMap = <String, String>{};
+  //   final matches = regex.allMatches(body2);
+  //   final keysMap = <String, String>{};
 
-    for (final match in matches) {
-      final hashId = match.group(1)!;
-      final functionName = match.group(2)!;
-      keysMap[functionName] = hashId;
-    }
+  //   for (final match in matches) {
+  //     final hashId = match.group(1)!;
+  //     final functionName = match.group(2)!;
+  //     keysMap[functionName] = hashId;
+  //   }
 
-    keysMap["baseUrl"] = baseUrl;
+  //   keysMap["baseUrl"] = baseUrl;
 
-    final newKeys = json.encode(keysMap);
-    await storeMiscVal("aniplayTokens", [newKeys, nowTs.toString()]);
+  //   final newKeys = json.encode(keysMap);
+  //   await storeMiscVal("aniplayTokens", [newKeys, nowTs.toString()]);
 
-    return keysMap;
-  }
+  //   return keysMap;
+  // }
 }

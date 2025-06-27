@@ -1,4 +1,4 @@
-import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
@@ -112,7 +112,7 @@ class NotificationController {
     if (receivedAction.buttonKeyPressed == 'cancel') {
       final id = receivedAction.payload!['id']!;
       NotificationService().removeNotification(int.parse(id));
-      Downloader.cancelDownload(int.parse(id));
+      DownloadManager().cancelDownload(int.parse(id));
     }
     if (receivedAction.buttonKeyPressed == 'open_file') {
       OpenFile.open(receivedAction.payload?['path'], type: "video/mp4");

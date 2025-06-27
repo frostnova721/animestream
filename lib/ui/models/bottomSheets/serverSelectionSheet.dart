@@ -1,8 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
-import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
@@ -280,38 +279,19 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   Map<String, String> headers = Map.from(mapped).cast();
 
                   final fileName = "${title} Ep ${widget.episodeIndex + 1}";
-                  final parallelBatches = (currentUserSettings?.fasterDownloads ?? false) ? 10 : 5;
-                  final streamLink =  qualities[ind]['link']!;
+                  final streamLink = qualities[ind]['link']!;
+                  // print(streamLink);
 
-                  if (currentUserSettings?.useQueuedDownloads ?? false) {
-                    Downloader()
-                        .addToQueue(
-                     streamLink,
-                      fileName,
-                      parallelBatches: parallelBatches,
-                      customHeaders: headers,
-                      subsUrl: subs,
-                    )
-                        .onError((err, st) {
-                      print(err);
-                      print(st);
-                      floatingSnackBar("$err");
-                    });
-                  } else {
-                    Downloader()
-                        .download(
-                      streamLink,
-                      fileName,
-                      parallelBatches: parallelBatches,
-                      customHeaders: headers,
-                      subsUrl: subs,
-                    )
-                        .onError((err, st) {
-                      print(err);
-                      print(st);
-                      floatingSnackBar("$err");
-                    });
-                  }
+                  DownloadManager().addDownloadTask(
+                    streamLink,
+                    fileName,
+                    customHeaders: headers,
+                    subtitleUrl: subs,
+                  ).onError((err, st) {
+                    print(err);
+                    print(st);
+                    floatingSnackBar("$err");
+                  });
                   Navigator.of(context).pop();
                   floatingSnackBar("Downloading the episode to your downloads folder");
                 },

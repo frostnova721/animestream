@@ -127,10 +127,10 @@ flutter:
   fonts:
     - family: Inter
       fonts:
-        - asset: lib/assets/fonts/inter-Regular.ttf
+        - asset: lib/assets/fonts/Inter-Regular.ttf
           style: normal
           weight: 500
-        - asset: lib/assets/fonts/inter-Bold.ttf
+        - asset: lib/assets/fonts/Inter-Bold.ttf
           weight: 700
     - family: OpenSans
       fonts:

@@ -1,8 +1,8 @@
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/types.dart';
@@ -1332,7 +1332,7 @@ class _InfoMobileState extends State<InfoMobile> {
                           child: ElevatedButton(
                             onPressed: () async {
                               try {
-                                await Downloader().downloadImage(
+                                await DownloadManager().addDownloadTask(
                                     img,
                                     (provider.data.title['english'] ?? provider.data.title['romaji'] ?? "anime") +
                                         "_Banner");

@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:animestream/ui/models/extensions.dart';
+import 'package:animestream/core/commons/extensions.dart';
 import 'package:flutter/material.dart';
 
 class SubtitleSettings {

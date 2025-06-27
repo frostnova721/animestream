@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:flutter/material.dart';
 
 extension ColorExtensions on Color {
@@ -38,4 +39,14 @@ extension StringExtensions on String {
   Uri? toUri() {
     return Uri.tryParse(this);
   }
+}
+
+extension DownloadStatusExtension on DownloadStatus {
+  bool get isActive => this == DownloadStatus.queued || this == DownloadStatus.downloading;
+  bool get isDead => this == DownloadStatus.cancelled || this == DownloadStatus.completed || this == DownloadStatus.failed;
+}
+
+extension DownloadItemExtension on DownloadItem {
+  bool get isActive => this.status.isActive;
+  bool get isQueued => this.status == DownloadStatus.queued;
 }

@@ -1,5 +1,4 @@
 import 'package:animestream/core/anime/providers/animeProvider.dart';
-import 'package:animestream/core/anime/providers/providerManager.dart';
 // import 'package:d4rt/d4rt.dart';
 
 class ProviderPlugin {
@@ -8,21 +7,22 @@ class ProviderPlugin {
     _setupCompiler();
   }
 
-  final Map<String, AnimeProvider> _compiledProviders = {};
+  // final Map<String, AnimeProvider> _compiledProviders = {};
 
   void _setupCompiler() {}
 
   Future<AnimeProvider?> getProvider(String provider, {String? testCode}) async {
-    if (provider.isEmpty && testCode == null) return null;
+    return null;
+    // if (provider.isEmpty && testCode == null) return null;
 
-    final cachedProvider = _compiledProviders[provider];
-    if (cachedProvider != null) return cachedProvider;
+    // final cachedProvider = _compiledProviders[provider];
+    // if (cachedProvider != null) return cachedProvider;
 
-    print("Cache miss. compiling provider.");
+    // print("Cache miss. compiling provider.");
 
-    final program = testCode != null ? testCode : await ProviderManager().getSavedProviderCode(provider);
+    // final program = testCode != null ? testCode : await ProviderManager().getSavedProviderCode(provider);
 
-    if (program == null) return null;
+    // if (program == null) return null;
 
     // final d4rt = D4rt();
 

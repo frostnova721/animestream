@@ -1,6 +1,4 @@
-import 'dart:math';
-
-import 'package:animestream/core/anime/downloader/downloader.dart';
+import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:flutter/material.dart';
@@ -21,12 +19,22 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
 
   late final TabController _tabController;
 
+  int downloadCount = 1;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: () {
-        Downloader().mockDownload(DownloadingItem(id: Random().nextInt(100), status: DownloadStatus.downloading, fileName: "Apothe niggas sd sdf sdffg hgdr5t wersdsg sfdg Ep 1"), Duration(seconds: 60));
-      }, child: Icon(Icons.run_circle_outlined),),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            // Downloader().addToQueue(
+              // "https://vault-14.kwikie.ru/stream/14/06/3227de914404951e539d296cf9dcb40faae39ae7d979e50393c6be0bd73be9db/uwu.m3u8",
+              // "nigga $downloadCount",
+            // );
+            // DownloadManager.mockDownload(DownloadingItem(id: Random().nextInt(100), status: DownloadStatus.downloading, fileName: "Apothe niggas sd sdf sdffg hgdr5t wersdsg sfdg Ep 1"), Duration(seconds: 60));
+            downloadCount++;
+          },
+          child: Icon(Icons.run_circle_outlined),
+        ),
         appBar: AppBar(
           title: Text(
             "Downloads",
@@ -74,11 +82,11 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
 
   Widget _buildDownloading() {
     return ValueListenableBuilder(
-      valueListenable: Downloader.downloadCount,
+      valueListenable: DownloadManager.downloadsCount,
       builder: (ctx, val, child) => ListView.builder(
-        itemCount: Downloader.downloadingItems.length,
+        itemCount: DownloadManager.downloadingItems.length,
         itemBuilder: (context, index) {
-          return _downloadItem(Downloader.downloadingItems[index]);
+          return _downloadItem(DownloadManager.downloadingItems[index]);
         },
       ),
     );
@@ -87,7 +95,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   Widget _buildDownloaded() {
     return ListView.builder(
       itemBuilder: (context, index) {
-
+        return Container();
       },
     );
   }
@@ -106,7 +114,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
     );
   }
 
-  Widget _downloadItem(DownloadingItem downloadingItem) {
+  Widget _downloadItem(DownloadItem downloadingItem) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       child: Row(
@@ -135,22 +143,27 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                     ),
                   ),
                   ValueListenableBuilder(
-                    valueListenable: downloadingItem.progressNotifier,
-                    builder: (context, value, child) {
-                      return downloadingItem.status == DownloadStatus.downloading ? LinearProgressIndicator(
-                        value: downloadingItem.progress / 100
-                      ) : Text("queued", style: TextStyle(fontFamily: "NunitoSans", fontSize: 14, color: appTheme.textSubColor),);
-                    }
-                  ),
+                      valueListenable: downloadingItem.progressNotifier,
+                      builder: (context, value, child) {
+                        return downloadingItem.status == DownloadStatus.downloading
+                            ? LinearProgressIndicator(value: downloadingItem.progress / 100)
+                            : Text(
+                                "queued",
+                                style: TextStyle(fontFamily: "NunitoSans", fontSize: 14, color: appTheme.textSubColor),
+                              );
+                      }),
                 ],
               ),
             ),
           ),
           IconButton(
             onPressed: () {
-              Downloader.cancelDownload(downloadingItem.id);
+              DownloadManager().cancelDownload(downloadingItem.id);
             },
-            icon: Icon(Icons.close, color: appTheme.textMainColor,),
+            icon: Icon(
+              Icons.close,
+              color: appTheme.textMainColor,
+            ),
           )
         ],
       ),

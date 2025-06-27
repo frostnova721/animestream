@@ -1,4 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/app/version.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -152,7 +153,8 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                           "Thanks For Downloading!! ❤️",
                           style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 16),
                         ),
-                      )
+                      ),
+                      Align(alignment: Alignment.bottomCenter ,child: Text(AppVersion.instance.nickname),),
                     ],
                   )
                 : Center(

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/core/app/version.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/theme/lime.dart';
@@ -40,6 +41,9 @@ void main(List<String> args) async {
     WidgetsFlutterBinding.ensureInitialized();
 
     final Directory dir = await getApplicationDocumentsDirectory();
+
+    // Initialise app version instance
+    AppVersion.init();
 
     await Hive.initFlutter(dir.path);
 

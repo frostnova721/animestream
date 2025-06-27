@@ -70,7 +70,7 @@ class PlayerDataProvider extends ChangeNotifier {
       mime = headRes.headers['content-type'];
       print(mime);
     }
-    if (url.contains(".m3u8") || (mime != null && mime.contains("mpegurl"))) { // text/plain usually means its m3u8 or dash
+    if (url.contains(".m3u8") || (mime != null && mime.contains("mpegurl"))) {
       final qualities = await getQualityStreams(url, customHeader: headers);
       _state = _state.copyWith(qualities: qualities);
     } else {

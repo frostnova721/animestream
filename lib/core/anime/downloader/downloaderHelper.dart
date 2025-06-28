@@ -71,8 +71,8 @@ class DownloaderHelper {
   }
 
   /// Make the directory for the file
-  Future<String> makeDirectory({required String fileName, bool isImage = false, String? fileExtension = null}) async {
-    final basePath = await getDownloadsPath();
+  Future<String> makeDirectory({required String fileName, required downloadPath,  bool isImage = false, String? fileExtension = null}) async {
+    final basePath = downloadPath;
 
     final downPath = await Directory(basePath);
     String finalPath;
@@ -84,22 +84,24 @@ class DownloaderHelper {
     // split the anime name
     final animeName = fileName.replaceAll(RegExp(r'\s+ep\s*\d+\s*$', caseSensitive: false), '').trim();
 
-    if (downPath.existsSync()) {
+    // The check was BS since non existing directory cant be selected!
+    // if (downPath.existsSync()) {
       final directory = Directory("${downPath.path}/$animeName");
       if (!(await directory.exists())) {
         await directory.create(recursive: true);
       }
 
       finalPath = '$basePath/$animeName/$fileName.$ext';
-    } else {
-      final externalStorage = await getExternalStorageDirectory();
-      final directory = Directory("${externalStorage?.path}/$animeName");
-      if (!(await directory.exists())) {
-        await directory.create(recursive: true);
-      }
+    // } else {
+    //   // This block shouldnt be called in normal cases btw
+    //   final externalStorage = await getExternalStorageDirectory();
+    //   final directory = Directory("${externalStorage?.path}/$animeName");
+    //   if (!(await directory.exists())) {
+    //     await directory.create(recursive: true);
+    //   }
 
-      finalPath = "${externalStorage?.path}/$animeName/$fileName.$ext";
-    }
+    //   finalPath = "${externalStorage?.path}/$animeName/$fileName.$ext";
+    // }
 
     return finalPath;
   }
@@ -195,7 +197,7 @@ class DownloaderHelper {
   }
 
   // Small regex for getting usual extensions
-  String? extractVideoExtension(String url) {
+  String? extractExtension(String url) {
   final match = RegExp(r'\.([a-zA-Z0-9]+)(?:\?|#|$)').firstMatch(url);
   if (match == null) return null;
 

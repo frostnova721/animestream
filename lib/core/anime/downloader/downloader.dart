@@ -67,7 +67,6 @@ class Downloader {
   }
 
   Future<void> _fireUpIsolate(DownloadItem item) async {
-    final task = _cookTask(item);
     Future<void> Function(DownloadTaskIsolate) downloadFunction;
 
     final type = await _getDownloadType(item);
@@ -81,6 +80,10 @@ class Downloader {
       case _DownloadType.stream:
         downloadFunction = DownloaderCore.downloadStream;
     }
+
+    final path = await _helper.getDownloadsPath();
+
+    final task = _cookTask(item, path);
 
     // Run the downloading
     final isolate = await Isolate.spawn(downloadFunction, task);
@@ -100,6 +103,14 @@ class Downloader {
     DownloadManager.dequeue(id);
   }
 
+  Future<void> _endTask(int id) async {
+    // Perform isolate kill
+    await _cleanUp(id);
+
+    // Continue next download if scheduled
+    _processQueue();
+  }
+
   Future<void> requestCancellation(int id) async {
     _isolatePorts[id]?.send('cancel');
     // hmm thinking of doing this, but since cancellation is requested
@@ -117,11 +128,11 @@ class Downloader {
         }
       case 'complete':
         {
-          _cleanUp(msg.id);
+          _endTask(msg.id);
         }
       case 'error':
         {
-          _cleanUp(msg.id);
+          _endTask(msg.id);
           print("Welp, something went wrong..");
           await Logger()
             ..addLog("Download Manager: error on ${msg.id} ${msg.message}")
@@ -129,12 +140,12 @@ class Downloader {
         }
       case 'fail':
         {
-          _cleanUp(msg.id);
-          print("Download failed for ${msg.id}");
+          _endTask(msg.id);
+          print("Download failed for ${msg.id}. Reason: ${msg.message}");
         }
       case 'cancel':
         {
-          _cleanUp(msg.id);
+          _endTask(msg.id);
           print("Download cancelled for ${msg.id}");
         }
 
@@ -152,7 +163,7 @@ class Downloader {
     }
   }
 
-  DownloadTaskIsolate _cookTask(DownloadItem item) {
+  DownloadTaskIsolate _cookTask(DownloadItem item, String downloadPath) {
     final rp = ReceivePort();
 
     rp.listen(_handleMessage);
@@ -172,13 +183,14 @@ class Downloader {
       sendPort: rp.sendPort,
       id: item.id,
       rootIsolateToken: rootIsolateToken,
+      downloadPath: downloadPath,
     );
 
     return task;
   }
 
   Future<_DownloadType> _getDownloadType(DownloadItem item) async {
-    final ext = _helper.extractVideoExtension(item.url);
+    final ext = _helper.extractExtension(item.url);
     final videoExtensions = ['mp4', 'mkv', 'avi', 'webm', 'flv'];
     final streamExtensions = ['m3u8', 'm3u'];
 

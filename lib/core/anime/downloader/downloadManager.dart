@@ -1,6 +1,8 @@
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/widgets.dart';
 
 /// Manages and Keeps track of downloads.
@@ -24,7 +26,8 @@ class DownloadManager {
   static void enqueue(DownloadItem item) {
     _downloadingItems.add(item);
     downloadsCount.value++;
-    print("Added item to queue. Items in queue: ${downloadsCount.value}");
+    print(
+        "Added item to queue. Items in queue: ${downloadsCount.value}. [queue mode: ${(currentUserSettings?.useQueuedDownloads ?? false)}");
   }
 
   /// The queue is managed from [Downloader] class
@@ -39,6 +42,10 @@ class DownloadManager {
     String? subtitleUrl,
     Map<String, String> customHeaders = const {},
   }) async {
+    if(!(await DownloaderHelper().checkAndRequestPermission())) {
+      floatingSnackBar("Provide storage access for downloading...");
+      return;
+    }
     final id = DownloaderHelper.generateId();
 
     final item = DownloadItem(

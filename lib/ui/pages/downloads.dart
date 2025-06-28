@@ -94,6 +94,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
 
   Widget _buildDownloaded() {
     return ListView.builder(
+      itemCount: 0,
       itemBuilder: (context, index) {
         return Container();
       },

@@ -83,6 +83,7 @@ class DownloadTaskIsolate {
   final String? subsUrl;
   final SendPort? sendPort;
   final RootIsolateToken rootIsolateToken;
+  String downloadPath;
 
   DownloadTaskIsolate({
     required this.url,
@@ -94,6 +95,7 @@ class DownloadTaskIsolate {
     required this.sendPort,
     required this.id,
     required this.rootIsolateToken,
+    required this.downloadPath,
   });
 }
 

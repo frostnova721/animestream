@@ -4,7 +4,6 @@ import 'dart:isolate';
 
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
-import 'package:animestream/ui/models/snackBar.dart';
 import 'package:http/http.dart';
 
 // The class handling the core of downloading
@@ -20,13 +19,14 @@ class DownloaderCore {
   DownloadStatus _status = DownloadStatus.downloading;
 
   Future<void> _downloadStream(DownloadTaskIsolate task) async {
-    helper.checkAndRequestPermission();
+
     _setUpPorts(task);
 
-    final finalPath = await helper.makeDirectory(fileName: task.fileName, fileExtension: "mp4");
+    final finalPath =
+        await helper.makeDirectory(fileName: task.fileName, fileExtension: "mp4", downloadPath: task.downloadPath);
 
     // Download subtitles if available
-    if (task.subsUrl != null) downloadSubs(task.subsUrl!, task.fileName);
+    if (task.subsUrl != null) downloadSubs(task.subsUrl!, task.fileName, task.downloadPath);
 
     final output = File(finalPath);
 
@@ -139,14 +139,17 @@ class DownloaderCore {
 
   /// Download a mp4 video
   Future<void> _downloadVideo(DownloadTaskIsolate task) async {
-    helper.checkAndRequestPermission();
     _setUpPorts(task);
 
     // Guess/Extract extension from link, otherwise give null and download as an mp4
-    String? extensionGuess = helper.extractVideoExtension(task.url);
+    String? extensionGuess = helper.extractExtension(task.url);
     extensionGuess = ['mp4', 'mkv', 'avi', 'webm', 'flv'].contains(extensionGuess) ? extensionGuess : null;
 
-    final filepath = await helper.makeDirectory(fileName: task.fileName, fileExtension: extensionGuess);
+    final filepath = await helper.makeDirectory(
+      fileName: task.fileName,
+      fileExtension: extensionGuess,
+      downloadPath: task.downloadPath,
+    );
 
     //we considering the file as mp4
     final req = Request("GET", Uri.parse(task.url));
@@ -182,6 +185,7 @@ class DownloaderCore {
             status: 'cancel',
             id: task.id,
           ));
+          return;
         }
 
         sink.add(chunk);
@@ -226,17 +230,16 @@ class DownloaderCore {
 
   /// Download an Image
   Future<void> _downloadImage(DownloadTaskIsolate task) async {
-    final permission = await helper.checkAndRequestPermission();
-    if (!permission) {
-      showToast("Permission denied! Grant access to storage");
-      throw Exception("Couldnt download image due to lack of permission!");
-    }
-
     try {
-      final ext = task.url.split('.').lastOrNull; // yeah usually
+      final ext = helper.extractExtension(task.url);
       final fileName = task.fileName.substring(
           0, task.fileName.length - "-Banner".length); // jst to remove the 'banner' suffix from anime_name-banner
-      final outDir = await helper.makeDirectory(fileName: fileName, isImage: true, fileExtension: ext);
+      final outDir = await helper.makeDirectory(
+        fileName: fileName,
+        isImage: true,
+        fileExtension: ext,
+        downloadPath: task.downloadPath,
+      );
       final out = File(outDir);
       final imgData = (await get(Uri.parse(task.url))).bodyBytes;
       await out.writeAsBytes(imgData);
@@ -247,9 +250,12 @@ class DownloaderCore {
     }
   }
 
-  Future<void> downloadSubs(String url, String fileName) async {
-    final path =
-        await helper.makeDirectory(fileName: fileName + "_subs", fileExtension: url.split(".").lastOrNull ?? "txt");
+  Future<void> downloadSubs(String url, String fileName, String downloadPath) async {
+    final path = await helper.makeDirectory(
+      fileName: fileName + "_subs",
+      fileExtension: url.split(".").lastOrNull ?? "txt",
+      downloadPath: downloadPath,
+    );
     final file = File(path);
     await file.writeAsString((await get(Uri.parse(url))).body);
     return;

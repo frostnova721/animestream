@@ -35,7 +35,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
 
   bool loaded = false;
 
-  String appVersion = '';
+  String appVersion = AppVersion.instance.version;
   String appName = '';
   bool iconPressed = false;
 
@@ -89,13 +89,40 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                 ],
                                 child: Container(
                                     padding: EdgeInsets.only(right: 25),
-                                    child: Image.asset(
-                                      // iconPressed
-                                      //     ? 'lib/assets/icons/logo_monochrome.png'
-                                      'lib/assets/icons/logo_foreground.png',
-                                      color: iconPressed ? appTheme.textMainColor : null,
-                                      height: 100,
-                                      width: 100,
+                                    child: AnimatedSwitcher(
+                                      duration: Duration(milliseconds: 400),
+                                      switchInCurve: Curves.easeOutCubic,
+                                      switchOutCurve: Curves.easeInCubic,
+                                      transitionBuilder: (child, animation) {
+                                        return FadeTransition(
+                                          opacity: animation,
+                                          child: ScaleTransition(
+                                            scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                                            child: child,
+                                          ),
+                                        );
+                                      },
+                                      child: iconPressed
+                                          ? ShaderMask(
+                                              shaderCallback: (bounds) => RadialGradient(
+                                                      colors: AppVersion.instance.colorCode,
+                                                      center: Alignment.bottomLeft,
+                                                      radius: 1.5)
+                                                  .createShader(bounds),
+                                              blendMode: BlendMode.srcIn,
+                                              child: Image.asset(
+                                                // iconPressed
+                                                //     ? 'lib/assets/icons/logo_monochrome.png'
+                                                'lib/assets/icons/logo_foreground.png',
+                                                height: 100,
+                                                width: 100,
+                                              ),
+                                            )
+                                          : Image.asset(
+                                              'lib/assets/icons/logo_foreground.png',
+                                              height: 100,
+                                              width: 100,
+                                            ),
                                     )),
                               ),
                             ),
@@ -147,14 +174,43 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                           ],
                         ),
                       ),
+                      if (iconPressed) ...[
+                        Padding(
+                          padding: const EdgeInsets.only(top: 50),
+                          child: Text(
+                            "— ${AppVersion.instance.nickname} —",
+                            style: TextStyle(
+                              fontFamily: "Rubik",
+                              fontSize: 14,
+                              fontStyle: FontStyle.italic,
+                              fontWeight: FontWeight.bold,
+                              color: appTheme.textSubColor.withAlpha((160).toInt()),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 24),
+                          child: Text(
+                            AppVersion.instance.desc,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              fontFamily: "NunitoSans",
+                              fontSize: 13,
+                              height: 1.5,
+                              color: appTheme.textSubColor.withAlpha(147),
+                            ),
+                          ),
+                        ),
+                      ],
                       Container(
-                        margin: EdgeInsets.only(top: 100, bottom: MediaQuery.of(context).padding.bottom),
+                        margin: EdgeInsets.only(top: 50, bottom: MediaQuery.of(context).padding.bottom),
                         child: Text(
                           "Thanks For Downloading!! ❤️",
                           style: TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 16),
                         ),
                       ),
-                      Align(alignment: Alignment.bottomCenter ,child: Text(AppVersion.instance.nickname),),
                     ],
                   )
                 : Center(

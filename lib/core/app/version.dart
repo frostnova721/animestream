@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class AppVersion {
@@ -23,4 +24,10 @@ class AppVersion {
 
   /// Codename
   final String nickname = 'Moonrise';
+
+  /// Just for fun!
+  final String desc = "In the hush between day and dusk,\nthe moon finds its place";
+
+  /// Color code
+  final colorCode = [Color.fromARGB(255, 60, 66, 87), Color.fromARGB(255, 78, 64, 85)];
 }

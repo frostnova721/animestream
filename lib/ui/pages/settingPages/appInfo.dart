@@ -174,7 +174,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                           ],
                         ),
                       ),
-                      if (iconPressed) ...[
+                      if (iconPressed)
                         Padding(
                           padding: const EdgeInsets.only(top: 50),
                           child: Text(
@@ -188,22 +188,6 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                             ),
                           ),
                         ),
-                        SizedBox(height: 8),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 24),
-                          child: Text(
-                            AppVersion.instance.desc,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontStyle: FontStyle.italic,
-                              fontFamily: "NunitoSans",
-                              fontSize: 13,
-                              height: 1.5,
-                              color: appTheme.textSubColor.withAlpha(147),
-                            ),
-                          ),
-                        ),
-                      ],
                       Container(
                         margin: EdgeInsets.only(top: 50, bottom: MediaQuery.of(context).padding.bottom),
                         child: Text(

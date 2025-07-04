@@ -26,10 +26,10 @@ dependencies:
   path_provider: ^2.0.11
   awesome_notifications: ^0.10.1
   package_info_plus: ^8.0.0
-  permission_handler: ^11.4.0
-  device_info_plus: ^10.1.0
+  permission_handler: ^12.0.1
+  device_info_plus: ^11.5.0
   provider: ^6.1.2
-  file_picker: ^8.1.2
+  file_picker: ^10.2.0
   dynamic_color: ^1.7.0
   flutter_dotenv: ^5.2.1
   app_links: ^6.3.2
@@ -51,7 +51,7 @@ dependencies:
 
   # UI
   pull_to_refresh: ^2.0.0
-  flutter_markdown: ^0.6.20
+  flutter_markdown: ^0.7.7+1
   desktop_webview_window: ^0.2.3
   cached_network_image: ^3.3.1
   window_manager:
@@ -66,11 +66,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_launcher_icons: ^0.13.1
-  inno_bundle: ^0.8.0
-
-dependency_overrides:
-  win32: ^5.2.0
+  flutter_launcher_icons: ^0.14.4
+  inno_bundle: ^0.9.0
 
 inno_bundle:
   id: "59cae0c0-fb9d-11ef-b95e-5f3937b12ea5"
@@ -142,19 +139,23 @@ flutter:
     - family: Rubik
       fonts:
         - asset: lib/assets/fonts/Rubik-Medium.ttf
+          weight: 500
         - asset: lib/assets/fonts/Rubik-Bold.ttf
           weight: 700
     - family: NunitoSans
       fonts:
         - asset: lib/assets/fonts/NunitoSans_10pt-Medium.ttf
           style: normal
+          weight: 500
         - asset: lib/assets/fonts/NunitoSans_10pt-Bold.ttf
           weight: 700
     - family: NotoSans
       fonts:
         - asset: lib/assets/fonts/NotoSans-Regular.ttf
           style: normal
+          weight: 500
         - asset: lib/assets/fonts/NotoSans-Bold.ttf
+          weight: 700
     - family: Poppins
       fonts:
         - asset: lib/assets/fonts/Poppins-Bold.ttf

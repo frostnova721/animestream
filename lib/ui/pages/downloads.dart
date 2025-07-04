@@ -108,7 +108,8 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       child: Text(
         label,
         style: TextStyle(
-          fontFamily: "NotoSans-Bold",
+          fontFamily: "NotoSans",
+          fontWeight: FontWeight.w700,
           fontSize: 17,
         ),
       ),

@@ -57,12 +57,12 @@ class AniPlay extends AnimeProvider {
     servers.forEach((it) {
       final itIndex = servers.indexOf(it);
       final currentServersEpId = epId[itIndex];
-      final link = getWatchUrl(it, epNum, anilistId, currentServersEpId);
+      final link = getWatchUrl(it, epNum, anilistId, currentServersEpId, dub: dub);
       
       final resFuture = get(Uri.parse(link),
           headers: {
             "Content-Type": "text/plain;charset=UTF-8",
-            "Referer": "https://aniplaynow.live/anime/watch/$anilistId?host=$it&ep=$epNum&type=sub"
+            "Referer": "https://aniplaynow.live/anime/watch/$anilistId?host=$it&ep=$epNum&type=${dub? 'dub' : 'sub'}"
             // 'Next-Action': keys['getSources'] ?? '',
           },
           );
@@ -81,9 +81,9 @@ class AniPlay extends AnimeProvider {
           return;
         }
 
-        print(parsed['source']);
+        // print(parsed['source']);
 
-        final List<Map<String, dynamic>>? sources = List.castFrom(parsed['sources']);
+        final List<Map<String, dynamic>>? sources = List.castFrom(parsed['sources'] ?? []);
 
         if (sources == null || sources.isEmpty) {
           serversFetched++;
@@ -105,6 +105,13 @@ class AniPlay extends AnimeProvider {
               quality: "multi-quality",
               link: stream['url'],
               isM3u8: stream['url'].endsWith(".m3u8"),
+              customHeaders: headers,
+               subtitle: subtitleItem?['url'],
+                subtitleFormat: subtitleItem != null
+                    ? subtitleItem['url'].endsWith("vtt")
+                        ? SubtitleFormat.VTT.name
+                        : SubtitleFormat.ASS.name
+                    : null,
               server: it,
               backup: false,
             )
@@ -121,8 +128,8 @@ class AniPlay extends AnimeProvider {
                 link: str['url'],
                 isM3u8: str['url'].endsWith(".m3u8"),
                 server: it,
-                backup: (str['quality'] ?? "") == "backup",
-                customHeaders: it == "yuki" ? headers : null,
+                backup: str['quality'] == "backup",
+                customHeaders: headers,
                 subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
                     ? subtitleItem['url'].endsWith("vtt")
@@ -142,8 +149,8 @@ class AniPlay extends AnimeProvider {
     return;
   }
 
-  String getWatchUrl(String server, String epnum, String anilistId, String epId) {
-    return "https://aniplaynow.live/api/anime/sources?id=$anilistId&provider=$server&epId=$epId&epNum=$epnum&subType=sub&cache=true";
+  String getWatchUrl(String server, String epnum, String anilistId, String epId, { bool dub = false}) {
+    return "https://aniplaynow.live/api/anime/sources?id=$anilistId&provider=$server&epId=$epId&epNum=$epnum&subType=${dub ? 'dub' : 'sub'}&cache=true";
     // return "$baseUrl/anime/watch/$anilistId?ep=$epnum?host=${server}&type=sub";
   }
 

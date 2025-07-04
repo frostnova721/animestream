@@ -178,11 +178,13 @@ class _AnimeStreamState extends State<AnimeStream> {
       onDismissActionReceivedMethod: NotificationController.onDismissActionReceivedMethod,
     );
 
-    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
-        statusBarColor: Colors.black.withValues(alpha: 0.002),
-        systemNavigationBarColor: Colors.black.withValues(alpha: 0.002)));
-
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
+     SystemChrome.setSystemUIOverlayStyle(
+        SystemUiOverlayStyle(
+          statusBarColor: Colors.black.withValues(alpha: 0.002),
+          systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
+        ),
+      );
 
     // if (currentUserSettings?.enableDiscordPresence ?? false)
     // FlutterDiscordRPC.instance.connect(autoRetry: true, retryDelay: Duration(seconds: 10));

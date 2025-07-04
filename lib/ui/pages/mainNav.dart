@@ -32,6 +32,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   @override
   void initState() {
     super.initState();
+
     isTv().then((value) => tv = value);
 
     //check for app updates & show prompt
@@ -312,7 +313,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context) {        
     if (recentlyUpdatedList.isNotEmpty && thisSeason.isNotEmpty) {
       rebuildCards();
     }

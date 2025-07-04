@@ -47,7 +47,7 @@ class _UserStatsState extends State<UserStats> {
 
   ({int minutes, int hours, int days, int months, int years})? timeSpent;
 
-  TextStyle textStyle(double fontSize, {bool bold = false, String fontFamily = "NotoSans-Bold"}) => TextStyle(
+  TextStyle textStyle(double fontSize, {bool bold = false, String fontFamily = "NotoSans"}) => TextStyle(
         color: appTheme.textMainColor,
         fontFamily: fontFamily,
         fontSize: fontSize,

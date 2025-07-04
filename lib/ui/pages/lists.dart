@@ -397,7 +397,8 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
   TextStyle _textStyle() {
     return TextStyle(
       // color: appTheme.textMainColor,
-      fontFamily: "NotoSans-Bold",
+      fontFamily: "NunitoSans",
+      fontWeight: FontWeight.w700,
       fontSize: 17,
     );
   }

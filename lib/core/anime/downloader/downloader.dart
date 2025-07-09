@@ -53,7 +53,7 @@ class Downloader {
 
       // Dont download if active item is present
       if (DownloadManager.downloadingItems.any((it) => it.status == DownloadStatus.downloading)) return;
-      item.status = DownloadStatus.downloading;
+      // item.status = DownloadStatus.downloading; // this is set using message from isolate
       await _fireUpIsolate(item);
     } else {
       // Download items till tummy is filled (MAX_COUNT reached)
@@ -90,7 +90,7 @@ class Downloader {
     _isolates[item.id] = isolate;
   }
 
-  Future<void> _cleanUp(int id) async {
+  Future<void> _cleanUp(int id, {bool dequeue = true}) async {
     // Close and remove isolate entry
     _isolates[id]?.kill(priority: Isolate.immediate); // NUKE THAT F-
     _isolates.remove(id);
@@ -100,7 +100,7 @@ class Downloader {
     _receivePorts.remove(id);
 
     // Remove it from existence (list)
-    DownloadManager.dequeue(id);
+    if (dequeue) DownloadManager.dequeue(id);
   }
 
   Future<void> _endTask(int id) async {
@@ -118,14 +118,59 @@ class Downloader {
     // DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id)?.status = DownloadStatus.cancelled;
   }
 
+  Future<void> requestPause(int id) async {
+    _isolatePorts[id]?.send('pause');
+  }
+
+  Future<void> requestResume(int id) async {
+    _resumeTask(id);
+  }
+
+  Future<void> _pauseTask(int id, int progress, int nextSegmentIndex) async {
+    final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
+    if(item == null) throw Exception("Download item with id: $id not found.");
+    item.status = DownloadStatus.paused;
+    item.lastDownloadedPart = nextSegmentIndex == -1 ? null : nextSegmentIndex;
+  }
+
+  Future<void> _resumeTask(int id) async {
+    if (_isolates[id] == null) {
+      final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
+      if (item == null) throw Exception("Download item for id:$id not found.");
+      return _fireUpIsolate(item);
+    } else {
+      // This condition would mean that the isolate is alive, then js resume the downloads
+      _isolatePorts[id]?.send('resume');
+    }
+  }
+
+  Future<void> _retryDownload(int id) async {
+    _cleanUp(id, dequeue: false);
+     final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
+      if (item == null) throw Exception("Download item for id:$id not found.");
+      
+      // Set the item to initial condition!
+      item.progress = 0;
+      item.status = DownloadStatus.downloading;
+      item.lastDownloadedPart = null;
+      
+    _fireUpIsolate(item);
+  } 
+
   Future<void> _handleMessage(dynamic msg) async {
-    if (!(msg is DownloadMessage)) return;
+    if (!(msg is DownloadMessage)) {
+      print("Recieved message. But not as DownloadMessage!\nMessage: $msg");
+      return;
+    }
     switch (msg.status) {
       // Stuff for download state
       case 'progress':
         {
           DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.progress = msg.progress;
         }
+      case 'downloading': {
+        DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.status = DownloadStatus.downloading;
+      }
       case 'complete':
         {
           _endTask(msg.id);
@@ -148,12 +193,23 @@ class Downloader {
           _endTask(msg.id);
           print("Download cancelled for ${msg.id}");
         }
+      case 'paused':
+        {
+          _pauseTask(msg.id, msg.progress, msg.extras.first as int);
+        }
+      case 'retry': {
+        _retryDownload(msg.id);
+      }
 
       // Non download state stuff
       case 'port':
         {
           if (msg.extras.isNotEmpty && msg.extras.first is SendPort)
             _isolatePorts[msg.id] = msg.extras.first as SendPort;
+        }
+      case 'isolate_timeout':
+        {
+          _cleanUp(msg.id, dequeue: false);
         }
 
       default:
@@ -184,6 +240,7 @@ class Downloader {
       id: item.id,
       rootIsolateToken: rootIsolateToken,
       downloadPath: downloadPath,
+      resumeFrom: item.lastDownloadedPart ?? 0,
     );
 
     return task;

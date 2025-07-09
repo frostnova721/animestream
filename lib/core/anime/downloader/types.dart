@@ -12,9 +12,6 @@ class DownloadItem {
   // The download ID
   final int id;
 
-  // The Download status
-  DownloadStatus status;
-
   // The URL to the media to download (can be stream or video file)
   final String url;
 
@@ -27,6 +24,9 @@ class DownloadItem {
   // Subtitle url
   final String? subtitleUrl;
 
+  // Value to resume from after pausing
+  int? lastDownloadedPart;
+
   // Notifier for UI updation
   final ValueNotifier<int> progressNotifier = ValueNotifier(0);
 
@@ -36,16 +36,28 @@ class DownloadItem {
     progressNotifier.value = prg;
   }
 
+  // Again a notifier for status updation on UI
+  final ValueNotifier<DownloadStatus> statusNotifier = ValueNotifier(DownloadStatus.queued);
+
+  // The Download status
+  DownloadStatus get status => statusNotifier.value;
+
+  set status(DownloadStatus newStatus) {
+    statusNotifier.value = newStatus;
+  }
+
   DownloadItem({
     required this.id,
     required this.url,
-    required this.status,
+    required DownloadStatus status,
     required this.fileName,
     this.customHeaders = const {},
     int progress = 0,
     this.subtitleUrl,
+    this.lastDownloadedPart,
   }) {
     progressNotifier.value = progress;
+    statusNotifier.value = status;
   }
 
   DownloadItem copyWith({
@@ -83,7 +95,9 @@ class DownloadTaskIsolate {
   final String? subsUrl;
   final SendPort? sendPort;
   final RootIsolateToken rootIsolateToken;
+  final int resumeFrom;
   String downloadPath;
+  
 
   DownloadTaskIsolate({
     required this.url,
@@ -96,6 +110,7 @@ class DownloadTaskIsolate {
     required this.id,
     required this.rootIsolateToken,
     required this.downloadPath,
+    this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
   });
 }
 

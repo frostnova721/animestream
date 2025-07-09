@@ -27,7 +27,7 @@ class DownloadManager {
     _downloadingItems.add(item);
     downloadsCount.value++;
     print(
-        "Added item to queue. Items in queue: ${downloadsCount.value}. [queue mode: ${(currentUserSettings?.useQueuedDownloads ?? false)}");
+        "Added item to queue. Items in queue: ${downloadsCount.value}. [queue mode: ${(currentUserSettings?.useQueuedDownloads ?? false)}]");
   }
 
   /// The queue is managed from [Downloader] class
@@ -61,8 +61,19 @@ class DownloadManager {
     await _downloader.startDownload(item);
   }
 
+  /// ** All of the below commands to the downloader are fire and forget. **
+  // How was that loading screen tip?
+
   void cancelDownload(int id) {
     _downloader.requestCancellation(id);
+  }
+
+  void pauseDownload(int id) {
+    _downloader.requestPause(id);
+  }
+
+  void resumeDownload(int id) {
+    _downloader.requestResume(id);
   }
 
   Future<void> retryDownload(int id) async {}

@@ -18,8 +18,13 @@ class DownloaderCore {
   // If the item is in this class, it's default state is definitely downloading
   DownloadStatus _status = DownloadStatus.downloading;
 
-  Future<void> _downloadStream(DownloadTaskIsolate task) async {
+  // Completer for managing paused state
+  Completer<void>? _completer;
 
+  // Timer to kill the Isolate after pausing for n duration
+  Timer? _timer;
+
+  Future<void> _downloadStream(DownloadTaskIsolate task) async {
     _setUpPorts(task);
 
     final finalPath =
@@ -31,7 +36,7 @@ class DownloaderCore {
     final output = File(finalPath);
 
     // open the write mode
-    final out = await output.openWrite();
+    final out = await output.openWrite(mode: task.resumeFrom == 0 ? FileMode.write : FileMode.append);
 
     try {
       final streamBaseLink = helper.makeBaseLink(task.url);
@@ -49,8 +54,44 @@ class DownloaderCore {
 
       int lastUpdatedProgress = 0; // Dont notify if progress is same
 
-      for (int i = 0; i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
+      int lastDownloadedSegmentIndex = -1;
+
+      for (int i = task.resumeFrom.toInt(); i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
         final List<BufferItem> buffers = [];
+
+        // Handle commands
+        if (_status == DownloadStatus.cancelled) {
+          break; // just break out of the loop, the case is handled after loop close
+        } else if (_status == DownloadStatus.paused) {
+          if (_completer != null && !_completer!.isCompleted) {
+            print("Already waiting. Skipping duplicate pause.");
+            return;
+          }
+          task.sendPort?.send(DownloadMessage(
+            status: 'paused',
+            id: task.id,
+            progress: lastUpdatedProgress,
+            message: "Paused at $lastUpdatedProgress%",
+            extras: [lastDownloadedSegmentIndex], // Just pass which segment index it should resume from!
+          ));
+
+          _completer = Completer();
+          try {
+            _timer = Timer(Duration(minutes: 1), () => _completer!.completeError(Exception("Isolate wait timeout")));
+            await _completer!.future;
+            _completer = null;
+            _timer?.cancel();
+            _timer = null; // Kill the timer if resumed within the 1 minute window
+          } catch (err) {
+            print("Isolate wait timed out! \nError: ${err.toString()}");
+            print("Self destructing isolate...");
+            _timer?.cancel(); // some gracefulness ?
+            _timer = null;
+            _completer = null;
+            task.sendPort?.send(DownloadMessage(status: 'isolate_timeout', id: task.id));
+            break;
+          }
+        }
 
         // calculate batch's length
         final batchEnd = (i + parallelDownloadsBatchSize < segmentsFiltered.length)
@@ -59,13 +100,9 @@ class DownloaderCore {
 
         final batch = entries.sublist(i, batchEnd);
 
-        print("[DOWNLOADER]<${task.id}> fetching segments [$i-$batchEnd of ${entries.length - 1}]");
+        print("[DOWNLOADER]<${task.id}> fetching segments [$i-$batchEnd of ${entries.length}]");
 
         final futures = batch.map((entry) async {
-          if (_status == DownloadStatus.cancelled) {
-            return;
-          }
-
           final segment = entry.value;
           final segmentNumber = entry.key + 1;
 
@@ -75,6 +112,7 @@ class DownloaderCore {
 
           if (progress > lastUpdatedProgress) {
             // Update download progress thru the notification
+            helper.sendProgressNotif(task, progress);
             task.sendPort?.send(DownloadMessage(
                 status: 'progress', progress: progress, extras: [finalPath], message: "progressing...", id: task.id));
 
@@ -109,18 +147,24 @@ class DownloaderCore {
 
         // Write the downloaded buffers
         for (final b in buffers) out.add(b.buffer);
+
+        // Start from next batch ig
+        lastDownloadedSegmentIndex = i + parallelDownloadsBatchSize;
       }
 
       // send the completion/cancelled notification
       if (_status == DownloadStatus.cancelled) {
         await out.close();
         await output.delete();
+        helper.sendCancelledNotif(task);
         task.sendPort
             ?.send(DownloadMessage(status: 'cancel', id: task.id, message: "Download cancelled on user request"));
-      } else {
-        // Assume completion since fail, cancelled are handled already
+      } else if (_status == DownloadStatus.paused) {
+      } // do nothing!
+      else {
         _status = DownloadStatus.completed;
         await out.close();
+        helper.sendCompletedNotif(task);
         task.sendPort?.send(
             DownloadMessage(status: 'complete', extras: [finalPath], message: "Download complete.", id: task.id));
       }
@@ -133,6 +177,7 @@ class DownloaderCore {
       if (await output.exists()) output.delete();
 
       //send download failed notification
+      helper.sendCancelledNotif(task, failed: true);
       task.sendPort?.send(DownloadMessage(status: 'fail', message: "Download failed.", id: task.id));
     }
   }
@@ -155,9 +200,21 @@ class DownloaderCore {
     final req = Request("GET", Uri.parse(task.url));
     // add the headers
     req.headers.addAll(task.customHeaders);
+    if (task.resumeFrom != 0) {
+      final doesServerSupportRangeHeader = await helper.checkRangeSupport(Uri.parse(task.url));
+      if (doesServerSupportRangeHeader) {
+        req.headers.addAll({'Range': 'bytes=${task.resumeFrom}-'});
+      } else {
+        print("Server doesnt support ranges. Retrying download...");
+        // start the download again
+        task.sendPort?.send(DownloadMessage(status: 'retry', id: task.id));
+        return;
+      }
+    }
 
     final file = File(filepath);
-    final sink = file.openWrite();
+
+    final sink = file.openWrite(mode: task.resumeFrom == 0 ? FileMode.write : FileMode.append);
 
     // just to catch any OS errors like file access
     try {
@@ -166,7 +223,7 @@ class DownloaderCore {
         throw Exception("Received response with status code ${res.statusCode}");
       }
       final totalSize = res.contentLength ?? -1;
-      int downloadedBytes = 0;
+      int downloadedBytes = task.resumeFrom;
       int lastProgress = 0;
       int lastPrintedProgress = 0; // to reduce console logs.
 
@@ -175,23 +232,55 @@ class DownloaderCore {
       final completer = Completer<void>();
 
       subscription = res.stream.listen((chunk) async {
+        // Write the data since its already fetched!
+        sink.add(chunk);
+        downloadedBytes += chunk.length;
+
+        final progress = (downloadedBytes / totalSize * 100).toInt();
+
+        // Handle commands
         if (_status == DownloadStatus.cancelled) {
           await subscription?.cancel();
           await sink.close();
           file.deleteSync();
 
           completer.complete();
+          
+          helper.sendCancelledNotif(task);
           task.sendPort?.send(DownloadMessage(
             status: 'cancel',
             id: task.id,
           ));
           return;
+        } else if (_status == DownloadStatus.paused) {
+          subscription?.pause();
+
+          task.sendPort?.send(DownloadMessage(
+            status: 'paused',
+            id: task.id,
+            progress: progress,
+            message: "Paused at $progress%",
+            extras: [downloadedBytes], // Just pass which segment index it should resume from!
+          ));
+
+          _completer = Completer();
+          try {
+            _timer = Timer(Duration(minutes: 1), () => _completer?.completeError(Exception("Timeout!")));
+            await _completer!.future;
+            subscription?.resume();
+            _completer = null;
+            _timer?.cancel();
+            _timer = null;
+          } catch (err) {
+            print("Isolate Timeout! Error: ${err.toString()}");
+            print("Self destructing isolate...");
+            _completer = null;
+            _timer?.cancel();
+            _timer = null;
+            subscription?.cancel();
+            task.sendPort?.send(DownloadMessage(status: 'isolate_timeout', id: task.id));
+          }
         }
-
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
-
-        final progress = (downloadedBytes / totalSize * 100).toInt();
 
         if (progress > lastProgress) {
           // just to reduce the logging from 100 to 10
@@ -201,12 +290,14 @@ class DownloaderCore {
           }
 
           task.sendPort?.send(DownloadMessage(status: 'progress', progress: progress, extras: [filepath], id: task.id));
+          helper.sendProgressNotif(task, progress);
           lastProgress = progress;
         }
       }, onDone: () async {
         await sink.close();
         print("[DOWNLOADER] succesfully written the file to disk");
         completer.complete();
+        helper.sendCompletedNotif(task);
         task.sendPort?.send(DownloadMessage(status: 'complete', extras: [filepath], id: task.id));
       }, onError: (err) async {
         print(err);
@@ -214,6 +305,7 @@ class DownloaderCore {
         completer.completeError(err);
         await sink.close();
         await file.delete();
+        helper.sendCancelledNotif(task, failed: true);
         task.sendPort?.send(DownloadMessage(status: 'fail', id: task.id, message: "Download failed!"));
       });
 
@@ -224,6 +316,7 @@ class DownloaderCore {
       print("From media url: ${task.url}");
       await sink.close();
       await file.delete();
+      helper.sendCancelledNotif(task, failed: true);
       task.sendPort?.send(DownloadMessage(status: 'fail', id: task.id, message: "Download failed!"));
     }
   }
@@ -264,6 +357,7 @@ class DownloaderCore {
   Future<void> _setUpPorts(DownloadTaskIsolate task) async {
     final rp = ReceivePort();
     task.sendPort?.send(DownloadMessage(status: 'port', id: task.id, extras: [rp.sendPort]));
+    task.sendPort?.send(DownloadMessage(status: 'downloading', id: task.id)); // set as downloading!
 
     rp.listen((msg) {
       if (msg is String) {
@@ -271,13 +365,30 @@ class DownloaderCore {
           case 'cancel':
             {
               _status = DownloadStatus.cancelled;
-              print("Set download status of ${task.id} to ${_status.name}.");
+              break;
+            }
+          case 'pause':
+            {
+              _status = DownloadStatus.paused;
+              break;
+            }
+          case 'resume':
+            {
+              _status = DownloadStatus.downloading;
+              task.sendPort?.send(DownloadMessage(status: 'downloading', id: task.id));
+              if (_completer != null && !_completer!.isCompleted) {
+                _completer!.complete();
+              }
             }
           default:
             {
               print("Recieved undefined command $msg for isolate ${task.id}. Ignoring...");
+              return;
             }
         }
+        // leave print msg here to avoid code duplication, cus now, this listener only
+        // deals with altering the download states!
+        print("Set download status of ${task.id} to ${_status.name}.");
       }
     });
   }

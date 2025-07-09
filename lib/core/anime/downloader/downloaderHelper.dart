@@ -2,7 +2,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:encrypt/encrypt.dart';
@@ -11,6 +13,9 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class DownloaderHelper {
+
+  final NotificationService _notifierService = NotificationService();
+
   // Requests for file permission.
   Future<bool> checkAndRequestPermission() async {
     // We have perm to store anywhere in windows ig
@@ -71,7 +76,8 @@ class DownloaderHelper {
   }
 
   /// Make the directory for the file
-  Future<String> makeDirectory({required String fileName, required downloadPath,  bool isImage = false, String? fileExtension = null}) async {
+  Future<String> makeDirectory(
+      {required String fileName, required downloadPath, bool isImage = false, String? fileExtension = null}) async {
     final basePath = downloadPath;
 
     final downPath = await Directory(basePath);
@@ -86,12 +92,12 @@ class DownloaderHelper {
 
     // The check was BS since non existing directory cant be selected!
     // if (downPath.existsSync()) {
-      final directory = Directory("${downPath.path}/$animeName");
-      if (!(await directory.exists())) {
-        await directory.create(recursive: true);
-      }
+    final directory = Directory("${downPath.path}/$animeName");
+    if (!(await directory.exists())) {
+      await directory.create(recursive: true);
+    }
 
-      finalPath = '$basePath/$animeName/$fileName.$ext';
+    finalPath = '$basePath/$animeName/$fileName.$ext';
     // } else {
     //   // This block shouldnt be called in normal cases btw
     //   final externalStorage = await getExternalStorageDirectory();
@@ -198,11 +204,38 @@ class DownloaderHelper {
 
   // Small regex for getting usual extensions
   String? extractExtension(String url) {
-  final match = RegExp(r'\.([a-zA-Z0-9]+)(?:\?|#|$)').firstMatch(url);
-  if (match == null) return null;
+    final match = RegExp(r'\.([a-zA-Z0-9]+)(?:\?|#|$)').firstMatch(url);
+    if (match == null) return null;
 
-  final ext = match.group(1)?.toLowerCase();
+    final ext = match.group(1)?.toLowerCase();
 
-  return ext;
-}
+    return ext;
+  }
+
+  Future<bool> checkRangeSupport(Uri url) async {
+    final client = HttpClient();
+    try {
+      final req = await client.headUrl(url);
+      final res = await req.close();
+      client.close();
+      return res.headers.value('accept-ranges')?.toLowerCase() == "bytes";
+    } catch (err) {
+      client.close();
+      return false;
+    }
+  }
+
+  void sendProgressNotif(DownloadTaskIsolate task, int progress) {
+    _notifierService.updateNotificationProgressBar(
+        id: task.id, currentStep: progress, maxStep: 100, fileName: task.fileName, path: task.downloadPath);
+  }
+
+  void sendCancelledNotif(DownloadTaskIsolate task, {bool failed = false}) {
+    _notifierService.pushBasicNotification(task.id, "Download ${failed ? 'Failed' : 'Cancelled'}",
+        "Download ${failed ? "failed due to an error" : "was cancelled"}");
+  }
+
+  void sendCompletedNotif(DownloadTaskIsolate task) {
+    _notifierService.downloadCompletionNotification(id: task.id, fileName: task.fileName, path: task.downloadPath);
+  }
 }

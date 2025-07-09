@@ -1,6 +1,7 @@
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extensions.dart';
 import 'package:flutter/material.dart';
 
 class DownloadsPage extends StatefulWidget {
@@ -18,20 +19,20 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   }
 
   late final TabController _tabController;
+  int dc = 0;
 
-  int downloadCount = 1;
+  final DownloadManager _dm = DownloadManager();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // Downloader().addToQueue(
-              // "https://vault-14.kwikie.ru/stream/14/06/3227de914404951e539d296cf9dcb40faae39ae7d979e50393c6be0bd73be9db/uwu.m3u8",
-              // "nigga $downloadCount",
-            // );
-            // DownloadManager.mockDownload(DownloadingItem(id: Random().nextInt(100), status: DownloadStatus.downloading, fileName: "Apothe niggas sd sdf sdffg hgdr5t wersdsg sfdg Ep 1"), Duration(seconds: 60));
-            downloadCount++;
+            final url =
+                "https://vault-14.kwikie.ru/stream/14/04/949408bf3775e6800948c22550842b1147995c801349d3de960e76760b81de14/uwu.m3u8";
+            // DownloadManager().addDownloadTask(url, "Down$dc");
+            dc++;
+            setState(() {});
           },
           child: Icon(Icons.run_circle_outlined),
         ),
@@ -70,10 +71,14 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                 tabs: [_tabBarItem("Downloading"), _tabBarItem("Downloaded")],
               ),
               Expanded(
-                child: TabBarView(controller: _tabController, children: [
-                  _buildDownloading(),
-                  _buildDownloaded(),
-                ]),
+                child: Padding(
+                  padding: EdgeInsets.only(
+                      left: MediaQuery.paddingOf(context).left, right: MediaQuery.paddingOf(context).right),
+                  child: TabBarView(controller: _tabController, children: [
+                    _buildDownloading(),
+                    _buildDownloaded(),
+                  ]),
+                ),
               ),
             ],
           ),
@@ -84,8 +89,12 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
     return ValueListenableBuilder(
       valueListenable: DownloadManager.downloadsCount,
       builder: (ctx, val, child) => ListView.builder(
-        itemCount: DownloadManager.downloadingItems.length,
+        itemCount: DownloadManager.downloadsCount.value,
+        padding: EdgeInsets.only(top: 16),
         itemBuilder: (context, index) {
+          // final it = DownloadItem(
+          // id: dc, url: "", status: DownloadStatus.downloading, fileName: "adsa sdfsdf sdfdsf sdfsdf dsfsdf sd$dc");
+          // return _downloadItem(it);
           return _downloadItem(DownloadManager.downloadingItems[index]);
         },
       ),
@@ -108,7 +117,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       child: Text(
         label,
         style: TextStyle(
-          fontFamily: "NotoSans",
+          fontFamily: "NunitoSans",
           fontWeight: FontWeight.w700,
           fontSize: 17,
         ),
@@ -118,56 +127,89 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
 
   Widget _downloadItem(DownloadItem downloadingItem) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(16),
-            margin: EdgeInsets.only(right: 10),
-            decoration: BoxDecoration(
-              color: appTheme.backgroundSubColor,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Icon(Icons.download),
-          ),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 5),
-                    child: Text(
-                      downloadingItem.fileName,
-                      style: TextStyle(fontFamily: "NunitoSans", fontWeight: FontWeight.bold, fontSize: 18),
-                      maxLines: 2,
-                    ),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: appTheme.backgroundSubColor.withAlpha(150),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      padding: EdgeInsets.all(8),
+      child: ValueListenableBuilder(
+        valueListenable: downloadingItem.statusNotifier,
+        builder: (context, status, child) => Row(
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: appTheme.backgroundSubColor,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              margin: EdgeInsets.only(right: 5),
+              clipBehavior: Clip.hardEdge,
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    if (downloadingItem.isPaused) {
+                      _dm.resumeDownload(downloadingItem.id);
+                    } else {
+                      _dm.pauseDownload(downloadingItem.id);
+                    }
+
+                    setState(() {});
+                  },
+                  child: Padding(
+                    padding: EdgeInsets.all(16),
+                    child: Icon(status == DownloadStatus.downloading
+                        ? Icons.pause_rounded
+                        : Icons.download_rounded),
                   ),
-                  ValueListenableBuilder(
-                      valueListenable: downloadingItem.progressNotifier,
-                      builder: (context, value, child) {
-                        return downloadingItem.status == DownloadStatus.downloading
-                            ? LinearProgressIndicator(value: downloadingItem.progress / 100)
-                            : Text(
-                                "queued",
-                                style: TextStyle(fontFamily: "NunitoSans", fontSize: 14, color: appTheme.textSubColor),
-                              );
-                      }),
-                ],
+                ),
               ),
             ),
-          ),
-          IconButton(
-            onPressed: () {
-              DownloadManager().cancelDownload(downloadingItem.id);
-            },
-            icon: Icon(
-              Icons.close,
-              color: appTheme.textMainColor,
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 5),
+                      child: Text(
+                        downloadingItem.fileName,
+                        style: TextStyle(fontFamily: "NunitoSans", fontWeight: FontWeight.bold, fontSize: 18),
+                        maxLines: 2,
+                      ),
+                    ),
+                    ValueListenableBuilder(
+                        valueListenable: downloadingItem.progressNotifier,
+                        builder: (context, value, child) {
+                          return downloadingItem.status == DownloadStatus.downloading
+                              ? LinearProgressIndicator(
+                                  value: downloadingItem.progress / 100,
+                                  color: appTheme.accentColor,
+                                )
+                              : Text(
+                                  downloadingItem.status.name,
+                                  style:
+                                      TextStyle(fontFamily: "NunitoSans", fontSize: 14, color: appTheme.textSubColor),
+                                );
+                        }),
+                  ],
+                ),
+              ),
             ),
-          )
-        ],
+            IconButton(
+              onPressed: () {
+                _dm.cancelDownload(downloadingItem.id);
+                dc--;
+                setState(() {});
+              },
+              icon: Icon(
+                Icons.close,
+                color: appTheme.textMainColor,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }

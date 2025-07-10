@@ -1,5 +1,4 @@
 import 'dart:isolate';
-import 'dart:ui';
 
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/commons/extensions.dart';
@@ -167,12 +166,14 @@ class Downloader {
       case 'progress':
         {
           DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.progress = msg.progress;
+          _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
         }
       case 'downloading': {
         DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.status = DownloadStatus.downloading;
       }
       case 'complete':
         {
+           _helper.sendCompletedNotif(msg.id, msg.extras[0] as String, msg.extras[1] as String);
           _endTask(msg.id);
         }
       case 'error':
@@ -185,12 +186,15 @@ class Downloader {
         }
       case 'fail':
         {
+           _helper.sendCancelledNotif(msg.id, failed: true);
           _endTask(msg.id);
           print("Download failed for ${msg.id}. Reason: ${msg.message}");
         }
       case 'cancel':
         {
+           _helper.sendCancelledNotif(msg.id, failed: false);
           _endTask(msg.id);
+         
           print("Download cancelled for ${msg.id}");
         }
       case 'paused':
@@ -224,7 +228,7 @@ class Downloader {
 
     rp.listen(_handleMessage);
 
-    final rootIsolateToken = RootIsolateToken.instance!;
+    // final rootIsolateToken = RootIsolateToken.instance!;
 
     _receivePorts[item.id]?.close(); // close if already exists (JIC)
     _receivePorts[item.id] = rp;
@@ -238,7 +242,7 @@ class Downloader {
       subsUrl: item.subtitleUrl,
       sendPort: rp.sendPort,
       id: item.id,
-      rootIsolateToken: rootIsolateToken,
+      // rootIsolateToken: rootIsolateToken,
       downloadPath: downloadPath,
       resumeFrom: item.lastDownloadedPart ?? 0,
     );

@@ -1,7 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:isolate';
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
@@ -94,7 +93,7 @@ class DownloadTaskIsolate {
   final int parallelBatches;
   final String? subsUrl;
   final SendPort? sendPort;
-  final RootIsolateToken rootIsolateToken;
+  // final RootIsolateToken? rootIsolateToken;
   final int resumeFrom;
   String downloadPath;
   
@@ -108,7 +107,7 @@ class DownloadTaskIsolate {
     required this.subsUrl,
     required this.sendPort,
     required this.id,
-    required this.rootIsolateToken,
+    // required this.rootIsolateToken,
     required this.downloadPath,
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
   });

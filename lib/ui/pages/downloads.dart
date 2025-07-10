@@ -184,6 +184,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                         builder: (context, value, child) {
                           return downloadingItem.status == DownloadStatus.downloading
                               ? LinearProgressIndicator(
+                                year2023: false,
                                   value: downloadingItem.progress / 100,
                                   color: appTheme.accentColor,
                                 )

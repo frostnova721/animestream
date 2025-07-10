@@ -25,7 +25,7 @@ class DownloaderCore {
   Timer? _timer;
 
   Future<void> _downloadStream(DownloadTaskIsolate task) async {
-    _setUpPorts(task);
+    await _setUpPorts(task);
 
     final finalPath =
         await helper.makeDirectory(fileName: task.fileName, fileExtension: "mp4", downloadPath: task.downloadPath);
@@ -112,9 +112,8 @@ class DownloaderCore {
 
           if (progress > lastUpdatedProgress) {
             // Update download progress thru the notification
-            helper.sendProgressNotif(task, progress);
             task.sendPort?.send(DownloadMessage(
-                status: 'progress', progress: progress, extras: [finalPath], message: "progressing...", id: task.id));
+                status: 'progress', progress: progress, extras: [task.fileName ,finalPath], message: "progressing...", id: task.id));
 
             lastUpdatedProgress = progress;
           }
@@ -156,7 +155,6 @@ class DownloaderCore {
       if (_status == DownloadStatus.cancelled) {
         await out.close();
         await output.delete();
-        helper.sendCancelledNotif(task);
         task.sendPort
             ?.send(DownloadMessage(status: 'cancel', id: task.id, message: "Download cancelled on user request"));
       } else if (_status == DownloadStatus.paused) {
@@ -164,9 +162,8 @@ class DownloaderCore {
       else {
         _status = DownloadStatus.completed;
         await out.close();
-        helper.sendCompletedNotif(task);
         task.sendPort?.send(
-            DownloadMessage(status: 'complete', extras: [finalPath], message: "Download complete.", id: task.id));
+            DownloadMessage(status: 'complete', extras: [task.fileName, finalPath], message: "Download complete.", id: task.id));
       }
 
       print("[DOWNLOADER]<${task.id}> Closing download with state: ${_status.name}");
@@ -177,14 +174,13 @@ class DownloaderCore {
       if (await output.exists()) output.delete();
 
       //send download failed notification
-      helper.sendCancelledNotif(task, failed: true);
       task.sendPort?.send(DownloadMessage(status: 'fail', message: "Download failed.", id: task.id));
     }
   }
 
   /// Download a mp4 video
   Future<void> _downloadVideo(DownloadTaskIsolate task) async {
-    _setUpPorts(task);
+    await _setUpPorts(task);
 
     // Guess/Extract extension from link, otherwise give null and download as an mp4
     String? extensionGuess = helper.extractExtension(task.url);
@@ -245,8 +241,7 @@ class DownloaderCore {
           file.deleteSync();
 
           completer.complete();
-          
-          helper.sendCancelledNotif(task);
+
           task.sendPort?.send(DownloadMessage(
             status: 'cancel',
             id: task.id,
@@ -289,23 +284,20 @@ class DownloaderCore {
             lastPrintedProgress += 10;
           }
 
-          task.sendPort?.send(DownloadMessage(status: 'progress', progress: progress, extras: [filepath], id: task.id));
-          helper.sendProgressNotif(task, progress);
+          task.sendPort?.send(DownloadMessage(status: 'progress', progress: progress, extras: [task.fileName ,filepath], id: task.id));
           lastProgress = progress;
         }
       }, onDone: () async {
         await sink.close();
         print("[DOWNLOADER] succesfully written the file to disk");
         completer.complete();
-        helper.sendCompletedNotif(task);
-        task.sendPort?.send(DownloadMessage(status: 'complete', extras: [filepath], id: task.id));
+        task.sendPort?.send(DownloadMessage(status: 'complete', extras: [task.fileName, filepath], id: task.id));
       }, onError: (err) async {
         print(err);
         print("From media url: ${task.url}");
         completer.completeError(err);
         await sink.close();
         await file.delete();
-        helper.sendCancelledNotif(task, failed: true);
         task.sendPort?.send(DownloadMessage(status: 'fail', id: task.id, message: "Download failed!"));
       });
 
@@ -316,7 +308,6 @@ class DownloaderCore {
       print("From media url: ${task.url}");
       await sink.close();
       await file.delete();
-      helper.sendCancelledNotif(task, failed: true);
       task.sendPort?.send(DownloadMessage(status: 'fail', id: task.id, message: "Download failed!"));
     }
   }
@@ -344,6 +335,7 @@ class DownloaderCore {
   }
 
   Future<void> downloadSubs(String url, String fileName, String downloadPath) async {
+    try {
     final path = await helper.makeDirectory(
       fileName: fileName + "_subs",
       fileExtension: url.split(".").lastOrNull ?? "txt",
@@ -352,6 +344,9 @@ class DownloaderCore {
     final file = File(path);
     await file.writeAsString((await get(Uri.parse(url))).body);
     return;
+    } catch(err) {
+      print("[DOWNLOADER] Failed to download $fileName subs!");
+    }
   }
 
   Future<void> _setUpPorts(DownloadTaskIsolate task) async {

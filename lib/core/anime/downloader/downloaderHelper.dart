@@ -2,7 +2,6 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -225,17 +224,17 @@ class DownloaderHelper {
     }
   }
 
-  void sendProgressNotif(DownloadTaskIsolate task, int progress) {
+  void sendProgressNotif(int id, int progress, String fileName, String downloadPath) {
     _notifierService.updateNotificationProgressBar(
-        id: task.id, currentStep: progress, maxStep: 100, fileName: task.fileName, path: task.downloadPath);
+        id: id, currentStep: progress, maxStep: 100, fileName: fileName, path: downloadPath);
   }
 
-  void sendCancelledNotif(DownloadTaskIsolate task, {bool failed = false}) {
-    _notifierService.pushBasicNotification(task.id, "Download ${failed ? 'Failed' : 'Cancelled'}",
+  void sendCancelledNotif(int id, {bool failed = false}) {
+    _notifierService.pushBasicNotification(id, "Download ${failed ? 'Failed' : 'Cancelled'}",
         "Download ${failed ? "failed due to an error" : "was cancelled"}");
   }
 
-  void sendCompletedNotif(DownloadTaskIsolate task) {
-    _notifierService.downloadCompletionNotification(id: task.id, fileName: task.fileName, path: task.downloadPath);
+  void sendCompletedNotif(int id, String fileName, String downloadPath) {
+    _notifierService.downloadCompletionNotification(id: id, fileName: fileName, path: downloadPath);
   }
 }

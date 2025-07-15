@@ -1,7 +1,7 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/notification.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -12,6 +12,8 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class DownloaderHelper {
+
+  static final _idSet = <int>{};
 
   final NotificationService _notifierService = NotificationService();
 
@@ -48,14 +50,14 @@ class DownloaderHelper {
     }
   }
 
-  /// Generate id for the item
+  // generate a unique id
   static int generateId() {
-    int maxId = DownloadManager.downloadingItems.isNotEmpty
-        ? DownloadManager.downloadingItems
-            .map((item) => item.id) // get list of ids
-            .reduce((a, b) => a > b ? a : b) // find the greatest number
-        : 0;
-    return maxId + 1;
+    int id = Random().nextInt(1 << 31); // rand 32 bit int
+    while(_idSet.contains(id)) {
+      id = Random().nextInt(1 << 31);
+    }
+    _idSet.add(id);
+    return id;
   }
 
   Future<String> getDownloadsPath() async {
@@ -211,10 +213,11 @@ class DownloaderHelper {
     return ext;
   }
 
-  Future<bool> checkRangeSupport(Uri url) async {
+  Future<bool> checkRangeSupport(Uri url, { Map<String, String> customHeaders = const {} }) async {
     final client = HttpClient();
     try {
       final req = await client.headUrl(url);
+      customHeaders.forEach((k,v) { req.headers.add(k, v, preserveHeaderCase: true); });
       final res = await req.close();
       client.close();
       return res.headers.value('accept-ranges')?.toLowerCase() == "bytes";

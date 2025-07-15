@@ -2,6 +2,7 @@ import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extensions.dart';
+import 'package:animestream/core/data/downloadHistory.dart';
 import 'package:flutter/material.dart';
 
 class DownloadsPage extends StatefulWidget {
@@ -22,6 +23,8 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   int dc = 0;
 
   final DownloadManager _dm = DownloadManager();
+
+  final _boxListenable = DownloadHistory.listenable;
 
   @override
   Widget build(BuildContext context) {
@@ -102,12 +105,18 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   }
 
   Widget _buildDownloaded() {
-    return ListView.builder(
-      itemCount: 0,
-      itemBuilder: (context, index) {
-        return Container();
-      },
-    );
+    return ValueListenableBuilder(
+        valueListenable: _boxListenable,
+        builder: (context, box, child) {
+          final values = DownloadHistory.getDownloadHistory(status: DownloadStatus.completed);
+          return ListView.builder(
+            itemCount: values.length,
+            padding: EdgeInsets.only(top: 16),
+            itemBuilder: (context, index) {
+              return _downloadedItem(values[index]);
+            },
+          );
+        });
   }
 
   Container _tabBarItem(String label) {
@@ -121,6 +130,23 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
           fontWeight: FontWeight.w700,
           fontSize: 17,
         ),
+      ),
+    );
+  }
+
+  Widget _downloadedItem(DownloadHistoryItem item) {
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        color: appTheme.backgroundSubColor,
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
+      padding: EdgeInsets.all(8),
+      child: Column(
+        children: [
+          Text(item.fileName, style: _titleStyle(), maxLines: 2,),
+          Text(item.status.name, ),
+        ],
       ),
     );
   }
@@ -158,9 +184,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                   },
                   child: Padding(
                     padding: EdgeInsets.all(16),
-                    child: Icon(status == DownloadStatus.downloading
-                        ? Icons.pause_rounded
-                        : Icons.download_rounded),
+                    child: Icon(status == DownloadStatus.downloading ? Icons.pause_rounded : Icons.download_rounded),
                   ),
                 ),
               ),
@@ -175,7 +199,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                       padding: const EdgeInsets.only(bottom: 5),
                       child: Text(
                         downloadingItem.fileName,
-                        style: TextStyle(fontFamily: "NunitoSans", fontWeight: FontWeight.bold, fontSize: 18),
+                        style: _titleStyle(),
                         maxLines: 2,
                       ),
                     ),
@@ -184,7 +208,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                         builder: (context, value, child) {
                           return downloadingItem.status == DownloadStatus.downloading
                               ? LinearProgressIndicator(
-                                year2023: false,
+                                  year2023: false,
                                   value: downloadingItem.progress / 100,
                                   color: appTheme.accentColor,
                                 )
@@ -214,4 +238,6 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       ),
     );
   }
+
+  TextStyle _titleStyle() => TextStyle(fontFamily: "NunitoSans", fontWeight: FontWeight.bold, fontSize: 18);
 }

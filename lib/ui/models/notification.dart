@@ -10,7 +10,7 @@ class NotificationService {
       'resource://drawable/ic_launcher_foreground',
       [
         NotificationChannel(
-          channelGroupKey: 'basic_channel_group',
+          channelGroupKey: 'animestream_group',
           channelKey: 'animestream',
           channelName: 'animestream',
           channelDescription: 'animestream notification channel',
@@ -22,7 +22,7 @@ class NotificationService {
       debug: false,
       channelGroups: [
         NotificationChannelGroup(
-          channelGroupKey: 'basic_channel_group',
+          channelGroupKey: 'animestream_group',
           channelGroupName: 'animestream',
         )
       ],

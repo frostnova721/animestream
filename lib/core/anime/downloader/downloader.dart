@@ -1,14 +1,15 @@
 import 'dart:isolate';
 
-import 'package:animestream/core/app/logging.dart';
-import 'package:animestream/core/commons/extensions.dart';
 import 'package:collection/collection.dart';
 
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/downloader/downloaderCore.dart';
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extensions.dart';
+import 'package:animestream/core/data/downloadHistory.dart';
 
 enum _DownloadType { stream, video, image }
 
@@ -31,6 +32,14 @@ class Downloader {
 
   /// Count of Refetching failed segments
   static int MAX_RETRY_ATTEMPTS = 5;
+
+  DownloadItem _getDownloadItem(int id) {
+    final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
+    if (item != null) return item;
+    throw Exception("Couldnt find an item with given id!");
+  }
+
+  DownloadItem? _maybeGetDownloadItem(int id) => DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
 
   Future<void> startDownload(DownloadItem item) async {
     // add the item to queue and wait for it to be processed
@@ -94,6 +103,9 @@ class Downloader {
     _isolates[id]?.kill(priority: Isolate.immediate); // NUKE THAT F-
     _isolates.remove(id);
 
+    // remove the entry of send port (why am i commenting like this...)
+    _isolatePorts.remove(id);
+
     // Close and remove port entry
     _receivePorts[id]?.close();
     _receivePorts.remove(id);
@@ -125,17 +137,16 @@ class Downloader {
     _resumeTask(id);
   }
 
-  Future<void> _pauseTask(int id, int progress, int nextSegmentIndex) async {
-    final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
-    if(item == null) throw Exception("Download item with id: $id not found.");
+  Future<void> _pauseTask(int id, int progress, int nextSegmentIndex, String filePath) async {
+    final item = _getDownloadItem(id);
     item.status = DownloadStatus.paused;
     item.lastDownloadedPart = nextSegmentIndex == -1 ? null : nextSegmentIndex;
+    await DownloadHistory.saveItem(_cookHistoryItem(item, DownloadStatus.paused, filePath));
   }
 
   Future<void> _resumeTask(int id) async {
     if (_isolates[id] == null) {
-      final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
-      if (item == null) throw Exception("Download item for id:$id not found.");
+      final item = _getDownloadItem(id);
       return _fireUpIsolate(item);
     } else {
       // This condition would mean that the isolate is alive, then js resume the downloads
@@ -145,16 +156,15 @@ class Downloader {
 
   Future<void> _retryDownload(int id) async {
     _cleanUp(id, dequeue: false);
-     final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
-      if (item == null) throw Exception("Download item for id:$id not found.");
-      
-      // Set the item to initial condition!
-      item.progress = 0;
-      item.status = DownloadStatus.downloading;
-      item.lastDownloadedPart = null;
-      
+    final item = _getDownloadItem(id);
+
+    // Set the item to initial condition!
+    item.progress = 0;
+    item.status = DownloadStatus.downloading;
+    item.lastDownloadedPart = null;
+
     _fireUpIsolate(item);
-  } 
+  }
 
   Future<void> _handleMessage(dynamic msg) async {
     if (!(msg is DownloadMessage)) {
@@ -165,16 +175,21 @@ class Downloader {
       // Stuff for download state
       case 'progress':
         {
-          DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.progress = msg.progress;
+          _maybeGetDownloadItem(msg.id)?.progress = msg.progress;
           _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
+          break;
         }
-      case 'downloading': {
-        DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == msg.id)?.status = DownloadStatus.downloading;
-      }
+      case 'downloading':
+        _maybeGetDownloadItem(msg.id)?.status = DownloadStatus.downloading;
+        break;
+
       case 'complete':
         {
-           _helper.sendCompletedNotif(msg.id, msg.extras[0] as String, msg.extras[1] as String);
+          _helper.sendCompletedNotif(msg.id, msg.extras[0] as String, msg.extras[1] as String);
+          DownloadHistory.saveItem(
+              _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String));
           _endTask(msg.id);
+          break;
         }
       case 'error':
         {
@@ -183,38 +198,39 @@ class Downloader {
           await Logger()
             ..addLog("Download Manager: error on ${msg.id} ${msg.message}")
             ..writeLog();
+          break;
         }
       case 'fail':
         {
-           _helper.sendCancelledNotif(msg.id, failed: true);
+          _helper.sendCancelledNotif(msg.id, failed: true);
           _endTask(msg.id);
           print("Download failed for ${msg.id}. Reason: ${msg.message}");
+          break;
         }
       case 'cancel':
         {
-           _helper.sendCancelledNotif(msg.id, failed: false);
+          _helper.sendCancelledNotif(msg.id, failed: false);
           _endTask(msg.id);
-         
+
           print("Download cancelled for ${msg.id}");
+          break;
         }
       case 'paused':
-        {
-          _pauseTask(msg.id, msg.progress, msg.extras.first as int);
-        }
-      case 'retry': {
+        _pauseTask(msg.id, msg.progress, msg.extras.first as int, msg.extras[1] as String);
+        break;
+
+      case 'retry':
         _retryDownload(msg.id);
-      }
+        break;
 
       // Non download state stuff
       case 'port':
-        {
-          if (msg.extras.isNotEmpty && msg.extras.first is SendPort)
-            _isolatePorts[msg.id] = msg.extras.first as SendPort;
-        }
+        if (msg.extras.isNotEmpty && msg.extras.first is SendPort) _isolatePorts[msg.id] = msg.extras.first as SendPort;
+        break;
+
       case 'isolate_timeout':
-        {
-          _cleanUp(msg.id, dequeue: false);
-        }
+        _cleanUp(msg.id, dequeue: false);
+        break;
 
       default:
         {
@@ -248,6 +264,20 @@ class Downloader {
     );
 
     return task;
+  }
+
+  DownloadHistoryItem _cookHistoryItem(DownloadItem item, DownloadStatus newStatus, String filepath) {
+    return DownloadHistoryItem(
+      id: item.id,
+      status: newStatus,
+      timestamp: DateTime.now().millisecondsSinceEpoch,
+      filePath: filepath,
+      url: item.url,
+      headers: item.customHeaders,
+      fileName: item.fileName,
+      size: 0,
+      lastDownloadedPart: item.lastDownloadedPart,
+    );
   }
 
   Future<_DownloadType> _getDownloadType(DownloadItem item) async {

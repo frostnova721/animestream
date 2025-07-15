@@ -72,7 +72,7 @@ class DownloaderCore {
             id: task.id,
             progress: lastUpdatedProgress,
             message: "Paused at $lastUpdatedProgress%",
-            extras: [lastDownloadedSegmentIndex], // Just pass which segment index it should resume from!
+            extras: [lastDownloadedSegmentIndex, finalPath], // Just pass which segment index it should resume from!
           ));
 
           _completer = Completer();
@@ -255,7 +255,7 @@ class DownloaderCore {
             id: task.id,
             progress: progress,
             message: "Paused at $progress%",
-            extras: [downloadedBytes], // Just pass which segment index it should resume from!
+            extras: [downloadedBytes, filepath], // Just pass which segment index it should resume from!
           ));
 
           _completer = Completer();

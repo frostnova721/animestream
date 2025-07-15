@@ -5,6 +5,7 @@ import 'package:animestream/core/app/update.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/core/data/downloadHistory.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
@@ -34,6 +35,9 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     super.initState();
 
     isTv().then((value) => tv = value);
+
+    // open the box for the whole app life time!
+    DownloadHistory.initBox();
 
     //check for app updates & show prompt
     checkForUpdates().then((data) => {

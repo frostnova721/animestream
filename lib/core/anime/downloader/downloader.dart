@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:isolate';
 
 import 'package:collection/collection.dart';
@@ -267,6 +268,15 @@ class Downloader {
   }
 
   DownloadHistoryItem _cookHistoryItem(DownloadItem item, DownloadStatus newStatus, String filepath) {
+    int size;
+
+    // CUS THIS MF CAN FAIL FOR SOME REASON EVEN THOUGH ITS KINDA RARE! (Fuck overheads)
+    try {
+      size = File(filepath).lengthSync();
+    } catch(err) {
+      size = 0;
+    }
+
     return DownloadHistoryItem(
       id: item.id,
       status: newStatus,
@@ -275,7 +285,7 @@ class Downloader {
       url: item.url,
       headers: item.customHeaders,
       fileName: item.fileName,
-      size: 0,
+      size: size,
       lastDownloadedPart: item.lastDownloadedPart,
     );
   }

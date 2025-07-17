@@ -278,7 +278,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   final mapped = jsonDecode(qualities[ind]['headers'] ?? "{}");
                   Map<String, String> headers = Map.from(mapped).cast();
 
-                  final fileName = "${title} Ep ${widget.episodeIndex + 1}";
+                  final episodeNum = "${widget.episodeIndex + 1}";
+
+                  final fileName = "${title} EP ${episodeNum.padLeft(2, '0')}";
                   final streamLink = qualities[ind]['link']!;
                   // print(streamLink);
 

@@ -126,7 +126,7 @@ class DownloadMessage {
   final String status;
   final int id;
   final String? message;
-  final List<Object> extras;
+  final List<Object> extras; // ik, not a good way to do it! might refactor later, lazy rn
 
   DownloadMessage({
     required this.status,

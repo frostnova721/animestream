@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -25,6 +27,14 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   final DownloadManager _dm = DownloadManager();
 
   final _boxListenable = DownloadHistory.listenable;
+
+  Future<void> _deleteDownload(DownloadHistoryItem item) async {
+    await DownloadHistory.removeItem(item.id);
+    final file = File(item.filePath!);
+    if (await file.exists()) {
+      await file.delete();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,12 +103,16 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       valueListenable: DownloadManager.downloadsCount,
       builder: (ctx, val, child) => ListView.builder(
         itemCount: DownloadManager.downloadsCount.value,
+        // itemCount: dc,
         padding: EdgeInsets.only(top: 16),
         itemBuilder: (context, index) {
           // final it = DownloadItem(
-          // id: dc, url: "", status: DownloadStatus.downloading, fileName: "adsa sdfsdf sdfdsf sdfsdf dsfsdf sd$dc");
-          // return _downloadItem(it);
-          return _downloadItem(DownloadManager.downloadingItems[index]);
+          //     id: dc,
+          //     url: "",
+          //     status: DownloadStatus.downloading,
+          //     fileName: "That Time I Got Reincarnated as a Slime EP ${"$dc".padLeft(2, '0')}");
+          // return _downloadItem2(it);
+          return _downloadItem2(DownloadManager.downloadingItems[index]);
         },
       ),
     );
@@ -136,17 +150,209 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
 
   Widget _downloadedItem(DownloadHistoryItem item) {
     return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: appTheme.backgroundSubColor,
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      padding: EdgeInsets.all(8),
-      child: Column(
+      decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(12)),
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      margin: EdgeInsets.all(8),
+      child: Row(
         children: [
-          Text(item.fileName, style: _titleStyle(), maxLines: 2,),
-          Text(item.status.name, ),
+          Expanded(
+            flex: 1,
+            child: Container(
+              child: Icon(
+                Icons.play_arrow_rounded,
+                size: 35,
+              ),
+              padding: EdgeInsets.all(16),
+              margin: EdgeInsets.only(right: 15),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                color: appTheme.backgroundColor.withAlpha(130),
+              ),
+            ),
+          ),
+          Expanded(
+              flex: 2,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.fileName,
+                    style: _titleStyle(),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 5),
+                    child: Text(
+                      item.status.name + " • ${_toMegs(item.size)} MB",
+                      style: TextStyle(fontFamily: "Rubik", color: appTheme.textSubColor),
+                    ),
+                  ),
+                  Container(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.only(right: 8),
+                            child: IconButton.filled(
+                              onPressed: () {
+                                // Video play logic!
+                              },
+                              icon: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.open_in_new),
+                                  Text(
+                                    "Open",
+                                    style: TextStyle(
+                                        fontFamily: "NotoSans", fontWeight: FontWeight.bold, color: appTheme.onAccent),
+                                  )
+                                ],
+                              ),
+                              style: _iconButtonStyle(),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          child: IconButton.filled(
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (context) => AlertDialog(
+                                        title: Text("You Sure?"),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text("no"),
+                                          ),
+                                          TextButton(
+                                            onPressed: () async {
+                                              await _deleteDownload(item);
+                                              Navigator.pop(context);
+                                            },
+                                            style: TextButton.styleFrom(
+                                              backgroundColor: appTheme.accentColor,
+                                              foregroundColor: appTheme.onAccent,
+                                            ),
+                                            child: Text("Yes"),
+                                          ),
+                                        ],
+                                        content: Padding(
+                                          padding: const EdgeInsets.all(5),
+                                          child: Text('Are you sure to delete "${item.fileName}" from your device?'),
+                                        ),
+                                      ));
+                            },
+                            icon: Icon(Icons.delete),
+                            style: _iconButtonStyle(),
+                          ),
+                        ),
+                      ],
+                    ),
+                  )
+                ],
+              )),
         ],
+      ),
+    );
+  }
+
+  Widget _downloadItem2(DownloadItem item) {
+    return Container(
+      decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(12)),
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+      margin: EdgeInsets.all(8),
+      child: ValueListenableBuilder(
+        valueListenable: item.statusNotifier,
+        builder: (context, status, child) => Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Container(
+                child: ValueListenableBuilder(
+                  valueListenable: item.progressNotifier,
+                  builder: (context, progress, child) => Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Center(
+                          child: CircularProgressIndicator(
+                            year2023: false,
+                            value: item.progress / 100,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        "$progress%",
+                        style: TextStyle(fontFamily: "NotoSans", fontWeight: FontWeight.bold),
+                      )
+                    ],
+                  ),
+                ),
+                padding: EdgeInsets.all(16),
+                margin: EdgeInsets.only(right: 15),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: appTheme.backgroundColor.withAlpha(130),
+                ),
+              ),
+            ),
+            Expanded(
+                flex: 2,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.fileName,
+                      style: _titleStyle(),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 5),
+                      child: Text(
+                        item.status.name + " • ?? MB",
+                        style: TextStyle(fontFamily: "Rubik", color: appTheme.textSubColor),
+                      ),
+                    ),
+                    Container(
+                      padding: EdgeInsets.only(right: 6),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: const EdgeInsets.only(right: 8),
+                              child: IconButton.filled(
+                                onPressed: () {
+                                  if (status.isPaused)
+                                    _dm.resumeDownload(item.id);
+                                  else
+                                    _dm.pauseDownload(item.id);
+                                },
+                                icon: Icon(status.isPaused ? Icons.play_arrow_rounded : Icons.pause),
+                                style: _iconButtonStyle(),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: IconButton.filled(
+                              onPressed: () {
+                                _dm.cancelDownload(item.id);
+                              },
+                              icon: Icon(Icons.close),
+                              style: _iconButtonStyle(),
+                            ),
+                          ),
+                        ],
+                      ),
+                    )
+                  ],
+                )),
+          ],
+        ),
       ),
     );
   }
@@ -239,5 +445,13 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
     );
   }
 
+  String _toMegs(int sizeInBytes) => (sizeInBytes / (1024 * 1024)).toStringAsFixed(1);
+
   TextStyle _titleStyle() => TextStyle(fontFamily: "NunitoSans", fontWeight: FontWeight.bold, fontSize: 18);
+
+  ButtonStyle _iconButtonStyle() => IconButton.styleFrom(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      backgroundColor: appTheme.accentColor);
 }

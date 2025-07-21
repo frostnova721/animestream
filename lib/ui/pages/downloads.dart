@@ -1,11 +1,19 @@
 import 'dart:io';
 
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
+import 'package:animestream/ui/models/providers/playerDataProvider.dart';
+import 'package:animestream/ui/models/providers/playerProvider.dart';
+import 'package:animestream/ui/models/watchPageUtil.dart';
+import 'package:animestream/ui/models/widgets/fileExplorer.dart';
+import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class DownloadsPage extends StatefulWidget {
   const DownloadsPage({super.key});
@@ -17,7 +25,7 @@ class DownloadsPage extends StatefulWidget {
 class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateMixin {
   @override
   initState() {
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
     super.initState();
   }
 
@@ -28,9 +36,9 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
 
   final _boxListenable = DownloadHistory.listenable;
 
-  Future<void> _deleteDownload(DownloadHistoryItem item) async {
-    await DownloadHistory.removeItem(item.id);
-    final file = File(item.filePath!);
+  Future<void> _deleteDownload(String filePath, int? id) async {
+    if (id != null) await DownloadHistory.removeItem(id);
+    final file = File(filePath);
     if (await file.exists()) {
       await file.delete();
     }
@@ -39,16 +47,16 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            final url =
-                "https://vault-14.kwikie.ru/stream/14/04/949408bf3775e6800948c22550842b1147995c801349d3de960e76760b81de14/uwu.m3u8";
-            // DownloadManager().addDownloadTask(url, "Down$dc");
-            dc++;
-            setState(() {});
-          },
-          child: Icon(Icons.run_circle_outlined),
-        ),
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //     // final url =
+        //     //     "https://vault-14.kwikie.ru/stream/14/04/949408bf3775e6800948c22550842b1147995c801349d3de960e76760b81de14/uwu.m3u8";
+        //     // DownloadManager().addDownloadTask(url, "Down$dc");
+        //     dc++;
+        //     setState(() {});
+        //   },
+        //   child: Icon(Icons.run_circle_outlined),
+        // ),
         appBar: AppBar(
           title: Text(
             "Downloads",
@@ -81,15 +89,16 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                   fontWeight: FontWeight.bold,
                   fontFamily: "NotoSans",
                 ),
-                tabs: [_tabBarItem("Downloading"), _tabBarItem("Downloaded")],
+                tabs: [_tabBarItem("Active"), _tabBarItem("History"), _tabBarItem("Downloads")],
               ),
               Expanded(
                 child: Padding(
                   padding: EdgeInsets.only(
                       left: MediaQuery.paddingOf(context).left, right: MediaQuery.paddingOf(context).right),
                   child: TabBarView(controller: _tabController, children: [
-                    _buildDownloading(),
-                    _buildDownloaded(),
+                    _buildActive(),
+                    _buildHistory(),
+                    _buildDownloads(),
                   ]),
                 ),
               ),
@@ -98,39 +107,51 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
         ));
   }
 
-  Widget _buildDownloading() {
+  Widget _buildActive() {
     return ValueListenableBuilder(
       valueListenable: DownloadManager.downloadsCount,
-      builder: (ctx, val, child) => ListView.builder(
-        itemCount: DownloadManager.downloadsCount.value,
-        // itemCount: dc,
-        padding: EdgeInsets.only(top: 16),
-        itemBuilder: (context, index) {
-          // final it = DownloadItem(
-          //     id: dc,
-          //     url: "",
-          //     status: DownloadStatus.downloading,
-          //     fileName: "That Time I Got Reincarnated as a Slime EP ${"$dc".padLeft(2, '0')}");
-          // return _downloadItem2(it);
-          return _downloadItem2(DownloadManager.downloadingItems[index]);
-        },
-      ),
+      builder: (ctx, val, child) => val == 0
+          ? Center(
+              child: Text("Start a download!!"),
+            )
+          : ListView.builder(
+              itemCount: DownloadManager.downloadsCount.value,
+              // itemCount: dc,
+              padding: EdgeInsets.only(top: 16),
+              itemBuilder: (context, index) {
+                // final it = DownloadItem(
+                //     id: dc,
+                //     url: "",
+                //     status: DownloadStatus.downloading,
+                //     fileName: "That Time I Got Reincarnated as a Slime EP ${"$dc".padLeft(2, '0')}");
+                // return _downloadItem(it);
+                return _downloadItem(DownloadManager.downloadingItems[index]);
+              },
+            ),
     );
   }
 
-  Widget _buildDownloaded() {
+  Widget _buildHistory() {
     return ValueListenableBuilder(
         valueListenable: _boxListenable,
         builder: (context, box, child) {
           final values = DownloadHistory.getDownloadHistory(status: DownloadStatus.completed);
-          return ListView.builder(
-            itemCount: values.length,
-            padding: EdgeInsets.only(top: 16),
-            itemBuilder: (context, index) {
-              return _downloadedItem(values[index]);
-            },
-          );
+          return values.length == 0
+              ? Center(
+                  child: Text("Just like the search history!"),
+                )
+              : ListView.builder(
+                  itemCount: values.length,
+                  padding: EdgeInsets.only(top: 16),
+                  itemBuilder: (context, index) {
+                    return _downloadedItem(values[index]);
+                  },
+                );
         });
+  }
+
+  Widget _buildDownloads() {
+    return FileExplorer();
   }
 
   Container _tabBarItem(String label) {
@@ -185,7 +206,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     child: Text(
                       item.status.name + " • ${_toMegs(item.size)} MB",
-                      style: TextStyle(fontFamily: "Rubik", color: appTheme.textSubColor),
+                      style: TextStyle(fontFamily: "NotoSans", color: appTheme.textSubColor),
                     ),
                   ),
                   Container(
@@ -198,6 +219,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                             child: IconButton.filled(
                               onPressed: () {
                                 // Video play logic!
+                                _playVideo(item.filePath!);
                               },
                               icon: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
@@ -217,36 +239,19 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                         Expanded(
                           child: IconButton.filled(
                             onPressed: () {
-                              showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                        title: Text("You Sure?"),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () {
-                                              Navigator.pop(context);
-                                            },
-                                            child: Text("no"),
-                                          ),
-                                          TextButton(
-                                            onPressed: () async {
-                                              await _deleteDownload(item);
-                                              Navigator.pop(context);
-                                            },
-                                            style: TextButton.styleFrom(
-                                              backgroundColor: appTheme.accentColor,
-                                              foregroundColor: appTheme.onAccent,
-                                            ),
-                                            child: Text("Yes"),
-                                          ),
-                                        ],
-                                        content: Padding(
-                                          padding: const EdgeInsets.all(5),
-                                          child: Text('Are you sure to delete "${item.fileName}" from your device?'),
-                                        ),
-                                      ));
+                              _deleteDialog(item.filePath!, item.id);
                             },
-                            icon: Icon(Icons.delete),
+                            icon: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.delete),
+                                Text(
+                                  "Delete",
+                                  style: TextStyle(
+                                      fontFamily: "NotoSans", fontWeight: FontWeight.bold, color: appTheme.onAccent),
+                                ),
+                              ],
+                            ),
                             style: _iconButtonStyle(),
                           ),
                         ),
@@ -260,7 +265,74 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
     );
   }
 
-  Widget _downloadItem2(DownloadItem item) {
+  void _deleteDialog(String filepath, int? id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("You Sure?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: Text("no"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await _deleteDownload(filepath, id);
+              Navigator.pop(context);
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: appTheme.accentColor,
+              foregroundColor: appTheme.onAccent,
+            ),
+            child: Text("Yes"),
+          ),
+        ],
+        content: Padding(
+          padding: const EdgeInsets.all(5),
+          child: Text('Are you sure to delete "${filepath.split("/").last}" from your device?'),
+        ),
+      ),
+    );
+  }
+
+  void _playVideo(String filepath) {
+    final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+    final filename = filepath.split("/").last;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (context) => PlayerDataProvider(
+                initialStreams: [],
+                initialStream:
+                    VideoStream(quality: "default", link: filepath, isM3u8: false, server: "local", backup: false),
+                epLinks: [], // doesnt matter
+                showTitle: filename,
+                showId: 0, // doesnt matter
+                selectedSource: "default", //doesnt matter
+                startIndex: 0, // does matter! [change with episode number, need to fw download methods]
+                altDatabases: [], // doesnt matter
+                preferDubs: false, // doesnt matter
+                lastWatchDuration: null, // does matter!
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (context) => PlayerProvider(controller),
+            ),
+          ],
+          child: Watch(
+            controller: controller,
+            localSource: true,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _downloadItem(DownloadItem item) {
     return Container(
       decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(12)),
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
@@ -351,94 +423,6 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                     )
                   ],
                 )),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _downloadItem(DownloadItem downloadingItem) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        color: appTheme.backgroundSubColor.withAlpha(150),
-      ),
-      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
-      padding: EdgeInsets.all(8),
-      child: ValueListenableBuilder(
-        valueListenable: downloadingItem.statusNotifier,
-        builder: (context, status, child) => Row(
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: appTheme.backgroundSubColor,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              margin: EdgeInsets.only(right: 5),
-              clipBehavior: Clip.hardEdge,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: () {
-                    if (downloadingItem.isPaused) {
-                      _dm.resumeDownload(downloadingItem.id);
-                    } else {
-                      _dm.pauseDownload(downloadingItem.id);
-                    }
-
-                    setState(() {});
-                  },
-                  child: Padding(
-                    padding: EdgeInsets.all(16),
-                    child: Icon(status == DownloadStatus.downloading ? Icons.pause_rounded : Icons.download_rounded),
-                  ),
-                ),
-              ),
-            ),
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 5),
-                      child: Text(
-                        downloadingItem.fileName,
-                        style: _titleStyle(),
-                        maxLines: 2,
-                      ),
-                    ),
-                    ValueListenableBuilder(
-                        valueListenable: downloadingItem.progressNotifier,
-                        builder: (context, value, child) {
-                          return downloadingItem.status == DownloadStatus.downloading
-                              ? LinearProgressIndicator(
-                                  year2023: false,
-                                  value: downloadingItem.progress / 100,
-                                  color: appTheme.accentColor,
-                                )
-                              : Text(
-                                  downloadingItem.status.name,
-                                  style:
-                                      TextStyle(fontFamily: "NunitoSans", fontSize: 14, color: appTheme.textSubColor),
-                                );
-                        }),
-                  ],
-                ),
-              ),
-            ),
-            IconButton(
-              onPressed: () {
-                _dm.cancelDownload(downloadingItem.id);
-                dc--;
-                setState(() {});
-              },
-              icon: Icon(
-                Icons.close,
-                color: appTheme.textMainColor,
-              ),
-            )
           ],
         ),
       ),

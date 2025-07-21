@@ -12,7 +12,6 @@ class AnimeCardExtended extends StatelessWidget {
   final String title;
   final String imageUrl;
   final double rating;
-  final bool ongoing;
   final bool shouldNavigate;
   final bool isAnime;
   final String? subText;
@@ -20,6 +19,7 @@ class AnimeCardExtended extends StatelessWidget {
   final int? watchedEpisodeCount;
   final int? totalEpisodes;
   final String? bannerImageUrl;
+  final double? customWidth;
 
   const AnimeCardExtended({
     super.key,
@@ -27,7 +27,6 @@ class AnimeCardExtended extends StatelessWidget {
     required this.title,
     required this.imageUrl,
     required this.rating,
-    this.ongoing = false,
     this.shouldNavigate = true,
     this.isAnime = true,
     this.subText = null,
@@ -35,6 +34,7 @@ class AnimeCardExtended extends StatelessWidget {
     this.watchedEpisodeCount,
     this.totalEpisodes,
     this.bannerImageUrl,
+    this.customWidth,
   });
 
   @override
@@ -65,7 +65,7 @@ class AnimeCardExtended extends StatelessWidget {
               });
           },
           child: Container(
-            width: 305,
+            width: customWidth ?? 305,
             height: 150,
             child: Stack(
               children: [
@@ -99,98 +99,100 @@ class AnimeCardExtended extends StatelessWidget {
                           height: 130,
                         ),
                       ),
-                      Container(
-                        padding: EdgeInsets.only(left: 15, top: 10),
-                        width: 175,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              title,
-                              style: TextStyle(
-                                color: appTheme.textMainColor,
-                                fontFamily: "NotoSans",
-                                fontWeight: FontWeight.w600,
-                                fontSize: 16,
+                      Expanded(
+                        child: Container(
+                          padding: EdgeInsets.only(left: 15, top: 10),
+                          // width: 175,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                title,
+                                style: TextStyle(
+                                  color: appTheme.textMainColor,
+                                  fontFamily: "NotoSans",
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 16,
+                                ),
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 2,
                               ),
-                              overflow: TextOverflow.ellipsis,
-                              maxLines: 2,
-                            ),
-                            Container(
-                              margin: EdgeInsets.only(bottom: 15),
-                              child: Row(
-                                // mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 52,
-                                    padding: EdgeInsets.all(5),
-                                    decoration: BoxDecoration(
-                                        color: appTheme.accentColor.withValues(alpha: 0.8),
-                                        borderRadius: BorderRadius.circular(10)),
-                                    child: Row(
-                                      crossAxisAlignment: CrossAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          color: appTheme.onAccent,
-                                          // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
-                                          size: 15,
-                                        ),
-                                        Padding(
-                                          padding: const EdgeInsets.only(left: 3),
-                                          child: Text(
-                                            "$rating",
-                                            style: TextStyle(
-                                              color: appTheme.onAccent,
-                                              //  (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
-                                              fontFamily: "NotoSans",
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 14,
+                              Container(
+                                margin: EdgeInsets.only(bottom: 15),
+                                child: Row(
+                                  // mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Container(
+                                      width: 52,
+                                      padding: EdgeInsets.all(5),
+                                      decoration: BoxDecoration(
+                                          color: appTheme.accentColor.withValues(alpha: 0.8),
+                                          borderRadius: BorderRadius.circular(10)),
+                                      child: Row(
+                                        crossAxisAlignment: CrossAxisAlignment.center,
+                                        children: [
+                                          Icon(
+                                            Icons.star,
+                                            color: appTheme.onAccent,
+                                            // (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
+                                            size: 15,
+                                          ),
+                                          Padding(
+                                            padding: const EdgeInsets.only(left: 3),
+                                            child: Text(
+                                              "$rating",
+                                              style: TextStyle(
+                                                color: appTheme.onAccent,
+                                                //  (currentUserSettings?.darkMode ?? true) ? appTheme.backgroundColor : appTheme.textMainColor,
+                                                fontFamily: "NotoSans",
+                                                fontWeight: FontWeight.w600,
+                                                fontSize: 14,
+                                              ),
+                                              maxLines: 2,
                                             ),
-                                            maxLines: 2,
                                           ),
-                                        ),
-                                      ],
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                  // if (totalEpisodes != null || watchedEpisodeCount != null)
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 13, right: 13),
-                                    child: Text(
-                                      '•',
-                                      style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.secondary),
+                                    // if (totalEpisodes != null || watchedEpisodeCount != null)
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 13, right: 13),
+                                      child: Text(
+                                        '•',
+                                        style: TextStyle(fontSize: 17, color: Theme.of(context).colorScheme.secondary),
+                                      ),
                                     ),
-                                  ),
-                                  Container(
-                                    child: Row(
-                                      children: [
-                                        Text(
-                                          "${watchedEpisodeCount ?? "~"} ",
-                                          style: TextStyle(
-                                            fontFamily: "NunitoSans",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).colorScheme.primary,
+                                    Container(
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "${watchedEpisodeCount ?? "~"} ",
+                                            style: TextStyle(
+                                              fontFamily: "NunitoSans",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).colorScheme.primary,
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          "/ ${totalEpisodes ?? "??"}",
-                                          style: TextStyle(
-                                            fontFamily: "NunitoSans",
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.bold,
-                                            color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                          Text(
+                                            "/ ${totalEpisodes ?? "??"}",
+                                            style: TextStyle(
+                                              fontFamily: "NunitoSans",
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.bold,
+                                              color: Theme.of(context).colorScheme.onSecondaryContainer,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
+                                        ],
+                                      ),
+                                    )
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       )
                     ],

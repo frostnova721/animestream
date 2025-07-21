@@ -20,9 +20,11 @@ import 'package:animestream/ui/models/widgets/player/desktopControls.dart';
 
 class Watch extends StatefulWidget {
   final VideoController controller;
+  final bool localSource;
   const Watch({
     super.key,
     required this.controller,
+    this.localSource = false,
   });
 
   @override
@@ -58,13 +60,17 @@ class _WatchState extends State<Watch> {
 
     dataProvider.initSubsettings();
 
-    await dataProvider.extractCurrentStreamQualities();
+    if (!widget.localSource) {
+      await dataProvider.extractCurrentStreamQualities();
 
-    final q = dataProvider.getPreferredQualityStreamFromQualities();
+      final q = dataProvider.getPreferredQualityStreamFromQualities();
 
-    dataProvider.updateCurrentQuality(q);
+      dataProvider.updateCurrentQuality(q);
 
-    await controller.initiateVideo(q['link']!, headers: dataProvider.state.currentStream.customHeaders);
+      await controller.initiateVideo(q['link']!, headers: dataProvider.state.currentStream.customHeaders);
+    } else {
+      await controller.initiateVideo(dataProvider.state.currentStream.link);
+    }
 
     final lastWatchDuration = (((dataProvider.lastWatchDuration ?? 0) / 100) * (controller.duration ?? 1)).toInt();
 
@@ -115,15 +121,17 @@ class _WatchState extends State<Watch> {
 
     playerProvider.handleWakelock(); // Yes, it handles wakelock state
 
-    final currentByTotal = (controller.position ?? 0) / (controller.duration ?? 0);
-    if (currentByTotal * 100 >= 75 && !dataProvider.state.preloadStarted && (controller.isPlaying ?? false)) {
-      dataProvider.preloadNextEpisode();
-      updateWatching(
-        dataProvider.showId,
-        dataProvider.showTitle,
-        dataProvider.state.currentEpIndex + 1,
-        dataProvider.altDatabases,
-      );
+    if (!widget.localSource) {
+      final currentByTotal = (controller.position ?? 0) / (controller.duration ?? 0);
+      if (currentByTotal * 100 >= 75 && !dataProvider.state.preloadStarted && (controller.isPlaying ?? false)) {
+        dataProvider.preloadNextEpisode();
+        updateWatching(
+          dataProvider.showId,
+          dataProvider.showTitle,
+          dataProvider.state.currentEpIndex + 1,
+          dataProvider.altDatabases,
+        );
+      }
     }
 
     final finalEpReached = dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length;

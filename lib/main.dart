@@ -305,6 +305,7 @@ class _AnimeStreamState extends State<AnimeStream> {
               brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
               seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
             ),
+            iconTheme: IconThemeData(color: appTheme.textMainColor)
           ),
           home: Platform.isWindows
               ? AppWrapper(firstPage: deepLinkRequestedNavigationPage ?? MainNavigator())

@@ -5,6 +5,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
+import 'package:animestream/ui/models/widgets/cards/animeCardExtended.dart';
 import 'package:animestream/ui/models/widgets/header.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
@@ -62,6 +63,7 @@ class _SearchState extends State<Search> {
   }
 
   bool exactMatch = false;
+  bool verticalCards = true;
 
   @override
   Widget build(BuildContext context) {
@@ -140,7 +142,24 @@ class _SearchState extends State<Search> {
               fontFamily: "NotoSans",
               fontWeight: FontWeight.bold,
             ),
-          )
+          ),
+          Checkbox(
+            value: verticalCards,
+            onChanged: (val) => setState(() {
+              verticalCards = val!;
+            }),
+            activeColor: appTheme.accentColor,
+            checkColor: Colors.black,
+            materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          ),
+           Text(
+            "list view",
+            style: TextStyle(
+              color: appTheme.textMainColor,
+              fontFamily: "NotoSans",
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -156,19 +175,23 @@ class _SearchState extends State<Search> {
             GridView.builder(
               padding: EdgeInsets.zero,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                maxCrossAxisExtent: 180,
-                mainAxisExtent: Platform.isAndroid ? 220 : 260,
+                  maxCrossAxisExtent: verticalCards ? 450 : 180,
+                  mainAxisExtent: verticalCards ? 150 : Platform.isAndroid ? 220 : 260,
                   // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
-                  childAspectRatio: 120 / 220, //set as width and height of each child container
+                  // childAspectRatio: 120 / 220, //set as width and height of each child container
                   mainAxisSpacing: 15),
               shrinkWrap: true,
               physics: NeverScrollableScrollPhysics(),
               itemCount: exactMatch ? exactMatches.length : results.length,
               itemBuilder: (context, index) {
-                return Container(
-                  child: exactMatch ? exactMatches[index] : results[index],
-                );
+                if (verticalCards) {
+                  final it = results[index];
+                  return AnimeCardExtended(id: it.id, title: it.title, imageUrl: it.imageUrl, rating: it.rating ?? 0, customWidth: 450,);
+                } else
+                  return Container(
+                    child: exactMatch ? exactMatches[index] : results[index],
+                  );
               },
             ),
             footSpace(),

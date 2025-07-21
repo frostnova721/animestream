@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 // import 'package:av_media_player/player.dart';
@@ -27,7 +28,7 @@ abstract class VideoController {
   Future<void> pause();
 
   // initiate a source
-  Future<void> initiateVideo(String url, {Map<String, String>? headers = null});
+  Future<void> initiateVideo(String url, {Map<String, String>? headers = null, bool offline = false});
 
   /// Retuns the Widget of the player
   Widget getWidget();
@@ -92,8 +93,9 @@ class BetterPlayerWrapper implements VideoController {
   );
 
   @override
-  Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
-    return await controller.setupDataSource(dataSourceConfig(url, headers: headers));
+  Future<void> initiateVideo(String url, {Map<String, String>? headers, bool offline = false}) async {
+    final ds = offline ? BetterPlayerDataSource.file(url) : dataSourceConfig(url, headers: headers);
+    return await controller.setupDataSource(ds);
   }
 
   @override
@@ -178,14 +180,14 @@ class VideoPlayerWindowsWrapper implements VideoController {
   final List<VoidCallback> _listeners = [];
 
   @override
-  Future<void> initiateVideo(String url, {Map<String, String>? headers}) async {
+  Future<void> initiateVideo(String url, {Map<String, String>? headers, bool offline = false}) async {
     final vol = controller.value.volume;
     //kill the player and create a new instance :)
     await controller.dispose();
 
     // wait some time for proper disposal.
     await Future.delayed(Duration(milliseconds: 100));
-    controller = WinVideoPlayerController.network(url);
+    controller = offline ? WinVideoPlayerController.file(File(url)) : WinVideoPlayerController.network(url);
     await controller.initialize();
     for (final listener in _listeners) {
       controller.addListener(listener);

@@ -189,7 +189,6 @@ class Cards {
         afterNavigation: afterNavigation,
         bannerImageUrl: bannerImageUrl,
         isAnime: isAnime,
-        ongoing: ongoing,
         shouldNavigate: shouldNavigate,
         subText: subText,
         totalEpisodes: totalEpisodes,

@@ -43,6 +43,7 @@ class PlayerProvider extends ChangeNotifier {
   Future<void> playVideo(
     String url, {
     required VideoStream currentStream,
+    bool offline = false,
     bool preserveProgress = false,
     // List<VideoStream>? streams,
   }) async {
@@ -51,7 +52,7 @@ class PlayerProvider extends ChangeNotifier {
       seekTime = _controller.position ?? 0;
       await _controller.pause();
     }
-    await _controller.initiateVideo(url, headers: currentStream.customHeaders);
+    await _controller.initiateVideo(url, headers: currentStream.customHeaders, offline: offline);
 
     if (seekTime != null) await _controller.seekTo(Duration(milliseconds: seekTime));
   }

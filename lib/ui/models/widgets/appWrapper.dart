@@ -1,8 +1,7 @@
-import 'dart:ui';
-
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:provider/provider.dart';
@@ -13,6 +12,8 @@ class AppWrapper extends StatelessWidget {
   const AppWrapper({super.key, required this.firstPage});
 
   static final navKey = GlobalKey<NavigatorState>();
+
+  static final _fn = FocusNode();
 
   @override
   Widget build(BuildContext context) {
@@ -54,13 +55,24 @@ class AppWrapper extends StatelessWidget {
               ),
             )
           : null,
-      // extendBodyBehindAppBar: true, //should i?
-      body: Navigator(
-        key: navKey,
-        onGenerateRoute: (settings) {
-          Widget page = firstPage;
-          return MaterialPageRoute(builder: (context) => page);
-        },
+      body: StatefulBuilder(
+        builder: (context, setState) {
+          return Listener(
+            onPointerDown: (event) {
+              if(event.buttons == kBackMouseButton) {
+                Navigator.of(navKey.currentState!.context).maybePop();
+                setState((){});
+              }
+            },
+            child: Navigator(
+              key: navKey,
+              onGenerateRoute: (settings) {
+                Widget page = firstPage;
+                return MaterialPageRoute(builder: (context) => page);
+              },
+            ),
+          );
+        }
       ),
     );
   }
@@ -118,3 +130,5 @@ class _WindowButtonState extends State<WindowButton> {
     );
   }
 }
+
+

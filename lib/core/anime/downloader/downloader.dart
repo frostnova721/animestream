@@ -142,7 +142,7 @@ class Downloader {
     final item = _getDownloadItem(id);
     item.status = DownloadStatus.paused;
     item.lastDownloadedPart = nextSegmentIndex == -1 ? null : nextSegmentIndex;
-    await DownloadHistory.saveItem(_cookHistoryItem(item, DownloadStatus.paused, filePath));
+    // await DownloadHistory.saveItem(_cookHistoryItem(item, DownloadStatus.paused, filePath));
   }
 
   Future<void> _resumeTask(int id) async {

@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
-import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -63,7 +62,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
             style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 24),
           ),
           leading: IconButton(
-            onPressed: () => Navigator.of(context).pop(),
+            onPressed: () => Navigator.of(context).maybePop(),
             icon: Icon(
               Icons.arrow_back_rounded,
               size: 28,
@@ -437,5 +436,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
       ),
-      backgroundColor: appTheme.accentColor);
+      backgroundColor: appTheme.accentColor,
+      foregroundColor: appTheme.onAccent,
+      );
 }

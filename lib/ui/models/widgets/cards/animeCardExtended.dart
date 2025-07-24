@@ -19,6 +19,7 @@ class AnimeCardExtended extends StatelessWidget {
   final int? watchedEpisodeCount;
   final int? totalEpisodes;
   final String? bannerImageUrl;
+  final Color? surfaceColor;
   final double? customWidth;
 
   const AnimeCardExtended({
@@ -35,6 +36,7 @@ class AnimeCardExtended extends StatelessWidget {
     this.totalEpisodes,
     this.bannerImageUrl,
     this.customWidth,
+    this.surfaceColor,
   });
 
   @override

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/data/preferences.dart';
+import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
@@ -59,11 +61,14 @@ class _SearchState extends State<Search> {
 
   @override
   void initState() {
+    UserPreferences.getUserPreferences().then((val) => setState(() {
+          verticalCards = val.searchPageListMode ?? false;
+        }));
     super.initState();
   }
 
   bool exactMatch = false;
-  bool verticalCards = true;
+  bool verticalCards = false;
 
   @override
   Widget build(BuildContext context) {
@@ -146,13 +151,15 @@ class _SearchState extends State<Search> {
           Checkbox(
             value: verticalCards,
             onChanged: (val) => setState(() {
+              print("asd");
               verticalCards = val!;
+              UserPreferences.saveUserPreferences(UserPreferencesModal(searchPageListMode: val));
             }),
             activeColor: appTheme.accentColor,
             checkColor: Colors.black,
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
-           Text(
+          Text(
             "list view",
             style: TextStyle(
               color: appTheme.textMainColor,
@@ -176,7 +183,11 @@ class _SearchState extends State<Search> {
               padding: EdgeInsets.zero,
               gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                   maxCrossAxisExtent: verticalCards ? 450 : 180,
-                  mainAxisExtent: verticalCards ? 150 : Platform.isAndroid ? 220 : 260,
+                  mainAxisExtent: verticalCards
+                      ? 150
+                      : Platform.isAndroid
+                          ? 220
+                          : 260,
                   // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
                   // childAspectRatio: 120 / 220, //set as width and height of each child container
@@ -187,7 +198,13 @@ class _SearchState extends State<Search> {
               itemBuilder: (context, index) {
                 if (verticalCards) {
                   final it = results[index];
-                  return AnimeCardExtended(id: it.id, title: it.title, imageUrl: it.imageUrl, rating: it.rating ?? 0, customWidth: 450,);
+                  return AnimeCardExtended(
+                    id: it.id,
+                    title: it.title,
+                    imageUrl: it.imageUrl,
+                    rating: it.rating ?? 0,
+                    customWidth: 450,
+                  );
                 } else
                   return Container(
                     child: exactMatch ? exactMatches[index] : results[index],

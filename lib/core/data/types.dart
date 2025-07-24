@@ -90,14 +90,21 @@ class UserPreferencesModal {
   final EpisodeViewModes? episodesViewMode;
   final SubtitleSettings? subtitleSettings;
   final bool? preferDubs;
+  final bool? searchPageListMode;
 
-  UserPreferencesModal({this.episodesViewMode, this.subtitleSettings, this.preferDubs});
+  UserPreferencesModal({
+    this.episodesViewMode,
+    this.subtitleSettings,
+    this.preferDubs,
+    this.searchPageListMode,
+  });
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(
       episodesViewMode: getViewModeEnum(map['episodesViewMode'] ?? 0),
       subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings'] ?? SubtitleSettings().toMap()),
       preferDubs: map['preferDubs'] ?? false,
+      searchPageListMode: map['searchPageListMode'] ?? false,
     );
   }
 
@@ -106,6 +113,7 @@ class UserPreferencesModal {
       'episodesViewMode': getViewModeIndex(episodesViewMode ?? EpisodeViewModes.list),
       'subtitleSettings': subtitleSettings?.toMap() ?? SubtitleSettings().toMap(),
       'preferDubs': preferDubs ?? false,
+      'searchPageListMode': searchPageListMode ?? false,
     };
   }
 
@@ -141,5 +149,6 @@ class AnimeSpecificPreference {
   AnimeSpecificPreference({required this.lastWatchDuration, required this.manualSearchQuery});
 
   @override
-  String toString() => 'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery)';
+  String toString() =>
+      'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery)';
 }

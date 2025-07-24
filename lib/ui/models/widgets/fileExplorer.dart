@@ -8,7 +8,6 @@ import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/pages/watch.dart';
-import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -47,15 +46,24 @@ class _FileExplorerState extends State<FileExplorer> {
   }
 
   bool get _canGoBack => currentDir.path != _rootDir;
-  void _readDir() {
-    entities = currentDir.listSync();
+  Future<void> _readDir() async {
     currentDirPathSplit = currentDir.path.split(Platform.isWindows ? "\\" : "/");
-    setState(() {});
+    setState(() {
+      _loadingFiles = true;
+    });
+    entities = currentDir.listSync();
+
+    if (mounted)
+      setState(() {
+        _loadingFiles = false;
+      });
   }
 
   Directory currentDir = Directory(currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream');
 
   List<FileSystemEntity> entities = [];
+
+  bool _loadingFiles = false;
 
   IconData _getTypeIcon(String ext) {
     return switch (ext) {
@@ -81,16 +89,23 @@ class _FileExplorerState extends State<FileExplorer> {
         children: [
           _currentPathAndFile(),
           Expanded(
-            child: ListView.builder(
-              itemCount: entities.length,
-              itemBuilder: (context, index) {
-                final e = entities[index];
-                if (e is Directory)
-                  return _folderTile(e);
-                else
-                  return _fileTile(e);
-              },
-            ),
+            child: entities.isEmpty
+                ? Center(
+                    child: Text(
+                      "Empty folder!",
+                      style: TextStyle(fontFamily: "NunitoSans"),
+                    ),
+                  )
+                : ListView.builder(
+                    itemCount: entities.length,
+                    itemBuilder: (context, index) {
+                      final e = entities[index];
+                      if (e is Directory)
+                        return _folderTile(e);
+                      else
+                        return _fileTile(e);
+                    },
+                  ),
           ),
         ],
       ),
@@ -99,30 +114,42 @@ class _FileExplorerState extends State<FileExplorer> {
 
   Widget _currentPathAndFile() {
     return Container(
-      color: appTheme.backgroundSubColor.withAlpha(100),
-      padding: EdgeInsets.only(left: 16, bottom: 12, right: 16, top: 12),
+      decoration:
+          BoxDecoration(color: appTheme.backgroundSubColor.withAlpha(100), borderRadius: BorderRadius.circular(10)),
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 5),
+      margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       child: Row(
         children: [
-          IconButton(onPressed: () {
-            // for respecting the popscope widget!
-            if(_canGoBack)
-            Navigator.maybePop(context);
-          }, icon: Icon(Icons.arrow_back_ios_rounded,), alignment: Alignment.center,),
-          Padding(
-            padding: const EdgeInsets.only(left: 8, right: 28),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(currentDirPathSplit.sublist(0, currentDirPathSplit.length - 1).join('/') + "/"),
-                Text(
-                  currentDirPathSplit.last,
-                  style: _titleStyle(),
-                ),
-              ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8, right: 28),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                      currentDirPathSplit.sublist(0, currentDirPathSplit.length - 1).join('/') +
+                          "/",
+                      style: TextStyle(fontSize: 12),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  Text(
+                    currentDirPathSplit.last,
+                    style: _titleStyle().copyWith(fontSize: 16),
+                  ),
+                ],
+              ),
             ),
           ),
-          Spacer(),
-          Text("${entities.length} items")
+          // Spacer(),
+          if (_loadingFiles)
+            CircularProgressIndicator(
+              color: appTheme.textSubColor,
+            )
+          else
+            Text(
+              "${entities.length} items",
+              style: TextStyle(fontSize: 12, fontFamily: "NunitoSans", fontWeight: FontWeight.bold),
+            )
         ],
       ),
     );
@@ -147,7 +174,7 @@ class _FileExplorerState extends State<FileExplorer> {
           ),
           Expanded(
               child: Text(
-           _getFileName(entity.path),
+            _getFileName(entity.path),
             style: _titleStyle(),
             overflow: TextOverflow.ellipsis,
           )),
@@ -201,7 +228,7 @@ class _FileExplorerState extends State<FileExplorer> {
           ),
           IconButton(
               onPressed: () {
-                _deleteDialog(entity.path, null);
+                _deleteDialog(entity.path, null).then((val) => _readDir());
               },
               icon: Icon(Icons.delete)),
         ],
@@ -228,8 +255,8 @@ class _FileExplorerState extends State<FileExplorer> {
     );
   }
 
-  void _deleteDialog(String filepath, int? id) {
-    showDialog(
+  Future<T?> _deleteDialog<T>(String filepath, int? id) {
+    return showDialog(
         context: context,
         builder: (context) => AlertDialog(
               title: Text("You Sure?"),

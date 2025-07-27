@@ -21,7 +21,7 @@ class Kwik extends AnimeExtractor {
 
     if (streamLink == null) throw new Exception("UNABLE TO EXTRACT KWIK STREAM");
 
-    return [VideoStream(quality: quality ?? "single", link: streamLink!, isM3u8: streamLink!.endsWith("m3u8"), server: server ?? "Kwik", backup: false)];
+    return [VideoStream(quality: quality ?? "single", link: streamLink!, server: server ?? "Kwik", backup: false)];
   }
 }
 

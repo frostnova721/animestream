@@ -14,7 +14,6 @@ class AnimeCardExtended extends StatelessWidget {
   final double rating;
   final bool shouldNavigate;
   final bool isAnime;
-  final String? subText;
   final void Function()? afterNavigation;
   final int? watchedEpisodeCount;
   final int? totalEpisodes;
@@ -30,7 +29,6 @@ class AnimeCardExtended extends StatelessWidget {
     required this.rating,
     this.shouldNavigate = true,
     this.isAnime = true,
-    this.subText = null,
     this.afterNavigation,
     this.watchedEpisodeCount,
     this.totalEpisodes,
@@ -69,6 +67,7 @@ class AnimeCardExtended extends StatelessWidget {
           child: Container(
             width: customWidth ?? 305,
             height: 150,
+            color: surfaceColor,
             child: Stack(
               children: [
                 if (bannerImageUrl != null)

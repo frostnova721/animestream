@@ -55,7 +55,6 @@ class _ThemeSettingState extends State<ThemeSetting> {
   Future<void> applyTheme(int id) async {
     await setTheme(id);
     final theme = availableThemes.where((themeItem) => themeItem.id == id).toList()[0];
-    Provider.of<AppProvider>(context, listen: false).themeItem = theme;
     Provider.of<AppProvider>(context, listen: false).applyTheme(darkMode ? theme.theme : theme.lightVariant);
   }
 

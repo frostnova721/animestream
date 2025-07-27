@@ -13,8 +13,6 @@ class AppWrapper extends StatelessWidget {
 
   static final navKey = GlobalKey<NavigatorState>();
 
-  static final _fn = FocusNode();
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

@@ -354,11 +354,16 @@ class DownloaderCore {
     task.sendPort?.send(DownloadMessage(status: 'port', id: task.id, extras: [rp.sendPort]));
     task.sendPort?.send(DownloadMessage(status: 'downloading', id: task.id)); // set as downloading!
 
-    rp.listen((msg) {
+    rp.listen((msg) async {
       if (msg is String) {
         switch (msg) {
           case 'cancel':
             {
+              if(_status == DownloadStatus.paused) {
+                final file = File(await helper.makeDirectory(fileName: task.fileName, downloadPath: task.downloadPath));
+                if(await file.exists()) await file.delete();
+                Isolate.exit(task.sendPort, DownloadMessage(status: "cancel", id: task.id));
+              }
               _status = DownloadStatus.cancelled;
               break;
             }

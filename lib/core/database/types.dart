@@ -5,6 +5,7 @@ abstract class DatabaseSearchResult {
   Map<String, String?> get title;
   String get cover;
   double? rating;
+  int? get totalEpisodes;
 }
 
 abstract class DatabaseRelatedRecommendation {

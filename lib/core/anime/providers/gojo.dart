@@ -8,13 +8,13 @@ import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
-  static const String apiUrl = "https://backend.animetsu.cc/api/anime";
+  static const String apiUrl = "https://backend.animetsu.to/api/anime";
 
-  final baseUrl = "https://animetsu.cc";
+  final baseUrl = "https://animetsu.to";
 
   final headers = {
-    'Origin': 'https://animetsu.cc',
-    'Referer': 'https://animetsu.cc/',
+    'Origin': 'https://animetsu.to',
+    'Referer': 'https://animetsu.to/',
   };
 
   @override
@@ -149,7 +149,6 @@ class Gojo extends AnimeProvider {
               VideoStream(
                 quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
                 link: i['url'],
-                isM3u8: i['url'].endsWith('.m3u8'),
                 server: provider,
                 backup: false,
                 subtitleFormat: SubtitleFormat.VTT.name,

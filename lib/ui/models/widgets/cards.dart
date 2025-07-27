@@ -175,7 +175,6 @@ class Cards {
     bool ongoing = false,
     bool shouldNavigate = true,
     bool isAnime = true,
-    String? subText = null,
     void Function()? afterNavigation,
     int? watchedEpisodeCount,
     int? totalEpisodes,
@@ -190,7 +189,6 @@ class Cards {
         bannerImageUrl: bannerImageUrl,
         isAnime: isAnime,
         shouldNavigate: shouldNavigate,
-        subText: subText,
         totalEpisodes: totalEpisodes,
         watchedEpisodeCount: watchedEpisodeCount,
       );

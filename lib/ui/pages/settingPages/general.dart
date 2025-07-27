@@ -147,7 +147,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         );
                       },
                       label: "Default provider",
-                      description: currentUserSettings?.preferredProvider,
+                      description: currentUserSettings?.preferredProvider ?? sources.first.identifier,
                       suffixIcon: Icon(Icons.arrow_drop_down),
                     ),
                     ClickableItem(onTap: () {
@@ -189,11 +189,12 @@ class _GeneralSettingState extends State<GeneralSetting> {
                 shrinkWrap: true,
                 itemCount: sources.length,
                 itemBuilder: (context, index) {
+                  final activeProvider = currentUserSettings?.preferredProvider ?? sources.first.identifier;
                   return Container(
                     margin: const EdgeInsets.symmetric(vertical: 5),
                     clipBehavior: Clip.hardEdge,
                     decoration: BoxDecoration(
-                      color: sources[index].identifier == currentUserSettings?.preferredProvider
+                      color: sources[index].identifier == activeProvider
                           ? appTheme.accentColor
                           : appTheme.backgroundSubColor,
                       borderRadius: BorderRadius.circular(20),
@@ -212,7 +213,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                           child: Text(
                             sources[index].name,
                             style: textStyle().copyWith(
-                              color: sources[index].identifier == currentUserSettings?.preferredProvider
+                              color: sources[index].identifier == activeProvider
                                   ? appTheme.onAccent
                                   : appTheme.textMainColor,
                             ),

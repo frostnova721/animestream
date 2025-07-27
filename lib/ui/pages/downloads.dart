@@ -307,7 +307,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
               create: (context) => PlayerDataProvider(
                 initialStreams: [],
                 initialStream:
-                    VideoStream(quality: "default", link: filepath, isM3u8: false, server: "local", backup: false),
+                    VideoStream(quality: "default", link: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
                 showTitle: filename,
                 showId: 0, // doesnt matter

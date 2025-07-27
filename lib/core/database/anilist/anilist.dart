@@ -20,6 +20,7 @@ class Anilist extends Database {
                             english
                             romaji
                         }
+                        episodes
                         averageScore
                         coverImage {
                             large
@@ -45,6 +46,7 @@ class Anilist extends Database {
             'english': item['title']['english'],
             'romaji': item['title']['romaji'],
           },
+          totalEpisodes: item['episodes'],
           rating: item['averageScore'] is int ? item['averageScore'] / 10 : null);
       searchResults.add(classified);
     });

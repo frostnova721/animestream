@@ -13,13 +13,9 @@ class AppProvider with ChangeNotifier {
 
   bool _isDark = currentUserSettings?.darkMode ?? false;
 
-  ThemeItem _themeItem = activeThemeItem;
-
   AnimeStreamTheme get theme => _theme;
 
   bool get isDark => _isDark;
-
-  ThemeItem get themeItem => _themeItem;
 
   bool _isFullScreen = false;
 
@@ -65,10 +61,6 @@ class AppProvider with ChangeNotifier {
 
   set isDark(bool dark) {
     _isDark = dark;
-  }
-
-  set themeItem(ThemeItem ti) {
-    activeThemeItem = ti;
   }
 
   void setTitlebarColor(Color? color) {

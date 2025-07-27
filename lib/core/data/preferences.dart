@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/data/types.dart';
@@ -9,8 +10,9 @@ class UserPreferences {
     return UserPreferencesModal.fromMap(prefMap);
   }
 
-  static Future<void> saveUserPreferences(UserPreferencesModal userPreferences) async {
-    final mapped = userPreferences.toMap();
+  static Future<void> saveUserPreferences(UserPreferencesModal userPref) async {
+    final mapped = userPref.toMap();
+    userPreferences = userPref;
     await storeVal(HiveKey.userPreferences, mapped);
   }
 }

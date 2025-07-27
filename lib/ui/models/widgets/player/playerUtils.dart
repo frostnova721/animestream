@@ -1,10 +1,12 @@
+import 'package:animestream/core/commons/utils.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 
-BetterPlayerDataSource dataSourceConfig(String url, {Map<String, String>? headers = null}) {
+Future<BetterPlayerDataSource> dataSourceConfig(String url, {Map<String, String>? headers = null}) async {
   return BetterPlayerDataSource(
     BetterPlayerDataSourceType.network,
     url,
+    videoFormat: await _getFormat(url, headers),
     bufferingConfiguration: BetterPlayerBufferingConfiguration(
       maxBufferMs: 120000,
     ),
@@ -16,6 +18,29 @@ BetterPlayerDataSource dataSourceConfig(String url, {Map<String, String>? header
     headers: headers,
     placeholder: PlayerLoadingWidget(),
   );
+}
+
+Future<BetterPlayerVideoFormat> _getFormat(String url, Map<String, String>? headers) async {
+  final mime = await getMediaMimeType(url, headers);
+
+  // lets assume stuff if something goes wrong
+  if (mime == null || mime.contains("octet-stream")) {
+    final urlPath = Uri.parse(url).path.toLowerCase(); //wrong variable name btw!
+
+    //guessing game
+    if (urlPath.endsWith(".m3u8")) return BetterPlayerVideoFormat.hls;
+    if (urlPath.endsWith(".mpd")) return BetterPlayerVideoFormat.dash;
+    return BetterPlayerVideoFormat.other;
+
+  } else if (mime.contains("mpegurl")) {
+    return BetterPlayerVideoFormat.hls;
+
+  } else if (mime.contains("dash")) {
+    return BetterPlayerVideoFormat.dash;
+    
+  } else {
+    return BetterPlayerVideoFormat.other;
+  }
 }
 
 class PlayerLoadingWidget extends StatelessWidget {

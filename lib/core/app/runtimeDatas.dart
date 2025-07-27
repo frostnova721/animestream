@@ -9,11 +9,11 @@ UserModal? storedUserData;
 //saved settings
 SettingsModal? currentUserSettings;
 
+//user prefs
+UserPreferencesModal? userPreferences;
+
 //saved theme
 late AnimeStreamTheme appTheme;
-
-//active theme's themeItem
-late ThemeItem activeThemeItem;
 
 late String animeOnsenToken;
 

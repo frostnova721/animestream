@@ -23,9 +23,14 @@ class AniPlay extends AnimeProvider {
       //string which contains the id's for each servers
       String idString = "";
       serversAndEps.forEach((it) {
+        try {
         final List<dynamic> ep = it['episodes'];
         idString += "${idString.isEmpty ? "" : ","}${ep[i]['id']}";
         serverString += "${serverString.isEmpty ? "" : ","}${it['server']}";
+        }  catch(er) {
+          print(er.toString());
+          print("Index cooked!");
+        }
       });
 
       //here we give em as "episodeId+servers+anilistId"
@@ -93,8 +98,11 @@ class AniPlay extends AnimeProvider {
         }
 
         final List<Map<String, dynamic>>? subtitleArr = List.castFrom(parsed['subtitles'] ?? []);
-        final Map<String, String>? headers = Map.from(parsed['headers'] ?? {}).cast<String, String>();
+        final Map<String, String> headers = Map.from(parsed['headers'] ?? {}).cast<String, String>();
         final subtitleItem = subtitleArr?.where((st) => st['lang'] == "English").firstOrNull; // We only need english
+
+        //here goes my assumptions
+        if(headers.isEmpty) headers['Referer'] = "https://megaplay.buzz/";
 
         //choosing this since the quality is changeable in the default
         final stream = sources.where((element) => element['quality'] == "default").firstOrNull;
@@ -104,7 +112,6 @@ class AniPlay extends AnimeProvider {
             VideoStream(
               quality: "multi-quality",
               link: stream['url'],
-              isM3u8: stream['url'].endsWith(".m3u8"),
               customHeaders: headers,
                subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
@@ -126,7 +133,6 @@ class AniPlay extends AnimeProvider {
               srcs.add(VideoStream(
                 quality: "multi-quality", // yeah most times (assumptions...)
                 link: str['url'],
-                isM3u8: str['url'].endsWith(".m3u8"),
                 server: it,
                 backup: str['quality'] == "backup",
                 customHeaders: headers,

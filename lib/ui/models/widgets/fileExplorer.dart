@@ -116,13 +116,13 @@ class _FileExplorerState extends State<FileExplorer> {
     return Container(
       decoration:
           BoxDecoration(color: appTheme.backgroundSubColor.withAlpha(100), borderRadius: BorderRadius.circular(10)),
-      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 5),
+      padding: EdgeInsets.symmetric(vertical: 12, horizontal: 13),
       margin: EdgeInsets.symmetric(horizontal: 8, vertical: 5),
       child: Row(
         children: [
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.only(left: 8, right: 28),
+              padding: const EdgeInsets.only(right: 15),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -297,7 +297,7 @@ class _FileExplorerState extends State<FileExplorer> {
               create: (context) => PlayerDataProvider(
                 initialStreams: [],
                 initialStream:
-                    VideoStream(quality: "default", link: filepath, isM3u8: false, server: "local", backup: false),
+                    VideoStream(quality: "default", link: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
                 showTitle: filename,
                 showId: 0, // doesnt matter

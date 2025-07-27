@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:animestream/core/app/version.dart';
+import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/theme/lime.dart';
@@ -113,6 +114,11 @@ Future<void> loadAndAssignSettings() async {
         print("[STARTUP] Loaded user settings"),
       });
 
+  await UserPreferences.getUserPreferences().then((pref) {
+    userPreferences = pref;
+    print("[STARTUP] Loaded user preferences");
+  });
+
   //load and apply theme
   await getTheme().then((themeId) {
     if (themeId > availableThemes.length || themeId < 1) {
@@ -132,7 +138,6 @@ Future<void> loadAndAssignSettings() async {
       print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
     }
 
-    activeThemeItem = theme;
     if (darkMode) {
       appTheme = theme.theme;
       appTheme.backgroundColor =
@@ -179,12 +184,12 @@ class _AnimeStreamState extends State<AnimeStream> {
     );
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge, overlays: [SystemUiOverlay.top]);
-     SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(
-          statusBarColor: Colors.black.withValues(alpha: 0.002),
-          systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
-        ),
-      );
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.black.withValues(alpha: 0.002),
+        systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
+      ),
+    );
 
     // if (currentUserSettings?.enableDiscordPresence ?? false)
     // FlutterDiscordRPC.instance.connect(autoRetry: true, retryDelay: Duration(seconds: 10));
@@ -296,17 +301,16 @@ class _AnimeStreamState extends State<AnimeStream> {
           title: 'Animestream',
           scaffoldMessengerKey: AnimeStream.snackbarKey,
           theme: ThemeData(
-            useMaterial3: true,
-            brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-            textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
-            scaffoldBackgroundColor: appTheme.backgroundColor,
-            bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
-            colorScheme: ColorScheme.fromSeed(
+              useMaterial3: true,
               brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-              seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
-            ),
-            iconTheme: IconThemeData(color: appTheme.textMainColor)
-          ),
+              textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
+              scaffoldBackgroundColor: appTheme.backgroundColor,
+              bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
+              colorScheme: ColorScheme.fromSeed(
+                brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
+                seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
+              ),
+              iconTheme: IconThemeData(color: appTheme.textMainColor)),
           home: Platform.isWindows
               ? AppWrapper(firstPage: deepLinkRequestedNavigationPage ?? MainNavigator())
               : deepLinkRequestedNavigationPage ?? MainNavigator(),

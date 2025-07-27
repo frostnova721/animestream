@@ -230,6 +230,7 @@ class InfoProvider extends ChangeNotifier {
     }
   }
 
+  // Messy asf function. dont touch, not even I have a clue what its doing!
   void paginate(List<EpisodeDetails> links) {
     _visibleEpList = [];
     _epLinks = links;
@@ -252,7 +253,7 @@ class InfoProvider extends ChangeNotifier {
     } else {
       List<Map<String, dynamic>> pageOne = [];
       for (int i = 0; i < _epLinks.length; i++) {
-        if(preferDubs && (epLinks[i].hasDub ?? false) || !preferDubs)
+        if (preferDubs && (epLinks[i].hasDub ?? false) || !preferDubs)
           pageOne.add({'realIndex': i, 'epLink': _epLinks[i]});
       }
       visibleEpList.add(pageOne);

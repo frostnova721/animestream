@@ -70,7 +70,6 @@ class StreamWish extends AnimeExtractor {
         link: streamLink,
         quality: "multi-quality",
         backup: false,
-        isM3u8: streamLink.contains('.m3u8'),
         subtitle: subtitles,
         subtitleFormat: subtitles != null ? subtitles!.endsWith(".vtt") ? "vtt" : "ass" : null,
         customHeaders: headersOverrides ?? {"Referer": streamUrl, "Origin": "https://${Uri.parse(streamUrl).host}"},

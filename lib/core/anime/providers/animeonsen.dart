@@ -85,7 +85,6 @@ class AnimeOnsen extends AnimeProvider {
     final result = VideoStream(
         quality: "single",
         link: baseUrl,
-        isM3u8: false,
         server: "animeonsen",
         backup: false,
         subtitle: subtitleUrl,

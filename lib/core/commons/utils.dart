@@ -9,6 +9,12 @@ Future<String> fetch(String uri) async {
   return res.body;
 }
 
+Future<String?> getMediaMimeType(String uri, Map<String, String>? headers) async {
+  final heads = await head(Uri.parse(uri), headers: headers);
+  final type = heads.headers['content-type'];
+  return type;
+}
+
 String getCurrentSeason() {
   final month = DateTime.now().month;
   switch (month) {

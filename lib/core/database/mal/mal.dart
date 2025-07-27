@@ -37,7 +37,7 @@ class MAL extends Database {
     final headers = await getHeader(refreshHeaders: refreshHeaders);
     final res = await get(Uri.parse(url), headers: headers);
 
-    print(res.statusCode);
+    // print(res.statusCode);
 
     if(res.statusCode == 401) {
       await MALLogin().refreshToken();

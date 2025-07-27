@@ -193,6 +193,7 @@ class AnilistSearchResult extends DatabaseSearchResult {
   final Map<String, String?> title;
   final String cover;
   final double? rating;
+  final int? totalEpisodes;
 
   AnilistSearchResult({
     required this.cover,
@@ -200,6 +201,7 @@ class AnilistSearchResult extends DatabaseSearchResult {
     required this.idMal,
     required this.title,
     required this.rating,
+    required this.totalEpisodes,
   });
 }
 

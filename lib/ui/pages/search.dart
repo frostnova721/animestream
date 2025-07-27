@@ -5,8 +5,8 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/database/handler/handler.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
-import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCardExtended.dart';
 import 'package:animestream/ui/models/widgets/header.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -20,8 +20,8 @@ class Search extends StatefulWidget {
 }
 
 class _SearchState extends State<Search> {
-  List<AnimeCard> results = [];
-  List<AnimeCard> exactMatches = [];
+  List<DatabaseSearchResult> results = [];
+  List<DatabaseSearchResult> exactMatches = [];
 
   TextEditingController textEditingController = TextEditingController();
 
@@ -42,16 +42,10 @@ class _SearchState extends State<Search> {
         _searching = false;
       });
     searchResults.forEach((ele) {
-      final image = ele.cover;
       final String title = ele.title['english'] ?? ele.title['romaji'] ?? '';
-      final id = ele.id;
-      results.add(
-        Cards.animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
-      );
+      results.add(ele);
       if (query.toLowerCase() == title.toLowerCase()) {
-        exactMatches.add(
-          Cards.animeCard(id, title, image, rating: ele.rating, isMobile: Platform.isAndroid),
-        );
+        exactMatches.add(ele);
       }
     });
     setState(() {
@@ -61,14 +55,11 @@ class _SearchState extends State<Search> {
 
   @override
   void initState() {
-    UserPreferences.getUserPreferences().then((val) => setState(() {
-          verticalCards = val.searchPageListMode ?? false;
-        }));
     super.initState();
   }
 
   bool exactMatch = false;
-  bool verticalCards = false;
+  bool verticalCards = userPreferences?.searchPageListMode ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -151,7 +142,6 @@ class _SearchState extends State<Search> {
           Checkbox(
             value: verticalCards,
             onChanged: (val) => setState(() {
-              print("asd");
               verticalCards = val!;
               UserPreferences.saveUserPreferences(UserPreferencesModal(searchPageListMode: val));
             }),
@@ -197,18 +187,28 @@ class _SearchState extends State<Search> {
               itemCount: exactMatch ? exactMatches.length : results.length,
               itemBuilder: (context, index) {
                 if (verticalCards) {
-                  final it = results[index];
+                   final it = results[index];
+                final image = it.cover;
+                final String title = it.title['english'] ?? it.title['romaji'] ?? '';
+                final id = it.id;
                   return AnimeCardExtended(
-                    id: it.id,
-                    title: it.title,
-                    imageUrl: it.imageUrl,
+                    id: id,
+                    title: title,
+                    imageUrl: image,
                     rating: it.rating ?? 0,
                     customWidth: 450,
+                    totalEpisodes: it.totalEpisodes,
+                    surfaceColor: appTheme.backgroundSubColor.withAlpha(100),
                   );
-                } else
+                } else {
+                   final it = exactMatch ? exactMatches[index] : results[index];
+                final image = it.cover;
+                final String title = it.title['english'] ?? it.title['romaji'] ?? '';
+                final id = it.id;
                   return Container(
-                    child: exactMatch ? exactMatches[index] : results[index],
+                    child: Cards.animeCard(id, title, image, rating: it.rating, isAnime: true, isMobile: Platform.isAndroid),
                   );
+                }
               },
             ),
             footSpace(),

@@ -4,7 +4,6 @@ import 'dart:convert';
 class VideoStream {
   final String quality;
   final String link;
-  final bool isM3u8;
   final String? subtitle;
   final String? subtitleFormat;
   final String server;
@@ -14,7 +13,6 @@ class VideoStream {
   VideoStream({
     required this.quality,
     required this.link,
-    required this.isM3u8,
     required this.server,
     required this.backup,
     this.subtitleFormat = null,
@@ -24,14 +22,13 @@ class VideoStream {
 
   @override
   String toString() {
-    return 'VideoStream(quality: $quality, link: $link, isM3u8: $isM3u8, subtitle: $subtitle, subtitleFormat: $subtitleFormat, server: $server, backup: $backup, customHeaders: $customHeaders)';
+    return 'VideoStream(quality: $quality, link: $link, subtitle: $subtitle, subtitleFormat: $subtitleFormat, server: $server, backup: $backup, customHeaders: $customHeaders)';
   }
 
   Map<String, dynamic> toMap() {
     return <String, dynamic>{
       'quality': quality,
       'link': link,
-      'isM3u8': isM3u8,
       'subtitle': subtitle,
       'subtitleFormat': subtitleFormat,
       'server': server,
@@ -44,7 +41,6 @@ class VideoStream {
     return VideoStream(
       quality: map['quality'] as String,
       link: map['link'] as String,
-      isM3u8: map['isM3u8'] as bool,
       subtitle: map['subtitle'] != null ? map['subtitle'] as String : null,
       subtitleFormat: map['subtitleFormat'] != null ? map['subtitleFormat'] : null,
       server: map['server'] as String,

@@ -6,11 +6,13 @@ class SimklSearchResult extends DatabaseSearchResult {
   final int id;
   final String cover;
   final Map<String, String?> title;
+  final int? totalEpisodes;
 
   SimklSearchResult({
     required this.cover,
     required this.id,
     required this.title,
+    this.totalEpisodes = null,
   });
 }
 

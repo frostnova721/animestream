@@ -97,5 +97,6 @@ This project is licensed under the **GNU Public License version 3.0**.
 
 ## Support
 
-Dono? 
+Dono?
+
 <a href="https://www.buymeacoffee.com/frostnova" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>

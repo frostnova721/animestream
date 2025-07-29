@@ -49,9 +49,14 @@ abstract class VideoController {
   /// Add a listener for videoplayer controller
   void addListener(VoidCallback cb);
 
+  /// Detach the listener from the controller
   void removeListener(VoidCallback cb);
 
+  /// Set the player view mode
   void setFit(BoxFit fit);
+
+  /// manage PiP
+  Future<void> setPip(bool value);
 
   /// Playing state of the VideoPlayer
   bool? get isPlaying;
@@ -172,6 +177,10 @@ class BetterPlayerWrapper implements VideoController {
   void removeListener(VoidCallback cb) {
     return controller.videoPlayerController?.removeListener(cb);
   }
+
+  @override
+  Future<void> setPip(bool value) async {
+  }
 }
 
 class VideoPlayerWindowsWrapper implements VideoController {
@@ -269,6 +278,11 @@ class VideoPlayerWindowsWrapper implements VideoController {
   @override
   void removeListener(VoidCallback cb) {
     return controller.removeListener(cb);
+  }
+
+  @override
+  Future<void> setPip(bool value) {
+    throw Exception("PiP isnt supported on Windows.");
   }
 }
 

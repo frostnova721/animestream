@@ -24,6 +24,7 @@ class PlayerProvider extends ChangeNotifier {
           controlsVisible: true,
           wakelockEnabled: false,
           currentViewMode: ViewMode.fit,
+          pip: false,
         );
 
   VideoController get controller => _controller;
@@ -116,6 +117,15 @@ class PlayerProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Set pip mode
+  Future<void> setPip(bool val) async {
+    print("[PLAYER] set pip: $val");
+    _state = _state.copyWith(pip: val);
+    await controller.setPip(val);
+    notifyListeners();
+  }
+
+  /// Set playback speed
   void setSpeed(double val) {
     _state = _state.copyWith(speed: val);
     _controller.setSpeed(val);
@@ -184,6 +194,7 @@ class PlayerProviderState {
   final bool controlsVisible;
   final bool wakelockEnabled;
   final ViewMode currentViewMode;
+  final bool pip;
 
   PlayerProviderState({
     required this.playerState,
@@ -193,6 +204,7 @@ class PlayerProviderState {
     required this.controlsVisible,
     required this.wakelockEnabled,
     required this.currentViewMode,
+    required this.pip,
   });
 
   PlayerProviderState copyWith({
@@ -203,6 +215,7 @@ class PlayerProviderState {
     bool? controlsVisible,
     bool? wakelockEnabled,
     ViewMode? currentViewMode,
+    bool? pip,
   }) {
     return PlayerProviderState(
       playerState: playerState ?? this.playerState,
@@ -212,6 +225,7 @@ class PlayerProviderState {
       controlsVisible: controlsVisible ?? this.controlsVisible,
       wakelockEnabled: wakelockEnabled ?? this.wakelockEnabled,
       currentViewMode: currentViewMode ?? this.currentViewMode,
+      pip: pip ?? this.pip,
     );
   }
 }

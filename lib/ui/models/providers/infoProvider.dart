@@ -173,20 +173,25 @@ class InfoProvider extends ChangeNotifier {
   }
 
   Future<void> getWatched({bool refreshLastWatchDuration = false}) async {
-    if (await AniListLogin().isAnilistLoggedIn()) if (_mediaListStatus == null) {
-      _watched = 0;
-      _started = false;
-    }
-    final item = await getAnimeWatchProgress(id, _mediaListStatus);
-    _watched = item == 0 ? 0 : item;
-    _started = item != 0;
+    try {
+      if (await AniListLogin().isAnilistLoggedIn()) if (_mediaListStatus == null) {
+        _watched = 0;
+        _started = false;
+      }
+      final item = await getAnimeWatchProgress(id, _mediaListStatus);
+      _watched = item == 0 ? 0 : item;
+      _started = item != 0;
 
-    final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
+      final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
-    _currentPageIndex = supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex;
+      _currentPageIndex = supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex;
 
-    if (refreshLastWatchDuration) {
-      _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
+      if (refreshLastWatchDuration) {
+        _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
+      }
+    } catch (err) {
+      floatingSnackBar("Couldn't fetch watch progress.");
+      print(err.toString());
     }
 
     notifyListeners();

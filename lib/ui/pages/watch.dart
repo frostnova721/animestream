@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
+import 'package:animestream/ui/models/doubleTapDectector.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -69,7 +70,7 @@ class _WatchState extends State<Watch> {
 
       await controller.initiateVideo(q['link']!, headers: dataProvider.state.currentStream.customHeaders);
     } else {
-      await controller.initiateVideo(dataProvider.state.currentStream.link);
+      await controller.initiateVideo(dataProvider.state.currentStream.link, offline: true);
     }
 
     final lastWatchDuration = (((dataProvider.lastWatchDuration ?? 0) / 100) * (controller.duration ?? 1)).toInt();
@@ -170,6 +171,30 @@ class _WatchState extends State<Watch> {
   int lastTapTime = 0;
   final int doubleTapThreshold = 200; // in ms
 
+  bool _showRewindAnim = false;
+  bool _showForwardAnim = false;
+  Timer? _animTimer;
+
+  void _showFastForwardAnim(bool isForward) {
+    setState(() {
+      if (isForward) {
+        _showForwardAnim = true;
+      } else {
+        _showRewindAnim = true;
+      }
+    });
+
+    _animTimer?.cancel();
+    _animTimer = Timer(Duration(milliseconds: 800), () {
+      if (mounted) {
+        setState(() {
+          _showRewindAnim = false;
+          _showForwardAnim = false;
+        });
+      }
+    });
+  }
+
   void _handleTap() {
     if (!Platform.isWindows) return _handleSingleTap();
     int now = DateTime.now().millisecondsSinceEpoch;
@@ -194,11 +219,15 @@ class _WatchState extends State<Watch> {
   }
 
   void _handleDoubleTap() {
+    if (!Platform.isWindows) return;
     final themeProvider = context.read<AppProvider>();
     themeProvider.setFullScreen(!themeProvider.isFullScreen);
   }
 
   bool hidePointer = false;
+
+  // for tap gesures
+  bool lTapped = false, rTapped = false;
 
   @override
   Widget build(BuildContext context) {
@@ -245,7 +274,7 @@ class _WatchState extends State<Watch> {
                   ? SystemMouseCursors.basic
                   : SystemMouseCursors.none,
               child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
+                // behavior: HitTestBehavior.opaque,
                 onTap: _handleTap,
                 child: Stack(
                   children: [
@@ -291,6 +320,107 @@ class _WatchState extends State<Watch> {
                                 ],
                               )
                             : Container(),
+                    Container(
+                      // margin: MediaQuery.paddingOf(context),
+                      child: Row(children: [
+                        Expanded(
+                          // flex: 2,
+                          child: DoubleTapDectector(
+                            behavior: HitTestBehavior.translucent,
+                            onDoubleTap: () {
+                              playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
+                              _showFastForwardAnim(false);
+                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: Container(),
+                          flex: 1,
+                        ),
+                        Expanded(
+                          // flex: 2,
+                          child: DoubleTapDectector(
+                            behavior: HitTestBehavior.translucent,
+                            onDoubleTap: () {
+                              playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
+                              _showFastForwardAnim(true);
+                            },
+                          ),
+                        ),
+                      ]),
+                    ),
+                    if (_showRewindAnim)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: AnimatedOpacity(
+                            duration: Duration(milliseconds: 150),
+                            opacity: _showRewindAnim ? 1.0 : 0.0,
+                            child: Container(
+                              alignment: Alignment.centerLeft,
+                              padding: EdgeInsets.only(left: 50),
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: appTheme.backgroundSubColor.withAlpha(200),
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(Icons.fast_rewind, color: Colors.white, size: 30),
+                                    SizedBox(width: 8),
+                                    Text(
+                                      '-${currentUserSettings?.skipDuration ?? 10}s',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: "Rubik",
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (_showForwardAnim)
+                      Positioned.fill(
+                        child: IgnorePointer(
+                          child: AnimatedOpacity(
+                            duration: Duration(milliseconds: 150),
+                            opacity: _showForwardAnim ? 1.0 : 0.0,
+                            child: Container(
+                              alignment: Alignment.centerRight,
+                              padding: EdgeInsets.only(right: 50),
+                              child: Container(
+                                padding: EdgeInsets.all(20),
+                                decoration: BoxDecoration(
+                                  color: appTheme.backgroundSubColor.withAlpha(200),
+                                  borderRadius: BorderRadius.circular(50),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      '+${currentUserSettings?.skipDuration ?? 10}s',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: "Rubik",
+                                      ),
+                                    ),
+                                    SizedBox(width: 8),
+                                    Icon(Icons.fast_forward, color: Colors.white, size: 30),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),

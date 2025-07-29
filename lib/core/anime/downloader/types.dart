@@ -119,6 +119,11 @@ class DownloadTaskIsolate {
     required this.downloadPath,
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
   });
+
+  @override
+  String toString() {
+    return 'DownloadTaskIsolate(url: $url, fileName: $fileName, id: $id, customHeaders: $customHeaders, retryAttempts: $retryAttempts, parallelBatches: $parallelBatches, subsUrl: $subsUrl, sendPort: $sendPort, resumeFrom: $resumeFrom, downloadPath: $downloadPath)';
+  }
 }
 
 class DownloadMessage {

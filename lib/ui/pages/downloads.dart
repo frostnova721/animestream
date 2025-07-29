@@ -8,6 +8,7 @@ import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/fileExplorer.dart';
 import 'package:animestream/ui/pages/watch.dart';
@@ -297,6 +298,10 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   }
 
   void _playVideo(String filepath) {
+    if(!File(filepath).existsSync()) {
+      floatingSnackBar("File Not Found!");
+      return;
+    }
     final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
     final filename = filepath.split("/").last;
     Navigator.of(context).push(

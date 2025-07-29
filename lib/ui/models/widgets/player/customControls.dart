@@ -747,21 +747,33 @@ class BottomControls extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                        onPressed: () {
-                          playerProvider.toggleSubs();
-                        },
-                        onLongPress: () {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (ctx) => SubtitleSettingPage(fromWatchPage: true,)))
-                              .then((v) {
-                            dataProvider.initSubsettings();
-                          });
-                        },
-                        tooltip: "Subtitles",
-                        icon: Icon(
-                          !playerProvider.state.showSubs ? Icons.subtitles_outlined : Icons.subtitles_rounded,
-                          color: Colors.white,
-                        )),
+                      onPressed: () {
+                        playerProvider.toggleSubs();
+                      },
+                      onLongPress: () {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(
+                                builder: (ctx) => SubtitleSettingPage(
+                                      fromWatchPage: true,
+                                    )))
+                            .then((v) {
+                          dataProvider.initSubsettings();
+                        });
+                      },
+                      tooltip: "Subtitles",
+                      icon: Icon(
+                        !playerProvider.state.showSubs ? Icons.subtitles_outlined : Icons.subtitles_rounded,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () async {
+                        await playerProvider.setPip(!playerProvider.state.pip);
+                      },
+                      icon: Icon(Icons.picture_in_picture_alt_rounded),
+                      tooltip: playerProvider.state.currentViewMode.desc,
+                      color: Colors.white,
+                    ),
                     IconButton(
                       onPressed: () {
                         playerProvider.cycleViewMode();
@@ -769,7 +781,7 @@ class BottomControls extends StatelessWidget {
                       icon: Icon(playerProvider.state.currentViewMode.icon),
                       tooltip: playerProvider.state.currentViewMode.desc,
                       color: Colors.white,
-                    )
+                    ),
                   ],
                 )
               ],

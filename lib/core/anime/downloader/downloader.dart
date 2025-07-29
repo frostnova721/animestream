@@ -94,6 +94,8 @@ class Downloader {
 
     final task = _cookTask(item, path);
 
+    print('[DOWNLOADER] Queuing task $task');
+
     // Run the downloading
     final isolate = await Isolate.spawn(downloadFunction, task);
     _isolates[item.id] = isolate;
@@ -255,7 +257,7 @@ class Downloader {
       fileName: item.fileName,
       customHeaders: item.customHeaders,
       retryAttempts: MAX_RETRY_ATTEMPTS,
-      parallelBatches: MAX_STREAM_BATCH_SIZE,
+      parallelBatches: MAX_STREAM_BATCH_SIZE * ((currentUserSettings?.fasterDownloads ?? false ) ? 2 : 1 ),
       subsUrl: item.subtitleUrl,
       sendPort: rp.sendPort,
       id: item.id,

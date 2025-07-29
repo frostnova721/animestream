@@ -362,6 +362,7 @@ class DownloaderCore {
               if(_status == DownloadStatus.paused) {
                 final file = File(await helper.makeDirectory(fileName: task.fileName, downloadPath: task.downloadPath));
                 if(await file.exists()) await file.delete();
+                print("[ISOLATE] Download Cancelled, Exiting Isolate");
                 Isolate.exit(task.sendPort, DownloadMessage(status: "cancel", id: task.id));
               }
               _status = DownloadStatus.cancelled;

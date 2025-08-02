@@ -235,9 +235,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                         ),
                         Expanded(
                           child: IconButton.filled(
-                            onPressed: () {
-                              _deleteDialog(item.filePath!, item.id);
-                            },
+                            onPressed: () =>_deleteDialog(item.filePath!, item.id),
                             icon: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

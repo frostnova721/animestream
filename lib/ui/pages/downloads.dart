@@ -218,7 +218,6 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                             padding: const EdgeInsets.only(right: 8),
                             child: IconButton.filled(
                               onPressed: () {
-                                // Video play logic!
                                 _playVideo(item.filePath!);
                               },
                               icon: Row(

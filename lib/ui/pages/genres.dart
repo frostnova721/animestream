@@ -96,7 +96,6 @@ class _GenresPageState extends State<GenresPage> {
   bool _firstSearchDone = false;
 
   final ScrollController _scrollController = ScrollController();
-
   final ScrollController _tagsScrollController = ScrollController();
 
   @override

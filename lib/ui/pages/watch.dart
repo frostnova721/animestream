@@ -80,7 +80,7 @@ class _WatchState extends State<Watch> {
     // Seek to last watched part
     await controller.seekTo(Duration(milliseconds: lastWatchDuration)); //percentage to value
 
-    context.read<PlayerProvider>().toggleSubs(action: dataProvider.state.currentStream.subtitle != null);
+    if (mounted) context.read<PlayerProvider>().toggleSubs(action: dataProvider.state.currentStream.subtitle != null);
 
     // Placed here for safety. placing it above might cause issues with custom controls functions
     setState(() {
@@ -176,15 +176,20 @@ class _WatchState extends State<Watch> {
   Timer? _animTimer;
 
   void _showFastForwardAnim(bool isForward) {
+    skipCount++;
+
+    _animTimer?.cancel();
+
     setState(() {
       if (isForward) {
         _showForwardAnim = true;
+        _showRewindAnim = false;
       } else {
         _showRewindAnim = true;
+        _showForwardAnim = false;
       }
     });
 
-    _animTimer?.cancel();
     _animTimer = Timer(Duration(milliseconds: 800), () {
       if (mounted) {
         setState(() {
@@ -196,17 +201,16 @@ class _WatchState extends State<Watch> {
   }
 
   void _handleTap() {
-    if (!Platform.isWindows) return _handleSingleTap();
-    int now = DateTime.now().millisecondsSinceEpoch;
-
-    if (now - lastTapTime <= doubleTapThreshold) {
+    if (_tapTimer != null && _tapTimer!.isActive) {
+      // Double tap
+      _tapTimer!.cancel();
       _handleDoubleTap();
-      lastTapTime = 0; // Reset
     } else {
-      _handleSingleTap();
+      // Single tap
+      _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
+        _handleSingleTap();
+      });
     }
-
-    lastTapTime = now;
   }
 
   void _handleSingleTap() {
@@ -228,6 +232,8 @@ class _WatchState extends State<Watch> {
 
   // for tap gesures
   bool lTapped = false, rTapped = false;
+
+  int skipCount = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -286,6 +292,7 @@ class _WatchState extends State<Watch> {
                             playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
                         subtitleSource: playerDataProvider.state.currentStream.subtitle!,
                         settings: playerDataProvider.subtitleSettings,
+                        headers: playerDataProvider.state.currentStream.customHeaders,
                       ),
                     isInitiated
                         ? AnimatedOpacity(
@@ -329,6 +336,7 @@ class _WatchState extends State<Watch> {
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
                               playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
+                              if (!_showRewindAnim) skipCount = 0;
                               _showFastForwardAnim(false);
                             },
                           ),
@@ -343,88 +351,80 @@ class _WatchState extends State<Watch> {
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
                               playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
+                              if (!_showForwardAnim) skipCount = 0;
                               _showFastForwardAnim(true);
                             },
                           ),
                         ),
                       ]),
                     ),
-                    if (_showRewindAnim)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: AnimatedOpacity(
-                            duration: Duration(milliseconds: 150),
-                            opacity: _showRewindAnim ? 1.0 : 0.0,
-                            child: Container(
-                              alignment: Alignment.centerLeft,
-                              padding: EdgeInsets.only(left: 50),
-                              child: Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: appTheme.backgroundSubColor.withAlpha(200),
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Icon(Icons.fast_rewind, color: Colors.white, size: 30),
-                                    SizedBox(width: 8),
-                                    Text(
-                                      '-${currentUserSettings?.skipDuration ?? 10}s',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "Rubik",
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    if (_showForwardAnim)
-                      Positioned.fill(
-                        child: IgnorePointer(
-                          child: AnimatedOpacity(
-                            duration: Duration(milliseconds: 150),
-                            opacity: _showForwardAnim ? 1.0 : 0.0,
-                            child: Container(
-                              alignment: Alignment.centerRight,
-                              padding: EdgeInsets.only(right: 50),
-                              child: Container(
-                                padding: EdgeInsets.all(20),
-                                decoration: BoxDecoration(
-                                  color: appTheme.backgroundSubColor.withAlpha(200),
-                                  borderRadius: BorderRadius.circular(50),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      '+${currentUserSettings?.skipDuration ?? 10}s',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.bold,
-                                        fontFamily: "Rubik",
-                                      ),
-                                    ),
-                                    SizedBox(width: 8),
-                                    Icon(Icons.fast_forward, color: Colors.white, size: 30),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
+                    _skipIndicators(),
                   ],
                 ),
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  IgnorePointer _skipIndicators() {
+    return IgnorePointer(
+      ignoring: true,
+      child: Center(
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 100),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              AnimatedOpacity(
+                duration: Duration(milliseconds: 500),
+                opacity: _showRewindAnim ? 1 : 0,
+                child: AnimatedSlide(
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  offset: Offset(_showRewindAnim ? 0 : -1, 0),
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: appTheme.backgroundSubColor.withAlpha(200),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Text(
+                      " - ${(currentUserSettings?.skipDuration ?? 10) * skipCount}s",
+                      style: TextStyle(
+                        fontFamily: "Rubik",
+                        fontSize: 23,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              AnimatedOpacity(
+                duration: Duration(milliseconds: 500),
+                opacity: _showForwardAnim ? 1 : 0,
+                child: AnimatedSlide(
+                  duration: Duration(milliseconds: 500),
+                  curve: Curves.easeInOut,
+                  offset: Offset(_showForwardAnim ? 0 : 1, 0),
+                  child: Container(
+                    padding: EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: appTheme.backgroundSubColor.withAlpha(200),
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    child: Text(
+                      "+ ${(currentUserSettings?.skipDuration ?? 10) * skipCount}s",
+                      style: TextStyle(
+                        fontFamily: "Rubik",
+                        fontSize: 23,
+                      ),
+                    ),
+                  ),
+                ),
+              )
+            ],
           ),
         ),
       ),

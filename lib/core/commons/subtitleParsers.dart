@@ -2,10 +2,10 @@ import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 import 'package:http/http.dart';
 
 class Subtitleparsers {
-  Future<List<Subtitle>> parseAss(String assSource) async {
+  Future<List<Subtitle>> parseAss(String assSource, { Map<String, String> headers = const {}}) async {
     if (assSource.startsWith("https://")) {
       //its a link
-      final res = await get(Uri.parse(assSource));
+      final res = await get(Uri.parse(assSource), headers: headers);
       final sub = ASSRIPPER().parseASS(res.body);
       return sub;
     }
@@ -13,9 +13,9 @@ class Subtitleparsers {
     return ASSRIPPER().parseASS(assSource);
   }
 
-  Future<List<Subtitle>> parseVtt(String source) async {
+  Future<List<Subtitle>> parseVtt(String source, { Map<String, String> headers = const {}}) async {
     if (source.startsWith('https://')) {
-      final res = await get(Uri.parse(source));
+      final res = await get(Uri.parse(source), headers: headers);
       final subs = VttRipper().parseVtt(res.body);
       return subs;
     }

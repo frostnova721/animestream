@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 class SubViewer extends StatefulWidget {
   final VideoController controller;
   final String subtitleSource;
+  final Map<String, String>? headers;
   final SubtitleFormat format;
   final SubtitleSettings settings;
 
@@ -21,6 +22,7 @@ class SubViewer extends StatefulWidget {
     required this.format,
     required this.subtitleSource,
     required this.settings,
+    this.headers = const {},
   });
 
   @override
@@ -52,9 +54,9 @@ class _SubViewerState extends State<SubViewer> {
       print("loading ${widget.format.name} subs");
       switch (widget.format) {
         case SubtitleFormat.ASS:
-          subs = await Subtitleparsers().parseAss(widget.subtitleSource);
+          subs = await Subtitleparsers().parseAss(widget.subtitleSource, headers: widget.headers!);
         case SubtitleFormat.VTT:
-          subs = await Subtitleparsers().parseVtt(widget.subtitleSource);
+          subs = await Subtitleparsers().parseVtt(widget.subtitleSource, headers: widget.headers!);
         // default:
         // throw Exception("Not implemented!");
       }

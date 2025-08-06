@@ -99,7 +99,7 @@ class AniPlay extends AnimeProvider {
 
         final List<Map<String, dynamic>>? subtitleArr = List.castFrom(parsed['subtitles'] ?? []);
         final Map<String, String> headers = Map.from(parsed['headers'] ?? {}).cast<String, String>();
-        final subtitleItem = subtitleArr?.where((st) => st['lang'] == "English").firstOrNull; // We only need english
+        final subtitleItem = subtitleArr?.where((st) => (st['lang'] ?? st['language']) == "English").firstOrNull; // We only need english
 
         //here goes my assumptions
         if(headers.isEmpty) headers['Referer'] = "https://megaplay.buzz/";

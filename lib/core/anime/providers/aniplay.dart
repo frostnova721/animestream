@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
-import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
@@ -99,7 +98,11 @@ class AniPlay extends AnimeProvider {
 
         final List<Map<String, dynamic>>? subtitleArr = List.castFrom(parsed['subtitles'] ?? []);
         final Map<String, String> headers = Map.from(parsed['headers'] ?? {}).cast<String, String>();
-        final subtitleItem = subtitleArr?.where((st) => (st['lang'] ?? st['language']) == "English").firstOrNull; // We only need english
+        Map<String, dynamic>? subtitleItem = subtitleArr?.where((st) => (st['default']) == true).firstOrNull; // default is most likely english
+        if (subtitleItem == null || subtitleItem.isEmpty) {
+          subtitleItem = subtitleArr?.where((st) => st['label']?.toLowerCase() == "english").firstOrNull;
+        }
+        print(subtitleItem);
 
         //here goes my assumptions
         if(headers.isEmpty) headers['Referer'] = "https://megaplay.buzz/";
@@ -115,9 +118,7 @@ class AniPlay extends AnimeProvider {
               customHeaders: headers,
                subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
-                    ? subtitleItem['url'].endsWith("vtt")
-                        ? SubtitleFormat.VTT.name
-                        : SubtitleFormat.ASS.name
+                    ? subtitleItem['url'].split('.').last
                     : null,
               server: it,
               backup: false,
@@ -138,9 +139,7 @@ class AniPlay extends AnimeProvider {
                 customHeaders: headers,
                 subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
-                    ? subtitleItem['url'].endsWith("vtt")
-                        ? SubtitleFormat.VTT.name
-                        : SubtitleFormat.ASS.name
+                    ? subtitleItem['url'].split('.').last
                     : null,
               ));
             } catch (err) {

@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/commons/subtitleParsers.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitleParsers.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
@@ -57,6 +57,8 @@ class _SubViewerState extends State<SubViewer> {
           subs = await Subtitleparsers().parseAss(widget.subtitleSource, headers: widget.headers!);
         case SubtitleFormat.VTT:
           subs = await Subtitleparsers().parseVtt(widget.subtitleSource, headers: widget.headers!);
+        case SubtitleFormat.SRT:
+          subs = await Subtitleparsers().parseSrt(widget.subtitleSource, headers: widget.headers!);
         // default:
         // throw Exception("Not implemented!");
       }

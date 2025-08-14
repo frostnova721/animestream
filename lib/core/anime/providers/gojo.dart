@@ -8,13 +8,13 @@ import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
-  static const String apiUrl = "https://backend.animetsu.to/api/anime";
+  static const String apiUrl = "https://backend.animetsu.cc/api/anime";
 
-  final baseUrl = "https://animetsu.to";
+  final baseUrl = "https://animetsu.cc";
 
   final headers = {
-    'Origin': 'https://animetsu.to',
-    'Referer': 'https://animetsu.to/',
+    'Origin': 'https://animetsu.cc',
+    'Referer': 'https://animetsu.cc/',
   };
 
   @override
@@ -39,11 +39,12 @@ class Gojo extends AnimeProvider {
   Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
     //alias id here is the anilist id
 
-    final url = Uri.parse("$apiUrl/episodes/$aliasId");
+    final url = Uri.parse("$apiUrl/eps/$aliasId");
     final res = await get(url, headers: headers);
     final List<dynamic> json = jsonDecode(res.body);
     final List<Map<String, dynamic>> mapList = [];
     json.forEach((it) {
+      // TODO: FW API CHANGE
       final String provider = it['providerId'];
 
       final List<dynamic> episodeList = it['episodes'];
@@ -151,7 +152,7 @@ class Gojo extends AnimeProvider {
                 link: i['url'],
                 server: provider,
                 backup: false,
-                subtitleFormat: SubtitleFormat.VTT.name,
+                subtitleFormat: SubtitleFormat.VTT.name, // gojo uses vtt mainly
                 customHeaders: headers,
                 subtitle: subtitles?.where((it) => it['lang'] == "English").firstOrNull?['url'] ?? //pick only english
                     subtitles?.firstOrNull?['url'],

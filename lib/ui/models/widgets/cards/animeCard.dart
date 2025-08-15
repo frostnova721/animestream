@@ -157,7 +157,8 @@ class _AnimeCardState extends State<AnimeCard> {
                   Positioned(
                     right: 0,
                     bottom: 10,
-                    child: Container(
+                    child: AnimatedContainer(
+                      duration: Duration(milliseconds: 200),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.only(
                             topLeft: Radius.circular(15),

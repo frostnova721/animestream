@@ -1218,10 +1218,10 @@ packages:
     dependency: "direct main"
     description:
       name: video_player_win
-      sha256: de9ad9dd23731186bc7cb19043fe18b0e452411d693db9872b66e7293f78f3fe
+      sha256: aac8b923e669fa9db69e59e2e2338a6923a4eab8d1e59ab489f68e2300d4ae94
       url: "https://pub.dev"
     source: hosted
-    version: "3.1.1"
+    version: "3.2.0"
   visibility_detector:
     dependency: transitive
     description:

@@ -2,12 +2,15 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
+import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/subtitle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class PlayerSetting extends StatefulWidget {
-  const PlayerSetting({super.key});
+  final bool fromWatchPage;
+  const PlayerSetting({super.key, this.fromWatchPage = false});
 
   @override
   State<PlayerSetting> createState() => PlayerSettingState();
@@ -16,6 +19,11 @@ class PlayerSetting extends StatefulWidget {
 class PlayerSettingState extends State<PlayerSetting> {
   @override
   void initState() {
+    if (widget.fromWatchPage) {
+      SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     super.initState();
     readSettings();
   }
@@ -31,6 +39,7 @@ class PlayerSettingState extends State<PlayerSetting> {
   String? preferredQuality;
 
   late bool enableSuperSpeeds;
+  late bool doubleTapToSkip;
 
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
@@ -42,6 +51,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       skipDurationSliderValue = skipDuration!.toDouble();
       megaSkipDurationSliderValue = megaSkipDuration!.toDouble();
       enableSuperSpeeds = settings.enableSuperSpeeds ?? false;
+      doubleTapToSkip = settings.doubleTapToSkip ?? true;
     });
   }
 
@@ -165,7 +175,6 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     min: 20,
                                   ),
                                 ),
-                               
                               ],
                             ),
                           ),
@@ -243,7 +252,15 @@ class PlayerSettingState extends State<PlayerSetting> {
                               description: "Enable extra player speeds", () {
                             enableSuperSpeeds = !enableSuperSpeeds;
                             writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
-                          })
+                          }),
+                          ToggleItem(
+                              onTapFunction: () {
+                                doubleTapToSkip = !doubleTapToSkip;
+                                writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
+                              },
+                              label: "Double tap to seek",
+                              description: "Double tap left/right to jump $skipDuration seconds\n(Replaces seek buttons)",
+                              value: doubleTapToSkip)
                         ],
                       ),
                     )
@@ -279,6 +296,14 @@ class PlayerSettingState extends State<PlayerSetting> {
 
   @override
   void dispose() {
+    if (widget.fromWatchPage) {
+      SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    } else {
+      SystemChrome.setPreferredOrientations(
+          [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
     super.dispose();
   }
 }

@@ -49,6 +49,7 @@ class ToggleItem extends StatelessWidget {
                 onChanged: (val) {
                   onTapFunction();
                 },
+                inactiveTrackColor: appTheme.backgroundColor,
                 activeColor: appTheme.backgroundColor,
                 activeTrackColor: appTheme.accentColor,
               )

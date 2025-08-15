@@ -184,7 +184,7 @@ class BetterPlayerWrapper implements VideoController {
 }
 
 class VideoPlayerWindowsWrapper implements VideoController {
-  WinVideoPlayerController controller = WinVideoPlayerController.network("");
+  WinVideoPlayerController controller = WinVideoPlayerController.networkUrl(Uri.parse(""));
 
   final List<VoidCallback> _listeners = [];
 
@@ -196,7 +196,7 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
     // wait some time for proper disposal.
     await Future.delayed(Duration(milliseconds: 100));
-    controller = offline ? WinVideoPlayerController.file(File(url)) : WinVideoPlayerController.network(url);
+    controller = offline ? WinVideoPlayerController.file(File(url)) : WinVideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers ?? {});
     await controller.initialize();
     for (final listener in _listeners) {
       controller.addListener(listener);

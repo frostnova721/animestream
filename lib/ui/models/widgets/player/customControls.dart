@@ -345,7 +345,7 @@ class _ControlsState extends State<Controls> {
               if (!dataProvider.state.controlsLocked)
                 IconButton(
                   onPressed: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting())).then((val) {
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => PlayerSetting(fromWatchPage: true,))).then((val) {
                       dataProvider.initSubsettings();
                       // Restore View state (subtitle screen may change the view type)
                       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -766,14 +766,14 @@ class BottomControls extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    IconButton(
-                      onPressed: () async {
-                        await playerProvider.setPip(!playerProvider.state.pip);
-                      },
-                      icon: Icon(Icons.picture_in_picture_alt_rounded),
-                      tooltip: playerProvider.state.currentViewMode.desc,
-                      color: Colors.white,
-                    ),
+                    // IconButton(
+                    //   onPressed: () async {
+                    //     await playerProvider.setPip(!playerProvider.state.pip);
+                    //   },
+                    //   icon: Icon(Icons.picture_in_picture_alt_rounded),
+                    //   tooltip: playerProvider.state.currentViewMode.desc,
+                    //   color: Colors.white,
+                    // ),
                     IconButton(
                       onPressed: () {
                         playerProvider.cycleViewMode();

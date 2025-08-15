@@ -15,6 +15,10 @@ class ContinueWatchingSideBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final value = provider.lastWatchedDurationMap?[
+            provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+        0;
+    final int watchedProgress = (value.isNaN || value.isInfinite) ? 0 : value.toInt();
     final size = MediaQuery.sizeOf(context);
     return Container(
       margin: EdgeInsets.only(left: 60, top: 20, bottom: 20),
@@ -241,7 +245,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Text(
-                              "${(provider.lastWatchedDurationMap?[provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ?? 0).toInt()}%",
+                              "${(watchedProgress).toInt()}%",
                               style: TextStyle(
                                 color: appTheme.accentColor,
                                 fontFamily: "Poppins",
@@ -256,11 +260,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                       TweenAnimationBuilder<double>(
                         tween: Tween<double>(
                           begin: 0,
-                          end: (provider.lastWatchedDurationMap?[provider.watched < provider.epLinks.length
-                                      ? provider.watched + 1
-                                      : provider.watched] ??
-                                  0) /
-                              100,
+                          end: watchedProgress / 100,
                         ),
                         duration: Duration(milliseconds: 800),
                         curve: Curves.easeOutCubic,
@@ -323,10 +323,10 @@ class ContinueWatchingBodyBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int watchedProgress = (provider.lastWatchedDurationMap?[
-                provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
-            0)
-        .toInt();
+    final value = provider.lastWatchedDurationMap?[
+            provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+        0;
+    final watchedProgress = (value.isNaN || value.isInfinite) ? 0 : value.toInt();
     final size = MediaQuery.sizeOf(context);
 
     return Container(

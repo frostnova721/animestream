@@ -178,6 +178,7 @@ class _SearchState extends State<Search> {
                       : Platform.isAndroid
                           ? 220
                           : 260,
+                          crossAxisSpacing: 10,
                   // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
                   // childAspectRatio: 120 / 220, //set as width and height of each child container

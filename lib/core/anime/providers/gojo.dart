@@ -41,89 +41,41 @@ class Gojo extends AnimeProvider {
 
     final url = Uri.parse("$apiUrl/eps/$aliasId");
     final res = await get(url, headers: headers);
-    final List<dynamic> json = jsonDecode(res.body);
-    final List<Map<String, dynamic>> mapList = [];
-    json.forEach((it) {
-      // TODO: FW API CHANGE
-      final String provider = it['providerId'];
+    final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body));
+    final newSht = json.map<Map<String, dynamic>>((item) {
+      final int epNum = item['number']?.toInt();
+      final bool isFiller = item['isFiller'];
+      final String? img = item['image'];
+      final String? title = item['title'];
 
-      final List<dynamic> episodeList = it['episodes'];
-
-      final bool hasDub = it['hasDub'];
-
-      final newSht = episodeList.map<Map<String, dynamic>>((item) {
-        final int epNum = item['number']?.toInt();
-        final String id = "${item['id']}";
-        final bool isFiller = item['isFiller'];
-        final String? img = item['image'];
-        final String? title = item['title'];
-
-        return {
-          'num': epNum,
-          'id': id,
-          'provider': provider,
-          'filler': isFiller,
-          'img': (img?.isEmpty ?? true) ? null : img?.replaceAll(RegExp(r'https:\/\/img\.(?:animetsu|gojo)\.(?:cc|live)\/'), ""),
-          'title': (title?.isEmpty ?? true) ? null : title,
-          'hasDub': hasDub
-        };
-      }).toList();
-
-      mapList.addAll(newSht);
-    });
-
-    final Map<int, List<String>> grp = {};
-
-    for (int i = 0; i < mapList.length; i++) {
-      final it = mapList[i];
-      if (!grp.containsKey(it['num'])) {
-        grp[it['num']] = [];
-      }
-      grp[it['num']]?.add("${it['id']}+${it['provider']}");
-    }
-
-    final links = grp.entries.map((ent) {
-      final match = mapList.firstWhere(
-        (e) => e['num'] == ent.key,
-        orElse: () => {},
-      );
       return {
-        'episodeLink': ent.value.join("+"),
-        'episodeNumber': ent.key,
-        'filler': match['filler'],
-        'thumbnail': match['img'],
-        'episodeTitle': match['title'],
-        'hasDub': match['hasDub'],
-        'metadata': "$aliasId+${ent.key}"
+        'episodeLink': "$aliasId", // used for getting other stuff
+        'episodeNumber': epNum,
+        'filler': isFiller,
+        'thumbnail': img,
+        'episodeTitle': title,
+        'hasDub': true,
+        'metadata': "$epNum",
       };
     }).toList();
 
-    return links;
+    return newSht;
   }
 
   @override
   Future<void> getStreams(String epLink, Function(List<VideoStream> list, bool isFinished) update,
       {bool dub = false, String? metadata}) async {
-    final linkSplit = epLink.split("+");
-    if(metadata == null) throw Exception("Couldnt get streams, required field metadata recieved null.");
-
-    final mdsplit = metadata.split("+");
-
-    if(mdsplit.length < 2) throw Exception("id or episodeNumber missing!");
-
-    final id = mdsplit.first;
-    final epNum = mdsplit[1];
+    final id = epLink;
+    final epNum = metadata;
+    if (metadata == null) throw Exception("Couldnt get streams, required field metadata recieved null.");
 
     final List<Future<Response>> futures = [];
 
-    //only select with even indexes (odd ones have providers)
-    final listWithOnlyIds = linkSplit.where((item) => linkSplit.indexOf(item) % 2 == 0).toList();
-    int i = 0;
-    listWithOnlyIds.forEach((it) {
-      final providerIndex = linkSplit.indexOf(it, i) + 1;
-      i = providerIndex;
-      final url =
-          "$apiUrl/tiddies?provider=${linkSplit[providerIndex]}&id=$id&num=$epNum&subType=${dub ? "dub" : "sub"}&watchId=$it&dub_id=null";
+    final serverList = await get(Uri.parse("$apiUrl/servers?id=$id&num=$epNum"), headers: headers);
+    final List<Map<String, dynamic>> serversJson = List.castFrom(jsonDecode(serverList.body));
+    print(serversJson);
+    serversJson.forEach((it) {
+      final url = "$apiUrl/tiddies?server=${it['id']}&id=$id&num=$epNum&subType=${dub ? "dub" : "sub"}";
       final res = get(Uri.parse(url), headers: headers);
       futures.add(res);
     });
@@ -141,9 +93,9 @@ class Gojo extends AnimeProvider {
 
       doneSources++;
 
-      if(sources?.isEmpty == true) return update([], doneSources == totalSources);
+      if (sources?.isEmpty == true) return update([], doneSources == totalSources);
 
-      final provider = item.request?.url.queryParameters['provider'] ?? '';
+      final provider = item.request?.url.queryParameters['server'] ?? '';
 
       sources?.forEach((i) => update(
             [

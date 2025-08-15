@@ -51,12 +51,19 @@ class _FileExplorerState extends State<FileExplorer> {
     setState(() {
       _loadingFiles = true;
     });
-    entities = currentDir.listSync();
-
-    if (mounted)
-      setState(() {
-        _loadingFiles = false;
-      });
+    final items = <FileSystemEntity>[];
+    currentDir.list().listen(
+      (it) {
+        items.add(it);
+      },
+      onDone: () {
+        if (mounted)
+          setState(() {
+            entities = items;
+            _loadingFiles = false;
+          });
+      },
+    );
   }
 
   Directory currentDir = Directory(currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream');
@@ -127,11 +134,10 @@ class _FileExplorerState extends State<FileExplorer> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                      currentDirPathSplit.sublist(0, currentDirPathSplit.length - 1).join('/') +
-                          "/",
-                      style: TextStyle(fontSize: 12),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    currentDirPathSplit.sublist(0, currentDirPathSplit.length - 1).join('/') + "/",
+                    style: TextStyle(fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
                   Text(
                     currentDirPathSplit.last,
                     style: _titleStyle().copyWith(fontSize: 16),
@@ -296,8 +302,7 @@ class _FileExplorerState extends State<FileExplorer> {
             ChangeNotifierProvider(
               create: (context) => PlayerDataProvider(
                 initialStreams: [],
-                initialStream:
-                    VideoStream(quality: "default", link: filepath, server: "local", backup: false),
+                initialStream: VideoStream(quality: "default", link: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
                 showTitle: filename,
                 showId: 0, // doesnt matter

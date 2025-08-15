@@ -83,7 +83,10 @@ class _SubViewerState extends State<SubViewer> {
 
     if (currentPosition == null || subs.isEmpty) return;
 
-    if (_loadedSubsUrl != widget.subtitleSource && !areSubsLoading) return loadSubs();
+    if (_loadedSubsUrl != widget.subtitleSource && !areSubsLoading) {
+      print("Subtitle Source Changed, Loading new subs..");
+      return loadSubs();
+    }
 
     int i = lastLineIndex;
 

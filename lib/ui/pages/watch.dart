@@ -169,7 +169,7 @@ class _WatchState extends State<Watch> {
   // Just a smol logic to handle taps since gesture dectector doesnt do the job with double taps
   Timer? _tapTimer;
   int lastTapTime = 0;
-  final int doubleTapThreshold = 200; // in ms
+  final int doubleTapThreshold = 300; // in ms
 
   bool _showRewindAnim = false;
   bool _showForwardAnim = false;
@@ -190,7 +190,7 @@ class _WatchState extends State<Watch> {
       }
     });
 
-    _animTimer = Timer(Duration(milliseconds: 800), () {
+    _animTimer = Timer(Duration(milliseconds: 500), () {
       if (mounted) {
         setState(() {
           _showRewindAnim = false;
@@ -244,7 +244,14 @@ class _WatchState extends State<Watch> {
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         // save the last watched duration
-        final double watchPercentage = isInitiated ? ((controller.position ?? 0) / controller.duration!) : 0;
+        double watchPercentage;
+        if (isInitiated && controller.duration != null && controller.duration! > 0) {
+          watchPercentage = (controller.position ?? 0) / controller.duration!;
+          // clamp to 0-1 just in case
+          watchPercentage = watchPercentage.clamp(0.0, 1.0);
+        } else {
+          watchPercentage = 0;
+        }
         addLastWatchedDuration(
             playerDataProvider.showId.toString(), {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100});
         await context.read<AppProvider>()
@@ -335,9 +342,11 @@ class _WatchState extends State<Watch> {
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
-                              playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
-                              if (!_showRewindAnim) skipCount = 0;
-                              _showFastForwardAnim(false);
+                              if (currentUserSettings?.doubleTapToSkip ?? true) {
+                                playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
+                                if (!_showRewindAnim) skipCount = 0;
+                                _showFastForwardAnim(false);
+                              }
                             },
                           ),
                         ),
@@ -350,9 +359,11 @@ class _WatchState extends State<Watch> {
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
-                              playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
-                              if (!_showForwardAnim) skipCount = 0;
-                              _showFastForwardAnim(true);
+                              if (currentUserSettings?.doubleTapToSkip ?? true) {
+                                playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
+                                if (!_showForwardAnim) skipCount = 0;
+                                _showFastForwardAnim(true);
+                              }
                             },
                           ),
                         ),
@@ -379,47 +390,39 @@ class _WatchState extends State<Watch> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
+                duration: Duration(milliseconds: 400),
+                curve: Curves.easeInOut,
                 opacity: _showRewindAnim ? 1 : 0,
-                child: AnimatedSlide(
-                  duration: Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  offset: Offset(_showRewindAnim ? 0 : -1, 0),
-                  child: Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: appTheme.backgroundSubColor.withAlpha(200),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Text(
-                      " - ${(currentUserSettings?.skipDuration ?? 10) * skipCount}s",
-                      style: TextStyle(
-                        fontFamily: "Rubik",
-                        fontSize: 23,
-                      ),
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    // color: appTheme.backgroundSubColor.withAlpha(200),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    "- ${(currentUserSettings?.skipDuration ?? 10) * skipCount}s",
+                    style: TextStyle(
+                      fontFamily: "Rubik",
+                      fontSize: 23,
                     ),
                   ),
                 ),
               ),
               AnimatedOpacity(
-                duration: Duration(milliseconds: 500),
+                duration: Duration(milliseconds: 400),
                 opacity: _showForwardAnim ? 1 : 0,
-                child: AnimatedSlide(
-                  duration: Duration(milliseconds: 500),
-                  curve: Curves.easeInOut,
-                  offset: Offset(_showForwardAnim ? 0 : 1, 0),
-                  child: Container(
-                    padding: EdgeInsets.all(15),
-                    decoration: BoxDecoration(
-                      color: appTheme.backgroundSubColor.withAlpha(200),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: Text(
-                      "+ ${(currentUserSettings?.skipDuration ?? 10) * skipCount}s",
-                      style: TextStyle(
-                        fontFamily: "Rubik",
-                        fontSize: 23,
-                      ),
+                curve: Curves.easeInOut,
+                child: Container(
+                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    // color: appTheme.backgroundSubColor.withAlpha(200),
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                  child: Text(
+                    "+ ${(currentUserSettings?.skipDuration ?? 10) * skipCount}s",
+                    style: TextStyle(
+                      fontFamily: "Rubik",
+                      fontSize: 23,
                     ),
                   ),
                 ),

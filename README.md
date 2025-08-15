@@ -28,7 +28,7 @@ You can download the latest apk file from the [releases](https://github.com/fros
 
 ## Known Issues
 
-- will be updated once found!
+- Some files not downloading properly (fixes incoming!)
 
 ## Building
 

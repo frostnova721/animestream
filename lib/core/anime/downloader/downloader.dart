@@ -94,7 +94,7 @@ class Downloader {
 
     final task = _cookTask(item, path);
 
-    print('[DOWNLOADER] Queuing task $task');
+    print('[DOWNLOADER] Queuing task $task with type: ${type.name}');
 
     // Run the downloading
     final isolate = await Isolate.spawn(downloadFunction, task);
@@ -303,10 +303,10 @@ class Downloader {
       if (['webp', 'jpeg', 'jpg', 'png'].contains(ext)) return _DownloadType.image;
     }
 
-    // Fallback (ik this is more precise, but dont wanna send a unnecessary request)
+    // Fallback (ik this is more precise, but dont wanna send a unnecessary request most times)
     final mime = await _helper.getMimeType(item.url, item.customHeaders);
     if (mime == null) throw Exception("Couldnt identify the media type.");
-    if (mime.contains("mpegurl")) return _DownloadType.stream;
+    if (mime.contains("mpegurl") || mime.contains(RegExp("mp2t", caseSensitive: false))) return _DownloadType.stream;
     if (mime.contains("video")) return _DownloadType.video;
     if (mime.contains("image")) return _DownloadType.image;
 

@@ -20,6 +20,7 @@ class SettingsModal {
   final bool? enableSuperSpeeds;
   final bool? useQueuedDownloads;
   final bool? useFramelessWindow;
+  final bool? doubleTapToSkip;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -39,6 +40,7 @@ class SettingsModal {
     this.enableSuperSpeeds,
     this.useQueuedDownloads,
     this.useFramelessWindow,
+    this.doubleTapToSkip,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -60,6 +62,7 @@ class SettingsModal {
       enableSuperSpeeds: map['enableSuperSpeeds'] ?? false,
       useQueuedDownloads: map['useQueuedDownloads'] ?? false,
       useFramelessWindow: map['useFramelessWindow'] ?? false,
+      doubleTapToSkip: map['doubleTapToSkip'] ?? true,
     );
   }
 
@@ -82,6 +85,7 @@ class SettingsModal {
       'enableSuperSpeeds': enableSuperSpeeds,
       'useQueuedDownloads': useQueuedDownloads,
       'useFramelessWindow': useFramelessWindow,
+      'doubleTapToSkip': doubleTapToSkip,
     };
   }
 }

@@ -21,7 +21,7 @@ Future<BetterPlayerDataSource> dataSourceConfig(String url, {Map<String, String>
 }
 
 Future<BetterPlayerVideoFormat> _getFormat(String url, Map<String, String>? headers) async {
-  final mime = await getMediaMimeType(url, headers);
+  final mime = (await getMediaMimeType(url, headers))?.toLowerCase();
 
   // lets assume stuff if something goes wrong
   if (mime == null || mime.contains("octet-stream")) {
@@ -32,7 +32,7 @@ Future<BetterPlayerVideoFormat> _getFormat(String url, Map<String, String>? head
     if (urlPath.endsWith(".mpd")) return BetterPlayerVideoFormat.dash;
     return BetterPlayerVideoFormat.other;
 
-  } else if (mime.contains("mpegurl")) {
+  } else if (mime.contains("mpegurl") || mime.contains("mp2t")) {
     return BetterPlayerVideoFormat.hls;
 
   } else if (mime.contains("dash")) {

@@ -106,7 +106,7 @@ class UserPreferencesModal {
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(
       episodesViewMode: getViewModeEnum(map['episodesViewMode'] ?? 0),
-      subtitleSettings: SubtitleSettings.fromMap(map['subtitleSettings'] ?? SubtitleSettings().toMap()),
+      subtitleSettings: map['subtitleSettings'] != null ? SubtitleSettings.fromMap(map['subtitleSettings']) : SubtitleSettings(),
       preferDubs: map['preferDubs'] ?? false,
       searchPageListMode: map['searchPageListMode'] ?? false,
     );

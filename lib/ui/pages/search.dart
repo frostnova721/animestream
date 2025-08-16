@@ -178,7 +178,7 @@ class _SearchState extends State<Search> {
                       : Platform.isAndroid
                           ? 220
                           : 260,
-                          crossAxisSpacing: 10,
+                  crossAxisSpacing: verticalCards ? 10 : 0,
                   // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
                   // childAspectRatio: 1 / 1.88,
                   // childAspectRatio: 120 / 220, //set as width and height of each child container
@@ -188,10 +188,10 @@ class _SearchState extends State<Search> {
               itemCount: exactMatch ? exactMatches.length : results.length,
               itemBuilder: (context, index) {
                 if (verticalCards) {
-                   final it = results[index];
-                final image = it.cover;
-                final String title = it.title['english'] ?? it.title['romaji'] ?? '';
-                final id = it.id;
+                  final it = results[index];
+                  final image = it.cover;
+                  final String title = it.title['english'] ?? it.title['romaji'] ?? '';
+                  final id = it.id;
                   return AnimeCardExtended(
                     id: id,
                     title: title,
@@ -202,12 +202,13 @@ class _SearchState extends State<Search> {
                     surfaceColor: appTheme.backgroundSubColor.withAlpha(100),
                   );
                 } else {
-                   final it = exactMatch ? exactMatches[index] : results[index];
-                final image = it.cover;
-                final String title = it.title['english'] ?? it.title['romaji'] ?? '';
-                final id = it.id;
+                  final it = exactMatch ? exactMatches[index] : results[index];
+                  final image = it.cover;
+                  final String title = it.title['english'] ?? it.title['romaji'] ?? '';
+                  final id = it.id;
                   return Container(
-                    child: Cards.animeCard(id, title, image, rating: it.rating, isAnime: true, isMobile: Platform.isAndroid),
+                    child: Cards.animeCard(id, title, image,
+                        rating: it.rating, isAnime: true, isMobile: Platform.isAndroid),
                   );
                 }
               },

@@ -6,7 +6,10 @@ import 'package:animestream/core/data/types.dart';
 class UserPreferences {
   static Future<UserPreferencesModal> getUserPreferences() async {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
-    if(prefMap == null || prefMap.isEmpty) prefMap = UserPreferencesModal().toMap();
+    if(prefMap == null || prefMap.isEmpty) {
+      print("Got empty list of preferences.");
+      return UserPreferencesModal();
+    }
     return UserPreferencesModal.fromMap(prefMap);
   }
 

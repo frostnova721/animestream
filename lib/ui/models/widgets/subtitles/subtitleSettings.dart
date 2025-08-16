@@ -1,7 +1,9 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 
-import 'package:animestream/core/commons/extensions.dart';
 import 'package:flutter/material.dart';
+
+import 'package:animestream/core/commons/extensions.dart';
 
 class SubtitleSettings {
   final Color textColor;
@@ -90,4 +92,9 @@ class SubtitleSettings {
 
   factory SubtitleSettings.fromJson(String source) =>
       SubtitleSettings.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  @override
+  String toString() {
+    return 'SubtitleSettings(textColor: $textColor, strokeColor: $strokeColor, backgroundColor: $backgroundColor, fontFamily: $fontFamily, strokeWidth: $strokeWidth, fontSize: $fontSize, bottomMargin: $bottomMargin, backgroundTransparency: $backgroundTransparency, bold: $bold, enableShadows: $enableShadows)';
+  }
 }

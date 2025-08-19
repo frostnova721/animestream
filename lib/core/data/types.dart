@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
@@ -115,7 +116,7 @@ class UserPreferencesModal {
   Map<dynamic, dynamic> toMap() {
     return {
       'episodesViewMode': getViewModeIndex(episodesViewMode ?? EpisodeViewModes.list),
-      'subtitleSettings': subtitleSettings?.toMap() ?? SubtitleSettings().toMap(),
+      'subtitleSettings': subtitleSettings?.toMap() ?? userPreferences?.subtitleSettings?.toMap() ?? SubtitleSettings(),
       'preferDubs': preferDubs ?? false,
       'searchPageListMode': searchPageListMode ?? false,
     };

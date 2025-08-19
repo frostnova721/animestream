@@ -148,8 +148,12 @@ class _FileExplorerState extends State<FileExplorer> {
           ),
           // Spacer(),
           if (_loadingFiles)
-            CircularProgressIndicator(
-              color: appTheme.textSubColor,
+            SizedBox(
+              height: 20,
+              width: 20,
+              child: CircularProgressIndicator(
+                color: appTheme.textSubColor,
+              ),
             )
           else
             Text(

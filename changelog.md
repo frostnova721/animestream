@@ -1,41 +1,36 @@
-# Changelog 1.3.6 -> 1.3.7
+# Changelog 1.3.7 -> 1.4.0
 
-**Ah yes, Yet another patch n fix update!**
+**v1.4.0 update (part 1)**
 
-## New Features & Changes
+## What's new?
 
-- Few more controls towards subtitles
-- New theme! (atp thats all im capable of. I hope its the final theme)
-- Few modifications for list page in Windows
-- Sub/Dub toggle! (availability will depend on luck & server!)
-- Added a quick access to subtitles page on holding subtitle button from watch page.
-- No new sources (hehe! will add one next time if the stars align)
-- Minor UI tweaks
+- Subtitles will now be downloaded along with the video file (if available)
+- UI tweaks in some places
+- Replaced Arial and Helvetica in favour of Inter and OpenSans fonts (the fonts were heavy)
+- Downloads now doesn't slow down / cause lag to UI
+- Download Management!
+- Support for srt subtitles
+- Double tap to seek!!! (toggleable in player settings!)
+- Offline media playback (if downloaded, closes #20)
+- List view on search page (suggestion from our discord community)
+- Find other changes on your own (I forgor :( )
 
 ## Fixes
 
-- Fixed **ASS** subtitle parsing. (Fixes flawed subs in AnimeOnsen)
-- Fixed AniPlay (please dont break now :pray:)
-- Fixed Gojo
-- To Fix animepahe, use a VPN!
-- Fixed subtitles not being updated when navigated to new episode
-- Fixed more white screen issues. (I really hope this is the last one.)
-- Fixed some UI inconsistancies
+- Fixed downloads stuck at 100% without showing a completion message
+- Fixed multiple dead providers
+- Fixed faulty downloads / low sized downloads (not 100% btw)
+- Fixed #22, dubs not being selected while using navigation from watch page.
+- Fixed subtitles showing random unreadable characters.
+- Fixed subtitle's custom styling resetting to default while dubs/episode list's view mode are toggled
+- There sure are some more fixes, forgot to keep track of all
 
-## Issues
+Okay, That wraps up this patch: part 1 of v1.4.0, This is unpolished, and I expect to find some bugs, part 2 is planned to feature the player improvements (hehe) and based on it, with added further refinements to the downloader.
 
-- Windows version is lacking sub/dub toggle. It will be there in next patch, im redoing the info page UI on windows.
-- The apk size bulked by ~1 MB due to added fonts for subtitle customisation. (Is this even an issue?)
+Well, the old downloader was scrapped in favour of a new Download Manager, imo the code is clean!
+I dont expect it to be bug/error proof, but will be fixed along the way if issues are found out!
 
-**Yep! That's it.**
+Alright alright, not yapping too much! <br>
+**As always, Thanks for the love and support <3**
 
-I fr forgot to track the changes, so there are changes in the app which arent mentioned above!
-Plugins has to wait :)
-
-Spent an awful lot of time on plugins. And yes, it didnt work out like I expected. It did work,
-just not according to my style and expectations! So, this is a small bug sqash update!
-
-If you are still encountering the white/gray screen issue or any other issues, submit it on github issues, discord or reddit.
-
-As always, love y'all and Until Next Version, <br>
-**Cya!**
+see yall with the part 2!

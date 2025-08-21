@@ -1,4 +1,6 @@
-import 'package:animestream/core/app/runtimeDatas.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
+
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
@@ -115,10 +117,10 @@ class UserPreferencesModal {
 
   Map<dynamic, dynamic> toMap() {
     return {
-      'episodesViewMode': getViewModeIndex(episodesViewMode ?? EpisodeViewModes.list),
-      'subtitleSettings': subtitleSettings?.toMap() ?? userPreferences?.subtitleSettings?.toMap() ?? SubtitleSettings(),
-      'preferDubs': preferDubs ?? false,
-      'searchPageListMode': searchPageListMode ?? false,
+      'episodesViewMode': episodesViewMode != null ? getViewModeIndex(episodesViewMode!) : null,
+      'subtitleSettings': subtitleSettings?.toMap(),
+      'preferDubs': preferDubs,
+      'searchPageListMode': searchPageListMode,
     };
   }
 
@@ -150,10 +152,60 @@ class UserPreferencesModal {
 class AnimeSpecificPreference {
   final Map? lastWatchDuration;
   final String? manualSearchQuery;
+  final String? preferredProvider;
 
-  AnimeSpecificPreference({required this.lastWatchDuration, required this.manualSearchQuery});
+  AnimeSpecificPreference({
+    this.lastWatchDuration,
+    this.manualSearchQuery,
+    this.preferredProvider,
+  });
 
   @override
   String toString() =>
-      'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery)';
+      'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery, preferredProvider: $preferredProvider)';
+
+  AnimeSpecificPreference copyWith({
+    Map? lastWatchDuration,
+    String? manualSearchQuery,
+    String? preferredProvider,
+  }) {
+    return AnimeSpecificPreference(
+      lastWatchDuration: lastWatchDuration ?? this.lastWatchDuration,
+      manualSearchQuery: manualSearchQuery ?? this.manualSearchQuery,
+      preferredProvider: preferredProvider ?? this.preferredProvider,
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'lastWatchDuration': lastWatchDuration,
+      'manualSearchQuery': manualSearchQuery,
+      'preferredProvider': preferredProvider,
+    };
+  }
+
+  factory AnimeSpecificPreference.fromMap(Map<String, dynamic> map) {
+    return AnimeSpecificPreference(
+      lastWatchDuration: map['lastWatchDuration'] != null ? Map.from(map['lastWatchDuration'] as Map<dynamic,dynamic>) : null,
+      manualSearchQuery: map['manualSearchQuery'] != null ? map['manualSearchQuery'] as String : null,
+      preferredProvider: map['preferredProvider'] != null ? map['preferredProvider'] as String : null,
+    );
+  }
+
+  String toJson() => json.encode(toMap());
+
+  factory AnimeSpecificPreference.fromJson(String source) => AnimeSpecificPreference.fromMap(json.decode(source) as Map<String, dynamic>);
+
+  @override
+  bool operator ==(covariant AnimeSpecificPreference other) {
+    if (identical(this, other)) return true;
+  
+    return 
+      other.lastWatchDuration == lastWatchDuration &&
+      other.manualSearchQuery == manualSearchQuery &&
+      other.preferredProvider == preferredProvider;
+  }
+
+  @override
+  int get hashCode => lastWatchDuration.hashCode ^ manualSearchQuery.hashCode ^ preferredProvider.hashCode;
 }

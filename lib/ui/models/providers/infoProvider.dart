@@ -87,8 +87,13 @@ class InfoProvider extends ChangeNotifier {
 
   bool _initCalled = false;
 
+  String? aspProvider;
+
   set selectedSource(ProviderDetails val) {
     _selectedSource = val;
+    if (aspProvider != val.identifier) {
+      saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(preferredProvider: val.identifier));
+    }
     // we just using this condition for validation (too lazy to add a field for it)
     sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0";
     notifyListeners();
@@ -140,19 +145,20 @@ class InfoProvider extends ChangeNotifier {
     if (_initCalled) throw Exception("The initialization was already done");
     _initCalled = true;
 
+    // Load manualsearch query and last watch
+    final asp = await getAnimeSpecificPreference(id.toString());
+    _lastWatchedDurationMap = asp?.lastWatchDuration ?? {};
+    _manualSearchQuery = asp?.manualSearchQuery;
+
     // Set up sources.
     final sources = sourceManager.sources;
-    final matchedSource = sources.where((e) => e.identifier == currentUserSettings?.preferredProvider).firstOrNull;
+    final matchedSource = sources
+        .where((e) => e.identifier == (asp?.preferredProvider ?? currentUserSettings?.preferredProvider))
+        .firstOrNull; // pick provider from last selected provider or default one
     selectedSource =
         matchedSource != null ? matchedSource : (sources.isEmpty ? sourceManager.inbuiltSources[0] : sources[0]);
 
     await _getInfo(id);
-
-    // Load manualsearch query and last watch
-    await getAnimeSpecificPreference(id.toString()).then((it) {
-      _lastWatchedDurationMap = it?.lastWatchDuration ?? {};
-      _manualSearchQuery = it?.manualSearchQuery;
-    });
 
     loadPreferences();
     await getEpisodes();
@@ -308,7 +314,7 @@ class InfoProvider extends ChangeNotifier {
   }
 
   void clearLastWatchDuration() async {
-    await addLastWatchedDuration(id.toString(), {});
+    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference());
     _lastWatchedDurationMap = {};
     notifyListeners();
   }

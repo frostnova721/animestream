@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
+import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/doubleTapDectector.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
 import 'package:flutter/material.dart';
@@ -252,8 +253,10 @@ class _WatchState extends State<Watch> {
         } else {
           watchPercentage = 0;
         }
-        addLastWatchedDuration(
-            playerDataProvider.showId.toString(), {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100});
+        saveAnimeSpecificPreference(
+            playerDataProvider.showId.toString(),
+            AnimeSpecificPreference(
+                lastWatchDuration: {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100}));
         await context.read<AppProvider>()
           ..setFullScreen(false)
           ..setTitlebarColor(null);

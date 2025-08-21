@@ -10,41 +10,43 @@ Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) as
   //just handle anilist
   if (currentUserSettings?.database != Databases.anilist) return null;
 
-var box = await Hive.openBox("animeInfo");
+  var box = await Hive.openBox("animeInfo");
   if (!box.isOpen) {
     box = await Hive.openBox("animeInfo");
   }
 
-  Map<dynamic, dynamic>? lastWatchDuration;
-  String? manualSearchString;
+  String? manSearch, provider;
+  Map<dynamic, dynamic>? lastWatch;
 
-  final Map<dynamic, dynamic> lastWatch = await box.get(HiveKey.lastWatchDuration.name) ?? {};
-  if (lastWatch.isEmpty) {
-    print("EMPTY MAP 'lastWatchDuration'");
+  final Map<dynamic, dynamic> asp = await box.get(HiveKey.animeSpecificPreference.name) ?? {};
+  if (asp.isEmpty) {
+    print("EMPTY MAP 'animeSpecificPreference'");
   }
 
-  lastWatchDuration = lastWatch[anilistId] ?? null;
+  final Map<String, dynamic> item = Map.castFrom(asp[anilistId] ?? {});
+  manSearch = item["manualSearchQuery"];
+  lastWatch = item['lastWatchDuration'];
+  provider = item['preferredProvider'];
+  print(item);
 
-  Map<dynamic, dynamic>? manualSearchQuery = await box.get(HiveKey.manualSearches.name);
-  if (manualSearchQuery?.isEmpty ?? true) {
-    print("EMPTY MAP 'manualSearches'");
-  }
-
-  manualSearchString = manualSearchQuery?[anilistId] ?? '';
-  if (manualSearchString?.isEmpty ?? true) {
-    print("NO QUERY FOR ALTERNATE SEARCHING");
-    manualSearchString = null;
-  }
-  
   await box.close();
-  
-  return AnimeSpecificPreference(lastWatchDuration: lastWatchDuration, manualSearchQuery: manualSearchString);
+
+  return AnimeSpecificPreference(
+      lastWatchDuration: lastWatch, manualSearchQuery: manSearch, preferredProvider: provider);
 }
 
-Future<void> addLastWatchedDuration(String anilistId, Map<int, double> item) async {
-  Map<dynamic, dynamic> map = await getVal(HiveKey.lastWatchDuration, boxName: "animeInfo") ?? {};
+Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreference preference) async {
+  Map<dynamic, dynamic> map = Map.castFrom(await getVal(HiveKey.animeSpecificPreference, boxName: "animeInfo") ?? {});
 
-  print(map);
+  // print(map);
+
+  final item = map[anilistId] ?? {};
+
+  preference.toMap().forEach((k,v) {
+    if(item[k] == null) {
+      item[k] = v;
+    }
+  });
 
   map[anilistId] = item;
 
@@ -56,19 +58,5 @@ Future<void> addLastWatchedDuration(String anilistId, Map<int, double> item) asy
     filteredMap = Map.fromEntries(entries);
   }
 
-  await storeVal(HiveKey.lastWatchDuration, filteredMap, boxName: "animeInfo");
-}
-
-Future<void> addManualSearchQuery(String anilistId, String searchTerm) async {
-  Map<dynamic, dynamic> map = await getVal(HiveKey.manualSearches, boxName: "animeInfo") ?? {};
-  map[anilistId] = searchTerm;
-  Map<dynamic, dynamic> filteredMap = map;
-
-  if (map.length > 40) {
-    List<MapEntry<dynamic, dynamic>> entries = map.entries.toList();
-    entries = entries.sublist(0, 40);
-    filteredMap = Map.fromEntries(entries);
-  }
-
-  await storeVal(HiveKey.manualSearches, filteredMap, boxName: "animeInfo");
+  await storeVal(HiveKey.animeSpecificPreference, filteredMap, boxName: "animeInfo");
 }

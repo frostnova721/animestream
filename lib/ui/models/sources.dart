@@ -122,6 +122,7 @@ List<DropdownMenuEntry> getSourceDropdownList() {
       DropdownMenuEntry(
         value: source,
         label: "${source.name}${source.version == "0.0.0.0" ? "" : " [Plugin]"}",
+        trailingIcon: source.identifier == currentUserSettings?.preferredProvider ? Icon(Icons.star_border_rounded) : null,
         style: ButtonStyle(
           foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
           textStyle: WidgetStatePropertyAll(

@@ -26,12 +26,11 @@ enum SubtitleFormat {
 }
 
 enum HiveKey {
-  manualSearches,
   userPreferences,
   settings,
   theme,
   watching,
-  lastWatchDuration,
+  animeSpecificPreference,
 
   @deprecated
   token,

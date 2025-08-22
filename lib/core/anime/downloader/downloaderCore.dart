@@ -329,6 +329,7 @@ class DownloaderCore {
       await out.writeAsBytes(imgData);
 
       print("Saved image to ${out.path}");
+      task.sendPort?.send(DownloadMessage(status: 'complete', id: task.id, silent: true));
     } catch (err) {
       throw Exception("Couldnt download image. $err");
     }

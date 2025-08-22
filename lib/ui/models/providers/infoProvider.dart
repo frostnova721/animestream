@@ -150,6 +150,8 @@ class InfoProvider extends ChangeNotifier {
     _lastWatchedDurationMap = asp?.lastWatchDuration ?? {};
     _manualSearchQuery = asp?.manualSearchQuery;
 
+    aspProvider = asp?.preferredProvider;
+
     // Set up sources.
     final sources = sourceManager.sources;
     final matchedSource = sources

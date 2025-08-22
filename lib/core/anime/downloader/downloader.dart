@@ -188,9 +188,11 @@ class Downloader {
 
       case 'complete':
         {
-          _helper.sendCompletedNotif(msg.id, msg.extras[0] as String, msg.extras[1] as String);
-          DownloadHistory.saveItem(
-              _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String));
+          if (!msg.silent) {
+            _helper.sendCompletedNotif(msg.id, msg.extras[0] as String, msg.extras[1] as String);
+            DownloadHistory.saveItem(
+                _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String));
+          }
           _endTask(msg.id);
           break;
         }
@@ -257,7 +259,7 @@ class Downloader {
       fileName: item.fileName,
       customHeaders: item.customHeaders,
       retryAttempts: MAX_RETRY_ATTEMPTS,
-      parallelBatches: MAX_STREAM_BATCH_SIZE * ((currentUserSettings?.fasterDownloads ?? false ) ? 2 : 1 ),
+      parallelBatches: MAX_STREAM_BATCH_SIZE * ((currentUserSettings?.fasterDownloads ?? false) ? 2 : 1),
       subsUrl: item.subtitleUrl,
       sendPort: rp.sendPort,
       id: item.id,
@@ -275,7 +277,7 @@ class Downloader {
     // CUS THIS MF CAN FAIL FOR SOME REASON EVEN THOUGH ITS KINDA RARE! (Fuck overheads)
     try {
       size = File(filepath).lengthSync();
-    } catch(err) {
+    } catch (err) {
       size = 0;
     }
 

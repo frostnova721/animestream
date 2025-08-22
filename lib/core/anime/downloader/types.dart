@@ -132,6 +132,7 @@ class DownloadMessage {
   final int id;
   final String? message;
   final List<Object> extras; // ik, not a good way to do it! might refactor later, lazy rn
+  final bool silent;
 
   DownloadMessage({
     required this.status,
@@ -139,6 +140,7 @@ class DownloadMessage {
     this.message,
     this.progress = 0,
     this.extras = const [],
+    this.silent = false,
   });
 }
 

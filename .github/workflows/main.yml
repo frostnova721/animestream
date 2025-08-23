@@ -2,6 +2,9 @@ name: Notify Release
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - master
 
 jobs:
   notify:
@@ -77,9 +80,8 @@ jobs:
            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}" -o release.json
           
           # Initialize environment variables
-          for VAR in apk_arm64 apk_armeabi apk_universal apk_x86_64 windows linux ios setup macos linuximg linuxrmp; do
-            echo "${VAR}_message=" >> $GITHUB_ENV
-          done
+          echo "apk_universal_message=" >> $GITHUB_ENV
+          echo "setup_message=" >> $GITHUB_ENV
           
           # Process each asset
           jq -r '.assets[] | "\(.browser_download_url) \(.size)"' release.json | while read -r LINE; do
@@ -95,16 +97,16 @@ jobs:
             # Categorize and set variables
             if [[ "$FILE_NAME" == *".apk" ]]; then
               echo "apk_universal_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
-            elif [[ "$FILE_NAME" == *".exe" ]]; then
+            elif [[ "$FILE_NAME" == *".exe" ]] || [[ "$FILE_NAME" == *".msi" ]]; then
               echo "setup_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
             fi
           done
-        
 
       - name: Send message to Discord
         env:
-          DISCORD_WEBHOOK_URL: ${{ env.DISCORD_WEBHOOK }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
+          # Clean the formatted notes for Discord
           FORMATTED_NOTES_CLEAN=$(echo "$FORMATTED_NOTES" | sed -E 's/\): [^:]+:/) :/g')
           
           # Mention the role based on the release name
@@ -129,11 +131,12 @@ jobs:
                         --arg footer_text "Version $VERSION" \
                         --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
                         --argjson embed_color "$embed_color" \
+                        --arg title "🚀 New Release: ${{env.LATEST_TAG}}" \
                         '{
                           "content": $role_mention,
                           "embeds": [
                             {
-                              "title": "🚀 New Release: ${{env.LATEST_TAG}}",
+                              "title": $title,
                               "color": $embed_color,
                               "description": $field_value,
                               "footer": {
@@ -153,11 +156,28 @@ jobs:
               "$DISCORD_WEBHOOK_URL"
 
       - name: Send Assets to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
         run: |
-          MESSAGE="${{ env.LATEST_TAG }} Released
-            🔹 ${{ env.apk_universal_message }} | **APK (universal)**
-            🔹 ${{ env.setup_message }} | **Windows EXE**
-          PAYLOAD=$(jq -n --arg content "$MESSAGE" '{ content: $content }')
-          curl -X POST "${{ env.DISCORD_WEBHOOK_URL }}" \
-            -H "Content-Type: application/json" \
-            -d "$PAYLOAD"
+          # Build the message with available assets
+          MESSAGE="${{ env.LATEST_TAG }} Released"$'\n'
+          
+          # Add APK download if available
+          if [ -n "${{ env.apk_universal_message }}" ]; then
+            MESSAGE="${MESSAGE}🔹 ${{ env.apk_universal_message }} | **APK (universal)**"$'\n'
+          fi
+          
+          # Add Windows setup if available
+          if [ -n "${{ env.setup_message }}" ]; then
+            MESSAGE="${MESSAGE}🔹 ${{ env.setup_message }} | **Windows Setup**"$'\n'
+          fi
+          
+          # Only send if we have at least one asset
+          if [ -n "${{ env.apk_universal_message }}" ] || [ -n "${{ env.setup_message }}" ]; then
+            PAYLOAD=$(jq -n --arg content "$MESSAGE" '{ content: $content }')
+            curl -X POST "$DISCORD_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD"
+          else
+            echo "No assets found to send"
+          fi

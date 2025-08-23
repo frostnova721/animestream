@@ -143,9 +143,9 @@ jobs:
             FILE_NAME=$(basename "$ASSET_URL")
             
             # Categorize and set variables
-            if [[ "$FILE_NAME" == *"-.apk" ]]; then
+            if [[ "$FILE_NAME" == *".apk" ]]; then
               echo "apk_universal_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
-            elif [[ "$FILE_NAME" == *"Installer.exe" ]]; then
+            elif [[ "$FILE_NAME" == *".exe" ]]; then
               echo "setup_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
             fi
           done

@@ -57,66 +57,16 @@ jobs:
       - name: Format Release Notes
         id: format_notes
         run: |
-          # Clean || markers and any HTML tags
-          sed 's/||//g' release_notes.txt | sed 's/<br>//g' > clean_release_notes.txt
-          echo "" > formatted_notes.txt
+          # Just clean the || markers and set as environment variable
+          sed 's/||//g' release_notes.txt > clean_release_notes.txt
           
-          extract_section() {
-            local title="$1"
-            local emoji="$2"
-            local pattern="$3"
-            
-            # Find the section start
-            local start=$(grep -n -i "^## $pattern" clean_release_notes.txt | head -n1 | cut -d: -f1)
-            if [ -z "$start" ]; then return; fi
-            
-            # Find the next section or end of file
-            local next=$(tail -n +$((start + 1)) clean_release_notes.txt | grep -n '^##' | head -n1 | cut -d: -f1)
-            
-            if [ -z "$next" ]; then
-              # No next section found, go to end of file
-              content=$(tail -n +$((start + 1)) clean_release_notes.txt | grep '^-' | head -n 10)
-            else
-              # Extract content between sections
-              end=$((start + next - 1))
-              content=$(sed -n "$((start + 1)),$((end - 1))p" clean_release_notes.txt | grep '^-' | head -n 10)
-            fi
-            
-            # Only add section if there's content
-            if [ -n "$content" ]; then
-              echo "### $emoji $title" >> formatted_notes.txt
-              echo "$content" >> formatted_notes.txt
-              echo "" >> formatted_notes.txt
-            fi
-          }
-          
-          # Extract version info from the top
-          version_info=$(head -n 5 clean_release_notes.txt | grep -E "(Changelog|update|v[0-9])" | head -n2)
-          if [ -n "$version_info" ]; then
-            echo "$version_info" >> formatted_notes.txt
-            echo "" >> formatted_notes.txt
-          fi
-          
-          # Extract sections with flexible patterns
-          extract_section "New Features" "🌟" "What's new"
-          extract_section "Bug Fixes" "🔧" "Fixes"
-          extract_section "Improvements" "⚡" "Improvements"
-          extract_section "Changes" "🔄" "Changes"
-          
-          # Add a footer note if there's additional content
-          footer_note=$(grep -i "thanks\|support\|love" clean_release_notes.txt | tail -n1)
-          if [ -n "$footer_note" ]; then
-            echo "---" >> formatted_notes.txt
-            echo "$footer_note" >> formatted_notes.txt
-          fi
-          
-          # Set environment variable for use in subsequent steps
+          # Set the entire content as environment variable
           echo "FORMATTED_NOTES<<EOF" >> $GITHUB_ENV
-          cat formatted_notes.txt >> $GITHUB_ENV
+          cat clean_release_notes.txt >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
           
-          echo "Preview of formatted notes:"
-          cat formatted_notes.txt
+          echo "Preview of release notes:"
+          cat clean_release_notes.txt
 
       - name: Get and Categorize Assets with Sizes
         id: categorize_assets
@@ -175,11 +125,7 @@ jobs:
       
           discord_data=$(jq -nc \
                         --arg role_mention "$role_mention" \
-                        --arg field_value "$FORMATTED_NOTES_CLEAN
-
-            [❓Don't know which version to download? Click here!](https://github.com/${{ github.repository }}/blob/main/INSTALLATION.md)  
-            
-            [📌 Full changelog](https://github.com/${{ github.repository }}/releases/tag/${{ env.LATEST_TAG }})" \
+                        --arg field_value "$FORMATTED_NOTES_CLEAN" \
                         --arg footer_text "Version $VERSION" \
                         --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
                         --argjson embed_color "$embed_color" \

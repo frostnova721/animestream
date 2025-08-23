@@ -1,341 +1,21 @@
-name: AnimeStream Release
+name: Notify Release
 
 on:
-  push:
-    tags: ['v*']
   workflow_dispatch:
 
 jobs:
-  test:
+  notify:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.32.1
-      - run: flutter test
-      - run: flutter analyze
-
-  build_android:
-    runs-on: ubuntu-latest
-    needs: test
-    permissions:
-      contents: write
-    steps:
-      # Essential setup
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      
-      # Flutter environment
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: "oracle"
-          java-version: "17"
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.32.1
-          cache: true
-      
-      # App signing (critical for AnimeStream)
-      - name: Setup Keystore
-        env:
-          KEYSTORE_BASE64: ${{ secrets.APK_SIGN }}
-        run: |
-          echo "$KEYSTORE_BASE64" | base64 --decode > android/app/release.keystore
-          
-      - name: Create key.properties
-        env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-        run: |
-          echo "storePassword=$KEYSTORE_PASSWORD" > android/key.properties
-          echo "keyPassword=$KEYSTORE_PASSWORD" >> android/key.properties
-          echo "keyAlias=$KEY_ALIAS" >> android/key.properties
-          echo "storeFile=release.keystore" >> android/key.properties
-      
-      # Build process
-      - run: flutter clean
-      - run: flutter pub get
-      - run: flutter build apk --release --split-per-abi
-      - run: flutter build apk --release
-      
-      # Rename APKs with version tags for better organization
-      - name: Rename APKs
-        run: |
-          cd build/app/outputs/flutter-apk
-          for file in app-*-release.apk; do
-            if [[ $file != "app-release.apk" ]]; then
-              abi=$(echo $file | sed 's/app-\(.*\)-release.apk/\1/')
-              mv "$file" "AnimeStream_Android_${abi}_${{ github.ref_name }}.apk"
-            fi
-          done
-          mv app-release.apk "AnimeStream_Android_Universal_${{ github.ref_name }}.apk"
-      
-      # Upload APKs to release
-      - name: Upload APKs
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/app/outputs/flutter-apk/AnimeStream_Android_*.apk
-          tag_name: ${{ github.ref_name }}
-          draft: true
-
-  build_windows:
-    runs-on: windows-latest
-    needs: test
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v4
-      
-      # Caching for performance
-      - uses: actions/cache@v4
-        with:
-          path: |
-            ~\AppData\Local\Pub\Cache
-            build\
-          key: ${{ runner.os }}-flutter-${{ hashFiles('pubspec.lock') }}
-      
-      # Code signing certificate
-      - name: Setup Certificate
-        run: |
-          $bytes = [Convert]::FromBase64String("${{ secrets.PFX_CERTIFICATE }}")
-          [IO.File]::WriteAllBytes("certificate.pfx", $bytes)
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: 3.32.1
-          cache: true
-      
-      - name: Enable Windows Desktop
-        run: flutter config --enable-windows-desktop
-      
-      - run: flutter clean
-      - run: flutter pub get
-      - run: flutter build windows --release
-      
-      # Extract version for installer naming
-      - name: Extract Version
-        id: get_version
-        run: |
-          $version = (Get-Content pubspec.yaml | Select-String -Pattern 'version: ([\d.]+)').Matches.Groups[1].Value
-          echo "version=$version" >> $env:GITHUB_ENV
-      
-      # Create installer (using inno_bundle as in your project)
-      - name: Build Installer
-        run: |
-          dart run inno_bundle:build --release --sign-tool-params 'signtool.exe sign /f certificate.pfx /p "${{ secrets.PFX_PASSWORD }}" /t http://timestamp.digicert.com $f'
-      
-      # Upload Windows installer
-      - name: Upload Windows Installer
-        uses: softprops/action-gh-release@v1
-        with:
-          files: build/windows/x64/installer/Release/AnimeStream-x86_64-${{ env.version }}-Installer.exe
-          tag_name: ${{ github.ref_name }}
-          draft: true
-
-  generate_changelog:
-    runs-on: ubuntu-latest
-    needs: [build_android, build_windows]
-    permissions:
-      contents: write
-    steps:
-      - name: Checkout Code
+      - name: Cloning repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Get Release Information
-        id: release_info
-        run: |
-          # Get current and previous tags
-          CURRENT_TAG="${{ github.ref_name }}"
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || git rev-list --max-parents=0 HEAD)
-          
-          echo "current_tag=$CURRENT_TAG" >> $GITHUB_ENV
-          echo "prev_tag=$PREV_TAG" >> $GITHUB_ENV
-          
-          # Get release date
-          RELEASE_DATE=$(date '+%Y-%m-%d')
-          echo "release_date=$RELEASE_DATE" >> $GITHUB_ENV
-
-      - name: Generate Enhanced Changelog
-        run: |
-          cat > CHANGELOG.md << EOF
-          # 🎬 AnimeStream ${{ env.current_tag }}
-          
-          **Release Date**: ${{ env.release_date }}  
-          **Platforms**: Android • Windows
-          
-          EOF
-
-          # Get commits with enhanced parsing
-          COMMITS=$(git log ${{ env.prev_tag }}..HEAD --pretty=format:'%h|%s' --no-merges)
-          
-          # Initialize categories
-          FEATURES=""
-          BUG_FIXES=""
-          REFACTORS=""
-          STYLE_CHANGES=""
-          PERFORMANCE=""
-          CHORES=""
-          BREAKING_CHANGES=""
-          SECURITY=""
-          
-          REPO_URL="https://github.com/${{ github.repository }}"
-
-          # Enhanced commit parsing
-          while IFS='|' read -r hash message; do
-            if [ -z "$hash" ]; then continue; fi
-            
-            LINK="[$hash]($REPO_URL/commit/$hash)"
-            FORMATTED_COMMIT="* $LINK: $message"
-            
-            # Check for breaking changes first
-            if [[ $message == *"BREAKING CHANGE"* ]] || [[ $message == *"!"* ]]; then
-              BREAKING_CHANGES+="$FORMATTED_COMMIT\n"
-            # Security fixes
-            elif [[ $message == *"security"* ]] || [[ $message == *"vulnerability"* ]] || [[ $message == *"CVE"* ]]; then
-              SECURITY+="$FORMATTED_COMMIT\n"
-            # Features
-            elif [[ $message =~ ^feat.*|^add.*|^new.* ]]; then
-              FEATURES+="$FORMATTED_COMMIT\n"
-            # Bug fixes and improvements
-            elif [[ $message =~ ^fix.*|^bug.*|^improvement.*|^patch.*|^resolve.* ]]; then
-              BUG_FIXES+="$FORMATTED_COMMIT\n"
-            # Performance
-            elif [[ $message =~ ^perf.*|^optimize.*|^speed.*|^performance.* ]]; then
-              PERFORMANCE+="$FORMATTED_COMMIT\n"
-            # Refactoring
-            elif [[ $message =~ ^refactor.*|^restructure.*|^cleanup.* ]]; then
-              REFACTORS+="$FORMATTED_COMMIT\n"
-            # Style changes
-            elif [[ $message =~ ^style.*|^format.*|^lint.* ]]; then
-              STYLE_CHANGES+="$FORMATTED_COMMIT\n"
-            # Chores and documentation
-            elif [[ $message =~ ^chore.*|^docs.*|^build.*|^ci.*|^test.*|^update.* ]]; then
-              CHORES+="$FORMATTED_COMMIT\n"
-            fi
-          done <<< "$COMMITS"
-
-          # Build changelog with enhanced sections
-          if [ -n "$BREAKING_CHANGES" ]; then
-            echo "## ⚠️ BREAKING CHANGES" >> CHANGELOG.md
-            echo -e "$BREAKING_CHANGES" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$SECURITY" ]; then
-            echo "## 🔒 Security Fixes" >> CHANGELOG.md
-            echo -e "$SECURITY" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$FEATURES" ]; then
-            echo "## 🎉 New Features" >> CHANGELOG.md
-            echo -e "$FEATURES" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$BUG_FIXES" ]; then
-            echo "## 🛠️ Bug Fixes & Improvements" >> CHANGELOG.md
-            echo -e "$BUG_FIXES" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$PERFORMANCE" ]; then
-            echo "## 🚀 Performance Improvements" >> CHANGELOG.md
-            echo -e "$PERFORMANCE" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$REFACTORS" ]; then
-            echo "## 🔧 Code Refactoring" >> CHANGELOG.md
-            echo -e "$REFACTORS" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$STYLE_CHANGES" ]; then
-            echo "## 🎨 Style & UI Changes" >> CHANGELOG.md
-            echo -e "$STYLE_CHANGES" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          if [ -n "$CHORES" ]; then
-            echo "## 🧹 Maintenance & Documentation" >> CHANGELOG.md
-            echo -e "$CHORES" >> CHANGELOG.md
-            echo "" >> CHANGELOG.md
-          fi
-
-          # Add download links section
-          echo "## 📥 Downloads" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "| Platform | Architecture | Download |" >> CHANGELOG.md
-          echo "|----------|-------------|----------|" >> CHANGELOG.md
-          echo "| Android | ARM64 | [Download APK](https://github.com/${{ github.repository }}/releases/download/${{ env.current_tag }}/AnimeStream_Android_arm64_${{ env.current_tag }}.apk) |" >> CHANGELOG.md
-          echo "| Android | ARMv7 | [Download APK](https://github.com/${{ github.repository }}/releases/download/${{ env.current_tag }}/AnimeStream_Android_armeabi-v7a_${{ env.current_tag }}.apk) |" >> CHANGELOG.md
-          echo "| Android | x86_64 | [Download APK](https://github.com/${{ github.repository }}/releases/download/${{ env.current_tag }}/AnimeStream_Android_x86_64_${{ env.current_tag }}.apk) |" >> CHANGELOG.md
-          echo "| Android | Universal | [Download APK](https://github.com/${{ github.repository }}/releases/download/${{ env.current_tag }}/AnimeStream_Android_Universal_${{ env.current_tag }}.apk) |" >> CHANGELOG.md
-          echo "| Windows | x64 | [Download Installer](https://github.com/${{ github.repository }}/releases/download/${{ env.current_tag }}/AnimeStream-x86_64-Installer.exe) |" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-
-          # Add statistics
-          TOTAL_COMMITS=$(echo "$COMMITS" | wc -l)
-          CONTRIBUTORS=$(git log ${{ env.prev_tag }}..HEAD --pretty=format:'%an' | sort | uniq | wc -l)
-          
-          echo "## 📊 Release Statistics" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-          echo "- **Total Commits**: $TOTAL_COMMITS" >> CHANGELOG.md
-          echo "- **Contributors**: $CONTRIBUTORS" >> CHANGELOG.md
-          echo "- **Files Changed**: $(git diff --name-only ${{ env.prev_tag }}..HEAD | wc -l)" >> CHANGELOG.md
-          echo "" >> CHANGELOG.md
-
-          # Add footer
-          echo "---" >> CHANGELOG.md
-          echo "**Full Changelog**: [${{ env.prev_tag }}...${{ env.current_tag }}]($REPO_URL/compare/${{ env.prev_tag }}...${{ env.current_tag }})" >> CHANGELOG.md
-
-      - name: Commit and Push Changelog
-        run: |
-          git config --global user.name "AnimeStream Bot"
-          git config --global user.email "bot@animestream.app"
-          
-          git add CHANGELOG.md
-          if git diff --staged --quiet; then
-            echo "No changes to commit"
-          else
-            git commit -m "📝 Update changelog for ${{ env.current_tag }}"
-            git push origin HEAD:main
-          fi
-
-      - name: Create or Update Release
-        uses: ncipollo/release-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          bodyFile: CHANGELOG.md
-          tag: ${{ env.current_tag }}
-          name: "AnimeStream ${{ env.current_tag }}"
-          allowUpdates: true
-          draft: false
-          makeLatest: true
-          
-  post-release-notes:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-    needs: [generate_changelog]
-    steps:
-      - name: Cloing repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      
       - name: Fetch Repository Tags by Date and Time
         id: fetch_tags
         run: |
-          curl -s "https://api.github.com/repos/${{github.repository}}/tags" -o tags.json
+          curl -s "https://api.github.com/repos/frostnova721/animestream/tags" -o tags.json
           TAGS=$(jq -r '.[].name' tags.json)
           declare -a TAGS_WITH_DATES=()
           for TAG in $TAGS; do
@@ -361,56 +41,130 @@ jobs:
           done
           echo "$LATEST_TAG"
           echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          
       - name: Get Latest Release Notes
         id: get_release_notes
         run: |
           RELEASE_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-          "https://api.github.com/repos/${{ github.repository }}/releases/latest")
+          "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}")
 
           RELEASE_NOTES=$(echo "$RELEASE_DATA" | jq -r '.body')
           echo "Release Notes: $RELEASE_NOTES"
 
-          echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
-          echo "$RELEASE_NOTES" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          # Write to file to handle multiline content safely
+          echo "$RELEASE_NOTES" > release_notes.txt
 
       - name: Format Release Notes
         id: format_notes
         run: |
-        
-          features=$(echo "$RELEASE_NOTES" | grep -iE '^\*\s\[[a-f0-9]+\]\(.*\):\sfeat' | head -n 5)
-          if [[ -n "$features" ]]; then
-            echo "**🚀 Features**" > formatted_notes.txt
-            echo "$features" >> formatted_notes.txt
+          # Clean || markers and any HTML tags
+          sed 's/||//g' release_notes.txt | sed 's/<br>//g' > clean_release_notes.txt
+          echo "" > formatted_notes.txt
+          
+          extract_section() {
+            local title="$1"
+            local emoji="$2"
+            local pattern="$3"
+            
+            # Find the section start
+            local start=$(grep -n -i "^## $pattern" clean_release_notes.txt | head -n1 | cut -d: -f1)
+            if [ -z "$start" ]; then return; fi
+            
+            # Find the next section or end of file
+            local next=$(tail -n +$((start + 1)) clean_release_notes.txt | grep -n '^##' | head -n1 | cut -d: -f1)
+            
+            if [ -z "$next" ]; then
+              # No next section found, go to end of file
+              content=$(tail -n +$((start + 1)) clean_release_notes.txt | grep '^-' | head -n 10)
+            else
+              # Extract content between sections
+              end=$((start + next - 1))
+              content=$(sed -n "$((start + 1)),$((end - 1))p" clean_release_notes.txt | grep '^-' | head -n 10)
+            fi
+            
+            # Only add section if there's content
+            if [ -n "$content" ]; then
+              echo "### $emoji $title" >> formatted_notes.txt
+              echo "$content" >> formatted_notes.txt
+              echo "" >> formatted_notes.txt
+            fi
+          }
+          
+          # Extract version info from the top
+          version_info=$(head -n 5 clean_release_notes.txt | grep -E "(Changelog|update|v[0-9])" | head -n2)
+          if [ -n "$version_info" ]; then
+            echo "$version_info" >> formatted_notes.txt
             echo "" >> formatted_notes.txt
           fi
-      
-          fixes=$(echo "$RELEASE_NOTES" | grep -iE '^\*\s\[[a-f0-9]+\]\(.*\):\s(fix|bug|improvement|patch)' | head -n 5)
-          if [[ -n "$fixes" ]]; then
-            echo "**🐛 Fixes**" >> formatted_notes.txt
-            echo "$fixes" >> formatted_notes.txt
-            echo "" >> formatted_notes.txt
+          
+          # Extract sections with flexible patterns
+          extract_section "New Features" "🌟" "What's new"
+          extract_section "Bug Fixes" "🔧" "Fixes"
+          extract_section "Improvements" "⚡" "Improvements"
+          extract_section "Changes" "🔄" "Changes"
+          
+          # Add a footer note if there's additional content
+          footer_note=$(grep -i "thanks\|support\|love" clean_release_notes.txt | tail -n1)
+          if [ -n "$footer_note" ]; then
+            echo "---" >> formatted_notes.txt
+            echo "$footer_note" >> formatted_notes.txt
           fi
-
-          chores=$(echo "$RELEASE_NOTES" | grep -iE '^\*\s\[[a-f0-9]+\]\(.*\):\s(chore|docs|build|ci)' | head -n 5)
-          if [[ -n "$chores" ]]; then
-            echo "**🛠 Chores**" >> formatted_notes.txt
-            echo "$chores" >> formatted_notes.txt
-            echo "" >> formatted_notes.txt
-          fi
-
-          cat formatted_notes.txt
-          FORMATTED_NOTES=$(cat formatted_notes.txt) 
+          
+          # Set environment variable for use in subsequent steps
           echo "FORMATTED_NOTES<<EOF" >> $GITHUB_ENV
-          echo "$FORMATTED_NOTES" >> $GITHUB_ENV
+          cat formatted_notes.txt >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
+          
+          echo "Preview of formatted notes:"
+          cat formatted_notes.txt
+
+      - name: Get and Categorize Assets with Sizes
+        id: categorize_assets
+        run: |
+          # Fetch release assets based on the latest tag
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+           -H "Accept: application/vnd.github.v3+json" \
+           "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}" -o release.json
+          
+          # Initialize environment variables
+          for VAR in apk_arm64 apk_armeabi apk_universal apk_x86_64 windows linux ios setup macos linuximg linuxrmp; do
+            echo "${VAR}_message=" >> $GITHUB_ENV
+          done
+          
+          # Process each asset
+          jq -r '.assets[] | "\(.browser_download_url) \(.size)"' release.json | while read -r LINE; do
+            ASSET_URL=$(echo "$LINE" | awk '{print $1}')
+            ASSET_SIZE=$(echo "$LINE" | awk '{print $2}')
+            SIZE_HR=$(awk -v size="$ASSET_SIZE" 'BEGIN{
+              split("B KB MB GB TB", unit);
+              for (i=1; size>=1024 && i<5; i++) size/=1024;
+              printf "%.2f %s", size, unit[i]
+            }')
+            FILE_NAME=$(basename "$ASSET_URL")
+            
+            # Categorize and set variables
+            if [[ "$FILE_NAME" == *"-.apk" ]]; then
+              echo "apk_universal_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
+            elif [[ "$FILE_NAME" == *"Installer.exe" ]]; then
+              echo "setup_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
+            fi
+          done
+        
 
       - name: Send message to Discord
         env:
-          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_RELEASE_URL }}
+          DISCORD_WEBHOOK_URL: ${{ env.DISCORD_WEBHOOK_URL }}
         run: |
-
-          FORMATTED_NOTES=$(echo "$FORMATTED_NOTES" | sed -E 's/\): [^:]+:/) :/g')
+          FORMATTED_NOTES_CLEAN=$(echo "$FORMATTED_NOTES" | sed -E 's/\): [^:]+:/) :/g')
+          
+          # Mention the role based on the release name
+          if [[ "${{ env.LATEST_TAG }}" == *alpha* ]]; then
+            role_mention="<@&1313089691523878942>"  # Role ID for alpha channel
+          elif [[ "${{ env.LATEST_TAG }}" == *beta* ]]; then
+            role_mention="<@&1313087262539518033>"  # Role ID for beta channel
+          else
+            role_mention="<@&1313346791479054456>"  # Default role ID
+          fi
         
           default_color="#1ac4c5"
           hex_to_decimal() { printf '%d' "0x${1#"#"}"; }
@@ -418,21 +172,22 @@ jobs:
 
           # Ensure VERSION is not empty
           VERSION=${VERSION:-"${{env.LATEST_TAG}}"}
-
-
+      
           discord_data=$(jq -nc \
-                        --arg field_value "$FORMATTED_NOTES
+                        --arg role_mention "$role_mention" \
+                        --arg field_value "$FORMATTED_NOTES_CLEAN
 
-                        
-                        [📌 Full changelog](https://github.com/${{github.repository}}/releases/tag/${{ env.LATEST_TAG }})" \
+            [❓Don't know which version to download? Click here!](https://github.com/${{ github.repository }}/blob/main/INSTALLATION.md)  
+            
+            [📌 Full changelog](https://github.com/${{ github.repository }}/releases/tag/${{ env.LATEST_TAG }})" \
                         --arg footer_text "Version $VERSION" \
                         --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
                         --argjson embed_color "$embed_color" \
                         '{
-                          "content": "<@&1298977336124903457>",
+                          "content": $role_mention,
                           "embeds": [
                             {
-                              "title": "New App Version Dropped 🔥",
+                              "title": "🚀 New Release: ${{env.LATEST_TAG}}",
                               "color": $embed_color,
                               "description": $field_value,
                               "footer": {
@@ -450,3 +205,13 @@ jobs:
               -X POST \
               -d "$discord_data" \
               "$DISCORD_WEBHOOK_URL"
+
+      - name: Send Assets to Discord
+        run: |
+          MESSAGE="${{ env.LATEST_TAG }} Released
+            🔹 ${{ env.apk_universal_message }} | **APK (universal)**
+            🔹 ${{ env.setup_message }} | **Windows EXE**
+          PAYLOAD=$(jq -n --arg content "$MESSAGE" '{ content: $content }')
+          curl -X POST "${{ env.DISCORD_WEBHOOK_URL }}" \
+            -H "Content-Type: application/json" \
+            -d "$PAYLOAD"

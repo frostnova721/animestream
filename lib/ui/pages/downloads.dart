@@ -12,6 +12,7 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/fileExplorer.dart';
 import 'package:animestream/ui/pages/watch.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -30,7 +31,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   }
 
   late final TabController _tabController;
-  int dc = 0;
+  // int dc = 0;
 
   final DownloadManager _dm = DownloadManager();
 
@@ -47,7 +48,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // floatingActionButton: FloatingActionButton(
+        // floatingActionButton: kDebugMode ? FloatingActionButton(
         //   onPressed: () {
         //     // final url =
         //     //     "https://vault-14.kwikie.ru/stream/14/04/949408bf3775e6800948c22550842b1147995c801349d3de960e76760b81de14/uwu.m3u8";
@@ -56,7 +57,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
         //     setState(() {});
         //   },
         //   child: Icon(Icons.run_circle_outlined),
-        // ),
+        // ) : null,
         appBar: AppBar(
           title: Text(
             "Downloads",
@@ -110,7 +111,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   Widget _buildActive() {
     return ValueListenableBuilder(
       valueListenable: DownloadManager.downloadsCount,
-      builder: (ctx, val, child) => val == 0
+      builder: (ctx, val, child) => (val == 0)
           ? Center(
               child: Text("Start a download!!"),
             )
@@ -385,7 +386,8 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 5),
                       child: Text(
-                        item.status.name + " • ?? MB",
+                        item.status.name,
+                        // + " • ?? MB",
                         style: TextStyle(fontFamily: "Rubik", color: appTheme.textSubColor),
                       ),
                     ),

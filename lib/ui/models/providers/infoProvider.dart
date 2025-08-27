@@ -316,8 +316,8 @@ class InfoProvider extends ChangeNotifier {
   }
 
   void clearLastWatchDuration() async {
-    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference());
     _lastWatchedDurationMap = {};
+    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(lastWatchDuration: _lastWatchedDurationMap));
     notifyListeners();
   }
 

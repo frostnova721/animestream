@@ -20,7 +20,7 @@ class SourceManager {
     "AnimeOnsen",
     "Aniplay",
     "Gojo",
-  ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0")).toList();
+  ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0", supportDownloads: e != "AnimeOnsen")).toList();
 
   /// Used till complete migration to remote providers is complete.
   bool _useInbuiltProviders = true;
@@ -91,10 +91,10 @@ class SourceManager {
 //   "Gojo",
 // ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0")).toList()
 
-final List<String> unDownloadableSources = [
-  //uses mpd which needs ffmpeg to download (makes the app bulky :< )
-  "animeonsen",
-];
+// final List<String> unDownloadableSources = [
+//   //uses mpd which needs ffmpeg to download (makes the app bulky :< )
+//   "animeonsen",
+// ];
 
 AnimeProvider getClass(String source) {
   switch (source) {

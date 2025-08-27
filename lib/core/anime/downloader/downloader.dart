@@ -128,8 +128,8 @@ class Downloader {
   Future<void> requestCancellation(int id) async {
     _isolatePorts[id]?.send('cancel');
     // hmm thinking of doing this, but since cancellation is requested
-    // and not really cancelled, should it be set as cancelled?
-    // DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id)?.status = DownloadStatus.cancelled;
+    // and not really cancelled, should it be set as cancelled? (nvm lets wing it)
+    DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id)?.status = DownloadStatus.cancelled;
   }
 
   Future<void> requestPause(int id) async {

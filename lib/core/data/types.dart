@@ -115,6 +115,15 @@ class UserPreferencesModal {
     );
   }
 
+  factory UserPreferencesModal.defaults() {
+    return UserPreferencesModal(
+      episodesViewMode: EpisodeViewModes.list,
+      preferDubs: false,
+      searchPageListMode: false,
+      subtitleSettings: SubtitleSettings(),
+    );
+  }
+
   Map<dynamic, dynamic> toMap() {
     return {
       'episodesViewMode': episodesViewMode != null ? getViewModeIndex(episodesViewMode!) : null,
@@ -195,17 +204,4 @@ class AnimeSpecificPreference {
   String toJson() => json.encode(toMap());
 
   factory AnimeSpecificPreference.fromJson(String source) => AnimeSpecificPreference.fromMap(json.decode(source) as Map<String, dynamic>);
-
-  @override
-  bool operator ==(covariant AnimeSpecificPreference other) {
-    if (identical(this, other)) return true;
-  
-    return 
-      other.lastWatchDuration == lastWatchDuration &&
-      other.manualSearchQuery == manualSearchQuery &&
-      other.preferredProvider == preferredProvider;
-  }
-
-  @override
-  int get hashCode => lastWatchDuration.hashCode ^ manualSearchQuery.hashCode ^ preferredProvider.hashCode;
 }

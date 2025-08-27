@@ -25,11 +25,10 @@ class _FileExplorerState extends State<FileExplorer> {
     super.initState();
   }
 
-  Future<void> _deleteDownload(String filePath, int? id) async {
+  Future<void> _deleteDownload(FileSystemEntity entity, int? id) async {
     if (id != null) await DownloadHistory.removeItem(id);
-    final file = File(filePath);
-    if (await file.exists()) {
-      await file.delete();
+    if (await entity.exists()) {
+      await entity.delete(recursive: true);
     }
   }
 
@@ -188,6 +187,28 @@ class _FileExplorerState extends State<FileExplorer> {
             style: _titleStyle(),
             overflow: TextOverflow.ellipsis,
           )),
+          InkWell(
+              onTapUp: (details) {
+                final offset = details.globalPosition;
+                showMenu(
+                    context: context,
+                    color: appTheme.backgroundSubColor,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    positionBuilder: (context, constraints) {
+                      return RelativeRect.fromLTRB(
+                        offset.dx,
+                        offset.dy,
+                        MediaQuery.of(context).size.width - offset.dx,
+                        MediaQuery.of(context).size.height - offset.dy,
+                      );
+                    },
+                    items: [
+                      PopupMenuItem(onTap: () {
+                        _deleteDialog(entity, null).then((val) => _readDir());
+                      }, child: Text("Delete", style: TextStyle(fontFamily: "NotoSans", color: appTheme.textMainColor),)),
+                    ]);
+              },
+              child: Icon(Icons.more_vert_rounded))
         ],
       ),
     );
@@ -199,6 +220,7 @@ class _FileExplorerState extends State<FileExplorer> {
 
   Container _fileTile(FileSystemEntity entity) {
     final ep = _episodeNumRegex.firstMatch(entity.path)?.group(1);
+    final isSubtitleFile = entity.path.contains(RegExp(r'\.(ass|srt|vtt|txt)$', caseSensitive: false));
     return _tappable(
       entity: entity,
       onTap: () {
@@ -224,7 +246,7 @@ class _FileExplorerState extends State<FileExplorer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  ep != null ? "Episode $ep" : _getFileName(entity.path),
+                  ep != null ? "Episode $ep ${isSubtitleFile ? "subtitles" : ""}" : _getFileName(entity.path),
                   style: _titleStyle(),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -238,7 +260,7 @@ class _FileExplorerState extends State<FileExplorer> {
           ),
           IconButton(
               onPressed: () {
-                _deleteDialog(entity.path, null).then((val) => _readDir());
+                _deleteDialog(entity, null).then((val) => _readDir());
               },
               icon: Icon(Icons.delete)),
         ],
@@ -265,7 +287,7 @@ class _FileExplorerState extends State<FileExplorer> {
     );
   }
 
-  Future<T?> _deleteDialog<T>(String filepath, int? id) {
+  Future<T?> _deleteDialog<T>(FileSystemEntity entity, int? id) {
     return showDialog(
         context: context,
         builder: (context) => AlertDialog(
@@ -279,7 +301,7 @@ class _FileExplorerState extends State<FileExplorer> {
                 ),
                 TextButton(
                   onPressed: () async {
-                    await _deleteDownload(filepath, id);
+                    await _deleteDownload(entity, id);
                     Navigator.pop(context);
                   },
                   style: TextButton.styleFrom(
@@ -291,7 +313,7 @@ class _FileExplorerState extends State<FileExplorer> {
               ],
               content: Padding(
                 padding: const EdgeInsets.all(5),
-                child: Text('Are you sure to delete "${_getFileName(filepath)}" from your device?'),
+                child: Text('Are you sure to delete "${_getFileName(entity.path)}" from your device?'),
               ),
             ));
   }

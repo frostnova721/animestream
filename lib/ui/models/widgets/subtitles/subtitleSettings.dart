@@ -20,7 +20,7 @@ class SubtitleSettings {
   final bool bold;
   final bool enableShadows;
 
-  SubtitleSettings({
+  const SubtitleSettings({
     this.backgroundColor = Colors.black,
     this.backgroundTransparency = 0,
     this.bottomMargin = 30,

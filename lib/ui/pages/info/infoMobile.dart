@@ -685,6 +685,10 @@ class _InfoMobileState extends State<InfoMobile> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                                   onPressed: () async {
                                     Navigator.of(ctx).pop();
+                                    if(!provider.selectedSource.supportDownloads && ServerSheetType.values[ind] == ServerSheetType.download) {
+                                      floatingSnackBar("This source doesn't support downloading yet!");
+                                      return;
+                                    }
                                     showModalBottomSheet(
                                       showDragHandle: true,
                                       isScrollControlled: true,
@@ -818,7 +822,7 @@ class _InfoMobileState extends State<InfoMobile> {
                       crossAxisAlignment: CrossAxisAlignment.end,
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
-                        if (!unDownloadableSources.contains(provider.selectedSource))
+                        if (provider.selectedSource.supportDownloads)
                           Container(
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.only(topLeft: Radius.circular(15)),
@@ -967,7 +971,7 @@ class _InfoMobileState extends State<InfoMobile> {
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            if (!unDownloadableSources.contains(provider.selectedSource))
+                            if (provider.selectedSource.supportDownloads)
                               Container(
                                 child: IconButton(
                                   onPressed: () async {

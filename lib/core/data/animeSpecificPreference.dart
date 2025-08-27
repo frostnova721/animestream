@@ -43,7 +43,7 @@ Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreferen
   final item = map[anilistId] ?? {};
 
   preference.toMap().forEach((k,v) {
-    if(item[k] != null) {
+    if(v != null) {
       item[k] = v;
     }
   });

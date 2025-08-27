@@ -8,7 +8,7 @@ class UserPreferences {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
     if(prefMap == null || prefMap.isEmpty) {
       print("Got empty list of preferences.");
-      return UserPreferencesModal();
+      return UserPreferencesModal.defaults();
     }
     return UserPreferencesModal.fromMap(prefMap);
   }
@@ -17,13 +17,15 @@ class UserPreferences {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
     if(prefMap == null || prefMap.isEmpty) {
       print("Got empty list of preferences.");
+      prefMap = UserPreferencesModal.defaults().toMap();
     }
     final mapped = userPref.toMap();
-    prefMap!.forEach((k,v) {
-      if (mapped[k] != null) {
-        prefMap[k] = mapped[k];
+    prefMap.forEach((k,v) {
+      if (v != null) {
+        prefMap![k] = mapped[k];
       }
     });
+    print(prefMap);
     userPreferences = UserPreferencesModal.fromMap(prefMap);
     await storeVal(HiveKey.userPreferences, prefMap);
   }

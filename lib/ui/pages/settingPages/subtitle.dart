@@ -186,7 +186,8 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                               shrinkWrap: true,
                               children: [
                                 _itemTitle("Font Family"),
-                                SizedBox(
+                                Container(
+                                  margin: EdgeInsets.only(bottom: 20),
                                   height: 220,
                                   child: GridView(
                                     padding: EdgeInsets.only(left: 10, right: 10, bottom: 20),

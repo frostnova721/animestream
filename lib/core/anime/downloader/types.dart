@@ -102,7 +102,6 @@ class DownloadTaskIsolate {
   final int parallelBatches;
   final String? subsUrl;
   final SendPort? sendPort;
-  // final RootIsolateToken? rootIsolateToken;
   final int resumeFrom;
   String downloadPath;
 
@@ -115,7 +114,6 @@ class DownloadTaskIsolate {
     required this.subsUrl,
     required this.sendPort,
     required this.id,
-    // required this.rootIsolateToken,
     required this.downloadPath,
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
   });

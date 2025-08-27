@@ -31,7 +31,7 @@ class DownloaderCore {
         await helper.makeDirectory(fileName: task.fileName, fileExtension: "mp4", downloadPath: task.downloadPath);
 
     // Download subtitles if available
-    if (task.subsUrl != null) downloadSubs(task.subsUrl!, task.fileName, task.downloadPath);
+    if (task.subsUrl != null) downloadSubs(task.subsUrl!, task.fileName, finalPath);
 
     final output = File(finalPath);
 
@@ -120,6 +120,11 @@ class DownloaderCore {
 
           final res =
               await helper.downloadSegmentWithRetries(uri, task.retryAttempts, customHeaders: task.customHeaders);
+
+          // Imo this is one of the best place to execute cancellation
+          if (_status == DownloadStatus.cancelled) {
+            return false;
+          }
 
           if (res.statusCode >= 200 && res.statusCode < 300) {
             // Decrypt if theres an encryption
@@ -337,12 +342,11 @@ class DownloaderCore {
 
   Future<void> downloadSubs(String url, String fileName, String downloadPath) async {
     try {
-    final path = await helper.makeDirectory(
-      fileName: fileName + "_subs",
-      fileExtension: url.split(".").lastOrNull ?? "txt",
-      downloadPath: downloadPath,
-    );
-    final file = File(path);
+    final folder = File(downloadPath).parent;
+    fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '') + " Subtitles";
+
+    final ext = url.split(".").lastOrNull ?? "txt";
+    final file = File("${folder.path}/$fileName.$ext");
     await file.writeAsString((await get(Uri.parse(url))).body);
     return;
     } catch(err) {

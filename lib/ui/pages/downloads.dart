@@ -12,7 +12,6 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/watchPageUtil.dart';
 import 'package:animestream/ui/models/widgets/fileExplorer.dart';
 import 'package:animestream/ui/pages/watch.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -49,6 +49,12 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     }
   }
 
+  String getTitle(Map<String, String?> titles) {
+    final preferNativeTitle = currentUserSettings?.nativeTitle ?? false;
+    final defaultTitle = titles['english'] ?? titles['romaji'] ?? '';
+    return preferNativeTitle ? titles['native'] ?? defaultTitle : defaultTitle;
+  }
+
   void injectToCorrespondingList(List<UserAnimeList> list) {
     //empty all the lists first
     watchingList = [];
@@ -63,7 +69,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           watchingList.add(
             Cards.animeCard(
               item.id,
-              item.title['english'] ?? item.title['romaji'] ?? '',
+              getTitle(item.title),
               item.coverImage,
               rating: item.rating,
             ),
@@ -75,7 +81,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           plannedList.add(
             Cards.animeCard(
               item.id,
-              item.title['english'] ?? item.title['romaji'] ?? '',
+              getTitle(item.title),
               item.coverImage,
               rating: item.rating,
             ),
@@ -87,7 +93,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           droppedList.add(
             Cards.animeCard(
               item.id,
-              item.title['english'] ?? item.title['romaji'] ?? '',
+              getTitle(item.title),
               item.coverImage,
               rating: item.rating,
             ),
@@ -99,7 +105,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           completedList.add(
             Cards.animeCard(
               item.id,
-              item.title['english'] ?? item.title['romaji'] ?? '',
+              getTitle(item.title),
               item.coverImage,
               rating: item.rating,
             ),
@@ -289,17 +295,17 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if(Platform.isWindows)
-                        AnimeStreamNavRail(
-                            shouldExpand: true,
-                            destinations: [
-                              const AnimeStreamNavDestination(icon: Icons.movie, label: "Watching"),
-                              const AnimeStreamNavDestination(icon: Icons.calendar_month, label: "Planned"),
-                              const AnimeStreamNavDestination(icon: Icons.highlight_off_outlined, label: "Dropped"),
-                              const AnimeStreamNavDestination(icon: Icons.task_alt_rounded, label: "Completed")
-                            ],
-                            controller: railController,
-                            initialIndex: 0),
+                        if (Platform.isWindows)
+                          AnimeStreamNavRail(
+                              shouldExpand: true,
+                              destinations: [
+                                const AnimeStreamNavDestination(icon: Icons.movie, label: "Watching"),
+                                const AnimeStreamNavDestination(icon: Icons.calendar_month, label: "Planned"),
+                                const AnimeStreamNavDestination(icon: Icons.highlight_off_outlined, label: "Dropped"),
+                                const AnimeStreamNavDestination(icon: Icons.task_alt_rounded, label: "Completed")
+                              ],
+                              controller: railController,
+                              initialIndex: 0),
                         getSelectedTabView(tabController.index).length == 0
                             //this wouldnt be shown! ik
                             ? Center(
@@ -315,17 +321,16 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                             : Expanded(
                                 child: Platform.isWindows
                                     ? Container(
-                                      margin: EdgeInsets.all(12),
-                                      padding: EdgeInsets.only(bottom: 22, top: 5, right: 10, left: 10),
-                                      decoration: BoxDecoration(
-                                      color: appTheme.backgroundSubColor.withAlpha(175),
-                                      borderRadius: BorderRadius.circular(20)
-                                      ),
-                                      child: BottomBarView(
-                                          children:
-                                              List.generate(tabController.length, (index) => itemGrid(context, index)),
-                                          controller: railController),
-                                    )
+                                        margin: EdgeInsets.all(12),
+                                        padding: EdgeInsets.only(bottom: 22, top: 5, right: 10, left: 10),
+                                        decoration: BoxDecoration(
+                                            color: appTheme.backgroundSubColor.withAlpha(175),
+                                            borderRadius: BorderRadius.circular(20)),
+                                        child: BottomBarView(
+                                            children: List.generate(
+                                                tabController.length, (index) => itemGrid(context, index)),
+                                            controller: railController),
+                                      )
                                     : TabBarView(
                                         controller: tabController,
                                         children:

@@ -1,6 +1,5 @@
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/animepahe.dart';
-import 'package:animestream/core/anime/providers/aniplay.dart';
 import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/providerDetails.dart';
@@ -18,7 +17,7 @@ class SourceManager {
   final List<ProviderDetails> inbuiltSources = [
     "Animepahe",
     "AnimeOnsen",
-    "Aniplay",
+    // "Aniplay", rip aniplay
     "Gojo",
   ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0", supportDownloads: e != "AnimeOnsen")).toList();
 
@@ -104,8 +103,8 @@ AnimeProvider getClass(String source) {
       return AnimePahe();
     case "animeonsen":
       return AnimeOnsen();
-    case "aniplay":
-      return AniPlay();
+    // case "aniplay":
+    //   return AniPlay();
     case "gojo":
       return Gojo();
     default:

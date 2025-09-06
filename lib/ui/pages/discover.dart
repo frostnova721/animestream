@@ -211,6 +211,10 @@ class _DiscoverState extends State<Discover> {
         },
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
+          final titles = widget.trendingList[index % widget.trendingList.length].title;
+          final title = titles['english'] ?? titles['romaji'] ?? '';
+          final preferNative = currentUserSettings?.nativeTitle ?? false;
+
           return GestureDetector(
             onTap: () {
               Navigator.push(
@@ -275,10 +279,7 @@ class _DiscoverState extends State<Discover> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Text(
-                                  widget.trendingList[index % widget.trendingList.length].title['english'] ??
-                                      widget.trendingList[index % widget.trendingList.length].title['romaji'] ??
-                                      '',
+                                child: Text( preferNative ? titles['native'] ?? title : title,
                                   style: TextStyle(
                                     color: appTheme.textMainColor,
                                     fontFamily: 'NunitoSans',

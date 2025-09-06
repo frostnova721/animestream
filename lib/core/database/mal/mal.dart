@@ -8,13 +8,11 @@ import 'package:http/http.dart';
 class MAL extends Database {
   @override
   Future<DatabaseInfo> getAnimeInfo(int id) {
-    // TODO: implement getAnimeInfo
     throw UnimplementedError();
   }
 
   @override
   Future<List<DatabaseSearchResult>> search(String query) {
-    // TODO: implement search
     throw UnimplementedError();
   }
 

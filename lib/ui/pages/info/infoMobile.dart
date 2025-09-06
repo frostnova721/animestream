@@ -30,10 +30,13 @@ class _InfoMobileState extends State<InfoMobile> {
   bool infoPage = true;
 
   FocusNode _watchInfoButtonFocusNode = FocusNode();
+  final useNativeTitle = currentUserSettings?.nativeTitle ?? false; 
 
   @override
   Widget build(BuildContext context) {
     provider = context.watch<InfoProvider>();
+    final normalTitle = provider.data.title['english'] ?? provider.data.title['romaji'] ?? '';
+    final customizedTitle = useNativeTitle ? provider.data.title['native'] ?? normalTitle : normalTitle;
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: provider.infoLoadError
@@ -159,7 +162,7 @@ class _InfoMobileState extends State<InfoMobile> {
                           alignment: Alignment.center,
                           // padding: EdgeInsets.only(left: 40, right: 25),
                           child: Text(
-                            provider.data.title['english'] ?? provider.data.title['romaji'] ?? '',
+                            customizedTitle,
                             style: TextStyle(
                               color: appTheme.textMainColor,
                               fontFamily: "NunitoSans",

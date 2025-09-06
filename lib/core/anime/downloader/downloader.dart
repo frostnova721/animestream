@@ -32,7 +32,7 @@ class Downloader {
   static int MAX_STREAM_BATCH_SIZE = 5;
 
   /// Count of Refetching failed segments
-  static int MAX_RETRY_ATTEMPTS = 5;
+  static int MAX_RETRY_ATTEMPTS = 10;
 
   DownloadItem _getDownloadItem(int id) {
     final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);

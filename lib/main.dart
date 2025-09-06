@@ -20,9 +20,6 @@ import 'package:provider/provider.dart';
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/data/hive.dart';
-import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
@@ -49,8 +46,6 @@ void main(List<String> args) async {
     await Hive.initFlutter(dir.path);
 
     await loadAndAssignSettings();
-
-    await migrateToSecureStorage();
 
     if (Platform.isWindows) {
       await windowManager.ensureInitialized();
@@ -95,16 +90,6 @@ void main(List<String> args) async {
 
     print("[CRASH] logged the error to logs folder");
     rethrow;
-  }
-}
-
-// Migrate if not already done, will be removed in future versions (if not discontinued)
-Future<void> migrateToSecureStorage() async {
-  final token = await getVal(HiveKey.token);
-  if (token != null) {
-    await storeSecureVal(SecureStorageKey.anilistToken, token);
-    await storeVal(HiveKey.token, null);
-    print("[STARTUP] Migrated to Secure Storage");
   }
 }
 

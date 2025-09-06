@@ -134,10 +134,11 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
               totalEpisodes: item.episodes,
               watchedEpisodeCount: item.watchProgress),
         );
+        final title = item.title['english'] ?? item.title['romaji'] ?? '';
         thisSeason.add(
           Cards.animeCard(
             item.id,
-            item.title['english'] ?? item.title['romaji'] ?? '',
+            (currentUserSettings?.nativeTitle ?? false) ? item.title['native'] ?? title : title,
             item.cover,
             rating: item.rating,
           ),
@@ -152,7 +153,6 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           });
           return;
         }
-        ;
         plannedList = [];
         List<UserAnimeListItem> itemList = pl[0].list;
         if (itemList.length > 25) itemList = itemList.sublist(0, 25);
@@ -206,10 +206,11 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     final isMobile = !tv && isAndroid;
 
     recentlyUpdatedListData.forEach((elem) {
+      final title = elem.title['english'] ?? elem.title['romaji'] ?? '';
       recentlyUpdatedList.add(
         Cards.animeCard(
           elem.id,
-          elem.title['english'] ?? elem.title['romaji'] ?? '',
+          (currentUserSettings?.nativeTitle ?? false) ? elem.title['native'] ?? title : title,
           elem.cover,
           rating: (elem.rating ?? 0) / 10,
           isMobile: isMobile,
@@ -219,13 +220,17 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
 
     recommendedList.clear();
     recommendedListData.forEach((item) {
-      recommendedList.add(Cards.animeCard(item.id, item.title['english'] ?? item.title['romaji'] ?? '', item.cover,
+      final title = item.title['english'] ?? item.title['romaji'] ?? '';
+      recommendedList.add(Cards.animeCard(
+          item.id, (currentUserSettings?.nativeTitle ?? false) ? item.title['native'] ?? title : title, item.cover,
           rating: item.rating, isMobile: isMobile));
     });
 
     thisSeason.clear();
     thisSeasonData.forEach((item) {
-      thisSeason.add(Cards.animeCard(item.id, item.title['english'] ?? item.title['romaji'] ?? '', item.cover,
+      final title = item.title['english'] ?? item.title['romaji'] ?? '';
+      thisSeason.add(Cards.animeCard(
+          item.id, (currentUserSettings?.nativeTitle ?? false) ? item.title['native'] ?? title : title, item.cover,
           rating: item.rating, isMobile: isMobile));
     });
 
@@ -244,10 +249,11 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     final list = await AnilistQueries().getRecommendedAnimes();
     recommendedListData = list;
     for (final item in list) {
+      final title = item.title['english'] ?? item.title['romaji'] ?? '';
       recommendedList.add(
         Cards.animeCard(
           item.id,
-          item.title['english'] ?? item.title['romaji'] ?? '',
+          (currentUserSettings?.nativeTitle ?? false)  ? item.title['native'] ?? title : title,
           item.cover,
           rating: item.rating,
           isMobile: !tv && isAndroid,
@@ -263,12 +269,13 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     Set<int> ids = {};
     for (final elem in list) {
       if (!ids.contains(elem.id)) {
+        final title = elem.title['english'] ?? elem.title['romaji'] ?? '';
         ids.add(elem.id);
         recentlyUpdatedListData.add(elem);
         recentlyUpdatedList.add(
           Cards.animeCard(
             elem.id,
-            elem.title['english'] ?? elem.title['romaji'] ?? '',
+            (currentUserSettings?.nativeTitle ?? false)  ? elem.title['native'] ?? title : title,
             elem.cover,
             rating: (elem.rating ?? 0) / 10,
             isMobile: !tv && isAndroid,
@@ -317,7 +324,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   }
 
   @override
-  Widget build(BuildContext context) {        
+  Widget build(BuildContext context) {
     if (recentlyUpdatedList.isNotEmpty && thisSeason.isNotEmpty) {
       rebuildCards();
     }

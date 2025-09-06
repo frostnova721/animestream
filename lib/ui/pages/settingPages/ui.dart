@@ -5,8 +5,10 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/popup.dart';
+import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/ui/theme/themes.dart';
@@ -45,6 +47,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
     navbarTranslucency = currentUserSettings?.navbarTranslucency ?? 0.6;
     darkMode = currentUserSettings?.darkMode ?? true;
     materialTheme = currentUserSettings?.materialTheme ?? false;
+    nativeTitle = currentUserSettings?.nativeTitle ?? false;
     // borderlessWindow = currentUserSettings?.useFramelessWindow ?? true;
   }
 
@@ -66,6 +69,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   late bool isAboveAndroid12;
   late bool materialTheme;
   late bool useNewHomeScreen;
+  late bool nativeTitle;
   // late bool borderlessWindow;
 
   @override
@@ -79,28 +83,31 @@ class _ThemeSettingState extends State<ThemeSetting> {
             children: [
               settingPagesTitleHeader(context, "UI"),
               Container(
-                padding: EdgeInsets.only(left: 15, right: 15, top: 0),
                 child: currentThemeId != null
                     ? Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          toggleItem("Material Theme", materialTheme,
-                              description: "wallpaper dependent theme", customPadding: EdgeInsets.all(10), () async {
-                            //the package just wont work if <android 12!!!
-                            if (!isAboveAndroid12) return floatingSnackBar("Android 12 or greater is required");
-                            materialTheme = !materialTheme;
-                            await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
-                            setState(() {});
-                            if (materialTheme) {
-                              return Provider.of<AppProvider>(context, listen: false).justRefresh();
-                            }
-                            final t = availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0];
-                            Provider.of<AppProvider>(context, listen: false)
-                                .applyTheme(darkMode ? t.theme : t.lightVariant);
-                          }),
+                          ToggleItem(
+                              label: "Material Theme",
+                              value: materialTheme,
+                              description: "wallpaper dependent theme",
+                              onTapFunction: () async {
+                                //the package just wont work if <android 12!!!
+                                if (!isAboveAndroid12) return floatingSnackBar("Android 12 or greater is required");
+                                materialTheme = !materialTheme;
+                                await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
+                                setState(() {});
+                                if (materialTheme) {
+                                  return Provider.of<AppProvider>(context, listen: false).justRefresh();
+                                }
+                                final t =
+                                    availableThemes.where((themeItem) => themeItem.id == currentThemeId).toList()[0];
+                                Provider.of<AppProvider>(context, listen: false)
+                                    .applyTheme(darkMode ? t.theme : t.lightVariant);
+                              }),
                           _themes(),
                           Container(
-                            padding: EdgeInsets.only(left: 10, right: 10, top: 10, bottom: 10),
+                            padding: EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
@@ -143,10 +150,20 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               ],
                             ),
                           ),
-                          toggleItem(
-                            "AMOLED Background",
-                            AMOLEDBackgroundEnabled,
-                            () async {
+                          ToggleItem(
+                            onTapFunction: () async {
+                              nativeTitle = !nativeTitle;
+                              setState(() {});
+                              await Settings().writeSettings(SettingsModal(nativeTitle: nativeTitle));
+                              Provider.of<AppProvider>(context, listen: false).justRefresh();
+                            },
+                            label: "Prefer Native Titles",
+                            value: nativeTitle,
+                          ),
+                          ToggleItem(
+                            label: "AMOLED Background",
+                            value: AMOLEDBackgroundEnabled,
+                            onTapFunction: () async {
                               final thm = availableThemes.firstWhere((i) => i.id == currentThemeId);
                               // setState(() {
                               AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
@@ -168,7 +185,6 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               Provider.of<AppProvider>(context, listen: false).justRefresh();
                               setState(() {});
                             },
-                            customPadding: EdgeInsets.all(10),
                             description: "Full black background",
                           ),
                           // if (Platform.isWindows)
@@ -186,22 +202,25 @@ class _ThemeSettingState extends State<ThemeSetting> {
                           //     await Settings().writeSettings(SettingsModal(useFramelessWindow: borderlessWindow));
                           //   }),
                           if (Platform.isAndroid)
-                            _sliderItem("Navbar Transparency", navbarTranslucency,
-                                min: 0,
-                                max: 1,
-                                description: "Transparency of the navbar",
-                                onChangedFunction: (val) {
-                                  setState(() {
-                                    navbarTranslucency = val;
-                                  });
-                                },
-                                divisions: 10,
-                                onDragEnd: (val) async {
-                                  await Settings().writeSettings(
-                                    SettingsModal(navbarTranslucency: navbarTranslucency),
-                                  );
-                                  Provider.of<AppProvider>(context, listen: false).justRefresh();
-                                }),
+                            Padding(
+                              padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
+                              child: _sliderItem("Navbar Transparency", navbarTranslucency,
+                                  min: 0,
+                                  max: 1,
+                                  description: "Transparency of the navbar",
+                                  onChangedFunction: (val) {
+                                    setState(() {
+                                      navbarTranslucency = val;
+                                    });
+                                  },
+                                  divisions: 10,
+                                  onDragEnd: (val) async {
+                                    await Settings().writeSettings(
+                                      SettingsModal(navbarTranslucency: navbarTranslucency),
+                                    );
+                                    Provider.of<AppProvider>(context, listen: false).justRefresh();
+                                  }),
+                            ),
                         ],
                       )
                     : Container(),
@@ -257,49 +276,15 @@ class _ThemeSettingState extends State<ThemeSetting> {
     );
   }
 
-  Widget _clickableItem(String label, {String? description, void Function()? onTapFunction, Icon? suffixIcon}) {
-    return InkWell(
-      onTap: onTapFunction,
-      child: item(
-        child: Container(
-          padding: EdgeInsets.only(left: 10, right: 10),
-          width: double.infinity,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      label,
-                      style: textStyle(),
-                    ),
-                    if (description != null)
-                      Text(
-                        description,
-                        style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
-                      ),
-                  ],
-                ),
-              ),
-              if (suffixIcon != null) suffixIcon,
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _themes() {
-    return _clickableItem(
-      "Themes",
+    return ClickableItem(
+      label: "Themes",
       description: "Change your themes",
       suffixIcon: Icon(
         Icons.keyboard_arrow_down_rounded,
         color: appTheme.textMainColor,
       ),
-      onTapFunction: () {
+      onTap: () {
         showPopup(
           context: context,
           isScrollControlledSheet: true,
@@ -308,7 +293,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
             // height: MediaQuery.of(context).orientation == Orientation.landscape
             //     ? MediaQuery.of(context).size.height / 2 + 100
             //     : MediaQuery.of(context).size.height / 3 + 100,
-            width: Platform.isWindows ? MediaQuery.sizeOf(context).width /3 : null,
+            width: Platform.isWindows ? MediaQuery.sizeOf(context).width / 3 : null,
             padding: EdgeInsets.only(
               top: 10,
               left: 20,

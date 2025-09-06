@@ -18,6 +18,7 @@ class AnilistQueries {
           title {
             romaji
             english
+            native
           }
           coverImage {
             large
@@ -43,6 +44,7 @@ class AnilistQueries {
             title: {
               'english': media['title']['english'],
               'romaji': media['title']['romaji'],
+              'native': media['title']['native'],
             },
             // releaseStatus: media['status'],
             episodes: media['episodes'],
@@ -185,6 +187,7 @@ class AnilistQueries {
         title {
           english
           romaji
+          native
         }
         averageScore
         coverImage {
@@ -208,6 +211,7 @@ class AnilistQueries {
           title: {
             'english': rec['title']['english'],
             'romaji': rec['title']['romaji'],
+            'native': rec['title']['native'],
           },
           rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null,
         ),
@@ -283,7 +287,7 @@ class AnilistQueries {
 
     final query =
         """{ Page(perPage: 30, page: $page){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} \
-        sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP", averageScore_lesser: ${ratingHigh * 10}, averageScore_greater: ${ratingLow * 10}) { id coverImage { large } title { english romaji } status averageScore } } }""";
+        sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP", averageScore_lesser: ${ratingHigh * 10}, averageScore_greater: ${ratingLow * 10}) { id coverImage { large } title { english romaji native } status averageScore } } }""";
     final res = await Anilist().fetchQuery(query, RequestType.media);
     List<AnimeCardData> results = [];
     for (final item in res) {
@@ -296,6 +300,7 @@ class AnilistQueries {
           title: {
             'english': item['title']['english'],
             'romaji': item['title']['romaji'],
+            'native': item['title']['native'],
           },
         ),
       );

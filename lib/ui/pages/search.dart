@@ -60,6 +60,7 @@ class _SearchState extends State<Search> {
 
   bool exactMatch = false;
   bool verticalCards = userPreferences?.searchPageListMode ?? false;
+  final nativeTitle = currentUserSettings?.nativeTitle ?? false;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +195,7 @@ class _SearchState extends State<Search> {
                   final id = it.id;
                   return AnimeCardExtended(
                     id: id,
-                    title: title,
+                    title: nativeTitle ? it.title['native'] ?? title : title,
                     imageUrl: image,
                     rating: it.rating ?? 0,
                     customWidth: 450,
@@ -207,7 +208,7 @@ class _SearchState extends State<Search> {
                   final String title = it.title['english'] ?? it.title['romaji'] ?? '';
                   final id = it.id;
                   return Container(
-                    child: Cards.animeCard(id, title, image,
+                    child: Cards.animeCard(id, nativeTitle ? it.title['native'] ?? title : title, image,
                         rating: it.rating, isAnime: true, isMobile: Platform.isAndroid),
                   );
                 }

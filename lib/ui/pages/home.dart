@@ -317,11 +317,14 @@ class _HomeState extends State<Home> {
                           itemCount: list.length,
                           itemBuilder: (context, index) {
                             final item = list[index];
+                            final preferNative = currentUserSettings?.nativeTitle ?? false;
+                            final normalTitle = item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '';
+                            final title = preferNative ? item.title['native'] ?? normalTitle : normalTitle;
                             return Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Cards.animeCardExtended(
                                   item.id,
-                                  item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '',
+                                  title,
                                   item.coverImage,
                                   item.rating ?? 0.0,
                                   bannerImageUrl: item.coverImage,

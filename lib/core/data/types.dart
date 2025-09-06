@@ -24,6 +24,7 @@ class SettingsModal {
   final bool? useQueuedDownloads;
   final bool? useFramelessWindow;
   final bool? doubleTapToSkip;
+  final bool? nativeTitle;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -44,6 +45,7 @@ class SettingsModal {
     this.useQueuedDownloads,
     this.useFramelessWindow,
     this.doubleTapToSkip,
+    this.nativeTitle,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -66,6 +68,7 @@ class SettingsModal {
       useQueuedDownloads: map['useQueuedDownloads'] ?? false,
       useFramelessWindow: map['useFramelessWindow'] ?? false,
       doubleTapToSkip: map['doubleTapToSkip'] ?? true,
+      nativeTitle: map['nativeTitle'] ?? false,
     );
   }
 
@@ -89,6 +92,7 @@ class SettingsModal {
       'useQueuedDownloads': useQueuedDownloads,
       'useFramelessWindow': useFramelessWindow,
       'doubleTapToSkip': doubleTapToSkip,
+      'nativeTitle': nativeTitle,
     };
   }
 }

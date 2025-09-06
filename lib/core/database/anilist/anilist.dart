@@ -19,6 +19,7 @@ class Anilist extends Database {
                         title {
                             english
                             romaji
+                            native
                         }
                         episodes
                         averageScore
@@ -45,6 +46,7 @@ class Anilist extends Database {
           title: {
             'english': item['title']['english'],
             'romaji': item['title']['romaji'],
+            'native': item['title']['native'],
           },
           totalEpisodes: item['episodes'],
           rating: item['averageScore'] is int ? item['averageScore'] / 10 : null);
@@ -155,8 +157,7 @@ class Anilist extends Database {
           mediaListStatus: info['mediaListEntry']?['status'],
           alternateDatabases: [
             AlternateDatabaseId(database: Databases.anilist, id: id),
-            if(info['idMal'] != null) 
-            AlternateDatabaseId(database: Databases.anilist, id: info['idMal']),
+            if (info['idMal'] != null) AlternateDatabaseId(database: Databases.anilist, id: info['idMal']),
           ]);
 
       return convertedGuy;
@@ -174,6 +175,7 @@ class Anilist extends Database {
                 title {
                   romaji
                   english
+                  native
                 }
                 episodes
                 averageScore
@@ -187,7 +189,8 @@ class Anilist extends Database {
             }
           }''';
 
-    final List<dynamic> data = await fetchQuery(query, RequestType.media, token: await getSecureVal(SecureStorageKey.anilistToken));
+    final List<dynamic> data =
+        await fetchQuery(query, RequestType.media, token: await getSecureVal(SecureStorageKey.anilistToken));
 
     final List<CurrentlyAiringResult> airingAnimes = [];
 
@@ -198,7 +201,11 @@ class Anilist extends Database {
           id: airingAnime['id'],
           status: airingAnime['status'],
           rating: (airingAnime['averageScore'] ?? 0) / 10,
-          title: {'english': airingAnime['title']['english'], 'romaji': airingAnime['title']['romaji']},
+          title: {
+            'english': airingAnime['title']['english'],
+            'romaji': airingAnime['title']['romaji'],
+            'native': airingAnime['title']['native'],
+          },
           episodes: airingAnime['episodes'],
           watchProgress: airingAnime['mediaListEntry']?['progress'],
         ),
@@ -219,6 +226,7 @@ class Anilist extends Database {
         title {
           english
           romaji
+          native
         }
         status
         id
@@ -248,7 +256,8 @@ class Anilist extends Database {
           episode: recentlyUpdatedAnime['episode'],
           title: {
             'english': recentlyUpdatedAnime['media']['title']['english'],
-            'romaji': recentlyUpdatedAnime['media']['title']['romaji']
+            'romaji': recentlyUpdatedAnime['media']['title']['romaji'],
+            'native': recentlyUpdatedAnime['media']['title']['native'],
           },
           id: recentlyUpdatedAnime['media']['id'],
           releaseStatus: recentlyUpdatedAnime['media']['status'],
@@ -276,6 +285,7 @@ class Anilist extends Database {
                         title {
                             english
                             romaji
+                            native
                         }
                         genres
                         averageScore
@@ -298,7 +308,11 @@ class Anilist extends Database {
         cover: trending['coverImage']['large'],
         genres: trending['genres'],
         rating: trending['averageScore'],
-        title: {'english': trending['title']['english'], 'romaji': trending['title']['romaji']},
+        title: {
+          'english': trending['title']['english'],
+          'romaji': trending['title']['romaji'],
+          'native': trending['title']['native'],
+        },
       );
       typed.add(data);
     }

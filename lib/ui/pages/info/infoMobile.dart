@@ -30,13 +30,18 @@ class _InfoMobileState extends State<InfoMobile> {
   bool infoPage = true;
 
   FocusNode _watchInfoButtonFocusNode = FocusNode();
-  final useNativeTitle = currentUserSettings?.nativeTitle ?? false; 
+  final useNativeTitle = currentUserSettings?.nativeTitle ?? false;
+
+  // just a small helper function!
+  String getTitle() {
+    final normalTitle = provider.data.title['english'] ?? provider.data.title['romaji'] ?? '';
+    final customizedTitle = useNativeTitle ? provider.data.title['native'] ?? normalTitle : normalTitle;
+    return customizedTitle;
+  }
 
   @override
   Widget build(BuildContext context) {
     provider = context.watch<InfoProvider>();
-    final normalTitle = provider.data.title['english'] ?? provider.data.title['romaji'] ?? '';
-    final customizedTitle = useNativeTitle ? provider.data.title['native'] ?? normalTitle : normalTitle;
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: provider.infoLoadError
@@ -162,7 +167,7 @@ class _InfoMobileState extends State<InfoMobile> {
                           alignment: Alignment.center,
                           // padding: EdgeInsets.only(left: 40, right: 25),
                           child: Text(
-                            customizedTitle,
+                            getTitle(),
                             style: TextStyle(
                               color: appTheme.textMainColor,
                               fontFamily: "NunitoSans",
@@ -444,9 +449,12 @@ class _InfoMobileState extends State<InfoMobile> {
   Container _pages() {
     return provider.visibleEpList[provider.currentPageIndex].isEmpty
         ? Container(
-          margin: EdgeInsets.only(top: 40, bottom: 40),
+            margin: EdgeInsets.only(top: 40, bottom: 40),
             child: Center(
-              child: Text("Oops. no items here!", style: TextStyle(fontFamily: "Rubik"),),
+              child: Text(
+                "Oops. no items here!",
+                style: TextStyle(fontFamily: "Rubik"),
+              ),
             ),
           )
         : Container(
@@ -688,7 +696,8 @@ class _InfoMobileState extends State<InfoMobile> {
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
                                   onPressed: () async {
                                     Navigator.of(ctx).pop();
-                                    if(!provider.selectedSource.supportDownloads && ServerSheetType.values[ind] == ServerSheetType.download) {
+                                    if (!provider.selectedSource.supportDownloads &&
+                                        ServerSheetType.values[ind] == ServerSheetType.download) {
                                       floatingSnackBar("This source doesn't support downloading yet!");
                                       return;
                                     }

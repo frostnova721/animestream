@@ -8,6 +8,7 @@ import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleText.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 
 class SubViewer extends StatefulWidget {
   final VideoController controller;
@@ -54,11 +55,11 @@ class _SubViewerState extends State<SubViewer> {
       print("loading ${widget.format.name} subs");
       switch (widget.format) {
         case SubtitleFormat.ASS:
-          subs = await Subtitleparsers().parseAss(widget.subtitleSource, headers: widget.headers!);
+          subs = await Subtitleparsers().parseAss(widget.subtitleSource, headers: widget.headers ?? {});
         case SubtitleFormat.VTT:
-          subs = await Subtitleparsers().parseVtt(widget.subtitleSource, headers: widget.headers!);
+          subs = await Subtitleparsers().parseVtt(widget.subtitleSource, headers: widget.headers ?? {});
         case SubtitleFormat.SRT:
-          subs = await Subtitleparsers().parseSrt(widget.subtitleSource, headers: widget.headers!);
+          subs = await Subtitleparsers().parseSrt(widget.subtitleSource, headers: widget.headers ?? {});
         // default:
         // throw Exception("Not implemented!");
       }
@@ -69,7 +70,9 @@ class _SubViewerState extends State<SubViewer> {
       });
     } catch (err) {
       print(err.toString());
-      floatingSnackBar("Couldnt load the subtitles!");
+      SchedulerBinding.instance.addPostFrameCallback((dur) {
+        floatingSnackBar("Couldnt load the subtitles!");
+      });
       setState(() {
         areSubsLoading = false;
       });

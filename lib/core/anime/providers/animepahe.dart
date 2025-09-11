@@ -12,13 +12,13 @@ class AnimePahe extends AnimeProvider {
 
   final _headers = {
     'Cookie': "__ddg1=;__ddg2_=",
-    'referer': "https://animepahe.ru/",
+    'referer': "https://animepahe.si/",
   };
 
   @override
   Future<List<Map<String, String?>>> search(String query) async {
     query = query.replaceAll("-", "");
-    final String url = "https://animepahe.ru/api?m=search&q=$query";
+    final String url = "https://animepahe.si/api?m=search&q=$query";
     final res = await http.get(Uri.parse(url), headers: _headers);
     final Map<String, dynamic> decoded = json.decode(res.body);
     final List<dynamic> results = decoded['data'];
@@ -36,7 +36,7 @@ class AnimePahe extends AnimeProvider {
   @override
   Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String session, {bool dub = false}) async {
     List list = [];
-    final String url = "https://animepahe.ru/api?m=release&id=$session&sort=episode_asc`";
+    final String url = "https://animepahe.si/api?m=release&id=$session&sort=episode_asc`";
     final data = await http.get(Uri.parse(url), headers: _headers);
     final bodyDecoded = json.decode(data.body);
 
@@ -54,7 +54,7 @@ class AnimePahe extends AnimeProvider {
     final List<Map<String, dynamic>> episodeLinks = [];
 
     for (int i = 0; i < list.length; i++) {
-      final episodeLink = "https://animepahe.ru/play/$session/${list[i]['session']}";
+      final episodeLink = "https://animepahe.si/play/$session/${list[i]['session']}";
       final String? thumbnail = list[i]['snapshot'];
       final filler = list[i]['filler'] != 0;
       final String? title = ((list[i]['title'] as String?)?.isEmpty ?? true) ? null : list[i]['title'];

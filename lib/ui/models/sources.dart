@@ -1,5 +1,6 @@
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/animepahe.dart';
+import 'package:animestream/core/anime/providers/anizone.dart';
 import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/providerDetails.dart';
@@ -18,6 +19,7 @@ class SourceManager {
     "Animepahe",
     "AnimeOnsen",
     // "Aniplay", rip aniplay
+    "AniZone",
     "Gojo",
   ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0", supportDownloads: e != "AnimeOnsen")).toList();
 
@@ -95,21 +97,34 @@ class SourceManager {
 //   "animeonsen",
 // ];
 
+final Map<String, AnimeProvider> sources = {
+    "animepahe": AnimePahe(),
+    "animeonsen": AnimeOnsen(),
+    "gojo": Gojo(),
+    "anizone": AniZone(),
+  };
+
 AnimeProvider getClass(String source) {
-  switch (source) {
-    // case "gogoanime":
-    // return GogoAnime();  :(
-    case "animepahe":
-      return AnimePahe();
-    case "animeonsen":
-      return AnimeOnsen();
-    // case "aniplay":
-    //   return AniPlay();
-    case "gojo":
-      return Gojo();
-    default:
-      throw new Exception("Invalid source");
+  final match = sources[source];
+  if(match == null) {
+    throw Exception("Invalid Source!");
   }
+
+  return match;
+  // switch (source) {
+  //   // case "gogoanime":
+  //   // return GogoAnime();  :(
+  //   case "animepahe":
+  //     return AnimePahe();
+  //   case "animeonsen":
+  //     return AnimeOnsen();
+  //   // case "aniplay":
+  //   //   return AniPlay();
+  //   case "gojo":
+  //     return Gojo();
+  //   default:
+  //     throw new Exception("Invalid source");
+  // }
 }
 
 List<DropdownMenuEntry> getSourceDropdownList() {

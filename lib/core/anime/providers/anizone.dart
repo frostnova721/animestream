@@ -118,7 +118,7 @@ class AniZone extends AnimeProvider {
 
     update([
       VideoStream(
-          quality: "multi-quality",
+          quality: "single", // TODO: MAKE IT MULTI QUALITY, DIDNT DO IT CUS OF AUDIO TRACK ISSUE
           link: src,
           server: srcName,
           subtitle: subs.first['url'],

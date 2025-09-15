@@ -117,7 +117,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   Future<void> getQualities(VideoStream source) async {
     List<Map<String, String>> mainList = [];
 
-    final list = await getQualityStreams(source.link);
+    final list = await getQualityStreams(source.link, customHeader: source.customHeaders);
     list.forEach((element) {
       element['server'] = "${source.server} ${source.backup ? "- backup" : ""}";
       element['subtitle'] = source.subtitle ?? "";

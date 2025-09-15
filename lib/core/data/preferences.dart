@@ -21,8 +21,8 @@ class UserPreferences {
       prefMap = UserPreferencesModal.defaults().toMap();
     }
     final mapped = userPref.toMap();
-    prefMap.forEach((k,v) {
-      if (v == null) {
+    mapped.forEach((k,v) {
+      if (v != null) {
         prefMap![k] = mapped[k];
       }
     });

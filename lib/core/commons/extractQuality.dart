@@ -6,7 +6,8 @@ String _makeBaseLink(String uri) {
   return split.join('/');
 }
 
-Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<String, String>? customHeader = null}) async {
+Future<List<Map<String, String>>> getQualityStreams(String streamUrl,
+    {Map<String, String>? customHeader = null}) async {
   try {
   final content = (await get(Uri.parse(streamUrl), headers: customHeader)).body;
 
@@ -19,16 +20,15 @@ Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<Stri
   final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
   for (final line in lines) {
     if (line.startsWith("#")) {
-      if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA"))
-        continue;
+      // we dont need these info yet
+      // if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA") || line.startsWith("#EXT-X-VERSION"))
+      if (!line.startsWith("#EXT-X-STREAM-INF")) continue;
       final match = regex.allMatches(line).first;
       resolutions.add(match.group(0)?.replaceAll("RESOLUTION=", '') ?? 'null');
     } else {
       final linkPart = line.trim();
       if (linkPart.length > 1)
-        links.add(linkPart.startsWith('http')
-            ? linkPart
-            : "${_makeBaseLink(streamUrl)}/$linkPart");
+        links.add(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
     }
   }
 
@@ -44,12 +44,10 @@ Future<List<Map<String, String>>> getQualityStreams(String streamUrl, { Map<Stri
   }
 
   return grouped;
-  } catch(err) {
-    return [{
-      'link' : streamUrl,
-      'resolution': "",
-      'quality': 'default'
-    }];
-
+  } catch (err) {
+    print(err);
+    return [
+      {'link': streamUrl, 'resolution': "", 'quality': 'default'}
+    ];
   }
 }

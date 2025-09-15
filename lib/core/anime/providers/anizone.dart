@@ -80,7 +80,6 @@ class AniZone extends AnimeProvider {
   @override
   Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) {
-    // TODO: implement getDownloadSources
     throw UnimplementedError();
   }
 
@@ -118,7 +117,7 @@ class AniZone extends AnimeProvider {
 
     update([
       VideoStream(
-          quality: "single", // TODO: MAKE IT MULTI QUALITY, DIDNT DO IT CUS OF AUDIO TRACK ISSUE
+          quality: "multi-quality",
           link: src,
           server: srcName,
           subtitle: subs.first['url'],
@@ -128,6 +127,5 @@ class AniZone extends AnimeProvider {
   }
 
   @override
-  // TODO: implement providerName
-  String get providerName => throw UnimplementedError();
+  String get providerName => "anizone";
 }

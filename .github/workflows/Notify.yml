@@ -1,0 +1,183 @@
+name: Notify Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cloning repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Fetch Repository Tags by Date and Time
+        id: fetch_tags
+        run: |
+          curl -s "https://api.github.com/repos/${{github.repository}}/tags" -o tags.json
+          TAGS=$(jq -r '.[].name' tags.json)
+          declare -a TAGS_WITH_DATES=()
+          for TAG in $TAGS; do
+            TAG_DETAILS=$(curl -s "https://api.github.com/repos/${{github.repository}}/git/refs/tags/$TAG")
+            OBJECT_URL=$(echo "$TAG_DETAILS" | jq -r '.object.url // empty')
+            if [ -n "$OBJECT_URL" ]; then
+              OBJECT_DETAILS=$(curl -s "$OBJECT_URL")
+              DATE=$(echo "$OBJECT_DETAILS" | jq -r '.tagger.date // .committer.date // empty')
+              if [ -n "$DATE" ]; then
+                TAGS_WITH_DATES+=("$DATE $TAG")
+              fi
+            fi
+          done
+          LATEST_TAG=""
+          LATEST_DATE=""
+          for TAG_DATE in "${TAGS_WITH_DATES[@]}"; do
+            TAG_DATE_TIME=$(echo "$TAG_DATE" | awk '{print $1}')
+            TAG_NAME=$(echo "$TAG_DATE" | awk '{print $2}')
+            if [[ -z "$LATEST_DATE" || "$TAG_DATE_TIME" > "$LATEST_DATE" ]]; then
+              LATEST_DATE="$TAG_DATE_TIME"
+              LATEST_TAG="$TAG_NAME"
+            fi
+          done
+          echo "$LATEST_TAG"
+          echo "LATEST_TAG=$LATEST_TAG" >> $GITHUB_ENV
+          
+      - name: Get Latest Release Notes
+        id: get_release_notes
+        run: |
+          RELEASE_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}")
+
+          RELEASE_NOTES=$(echo "$RELEASE_DATA" | jq -r '.body')
+          echo "Release Notes: $RELEASE_NOTES"
+
+          # Write to file to handle multiline content safely
+          echo "$RELEASE_NOTES" > release_notes.txt
+
+      - name: Format Release Notes
+        id: format_notes
+        run: |
+          # Just clean the || markers and set as environment variable
+          sed 's/||//g' release_notes.txt > clean_release_notes.txt
+          
+          # Set the entire content as environment variable
+          echo "FORMATTED_NOTES<<EOF" >> $GITHUB_ENV
+          cat clean_release_notes.txt >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+          
+          echo "Preview of release notes:"
+          cat clean_release_notes.txt
+
+      - name: Get and Categorize Assets with Sizes
+        id: categorize_assets
+        run: |
+          # Fetch release assets based on the latest tag
+          curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+           -H "Accept: application/vnd.github.v3+json" \
+           "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}" -o release.json
+          
+          # Initialize environment variables
+          echo "apk_universal_message=" >> $GITHUB_ENV
+          echo "setup_message=" >> $GITHUB_ENV
+          
+          # Process each asset
+          jq -r '.assets[] | "\(.browser_download_url) \(.size)"' release.json | while read -r LINE; do
+            ASSET_URL=$(echo "$LINE" | awk '{print $1}')
+            ASSET_SIZE=$(echo "$LINE" | awk '{print $2}')
+            SIZE_HR=$(awk -v size="$ASSET_SIZE" 'BEGIN{
+              split("B KB MB GB TB", unit);
+              for (i=1; size>=1024 && i<5; i++) size/=1024;
+              printf "%.2f %s", size, unit[i]
+            }')
+            FILE_NAME=$(basename "$ASSET_URL")
+            
+            # Categorize and set variables
+            if [[ "$FILE_NAME" == *".apk" ]]; then
+              echo "apk_universal_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
+            elif [[ "$FILE_NAME" == *".exe" ]] || [[ "$FILE_NAME" == *".msi" ]]; then
+              echo "setup_message=[Download]($ASSET_URL) | $SIZE_HR" >> $GITHUB_ENV
+            fi
+          done
+
+      - name: Send message to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # Clean the formatted notes for Discord
+          FORMATTED_NOTES_CLEAN=$(echo "$FORMATTED_NOTES" | sed -E 's/\): [^:]+:/) :/g')
+          
+          # Mention the role based on the release name
+          if [[ "${{ env.LATEST_TAG }}" == *alpha* ]]; then
+            role_mention=""  # Role ID for alpha channel
+          elif [[ "${{ env.LATEST_TAG }}" == *beta* ]]; then
+            role_mention="<>"  # Role ID for beta channel
+          else
+            role_mention="<>"  # Default role ID
+          fi
+        
+          default_color="#1ac4c5"
+          hex_to_decimal() { printf '%d' "0x${1#"#"}"; }
+          embed_color=$(hex_to_decimal "$default_color")
+
+          # Ensure VERSION is not empty
+          VERSION=${VERSION:-"${{env.LATEST_TAG}}"}
+      
+          discord_data=$(jq -nc \
+                        --arg role_mention "$role_mention" \
+                        --arg field_value "$FORMATTED_NOTES_CLEAN" \
+                        --arg footer_text "Version $VERSION" \
+                        --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
+                        --argjson embed_color "$embed_color" \
+                        --arg title "🚀 New Release: ${{env.LATEST_TAG}}" \
+                        '{
+                          "content": $role_mention,
+                          "embeds": [
+                            {
+                              "title": $title,
+                              "color": $embed_color,
+                              "description": $field_value,
+                              "footer": {
+                                "text": $footer_text
+                              },
+                              "timestamp": $timestamp
+                            }
+                          ]
+                        }')
+
+          echo "Debug: Final Discord payload is: $discord_data"
+
+          # Send the message to Discord using the webhook
+          curl -H "Content-Type: application/json" \
+              -X POST \
+              -d "$discord_data" \
+              "$DISCORD_WEBHOOK_URL"
+
+      - name: Send Assets to Discord
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK }}
+        run: |
+          # Build the message with available assets
+          MESSAGE="${{ env.LATEST_TAG }} Released"$'\n'
+          
+          # Add APK download if available
+          if [ -n "${{ env.apk_universal_message }}" ]; then
+            MESSAGE="${MESSAGE}🔹 ${{ env.apk_universal_message }} | **APK (universal)**"$'\n'
+          fi
+          
+          # Add Windows setup if available
+          if [ -n "${{ env.setup_message }}" ]; then
+            MESSAGE="${MESSAGE}🔹 ${{ env.setup_message }} | **Windows Setup**"$'\n'
+          fi
+          
+          # Only send if we have at least one asset
+          if [ -n "${{ env.apk_universal_message }}" ] || [ -n "${{ env.setup_message }}" ]; then
+            PAYLOAD=$(jq -n --arg content "$MESSAGE" '{ content: $content }')
+            curl -X POST "$DISCORD_WEBHOOK_URL" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD"
+          else
+            echo "No assets found to send"
+          fi

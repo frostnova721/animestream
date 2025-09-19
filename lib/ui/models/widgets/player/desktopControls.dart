@@ -414,23 +414,23 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                   behavior: HitTestBehavior.translucent,
                                   onTap: () async {
                                     dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                    provider.playVideo(dataProvider.state.qualities[index]['link']!,
+                                    provider.playVideo(dataProvider.state.qualities[index].url,
                                         currentStream: dataProvider.state.currentStream, preserveProgress: true);
                                     setState(() {});
                                   },
                                   child: Container(
-                                    color: dataProvider.state.qualities[index]['link'] ==
-                                            dataProvider.state.currentQuality['link']
+                                    color: dataProvider.state.qualities[index].url ==
+                                            dataProvider.state.currentQuality.url
                                         ? appTheme.accentColor
                                         : null,
                                     height: 40,
                                     alignment: Alignment.center,
                                     child: Text(
-                                      "${dataProvider.state.qualities[index]['quality']}",
+                                      "${dataProvider.state.qualities[index].quality}",
                                       style: TextStyle(
                                         fontSize: 18,
-                                        color: dataProvider.state.qualities[index]['link'] ==
-                                                dataProvider.state.currentQuality['link']
+                                        color: dataProvider.state.qualities[index].url ==
+                                                dataProvider.state.currentQuality.url
                                             ? appTheme.onAccent
                                             : appTheme.textMainColor,
                                         fontFamily: "Poppins",
@@ -454,7 +454,7 @@ class _DesktopcontrolsState extends State<Desktopcontrols> {
                                     dataProvider.updateCurrentStream(dataProvider.state.streams[index]);
                                     await dataProvider.extractCurrentStreamQualities();
                                     final q = dataProvider.getPreferredQualityStreamFromQualities();
-                                    await provider.playVideo(q['link']!,
+                                    await provider.playVideo(q.url,
                                         preserveProgress: true, currentStream: dataProvider.state.streams[index]);
                                     setState(() {});
                                   },

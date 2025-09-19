@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:flutter/material.dart';
 
@@ -58,6 +59,11 @@ class PlayerProvider extends ChangeNotifier {
     if (seekTime != null) await _controller.seekTo(Duration(milliseconds: seekTime));
   }
 
+  Future<void> setAudioTrack(AudioStream audio) async {
+    await controller.setAudioTrack(audio.url, audio.language, audio.name);
+  }
+
+  /// Fast forward / Seek n seconds
   Future<void> fastForward(int seekDuration) async {
     final currentPosition = (_controller.position ?? 0) ~/ 1000;
     final duration = (_controller.duration ?? 0) ~/ 1000;
@@ -71,6 +77,7 @@ class PlayerProvider extends ChangeNotifier {
     }
   }
 
+  /// It just manages the state of wakelock according to video play status
   void handleWakelock() async {
     if ((_controller.isPlaying ?? false) && !_state.wakelockEnabled) {
       await WakelockPlus.enable();
@@ -83,6 +90,7 @@ class PlayerProvider extends ChangeNotifier {
     }
   }
 
+  /// tweak the video volume
   void updateVolume(double vol) {
     _state = _state.copyWith(volume: vol);
     _controller.setVolume(vol);
@@ -164,7 +172,7 @@ class PlayerProvider extends ChangeNotifier {
 
       dataProvider.updateCurrentQuality(q);
 
-      controller.initiateVideo(q['link']!, headers: src.customHeaders);
+      controller.initiateVideo(q.url, headers: src.customHeaders);
     } else {
       // showModalBottomSheet(
       //   context: context,

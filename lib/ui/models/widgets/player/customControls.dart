@@ -553,6 +553,8 @@ class BottomControls extends StatelessWidget {
   Widget build(BuildContext context) {
     final dataProvider = context.read<PlayerDataProvider>();
     final playerProvider = context.read<PlayerProvider>();
+    // final a = dataProvider.state.currentAudioTrack;
+    // playerProvider.controller.setAudioTrack(a.url, a.language, a.name);
 
     return dataProvider.state.controlsLocked
         ? Container()
@@ -596,7 +598,7 @@ class BottomControls extends StatelessWidget {
                                         padding: EdgeInsets.only(left: 25, right: 25),
                                         child: ElevatedButton(
                                           onPressed: () async {
-                                            final src = dataProvider.state.qualities[index]['link']!;
+                                            final src = dataProvider.state.qualities[index].url;
                                             // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
                                             dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
                                             playerProvider.playVideo(src,
@@ -609,16 +611,16 @@ class BottomControls extends StatelessWidget {
                                               borderRadius: BorderRadius.circular(10),
                                               // side: BorderSide(color: Colors.white)
                                             ),
-                                            backgroundColor: dataProvider.state.qualities[index]['link'] ==
-                                                    dataProvider.state.currentQuality['link']
+                                            backgroundColor: dataProvider.state.qualities[index].url ==
+                                                    dataProvider.state.currentQuality.url
                                                 ? appTheme.accentColor
                                                 : appTheme.backgroundSubColor,
                                           ),
                                           child: Text(
-                                            "${dataProvider.state.qualities[index]['quality']}",
+                                            "${dataProvider.state.qualities[index].quality}",
                                             style: TextStyle(
-                                              color: dataProvider.state.qualities[index]['link'] ==
-                                                      dataProvider.state.currentQuality['link']
+                                              color: dataProvider.state.qualities[index].url ==
+                                                      dataProvider.state.currentQuality.url
                                                   ? Colors.black
                                                   : appTheme.accentColor,
                                               fontFamily: "Poppins",

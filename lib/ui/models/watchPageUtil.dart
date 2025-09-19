@@ -30,6 +30,9 @@ abstract class VideoController {
   // initiate a source
   Future<void> initiateVideo(String url, {Map<String, String>? headers = null, bool offline = false});
 
+  // set audio track
+  Future<void> setAudioTrack(String url, String language, String label);
+
   /// Retuns the Widget of the player
   Widget getWidget();
 
@@ -93,14 +96,32 @@ class BetterPlayerWrapper implements VideoController {
     fit: BoxFit.contain,
     expandToFill: true,
     autoPlay: true,
+    errorBuilder: (context, errorMessage) {
+      // TODO: Improve this
+      return Text("Whoops! Ran into some errors playing this video!\nDetails:\n$errorMessage");
+    },
+    eventListener: (ev) {
+      if(ev.betterPlayerEventType == BetterPlayerEventType.exception) {
+        print(ev.parameters);
+      }
+    },
     autoDispose: true,
-    controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false),
+    controlsConfiguration: BetterPlayerControlsConfiguration(showControls: true,enableAudioTracks: true),
   );
 
   @override
   Future<void> initiateVideo(String url, {Map<String, String>? headers, bool offline = false}) async {
     final ds = offline ? BetterPlayerDataSource.file(url) : await dataSourceConfig(url, headers: headers);
     return await controller.setupDataSource(ds);
+  }
+
+  @override
+  Future<void> setAudioTrack(String url, String language, String label) async {
+    print("audurl: $url");
+    controller.setAudioTrack(BetterPlayerAsmsAudioTrack(
+      language: language, label: label, url: url,
+    ));
+    print("audioTracks: ${controller.betterPlayerAsmsAudioTrack?.language}");
   }
 
   @override
@@ -179,8 +200,7 @@ class BetterPlayerWrapper implements VideoController {
   }
 
   @override
-  Future<void> setPip(bool value) async {
-  }
+  Future<void> setPip(bool value) async {}
 }
 
 class VideoPlayerWindowsWrapper implements VideoController {
@@ -196,7 +216,9 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
     // wait some time for proper disposal.
     await Future.delayed(Duration(milliseconds: 100));
-    controller = offline ? WinVideoPlayerController.file(File(url)) : WinVideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers ?? {});
+    controller = offline
+        ? WinVideoPlayerController.file(File(url))
+        : WinVideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers ?? {});
     await controller.initialize();
     for (final listener in _listeners) {
       controller.addListener(listener);
@@ -283,6 +305,12 @@ class VideoPlayerWindowsWrapper implements VideoController {
   @override
   Future<void> setPip(bool value) {
     throw Exception("PiP isnt supported on Windows.");
+  }
+  
+  @override
+  Future<void> setAudioTrack(String url, String language, String label) {
+    // TODO: implement setAudioTrack
+    throw UnimplementedError();
   }
 }
 

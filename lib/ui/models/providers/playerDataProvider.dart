@@ -38,7 +38,9 @@ class PlayerDataProvider extends ChangeNotifier {
           currentStream: initialStream,
           controlsLocked: false,
           qualities: [],
-          currentQuality: {},
+          currentQuality: QualityStream.paceholder(),
+          audioTracks: [],
+          currentAudioTrack: AudioStream.placeholder(),
           currentEpIndex: startIndex,
           preloadStarted: false,
           preloadedSources: [],
@@ -59,7 +61,7 @@ class PlayerDataProvider extends ChangeNotifier {
         notifyListeners();
       });
 
-  /// Get and store the qualities available for the current stream
+  /// Get and store the qualities and audio available for the current stream
   Future<void> extractCurrentStreamQualities() async {
     final url = _state.currentStream.link;
     final headers = _state.currentStream.customHeaders;
@@ -70,12 +72,12 @@ class PlayerDataProvider extends ChangeNotifier {
       print(mime);
     }
     if (url.contains(".m3u8") || (mime != null && mime.contains("mpegurl"))) {
-      final qualities = await getQualityStreams(url, customHeader: headers);
-      _state = _state.copyWith(qualities: qualities);
+      final master = await parseMasterPlaylist(url, customHeader: headers);
+      _state = _state.copyWith(qualities: master.qualityStreams, audioTracks: master.audioStreams);
     } else {
       _state = _state.copyWith(
         qualities: [
-          {'link': url, 'resolution': 'default', 'quality': _state.currentStream.quality}
+          QualityStream(url: url, resolution: 'default', quality: _state.currentStream.quality)
         ],
       );
     }
@@ -83,16 +85,22 @@ class PlayerDataProvider extends ChangeNotifier {
     print("Available Qualities: ${state.qualities}");
   }
 
-  Map<String, String> getPreferredQualityStreamFromQualities() {
+  QualityStream getPreferredQualityStreamFromQualities() {
     return _state.qualities
-            .where((it) => it['quality'] == (currentUserSettings?.preferredQuality ?? '720p'))
+            .where((it) => it.quality == (currentUserSettings?.preferredQuality ?? '720p'))
             .firstOrNull ??
         _state.qualities[0];
   }
 
   /// Update the state of current quality
-  void updateCurrentQuality(Map<String, String> quality) {
+  void updateCurrentQuality(QualityStream quality) {
     _state = _state.copyWith(currentQuality: quality);
+    notifyListeners();
+  }
+
+  /// Update the current audio track!
+  void updateCurrentAudioTrack(AudioStream track) {
+    _state = _state.copyWith(currentAudioTrack: track);
     notifyListeners();
   }
 
@@ -206,8 +214,13 @@ class PlayerDataProviderState {
   final List<VideoStream> streams;
   final VideoStream currentStream;
   final bool controlsLocked;
-  final List<Map<String, String>> qualities;
-  final Map<String, String> currentQuality;
+  
+  final List<QualityStream> qualities;
+  final QualityStream currentQuality;
+
+  final List<AudioStream> audioTracks;
+  final AudioStream currentAudioTrack;
+
   final int currentEpIndex;
   final bool preloadStarted;
   final List<VideoStream> preloadedSources;
@@ -230,6 +243,8 @@ class PlayerDataProviderState {
     required this.maxTimeStamp,
     required this.preferredServer,
     required this.sliderValue,
+    required this.audioTracks,
+    required this.currentAudioTrack,
     this.subsInited = false,
   });
 
@@ -239,8 +254,8 @@ class PlayerDataProviderState {
     bool? controlsLocked,
     bool? controlsVisible,
     bool? wakelockEnabled,
-    List<Map<String, String>>? qualities,
-    Map<String, String>? currentQuality,
+    List<QualityStream>? qualities,
+    QualityStream? currentQuality,
     int? currentEpIndex,
     bool? preloadStarted,
     List<VideoStream>? preloadedSources,
@@ -249,6 +264,8 @@ class PlayerDataProviderState {
     String? preferredServer,
     int? sliderValue,
     bool? subsInited,
+    List<AudioStream>? audioTracks,
+  AudioStream? currentAudioTrack,
   }) {
     return PlayerDataProviderState(
       streams: streams ?? this.streams,
@@ -264,6 +281,8 @@ class PlayerDataProviderState {
       preferredServer: preferredServer ?? this.preferredServer,
       sliderValue: sliderValue ?? this.sliderValue,
       subsInited: subsInited ?? this.subsInited,
+      audioTracks: audioTracks ?? this.audioTracks,
+      currentAudioTrack: currentAudioTrack ?? this.currentAudioTrack,
     );
   }
 }

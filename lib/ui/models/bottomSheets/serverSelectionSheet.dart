@@ -117,12 +117,14 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   Future<void> getQualities(VideoStream source) async {
     List<Map<String, String>> mainList = [];
 
-    final list = await getQualityStreams(source.link, customHeader: source.customHeaders);
-    list.forEach((element) {
-      element['server'] = "${source.server} ${source.backup ? "- backup" : ""}";
-      element['subtitle'] = source.subtitle ?? "";
-      element['headers'] = jsonEncode(source.customHeaders ?? {});
-      mainList.add(element);
+    final list = await parseMasterPlaylist(source.link, customHeader: source.customHeaders);
+    list.qualityStreams.forEach((element) {
+      final map = element.toMap();
+      map['bandwidth'] = map['bandwidth']?.toString();
+      map['server'] = "${source.server} ${source.backup ? "- backup" : ""}";
+      map['subtitle'] = source.subtitle ?? "";
+      map['headers'] = jsonEncode(source.customHeaders ?? {});
+      mainList.add(map.cast());
     });
     // if (mounted)
     setState(() {
@@ -281,7 +283,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   final episodeNum = "${widget.episodeIndex + 1}";
 
                   final fileName = "${title} EP ${episodeNum.padLeft(2, '0')}";
-                  final streamLink = qualities[ind]['link']!;
+                  final streamLink = qualities[ind]['url']!;
                   // print(streamLink);
 
                   DownloadManager().addDownloadTask(

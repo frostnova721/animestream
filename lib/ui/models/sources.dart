@@ -19,7 +19,7 @@ class SourceManager {
     "Animepahe",
     "AnimeOnsen",
     // "Aniplay", rip aniplay
-    // "AniZone",
+    "AniZone",
     "Gojo",
   ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0", supportDownloads: e != "AnimeOnsen")).toList();
 

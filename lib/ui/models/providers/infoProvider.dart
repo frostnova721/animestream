@@ -336,7 +336,7 @@ class InfoProvider extends ChangeNotifier {
     }
   }
 
-  void refreshListStatus(String status, int progress) {
+  void refreshListStatus(String? status, int progress) {
     _mediaListStatus = assignItemEnum(status);
     _watched = progress;
     notifyListeners();

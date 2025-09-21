@@ -50,6 +50,43 @@ class SyncHandler extends DatabaseMutation {
     return null;
   }
 
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id, List<AlternateDatabaseId>? otherIds}) async {
+    final List<Databases> databases = Databases.values;
+    final activedb = getActiveDatabase();
+    final activeDbInstance = getDatabaseMutationInstance(activedb);
+
+    //sync with the active database first
+    activeDbInstance
+        .deleteAnimeEntry(id: id)
+        .then((val) => print("[SYNC HANDLER]: Deleted from ${activedb.name}"))
+        .catchError((e, st) {
+      print(e);
+      print(st.toString());
+      return null;
+    });
+
+    //sync with other databases
+    otherIds?.forEach((it) {
+      if (it.database != activedb) {
+        final altdb = databases.where((db) => db == it.database).firstOrNull;
+        if (altdb != null) {
+          final mutInstance = getDatabaseMutationInstance(altdb);
+          mutInstance
+              .deleteAnimeEntry(id: it.id)
+              .then((val) => print("[SYNC HANDLER]: Deleted from ${it.database.name}"))
+              .catchError((e, st) {
+            print(e);
+            print(st.toString());
+            return null;
+          });
+        }
+      }
+    });
+
+    return null;
+  }
+
   DatabaseMutation getDatabaseMutationInstance(Databases db) {
     switch (db) {
       case Databases.anilist:
@@ -67,5 +104,4 @@ class SyncHandler extends DatabaseMutation {
   Databases getActiveDatabase() {
     return currentUserSettings?.database ?? Databases.anilist;
   }
-
 }

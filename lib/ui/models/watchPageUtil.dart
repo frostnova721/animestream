@@ -106,7 +106,7 @@ class BetterPlayerWrapper implements VideoController {
       }
     },
     autoDispose: true,
-    controlsConfiguration: BetterPlayerControlsConfiguration(showControls: true,enableAudioTracks: true),
+    controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false),
   );
 
   @override

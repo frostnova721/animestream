@@ -172,6 +172,7 @@ class AnilistQueries {
         }
       }
       mediaListEntry {
+        id
         status
       }
     }

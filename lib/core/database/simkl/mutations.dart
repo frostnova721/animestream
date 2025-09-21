@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:animestream/core/database/simkl/login.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:http/http.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -34,6 +35,25 @@ class SimklMutation extends DatabaseMutation {
       addToList(id, status ?? MediaStatus.CURRENT);
 
     return SimklMutationResult();
+  }
+
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) async {
+     final url = "https://api.simkl.com/sync/history/remove";
+    final body = jsonEncode({
+      'shows': [
+        {
+          'ids': {
+            'simkl': id,
+          },
+        },
+      ],
+    });
+
+    final header = await getHeader();
+    // final res =
+    await post(Uri.parse(url), headers: header, body: body);
+    return null;
   }
 
   Future addToList(int id, MediaStatus status) async {

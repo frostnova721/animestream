@@ -39,4 +39,6 @@ abstract class Database {
 abstract class DatabaseMutation {
   Future<DatabaseMutationResult?> mutateAnimeList(
       {required int id, MediaStatus? status = MediaStatus.CURRENT, int? progress = 0, MediaStatus? previousStatus});
+
+  Future<DatabaseMutationResult?> deleteAnimeEntry({ required int id });
 }

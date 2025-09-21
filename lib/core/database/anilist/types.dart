@@ -127,6 +127,7 @@ class AnilistInfo extends DatabaseInfo {
   final List<String> tags;
   final String? mediaListStatus;
   final List<AlternateDatabaseId> alternateDatabases;
+  final int? listId;
 
   AnilistInfo({
     required this.aired,
@@ -149,6 +150,7 @@ class AnilistInfo extends DatabaseInfo {
     required this.title,
     required this.type,
     required this.alternateDatabases,
+    required this.listId,
   });
 }
 

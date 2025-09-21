@@ -3,6 +3,7 @@ import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/types.dart';
 
 class AnilistMutations extends DatabaseMutation {
   @override
@@ -25,5 +26,19 @@ class AnilistMutations extends DatabaseMutation {
         await Anilist().fetchQuery(query, RequestType.mutate, token: await getSecureVal(SecureStorageKey.anilistToken));
     return AnilistMutationResult(
         status: res?['SaveMediaListEntry']?['status'], progress: res?['SaveMediaListEntry']?['progress']);
+  }
+
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) async {
+    final query = '''
+      mutation {
+        DeleteMediaListEntry(id: $id) {
+          deleted
+        }
+      }
+    ''';
+    final res =
+        await Anilist().fetchQuery(query, RequestType.mutate, token: await getSecureVal(SecureStorageKey.anilistToken));
+    return AnilistMutationResult(status: res['deleted'].toString(), progress: 0);
   }
 }

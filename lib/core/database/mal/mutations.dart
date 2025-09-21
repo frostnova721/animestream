@@ -3,6 +3,7 @@ import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/mal/types.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:http/http.dart';
 
 class MALMutation extends DatabaseMutation {
@@ -37,6 +38,28 @@ class MALMutation extends DatabaseMutation {
         body: body,
       );
     }
+    return MALMutationResult();
+  }
+
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) async {
+    final url = "https://api.myanimelist.net/v2/anime/$id/my_list_status";
+    final headers = {...(await MAL.getHeader())};
+    Response res = await delete(Uri.parse(url), headers: headers);
+
+    if (res.statusCode == 401) {
+      // Retry after refreshing token
+      await MALLogin().refreshToken();
+      final headers = {
+        ...(await MAL.getHeader(refreshHeaders: true)),
+      };
+      res = await delete(Uri.parse(url), headers: headers);
+    }
+
+    if (res.statusCode == 404) {
+      throw Exception("[MAL]: The anime with id: $id doesn't exist in MAL");
+    }
+
     return MALMutationResult();
   }
 

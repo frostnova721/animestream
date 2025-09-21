@@ -53,4 +53,5 @@ abstract class DatabaseInfo {
   List<String>? tags;
   String? mediaListStatus;
   List<AlternateDatabaseId> get alternateDatabases;
+  int? listId;
 }

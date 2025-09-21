@@ -155,6 +155,7 @@ class Anilist extends Database {
           synopsis: info['description'].replaceAll(RegExp(r'<[^>]*>'), "").replaceAll(RegExp(r'\n+'), '\n'),
           tags: tags,
           mediaListStatus: info['mediaListEntry']?['status'],
+          listId: info['mediaListEntry']?['id'],
           alternateDatabases: [
             AlternateDatabaseId(database: Databases.anilist, id: id),
             if (info['idMal'] != null) AlternateDatabaseId(database: Databases.anilist, id: info['idMal']),
@@ -320,18 +321,19 @@ class Anilist extends Database {
     return typed;
   }
 
-  fetchQuery(String query, RequestType? type, {String? token}) async {
+  Future<dynamic> fetchQuery(String query, RequestType? type, {String? token}) async {
     GraphQLClient client;
-    if (token != null)
+    if (token != null) {
       client = GraphQLClient(
         link: HttpLink("https://graphql.anilist.co", defaultHeaders: {'Authorization': 'Bearer $token'}),
         cache: GraphQLCache(),
       );
-    else
+    } else {
       client = GraphQLClient(
         link: HttpLink("https://graphql.anilist.co"),
         cache: GraphQLCache(),
       );
+    }
 
     QueryResult res;
 

@@ -58,10 +58,12 @@ class _GenresPageState extends State<GenresPage> {
         ratingLow: ratingRange.start.toInt(),
       );
       res.forEach((e) {
+        final defaultTitle = e.title['english'] ?? e.title['romaji'] ?? '';
+        final title = (currentUserSettings?.nativeTitle ?? false) ? e.title['native'] ?? defaultTitle : defaultTitle;
         searchResultsAsWidgets.add(
           Cards.animeCard(
             e.id,
-            e.title['english'] ?? e.title['romaji'] ?? '',
+            title,
             e.cover,
             ongoing: e.status == "RELEASING",
             rating: e.rating,
@@ -75,8 +77,12 @@ class _GenresPageState extends State<GenresPage> {
       });
     } catch (err) {
       if (currentUserSettings?.showErrors ?? false) {
-        floatingSnackBar( err.toString());
+        floatingSnackBar(err.toString());
       }
+      setState(() {
+        _searching = false;
+        _isLazyLoading = false;
+      });
     }
   }
 
@@ -186,7 +192,7 @@ class _GenresPageState extends State<GenresPage> {
                                         ElevatedButton(
                                           onPressed: () {
                                             getList().then((_) {
-                                              if(Platform.isWindows) getList(lazyLoaded: true);
+                                              if (Platform.isWindows) getList(lazyLoaded: true);
                                             });
                                             Navigator.of(context).pop();
                                           },

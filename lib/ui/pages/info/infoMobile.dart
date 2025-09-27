@@ -32,10 +32,10 @@ class _InfoMobileState extends State<InfoMobile> {
   FocusNode _watchInfoButtonFocusNode = FocusNode();
   final useNativeTitle = currentUserSettings?.nativeTitle ?? false;
 
-  // just a small helper function!
-  String getTitle() {
-    final normalTitle = provider.data.title['english'] ?? provider.data.title['romaji'] ?? '';
-    final customizedTitle = useNativeTitle ? provider.data.title['native'] ?? normalTitle : normalTitle;
+  // just a small helper function to get the title based on preference!
+  String getTitle(Map<String, String?> titles) {
+    final normalTitle = titles['english'] ?? titles['romaji'] ?? '';
+    final customizedTitle = useNativeTitle ? titles['native'] ?? normalTitle : normalTitle;
     return customizedTitle;
   }
 
@@ -167,7 +167,7 @@ class _InfoMobileState extends State<InfoMobile> {
                           alignment: Alignment.center,
                           // padding: EdgeInsets.only(left: 40, right: 25),
                           child: Text(
-                            getTitle(),
+                            getTitle(provider.data.title),
                             style: TextStyle(
                               color: appTheme.textMainColor,
                               fontFamily: "NunitoSans",
@@ -1258,10 +1258,10 @@ class _InfoMobileState extends State<InfoMobile> {
             child: Container(
                 width: 130,
                 child: recommended
-                    ? Cards.animeCard(item.id, item.title['english'] ?? item.title['romaji'] ?? "", item.cover,
+                    ? Cards.animeCard(item.id, getTitle(item.title), item.cover,
                         rating: item.rating)
                     : Cards.characterCard(
-                        item.title['english'] ?? item.title['romaji'] ?? "",
+                        getTitle(item.title),
                         recommended ? item.type : item.relationType!,
                         item.cover,
                       )),

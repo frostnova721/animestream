@@ -2,12 +2,12 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/scrollingList.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/widgets/header.dart';
 import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
@@ -15,16 +15,11 @@ import 'package:animestream/ui/pages/news.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 
 class Discover extends StatefulWidget {
-  final List<AnimeCard> thisSeason;
-  final List<TrendingResult> trendingList;
-  final List<AnimeCard> recentlyUpdatedList;
-  final List<AnimeCard> recommendedList;
+  final MainNavProvider mainNavProvider;
+
   const Discover({
     super.key,
-    required this.recentlyUpdatedList,
-    required this.recommendedList,
-    required this.thisSeason,
-    required this.trendingList,
+    required this.mainNavProvider,
   });
 
   @override
@@ -35,6 +30,7 @@ class _DiscoverState extends State<Discover> {
   @override
   void initState() {
     super.initState();
+    if (!widget.mainNavProvider.discoverDataLoaded) widget.mainNavProvider.loadDiscoverItems();
     _pageController.addListener(onScroll);
   }
 
@@ -57,7 +53,7 @@ class _DiscoverState extends State<Discover> {
   Future<void> pageTimeout() async {
     if (timer != null && timer!.isActive) timer!.cancel();
     timer = Timer(Duration(seconds: 5), () {
-      if (currentPage < widget.trendingList.length - 1) {
+      if (currentPage < widget.mainNavProvider.trendingList.length - 1) {
         currentPage++;
       } else
         currentPage = 0;
@@ -74,7 +70,7 @@ class _DiscoverState extends State<Discover> {
 
   @override
   Widget build(BuildContext context) {
-    if (!initialTimeOutCalled && widget.trendingList.length > 0) {
+    if (!initialTimeOutCalled && widget.mainNavProvider.trendingList.length > 0) {
       pageTimeout();
       initialTimeOutCalled = true;
     }
@@ -90,7 +86,7 @@ class _DiscoverState extends State<Discover> {
                   // margin: EdgeInsets.only(top: 30),
                   height: Platform.isWindows ? 450 : 370,
                   // width: double.infinity,
-                  child: widget.trendingList.length > 0
+                  child: widget.mainNavProvider.trendingList.length > 0
                       ? _trendingAnimesPageView()
                       : Container(
                           child: Center(
@@ -182,11 +178,11 @@ class _DiscoverState extends State<Discover> {
               ],
             ),
             _itemTitle("Recently updated", recentlyUpdatedScrollController),
-            _scrollList(widget.recentlyUpdatedList, recentlyUpdatedScrollController),
+            _scrollList(widget.mainNavProvider.recentlyUpdatedList, recentlyUpdatedScrollController),
             _itemTitle("This season", thisSeasonScrollController),
-            _scrollList(widget.thisSeason, thisSeasonScrollController),
+            _scrollList(widget.mainNavProvider.thisSeason, thisSeasonScrollController),
             _itemTitle("Recommended", recommendedScrollController),
-            _scrollList(widget.recommendedList, recommendedScrollController),
+            _scrollList(widget.mainNavProvider.recommendedList, recommendedScrollController),
             footSpace(),
           ],
         ),
@@ -211,7 +207,8 @@ class _DiscoverState extends State<Discover> {
         },
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
-          final titles = widget.trendingList[index % widget.trendingList.length].title;
+          final trendingList = widget.mainNavProvider.trendingList;
+          final titles = trendingList[index % trendingList.length].title;
           final title = titles['english'] ?? titles['romaji'] ?? '';
           final preferNative = currentUserSettings?.nativeTitle ?? false;
 
@@ -221,7 +218,7 @@ class _DiscoverState extends State<Discover> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => Info(
-                    id: widget.trendingList[index % widget.trendingList.length].id,
+                    id: trendingList[index % trendingList.length].id,
                   ),
                 ),
               );
@@ -237,8 +234,8 @@ class _DiscoverState extends State<Discover> {
                       child: ImageFiltered(
                         imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                         child: Image.network(
-                          widget.trendingList[index % widget.trendingList.length].banner ??
-                              widget.trendingList[index % widget.trendingList.length].cover,
+                          trendingList[index % trendingList.length].banner ??
+                              trendingList[index % trendingList.length].cover,
                           alignment: Alignment((index - page).clamp(-1, 1).toDouble(), 1),
                           opacity: AlwaysStoppedAnimation(0.5),
                           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -264,7 +261,7 @@ class _DiscoverState extends State<Discover> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.network(
-                            widget.trendingList[index % widget.trendingList.length].cover,
+                            trendingList[index % trendingList.length].cover,
                             height: 170,
                             width: 120,
                           ),
@@ -279,7 +276,8 @@ class _DiscoverState extends State<Discover> {
                             children: [
                               Padding(
                                 padding: const EdgeInsets.only(bottom: 10.0),
-                                child: Text( preferNative ? titles['native'] ?? title : title,
+                                child: Text(
+                                  preferNative ? titles['native'] ?? title : title,
                                   style: TextStyle(
                                     color: appTheme.textMainColor,
                                     fontFamily: 'NunitoSans',
@@ -291,7 +289,7 @@ class _DiscoverState extends State<Discover> {
                                 ),
                               ),
                               Text(
-                                widget.trendingList[index % widget.trendingList.length].genres.join(', '),
+                                trendingList[index % trendingList.length].genres.join(', '),
                                 style: TextStyle(
                                     color: appTheme.textMainColor.withAlpha(145),
                                     fontFamily: 'NunitoSans',
@@ -311,7 +309,7 @@ class _DiscoverState extends State<Discover> {
                                       size: 20,
                                     ),
                                     Text(
-                                      "${widget.trendingList[index % widget.trendingList.length].rating != null ? widget.trendingList[index % widget.trendingList.length].rating! / 10 : '??'}",
+                                      "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
                                       style:
                                           TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 17),
                                     ),

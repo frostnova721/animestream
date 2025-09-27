@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/version.dart';
 import 'package:animestream/core/data/preferences.dart';
+import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:animestream/ui/theme/lime.dart';
@@ -296,9 +297,12 @@ class _AnimeStreamState extends State<AnimeStream> {
                 seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
               ),
               iconTheme: IconThemeData(color: appTheme.textMainColor)),
-          home: Platform.isWindows
-              ? AppWrapper(firstPage: deepLinkRequestedNavigationPage ?? MainNavigator())
-              : deepLinkRequestedNavigationPage ?? MainNavigator(),
+          home: ChangeNotifierProvider(
+            create: (context) => MainNavProvider(),
+            child: Platform.isWindows
+                ? AppWrapper(firstPage: deepLinkRequestedNavigationPage ?? MainNavigator())
+                : deepLinkRequestedNavigationPage ?? MainNavigator(),
+          ),
           debugShowCheckedModeBanner: false,
         );
       },

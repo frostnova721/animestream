@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:flutter/material.dart';
 
@@ -57,10 +56,6 @@ class PlayerProvider extends ChangeNotifier {
     await _controller.initiateVideo(url, headers: currentStream.customHeaders, offline: offline);
 
     if (seekTime != null) await _controller.seekTo(Duration(milliseconds: seekTime));
-  }
-
-  Future<void> setAudioTrack(AudioStream audio) async {
-    await controller.setAudioTrack(audio.url, audio.language, audio.name);
   }
 
   /// Fast forward / Seek n seconds

@@ -199,7 +199,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   }
 
   ListView _list() {
-    final title = widget.provider.data.title['english'] ?? widget.provider.data.title['romaji'] ?? "";
+    final titles = widget.provider.data.title;
+    final defaulTitle = titles['english'] ?? titles['romaji'] ?? "";
+    final title = (currentUserSettings?.nativeTitle ?? false) ? titles['native'] ?? defaulTitle : defaulTitle;
 
     return widget.type == ServerSheetType.watch
         ? ListView.builder(
@@ -286,12 +288,14 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   final streamLink = qualities[ind]['url']!;
                   // print(streamLink);
 
-                  DownloadManager().addDownloadTask(
+                  DownloadManager()
+                      .addDownloadTask(
                     streamLink,
                     fileName,
                     customHeaders: headers,
                     subtitleUrl: subs,
-                  ).onError((err, st) {
+                  )
+                      .onError((err, st) {
                     print(err);
                     print(st);
                     floatingSnackBar("$err");

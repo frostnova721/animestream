@@ -1,3 +1,4 @@
+import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -13,21 +14,12 @@ import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
 
 class Home extends StatefulWidget {
-  final List<HomePageList> recentlyWatched;
-  final List<HomePageList> currentlyAiring;
-  final List<HomePageList> planned;
-  final bool dataLoaded;
-  final bool error;
-  final void Function(List<HomePageList> recentlyWatched) updateWatchedList;
+
+  final MainNavProvider mainNavProvider;
 
   const Home({
     super.key,
-    required this.currentlyAiring,
-    required this.recentlyWatched,
-    required this.dataLoaded,
-    required this.error,
-    required this.updateWatchedList,
-    required this.planned,
+    required this.mainNavProvider,
   });
 
   @override
@@ -75,7 +67,7 @@ class _HomeState extends State<Home> {
         ),
       );
 
-      widget.updateWatchedList(recentlyWatched);
+      widget.mainNavProvider.updateWatchedList(recentlyWatched);
 
       if (mounted)
         setState(() {
@@ -126,14 +118,14 @@ class _HomeState extends State<Home> {
                     )
                     : null,
               ),
-              _titleAndList("Continue Watching", widget.recentlyWatched, showRefreshIndication: refreshing),
+              _titleAndList("Continue Watching", widget.mainNavProvider.recentlyWatched, showRefreshIndication: refreshing),
               divider(),
-              _titleAndList("Aired This Season", widget.currentlyAiring),
+              _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
               if (isLoggedIn)
                 Column(
                   children: [
                     divider(),
-                    _titleAndList("From Your Planned", widget.planned),
+                    _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
                   ],
                 ),
               footSpace(),
@@ -281,7 +273,7 @@ class _HomeState extends State<Home> {
         ),
         Container(
           height: 160,
-          child: widget.error
+          child: widget.mainNavProvider.homePageError
               ? Center(
                   child: Container(
                     alignment: Alignment.center,
@@ -309,7 +301,7 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                 )
-              : widget.dataLoaded
+              : widget.mainNavProvider.homeDataLoaded
                   ? list.length > 0
                       ? ListView.builder(
                           padding: EdgeInsets.zero,

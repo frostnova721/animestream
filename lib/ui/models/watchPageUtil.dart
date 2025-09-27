@@ -30,9 +30,6 @@ abstract class VideoController {
   // initiate a source
   Future<void> initiateVideo(String url, {Map<String, String>? headers = null, bool offline = false});
 
-  // set audio track
-  Future<void> setAudioTrack(String url, String language, String label);
-
   /// Retuns the Widget of the player
   Widget getWidget();
 
@@ -113,15 +110,6 @@ class BetterPlayerWrapper implements VideoController {
   Future<void> initiateVideo(String url, {Map<String, String>? headers, bool offline = false}) async {
     final ds = offline ? BetterPlayerDataSource.file(url) : await dataSourceConfig(url, headers: headers);
     return await controller.setupDataSource(ds);
-  }
-
-  @override
-  Future<void> setAudioTrack(String url, String language, String label) async {
-    print("audurl: $url");
-    controller.setAudioTrack(BetterPlayerAsmsAudioTrack(
-      language: language, label: label, url: url,
-    ));
-    print("audioTracks: ${controller.betterPlayerAsmsAudioTrack?.language}");
   }
 
   @override
@@ -305,12 +293,6 @@ class VideoPlayerWindowsWrapper implements VideoController {
   @override
   Future<void> setPip(bool value) {
     throw Exception("PiP isnt supported on Windows.");
-  }
-  
-  @override
-  Future<void> setAudioTrack(String url, String language, String label) {
-    // TODO: implement setAudioTrack
-    throw UnimplementedError();
   }
 }
 

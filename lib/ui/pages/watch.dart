@@ -71,14 +71,6 @@ class _WatchState extends State<Watch> {
 
       await controller.initiateVideo(q.url, headers: dataProvider.state.currentStream.customHeaders);
 
-      final at = dataProvider.state.audioTracks;
-
-      if (at.isNotEmpty) {
-        print("Audio trak");
-        final audio = at.first;
-        await controller.setAudioTrack(audio.url, audio.language, audio.name);
-        dataProvider.updateCurrentAudioTrack(audio);
-      }
     } else {
       await controller.initiateVideo(dataProvider.state.currentStream.link, offline: true);
     }

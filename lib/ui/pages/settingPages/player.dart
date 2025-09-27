@@ -259,7 +259,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                 writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
                               },
                               label: "Double tap to seek",
-                              description: "Double tap left/right to jump $skipDuration seconds\n(Replaces seek buttons)",
+                              description: "Double tap left/right to jump $skipDuration seconds",
                               value: doubleTapToSkip)
                         ],
                       ),

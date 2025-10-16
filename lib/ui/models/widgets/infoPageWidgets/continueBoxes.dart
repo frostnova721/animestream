@@ -15,10 +15,11 @@ class ContinueWatchingSideBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final value = provider.lastWatchedDurationMap?[
-            provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
-        0;
-    final int watchedProgress = (value.isNaN || value.isInfinite) ? 0 : value.toInt();
+  final raw = provider.lastWatchedDurationMap?[
+      provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+    0;
+  final double value = (raw is num) ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0.0;
+  final int watchedProgress = (value.isNaN || value.isInfinite) ? 0 : value.toInt();
     final size = MediaQuery.sizeOf(context);
     return Container(
       margin: EdgeInsets.only(left: 60, top: 20, bottom: 20),
@@ -323,10 +324,11 @@ class ContinueWatchingBodyBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final value = provider.lastWatchedDurationMap?[
-            provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
-        0;
-    final watchedProgress = (value.isNaN || value.isInfinite) ? 0 : value.toInt();
+  final raw = provider.lastWatchedDurationMap?[
+      provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+    0;
+  final double value = (raw is num) ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0.0;
+  final watchedProgress = (value.isNaN || value.isInfinite) ? 0 : value.toInt();
     final size = MediaQuery.sizeOf(context);
 
     return Container(

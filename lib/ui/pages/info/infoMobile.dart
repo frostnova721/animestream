@@ -606,16 +606,19 @@ class _InfoMobileState extends State<InfoMobile> {
                   ),
                 ),
               ),
-              if (provider.lastWatchedDurationMap?[
-                      provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] !=
+              if (provider.lastWatchedDurationMap?[provider.watched < provider.epLinks.length
+                      ? provider.watched + 1
+                      : provider.watched] !=
                   null)
                 Container(
-                  width: 285 *
-                      ((provider.lastWatchedDurationMap?[provider.watched < provider.epLinks.length
-                                  ? provider.watched + 1
-                                  : provider.watched] ??
-                              0) /
-                          100) as double,
+                  width: 285 * (() {
+                    final raw = provider.lastWatchedDurationMap?[
+                            provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+                        0;
+                    final val = (raw is num) ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0.0;
+                    if (val.isNaN || val.isInfinite) return 0.0;
+                    return (val / 100).clamp(0.0, 1.0);
+                  })(),
                   height: 1.8,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),

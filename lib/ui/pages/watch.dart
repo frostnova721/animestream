@@ -75,7 +75,11 @@ class _WatchState extends State<Watch> {
       await controller.initiateVideo(dataProvider.state.currentStream.link, offline: true);
     }
 
-    final lastWatchDuration = (((dataProvider.lastWatchDuration ?? 0) / 100) * (controller.duration ?? 1)).toInt();
+  final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);
+  final totalMs = controller.duration ?? 0;
+  final lastWatchDuration = totalMs <= 0
+    ? 0
+    : ((lastWatchPct / 100) * totalMs).toInt();
 
     // await dataProvider.updateDiscordPresence();
 
@@ -246,18 +250,18 @@ class _WatchState extends State<Watch> {
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         // save the last watched duration
-        double watchPercentage;
-        if (isInitiated && controller.duration != null && controller.duration! > 0) {
-          watchPercentage = (controller.position ?? 0) / controller.duration!;
-          // clamp to 0-1 just in case
+        if (isInitiated && (controller.duration ?? 0) > 0) {
+          final pos = (controller.position ?? 0).toDouble();
+          final dur = controller.duration!.toDouble();
+          double watchPercentage = (dur <= 0) ? 0.0 : (pos / dur);
           watchPercentage = watchPercentage.clamp(0.0, 1.0);
-        } else {
-          watchPercentage = 0;
-        }
-        saveAnimeSpecificPreference(
+          await saveAnimeSpecificPreference(
             playerDataProvider.showId.toString(),
             AnimeSpecificPreference(
-                lastWatchDuration: {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100}));
+              lastWatchDuration: {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100},
+            ),
+          );
+        }
         await context.read<AppProvider>()
           ..setFullScreen(false)
           ..setTitlebarColor(null);

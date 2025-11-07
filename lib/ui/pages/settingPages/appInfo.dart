@@ -138,9 +138,8 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                           fontSize: 22,
                                           fontWeight: FontWeight.bold)),
                                 ),
-                                Text("package: $appName", style: textStyle),
                                 Text(
-                                  "app version: $appVersion",
+                                  "version: $appVersion",
                                   style: textStyle,
                                 ),
                                 Row(
@@ -156,7 +155,7 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                                             ClipboardData(text: "https://github.com/frostnova721/animestream"));
                                         floatingSnackBar("link has been copied to clipboard");
                                       },
-                                      onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream")),
+                                      onTap: () => launchUrl(Uri.parse("https://github.com/frostnova721/animestream"), mode: LaunchMode.externalApplication),
                                       child: Text(
                                         "animestream",
                                         style: TextStyle(

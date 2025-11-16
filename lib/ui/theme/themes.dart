@@ -24,7 +24,6 @@ List<ThemeItem> availableThemes = [
   NeonGreen(),
   Star(),
 ];
-
 // Represents a generic light theme (used only for its values)
 AnimeStreamTheme lightModeValues = AnimeStreamTheme(
   textMainColor: Colors.black,

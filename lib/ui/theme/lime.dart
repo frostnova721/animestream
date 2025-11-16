@@ -10,6 +10,9 @@ class LimeZest implements ThemeItem {
   String get name => "Lime Zest";
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color(0xffcaf979),
         backgroundColor: Colors.white,

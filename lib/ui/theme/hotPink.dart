@@ -6,6 +6,9 @@ class HotPink implements ThemeItem {
   int get id => 04;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color.fromARGB(255, 255, 91, 173),
         backgroundColor: Colors.white,

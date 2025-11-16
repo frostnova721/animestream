@@ -6,6 +6,9 @@ class NeonGreen implements ThemeItem {
   int get id => 08;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color(0xff00c896),
         backgroundColor: Color(0xfff5f9fc),

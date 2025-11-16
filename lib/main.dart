@@ -11,6 +11,7 @@ import 'package:app_links/app_links.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -107,7 +108,8 @@ Future<void> loadAndAssignSettings() async {
 
   //load and apply theme
   await getTheme().then((themeId) {
-    if (themeId > availableThemes.length || themeId < 1) {
+    // ignore the themeid limit checks for debug mode
+    if ((themeId > availableThemes.length && !kDebugMode) || themeId < 1) {
       print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
       showToast("Failed to apply theme. Using default theme");
       setTheme(01);

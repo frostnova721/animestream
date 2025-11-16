@@ -5,6 +5,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/doubleTapDectector.dart';
+import 'package:animestream/ui/models/widgets/player/controls.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -16,9 +17,7 @@ import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
-import 'package:animestream/ui/models/watchPageUtil.dart';
-import 'package:animestream/ui/models/widgets/player/customControls.dart';
-import 'package:animestream/ui/models/widgets/player/desktopControls.dart';
+import 'package:animestream/ui/models/playerControllers/videoController.dart';
 
 class Watch extends StatefulWidget {
   final VideoController controller;
@@ -58,7 +57,7 @@ class _WatchState extends State<Watch> {
 
     final dataProvider = context.read<PlayerDataProvider>();
 
-    debugPrint("Initializing stream ${dataProvider.state.currentStream}");
+    debugPrint("[PLAYER] Initializing stream ${dataProvider.state.currentStream}");
 
     dataProvider.initSubsettings();
 
@@ -69,17 +68,25 @@ class _WatchState extends State<Watch> {
 
       dataProvider.updateCurrentQuality(q);
 
-      await controller.initiateVideo(q.url, headers: dataProvider.state.currentStream.customHeaders);
+      await controller.initiateVideo(dataProvider.state.currentStream.link,
+          headers: dataProvider.state.currentStream.customHeaders);
 
+      controller.setQuality(q);
+
+      if (dataProvider.state.audioTracks.isNotEmpty) {
+        // gamble on this setting :)
+        dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks.first);
+        controller.setAudioTrack(dataProvider.state.currentAudioTrack);
+      } else {
+        print("[PLAYER] Couldnt find audio tracks for this stream");
+      }
     } else {
       await controller.initiateVideo(dataProvider.state.currentStream.link, offline: true);
     }
 
-  final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);
-  final totalMs = controller.duration ?? 0;
-  final lastWatchDuration = totalMs <= 0
-    ? 0
-    : ((lastWatchPct / 100) * totalMs).toInt();
+    final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);
+    final totalMs = controller.duration ?? 0;
+    final lastWatchDuration = totalMs <= 0 ? 0 : ((lastWatchPct / 100) * totalMs).toInt();
 
     // await dataProvider.updateDiscordPresence();
 
@@ -282,7 +289,6 @@ class _WatchState extends State<Watch> {
               }
               pointerHideTimer?.cancel();
               pointerHideTimer = Timer(Duration(seconds: 3), () {
-                print("Hiding pointer...");
                 if (mounted)
                   setState(() {
                     hidePointer = true;
@@ -316,9 +322,7 @@ class _WatchState extends State<Watch> {
                             child: Stack(
                               children: [
                                 IgnorePointer(ignoring: true, child: overlay()),
-                                IgnorePointer(
-                                    ignoring: !playerProvider.state.controlsVisible,
-                                    child: Platform.isWindows ? Desktopcontrols() : Controls()),
+                                IgnorePointer(ignoring: !playerProvider.state.controlsVisible, child: Controls()),
                               ],
                             ),
                           )

@@ -49,3 +49,6 @@ flutter_*.png
 
 todo.md
 localChangelog.md
+
+# FVM Version Cache
+.fvm/

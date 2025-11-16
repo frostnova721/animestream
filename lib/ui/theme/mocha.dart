@@ -6,6 +6,9 @@ class Mocha implements ThemeItem {
   int get id => 06;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color(0xff8C7972),
         backgroundColor: Color(0xffF2F2F2),

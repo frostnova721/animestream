@@ -24,7 +24,7 @@ class SourceSideWidget extends StatelessWidget {
 
       sourceMatchString = "Matching title ${isMatched ? "found" : "not found"}";
       statusIcon = isMatched ? Icons.check_circle_rounded : Icons.error_rounded;
-      statusColor = isMatched ? Colors.green.shade400 : Colors.orange.shade400;
+      statusColor = isMatched ? appTheme.accentColor : Colors.orange.shade400;
     } else {
       statusIcon = Icons.search_rounded;
       statusColor = appTheme.textMainColor.withAlpha(153);
@@ -360,7 +360,7 @@ class SourceBodyWidget extends StatelessWidget {
 
       sourceMatchString = "Matching title ${isMatched ? "found" : "not found"}";
       statusIcon = isMatched ? Icons.check_circle_rounded : Icons.error_rounded;
-      statusColor = isMatched ? Colors.green.shade400 : Colors.orange.shade400;
+      statusColor = isMatched ? appTheme.accentColor : Colors.orange.shade400;
     } else {
       statusIcon = Icons.search_rounded;
       statusColor = appTheme.textMainColor.withAlpha(153);

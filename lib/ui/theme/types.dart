@@ -6,11 +6,14 @@ class ThemeItem {
   final AnimeStreamTheme lightVariant;    // Light variant of the theme
   final int id;                           // Theme ID
 
+  final bool dev;                        // Only for the dev versions (α, debug versions...)
+
   ThemeItem({
     required this.id,
     required this.name,
     required this.theme,
     required this.lightVariant,
+    required this.dev,
   });
 }
 

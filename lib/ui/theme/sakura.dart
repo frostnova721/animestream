@@ -6,6 +6,9 @@ class Sakura implements ThemeItem {
   int get id => 07;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color(0xFFF06292),
         backgroundColor: Color(0xFFFFF8F8),

@@ -7,6 +7,9 @@ class ColdPurple implements ThemeItem {
   int get id => 03;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color(0xff9D8ABF),
         backgroundColor: Colors.white,

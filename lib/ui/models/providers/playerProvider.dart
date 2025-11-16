@@ -6,7 +6,7 @@ import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/ui/models/watchPageUtil.dart';
+import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 /// Handle the core player stuff
@@ -167,7 +167,10 @@ class PlayerProvider extends ChangeNotifier {
 
       dataProvider.updateCurrentQuality(q);
 
-      controller.initiateVideo(q.url, headers: src.customHeaders);
+      // Start the video and set the preffered quality
+      await controller.initiateVideo(src.link, headers: src.customHeaders);
+
+      controller.setQuality(q);
     } else {
       // showModalBottomSheet(
       //   context: context,

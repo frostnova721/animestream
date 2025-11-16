@@ -8,6 +8,7 @@ Future<BetterPlayerDataSource> dataSourceConfig(String url, {Map<String, String>
     url,
     videoFormat: await _getFormat(url, headers),
     useAsmsAudioTracks: true,
+    useAsmsTracks: true,
     bufferingConfiguration: BetterPlayerBufferingConfiguration(
       maxBufferMs: 120000,
     ),

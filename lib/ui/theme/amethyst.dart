@@ -6,6 +6,9 @@ class Amethyst implements ThemeItem {
   int get id => 05;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Color(0xff6a3b76),
         backgroundColor: Color(0xfff9efea),

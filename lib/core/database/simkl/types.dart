@@ -40,7 +40,7 @@ class SimklRelatedRecommendation extends DatabaseRelatedRecommendation {
         'romaji': json['title'],
         'english': json['en_title'] as String?,
       },
-      cover: Simkl.imageLink(json['poster']),
+      cover: Simkl.imageLink(json['poster'] ?? ""), // not really a good idea. But yeah!
       type: json['anime_type'],
       rating: json['ratings']?['simkl']?['rating']?.toDouble(),
       relationType: json['relation_type'] ?? null,

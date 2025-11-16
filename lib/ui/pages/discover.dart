@@ -13,6 +13,7 @@ import 'package:animestream/ui/pages/genres.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/pages/news.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Discover extends StatefulWidget {
   final MainNavProvider mainNavProvider;
@@ -76,115 +77,125 @@ class _DiscoverState extends State<Discover> {
     }
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
-      body: SingleChildScrollView(
-        physics: isHoveredOverScrollList ? NeverScrollableScrollPhysics() : null,
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                Container(
-                  // margin: EdgeInsets.only(top: 30),
-                  height: Platform.isWindows ? 450 : 370,
-                  // width: double.infinity,
-                  child: widget.mainNavProvider.trendingList.length > 0
-                      ? _trendingAnimesPageView()
-                      : Container(
-                          child: Center(
-                            child: CircularProgressIndicator(
-                              color: appTheme.accentColor,
+      body: SmartRefresher(
+        controller: widget.mainNavProvider.discoverRefreshController,
+        onRefresh: () async {
+          await widget.mainNavProvider.refresh(refreshPage: 1, fromSettings: false);
+        },
+        header: WaterDropMaterialHeader(
+          backgroundColor: appTheme.backgroundSubColor,
+          color: appTheme.accentColor,
+        ),
+        child: SingleChildScrollView(
+          physics: isHoveredOverScrollList ? NeverScrollableScrollPhysics() : null,
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  Container(
+                    // margin: EdgeInsets.only(top: 30),
+                    height: Platform.isWindows ? 450 : 370,
+                    // width: double.infinity,
+                    child: widget.mainNavProvider.trendingList.length > 0
+                        ? _trendingAnimesPageView()
+                        : Container(
+                            child: Center(
+                              child: CircularProgressIndicator(
+                                color: appTheme.accentColor,
+                              ),
                             ),
                           ),
+                  ),
+                  Padding(
+                    padding: pagePadding(context).copyWith(left: 0),
+                    child: buildHeader("Discover", context, afterNavigation: () => setState(() {})),
+                  )
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(top: 30, right: 25),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => News()));
+                      },
+                      child: Container(
+                        height: 75,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          // color: Colors.black,
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                              image: AssetImage(
+                                'lib/assets/images/chisato.jpeg',
+                              ),
+                              fit: BoxFit.cover,
+                              opacity: 0.4),
+                          border: Border.all(color: appTheme.accentColor),
                         ),
-                ),
-                Padding(
-                  padding: pagePadding(context).copyWith(left: 0),
-                  child: buildHeader("Discover", context, afterNavigation: () => setState(() {})),
-                )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  margin: EdgeInsets.only(top: 30, right: 25),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => News()));
-                    },
-                    child: Container(
-                      height: 75,
-                      width: 150,
-                      decoration: BoxDecoration(
-                        // color: Colors.black,
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
-                            image: AssetImage(
-                              'lib/assets/images/chisato.jpeg',
+                        child: Center(
+                          child: Text(
+                            "News",
+                            style: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontFamily: "NotoSans",
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
                             ),
-                            fit: BoxFit.cover,
-                            opacity: 0.4),
-                        border: Border.all(color: appTheme.accentColor),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "News",
-                          style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontFamily: "NotoSans",
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-                Container(
-                  margin: EdgeInsets.only(top: 30),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(20),
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => GenresPage()));
-                    },
-                    child: Container(
-                      height: 75,
-                      width: 150,
-                      decoration: BoxDecoration(
-                        // color: Colors.black,
-                        borderRadius: BorderRadius.circular(20),
-                        image: DecorationImage(
-                            image: AssetImage(
-                              'lib/assets/images/mitsuha.jpg',
+                  Container(
+                    margin: EdgeInsets.only(top: 30),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(20),
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => GenresPage()));
+                      },
+                      child: Container(
+                        height: 75,
+                        width: 150,
+                        decoration: BoxDecoration(
+                          // color: Colors.black,
+                          borderRadius: BorderRadius.circular(20),
+                          image: DecorationImage(
+                              image: AssetImage(
+                                'lib/assets/images/mitsuha.jpg',
+                              ),
+                              fit: BoxFit.cover,
+                              opacity: 0.4),
+                          border: Border.all(color: appTheme.accentColor),
+                        ),
+                        child: Center(
+                          child: Text(
+                            "Genres",
+                            style: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontFamily: "NotoSans",
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
                             ),
-                            fit: BoxFit.cover,
-                            opacity: 0.4),
-                        border: Border.all(color: appTheme.accentColor),
-                      ),
-                      child: Center(
-                        child: Text(
-                          "Genres",
-                          style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontFamily: "NotoSans",
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
-            _itemTitle("Recently updated", recentlyUpdatedScrollController),
-            _scrollList(widget.mainNavProvider.recentlyUpdatedList, recentlyUpdatedScrollController),
-            _itemTitle("This season", thisSeasonScrollController),
-            _scrollList(widget.mainNavProvider.thisSeason, thisSeasonScrollController),
-            _itemTitle("Recommended", recommendedScrollController),
-            _scrollList(widget.mainNavProvider.recommendedList, recommendedScrollController),
-            footSpace(),
-          ],
+                ],
+              ),
+              _itemTitle("Recently updated", recentlyUpdatedScrollController),
+              _scrollList(widget.mainNavProvider.recentlyUpdatedList, recentlyUpdatedScrollController),
+              _itemTitle("This season", thisSeasonScrollController),
+              _scrollList(widget.mainNavProvider.thisSeason, thisSeasonScrollController),
+              _itemTitle("Recommended", recommendedScrollController),
+              _scrollList(widget.mainNavProvider.recommendedList, recommendedScrollController),
+              footSpace(),
+            ],
+          ),
         ),
       ),
     );

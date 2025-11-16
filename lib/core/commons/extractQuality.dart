@@ -145,13 +145,13 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, Strin
             // in hopes that the playlist will contain everything we neeed!
             switch (kvPair[0]) {
               case "GROUP-ID":
-                asb.addGroupId(kvPair[1]);
+                asb.addGroupId(kvPair[1].replaceAll('"', ''));
               case "LANGUAGE":
-                asb.addLanguage(kvPair[1]);
+                asb.addLanguage(kvPair[1].replaceAll('"', ''));
               case "CHANNELS":
-                asb.addChannels(kvPair[1]);
+                asb.addChannels(kvPair[1].replaceAll('"', ''));
               case "NAME":
-                asb.addName(kvPair[1]);
+                asb.addName(kvPair[1].replaceAll('"', ''));
               case "URI":
                 {
                   final linkPart = kvPair[1].replaceAll('"', '');

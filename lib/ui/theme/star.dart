@@ -6,6 +6,9 @@ class Star implements ThemeItem {
   int get id => 09;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
       accentColor: Color(0xFFFBC02D),
       backgroundColor: Color(0xFFFAF8F0),

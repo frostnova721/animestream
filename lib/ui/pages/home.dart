@@ -12,9 +12,9 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/lists.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 
 class Home extends StatefulWidget {
-
   final MainNavProvider mainNavProvider;
 
   const Home({
@@ -75,8 +75,7 @@ class _HomeState extends State<Home> {
         });
     } catch (err) {
       print(err);
-      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
-        floatingSnackBar( err.toString());
+      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) floatingSnackBar(err.toString());
       if (mounted)
         setState(() {
           refreshing = false;
@@ -88,48 +87,57 @@ class _HomeState extends State<Home> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
-      body: SingleChildScrollView(
-        child: Container(
-          padding: pagePadding(context).copyWith(left: 0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              buildHeader("Home", context, afterNavigation: () {
-                if (mounted) setState(() {});
-              }),
-              AnimatedSwitcher(
-                duration: Duration(milliseconds: 400),
-                child: storedUserData != null
-                    ? Align(
-                      alignment: Alignment.center,
-                      child: Container(
-                          margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-                          constraints: BoxConstraints(
-                            maxWidth: 450
+      body: SmartRefresher(
+        controller: widget.mainNavProvider.homeRefreshController,
+        onRefresh: () async {
+          await widget.mainNavProvider.refresh(refreshPage: 0, fromSettings: false);
+        },
+        header: WaterDropMaterialHeader(
+          backgroundColor: appTheme.backgroundSubColor,
+          color: appTheme.accentColor,
+        ),
+        child: SingleChildScrollView(
+          child: Container(
+            padding: pagePadding(context).copyWith(left: 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                buildHeader("Home", context, afterNavigation: () {
+                  if (mounted) setState(() {});
+                }),
+                AnimatedSwitcher(
+                  duration: Duration(milliseconds: 400),
+                  child: storedUserData != null
+                      ? Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                            constraints: BoxConstraints(maxWidth: 450),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                _accountCard(),
+                                _listButton(),
+                              ],
+                            ),
                           ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              _accountCard(),
-                              _listButton(),
-                            ],
-                          ),
-                        ),
-                    )
-                    : null,
-              ),
-              _titleAndList("Continue Watching", widget.mainNavProvider.recentlyWatched, showRefreshIndication: refreshing),
-              divider(),
-              _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
-              if (isLoggedIn)
-                Column(
-                  children: [
-                    divider(),
-                    _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
-                  ],
+                        )
+                      : null,
                 ),
-              footSpace(),
-            ],
+                _titleAndList("Continue Watching", widget.mainNavProvider.recentlyWatched,
+                    showRefreshIndication: refreshing),
+                divider(),
+                _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
+                if (isLoggedIn)
+                  Column(
+                    children: [
+                      divider(),
+                      _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
+                    ],
+                  ),
+                footSpace(),
+              ],
+            ),
           ),
         ),
       ),
@@ -142,7 +150,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-   _listButton() {
+  _listButton() {
     return Expanded(
       flex: 4,
       child: Container(
@@ -217,7 +225,10 @@ class _HomeState extends State<Home> {
                   child: Text(
                     storedUserData!.name,
                     style: TextStyle(
-                        fontFamily: "Poppins", fontSize: 16, fontWeight: FontWeight.bold, color: appTheme.textMainColor),
+                        fontFamily: "Poppins",
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: appTheme.textMainColor),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -310,15 +321,12 @@ class _HomeState extends State<Home> {
                           itemBuilder: (context, index) {
                             final item = list[index];
                             final preferNative = currentUserSettings?.nativeTitle ?? false;
-                            final normalTitle = item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '';
+                            final normalTitle =
+                                item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '';
                             final title = preferNative ? item.title['native'] ?? normalTitle : normalTitle;
                             return Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child: Cards.animeCardExtended(
-                                  item.id,
-                                  title,
-                                  item.coverImage,
-                                  item.rating ?? 0.0,
+                              child: Cards.animeCardExtended(item.id, title, item.coverImage, item.rating ?? 0.0,
                                   bannerImageUrl: item.coverImage,
                                   watchedEpisodeCount: item.watchedEpisodeCount,
                                   totalEpisodes: item.totalEpisodes,

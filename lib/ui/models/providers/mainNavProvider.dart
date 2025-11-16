@@ -320,13 +320,21 @@ class MainNavProvider extends ChangeNotifier {
     }
   }
 
-  final RefreshController refreshController = RefreshController(initialRefresh: false);
+  final RefreshController homeRefreshController = RefreshController(initialRefresh: false);
+  final RefreshController discoverRefreshController = RefreshController(initialRefresh: false);
 
   /// refresh [0 = home, 1 = discover]
   Future<void> refresh({required int refreshPage, bool fromSettings = false}) async {
     if (refreshPage != 0 && refreshPage != 1) return;
-    // setState(() {
-    // });
+
+    if (refreshPage == 1) {
+      await loadDiscoverItems();
+      discoverRefreshController.refreshCompleted();
+      notifyListeners();
+      return;
+    }
+
+    // yes a bit expensive... we could check the userProfile nullability first. but meh
     final loggedIn = await AniListLogin().isAnilistLoggedIn();
     if (loggedIn && userProfile == null) {
       //load the userprofile and list if the user just signed in!
@@ -345,6 +353,7 @@ class MainNavProvider extends ChangeNotifier {
       await loadListsForHome();
       userProfile = null;
     }
-    refreshController.refreshCompleted();
+    homeRefreshController.refreshCompleted();
+    notifyListeners();
   }
 }

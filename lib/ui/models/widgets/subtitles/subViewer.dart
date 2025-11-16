@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/subtitleParsers/subtitleParsers.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/watchPageUtil.dart';
+import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleText.dart';

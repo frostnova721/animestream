@@ -6,6 +6,9 @@ class Monochrome implements ThemeItem {
   int get id => 02;
 
   @override
+  bool get dev => false;
+
+  @override
   AnimeStreamTheme get lightVariant => AnimeStreamTheme(
         accentColor: Colors.black,
         backgroundColor: Colors.white,

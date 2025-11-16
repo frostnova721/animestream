@@ -13,16 +13,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
-class Desktopcontrols extends StatefulWidget {
-  const Desktopcontrols({
+class DesktopControls extends StatefulWidget {
+  const DesktopControls({
     super.key,
   });
 
   @override
-  State<Desktopcontrols> createState() => _DesktopcontrolsState();
+  State<DesktopControls> createState() => _DesktopControlsState();
 }
 
-class _DesktopcontrolsState extends State<Desktopcontrols> {
+class _DesktopControlsState extends State<DesktopControls> {
   // late VideoController controller;
 
   @override

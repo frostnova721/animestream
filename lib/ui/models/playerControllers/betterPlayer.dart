@@ -16,11 +16,15 @@ class BetterPlayerWrapper implements VideoController {
     autoPlay: true,
     errorBuilder: (context, errorMessage) {
       // TODO: Improve this
-      return Text("Whoops! Ran into some errors playing this video!\nDetails:\n$errorMessage");
+      return Center(
+          child: Text(
+        "Whoops! Ran into some errors playing this video!\nDetails:\n$errorMessage",
+        style: TextStyle(fontSize: 20),
+      ));
     },
     eventListener: (ev) {
       if (ev.betterPlayerEventType == BetterPlayerEventType.exception) {
-        print(ev.parameters);
+        print("[PLAYER] Oooooooh! We've got some issues!!! \n$ev.parameters");
       }
     },
     autoDispose: true,
@@ -120,17 +124,26 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   void setQuality(QualityStream qs) async {
-    return controller.setTrack(_qsToAsmsTrack(qs));
+    final track = _qsToAsmsTrack(qs);
+    print("Found matching track: $track");
+    return controller.setTrack(track);
   }
 
   BetterPlayerAsmsTrack _qsToAsmsTrack(QualityStream qs) {
-    return BetterPlayerAsmsTrack('', int.tryParse(qs.resolution.split("x").first) ?? 0,
-        int.tryParse(qs.resolution.split("x").last) ?? 0, qs.bandwidth ?? 0, 0, '', '');
+    return controller.betterPlayerAsmsTracks.firstWhere((element) {
+      final resMatch = element.height == (int.tryParse(qs.resolution.split("x").last) ?? 0);
+      final bwMatch = element.bitrate == (qs.bandwidth ?? 0);
+      return resMatch && bwMatch;
+    }, orElse: () {
+      print("[ERROR] No matching track found for '${qs.resolution}', defaulting to first track.");
+      return controller.betterPlayerAsmsTracks.first;
+    });
+    // return BetterPlayerAsmsTrack('', int.tryParse(qs.resolution.split("x").first) ?? 0,
+    //     int.tryParse(qs.resolution.split("x").last) ?? 0, qs.bandwidth ?? 0, 0, '', '');
   }
 
   BetterPlayerAsmsAudioTrack _asToAsmsAudioTrack(AudioStream aud) {
     print(controller.betterPlayerAsmsAudioTrack?.language);
-    return controller.betterPlayerAsmsAudioTracks!
-        .firstWhere((element) => element.language == aud.language);
+    return controller.betterPlayerAsmsAudioTracks!.firstWhere((element) => element.language == aud.language);
   }
 }

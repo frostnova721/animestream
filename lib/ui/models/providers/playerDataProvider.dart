@@ -85,6 +85,7 @@ class PlayerDataProvider extends ChangeNotifier {
     print("Available Qualities: ${state.qualities}");
   }
 
+  /// Selects the preferred quality stream from available qualities, if it exists. Just a small helper
   QualityStream getPreferredQualityStreamFromQualities() {
     return _state.qualities
             .where((it) => it.quality == (currentUserSettings?.preferredQuality ?? '720p'))
@@ -211,23 +212,49 @@ class PlayerDataProvider extends ChangeNotifier {
 }
 
 class PlayerDataProviderState {
+  /// All available streams for the episode
   final List<VideoStream> streams;
+
+  /// Currently playing stream
   final VideoStream currentStream;
+
+  /// Control's lock state
   final bool controlsLocked;
   
+  /// Available qualities for current stream
   final List<QualityStream> qualities;
+
+  /// Currently selected quality
   final QualityStream currentQuality;
 
+  /// Available audio tracks
   final List<AudioStream> audioTracks;
+
+  /// Currently playing audio track
   final AudioStream currentAudioTrack;
 
+  /// Current episode index (obviously)
   final int currentEpIndex;
+
+  /// The flag to check if the preload has started
   final bool preloadStarted;
+
+  /// Preloaded sources for next episode
   final List<VideoStream> preloadedSources;
+
+  /// Guess what?! Current time stamp
   final String currentTimeStamp;
+
+  /// yes.. the duration of the video as timestamp
   final String maxTimeStamp;
+
+  /// Preferred server for streaming
   final String preferredServer;
+
+  /// The value for the player progress slider
   final int sliderValue;
+
+  /// Whether subtitle settings have been inited
   final bool subsInited;
 
   PlayerDataProviderState({

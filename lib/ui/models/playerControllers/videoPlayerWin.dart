@@ -111,12 +111,12 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   void setAudioTrack(AudioStream aud) {
-    // TODO: implement setAudioTrack
+    // TODO: implement setAudioTrack, not done cus WinVideoPlayerController doesnt support streams
   }
 
   @override
   void setQuality(dynamic) {
-    // TODO: implement setQuality
+    // TODO: implement setQuality, not done cus WinVideoPlayerController doesnt support streams
   }
   
 }

@@ -247,60 +247,60 @@ class BottomControls extends StatelessWidget {
                     //   tooltip: playerProvider.state.currentViewMode.desc,
                     //   color: Colors.white,
                     // ),
-                    IconButton(
-                      onPressed: () async {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return ListView.builder(
-                                itemCount: dataProvider.state.audioTracks.length,
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext context, index) {
-                                  return Container(
-                                    padding: EdgeInsets.only(left: 25, right: 25),
-                                    child: ElevatedButton(
-                                      onPressed: () async {
-                                        // final src = dataProvider.state.qualities[index].url;
-                                        dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks[index]);
-                                        playerProvider.controller.setAudioTrack(dataProvider.state.currentAudioTrack);
-                                        // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
-                                        // dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                        // playerProvider.playVideo(src,
-                                        //     currentStream: dataProvider.state.currentStream,
-                                        //     preserveProgress: true);
-                                        Navigator.pop(context);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                          // side: BorderSide(color: Colors.white)
-                                        ),
-                                        backgroundColor: dataProvider.state.audioTracks[index].url ==
-                                                dataProvider.state.currentAudioTrack.url
-                                            ? appTheme.accentColor
-                                            : appTheme.backgroundSubColor,
-                                      ),
-                                      child: Text(
-                                        "${dataProvider.state.audioTracks[index].name} (${dataProvider.state.audioTracks[index].language})",
-                                        style: TextStyle(
-                                          color: dataProvider.state.audioTracks[index].url ==
-                                                  dataProvider.state.currentAudioTrack.url
-                                              ? Colors.black
-                                              : appTheme.accentColor,
-                                          fontFamily: "Poppins",
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            });
-                      },
-                      icon: Icon(Icons.audiotrack_rounded),
-                      tooltip: "Audio Tracks",
-                      color: Colors.white,
-                    ),
+                    // IconButton(
+                    //   onPressed: () async {
+                    //     showModalBottomSheet(
+                    //         context: context,
+                    //         builder: (context) {
+                    //           return ListView.builder(
+                    //             itemCount: dataProvider.state.audioTracks.length,
+                    //             shrinkWrap: true,
+                    //             physics: NeverScrollableScrollPhysics(),
+                    //             itemBuilder: (BuildContext context, index) {
+                    //               return Container(
+                    //                 padding: EdgeInsets.only(left: 25, right: 25),
+                    //                 child: ElevatedButton(
+                    //                   onPressed: () async {
+                    //                     // final src = dataProvider.state.qualities[index].url;
+                    //                     dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks[index]);
+                    //                     playerProvider.controller.setAudioTrack(dataProvider.state.currentAudioTrack);
+                    //                     // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
+                    //                     // dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
+                    //                     // playerProvider.playVideo(src,
+                    //                     //     currentStream: dataProvider.state.currentStream,
+                    //                     //     preserveProgress: true);
+                    //                     Navigator.pop(context);
+                    //                   },
+                    //                   style: ElevatedButton.styleFrom(
+                    //                     shape: RoundedRectangleBorder(
+                    //                       borderRadius: BorderRadius.circular(10),
+                    //                       // side: BorderSide(color: Colors.white)
+                    //                     ),
+                    //                     backgroundColor: dataProvider.state.audioTracks[index].url ==
+                    //                             dataProvider.state.currentAudioTrack.url
+                    //                         ? appTheme.accentColor
+                    //                         : appTheme.backgroundSubColor,
+                    //                   ),
+                    //                   child: Text(
+                    //                     "${dataProvider.state.audioTracks[index].name} (${dataProvider.state.audioTracks[index].language})",
+                    //                     style: TextStyle(
+                    //                       color: dataProvider.state.audioTracks[index].url ==
+                    //                               dataProvider.state.currentAudioTrack.url
+                    //                           ? Colors.black
+                    //                           : appTheme.accentColor,
+                    //                       fontFamily: "Poppins",
+                    //                     ),
+                    //                   ),
+                    //                 ),
+                    //               );
+                    //             },
+                    //           );
+                    //         });
+                    //   },
+                    //   icon: Icon(Icons.audiotrack_rounded),
+                    //   tooltip: "Audio Tracks",
+                    //   color: Colors.white,
+                    // ),
                     IconButton(
                       onPressed: () {
                         playerProvider.cycleViewMode();

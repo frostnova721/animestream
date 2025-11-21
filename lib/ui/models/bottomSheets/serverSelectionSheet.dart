@@ -254,7 +254,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                             ),
                           ),
                           ChangeNotifierProvider(
-                            create: (context) => PlayerProvider(controller),
+                            create: (context) => PlayerProvider(controller, true),
                           ),
                         ],
                         child: Watch(
@@ -286,7 +286,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   final episodeNum = "${widget.episodeIndex + 1}";
 
                   final fileName = "${title} EP ${episodeNum.padLeft(2, '0')}";
-                  final streamLink = qualities[ind]['url']!;
+                  final streamLink = qualities[ind]['link']!;
                   // print(streamLink);
 
                   DownloadManager()

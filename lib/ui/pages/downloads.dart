@@ -320,7 +320,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
               ),
             ),
             ChangeNotifierProvider(
-              create: (context) => PlayerProvider(controller),
+              create: (context) => PlayerProvider(controller, true),
             ),
           ],
           child: Watch(

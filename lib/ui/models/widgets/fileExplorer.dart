@@ -341,7 +341,7 @@ class _FileExplorerState extends State<FileExplorer> {
               ),
             ),
             ChangeNotifierProvider(
-              create: (context) => PlayerProvider(controller),
+              create: (context) => PlayerProvider(controller, true),
             ),
           ],
           child: Watch(

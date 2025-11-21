@@ -30,8 +30,8 @@ Future<BetterPlayerVideoFormat> _getFormat(String url, Map<String, String>? head
     final urlPath = Uri.parse(url).path.toLowerCase(); //wrong variable name btw!
 
     //guessing game
-    if (urlPath.endsWith(".m3u8")) return BetterPlayerVideoFormat.hls;
-    if (urlPath.endsWith(".mpd")) return BetterPlayerVideoFormat.dash;
+    if (urlPath.endsWith(".m3u8") || urlPath.endsWith(".m3u")) return BetterPlayerVideoFormat.hls;
+    if (urlPath.endsWith(".mpd") || urlPath.endsWith(".dash")) return BetterPlayerVideoFormat.dash;
     return BetterPlayerVideoFormat.other;
 
   } else if (mime.contains("mpegurl") || mime.contains("mp2t")) {

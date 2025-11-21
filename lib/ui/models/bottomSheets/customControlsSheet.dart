@@ -80,11 +80,16 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
     }
   }
 
-  void play() {
-    dp.extractCurrentStreamQualities().then((val) {
+  void play() async {
+    await dp.extractCurrentStreamQualities().then((val) async {
+      // final q = dp.getPreferredQualityStreamFromQualities();
       final q = dp.getPreferredQualityStreamFromQualities();
-      pp.playVideo(q.url,
+
+      // start the stream with the desired quality
+      await pp.playVideo(dp.state.currentStream.link,
           currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
+      await pp.setQuality(q);
+
       dp.update(dp.state.copyWith(
         currentQuality: q,
         currentEpIndex: index,

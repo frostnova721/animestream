@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:flutter/material.dart';
 
@@ -13,9 +14,11 @@ import 'package:wakelock_plus/wakelock_plus.dart';
 class PlayerProvider extends ChangeNotifier {
   final VideoController _controller;
 
+  final bool _isOffline;
+
   PlayerProviderState _state;
 
-  PlayerProvider(this._controller)
+  PlayerProvider(this._controller, this._isOffline)
       : _state = PlayerProviderState(
           playerState: PlayerState.paused,
           showSubs: false,
@@ -30,6 +33,8 @@ class PlayerProvider extends ChangeNotifier {
   VideoController get controller => _controller;
 
   PlayerProviderState get state => _state;
+
+  bool get isOffline => _isOffline;
 
   List<double> get playbackSpeeds => [
         1,
@@ -132,6 +137,11 @@ class PlayerProvider extends ChangeNotifier {
   void setSpeed(double val) {
     _state = _state.copyWith(speed: val);
     _controller.setSpeed(val);
+    notifyListeners();
+  }
+
+  Future<void> setQuality(QualityStream qs) async {
+    _controller.setQuality(qs);
     notifyListeners();
   }
 

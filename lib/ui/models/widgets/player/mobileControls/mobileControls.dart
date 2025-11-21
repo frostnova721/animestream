@@ -266,6 +266,7 @@ class _MobileControlsState extends State<MobileControls> {
   }
 
   Expanded topControls() {
+    final epTitle = provider.isOffline ? 'Episode ${dataProvider.state.currentEpIndex + 1}' : dataProvider.epLinks[dataProvider.state.currentEpIndex].episodeTitle;
     return Expanded(
       child: Container(
         alignment: Alignment.topCenter,
@@ -293,7 +294,7 @@ class _MobileControlsState extends State<MobileControls> {
                           Container(
                             padding: const EdgeInsets.only(left: 20, top: 5),
                             alignment: Alignment.topLeft,
-                            child: Text("Episode ${dataProvider.state.currentEpIndex + 1}",
+                            child: Text((epTitle == null || epTitle.isEmpty) ? "Episode ${dataProvider.state.currentEpIndex + 1}" : epTitle,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'NotoSans',

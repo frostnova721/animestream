@@ -144,58 +144,63 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                       borderRadius: BorderRadius.circular(12),
                     ),
                     padding: EdgeInsets.only(right: 8),
-                    child: markedDelete ? Text("REMOVED", style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins", fontSize: 16), ) : DropdownMenu(
-                      controller: menuController,
-                      onSelected: (value) {
-                        if (value != initialSelection) selectedValue = value;
-                      },
-                      enableSearch: false,
-                      menuStyle: MenuStyle(
-                        backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
-                        shape: WidgetStatePropertyAll(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                            side: BorderSide(
-                              width: 1,
-                              color: appTheme.textMainColor.withAlpha(51),
+                    child: markedDelete
+                        ? Text(
+                            "REMOVED",
+                            style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins", fontSize: 16),
+                          )
+                        : DropdownMenu(
+                            controller: menuController,
+                            onSelected: (value) {
+                              if (value != initialSelection) selectedValue = value;
+                            },
+                            enableSearch: false,
+                            menuStyle: MenuStyle(
+                              backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
+                              shape: WidgetStatePropertyAll(
+                                RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  side: BorderSide(
+                                    width: 1,
+                                    color: appTheme.textMainColor.withAlpha(51),
+                                  ),
+                                ),
+                              ),
+                              elevation: WidgetStatePropertyAll(8),
+                              // padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8)),
                             ),
+                            textStyle: TextStyle(
+                              color: appTheme.textMainColor,
+                              fontFamily: "Poppins",
+                              fontSize: 16,
+                            ),
+                            inputDecorationTheme: InputDecorationTheme(
+                              filled: true,
+                              fillColor: appTheme.backgroundColor,
+                              border: OutlineInputBorder(
+                                borderSide: BorderSide(width: 1, color: appTheme.textMainColor.withAlpha(51)),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 1,
+                                  color: appTheme.textMainColor.withAlpha(51),
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderSide: BorderSide(
+                                  width: 1.5,
+                                  color: appTheme.accentColor,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                            ),
+                            width: double.infinity,
+                            initialSelection: getInitialSelection(),
+                            dropdownMenuEntries: itemList,
                           ),
-                        ),
-                        elevation: WidgetStatePropertyAll(8),
-                        padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8)),
-                      ),
-                      textStyle: TextStyle(
-                        color: appTheme.textMainColor,
-                        fontFamily: "Poppins",
-                        fontSize: 16,
-                      ),
-                      inputDecorationTheme: InputDecorationTheme(
-                        filled: true,
-                        fillColor: appTheme.backgroundColor,
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(width: 1, color: appTheme.textMainColor.withAlpha(51)),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1,
-                            color: appTheme.textMainColor.withAlpha(51),
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            width: 1.5,
-                            color: appTheme.accentColor,
-                          ),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      ),
-                      width: double.infinity,
-                      initialSelection: getInitialSelection(),
-                      dropdownMenuEntries: itemList,
-                    ),
                   ),
                 ),
                 _ProgressButton(
@@ -206,7 +211,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                     });
                   },
                   color: markedDelete ? appTheme.modalSheetBackgroundColor : appTheme.accentColor,
-                  backgroundColor: markedDelete ? appTheme.accentColor : appTheme.modalSheetBackgroundColor,
+                  backgroundColor: markedDelete ? appTheme.accentColor : appTheme.backgroundColor,
                   border: Border.all(
                     color: appTheme.textMainColor.withAlpha(51),
                   ),
@@ -341,11 +346,14 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                       onPressed: () {
                         final int progress = int.parse(textEditingController.value.text);
                         if (markedDelete) {
-                          SyncHandler().deleteAnimeEntry(id: provider.data.listId ?? provider.id, otherIds: provider.altDatabases).then((val) {
+                          SyncHandler()
+                              .deleteAnimeEntry(
+                                  id: provider.data.listId ?? provider.id, otherIds: provider.altDatabases)
+                              .then((val) {
                             provider.refreshListStatus(null, 0);
                           });
                           floatingSnackBar("Entry deleted!");
-                          if(mounted) Navigator.pop(context);
+                          if (mounted) Navigator.pop(context);
                           return;
                         }
                         if (selectedValue != null || progress != provider.watched || provider.mediaListStatus == null) {

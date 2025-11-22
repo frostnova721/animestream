@@ -6,6 +6,7 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
+import 'package:animestream/ui/pages/info.dart';
 import 'package:animestream/ui/theme/lime.dart';
 import 'package:app_links/app_links.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
@@ -200,25 +201,31 @@ class _AnimeStreamState extends State<AnimeStream> {
   void listenDeepLinkCall() {
     _appLinks = AppLinks();
     _sub = _appLinks.uriLinkStream.listen((uri) {
-      if (uri.scheme == "animestream") {
+      if (uri.scheme == "astrm") {
         print("Invoked DeepLink uri: ${uri.toString()}");
         String host = uri.host;
         switch (host) {
           case "info":
             {
               final id = int.tryParse(uri.queryParameters['id'] ?? "nothing");
-              if (id != null)
-                //need to do smth T-T
+              if (id != null) {
+                AnimeStream.navigatorKey.currentState?.push(
+                      MaterialPageRoute(
+                        builder: (context) => AppWrapper(
+                          firstPage: Info(id: id),
+                        ),
+                      ),
+                    ) ??
+                    print("Nah");
                 break;
+              }
             }
           default:
-            print("BAD-INTENT-PATH");
+            floatingSnackBar("BAD-DEEPLINK: Host $host not recognized!");
         }
       }
     });
   }
-
-  Widget? deepLinkRequestedNavigationPage = null;
 
   // This widget is the root of *my* application.
   @override
@@ -287,6 +294,7 @@ class _AnimeStreamState extends State<AnimeStream> {
 
         return MaterialApp(
           title: 'Animestream',
+          navigatorKey: AnimeStream.navigatorKey,
           scaffoldMessengerKey: AnimeStream.snackbarKey,
           theme: ThemeData(
               useMaterial3: true,
@@ -302,8 +310,8 @@ class _AnimeStreamState extends State<AnimeStream> {
           home: ChangeNotifierProvider(
             create: (context) => MainNavProvider(),
             child: Platform.isWindows
-                ? AppWrapper(firstPage: deepLinkRequestedNavigationPage ?? MainNavigator())
-                : deepLinkRequestedNavigationPage ?? MainNavigator(),
+                ? AppWrapper(firstPage: MainNavigator())
+                : MainNavigator(),
           ),
           debugShowCheckedModeBanner: false,
         );

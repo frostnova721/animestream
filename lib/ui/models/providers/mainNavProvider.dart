@@ -25,6 +25,17 @@ class MainNavProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// AniList login state
+  bool _loggedIn = false;
+
+  /// AniList login state
+  bool get loggedIn => _loggedIn;
+
+  set loggedIn(bool value) {
+    _loggedIn = value;
+    notifyListeners();
+  }
+
   UserModal? _userProfile;
   UserModal? get userProfile => _userProfile;
   set userProfile(UserModal? user) {
@@ -137,7 +148,7 @@ class MainNavProvider extends ChangeNotifier {
 
   /// check login status and get userprofile then load lists
   Future<void> init() async {
-    final loggedIn = await AniListLogin().isAnilistLoggedIn();
+    loggedIn = await AniListLogin().isAnilistLoggedIn();
     if (loggedIn) {
       AniListLogin()
           .getUserProfile()
@@ -218,6 +229,8 @@ class MainNavProvider extends ChangeNotifier {
   }
 
   Future<void> loadListsForHome({String? userName}) async {
+    // reset the error state
+    homePageError = false;
     try {
       //get all of em data
       final futures = await Future.wait([
@@ -294,9 +307,9 @@ class MainNavProvider extends ChangeNotifier {
       notifyListeners();
     } catch (err) {
       print(err);
-      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
+      if (currentUserSettings?.showErrors ?? false)
         floatingSnackBar(err.toString(), waitForPreviousToFinish: true);
-      floatingSnackBar("couldnt fetch the lists, anilist might be down", waitForPreviousToFinish: true);
+      floatingSnackBar("couldnt fetch the lists, anilist might be down!", waitForPreviousToFinish: true);
 
       homePageError = true;
       notifyListeners();
@@ -320,8 +333,8 @@ class MainNavProvider extends ChangeNotifier {
     }
   }
 
-  final RefreshController homeRefreshController = RefreshController(initialRefresh: false);
-  final RefreshController discoverRefreshController = RefreshController(initialRefresh: false);
+  RefreshController homeRefreshController = RefreshController(initialRefresh: false);
+  RefreshController discoverRefreshController = RefreshController(initialRefresh: false);
 
   /// refresh [0 = home, 1 = discover]
   Future<void> refresh({required int refreshPage, bool fromSettings = false}) async {
@@ -335,14 +348,13 @@ class MainNavProvider extends ChangeNotifier {
     }
 
     // yes a bit expensive... we could check the userProfile nullability first. but meh
-    final loggedIn = await AniListLogin().isAnilistLoggedIn();
+    loggedIn = await AniListLogin().isAnilistLoggedIn();
     if (loggedIn && userProfile == null) {
       //load the userprofile and list if the user just signed in!
-      final user = await AniListLogin().getUserProfile();
-      userProfile = user;
-      storedUserData = user;
+      userProfile = await AniListLogin().getUserProfile();
+      storedUserData = userProfile;
       print("[AUTHENTICATION] ${storedUserData?.name} Login Successful");
-      await loadListsForHome(userName: user.name);
+      await loadListsForHome(userName: userProfile!.name);
     } else if (loggedIn && userProfile != null) {
       //just load the list if the user was already signed in.
       //also dont refrest the list if user just visited the settings page and were already logged in

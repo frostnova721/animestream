@@ -41,7 +41,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
-                    android:scheme="animestream" />
+                    android:scheme="astrm" />
             </intent-filter>
         </activity>
         <activity

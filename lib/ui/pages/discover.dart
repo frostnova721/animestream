@@ -78,7 +78,8 @@ class _DiscoverState extends State<Discover> {
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: SmartRefresher(
-        controller: widget.mainNavProvider.discoverRefreshController,
+        // reset the controller on build, preventing it from causing error: "Dont use one controller for multiple SmartRefresher"
+        controller: widget.mainNavProvider.discoverRefreshController = RefreshController(initialRefresh: false),
         onRefresh: () async {
           await widget.mainNavProvider.refresh(refreshPage: 1, fromSettings: false);
         },

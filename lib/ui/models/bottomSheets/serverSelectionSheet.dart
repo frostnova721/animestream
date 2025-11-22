@@ -273,87 +273,105 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
         : ListView.builder(
             itemCount: qualities.length,
             shrinkWrap: true,
-            itemBuilder: (BuildContext context, ind) => Container(
-              margin: EdgeInsets.only(top: 10),
-              child: ElevatedButton(
-                onPressed: () {
-                  String? subs = qualities[ind]['subtitle'];
-                  subs = (subs?.isEmpty ?? true) ? null : subs;
-                  // print(qualities[ind]);
-                  final mapped = jsonDecode(qualities[ind]['headers'] ?? "{}");
-                  Map<String, String> headers = Map.from(mapped).cast();
-
-                  final episodeNum = "${widget.episodeIndex + 1}";
-
-                  final fileName = "${title} EP ${episodeNum.padLeft(2, '0')}";
-                  final streamLink = qualities[ind]['link']!;
-                  // print(streamLink);
-
-                  DownloadManager()
-                      .addDownloadTask(
-                    streamLink,
-                    fileName,
-                    customHeaders: headers,
-                    subtitleUrl: subs,
-                  )
-                      .onError((err, st) {
-                    print(err);
-                    print(st);
-                    floatingSnackBar("$err");
-                  });
-                  Navigator.of(context).pop();
-                  floatingSnackBar("Downloading the episode to your downloads folder");
-                },
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: appTheme.backgroundSubColor,
-                  padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.only(top: 5),
-                          child: Row(
-                            children: [
-                              Text(
-                                "${qualities[ind]['server']}",
-                                style: TextStyle(
-                                  color: appTheme.accentColor,
-                                  fontSize: 18,
-                                  fontFamily: "Rubik",
-                                ),
-                              ),
-                              Text(
-                                "• ${qualities[ind]['quality']}",
-                                style: TextStyle(
-                                  color: appTheme.textMainColor,
-                                  fontSize: 18,
-                                  fontFamily: "Rubik",
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            itemBuilder: (BuildContext context, ind) =>
+                _DownloadTile(quality: qualities[ind], widget: widget, title: title),
           );
   }
 
   @override
   void dispose() {
     super.dispose();
+  }
+}
+
+class _DownloadTile extends StatelessWidget {
+  const _DownloadTile({
+    required this.quality,
+    required this.widget,
+    required this.title,
+  });
+
+  final Map<String, String> quality;
+  final ServerSelectionBottomSheet widget;
+  final String title;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: EdgeInsets.only(top: 10),
+      child: ElevatedButton(
+        onPressed: () {
+          String? subs = quality['subtitle'];
+          subs = (subs?.isEmpty ?? true) ? null : subs;
+          // print(qualities[ind]);
+          final mapped = jsonDecode(quality['headers'] ?? "{}");
+          Map<String, String> headers = Map.from(mapped).cast();
+
+          final episodeNum = "${widget.episodeIndex + 1}";
+
+          final fileName = "${title} EP ${episodeNum.padLeft(2, '0')}";
+          final streamLink = quality['url']!;
+          // print(streamLink);
+
+          DownloadManager()
+              .addDownloadTask(
+            streamLink,
+            fileName,
+            customHeaders: headers,
+            subtitleUrl: subs,
+          )
+              .onError((err, st) {
+            print(err);
+            print(st);
+            floatingSnackBar("$err");
+          });
+          Navigator.of(context).pop();
+          floatingSnackBar("Downloading the episode to your downloads folder");
+        },
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: appTheme.backgroundSubColor,
+          padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Padding(
+                  padding: EdgeInsets.only(top: 5),
+                  child: Row(
+                    children: [
+                      Text(
+                        "${quality['server']}",
+                        style: TextStyle(
+                          color: appTheme.accentColor,
+                          fontSize: 18,
+                          fontFamily: "Rubik",
+                        ),
+                      ),
+                      Text(
+                        "• ${quality['quality']}",
+                        style: TextStyle(
+                          color: appTheme.textMainColor,
+                          fontSize: 18,
+                          fontFamily: "Rubik",
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

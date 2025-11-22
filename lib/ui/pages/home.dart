@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
-import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/header.dart';
@@ -32,18 +31,18 @@ class _HomeState extends State<Home> {
     super.initState();
 
     //check login status
-    AniListLogin().isAnilistLoggedIn().then(
-          (loggedIn) => setState(() {
-            isLoggedIn = loggedIn;
-          }),
-        );
+    // AniListLogin().isAnilistLoggedIn().then(
+    //       (loggedIn) => setState(() {
+    //         isLoggedIn = loggedIn;
+    //       }),
+    //     );
   }
 
   List<HomePageList> recentlyWatched = [];
   // List<HomePageList> currentlyAiring = [];
 
   bool refreshing = false;
-  bool isLoggedIn = false;
+  // bool isLoggedIn = false;
 
   Future<void> getLists({String? userName}) async {
     try {
@@ -88,7 +87,8 @@ class _HomeState extends State<Home> {
     return Scaffold(
       backgroundColor: appTheme.backgroundColor,
       body: SmartRefresher(
-        controller: widget.mainNavProvider.homeRefreshController,
+        // reset the controller, to prevent error: "Dont use one controller for multiple SmartRefresher"
+        controller: widget.mainNavProvider.homeRefreshController = RefreshController(initialRefresh: false),
         onRefresh: () async {
           await widget.mainNavProvider.refresh(refreshPage: 0, fromSettings: false);
         },
@@ -128,13 +128,10 @@ class _HomeState extends State<Home> {
                     showRefreshIndication: refreshing),
                 divider(),
                 _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
-                if (isLoggedIn)
-                  Column(
-                    children: [
-                      divider(),
-                      _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
-                    ],
-                  ),
+                if (widget.mainNavProvider.loggedIn) ...[
+                  divider(),
+                  _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
+                ],
                 footSpace(),
               ],
             ),

@@ -68,7 +68,7 @@ class _WatchState extends State<Watch> {
 
       dataProvider.updateCurrentQuality(q);
 
-      await controller.initiateVideo(dataProvider.state.currentStream.link,
+      await controller.initiateVideo(dataProvider.state.currentStream.url,
           headers: dataProvider.state.currentStream.customHeaders);
 
       controller.setQuality(q);
@@ -81,7 +81,7 @@ class _WatchState extends State<Watch> {
         print("[PLAYER] Couldnt find audio tracks for this stream");
       }
     } else {
-      await controller.initiateVideo(dataProvider.state.currentStream.link, offline: true);
+      await controller.initiateVideo(dataProvider.state.currentStream.url, offline: true);
     }
 
     final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);

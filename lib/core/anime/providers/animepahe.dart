@@ -146,7 +146,7 @@ class AnimePahe extends AnimeProvider {
             VideoStream(
               quality: e['quality']! + " [${e['size']}]",
               server: e['server'] ?? "unknown",
-              link: val,
+              url: val,
               backup: false,
               subtitle: null,
               subtitleFormat: null,

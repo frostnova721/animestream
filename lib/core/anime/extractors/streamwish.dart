@@ -67,7 +67,7 @@ class StreamWish extends AnimeExtractor {
     return [
       VideoStream(
         server: serverName,
-        link: streamLink,
+        url: streamLink,
         quality: "multi-quality",
         backup: false,
         subtitle: subtitles,

@@ -63,7 +63,7 @@ class PlayerDataProvider extends ChangeNotifier {
 
   /// Get and store the qualities and audio available for the current stream
   Future<void> extractCurrentStreamQualities() async {
-    final url = _state.currentStream.link;
+    final url = _state.currentStream.url;
     final headers = _state.currentStream.customHeaders;
     String? mime;
     if(!url.contains(RegExp(r'\.(mkv|mp4|mov|webm|dash|m3u|m3u8)', caseSensitive: false))) {

@@ -86,7 +86,7 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       final q = dp.getPreferredQualityStreamFromQualities();
 
       // start the stream with the desired quality
-      await pp.playVideo(dp.state.currentStream.link,
+      await pp.playVideo(dp.state.currentStream.url,
           currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
       await pp.setQuality(q);
 

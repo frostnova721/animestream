@@ -118,7 +118,7 @@ class AniZone extends AnimeProvider {
     update([
       VideoStream(
           quality: "multi-quality",
-          link: src,
+          url: src,
           server: srcName,
           subtitle: subs.first['url'],
           subtitleFormat: subs.first['type'],

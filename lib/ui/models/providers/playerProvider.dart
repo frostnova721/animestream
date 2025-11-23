@@ -178,7 +178,7 @@ class PlayerProvider extends ChangeNotifier {
       dataProvider.updateCurrentQuality(q);
 
       // Start the video and set the preffered quality
-      await controller.initiateVideo(src.link, headers: src.customHeaders);
+      await controller.initiateVideo(src.url, headers: src.customHeaders);
 
       controller.setQuality(q);
     } else {

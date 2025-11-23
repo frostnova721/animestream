@@ -114,7 +114,7 @@ class AniPlay extends AnimeProvider {
           update([
             VideoStream(
               quality: "multi-quality",
-              link: stream['url'],
+              url: stream['url'],
               customHeaders: headers,
                subtitle: subtitleItem?['url'],
                 subtitleFormat: subtitleItem != null
@@ -133,7 +133,7 @@ class AniPlay extends AnimeProvider {
             try {
               srcs.add(VideoStream(
                 quality: "multi-quality", // yeah most times (assumptions...)
-                link: str['url'],
+                url: str['url'],
                 server: it,
                 backup: str['quality'] == "backup",
                 customHeaders: headers,

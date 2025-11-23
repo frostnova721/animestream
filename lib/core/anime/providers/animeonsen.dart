@@ -84,7 +84,7 @@ class AnimeOnsen extends AnimeProvider {
     final subtitleUrl = "https://api.animeonsen.xyz/v4/subtitles/${animeId}/en-US/${episodeNumber}";
     final result = VideoStream(
         quality: "single",
-        link: baseUrl,
+        url: baseUrl,
         server: "animeonsen",
         backup: false,
         subtitle: subtitleUrl,

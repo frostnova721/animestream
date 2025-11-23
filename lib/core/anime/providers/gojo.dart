@@ -101,7 +101,7 @@ class Gojo extends AnimeProvider {
             [
               VideoStream(
                 quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
-                link: i['url'],
+                url: i['url'],
                 server: provider,
                 backup: false,
                 subtitleFormat: SubtitleFormat.VTT.name, // gojo uses vtt mainly

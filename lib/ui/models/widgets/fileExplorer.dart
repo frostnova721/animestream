@@ -329,7 +329,7 @@ class _FileExplorerState extends State<FileExplorer> {
             ChangeNotifierProvider(
               create: (context) => PlayerDataProvider(
                 initialStreams: [],
-                initialStream: VideoStream(quality: "default", link: filepath, server: "local", backup: false),
+                initialStream: VideoStream(quality: "default", url: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
                 showTitle: filename,
                 showId: 0, // doesnt matter

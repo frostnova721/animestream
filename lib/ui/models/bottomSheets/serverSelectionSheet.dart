@@ -62,7 +62,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                 if (widget.type == ServerSheetType.download) {
                   list.forEach((element) async {
                     qualities.add({
-                      'link': element.link,
+                      'url': element.url,
                       'server': "${element.server}  ${element.backup ? "- backup" : ""}",
                       'quality': "${element.quality}"
                     });
@@ -97,7 +97,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   await getQualities(element);
                 } else {
                   qualities.add({
-                    'link': element.link,
+                    'url': element.url,
                     'server': "${element.server}  ${element.backup ? "- backup" : ""}",
                     'quality': "${element.quality}",
                     'headers': jsonEncode(element.customHeaders ?? {}),
@@ -118,7 +118,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   Future<void> getQualities(VideoStream source) async {
     List<Map<String, String>> mainList = [];
 
-    final list = await parseMasterPlaylist(source.link, customHeader: source.customHeaders);
+    final list = await parseMasterPlaylist(source.url, customHeader: source.customHeaders);
     list.qualityStreams.forEach((element) {
       final map = element.toMap();
       map['bandwidth'] = map['bandwidth']?.toString();

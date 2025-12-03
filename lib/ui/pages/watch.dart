@@ -183,6 +183,7 @@ class _WatchState extends State<Watch> {
   Timer? _tapTimer;
   int lastTapTime = 0;
   final int doubleTapThreshold = 300; // in ms
+  bool _waitingForSecondTap = false;
 
   bool _showRewindAnim = false;
   bool _showForwardAnim = false;
@@ -214,16 +215,36 @@ class _WatchState extends State<Watch> {
   }
 
   void _handleTap() {
-    if (_tapTimer != null && _tapTimer!.isActive) {
-      // Double tap
-      _tapTimer!.cancel();
+    // New Logic Baby!
+    if (_waitingForSecondTap) {
+      // event where the 2nd tap is detected
+      _waitingForSecondTap = false;
+      _tapTimer?.cancel();
       _handleDoubleTap();
-    } else {
-      // Single tap
-      _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
-        _handleSingleTap();
-      });
+      return;
     }
+
+    _handleSingleTap();
+    _waitingForSecondTap = true;
+    _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
+      // after threshold time, if no 2nd tap, treat it as succesful single tap
+      if (mounted) {
+        setState(() {
+          _waitingForSecondTap = false;
+        });
+      }
+    });
+
+    // if (_tapTimer != null && _tapTimer!.isActive) {
+    //   // Double tap
+    //   _tapTimer!.cancel();
+    //   _handleDoubleTap();
+    // } else {
+    //   // Single tap
+    //   _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
+    //     _handleSingleTap();
+    //   });
+    // }
   }
 
   void _handleSingleTap() {
@@ -350,10 +371,11 @@ class _WatchState extends State<Watch> {
                       // margin: MediaQuery.paddingOf(context),
                       child: Row(children: [
                         Expanded(
-                          // flex: 2,
+                          flex: 2,
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
+                              if(playerDataProvider.state.controlsLocked) return;
                               if (currentUserSettings?.doubleTapToSkip ?? true) {
                                 playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
                                 if (!_showRewindAnim) skipCount = 0;
@@ -371,6 +393,7 @@ class _WatchState extends State<Watch> {
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
+                               if(playerDataProvider.state.controlsLocked) return;
                               if (currentUserSettings?.doubleTapToSkip ?? true) {
                                 playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
                                 if (!_showForwardAnim) skipCount = 0;

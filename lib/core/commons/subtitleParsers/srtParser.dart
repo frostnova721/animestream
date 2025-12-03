@@ -1,3 +1,4 @@
+import 'package:animestream/core/commons/subtitleParsers/util.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 // import 'package:flutter/widgets.dart';
 
@@ -20,31 +21,16 @@ class SrtRipper {
       if (match != null) {
         if (match.group(1) != null) {
           final alignmentNumber = int.parse(match.group(1)!);
-          alignment = _getAlignmentFromNumber(alignmentNumber);
+          alignment = SubtitleParserUtil.getAlignmentFromNumber(alignmentNumber);
         }
         //  else if (match.group(2) != null) {
           // final tagName = match.group(2)!;
         // }
-        text = text.replaceAll(RegExp(r'</?\w+>|{\an\d+}'), "");
+        text = text.replaceAll(RegExp(r'</?\w+>|{\\an\d+}'), "");
       }
       subs.add(Subtitle(dialogue: text, end: end, start: start, alignment: alignment,));
     }
     return subs;
-  }
-
-  SubtitleAlignment _getAlignmentFromNumber(int number) {
-    return switch (number) {
-      1 => SubtitleAlignment.bottomLeft,
-      2 => SubtitleAlignment.bottomCenter,
-      3 => SubtitleAlignment.bottomRight,
-      4 => SubtitleAlignment.centerLeft,
-      5 => SubtitleAlignment.center,
-      6 => SubtitleAlignment.centerRight,
-      7 => SubtitleAlignment.topLeft,
-      8 => SubtitleAlignment.topCenter,
-      9 => SubtitleAlignment.topRight,
-      _ => throw Exception("Unknown position for sub")
-    };
   }
 
   Duration _parseTimestamp(String timestamp) {

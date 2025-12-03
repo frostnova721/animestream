@@ -40,7 +40,6 @@ class _DoubleTapDectectorState extends State<DoubleTapDectector> {
       _tapCount = 0;
       _lastTapTime = null;
       _lastTapOffset = null;
-
       widget.onDoubleTap.call();
     } else {
       _tapCount = 1;

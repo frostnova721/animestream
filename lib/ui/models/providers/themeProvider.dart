@@ -63,6 +63,8 @@ class AppProvider with ChangeNotifier {
     _isDark = dark;
   }
 
+  /// Set the title bar color (only works on windows)
+  /// If null, default system color is used
   void setTitlebarColor(Color? color) {
     _titleBarColor = color;
     notifyListeners();
@@ -102,10 +104,12 @@ class AppProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  /// Refresh the root Widget tree
   void justRefresh() {
     notifyListeners();
   }
 
+  /// Set the window mode to fullscreen or windowed
   Future<void> setFullScreen(bool fs) async {
     if (Platform.isAndroid) return;
       await windowManager.setFullScreen(fs);

@@ -41,7 +41,7 @@ class _SubViewerState extends State<SubViewer> {
 
   List<Subtitle> subs = [];
 
-  String activeLine = "";
+  Subtitle? activeSubtitle;
   bool areSubsLoading = true;
 
   String? _loadedSubsUrl;
@@ -115,7 +115,7 @@ class _SubViewerState extends State<SubViewer> {
         currentPosition <= subs[i].end.inMilliseconds) {
       if (mounted) {
         setState(() {
-          activeLine = subs[i].dialogue;
+          activeSubtitle = subs[i];
         });
       }
       return;
@@ -124,7 +124,7 @@ class _SubViewerState extends State<SubViewer> {
     //clear line when nothings there!
     if (mounted)
       setState(() {
-        activeLine = '';
+        activeSubtitle = null;
       });
   }
 
@@ -148,10 +148,10 @@ class _SubViewerState extends State<SubViewer> {
       alignment: Alignment.bottomCenter,
       margin: EdgeInsets.only(bottom: widget.settings.bottomMargin),
       child: Container(
-        width: MediaQuery.of(context).size.width / 1.6,
-        alignment: Alignment.bottomCenter,
+        width: MediaQuery.of(context).size.width / 1.4,
+        alignment: getCurrentLineAlignment(),
         child: SubtitleText(
-          text: areSubsLoading ? "Loading Subs" : activeLine,
+          text: areSubsLoading ? "Loading Subs" : activeSubtitle?.dialogue ?? "",
           style: subTextStyle(),
           strokeColor: widget.settings.strokeColor,
           strokeWidth: widget.settings.strokeWidth,
@@ -161,6 +161,29 @@ class _SubViewerState extends State<SubViewer> {
         ),
       ),
     );
+  }
+
+  Alignment getCurrentLineAlignment() {
+    switch (activeSubtitle?.alignment ?? SubtitleAlignment.bottomCenter) {
+      case SubtitleAlignment.topLeft:
+        return Alignment.topLeft;
+      case SubtitleAlignment.topCenter:
+        return Alignment.topCenter;
+      case SubtitleAlignment.topRight:
+        return Alignment.topRight;
+      case SubtitleAlignment.centerLeft:
+        return Alignment.centerLeft;
+      case SubtitleAlignment.center:
+        return Alignment.center;
+      case SubtitleAlignment.centerRight:
+        return Alignment.centerRight;
+      case SubtitleAlignment.bottomLeft:
+        return Alignment.bottomLeft;
+      case SubtitleAlignment.bottomCenter:
+        return Alignment.bottomCenter;
+      case SubtitleAlignment.bottomRight:
+        return Alignment.bottomRight;
+    }
   }
 
   @override

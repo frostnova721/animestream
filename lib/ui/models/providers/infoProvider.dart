@@ -286,7 +286,6 @@ class InfoProvider extends ChangeNotifier {
     final links = await sourceManager.getAnimeEpisodes(selectedSource.identifier, match[0]['alias']!);
     paginate(links);
     _foundName = match[0]['name'];
-    print(foundName == query);
     notifyListeners();
   }
 

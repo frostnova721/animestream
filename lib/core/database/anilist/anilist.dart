@@ -352,7 +352,7 @@ class Anilist extends Database {
 
     if (res.hasException) {
       print(res.exception.toString());
-      throw Exception("ERR_COULDNT_FETCH");
+      throw Exception("ERR_COULDNT_FETCH_ANILIST_DATA");
     }
 
     if (type == null) return res.data;

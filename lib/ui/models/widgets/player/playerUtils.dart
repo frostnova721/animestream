@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:animestream/core/commons/utils.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
@@ -50,6 +52,20 @@ class PlayerLoadingWidget extends StatelessWidget {
     super.key,
   });
 
+  // Why not have some fun :)
+  final messages = const [
+    "Loading Your Anime...",
+    "Tweaking the pixels...",
+    "Setting up the fun...",
+    "Tried Oreshura? Loading anyway...",
+    "Just a moment, Senpai...",
+    ":)",
+    "Cooking up the playback...",
+    "Hold on! Will Ya?",
+    "Aligning the frames...",
+    "anime...stream...ing...",
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -65,7 +81,7 @@ class PlayerLoadingWidget extends StatelessWidget {
                 opacity: AlwaysStoppedAnimation(0.6),
               )),
           Text(
-            "Loading Your Anime...",
+            messages[Random().nextInt(messages.length)],
             style: TextStyle(color: Colors.grey, fontFamily: "Rubik", fontWeight: FontWeight.bold),
           )
         ],

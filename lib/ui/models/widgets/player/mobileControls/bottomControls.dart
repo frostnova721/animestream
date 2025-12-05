@@ -5,6 +5,7 @@ import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/subtitle.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class BottomControls extends StatelessWidget {
@@ -239,14 +240,14 @@ class BottomControls extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                    // IconButton(
-                    //   onPressed: () async {
-                    //     await playerProvider.setPip(!playerProvider.state.pip);
-                    //   },
-                    //   icon: Icon(Icons.picture_in_picture_alt_rounded),
-                    //   tooltip: playerProvider.state.currentViewMode.desc,
-                    //   color: Colors.white,
-                    // ),
+                    IconButton(
+                      onPressed: () async {
+                        await playerProvider.setPip(!playerProvider.state.pip);
+                      },
+                      icon: Icon(Icons.picture_in_picture_alt_rounded),
+                      tooltip: playerProvider.state.currentViewMode.desc,
+                      color: Colors.white,
+                    ),
                     // IconButton(
                     //   onPressed: () async {
                     //     showModalBottomSheet(

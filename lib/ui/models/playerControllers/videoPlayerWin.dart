@@ -115,7 +115,7 @@ class VideoPlayerWindowsWrapper implements VideoController {
   }
 
   @override
-  void setQuality(dynamic) {
+  void setQuality(QualityStream qs) {
     // TODO: implement setQuality, not done cus WinVideoPlayerController doesnt support streams
   }
   

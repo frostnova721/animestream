@@ -77,12 +77,16 @@ class InfoProvider extends ChangeNotifier {
   List<AlternateDatabaseId> get altDatabases => _altDatabases;
   List<EpisodeDetails> get epLinks => _epLinks;
 
+  /// Current [MediaStatus] in the user's list
   MediaStatus? get mediaListStatus => _mediaListStatus;
 
+  /// The name found from the search in the source
   String? get foundName => _foundName;
 
+  /// Currently selected source
   ProviderDetails get selectedSource => _selectedSource;
 
+  /// The Anime info
   DatabaseInfo get data => _data;
 
   bool _initCalled = false;
@@ -162,9 +166,11 @@ class InfoProvider extends ChangeNotifier {
 
     await _getInfo(id);
 
-    loadPreferences();
-    await getEpisodes();
-    await getWatched();
+    await loadPreferences();
+
+    // load em concurrently (fixes the delay in loading the progress)
+    getWatched();
+    getEpisodes();
   }
 
   /// Fetch preferences
@@ -200,6 +206,9 @@ class InfoProvider extends ChangeNotifier {
     } catch (err) {
       floatingSnackBar("Couldn't fetch watch progress.");
       print(err.toString());
+      if (currentUserSettings?.showErrors ?? false) {
+        floatingSnackBar(err.toString(), waitForPreviousToFinish: true);
+      }
     }
 
     notifyListeners();
@@ -249,6 +258,7 @@ class InfoProvider extends ChangeNotifier {
     _epLinks = links;
 
     if (_epLinks.length > 24) {
+      // We dealing with multiple pages
       final totalPages = (_epLinks.length / 24).ceil();
       int remainingItems = _epLinks.length;
       for (int h = 0; h < totalPages; h++) {
@@ -264,6 +274,7 @@ class InfoProvider extends ChangeNotifier {
         visibleEpList.add(page);
       }
     } else {
+      // Single pages case
       List<Map<String, dynamic>> pageOne = [];
       for (int i = 0; i < _epLinks.length; i++) {
         if (preferDubs && (epLinks[i].hasDub ?? false) || !preferDubs)
@@ -301,22 +312,35 @@ class InfoProvider extends ChangeNotifier {
       notifyListeners();
     } catch (err) {
       print(err.toString());
-      try {
-        await _search(data.title['romaji'] ?? '');
-      } catch (err) {
-        print(err.toString());
-        _epSearcherror = true;
-        notifyListeners();
-        if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) {
-          floatingSnackBar(err.toString());
+
+      // try again with romaji title if english title failed
+
+      final hasEnglishTitle = data.title['english'] != null;
+      final didUseManualQuery = _manualSearchQuery != null;
+
+      if (hasEnglishTitle && !didUseManualQuery) {
+        // try once more with romaji title if english title failed
+        try {
+          await _search(data.title['romaji'] ?? '');
+          notifyListeners();
+          return;
+        } catch (e) {
+          print(e.toString());
         }
+      }
+
+      _epSearcherror = true;
+      notifyListeners();
+      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) {
+        floatingSnackBar(err.toString());
       }
     }
   }
 
   void clearLastWatchDuration() async {
     _lastWatchedDurationMap = {};
-    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(lastWatchDuration: _lastWatchedDurationMap));
+    await saveAnimeSpecificPreference(
+        id.toString(), AnimeSpecificPreference(lastWatchDuration: _lastWatchedDurationMap));
     notifyListeners();
   }
 

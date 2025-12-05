@@ -23,6 +23,11 @@ class UpdateCheckResult {
     required this.downloadLink,
     required this.description,
   });
+
+  @override
+  String toString() {
+    return 'UpdateCheckResult(latestVersion: $latestVersion, currentVersion: $currentVersion, preRelease: $preRelease, downloadLink: $downloadLink, description: $description)';
+  }
 }
 
 /// Alright! the versioning is like: v?n.n.n(-stage?)
@@ -44,28 +49,33 @@ Future<UpdateCheckResult?> checkForUpdates() async {
     }
 
     bool triggerSheet = false; // Change this flag for triggering the sheet for debugging
-    int? currentVersionJoined, latestVersionJoined;
+    // int? currentVersionJoined, latestVersionJoined;
 
     final latestVersionCode = latestVersion.replaceAll('v', '');
     final versionNumber = latestVersionCode.split("-")[0];
 
+    bool isAnUpgrade = false;
+
     try {
-      //in this block, we just trying to join the numbers (eg: 1.3.5 to 135)
-      latestVersionJoined = int.tryParse(versionNumber.split(".").join());
+      isAnUpgrade = _checkIfTheNewVersionIsActuallyAnUpgrade(latestVersionCode, currentVersion);
 
-      currentVersionJoined = int.tryParse(currentVersion.split('-').first.split('.').join());
 
-      if (latestVersionJoined == null || currentVersionJoined == null) {
-        print("[UPDATE-CHECK] Updation check failed. Got null integers from either $currentVersion or $versionNumber");
-        return null;
-      }
+      //in this block, we just trying to join the numbers (eg: 1.3.5 to 135) [This method is deprecated now]
+      // latestVersionJoined = int.tryParse(versionNumber.split(".").join());
+
+      // currentVersionJoined = int.tryParse(currentVersion.split('-').first.split('.').join());
+
+      // if (latestVersionJoined == null || currentVersionJoined == null) {
+      //   print("[UPDATE-CHECK] Updation check failed. Got null integers from either $currentVersion or $versionNumber");
+      //   return null;
+      // }
     } catch (err) {
       // old version check logic as a backup method!
       if (currentVersion.split("-").firstOrNull != versionNumber) triggerSheet = true;
     }
 
     // we can assert not null since we do null check in try statement & the comparison wont occur if theres an issue
-    if (triggerSheet || (currentVersionJoined! < latestVersionJoined!)) {
+    if (triggerSheet || isAnUpgrade) {
       print("[UPDATE-CHECK] UPDATE AVAILABLE!!!");
       final List<dynamic> apkItem = releasesRes['assets']
           .where((item) => item['name'] == (Platform.isAndroid ? "app-release.apk" : "animestream-x86_64.exe"))
@@ -79,8 +89,10 @@ Future<UpdateCheckResult?> checkForUpdates() async {
         downloadLink: downloadLink,
         description: description,
       );
-    } else
+    } else {
+      print("[UPDATE-CHECK] APP IS ALREADY UP-TO-DATE!");
       return null;
+    }
   } catch (err) {
     // graceful quitting
     print("[UPDATE-CHECK] Update check failed. \n$err");
@@ -88,13 +100,54 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   }
 }
 
-showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre) async {
+// Naming Conventions? 
+bool _checkIfTheNewVersionIsActuallyAnUpgrade(String newVersion, String oldVersion) {
+  final oldParts = oldVersion.split('-').first.split('.');
+  final newParts = newVersion.split('-').first.split('.');
+
+  if (oldParts.length < 3 || newParts.length < 3) {
+    return false;
+  }
+
+  // Parse the version parts to integers
+  final (oldMajor, oldMinor, oldPatch) =
+      (int.tryParse(oldParts[0]), int.tryParse(oldParts[1]), int.tryParse(oldParts[2]));
+  final (newMajor, newMinor, newPatch) =
+      (int.tryParse(newParts[0]), int.tryParse(newParts[1]), int.tryParse(newParts[2]));
+
+  // probably redundant but yeah!
+  if (oldMajor == null ||
+      oldMinor == null ||
+      oldPatch == null ||
+      newMajor == null ||
+      newMinor == null ||
+      newPatch == null) {
+    return false;
+  }
+
+  // Compare by the parts
+  if (newMajor > oldMajor) {
+    return true;
+  } else if (newMajor == oldMajor) {
+    if (newMinor > oldMinor) {
+      return true;
+    } else if (newMinor == oldMinor) {
+      if (newPatch > oldPatch) {
+        return true;
+      }
+    }
+  }
+
+  return false;
+}
+
+showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre, {bool forceTrigger = false }) async {
   //dont show the sheet if recievePreRelease if off and release is a pre release
   if (pre && pre != (currentUserSettings?.receivePreReleases! ?? false)) {
     return;
   }
 
-  if (kDebugMode) {
+  if (kDebugMode && !forceTrigger) {
     return;
   }
 

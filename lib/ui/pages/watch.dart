@@ -7,6 +7,7 @@ import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/doubleTapDectector.dart';
 import 'package:animestream/ui/models/widgets/player/controls.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
+import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -38,17 +39,21 @@ class _WatchState extends State<Watch> {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
-    SystemChrome.setPreferredOrientations([
-      DeviceOrientation.landscapeLeft,
-      DeviceOrientation.landscapeRight,
-    ]);
+    setWatchMode();
 
     controller = widget.controller;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initialize();
     });
+  }
+
+  void setWatchMode() {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    SystemChrome.setPreferredOrientations([
+      DeviceOrientation.landscapeLeft,
+      DeviceOrientation.landscapeRight,
+    ]);
   }
 
   void _initialize() async {
@@ -99,6 +104,14 @@ class _WatchState extends State<Watch> {
     setState(() {
       isInitiated = true;
     });
+
+    if(Platform.isAndroid) {
+      (controller as BetterPlayerController).addEventsListener((ev) {
+        if(ev.betterPlayerEventType == BetterPlayerEventType.pipStop) {
+          setWatchMode();
+        }
+      });
+    }
 
     controller.addListener(_listener);
   }
@@ -389,7 +402,7 @@ class _WatchState extends State<Watch> {
                           flex: 1,
                         ),
                         Expanded(
-                          // flex: 2,
+                          flex: 2,
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {

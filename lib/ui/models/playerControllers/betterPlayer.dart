@@ -9,6 +9,8 @@ class BetterPlayerWrapper implements VideoController {
 
   final List<VoidCallback?> listeners = [];
 
+  final key = GlobalKey();
+
   static final _config = BetterPlayerConfiguration(
     aspectRatio: 16 / 9,
     fit: BoxFit.contain,
@@ -28,7 +30,9 @@ class BetterPlayerWrapper implements VideoController {
       }
     },
     autoDispose: true,
-    controlsConfiguration: BetterPlayerControlsConfiguration(showControls: false),
+    controlsConfiguration: BetterPlayerControlsConfiguration(
+      showControls: false,
+    ),
   );
 
   @override
@@ -88,7 +92,7 @@ class BetterPlayerWrapper implements VideoController {
 
   @override
   Widget getWidget() {
-    return BetterPlayer(controller: controller);
+    return BetterPlayer(controller: controller, key: key);
   }
 
   @override
@@ -113,7 +117,12 @@ class BetterPlayerWrapper implements VideoController {
   }
 
   @override
-  Future<void> setPip(bool value) async {}
+  Future<void> setPip(bool value) async {
+    if (value)
+      controller.enablePictureInPicture(key);
+    else
+      controller.disablePictureInPicture();
+  }
 
   @override
   Future<void> setAudioTrack(AudioStream aud) async {

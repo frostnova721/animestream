@@ -128,7 +128,7 @@ class PlayerProvider extends ChangeNotifier {
   /// Set pip mode
   Future<void> setPip(bool val) async {
     print("[PLAYER] set pip: $val");
-    _state = _state.copyWith(pip: val);
+    // _state = _state.copyWith(pip: val);
     await controller.setPip(val);
     notifyListeners();
   }

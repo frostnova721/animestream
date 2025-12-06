@@ -70,7 +70,7 @@ class BottomControls extends StatelessWidget {
                                           onPressed: () async {
                                             // final src = dataProvider.state.qualities[index].url;
                                             dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                            playerProvider.controller.setQuality(dataProvider.state.qualities[index]);
+                                            playerProvider.setQuality(dataProvider.state.qualities[index]);
                                             // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
                                             // dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
                                             // playerProvider.playVideo(src,
@@ -245,7 +245,7 @@ class BottomControls extends StatelessWidget {
                         await playerProvider.setPip(!playerProvider.state.pip);
                       },
                       icon: Icon(Icons.picture_in_picture_alt_rounded),
-                      tooltip: playerProvider.state.currentViewMode.desc,
+                      tooltip: "Picture in Picture",
                       color: Colors.white,
                     ),
                     // IconButton(
@@ -339,6 +339,7 @@ class BottomControls extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height / 2,
       child: AlertDialog(
+        backgroundColor: appTheme.modalSheetBackgroundColor,
           content: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -349,45 +350,46 @@ class BottomControls extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),
             ),
           ),
-          StatefulBuilder(
-            builder: (context, setState) => Container(
-              height: 230,
-              width: 250,
-              child: ListView.builder(
-                itemCount: playbackSpeeds.length,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return Container(
-                    margin: EdgeInsets.only(bottom: 5),
-                    clipBehavior: Clip.hardEdge,
-                    decoration: BoxDecoration(
-                      color: appTheme.backgroundSubColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {
-                          pp.setSpeed(playbackSpeeds[index]);
-                          setState(() {});
-                        },
-                        child: Row(
-                          children: [
-                            Radio<double>(
-                              value: playbackSpeeds[index],
-                              groupValue: pp.state.speed,
-                              onChanged: (val) {
-                                pp.setSpeed(val ?? 1);
-                                setState(() {});
-                              },
-                            ),
-                            Text(playbackSpeeds[index].toString() + "x"),
-                          ],
+          Expanded(
+            child: StatefulBuilder(
+              builder: (context, setState) => Container(
+                // height: 230,
+                width: 250,
+                child: ListView.builder(
+                  itemCount: playbackSpeeds.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                      margin: EdgeInsets.only(bottom: 5),
+                      clipBehavior: Clip.hardEdge,
+                      decoration: BoxDecoration(
+                        color: appTheme.backgroundSubColor,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: () {
+                            pp.setSpeed(playbackSpeeds[index]);
+                            setState(() {});
+                          },
+                          child: Row(
+                            children: [
+                              Radio<double>(
+                                value: playbackSpeeds[index],
+                                groupValue: pp.state.speed,
+                                onChanged: (val) {
+                                  pp.setSpeed(val ?? 1);
+                                  setState(() {});
+                                },
+                              ),
+                              Text(playbackSpeeds[index].toString() + "x"),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ),

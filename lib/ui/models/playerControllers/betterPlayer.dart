@@ -17,7 +17,6 @@ class BetterPlayerWrapper implements VideoController {
     expandToFill: true,
     autoPlay: true,
     errorBuilder: (context, errorMessage) {
-      // TODO: Improve this
       return Center(
           child: Text(
         "Whoops! Ran into some errors playing this video!\nDetails:\n$errorMessage",
@@ -134,19 +133,27 @@ class BetterPlayerWrapper implements VideoController {
   @override
   void setQuality(QualityStream qs) async {
     final track = _qsToAsmsTrack(qs);
+    if (track == null) {
+      return print("[ERROR] No matching track found for '${qs.resolution}', cannot set quality.");
+    }
+
     print("Found matching track: $track");
     return controller.setTrack(track);
   }
 
-  BetterPlayerAsmsTrack _qsToAsmsTrack(QualityStream qs) {
-    return controller.betterPlayerAsmsTracks.firstWhere((element) {
-      final resMatch = element.height == (int.tryParse(qs.resolution.split("x").last) ?? 0);
-      final bwMatch = element.bitrate == (qs.bandwidth ?? 0);
-      return resMatch && bwMatch;
-    }, orElse: () {
-      print("[ERROR] No matching track found for '${qs.resolution}', defaulting to first track.");
-      return controller.betterPlayerAsmsTracks.first;
-    });
+  BetterPlayerAsmsTrack? _qsToAsmsTrack(QualityStream qs) {
+    try {
+      return controller.betterPlayerAsmsTracks.firstWhere((element) {
+        final resMatch = element.height == (int.tryParse(qs.resolution.split("x").last) ?? 0);
+        final bwMatch = element.bitrate == (qs.bandwidth ?? 0);
+        return resMatch && bwMatch;
+      }, orElse: () {
+        print("[ERROR] No matching track found for '${qs.resolution}', defaulting to first track.");
+        return controller.betterPlayerAsmsTracks.first;
+      });
+    } catch (err) {
+      return null;
+    }
     // return BetterPlayerAsmsTrack('', int.tryParse(qs.resolution.split("x").first) ?? 0,
     //     int.tryParse(qs.resolution.split("x").last) ?? 0, qs.bandwidth ?? 0, 0, '', '');
   }

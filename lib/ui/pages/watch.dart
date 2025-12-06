@@ -5,6 +5,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/doubleTapDectector.dart';
+import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
 import 'package:animestream/ui/models/widgets/player/controls.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
 import 'package:better_player/better_player.dart';
@@ -105,15 +106,26 @@ class _WatchState extends State<Watch> {
       isInitiated = true;
     });
 
-    if(Platform.isAndroid) {
-      (controller as BetterPlayerController).addEventsListener((ev) {
-        if(ev.betterPlayerEventType == BetterPlayerEventType.pipStop) {
-          setWatchMode();
-        }
-      });
-    }
-
     controller.addListener(_listener);
+
+    // Since pip is only for android! (f* IOS)
+    if (Platform.isAndroid) {
+      try {
+        // quirky hack... but we gotta do what we gotta do
+        (controller as BetterPlayerWrapper).controller.addEventsListener((ev) {
+          if (ev.betterPlayerEventType == BetterPlayerEventType.pipStop) {
+            // The delay is required (cus its ignored without the delay for some reason)
+            Future.delayed(Duration(milliseconds: 200), () {
+              if (mounted) {
+                setWatchMode();
+              }
+            });
+          }
+        });
+      } catch (e) {
+        print("[PLAYER] PiP listener couldnt be added: $e");
+      }
+    }
   }
 
   void _listener() {
@@ -314,8 +326,12 @@ class _WatchState extends State<Watch> {
           padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
           child: Listener(
             onPointerHover: (event) {
+              // show controls on mouse movement
+              playerProvider.toggleControlsVisibility(action: true);
+              hideControlsOnTimeout(playerDataProvider, playerProvider);
+
               // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
-              if (playerProvider.state.controlsVisible) return;
+              // if (playerProvider.state.controlsVisible) return;
               if (hidePointer) {
                 setState(() {
                   hidePointer = false;
@@ -388,7 +404,8 @@ class _WatchState extends State<Watch> {
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
-                              if(playerDataProvider.state.controlsLocked) return;
+                               // windows shouldnt be having double tap to skip functionality
+                              if (playerDataProvider.state.controlsLocked || Platform.isWindows) return;
                               if (currentUserSettings?.doubleTapToSkip ?? true) {
                                 playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
                                 if (!_showRewindAnim) skipCount = 0;
@@ -406,7 +423,8 @@ class _WatchState extends State<Watch> {
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
-                               if(playerDataProvider.state.controlsLocked) return;
+                              // windows shouldnt be having double tap to skip functionality
+                              if (playerDataProvider.state.controlsLocked || Platform.isWindows) return;
                               if (currentUserSettings?.doubleTapToSkip ?? true) {
                                 playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
                                 if (!_showForwardAnim) skipCount = 0;

@@ -40,6 +40,8 @@ class PlayerSettingState extends State<PlayerSetting> {
 
   late bool enableSuperSpeeds;
   late bool doubleTapToSkip;
+  late bool enablePipOnMinimize;
+  late bool autoOpEdSkip;
 
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
@@ -52,6 +54,8 @@ class PlayerSettingState extends State<PlayerSetting> {
       megaSkipDurationSliderValue = megaSkipDuration!.toDouble();
       enableSuperSpeeds = settings.enableSuperSpeeds ?? false;
       doubleTapToSkip = settings.doubleTapToSkip ?? true;
+      enablePipOnMinimize = settings.enablePipOnMinimize ?? false;
+      autoOpEdSkip = settings.autoOpEdSkip ?? false;
     });
   }
 
@@ -248,19 +252,41 @@ class PlayerSettingState extends State<PlayerSetting> {
                               ),
                             ),
                           ),
-                          toggleItem("Enable super speeds", enableSuperSpeeds,
-                              description: "Enable extra player speeds", () {
-                            enableSuperSpeeds = !enableSuperSpeeds;
-                            writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
-                          }),
                           ToggleItem(
+                              label: "Enable super speeds",
+                              value: enableSuperSpeeds,
+                              description: "Enable extra player speeds",
                               onTapFunction: () {
-                                doubleTapToSkip = !doubleTapToSkip;
-                                writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
-                              },
-                              label: "Double tap to seek",
-                              description: "Double tap left/right to jump $skipDuration seconds",
-                              value: doubleTapToSkip)
+                                enableSuperSpeeds = !enableSuperSpeeds;
+                                writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
+                              }),
+                          ToggleItem(
+                            onTapFunction: () {
+                              doubleTapToSkip = !doubleTapToSkip;
+                              writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
+                            },
+                            label: "Double tap to seek",
+                            description: "Double tap left/right to jump $skipDuration seconds",
+                            value: doubleTapToSkip,
+                          ),
+                          ToggleItem(
+                            label: "Auto Picture-in-Picture",
+                            description: "Enter PiP automatically when minimized",
+                            value: enablePipOnMinimize,
+                            onTapFunction: () {
+                              enablePipOnMinimize = !enablePipOnMinimize;
+                              writeSettings(SettingsModal(enablePipOnMinimize: enablePipOnMinimize));
+                            },
+                          ),
+                          ToggleItem(
+                            label: "Auto Op/Ed Skip",
+                            description: "Auto skip opening and ending themes",
+                            value: autoOpEdSkip,
+                            onTapFunction: () {
+                              autoOpEdSkip = !autoOpEdSkip;
+                              writeSettings(SettingsModal(autoOpEdSkip: autoOpEdSkip));
+                            },
+                          ),
                         ],
                       ),
                     )

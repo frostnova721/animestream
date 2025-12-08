@@ -3,6 +3,8 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/preferences.dart';
+import 'package:animestream/core/database/aniskip/aniskip.dart';
+import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
@@ -66,7 +68,7 @@ class PlayerDataProvider extends ChangeNotifier {
     final url = _state.currentStream.url;
     final headers = _state.currentStream.customHeaders;
     String? mime;
-    if(!url.contains(RegExp(r'\.(mkv|mp4|mov|webm|dash|m3u|m3u8)', caseSensitive: false))) {
+    if (!url.contains(RegExp(r'\.(mkv|mp4|mov|webm|dash|m3u|m3u8)', caseSensitive: false))) {
       //get mime if none is mentioned
       mime = await getMediaMimeType(url, headers);
       print(mime);
@@ -76,9 +78,7 @@ class PlayerDataProvider extends ChangeNotifier {
       _state = _state.copyWith(qualities: master.qualityStreams, audioTracks: master.audioStreams);
     } else {
       _state = _state.copyWith(
-        qualities: [
-          QualityStream(url: url, resolution: 'default', quality: _state.currentStream.quality)
-        ],
+        qualities: [QualityStream(url: url, resolution: 'default', quality: _state.currentStream.quality)],
       );
     }
     notifyListeners();
@@ -179,6 +179,24 @@ class PlayerDataProvider extends ChangeNotifier {
     });
   }
 
+  /// Get skip times for current episode
+  Future<void> getSkipTimesForCurrentEpisode({double videoDuration = 0}) async {
+    final malId = altDatabases.where((element) => element.database == Databases.mal).firstOrNull?.id;
+    if (malId == null) {
+      print("No MAL id found for skip times");
+      return;
+    }
+    final episodeNumber = epLinks[_state.currentEpIndex].episodeNumber;
+    final skipTimes = await AniSkip().getSkipTimes(malId, episodeNumber, episodeLength: videoDuration / 1000);
+    print(skipTimes);
+    if (skipTimes == null) {
+      print("No skip times found");
+      return;
+    }
+
+    _state = _state.copyWith(opSkip: skipTimes.op, edSkip: skipTimes.ed);
+  }
+
   /// Update subtitle settings
   void updateSubtitleSettings(SubtitleSettings settings) {
     subtitleSettings = settings;
@@ -220,7 +238,7 @@ class PlayerDataProviderState {
 
   /// Control's lock state
   final bool controlsLocked;
-  
+
   /// Available qualities for current stream
   final List<QualityStream> qualities;
 
@@ -257,6 +275,10 @@ class PlayerDataProviderState {
   /// Whether subtitle settings have been inited
   final bool subsInited;
 
+  final SkipInterval? opSkip;
+
+  final SkipInterval? edSkip;
+
   PlayerDataProviderState({
     required this.streams,
     required this.currentStream,
@@ -273,6 +295,8 @@ class PlayerDataProviderState {
     required this.audioTracks,
     required this.currentAudioTrack,
     this.subsInited = false,
+    this.opSkip = null,
+    this.edSkip = null,
   });
 
   PlayerDataProviderState copyWith({
@@ -292,7 +316,9 @@ class PlayerDataProviderState {
     int? sliderValue,
     bool? subsInited,
     List<AudioStream>? audioTracks,
-  AudioStream? currentAudioTrack,
+    AudioStream? currentAudioTrack,
+    SkipInterval? opSkip,
+    SkipInterval? edSkip,
   }) {
     return PlayerDataProviderState(
       streams: streams ?? this.streams,
@@ -310,6 +336,8 @@ class PlayerDataProviderState {
       subsInited: subsInited ?? this.subsInited,
       audioTracks: audioTracks ?? this.audioTracks,
       currentAudioTrack: currentAudioTrack ?? this.currentAudioTrack,
+      opSkip: opSkip ?? this.opSkip,
+      edSkip: edSkip ?? this.edSkip,
     );
   }
 }

@@ -30,19 +30,21 @@ class ToggleItem extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: textStyle(),
-                  ),
-                  if (description != null)
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     Text(
-                      description!,
-                      style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
+                      label,
+                      style: textStyle(),
                     ),
-                ],
+                    if (description != null)
+                      Text(
+                        description!,
+                        style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
+                      ),
+                  ],
+                ),
               ),
               Switch(
                 value: value,

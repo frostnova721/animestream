@@ -34,7 +34,7 @@ class Watch extends StatefulWidget {
   State<Watch> createState() => _WatchState();
 }
 
-class _WatchState extends State<Watch> {
+class _WatchState extends State<Watch> with WidgetsBindingObserver {
   late VideoController controller;
 
   @override
@@ -47,6 +47,21 @@ class _WatchState extends State<Watch> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initialize();
     });
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if(state == AppLifecycleState.inactive && (currentUserSettings?.enablePipOnMinimize ?? false)) {
+      context.read<PlayerProvider>().setPip(true);
+    }
+    // else if(state == AppLifecycleState.resumed) {
+    //   context.read<PlayerProvider>().setPip(false);
+    //   setWatchMode();
+    // }
   }
 
   void setWatchMode() {
@@ -78,6 +93,9 @@ class _WatchState extends State<Watch> {
           headers: dataProvider.state.currentStream.customHeaders);
 
       controller.setQuality(q);
+
+      // Fetch those skips
+      dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
 
       if (dataProvider.state.audioTracks.isNotEmpty) {
         // gamble on this setting :)
@@ -184,11 +202,34 @@ class _WatchState extends State<Watch> {
       }
       playerProvider.playPreloadedEpisode(dataProvider);
     }
+
+    if((currentUserSettings?.autoOpEdSkip ?? false) && !_isSkippingOpOrEd) {
+      final isAtOp = dataProvider.state.opSkip != null &&
+          currentPositionInSeconds >= dataProvider.state.opSkip!.start &&
+          currentPositionInSeconds <= dataProvider.state.opSkip!.end;
+
+      final isAtEd = dataProvider.state.edSkip != null &&
+          currentPositionInSeconds >= dataProvider.state.edSkip!.start &&
+          currentPositionInSeconds <= dataProvider.state.edSkip!.end-1;
+
+      if(isAtOp) {
+        _isSkippingOpOrEd = true;
+        print("[PLAYER] Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
+        playerProvider.fastForward(dataProvider.state.opSkip!.end - currentPositionInSeconds + 1).then((_) => _isSkippingOpOrEd = false);
+      } else if(isAtEd) {
+        _isSkippingOpOrEd = true;
+        print("[PLAYER] Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
+        playerProvider.fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds).then((_) => _isSkippingOpOrEd = false);
+      }
+    } 
   }
 
-  void hideControlsOnTimeout(PlayerDataProvider dp, PlayerProvider pp) {
+  // Mutex to avoid multiple skips at once
+  bool _isSkippingOpOrEd = false;
+
+  void hideControlsOnTimeout(PlayerDataProvider dp, PlayerProvider pp, { int timeoutSeconds = 5 }) {
     if (_controlsTimer == null && (controller.isPlaying ?? false)) {
-      _controlsTimer = Timer(Duration(seconds: 5), () {
+      _controlsTimer = Timer(Duration(seconds: timeoutSeconds), () {
         if (controller.isPlaying ?? false) {
           pp.toggleControlsVisibility(action: false);
         }
@@ -328,7 +369,7 @@ class _WatchState extends State<Watch> {
             onPointerHover: (event) {
               // show controls on mouse movement
               playerProvider.toggleControlsVisibility(action: true);
-              hideControlsOnTimeout(playerDataProvider, playerProvider);
+              hideControlsOnTimeout(playerDataProvider, playerProvider, timeoutSeconds: 2);
 
               // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
               // if (playerProvider.state.controlsVisible) return;
@@ -538,8 +579,9 @@ class _WatchState extends State<Watch> {
       controller.dispose();
       _controlsTimer?.cancel();
       _tapTimer?.cancel();
-
-      super.dispose();
     }
+
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

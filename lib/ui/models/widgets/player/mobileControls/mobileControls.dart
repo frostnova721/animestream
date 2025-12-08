@@ -208,9 +208,21 @@ class _MobileControlsState extends State<MobileControls> {
   }
 
   ElevatedButton megaSkipButton() {
+    int posInSec = (provider.controller.position! / 1000).toInt();
+    final isAtOp = dataProvider.state.opSkip != null &&
+        posInSec >= dataProvider.state.opSkip!.start &&
+        posInSec <= dataProvider.state.opSkip!.end;
+    final isAtEd = dataProvider.state.edSkip != null &&
+        posInSec >= dataProvider.state.edSkip!.start &&
+        posInSec <= dataProvider.state.edSkip!.end;
+
     return ElevatedButton(
       onPressed: () {
-        provider.fastForward(megaSkipDuration!);
+        provider.fastForward(isAtOp
+            ? dataProvider.state.opSkip!.end -  posInSec
+            : isAtEd
+                ? dataProvider.state.edSkip!.end - posInSec
+                : megaSkipDuration!);
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color.fromARGB(68, 0, 0, 0),
@@ -226,7 +238,11 @@ class _MobileControlsState extends State<MobileControls> {
             Padding(
               padding: const EdgeInsets.only(right: 5),
               child: Text(
-                "+$megaSkipDuration",
+                isAtOp
+                    ? "Skip Op"
+                    : isAtEd
+                        ? "Skip Ed"
+                        : "+$megaSkipDuration",
                 style: TextStyle(
                   color: Colors.white,
                   fontFamily: "Rubik",
@@ -266,7 +282,9 @@ class _MobileControlsState extends State<MobileControls> {
   }
 
   Expanded topControls() {
-    final epTitle = provider.isOffline ? 'Episode ${dataProvider.state.currentEpIndex + 1}' : dataProvider.epLinks[dataProvider.state.currentEpIndex].episodeTitle;
+    final epTitle = provider.isOffline
+        ? 'Episode ${dataProvider.state.currentEpIndex + 1}'
+        : dataProvider.epLinks[dataProvider.state.currentEpIndex].episodeTitle;
     return Expanded(
       child: Container(
         alignment: Alignment.topCenter,
@@ -294,7 +312,10 @@ class _MobileControlsState extends State<MobileControls> {
                           Container(
                             padding: const EdgeInsets.only(left: 20, top: 5),
                             alignment: Alignment.topLeft,
-                            child: Text((epTitle == null || epTitle.isEmpty) ? "Episode ${dataProvider.state.currentEpIndex + 1}" : epTitle,
+                            child: Text(
+                                (epTitle == null || epTitle.isEmpty)
+                                    ? "Episode ${dataProvider.state.currentEpIndex + 1}"
+                                    : epTitle,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontFamily: 'NotoSans',

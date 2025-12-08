@@ -90,6 +90,8 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
           currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
       await pp.setQuality(q);
 
+      dp.getSkipTimesForCurrentEpisode(videoDuration: (pp.controller.duration ?? 0).toDouble());
+
       dp.update(dp.state.copyWith(
         currentQuality: q,
         currentEpIndex: index,

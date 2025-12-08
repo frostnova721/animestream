@@ -6,25 +6,67 @@ import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 
 class SettingsModal {
+  /// Skip duration in seconds for the player
   final int? skipDuration;
+
+  /// Mega skip duration in seconds for the player
   final int? megaSkipDuration;
+
+  /// Error display errors as snackbars
   final bool? showErrors;
+
+  /// Enable pre-release update notifications
   final bool? receivePreReleases;
+
+  /// AMOLED background for dark mode
   final bool? amoledBackground;
+
+  /// Preferred quality for the player
   final String? preferredQuality; // 1080p | 720p |480p | 360p as string
+
+  /// The trasparency of the homescreen navbar
   final double? navbarTranslucency; //value from 0 to 1
+
+  /// Enable faster downloads using increased batch size
   final bool? fasterDownloads;
+
+  /// Preferred source provider for playback
   final String? preferredProvider;
+
+  /// App's dark mode state
   final bool? darkMode;
+
+  /// Use material you theming (just the pallette)
   final bool? materialTheme;
+
+  /// Dev access
   final bool? isDev;
+
+  /// The preferred download path for anime/banner downloads
   final String? downloadPath;
+
+  /// The preferred database provider (SIMKL/MAL/AL)
   final Databases? database;
+
+  /// Enable extra speed options in player (4x,5x,8x,10x)
   final bool? enableSuperSpeeds;
+
+  /// Download items one by one instead of parallel downloads
   final bool? useQueuedDownloads;
+
+  /// Use frameless window (Windows only, not used rn)
   final bool? useFramelessWindow;
+
+  /// Enable double tap to skip in player (Not available for desktops)
   final bool? doubleTapToSkip;
+
+  /// Use native titles (japanese/korean) when available instead of romaji/english
   final bool? nativeTitle;
+
+  /// Enable picture in picture mode on minimize (Not available for desktops)
+  final bool? enablePipOnMinimize;
+
+  final bool? autoOpEdSkip;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -46,6 +88,8 @@ class SettingsModal {
     this.useFramelessWindow,
     this.doubleTapToSkip,
     this.nativeTitle,
+    this.enablePipOnMinimize,
+    this.autoOpEdSkip,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -69,6 +113,8 @@ class SettingsModal {
       useFramelessWindow: map['useFramelessWindow'] ?? false,
       doubleTapToSkip: map['doubleTapToSkip'] ?? true,
       nativeTitle: map['nativeTitle'] ?? false,
+      enablePipOnMinimize: map['enablePipOnMinimize'] ?? false,
+      autoOpEdSkip: map['autoOpEdSkip'] ?? false,
     );
   }
 
@@ -93,6 +139,8 @@ class SettingsModal {
       'useFramelessWindow': useFramelessWindow,
       'doubleTapToSkip': doubleTapToSkip,
       'nativeTitle': nativeTitle,
+      'enablePipOnMinimize': enablePipOnMinimize,
+      'autoOpEdSkip': autoOpEdSkip,
     };
   }
 }

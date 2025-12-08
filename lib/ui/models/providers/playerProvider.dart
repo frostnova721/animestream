@@ -127,6 +127,9 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Set pip mode
   Future<void> setPip(bool val) async {
+    if(!Platform.isAndroid) {
+      print("[PLAYER] PiP not supported on this platform.");
+    };
     print("[PLAYER] set pip: $val");
     // _state = _state.copyWith(pip: val);
     await controller.setPip(val);
@@ -181,6 +184,7 @@ class PlayerProvider extends ChangeNotifier {
       await controller.initiateVideo(src.url, headers: src.customHeaders);
 
       controller.setQuality(q);
+      dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
     } else {
       // showModalBottomSheet(
       //   context: context,

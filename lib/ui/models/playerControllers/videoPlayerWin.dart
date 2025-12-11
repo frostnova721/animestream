@@ -77,7 +77,7 @@ class VideoPlayerWindowsWrapper implements VideoController {
 
   @override
   Widget getWidget() {
-    return WinVideoPlayer(controller);
+    return AspectRatio(aspectRatio: 16/9,child: WinVideoPlayer(controller));
   }
 
   @override

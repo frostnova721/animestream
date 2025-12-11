@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:flutter/foundation.dart';
@@ -16,7 +18,9 @@ class AppWrapper extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: (defaultTargetPlatform == TargetPlatform.windows && !Provider.of<AppProvider>(context).isFullScreen)
+      appBar: (defaultTargetPlatform == TargetPlatform.windows &&
+              !Provider.of<AppProvider>(context).isFullScreen &&
+              !Provider.of<AppProvider>(context).showTitleBar)
           ? PreferredSize(
               preferredSize: const Size(double.maxFinite, 33),
               child: Container(
@@ -53,25 +57,23 @@ class AppWrapper extends StatelessWidget {
               ),
             )
           : null,
-      body: StatefulBuilder(
-        builder: (context, setState) {
-          return Listener(
-            onPointerDown: (event) {
-              if(event.buttons == kBackMouseButton) {
-                Navigator.of(navKey.currentState!.context).maybePop();
-                setState((){});
-              }
+      body: StatefulBuilder(builder: (context, setState) {
+        return Listener(
+          onPointerDown: (event) {
+            if (event.buttons == kBackMouseButton) {
+              Navigator.of(navKey.currentState!.context).maybePop();
+              setState(() {});
+            }
+          },
+          child: Navigator(
+            key: navKey,
+            onGenerateRoute: (settings) {
+              Widget page = firstPage;
+              return MaterialPageRoute(builder: (context) => page);
             },
-            child: Navigator(
-              key: navKey,
-              onGenerateRoute: (settings) {
-                Widget page = firstPage;
-                return MaterialPageRoute(builder: (context) => page);
-              },
-            ),
-          );
-        }
-      ),
+          ),
+        );
+      }),
     );
   }
 }
@@ -121,12 +123,12 @@ class _WindowButtonState extends State<WindowButton> {
             widget.icon,
             fit: BoxFit.none,
             // size: widget.size ?? 16,
-            colorFilter: ColorFilter.mode(hovered ? (widget.iconColorOnHover ?? appTheme.textMainColor) : appTheme.textMainColor, BlendMode.srcIn),
+            colorFilter: ColorFilter.mode(
+                hovered ? (widget.iconColorOnHover ?? appTheme.textMainColor) : appTheme.textMainColor,
+                BlendMode.srcIn),
           ),
         ),
       ),
     );
   }
 }
-
-

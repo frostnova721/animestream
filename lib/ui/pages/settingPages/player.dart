@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
@@ -260,15 +262,16 @@ class PlayerSettingState extends State<PlayerSetting> {
                                 enableSuperSpeeds = !enableSuperSpeeds;
                                 writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
                               }),
-                          ToggleItem(
-                            onTapFunction: () {
-                              doubleTapToSkip = !doubleTapToSkip;
-                              writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
-                            },
-                            label: "Double tap to seek",
-                            description: "Double tap left/right to jump $skipDuration seconds",
-                            value: doubleTapToSkip,
-                          ),
+                          if (Platform.isAndroid)
+                            ToggleItem(
+                              onTapFunction: () {
+                                doubleTapToSkip = !doubleTapToSkip;
+                                writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
+                              },
+                              label: "Double tap to seek",
+                              description: "Double tap left/right to jump $skipDuration seconds",
+                              value: doubleTapToSkip,
+                            ),
                           ToggleItem(
                             label: "Auto Picture-in-Picture",
                             description: "Enter PiP automatically when minimized",

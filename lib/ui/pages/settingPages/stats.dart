@@ -90,29 +90,22 @@ class _UserStatsState extends State<UserStats> {
       body: stats != null
           ? Container(
               padding: pagePadding(context).copyWith(top: 0),
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.only(top: 30, left: 15, right: 15),
-                      child: MediaQuery.sizeOf(context).width < 1200
-                          ? Column(children: [
-                            _profileSection(),
-                            _tableSection()
-                          ],)
-                          : Row(
-                              // crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: _profileSection()),
-                                Expanded(child: _tableSection()),
-                              ],
-                            ),
-                    ),
-                    Container(
-                      height: MediaQuery.of(context).padding.bottom + 10,
-                    ),
-                  ],
-                ),
+              child: Container(
+                margin:
+                    EdgeInsets.only(top: 30, left: 15, right: 15, bottom: MediaQuery.of(context).padding.bottom + 10),
+                child: MediaQuery.sizeOf(context).width < 1200
+                    ? SingleChildScrollView(
+                        child: Column(
+                          children: [_profileSection(false), _tableSection()],
+                        ),
+                      )
+                    : Row(
+                        // crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(flex: 2, child: _profileSection(true)),
+                          Expanded(flex: 3, child: SingleChildScrollView(child: _tableSection())),
+                        ],
+                      ),
               ),
             )
           : Center(
@@ -236,8 +229,9 @@ class _UserStatsState extends State<UserStats> {
     );
   }
 
-  Column _profileSection() {
+  Column _profileSection(bool center) {
     return Column(
+      mainAxisAlignment: center ? MainAxisAlignment.center : MainAxisAlignment.start,
       children: [
         Container(
           alignment: Alignment.center,

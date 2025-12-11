@@ -6,6 +6,7 @@ import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';
+import 'package:animestream/ui/models/widgets/player/desktopControls/pipMode.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/providers/themeProvider.dart';
 import 'package:animestream/ui/pages/settingPages/subtitle.dart';
@@ -57,7 +58,7 @@ class _DesktopControlsState extends State<DesktopControls> {
           break;
         }
 
-        // Seeking
+      // Seeking
       case LogicalKeyboardKey.arrowLeft:
         {
           await provider.fastForward(-(currentUserSettings?.skipDuration ?? 15));
@@ -69,7 +70,7 @@ class _DesktopControlsState extends State<DesktopControls> {
           break;
         }
 
-        // Volume controls
+      // Volume controls
       case LogicalKeyboardKey.keyM:
         {
           if (provider.state.volume != 0) {
@@ -101,6 +102,11 @@ class _DesktopControlsState extends State<DesktopControls> {
   Widget build(BuildContext context) {
     provider = context.watch<PlayerProvider>();
     dataProvider = context.watch<PlayerDataProvider>();
+
+    if (provider.state.pip) {
+      return PipUi(playerProvider: provider, dataProvider: dataProvider);
+    }
+
     return KeyboardListener(
         focusNode: _fn,
         onKeyEvent: keyListener,
@@ -212,16 +218,28 @@ class _DesktopControlsState extends State<DesktopControls> {
                         child: Row(
                           children: [
                             IconButton(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    useRootNavigator: false,
-                                    builder: (BuildContext context) {
-                                      return sideBox();
-                                    },
-                                  );
-                                },
-                                icon: makeIcon(Icons.high_quality_outlined))
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  useRootNavigator: false,
+                                  builder: (BuildContext context) {
+                                    return sideBox();
+                                  },
+                                );
+                              },
+                              icon: makeIcon(
+                                Icons.high_quality_outlined,
+                              ),
+                            ),
+                            IconButton(
+                              // tooltip: "Enter PiP Mode",
+                              onPressed: () {
+                                provider.setPip(!provider.state.pip);
+                              },
+                              icon: makeIcon(
+                                Icons.picture_in_picture,
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -230,7 +248,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                           IconButton(
                               onPressed: () {
                                 if (dataProvider.state.currentEpIndex == 0)
-                                  return floatingSnackBar( "Already on the first episode");
+                                  return floatingSnackBar("Already on the first episode");
                                 showDialog(
                                     context: context,
                                     useRootNavigator: false,
@@ -261,7 +279,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                           IconButton(
                               onPressed: () {
                                 if (dataProvider.state.currentEpIndex + 1 == dataProvider.epLinks.length)
-                                  return floatingSnackBar( "You are already in the final episode!");
+                                  return floatingSnackBar("You are already in the final episode!");
                                 if (dataProvider.state.preloadedSources.isNotEmpty) {
                                   print("from preload");
                                   provider.playPreloadedEpisode(dataProvider);
@@ -323,9 +341,14 @@ class _DesktopControlsState extends State<DesktopControls> {
 
                             ContextMenu(
                               menuItems: [
-                                ContextMenuItem(icon: Icons.open_in_new, label: "Customize Subs", onClick: () {
-                                  Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SubtitleSettingPage())).then((v) => dataProvider.initSubsettings());
-                                })
+                                ContextMenuItem(
+                                    icon: Icons.open_in_new,
+                                    label: "Customize Subs",
+                                    onClick: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(builder: (ctx) => SubtitleSettingPage()))
+                                          .then((v) => dataProvider.initSubsettings());
+                                    })
                               ],
                               child: IconButton(
                                   onPressed: () {
@@ -419,10 +442,10 @@ class _DesktopControlsState extends State<DesktopControls> {
                                     setState(() {});
                                   },
                                   child: Container(
-                                    color: dataProvider.state.qualities[index].url ==
-                                            dataProvider.state.currentQuality.url
-                                        ? appTheme.accentColor
-                                        : null,
+                                    color:
+                                        dataProvider.state.qualities[index].url == dataProvider.state.currentQuality.url
+                                            ? appTheme.accentColor
+                                            : null,
                                     height: 40,
                                     alignment: Alignment.center,
                                     child: Text(

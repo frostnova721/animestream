@@ -29,6 +29,16 @@ class AppProvider with ChangeNotifier {
 
   Color? get titleBarColor => _titleBarColor;
 
+  // For desktops
+  bool _showTitleBar = false;
+
+  bool get showTitleBar => _showTitleBar;
+
+  set showTitleBar(bool pip) {
+    _showTitleBar = pip;
+    notifyListeners();
+  }
+
   set windowTitle(String newTitle) {
     _windowTitle = newTitle;
     notifyListeners();

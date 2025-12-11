@@ -132,6 +132,16 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         body: MediaQuery.of(context).orientation == Orientation.landscape || Platform.isWindows
             ? Row(
                 children: [
+                  // AnimeStreamNavRail(
+                  //   destinations: [
+                  //     AnimeStreamNavDestination(icon: Icons.home, label: "Home"),
+                  //     AnimeStreamNavDestination(icon: Icons.auto_awesome, label: "Discover"),
+                  //     AnimeStreamNavDestination(icon: Icons.search, label: "Search"),
+                  //   ],
+                  //   controller: _barController,
+                  //   initialIndex: 0,
+                  //   shouldExpand: true,
+                  // ),
                   NavigationRail(
                     onDestinationSelected: (value) {
                       _barController.currentIndex = value;

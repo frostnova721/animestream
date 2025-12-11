@@ -4,11 +4,15 @@ import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
+import 'package:animestream/ui/models/providers/themeProvider.dart';
+import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
+import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import 'package:window_manager/window_manager.dart';
 
 /// Handle the core player stuff
 class PlayerProvider extends ChangeNotifier {
@@ -103,7 +107,7 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   /// Toggle visibility of controls
-  void toggleControlsVisibility({ bool? action = null}) {
+  void toggleControlsVisibility({bool? action = null}) {
     _state = _state.copyWith(controlsVisible: action ?? !_state.controlsVisible);
     notifyListeners();
   }
@@ -127,12 +131,18 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Set pip mode
   Future<void> setPip(bool val) async {
-    if(!Platform.isAndroid) {
+    if (!Platform.isAndroid && !Platform.isWindows) {
       print("[PLAYER] PiP not supported on this platform.");
     };
+
     print("[PLAYER] set pip: $val");
-    // _state = _state.copyWith(pip: val);
-    await controller.setPip(val);
+    _state = _state.copyWith(pip: val);
+
+    if (Platform.isWindows) {
+      val ? _enablePip() : _disablePip();
+    } else {
+      await controller.setPip(true); // doesnt really matter for android since disabling is done by the system 
+    }
     notifyListeners();
   }
 
@@ -203,6 +213,24 @@ class PlayerProvider extends ChangeNotifier {
       //   },
       // );
     }
+  }
+
+  // Cache the window size before entering pip
+  Size _windowSizeBefore = Size(1280, 720);
+
+  void _disablePip() {
+    windowManager.setAlwaysOnTop(false);
+    windowManager.setSize(_windowSizeBefore);
+    windowManager.setResizable(true);
+    Provider.of<AppProvider>(AppWrapper.navKey.currentContext!, listen: false).showTitleBar = false;
+  }
+
+  void _enablePip() async {
+    windowManager.setAlwaysOnTop(true);
+    _windowSizeBefore = await windowManager.getSize();
+    windowManager.setSize(Size(500, 300));
+    windowManager.setResizable(false);
+    Provider.of<AppProvider>(AppWrapper.navKey.currentContext!, listen: false).showTitleBar = true;
   }
 }
 

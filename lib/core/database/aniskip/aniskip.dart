@@ -36,13 +36,16 @@ class AniSkip {
       final id = item['skipId'] as String;
       final length = item['episodeLength'] as double;
 
-      final interval = Map.castFrom<dynamic, dynamic, String, int>(item['interval'] as Map);
       final skipInterval = SkipInterval(
-        start: interval['startTime']!,
-        end: interval['endTime']!,
+        // These values are always a double, but dart automatically converts some values
+        // to int, and throws an error if we try to cast a double to it.
+        // And... we dont want double, so we assert it to int via toInt()
+        start: (item['interval']['startTime']!).toInt(), // lets ignore the +/- 1 sec offset
+        end: (item['interval']['endTime']!).toInt(),
         id: id,
         epLength: length,
       );
+
 
       type == "op" ? op = skipInterval : ed = skipInterval;
     }

@@ -219,7 +219,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
       } else if(isAtEd) {
         _isSkippingOpOrEd = true;
         print("[PLAYER] Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
-        playerProvider.fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds).then((_) => _isSkippingOpOrEd = false);
+        playerProvider.fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds ).then((_) => _isSkippingOpOrEd = false);
       }
     } 
   }
@@ -324,6 +324,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   void _handleDoubleTap() {
     if (!Platform.isWindows) return;
+    if(context.read<PlayerProvider>().state.pip) return;
     final themeProvider = context.read<AppProvider>();
     themeProvider.setFullScreen(!themeProvider.isFullScreen);
   }

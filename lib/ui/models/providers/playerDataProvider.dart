@@ -207,26 +207,6 @@ class PlayerDataProvider extends ChangeNotifier {
     _state = newState;
     notifyListeners();
   }
-
-  // Future<void> updateDiscordPresence() async {
-  //   if (!(currentUserSettings?.enableDiscordPresence ?? false)) return;
-  //   return FlutterDiscordRPC.instance.setActivity(
-  //       activity: RPCActivity(
-  //     activityType: ActivityType.watching,
-  //     details: showTitle,
-  //     state: "Episode ${state.currentEpIndex + 1}",
-  //     timestamps: RPCTimestamps(start: DateTime.now().millisecondsSinceEpoch),
-  //     assets: RPCAssets(
-  //       largeText: coverImageUrl != null ? showTitle : null,
-  //       largeImage: coverImageUrl,
-  //     ),
-  //   ));
-  // }
-
-  // void clearDiscordPresence() {
-  //   if (!(currentUserSettings?.enableDiscordPresence ?? false)) return;
-  //   FlutterDiscordRPC.instance.clearActivity();
-  // }
 }
 
 class PlayerDataProviderState {
@@ -275,8 +255,10 @@ class PlayerDataProviderState {
   /// Whether subtitle settings have been inited
   final bool subsInited;
 
+  /// Opening skip interval
   final SkipInterval? opSkip;
 
+  /// Ending skip interval
   final SkipInterval? edSkip;
 
   PlayerDataProviderState({

@@ -55,7 +55,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
 
-    if(state == AppLifecycleState.inactive && (currentUserSettings?.enablePipOnMinimize ?? false)) {
+    if (state == AppLifecycleState.inactive && (currentUserSettings?.enablePipOnMinimize ?? false)) {
       context.read<PlayerProvider>().setPip(true);
     }
     // else if(state == AppLifecycleState.resumed) {
@@ -203,31 +203,37 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
       playerProvider.playPreloadedEpisode(dataProvider);
     }
 
-    if((currentUserSettings?.autoOpEdSkip ?? false) && !_isSkippingOpOrEd) {
+    if ((currentUserSettings?.autoOpEdSkip ?? false) && !_isSkippingOpOrEd) {
       final isAtOp = dataProvider.state.opSkip != null &&
           currentPositionInSeconds >= dataProvider.state.opSkip!.start &&
           currentPositionInSeconds <= dataProvider.state.opSkip!.end;
 
       final isAtEd = dataProvider.state.edSkip != null &&
           currentPositionInSeconds >= dataProvider.state.edSkip!.start &&
-          currentPositionInSeconds <= dataProvider.state.edSkip!.end-1;
+          currentPositionInSeconds <= dataProvider.state.edSkip!.end - 1;
 
-      if(isAtOp) {
+      if (isAtOp) {
         _isSkippingOpOrEd = true;
-        print("[PLAYER] Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
-        playerProvider.fastForward(dataProvider.state.opSkip!.end - currentPositionInSeconds + 1).then((_) => _isSkippingOpOrEd = false);
-      } else if(isAtEd) {
+        print(
+            "[PLAYER] Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
+        playerProvider
+            .fastForward(dataProvider.state.opSkip!.end - currentPositionInSeconds + 1)
+            .then((_) => _isSkippingOpOrEd = false);
+      } else if (isAtEd) {
         _isSkippingOpOrEd = true;
-        print("[PLAYER] Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
-        playerProvider.fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds ).then((_) => _isSkippingOpOrEd = false);
+        print(
+            "[PLAYER] Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
+        playerProvider
+            .fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds)
+            .then((_) => _isSkippingOpOrEd = false);
       }
-    } 
+    }
   }
 
   // Mutex to avoid multiple skips at once
   bool _isSkippingOpOrEd = false;
 
-  void hideControlsOnTimeout(PlayerDataProvider dp, PlayerProvider pp, { int timeoutSeconds = 5 }) {
+  void hideControlsOnTimeout(PlayerDataProvider dp, PlayerProvider pp, {int timeoutSeconds = 5}) {
     if (_controlsTimer == null && (controller.isPlaying ?? false)) {
       _controlsTimer = Timer(Duration(seconds: timeoutSeconds), () {
         if (controller.isPlaying ?? false) {
@@ -324,7 +330,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   void _handleDoubleTap() {
     if (!Platform.isWindows) return;
-    if(context.read<PlayerProvider>().state.pip) return;
+    if (context.read<PlayerProvider>().state.pip) return;
     final themeProvider = context.read<AppProvider>();
     themeProvider.setFullScreen(!themeProvider.isFullScreen);
   }
@@ -333,6 +339,8 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   // for tap gesures
   bool lTapped = false, rTapped = false;
+
+  bool spedUp = false;
 
   int skipCount = 0;
 
@@ -395,6 +403,26 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
               child: GestureDetector(
                 // behavior: HitTestBehavior.opaque,
                 onTap: _handleTap,
+                onLongPressStart: (details) {
+                  if (playerProvider.state.playerState == PlayerState.playing) {
+                    spedUp = true;
+
+                    // increase speed, Dont allow the max values >10x
+                    final currSpeed = playerProvider.state.speed;
+                    if (currSpeed >= 5) return;
+                    playerProvider.setSpeed(currSpeed * 2);
+                  } else {
+                    return;
+                  }
+                },
+                onLongPressEnd: (details) {
+                  // reset only if speed was increased
+                  if (!spedUp) return;
+                  spedUp = false;
+                  // reset speed
+                  playerProvider.setSpeed(playerProvider.state.speed / 2);
+                  print("Reduced speed to: ${playerProvider.state.speed}x");
+                },
                 child: Stack(
                   children: [
                     Player(controller),
@@ -446,7 +474,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                           child: DoubleTapDectector(
                             behavior: HitTestBehavior.translucent,
                             onDoubleTap: () {
-                               // windows shouldnt be having double tap to skip functionality
+                              // windows shouldnt be having double tap to skip functionality
                               if (playerDataProvider.state.controlsLocked || Platform.isWindows) return;
                               if (currentUserSettings?.doubleTapToSkip ?? true) {
                                 playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));

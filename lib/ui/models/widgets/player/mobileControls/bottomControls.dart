@@ -5,7 +5,6 @@ import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/subtitle.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 class BottomControls extends StatelessWidget {

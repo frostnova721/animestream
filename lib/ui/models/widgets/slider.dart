@@ -10,6 +10,7 @@ class CustomSlider extends StatefulWidget {
   final void Function(double)? onDragEnd;
   final int? divisions;
   final RoundedSliderValueIndicator? customValueIndicatorSize;
+  final bool? showValueIndicator;
   const CustomSlider({
     super.key,
     required this.onChanged,
@@ -20,6 +21,7 @@ class CustomSlider extends StatefulWidget {
     this.onDragStart,
     this.divisions,
     this.customValueIndicatorSize,
+    this.showValueIndicator = true,
   });
 
   @override
@@ -70,7 +72,7 @@ class CustomSliderState extends State<CustomSlider> {
         onChangeEnd: widget.onDragEnd,
         divisions: widget.divisions,
         value: widget.value,
-        label: "${widget.value}",
+        label: widget.showValueIndicator! ? "${widget.value}" : null,
       ),
     );
   }
@@ -228,7 +230,8 @@ class RoundedSliderValueIndicator extends SliderComponentShape {
 
     tp.layout();
 
-    context.canvas.drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)), Paint()..color = appTheme.accentColor);
-    tp.paint(context.canvas, Offset(center.dx - (tp.width /2) ,centerWithVerticalOffset.dy - (tp.height / 2)));
+    context.canvas
+        .drawRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius)), Paint()..color = appTheme.accentColor);
+    tp.paint(context.canvas, Offset(center.dx - (tp.width / 2), centerWithVerticalOffset.dy - (tp.height / 2)));
   }
 }

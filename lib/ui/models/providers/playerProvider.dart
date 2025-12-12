@@ -196,22 +196,7 @@ class PlayerProvider extends ChangeNotifier {
       controller.setQuality(q);
       dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
     } else {
-      // showModalBottomSheet(
-      //   context: context,
-      //   backgroundColor: appTheme.modalSheetBackgroundColor,
-      //   builder: (context) {
-      //     return CustomControlsBottomSheet(
-      //       getEpisodeSources: widget.episode['getEpisodeSources'],
-      //       currentSources: currentSources,
-      //       playVideo: playVideo,
-      //       next: true,
-      //       epLinks: widget.episode['epLinks'],
-      //       currentEpIndex: currentEpIndex,
-      //       refreshPage: widget.refreshPage,
-      //       updateCurrentEpIndex: updateCurrentEpIndex,
-      //     );
-      //   },
-      // );
+      print("[PLAYER] No preloaded sources found!");
     }
   }
 

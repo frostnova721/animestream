@@ -1,12 +1,14 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:hive/hive.dart';
 
 class Settings {
+  static final String _boxName = HiveBox.animestream.boxName;
+
   Future<SettingsModal> getSettings({bool writing = false}) async {
-    var box = await Hive.openBox('animestream');
-    if (!box.isOpen) box = await Hive.openBox('animestream');
+    var box = await Hive.openBox(_boxName);
+    if (!box.isOpen) box = await Hive.openBox(_boxName);
     Map<dynamic, dynamic> settings = await box.get(HiveKey.settings.name) ?? {};
     if (settings.isEmpty) settings = SettingsModal().toMap();
     final classed = SettingsModal.fromMap(settings);
@@ -15,8 +17,8 @@ class Settings {
   }
 
   Future<void> writeSettings(SettingsModal settings) async {
-    var box = await Hive.openBox('animestream');
-    if (!box.isOpen) box = await Hive.openBox('animestream');
+    var box = await Hive.openBox(_boxName);
+    if (!box.isOpen) box = await Hive.openBox(_boxName);
     var currentSettings = (await getSettings(writing: true)).toMap();
     var updatedSettings = settings.toMap();
     print("before updation: $currentSettings");

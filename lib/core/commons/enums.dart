@@ -1,4 +1,4 @@
-enum SettingKey { megaSkipDuration, skipDuration }
+import 'package:flutter/foundation.dart';
 
 enum RequestType { recentlyUpdatedAnime, media, mutate }
 
@@ -25,17 +25,6 @@ enum SubtitleFormat {
   }
 }
 
-enum HiveKey {
-  userPreferences,
-  settings,
-  theme,
-  watching,
-  animeSpecificPreference,
-
-  @deprecated
-  token,
-}
-
 enum SecureStorageKey {
   //tokens
   simklToken("simkl_token"),
@@ -48,9 +37,17 @@ enum SecureStorageKey {
   //codes
   malChallengeVerifier("mal_challenge_verifier");
 
-  final String value;
+  final String _rawName;
 
-  const SecureStorageKey(this.value);
+  const SecureStorageKey(this._rawName);
+
+  // Seperation of concern for the debug & release builds
+  String get value {
+    if (kDebugMode) {
+      return "dev_$_rawName";
+    }
+    return _rawName;
+  }
 }
 
 enum PlayerState {

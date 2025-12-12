@@ -1,13 +1,13 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/commons/enums/hiveEnums.dart';
 
 class UserPreferences {
   static Future<UserPreferencesModal> getUserPreferences() async {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
     print(prefMap);
-    if(prefMap == null || prefMap.isEmpty) {
+    if (prefMap == null || prefMap.isEmpty) {
       print("Got empty list of preferences.");
       return UserPreferencesModal.defaults();
     }
@@ -16,12 +16,12 @@ class UserPreferences {
 
   static Future<void> saveUserPreferences(UserPreferencesModal userPref) async {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
-    if(prefMap == null || prefMap.isEmpty) {
+    if (prefMap == null || prefMap.isEmpty) {
       print("Got empty list of preferences.");
       prefMap = UserPreferencesModal.defaults().toMap();
     }
     final mapped = userPref.toMap();
-    mapped.forEach((k,v) {
+    mapped.forEach((k, v) {
       if (v != null) {
         prefMap![k] = mapped[k];
       }

@@ -1,4 +1,5 @@
 import "package:animestream/core/app/runtimeDatas.dart";
+import "package:animestream/core/commons/enums/hiveEnums.dart";
 import "package:animestream/core/database/anilist/login.dart";
 import "package:animestream/core/database/anilist/queries.dart";
 import "package:animestream/core/database/anilist/types.dart";
@@ -6,6 +7,8 @@ import 'package:animestream/core/commons/enums.dart';
 import "package:animestream/core/database/handler/syncHandler.dart";
 import "package:animestream/core/database/types.dart";
 import "package:hive/hive.dart";
+
+final String _boxName = HiveBox.animestream.boxName;
 
 Future<void> storeWatching(
   String title,
@@ -22,9 +25,9 @@ Future<void> storeWatching(
       SyncHandler()
           .mutateAnimeList(id: id, status: MediaStatus.CURRENT, progress: watched, otherIds: alternateDatabases);
     } else {
-      var box = await Hive.openBox('animestream');
+      var box = await Hive.openBox(_boxName);
       if (!box.isOpen) {
-        box = await Hive.openBox('animestream');
+        box = await Hive.openBox(_boxName);
       }
       final List watchingList = box.get('watching') ?? [];
       // final currList = watchingList.where((item) => item['id'] == id).toList();
@@ -60,9 +63,9 @@ Future<void> updateWatching(int? id, String title, int watched, List<AlternateDa
         otherIds: otherIds,
       );
     } else {
-      var box = await Hive.openBox('animestream');
+      var box = await Hive.openBox(_boxName);
       if (!box.isOpen) {
-        box = await Hive.openBox('animestream');
+        box = await Hive.openBox(_boxName);
       }
       final List watchingList = box.get('watching') ?? [];
       final index = watchingList.indexWhere((item) => item['title'] == title);
@@ -93,7 +96,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
     }
     throw new Exception("ERR_USERNAME_NOT_PASSED");
   } else {
-    final box = await Hive.openBox('animestream');
+    final box = await Hive.openBox(_boxName);
     List watching = box.get('watching') ?? [];
 
     if (watching.length != 0) {
@@ -124,7 +127,7 @@ Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
       if (item != null) return item.watchProgress ?? 0;
     }
   } else {
-    final box = await Hive.openBox('animestream');
+    final box = await Hive.openBox(_boxName);
     final List watching = box.get('watching') ?? [];
     final item = watching.where((item) => item['id'] == id).firstOrNull;
     await box.close();

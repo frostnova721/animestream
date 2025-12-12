@@ -1,8 +1,9 @@
 import 'package:animestream/core/anime/providers/providerDetails.dart';
+import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:hive/hive.dart';
 
 class ProvidersPreferences {
-  final _boxKey = "anime_providers";
+  final _boxKey = HiveBox.animeProviders.boxName;
 
   Future<ProviderDetails?> getProvider(String identifier) async {
     final box = await Hive.openBox(_boxKey);

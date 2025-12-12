@@ -1,5 +1,5 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/database/database.dart';
@@ -8,14 +8,16 @@ import 'package:hive/hive.dart';
 /// Max number of anime-specific preference entries to retain (LRU policy)
 const int _animeInfoLruCapacity = 40;
 
+final String _boxName = HiveBox.animeInfo.boxName;
+
 /// Retruns an object of [AnimeSpecificPreference] if it exists!
 Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) async {
   //just handle anilist
   if (currentUserSettings?.database != Databases.anilist) return null;
 
-  var box = await Hive.openBox("animeInfo");
+  var box = await Hive.openBox(_boxName);
   if (!box.isOpen) {
-    box = await Hive.openBox("animeInfo");
+    box = await Hive.openBox(_boxName);
   }
 
   String? manSearch, provider;
@@ -46,7 +48,7 @@ Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) as
 }
 
 Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreference preference) async {
-  Map<dynamic, dynamic> map = Map.castFrom(await getVal(HiveKey.animeSpecificPreference, boxName: "animeInfo") ?? {});
+  Map<dynamic, dynamic> map = Map.castFrom(await getVal(HiveKey.animeSpecificPreference, boxName: HiveBox.animeInfo) ?? {});
 
   // print(map);
 
@@ -88,5 +90,5 @@ Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreferen
     finalMap = Map<dynamic, dynamic>.fromEntries(entries.take(_animeInfoLruCapacity));
   }
 
-  await storeVal(HiveKey.animeSpecificPreference, finalMap, boxName: "animeInfo");
+  await storeVal(HiveKey.animeSpecificPreference, finalMap, boxName: HiveBox.animeInfo);
 }

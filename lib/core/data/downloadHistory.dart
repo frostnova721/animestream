@@ -1,10 +1,11 @@
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class DownloadHistory {
-  static const _boxName = "download_history";
+  static final String _boxName = HiveBox.downloadHistory.boxName;
 
   static Future<void> initBox() => Hive.openBox(_boxName);
 

@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/mutations.dart';
@@ -45,8 +47,7 @@ class SimklLogin extends DatabaseLogin {
 
     if (at.isEmpty) throw Exception("ACCESS TOKEN IS NULL!");
 
-    final storage = new FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-    storage.write(key: "simkl_token", value: at);
+    storeSecureVal(SecureStorageKey.simklToken, at);
 
     print("[SIMKL-LOGIN]: Login success, Access token saved!");
     return true;
@@ -54,7 +55,7 @@ class SimklLogin extends DatabaseLogin {
 
   Future<void> removeToken() async {
     final storage = new FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-    storage.delete(key: "simkl_token");
+    storage.delete(key: SecureStorageKey.simklToken.value);
   }
 
   static Future<PCKECodeResult> getPkceCode() async {
@@ -94,8 +95,7 @@ class SimklLogin extends DatabaseLogin {
 
           //stop the timer and save the token
           if (jsoned['result'] == "OK") {
-            final storage = FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-            await storage.write(key: "simkl_token", value: jsoned['access_token']);
+            storeSecureVal(SecureStorageKey.simklToken, jsoned['access_token']);
             print("[SIMKL-LOGIN]: Login success, Access token saved!");
             timer.cancel();
             completer.complete(true);
@@ -125,14 +125,13 @@ class SimklLogin extends DatabaseLogin {
   }
 
   static Future<bool> isLoggedIn() async {
-    final storage = new FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
-    final token = await storage.read(key: "simkl_token");
+    final token = await getSecureVal(SecureStorageKey.simklToken);
     if (token == null || token.isEmpty) {
       return false;
     }
     return true;
   }
-  
+
   @override
   Future<void>? refreshToken() {
     return null; //permanent access token, no need to refresh

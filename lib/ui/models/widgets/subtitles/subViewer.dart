@@ -149,7 +149,7 @@ class _SubViewerState extends State<SubViewer> {
       margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
       child: Container(
         width: MediaQuery.of(context).size.width / 1.4,
-        alignment: getCurrentLineAlignment(),
+        alignment: getLineAlignment(activeSubtitle?.alignment ?? SubtitleAlignment.bottomCenter),
         child: SubtitleText(
           text: areSubsLoading ? "Loading Subs" : activeSubtitle?.dialogue ?? "",
           style: subTextStyle(),
@@ -163,8 +163,8 @@ class _SubViewerState extends State<SubViewer> {
     );
   }
 
-  Alignment getCurrentLineAlignment() {
-    switch (activeSubtitle?.alignment ?? SubtitleAlignment.bottomCenter) {
+  Alignment getLineAlignment(SubtitleAlignment alignment) {
+    switch (alignment) {
       case SubtitleAlignment.topLeft:
         return Alignment.topLeft;
       case SubtitleAlignment.topCenter:

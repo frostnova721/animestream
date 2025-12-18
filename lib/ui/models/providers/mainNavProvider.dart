@@ -219,8 +219,10 @@ class MainNavProvider extends ChangeNotifier {
 
   Future<void> loadListsForHome({String? userName}) async {
     // reset the error state
-    // homePageError = false;
-    // try {
+    currentlyAiring.state = LoadingState.loading;
+    recentlyWatched.state = LoadingState.loading;
+    plannedList.state = LoadingState.loading;
+
     //get all of em data
     final futures = await Future.wait([
       // fetches "continue watching" list

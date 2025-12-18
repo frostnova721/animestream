@@ -42,7 +42,7 @@ class AppProvider with ChangeNotifier {
   set windowTitle(String newTitle) {
     _windowTitle = newTitle;
     notifyListeners();
-  } 
+  }
 
   set isFullScreen(bool fs) {
     _isFullScreen = fs;
@@ -122,7 +122,7 @@ class AppProvider with ChangeNotifier {
   /// Set the window mode to fullscreen or windowed
   Future<void> setFullScreen(bool fs) async {
     if (Platform.isAndroid) return;
-      await windowManager.setFullScreen(fs);
+    await windowManager.setFullScreen(fs);
     isFullScreen = fs;
   }
 }

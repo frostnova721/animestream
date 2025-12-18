@@ -252,7 +252,7 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Column _titleAndList(String title, List<HomePageList> list, {bool showRefreshIndication = false}) {
+  Column _titleAndList(String title, AnimeListData<HomePageList> list, {bool showRefreshIndication = false}) {
     return Column(
       children: [
         Row(
@@ -281,42 +281,44 @@ class _HomeState extends State<Home> {
         ),
         Container(
           height: 160,
-          child: widget.mainNavProvider.homePageError
-              ? Center(
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Image.asset(
-                          "lib/assets/images/ghost.png",
-                          color: Color.fromARGB(255, 80, 80, 80),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.only(top: 10.0),
-                          child: Text(
-                            "Boo! Nothing's here!",
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontFamily: "NunitoSans",
-                              fontWeight: FontWeight.w500,
+          child:
+               list.state.isError
+                  ? Center(
+                      child: Container(
+                        alignment: Alignment.center,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Image.asset(
+                              "lib/assets/images/ghost.png",
                               color: Color.fromARGB(255, 80, 80, 80),
-                              fontSize: 18,
                             ),
-                          ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 10.0),
+                              child: Text(
+                                "Aww... Something's wrong!",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontFamily: "NunitoSans",
+                                  fontWeight: FontWeight.w500,
+                                  color: Color.fromARGB(255, 80, 80, 80),
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
-                )
-              : widget.mainNavProvider.homeDataLoaded
-                  ? list.length > 0
+                      ),
+                    )
+              : list.state.isLoaded
+                  ? list.items.length > 0
+                      // condition where list loaded and has items
                       ? ListView.builder(
                           padding: EdgeInsets.zero,
                           scrollDirection: Axis.horizontal,
-                          itemCount: list.length,
+                          itemCount: list.items.length,
                           itemBuilder: (context, index) {
-                            final item = list[index];
+                            final item = list.items[index];
                             final preferNative = currentUserSettings?.nativeTitle ?? false;
                             final normalTitle =
                                 item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '';
@@ -330,6 +332,8 @@ class _HomeState extends State<Home> {
                                   afterNavigation: () => getLists(userName: storedUserData?.name)),
                             );
                           })
+
+                      // condition where list loaded but has no items
                       : Center(
                           child: Container(
                             alignment: Alignment.center,
@@ -357,6 +361,8 @@ class _HomeState extends State<Home> {
                             ),
                           ),
                         )
+
+                    // Still in loading phase!
                   : Center(
                       child: CircularProgressIndicator(
                         color: appTheme.accentColor,

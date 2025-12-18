@@ -12,7 +12,7 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/stats.dart';
-import 'package:animestream/ui/models/providers/themeProvider.dart';
+import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 

@@ -18,7 +18,7 @@ import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
-import 'package:animestream/ui/models/providers/themeProvider.dart';
+import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 
 class Watch extends StatefulWidget {

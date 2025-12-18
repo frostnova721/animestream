@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/commons/enums/loadingState.dart';
 import 'package:animestream/core/commons/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
@@ -45,21 +46,24 @@ class MainNavProvider extends ChangeNotifier {
 
   //home items
 
-  List<HomePageList> _currentlyAiring = [];
-  List<HomePageList> _recentlyWatched = [];
-  List<HomePageList> _plannedList = [];
+  AnimeListData<HomePageList> _currentlyAiring = AnimeListData();
+  AnimeListData<HomePageList> _recentlyWatched = AnimeListData();
+  AnimeListData<HomePageList> _plannedList = AnimeListData();
 
-  bool _homePageError = false;
-  bool _homeDataLoaded = false;
+  // bool _homePageError = false;
+  // bool _homeDataLoaded = false;
 
   //Discover items
 
+  // lists
   List<TrendingResult> _trendingList = [];
   List<AnimeCard> _recommendedList = [];
-  List<AnilistRecommendations> _recommendedListData = [];
   List<AnimeCard> _recentlyUpdatedList = [];
-  List<RecentlyUpdatedResult> _recentlyUpdatedListData = [];
   List<AnimeCard> _thisSeason = [];
+
+  // datas
+  List<AnilistRecommendations> _recommendedListData = [];
+  List<RecentlyUpdatedResult> _recentlyUpdatedListData = [];
   List<CurrentlyAiringResult> _thisSeasonData = [];
 
   bool _discoverDataLoaded = false;
@@ -70,43 +74,39 @@ class MainNavProvider extends ChangeNotifier {
   }
 
   // Home items
-  List<HomePageList> get currentlyAiring => _currentlyAiring;
-  set currentlyAiring(List<HomePageList> value) {
+  AnimeListData<HomePageList> get currentlyAiring => _currentlyAiring;
+  set currentlyAiring(AnimeListData<HomePageList> value) {
     _currentlyAiring = value;
     notifyListeners();
   }
 
-  List<HomePageList> get recentlyWatched => _recentlyWatched;
-  set recentlyWatched(List<HomePageList> value) {
+  AnimeListData<HomePageList> get recentlyWatched => _recentlyWatched;
+  set recentlyWatched(AnimeListData<HomePageList> value) {
     _recentlyWatched = value;
     notifyListeners();
   }
 
-  List<HomePageList> get plannedList => _plannedList;
-  set plannedList(List<HomePageList> value) {
+  AnimeListData<HomePageList> get plannedList => _plannedList;
+  set plannedList(AnimeListData<HomePageList> value) {
     _plannedList = value;
     notifyListeners();
   }
 
-  bool get homePageError => _homePageError;
-  set homePageError(bool value) {
-    _homePageError = value;
-    notifyListeners();
-  }
+  // bool get homePageError => _homePageError;
+  // set homePageError(bool value) {
+  //   _homePageError = value;
+  //   notifyListeners();
+  // }
 
-  bool get homeDataLoaded => _homeDataLoaded;
-  set homeDataLoaded(bool value) {
-    _homeDataLoaded = value;
-    notifyListeners();
-  }
+  // bool get homeDataLoaded => _homeDataLoaded;
+  // set homeDataLoaded(bool value) {
+  //   _homeDataLoaded = value;
+  //   notifyListeners();
+  // }
 
   // Discover items
 
   List<TrendingResult> get trendingList => _trendingList;
-  set trendingList(List<TrendingResult> value) {
-    _trendingList = value;
-    notifyListeners();
-  }
 
   List<AnimeCard> get recommendedList => _recommendedList;
   set recommendedList(List<AnimeCard> value) {
@@ -115,10 +115,6 @@ class MainNavProvider extends ChangeNotifier {
   }
 
   List<AnilistRecommendations> get recommendedListData => _recommendedListData;
-  set recommendedListData(List<AnilistRecommendations> value) {
-    _recommendedListData = value;
-    notifyListeners();
-  }
 
   List<AnimeCard> get recentlyUpdatedList => _recentlyUpdatedList;
   set recentlyUpdatedList(List<AnimeCard> value) {
@@ -127,10 +123,6 @@ class MainNavProvider extends ChangeNotifier {
   }
 
   List<RecentlyUpdatedResult> get recentlyUpdatedListData => _recentlyUpdatedListData;
-  set recentlyUpdatedListData(List<RecentlyUpdatedResult> value) {
-    _recentlyUpdatedListData = value;
-    notifyListeners();
-  }
 
   List<AnimeCard> get thisSeason => _thisSeason;
   set thisSeason(List<AnimeCard> value) {
@@ -139,10 +131,6 @@ class MainNavProvider extends ChangeNotifier {
   }
 
   List<CurrentlyAiringResult> get thisSeasonData => _thisSeasonData;
-  set thisSeasonData(List<CurrentlyAiringResult> value) {
-    _thisSeasonData = value;
-    notifyListeners();
-  }
 
   // Methods
 
@@ -176,13 +164,13 @@ class MainNavProvider extends ChangeNotifier {
   /// Fetch the trending list from Anilist API
   Future<void> getTrendingList() async {
     final list = await Anilist().getTrending();
-    trendingList = list.sublist(0, 20);
+    _trendingList = list.sublist(0, 20);
   }
 
   /// Fetch the recommended list from Anilist API
   Future<void> getRecommended() async {
     final list = await AnilistQueries().getRecommendedAnimes();
-    recommendedListData = list;
+    _recommendedListData = list;
     for (final item in list) {
       final title = item.title['english'] ?? item.title['romaji'] ?? '';
       recommendedList.add(
@@ -224,96 +212,112 @@ class MainNavProvider extends ChangeNotifier {
   }
 
   void updateWatchedList(List<HomePageList> watchedList) {
-    recentlyWatched = watchedList;
+    // _recentlyWatched = watchedList;
+    _recentlyWatched.items = watchedList;
     notifyListeners();
   }
 
   Future<void> loadListsForHome({String? userName}) async {
     // reset the error state
-    homePageError = false;
-    try {
-      //get all of em data
-      final futures = await Future.wait([
-        getWatchedList(userName: userName),
-        Anilist().getCurrentlyAiringAnime(),
-        if (userName != null) AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING),
-      ]);
+    // homePageError = false;
+    // try {
+    //get all of em data
+    final futures = await Future.wait([
+      // fetches "continue watching" list
+      getWatchedList(userName: userName).onError((e, st) {
+        recentlyWatched.state = LoadingState.error;
+        return <UserAnimeListItem>[];
+      }),
 
-      List<UserAnimeListItem> watched = futures[0] as List<UserAnimeListItem>;
-      if (watched.length > 40) watched = watched.sublist(0, 40);
-      recentlyWatched = [];
-      watched.forEach(
-        (item) => recentlyWatched.add(
-          HomePageList(
-            coverImage: item.coverImage,
+      // fetches "aired this season" list
+      Anilist().getCurrentlyAiringAnime().onError((e, st) {
+        currentlyAiring.state = LoadingState.error;
+        return <CurrentlyAiringResult>[];
+      }),
+
+      // fetches "from your planned" list
+      if (userName != null)
+        AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING).onError((e, st) {
+          plannedList.state = LoadingState.error;
+          return <UserAnimeList>[];
+        }),
+    ]);
+
+    List<UserAnimeListItem> watched = futures[0] as List<UserAnimeListItem>;
+    if (watched.length > 40) watched = watched.sublist(0, 40);
+    recentlyWatched.items = [];
+    watched.forEach(
+      (item) => recentlyWatched.items.add(
+        HomePageList(
+          coverImage: item.coverImage,
+          id: item.id,
+          rating: item.rating,
+          title: item.title,
+          watchedEpisodeCount: item.watchProgress,
+          totalEpisodes: item.episodes,
+        ),
+      ),
+    );
+    recentlyWatched.state = LoadingState.loaded;
+
+    final List<CurrentlyAiringResult> currentlyAiringResponse = futures[1] as List<CurrentlyAiringResult>;
+    if (currentlyAiringResponse.isEmpty) return;
+
+    currentlyAiring.items = [];
+    _thisSeasonData = currentlyAiringResponse;
+    currentlyAiringResponse.forEach((item) {
+      currentlyAiring.items.add(
+        HomePageList(
+            coverImage: item.cover,
             id: item.id,
             rating: item.rating,
             title: item.title,
-            watchedEpisodeCount: item.watchProgress,
             totalEpisodes: item.episodes,
-          ),
+            watchedEpisodeCount: item.watchProgress),
+      );
+      currentlyAiring.state = LoadingState.loaded;
+
+      final title = item.title['english'] ?? item.title['romaji'] ?? '';
+      thisSeason.add(
+        Cards.animeCard(
+          item.id,
+          (currentUserSettings?.nativeTitle ?? false) ? item.title['native'] ?? title : title,
+          item.cover,
+          rating: item.rating,
         ),
       );
+    });
 
-      final List<CurrentlyAiringResult> currentlyAiringResponse = futures[1] as List<CurrentlyAiringResult>;
-      if (currentlyAiringResponse.isEmpty) return;
-
-      currentlyAiring = [];
-      thisSeasonData = currentlyAiringResponse;
-      currentlyAiringResponse.forEach((item) {
-        currentlyAiring.add(
-          HomePageList(
-              coverImage: item.cover,
-              id: item.id,
-              rating: item.rating,
-              title: item.title,
-              totalEpisodes: item.episodes,
-              watchedEpisodeCount: item.watchProgress),
-        );
-        final title = item.title['english'] ?? item.title['romaji'] ?? '';
-        thisSeason.add(
-          Cards.animeCard(
-            item.id,
-            (currentUserSettings?.nativeTitle ?? false) ? item.title['native'] ?? title : title,
-            item.cover,
-            rating: item.rating,
-          ),
-        );
-      });
-
-      if (userName != null) {
-        List<UserAnimeList> pl = futures[2] as List<UserAnimeList>;
-        if (pl.isEmpty) {
-          homeDataLoaded = true;
-          notifyListeners();
-          return;
-        }
-        plannedList = [];
-        List<UserAnimeListItem> itemList = pl[0].list;
-        if (itemList.length > 25) itemList = itemList.sublist(0, 25);
-        itemList.forEach((item) {
-          plannedList.add(HomePageList(
-            coverImage: item.coverImage,
-            rating: item.rating,
-            title: item.title,
-            id: item.id,
-            totalEpisodes: item.episodes,
-            watchedEpisodeCount: item.watchProgress,
-          ));
-        });
+    if (userName != null) {
+      List<UserAnimeList> pl = futures[2] as List<UserAnimeList>;
+      if (pl.isEmpty) {
+        notifyListeners();
+        return;
       }
-
-      homeDataLoaded = true;
-      notifyListeners();
-    } catch (err) {
-      print(err);
-      if (currentUserSettings?.showErrors ?? false)
-        floatingSnackBar(err.toString(), waitForPreviousToFinish: true);
-      floatingSnackBar("couldnt fetch the lists, anilist might be down!", waitForPreviousToFinish: true);
-
-      homePageError = true;
-      notifyListeners();
+      plannedList.items = [];
+      List<UserAnimeListItem> itemList = pl[0].list;
+      if (itemList.length > 25) itemList = itemList.sublist(0, 25);
+      itemList.forEach((item) {
+        plannedList.items.add(HomePageList(
+          coverImage: item.coverImage,
+          rating: item.rating,
+          title: item.title,
+          id: item.id,
+          totalEpisodes: item.episodes,
+          watchedEpisodeCount: item.watchProgress,
+        ));
+      });
+      plannedList.state = LoadingState.loaded;
     }
+
+    if (watched.isEmpty &&
+        currentlyAiringResponse.isEmpty &&
+        (userName != null ? (futures[2] as List<UserAnimeList>).isEmpty : false)) {
+      if (currentUserSettings?.showErrors ?? false)
+        floatingSnackBar("Couldn't load home data. Is Anilist down?", waitForPreviousToFinish: true);
+    }
+
+    notifyListeners();
   }
 
   /// Load the items list for the Discover page
@@ -368,4 +372,16 @@ class MainNavProvider extends ChangeNotifier {
     homeRefreshController.refreshCompleted();
     notifyListeners();
   }
+}
+
+class AnimeListData<T> {
+  String? title;
+  List<T> items;
+  LoadingState state;
+
+  AnimeListData({
+    this.title,
+    this.items = const [],
+    this.state = LoadingState.loading,
+  });
 }

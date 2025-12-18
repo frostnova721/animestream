@@ -8,7 +8,7 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/models/widgets/player/desktopControls/pipMode.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
-import 'package:animestream/ui/models/providers/themeProvider.dart';
+import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:animestream/ui/pages/settingPages/subtitle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

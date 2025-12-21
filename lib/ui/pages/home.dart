@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:flutter/material.dart';
 
@@ -73,7 +74,7 @@ class _HomeState extends State<Home> {
           refreshing = false;
         });
     } catch (err) {
-      print(err);
+      Logs.app.log(err.toString());
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) floatingSnackBar(err.toString());
       if (mounted)
         setState(() {

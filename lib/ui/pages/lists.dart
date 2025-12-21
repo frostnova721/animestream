@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
@@ -371,7 +372,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     return RefreshIndicator(
       onRefresh: () async {
         await getAnimeList();
-        print("refreshed lists!");
+        Logs.app.log("refreshed lists!");
       },
       child: Container(
         padding: EdgeInsets.only(

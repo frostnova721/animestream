@@ -46,7 +46,10 @@ void main(List<String> args) async {
     // Initialise app version instance
     AppVersion.init();
 
-    await Hive.initFlutter(dir.path);
+    // The dir.path only contains the path till documents folder in windows
+    final dirPath =  dir.path + (Platform.isWindows ? "/animestream" : "");
+
+    await Hive.initFlutter(dirPath);
 
     await loadAndAssignSettings();
 
@@ -77,6 +80,15 @@ void main(List<String> args) async {
     //   await FlutterDiscordRPC.initialize("1362858832266657812");
     // }
 
+    FlutterError.onError = (FlutterErrorDetails details) async {
+      FlutterError.presentError(details);
+
+      Logs.app.log(details.exceptionAsString());
+      await Logs.writeAllLogs();
+
+      print("[ERROR] logged the error to logs folder");
+    };
+
     runApp(
       ChangeNotifierProvider(
         create: (context) => AppProvider(),
@@ -86,10 +98,9 @@ void main(List<String> args) async {
   } catch (err) {
     debugPrint(err.toString());
 
-    Logger()
-      ..addLog(err.toString())
-      ..addLog("state: Crashed")
-      ..writeLog();
+    Logs.app.log(err.toString());
+    Logs.app.log("state: Crashed");
+    await Logs.writeAllLogs();
 
     print("[CRASH] logged the error to logs folder");
     rethrow;
@@ -99,19 +110,19 @@ void main(List<String> args) async {
 Future<void> loadAndAssignSettings() async {
   await Settings().getSettings().then((settings) => {
         currentUserSettings = settings,
-        print("[STARTUP] Loaded user settings"),
+        Logs.app.log("[STARTUP] Loaded user settings"),
       });
 
   await UserPreferences.getUserPreferences().then((pref) {
     userPreferences = pref;
-    print("[STARTUP] Loaded user preferences");
+    Logs.app.log("[STARTUP] Loaded user preferences");
   });
 
   //load and apply theme
   await getTheme().then((themeId) {
     // ignore the themeid limit checks for debug mode
     if ((themeId > availableThemes.length && !kDebugMode) || themeId < 1) {
-      print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
+      Logs.app.log("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
       showToast("Failed to apply theme. Using default theme");
       setTheme(01);
       themeId = 01;
@@ -124,7 +135,7 @@ Future<void> loadAndAssignSettings() async {
     if (theme == null) {
       // Set default theme incase of any corruptions/issues n stuff
       theme = LimeZest();
-      print("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
+      Logs.app.log("[STARTUP] Failed to apply theme with ID $themeId, Applying default theme");
     }
 
     if (darkMode) {
@@ -143,7 +154,7 @@ Future<void> loadAndAssignSettings() async {
       );
     }
 
-    print("[STARTUP] Loaded theme of ID $themeId (${theme.name})");
+    Logs.app.log("[STARTUP] Loaded theme of ID $themeId (${theme.name})");
   });
 }
 
@@ -202,7 +213,7 @@ class _AnimeStreamState extends State<AnimeStream> {
     _appLinks = AppLinks();
     _sub = _appLinks.uriLinkStream.listen((uri) {
       if (uri.scheme == "astrm") {
-        print("Invoked DeepLink uri: ${uri.toString()}");
+        Logs.app.log("Invoked DeepLink uri: ${uri.toString()}");
         String host = uri.host;
         switch (host) {
           case "info":

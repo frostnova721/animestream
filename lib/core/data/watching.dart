@@ -1,3 +1,4 @@
+import "package:animestream/core/app/logging.dart";
 import "package:animestream/core/app/runtimeDatas.dart";
 import "package:animestream/core/commons/enums/hiveEnums.dart";
 import "package:animestream/core/database/anilist/login.dart";
@@ -20,7 +21,7 @@ Future<void> storeWatching(
 }) async {
   try {
     //add to anilist if the user is logged in
-    print("SETTING WATCHED TO $watched");
+    Logs.app.log("SETTING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
       SyncHandler()
           .mutateAnimeList(id: id, status: MediaStatus.CURRENT, progress: watched, otherIds: alternateDatabases);
@@ -46,13 +47,13 @@ Future<void> storeWatching(
       box.close();
     }
   } catch (err) {
-    print(err);
+    Logs.app.log(err.toString());
   }
 }
 
 Future<void> updateWatching(int? id, String title, int watched, List<AlternateDatabaseId> otherIds) async {
   try {
-    print("UPDATING WATCHED TO $watched");
+    Logs.app.log("UPDATING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
       if (id == null) throw new Exception("ERR_NO_ID_PROVIDED");
       SyncHandler().mutateAnimeList(
@@ -72,13 +73,13 @@ Future<void> updateWatching(int? id, String title, int watched, List<AlternateDa
       if (index != -1) {
         watchingList[index]['watched'] = watched;
       } else {
-        print('noData');
+        Logs.app.log('noData');
       }
       box.put('watching', watchingList);
       box.close();
     }
   } catch (err) {
-    print(err);
+    Logs.app.log(err.toString());
   }
 }
 
@@ -91,10 +92,10 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
       if (list.length != 0) {
         return list;
       } else {
-        throw new Exception("COULDNT_FIND_ANY_ANIMES_IN_CURRENT");
+        throw new Exception("COULDNT_FIND_ANY_ANIMES_IN_CURRENT_LIST");
       }
     }
-    throw new Exception("ERR_USERNAME_NOT_PASSED");
+    throw new Exception("ERR_USERNAME_IS_NULL");
   } else {
     final box = await Hive.openBox(_boxName);
     List watching = box.get('watching') ?? [];

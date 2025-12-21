@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:hive/hive.dart';
 
@@ -20,6 +21,6 @@ Future<void> storeVal(HiveKey itemKey, dynamic val, {HiveBox boxName = HiveBox.a
     await box.put(itemKey.name, val);
     await box.close();
   } catch (err) {
-    print(err);
+    Logs.app.log(err.toString());
   }
 }

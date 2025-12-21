@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
@@ -132,10 +133,10 @@ class PlayerProvider extends ChangeNotifier {
   /// Set pip mode
   Future<void> setPip(bool val) async {
     if (!Platform.isAndroid && !Platform.isWindows) {
-      print("[PLAYER] PiP not supported on this platform.");
+      Logs.player.log("PiP not supported on this platform.");
     };
 
-    print("[PLAYER] set pip: $val");
+    Logs.player.log("set pip: $val");
     _state = _state.copyWith(pip: val);
 
     if (Platform.isWindows) {
@@ -196,7 +197,7 @@ class PlayerProvider extends ChangeNotifier {
       controller.setQuality(q);
       dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
     } else {
-      print("[PLAYER] No preloaded sources found!");
+      Logs.player.log("No preloaded sources found!");
     }
   }
 

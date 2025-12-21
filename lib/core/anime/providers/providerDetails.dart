@@ -54,7 +54,7 @@ class ProviderDetails {
       version: map['version'] as String,
       icon: map['icon'] != null ? map['icon'] as String : null,
       code: map['code'] != null ? map['code'] as String : null,
-      supportDownloads: map['supportDownloads'] as bool,
+      supportDownloads: (map['supportDownloads'] ?? false) as bool,
     );
   }
 

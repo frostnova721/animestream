@@ -603,7 +603,8 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
-      print("[PLAYER] SAVED WATCH DURATION");
+      if(!widget.localSource)
+        print("[PLAYER] SAVED WATCH DURATION");
       controller.removeListener(_listener);
       controller.dispose();
       _controlsTimer?.cancel();

@@ -1,5 +1,6 @@
 import 'package:animestream/core/anime/providers/providerDetails.dart';
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
@@ -205,7 +206,7 @@ class InfoProvider extends ChangeNotifier {
       }
     } catch (err) {
       floatingSnackBar("Couldn't fetch watch progress.");
-      print(err.toString());
+      Logs.app.log(err.toString());
       if (currentUserSettings?.showErrors ?? false) {
         floatingSnackBar(err.toString(), waitForPreviousToFinish: true);
       }
@@ -244,7 +245,7 @@ class InfoProvider extends ChangeNotifier {
       _mediaListStatus = assignItemEnum(data.mediaListStatus);
       notifyListeners();
     } catch (err) {
-      print(err);
+      Logs.app.log(err.toString());
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) floatingSnackBar(err.toString());
       _infoLoadError = true;
       notifyListeners();
@@ -311,7 +312,7 @@ class InfoProvider extends ChangeNotifier {
       await _search(searchTitle);
       notifyListeners();
     } catch (err) {
-      print(err.toString());
+      Logs.app.log(err.toString());
 
       // try again with romaji title if english title failed
 
@@ -325,7 +326,7 @@ class InfoProvider extends ChangeNotifier {
           notifyListeners();
           return;
         } catch (e) {
-          print(e.toString());
+          Logs.app.log(e.toString());
         }
       }
 

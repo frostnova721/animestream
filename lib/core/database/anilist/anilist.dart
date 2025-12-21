@@ -244,7 +244,6 @@ class Anilist extends Database {
     }
   }
 }''';
-    try {
       final res = await fetchQuery(query, RequestType.recentlyUpdatedAnime);
       final List<dynamic> recentlyUpdatedAnimes = res;
 
@@ -271,10 +270,6 @@ class Anilist extends Database {
         trendingList.add(data);
       }
       return trendingList;
-    } catch (err) {
-      print(err);
-      throw new Exception("ERR_COULDNT_GET_TRENDING_LIST");
-    }
   }
 
   Future<List<TrendingResult>> getTrending() async {
@@ -351,8 +346,7 @@ class Anilist extends Database {
     }
 
     if (res.hasException) {
-      print(res.exception.toString());
-      throw Exception("ERR_COULDNT_FETCH_ANILIST_DATA");
+      throw Exception(res.exception.toString());
     }
 
     if (type == null) return res.data;

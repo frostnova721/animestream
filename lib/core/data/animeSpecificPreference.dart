@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:animestream/core/data/hive.dart';
@@ -25,14 +26,14 @@ Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) as
 
   final Map<dynamic, dynamic> asp = await box.get(HiveKey.animeSpecificPreference.name) ?? {};
   if (asp.isEmpty) {
-    print("EMPTY MAP 'animeSpecificPreference'");
+    Logs.app.log("EMPTY MAP 'animeSpecificPreference'");
   }
 
   final Map<String, dynamic> item = Map.castFrom(asp[anilistId] ?? {});
   manSearch = item["manualSearchQuery"];
   lastWatch = item['lastWatchDuration'];
   provider = item['preferredProvider'];
-  print(item);
+  Logs.app.log(item.toString());
 
   // Update lastAccessed for LRU on read
   if (item.isNotEmpty) {

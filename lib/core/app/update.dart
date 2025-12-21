@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:flutter/foundation.dart';
@@ -41,7 +42,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
     final releasesRes = json.decode(await fetch(releasesUrl))[0];
     final String currentVersion = packageInfo.version;
     final String latestVersion = releasesRes['tag_name'];
-    print("[UPDATE-CHECK] current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
+    Logs.app.log("<UPDATE-CHECK> current ver: $currentVersion , latest ver: ${latestVersion.replaceAll('v', '')}");
     final String description = releasesRes['body'];
     final bool pre = releasesRes['prerelease'];
     if (!currentUserSettings!.receivePreReleases! && pre) {
@@ -58,17 +59,6 @@ Future<UpdateCheckResult?> checkForUpdates() async {
 
     try {
       isAnUpgrade = _checkIfTheNewVersionIsActuallyAnUpgrade(latestVersionCode, currentVersion);
-
-
-      //in this block, we just trying to join the numbers (eg: 1.3.5 to 135) [This method is deprecated now]
-      // latestVersionJoined = int.tryParse(versionNumber.split(".").join());
-
-      // currentVersionJoined = int.tryParse(currentVersion.split('-').first.split('.').join());
-
-      // if (latestVersionJoined == null || currentVersionJoined == null) {
-      //   print("[UPDATE-CHECK] Updation check failed. Got null integers from either $currentVersion or $versionNumber");
-      //   return null;
-      // }
     } catch (err) {
       // old version check logic as a backup method!
       if (currentVersion.split("-").firstOrNull != versionNumber) triggerSheet = true;
@@ -76,7 +66,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
 
     // we can assert not null since we do null check in try statement & the comparison wont occur if theres an issue
     if (triggerSheet || isAnUpgrade) {
-      print("[UPDATE-CHECK] UPDATE AVAILABLE!!!");
+      Logs.app.log("<UPDATE-CHECK> UPDATE AVAILABLE!!!");
       final List<dynamic> apkItem = releasesRes['assets']
           .where((item) => item['name'] == (Platform.isAndroid ? "app-release.apk" : "animestream-x86_64.exe"))
           .toList();
@@ -90,12 +80,12 @@ Future<UpdateCheckResult?> checkForUpdates() async {
         description: description,
       );
     } else {
-      print("[UPDATE-CHECK] APP IS ALREADY UP-TO-DATE!");
+      Logs.app.log("<UPDATE-CHECK> APP IS ALREADY UP-TO-DATE!");
       return null;
     }
   } catch (err) {
     // graceful quitting
-    print("[UPDATE-CHECK] Update check failed. \n$err");
+    Logs.app.log("<UPDATE-CHECK> Update check failed. \n$err");
     return null;
   }
 }

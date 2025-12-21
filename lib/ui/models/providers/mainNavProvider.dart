@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/enums/loadingState.dart';
@@ -136,6 +137,13 @@ class MainNavProvider extends ChangeNotifier {
 
   /// check login status and get userprofile then load lists
   Future<void> init() async {
+    if (!(await isConnectedToInternet())) {
+      floatingSnackBar("You're offline. Connect to the internet and try again.", waitForPreviousToFinish: true);
+      currentlyAiring.state = LoadingState.error;
+      recentlyWatched.state = LoadingState.error;
+      plannedList.state = LoadingState.error;
+      return;
+    }
     loggedIn = await AniListLogin().isAnilistLoggedIn();
     if (loggedIn) {
       AniListLogin()
@@ -143,7 +151,7 @@ class MainNavProvider extends ChangeNotifier {
           .then((user) => {
                 _userProfile = user,
                 storedUserData = user,
-                print("[AUTHENTICATION] ${storedUserData?.name} Login Successful"),
+                Logs.app.log("[AUTHENTICATION] ${storedUserData?.name} Login Successful"),
                 loadListsForHome(userName: user.name),
                 // loadDiscoverItems(),
               })
@@ -158,6 +166,19 @@ class MainNavProvider extends ChangeNotifier {
     } else {
       loadListsForHome();
       // loadDiscoverItems(); // lets let the discover page be lazy loaded
+    }
+  }
+
+  /// Checks if the device is connected to internet
+  Future<bool> isConnectedToInternet() async {
+    try {
+      final result = await InternetAddress.lookup('google.com');
+      if (result.isNotEmpty && result[0].rawAddress.isNotEmpty) {
+        return true;
+      }
+      return false;
+    } on SocketException catch (_) {
+      return false;
     }
   }
 
@@ -228,12 +249,14 @@ class MainNavProvider extends ChangeNotifier {
       // fetches "continue watching" list
       getWatchedList(userName: userName).onError((e, st) {
         recentlyWatched.state = LoadingState.error;
+        Logs.app.log("Error fetching watched list: $e");
         return <UserAnimeListItem>[];
       }),
 
       // fetches "aired this season" list
       Anilist().getCurrentlyAiringAnime().onError((e, st) {
         currentlyAiring.state = LoadingState.error;
+        Logs.app.log("Error fetching currently airing list: $e");
         return <CurrentlyAiringResult>[];
       }),
 
@@ -241,9 +264,14 @@ class MainNavProvider extends ChangeNotifier {
       if (userName != null)
         AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING).onError((e, st) {
           plannedList.state = LoadingState.error;
+          Logs.app.log("Error fetching planned list: $e");
           return <UserAnimeList>[];
         }),
     ]);
+
+    if (currentlyAiring.state.isError || recentlyWatched.state.isError || plannedList.state.isError) {
+      if (currentUserSettings?.enableLogging ?? false) await Logs.app.writeLog();
+    }
 
     List<UserAnimeListItem> watched = futures[0] as List<UserAnimeListItem>;
     if (watched.length > 40) watched = watched.sublist(0, 40);
@@ -312,9 +340,10 @@ class MainNavProvider extends ChangeNotifier {
       plannedList.state = LoadingState.loaded;
     }
 
-    if (watched.isEmpty &&
-        currentlyAiringResponse.isEmpty &&
-        (userName != null ? (futures[2] as List<UserAnimeList>).isEmpty : false)) {
+    // I think its safe to assume that if all three lists errored out, then Anilist must be down. Unless... user is offline
+    if (recentlyWatched.state.isError &&
+        currentlyAiring.state.isError &&
+        (userName != null ? plannedList.state.isError : false)) {
       if (currentUserSettings?.showErrors ?? false)
         floatingSnackBar("Couldn't load home data. Is Anilist down?", waitForPreviousToFinish: true);
     }
@@ -332,7 +361,7 @@ class MainNavProvider extends ChangeNotifier {
       ]);
       discoverDataLoaded = true;
     } catch (e) {
-      print("Error loading discover items: $e");
+      Logs.app.log("Error loading discover items: $e");
       discoverDataLoaded = false;
       if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!)
         floatingSnackBar(e.toString(), waitForPreviousToFinish: true);
@@ -345,6 +374,14 @@ class MainNavProvider extends ChangeNotifier {
   /// refresh [0 = home, 1 = discover]
   Future<void> refresh({required int refreshPage, bool fromSettings = false}) async {
     if (refreshPage != 0 && refreshPage != 1) return;
+
+    if (!(await isConnectedToInternet())) {
+      floatingSnackBar("You're offline. Connect to the internet and try again.", waitForPreviousToFinish: true);
+      currentlyAiring.state = LoadingState.error;
+      recentlyWatched.state = LoadingState.error;
+      plannedList.state = LoadingState.error;
+      return refreshPage == 0 ? homeRefreshController.refreshCompleted() : discoverRefreshController.refreshCompleted();
+    }
 
     if (refreshPage == 1) {
       await loadDiscoverItems();
@@ -359,7 +396,7 @@ class MainNavProvider extends ChangeNotifier {
       //load the userprofile and list if the user just signed in!
       userProfile = await AniListLogin().getUserProfile();
       storedUserData = userProfile;
-      print("[AUTHENTICATION] ${storedUserData?.name} Login Successful");
+      Logs.app.log("[AUTHENTICATION] ${storedUserData?.name} Login Successful");
       await loadListsForHome(userName: userProfile!.name);
     } else if (loggedIn && userProfile != null) {
       //just load the list if the user was already signed in.

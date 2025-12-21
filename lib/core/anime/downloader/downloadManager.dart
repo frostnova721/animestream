@@ -1,6 +1,7 @@
 import 'package:animestream/core/anime/downloader/downloader.dart';
 import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/widgets.dart';
@@ -11,22 +12,22 @@ class DownloadManager {
   factory DownloadManager() => _instance;
   DownloadManager._internal();
 
-  // The currently downloading items (includes queue)
+  /// The currently downloading items (includes queue)
   static final List<DownloadItem> _downloadingItems = [];
 
-  // The count for UI updations
+  /// The count for UI updations
   static final ValueNotifier<int> downloadsCount = ValueNotifier(0);
 
-  // Getter for public usage
+  /// Getter for public usage
   static List<DownloadItem> get downloadingItems => List.unmodifiable(_downloadingItems);
 
-  final Downloader _downloader = Downloader();
+  final Downloader _downloader = Downloader(logger: Logs.downloader);
 
   /// The queue is managed from [Downloader] class
   static void enqueue(DownloadItem item) {
     _downloadingItems.add(item);
     downloadsCount.value++;
-    print(
+    Logs.downloader.log(
         "Added item to queue. Items in queue: ${downloadsCount.value}. [queue mode: ${(currentUserSettings?.useQueuedDownloads ?? false)}]");
   }
 
@@ -36,6 +37,7 @@ class DownloadManager {
     downloadsCount.value--;
   }
 
+  /// Adds a new download task to the downloader
   Future<void> addDownloadTask(
     String url,
     String filename, {

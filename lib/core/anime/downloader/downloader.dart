@@ -18,6 +18,10 @@ enum _DownloadType { stream, video, image }
 class Downloader {
   final DownloaderHelper _helper = DownloaderHelper();
 
+  final Logbook? logger;
+
+  Downloader({this.logger});
+
   static final Map<int, Isolate> _isolates = {};
 
   static final Map<int, ReceivePort> _receivePorts = {};
@@ -94,7 +98,7 @@ class Downloader {
 
     final task = _cookTask(item, path);
 
-    print('[DOWNLOADER] Queuing task $task with type: ${type.name}');
+    logger?.log('[DOWNLOADER] Queuing task $task with type: ${type.name}');
 
     // Run the downloading
     final isolate = await Isolate.spawn(downloadFunction, task);
@@ -194,22 +198,22 @@ class Downloader {
                 _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String));
           }
           _endTask(msg.id);
+          logger?.log("Download completed for task ${msg.id}.");
           break;
         }
       case 'error':
         {
           _endTask(msg.id);
           print("Welp, something went wrong..");
-          await Logger()
-            ..addLog("Download Manager: error on ${msg.id} ${msg.message}")
-            ..writeLog();
+          logger?.log("Download error for ${msg.id}. Reason: ${msg.message} \n StackTrace: ${msg.extras[0] as String}");
+          await logger?.writeLog();
           break;
         }
       case 'fail':
         {
           _helper.sendCancelledNotif(msg.id, failed: true);
           _endTask(msg.id);
-          print("Download failed for ${msg.id}. Reason: ${msg.message}");
+          logger?.log("Download failed for ${msg.id}. Reason: ${msg.message}");
           break;
         }
       case 'cancel':
@@ -217,7 +221,7 @@ class Downloader {
           _helper.sendCancelledNotif(msg.id, failed: false);
           _endTask(msg.id);
 
-          print("Download cancelled for ${msg.id}");
+          logger?.log("Download cancelled for ${msg.id}. Reason: ${msg.message}");
           break;
         }
       case 'paused':

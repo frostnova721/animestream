@@ -6,6 +6,7 @@ import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
+import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/plugin.dart';
 import 'package:file_picker/file_picker.dart';
@@ -34,6 +35,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
       receivePreReleases = settings.receivePreReleases!;
       fasterDownloads = settings.fasterDownloads!;
       useQueuedDownloads = settings.useQueuedDownloads!;
+      enableLogging = settings.enableLogging!;
     });
   }
 
@@ -50,6 +52,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool fasterDownloads = false;
   bool useQueuedDownloads = false;
   bool enableDiscordPresence = false;
+  bool enableLogging = false;
 
   final sources = SourceManager().sources;
 
@@ -150,12 +153,25 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       description: currentUserSettings?.preferredProvider ?? sources.first.identifier,
                       suffixIcon: Icon(Icons.arrow_drop_down),
                     ),
-                    ClickableItem(onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(builder: (context) => PluginPage()));
-                    }, label: "Manage Providers",
-                    description: "Add or remove providers",
-                    suffixIcon: Icon(Icons.navigate_next_rounded),
+                    ClickableItem(
+                      onTap: () {
+                        Navigator.of(context).push(MaterialPageRoute(builder: (context) => PluginPage()));
+                      },
+                      label: "Manage Providers",
+                      description: "Add or remove providers",
+                      suffixIcon: Icon(Icons.navigate_next_rounded),
                     ),
+                    ToggleItem(
+                      onTapFunction: () {
+                        setState(() {
+                          enableLogging = !enableLogging;
+                        });
+                        writeSettings(SettingsModal(enableLogging: enableLogging));
+                      },
+                      label: "Enable Logging",
+                      description: "Helps with debugging issues",
+                      value: enableLogging,
+                    )
                   ],
                 ),
               ),

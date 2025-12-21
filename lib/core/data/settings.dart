@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:animestream/core/data/types.dart';
@@ -21,8 +22,8 @@ class Settings {
     if (!box.isOpen) box = await Hive.openBox(_boxName);
     var currentSettings = (await getSettings(writing: true)).toMap();
     var updatedSettings = settings.toMap();
-    print("before updation: $currentSettings");
-    print("value upation: $updatedSettings");
+    Logs.app.log("before updation: $currentSettings");
+    Logs.app.log("value upation: $updatedSettings");
     currentSettings.forEach((key, value) {
       if (updatedSettings[key] != null) {
         currentSettings[key] = updatedSettings[key];

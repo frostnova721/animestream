@@ -66,7 +66,11 @@ class SettingsModal {
   /// Enable picture in picture mode on minimize (Not available for desktops)
   final bool? enablePipOnMinimize;
 
+  /// Automatically skip opening and ending themes
   final bool? autoOpEdSkip;
+
+  /// Enable logging throughout the app
+  final bool? enableLogging;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -90,6 +94,7 @@ class SettingsModal {
     this.nativeTitle,
     this.enablePipOnMinimize,
     this.autoOpEdSkip,
+    this.enableLogging,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -115,6 +120,7 @@ class SettingsModal {
       nativeTitle: map['nativeTitle'] ?? false,
       enablePipOnMinimize: map['enablePipOnMinimize'] ?? false,
       autoOpEdSkip: map['autoOpEdSkip'] ?? false,
+      enableLogging: map['enableLogging'] ?? false,
     );
   }
 
@@ -141,6 +147,7 @@ class SettingsModal {
       'nativeTitle': nativeTitle,
       'enablePipOnMinimize': enablePipOnMinimize,
       'autoOpEdSkip': autoOpEdSkip,
+      'enableLogging': enableLogging,
     };
   }
 }
@@ -161,7 +168,8 @@ class UserPreferencesModal {
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
     return UserPreferencesModal(
       episodesViewMode: getViewModeEnum(map['episodesViewMode'] ?? 0),
-      subtitleSettings: map['subtitleSettings'] != null ? SubtitleSettings.fromMap(map['subtitleSettings']) : SubtitleSettings(),
+      subtitleSettings:
+          map['subtitleSettings'] != null ? SubtitleSettings.fromMap(map['subtitleSettings']) : SubtitleSettings(),
       preferDubs: map['preferDubs'] ?? false,
       searchPageListMode: map['searchPageListMode'] ?? false,
     );
@@ -247,7 +255,8 @@ class AnimeSpecificPreference {
 
   factory AnimeSpecificPreference.fromMap(Map<String, dynamic> map) {
     return AnimeSpecificPreference(
-      lastWatchDuration: map['lastWatchDuration'] != null ? Map.from(map['lastWatchDuration'] as Map<dynamic,dynamic>) : null,
+      lastWatchDuration:
+          map['lastWatchDuration'] != null ? Map.from(map['lastWatchDuration'] as Map<dynamic, dynamic>) : null,
       manualSearchQuery: map['manualSearchQuery'] != null ? map['manualSearchQuery'] as String : null,
       preferredProvider: map['preferredProvider'] != null ? map['preferredProvider'] as String : null,
     );
@@ -255,5 +264,6 @@ class AnimeSpecificPreference {
 
   String toJson() => json.encode(toMap());
 
-  factory AnimeSpecificPreference.fromJson(String source) => AnimeSpecificPreference.fromMap(json.decode(source) as Map<String, dynamic>);
+  factory AnimeSpecificPreference.fromJson(String source) =>
+      AnimeSpecificPreference.fromMap(json.decode(source) as Map<String, dynamic>);
 }

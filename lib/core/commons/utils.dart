@@ -3,6 +3,8 @@ import 'dart:io';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 Future<String> fetch(String uri) async {
   final res = await get(Uri.parse(uri));
@@ -81,9 +83,24 @@ MediaStatus? assignItemEnum(String? valueInString) {
 }
 
 Future<bool> isTv() async {
-  if(!Platform.isAndroid) return false;
+  if (!Platform.isAndroid) return false;
   DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
   AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
   bool isTV = androidInfo.systemFeatures.contains('android.software.leanback');
   return isTV;
+}
+
+Future<Directory> getDocumentsDirectory() async {
+  final Directory dir = await getApplicationDocumentsDirectory();
+  if (Platform.isAndroid) {
+    bool status = await Permission.manageExternalStorage.isGranted;
+    if (!status) {
+      final req = await Permission.manageExternalStorage.request();
+      if (req.isDenied || req.isPermanentlyDenied) {
+        return dir;
+      }
+    }
+    return Directory('/storage/emulated/0/Documents/animestream');
+  }
+  return Directory(dir.path + '/animestream');
 }

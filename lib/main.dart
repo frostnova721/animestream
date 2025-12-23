@@ -1,13 +1,6 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:animestream/core/app/version.dart';
-import 'package:animestream/core/data/preferences.dart';
-import 'package:animestream/ui/models/providers/mainNavProvider.dart';
-import 'package:animestream/ui/models/sources.dart';
-import 'package:animestream/ui/models/widgets/appWrapper.dart';
-import 'package:animestream/ui/pages/info.dart';
-import 'package:animestream/ui/theme/lime.dart';
 import 'package:app_links/app_links.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:desktop_webview_window/desktop_webview_window.dart';
@@ -17,21 +10,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:window_manager/window_manager.dart';
 
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/app/version.dart';
+import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
 import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/models/providers/appProvider.dart';
+import 'package:animestream/ui/models/providers/mainNavProvider.dart';
+import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/widgets/appWrapper.dart';
+import 'package:animestream/ui/pages/info.dart';
+import 'package:animestream/ui/pages/mainNav.dart';
+import 'package:animestream/ui/theme/lime.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
-import 'package:window_manager/window_manager.dart';
 
 void main(List<String> args) async {
   try {
@@ -41,15 +40,10 @@ void main(List<String> args) async {
 
     WidgetsFlutterBinding.ensureInitialized();
 
-    final Directory dir = await getApplicationDocumentsDirectory();
-
     // Initialise app version instance
     AppVersion.init();
 
-    // The dir.path only contains the path till documents folder in windows
-    final dirPath =  dir.path + (Platform.isWindows ? "/animestream" : "");
-
-    await Hive.initFlutter(dirPath);
+    await Hive.initFlutter(Platform.isWindows ? "/animestream" : null);
 
     await loadAndAssignSettings();
 
@@ -83,7 +77,8 @@ void main(List<String> args) async {
     FlutterError.onError = (FlutterErrorDetails details) async {
       FlutterError.presentError(details);
 
-      Logs.app.log(details.exceptionAsString());
+      // force add these error to logs 
+      Logs.app.log(details.exceptionAsString() + "\n${details.stack.toString()}", addToBuffer: true);
       await Logs.writeAllLogs();
 
       print("[ERROR] logged the error to logs folder");
@@ -96,10 +91,9 @@ void main(List<String> args) async {
       ),
     );
   } catch (err) {
-    debugPrint(err.toString());
-
-    Logs.app.log(err.toString());
-    Logs.app.log("state: Crashed");
+    // These are critical errors, so we force log them
+    Logs.app.log(err.toString(), addToBuffer: true);
+    Logs.app.log("state: Crashed", addToBuffer: true);
     await Logs.writeAllLogs();
 
     print("[CRASH] logged the error to logs folder");

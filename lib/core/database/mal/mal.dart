@@ -30,7 +30,7 @@ class MAL extends Database {
 
   Future<String> fetch(String url, {int recallAttempt = 0, bool refreshHeaders = false }) async {
 
-    if(recallAttempt > 2) throw Exception("MAX RECALL DEPTH LIMIT REACHED!");
+    if(recallAttempt > 2) throw Exception("MAL-FETCH: MAX RECALL DEPTH LIMIT REACHED!");
 
     final headers = await getHeader(refreshHeaders: refreshHeaders);
     final res = await get(Uri.parse(url), headers: headers);

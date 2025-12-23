@@ -2,6 +2,19 @@ import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/types.dart';
 
+class SimklException implements Exception {
+  final String message;
+  final int statusCode;
+  SimklException(this.message, this.statusCode);
+
+  bool get isUnauthorized => statusCode == 401;
+
+  @override
+  String toString() {
+    return "SimklException: (Message: $message, StatusCode: $statusCode)";
+  }
+}
+
 class SimklSearchResult extends DatabaseSearchResult {
   final int id;
   final String cover;
@@ -90,12 +103,12 @@ class SimklInfo extends DatabaseInfo {
   });
 
   factory SimklInfo.fromJson(Map<String, dynamic> json) {
-
     String? getTitleFromAltTitles(int langCode) {
       final titleList = (json['alt_titles'] as List?)?.where((it) => it['lang'] == langCode).toList();
-      if(titleList == null || titleList.isEmpty) return null;
+      if (titleList == null || titleList.isEmpty) return null;
       return titleList[0]['name'];
     }
+
     return SimklInfo(
         title: {
           'romaji': getTitleFromAltTitles(33) ?? json['title'],
@@ -111,7 +124,8 @@ class SimklInfo extends DatabaseInfo {
         rating: json['ratings']?['simkl']['rating']?.toDouble() ?? 0,
         genres: List<String>.from(json['genres']),
         recommended:
-            (json['users_recommendations'] as List?)?.map((rec) => SimklRelatedRecommendation.fromJson(rec)).toList() ?? [],
+            (json['users_recommendations'] as List?)?.map((rec) => SimklRelatedRecommendation.fromJson(rec)).toList() ??
+                [],
         banner: json['fanart'] != null ? Simkl.imageLink(json['fanart'], fanart: true) : null,
         status: json['status'],
         synopsis: json['overview'],
@@ -124,13 +138,11 @@ class SimklInfo extends DatabaseInfo {
           if (json['ids']['anilist'] != null)
             AlternateDatabaseId(database: Databases.anilist, id: int.parse(json['ids']['anilist'])),
           AlternateDatabaseId(database: Databases.simkl, id: json['ids']['simkl']),
-          if(json['ids']['mal'] != null)
+          if (json['ids']['mal'] != null)
             AlternateDatabaseId(database: Databases.mal, id: int.parse(json['ids']['mal'])),
         ]);
   }
 }
 
 //idk just leave this mf here
-class SimklMutationResult extends DatabaseMutationResult {
-
-}
+class SimklMutationResult extends DatabaseMutationResult {}

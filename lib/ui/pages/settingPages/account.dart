@@ -3,11 +3,13 @@ import 'dart:ui';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/secureStorage.dart';
+import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/simkl/login.dart';
+import 'package:animestream/core/database/simkl/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
@@ -42,17 +44,62 @@ class _AccountSettingState extends State<AccountSetting> {
       if (anilistLoggedIn) {
         futures.add(AniListLogin().getUserProfile().then((res) {
           alu = res;
+        }).catchError((Object? err) async {
+          if (!(err is AnilistApiException)) {
+            floatingSnackBar("Anilist error: ${err.toString()}");
+            return;
+
+            // yes, i know its not a good idea to check by message but yeah...
+          } else if (err.statusCode == 401 || err.message.toLowerCase().contains("invalid token")) {
+            // token is expired, invalid or has its access revoked!
+            floatingSnackBar("Anilist token is invalid. Login again!");
+
+            await AniListLogin().removeToken();
+          }
+          if (mounted) {
+            setState(() {
+              anilistLoggedIn = false;
+            });
+          }
         }));
       }
       if (simklLoggedIn) {
         futures.add(SimklLogin().getUserProfile().then((res) {
           simu = res;
+        }).catchError((Object? err) {
+          if (err is SimklException) {
+            if (err.isUnauthorized) {
+              floatingSnackBar("Simkl token is invalid. Login again!");
+
+              SimklLogin().removeToken();
+            }
+          }
+          if (mounted) {
+            setState(() {
+              simklLoggedIn = false;
+            });
+          }
         }));
       }
 
       if (malLoggedIn) {
         futures.add(MALLogin().getUserProfile().then((res) {
           malu = res;
+        }).catchError((Object? err) {
+          // since token cant be revoked from MAL site :), the 401 error is only for expired tokens
+          // and it is handled in MAL.fetch() itself, so no need to check for that here
+          // if (err is MalException) {
+          //   if (err.isUnauthorized) {
+          //     // token is expired, invalid or has its access revoked!
+          //     floatingSnackBar("MAL token is invalid. Login again!");
+
+          //     MALLogin().removeToken();
+          //   }
+          // }
+          floatingSnackBar("MAL error: ${err.toString()}");
+          setState(() {
+            malLoggedIn = false;
+          });
         }));
       }
 

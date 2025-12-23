@@ -7,6 +7,7 @@ import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/mutations.dart';
+import 'package:animestream/core/database/simkl/types.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:flutter_web_auth_2/flutter_web_auth_2.dart';
@@ -53,6 +54,7 @@ class SimklLogin extends DatabaseLogin {
     return true;
   }
 
+  @override
   Future<void> removeToken() async {
     final storage = new FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
     storage.delete(key: SecureStorageKey.simklToken.value);
@@ -113,6 +115,15 @@ class SimklLogin extends DatabaseLogin {
     final url = "https://api.simkl.com/users/settings";
     final headers = await SimklMutation.getHeader();
     final res = await post(Uri.parse(url), headers: headers);
+
+    if (res.statusCode == 401) {
+      throw SimklException("Unauthorized - Invalid Token", 401);
+    }
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw SimklException("Failed to fetch simkl user profile", res.statusCode);
+    }
+
     final jsoned = jsonDecode(res.body);
     final userModal = UserModal(
       avatar: jsoned['user']['avatar'],

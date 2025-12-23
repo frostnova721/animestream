@@ -8,6 +8,7 @@ import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
@@ -134,7 +135,8 @@ class PlayerProvider extends ChangeNotifier {
   Future<void> setPip(bool val) async {
     if (!Platform.isAndroid && !Platform.isWindows) {
       Logs.player.log("PiP not supported on this platform.");
-    };
+    }
+    ;
 
     Logs.player.log("set pip: $val");
     _state = _state.copyWith(pip: val);
@@ -142,7 +144,7 @@ class PlayerProvider extends ChangeNotifier {
     if (Platform.isWindows) {
       val ? _enablePip() : _disablePip();
     } else {
-      await controller.setPip(true); // doesnt really matter for android since disabling is done by the system 
+      await controller.setPip(true); // doesnt really matter for android since disabling is done by the system
     }
     notifyListeners();
   }
@@ -168,14 +170,16 @@ class PlayerProvider extends ChangeNotifier {
     // calledAutoNext = true;
     if (dataProvider.state.preloadedSources.isNotEmpty) {
       //try to get the preferred source otherwise use the first source from the list
-      final preferredServerLink = dataProvider.state.preloadedSources
-          .where(
-            (source) => source.server == dataProvider.state.currentStream.server,
-          )
+      List<VideoStream> preferredServerLink = dataProvider.state.preloadedSources
+          .where((source) => source.server == dataProvider.state.currentStream.server)
           .toList();
-      print("${preferredServerLink}");
 
-      final src = preferredServerLink.isNotEmpty ? preferredServerLink[0] : dataProvider.state.preloadedSources[0];
+      // print("${preferredServerLink}");
+
+      final src = preferredServerLink.isNotEmpty
+          ? (preferredServerLink.firstWhereOrNull((e) => e.quality == dataProvider.state.currentStream.quality) ??
+              preferredServerLink[0]) // pick the most matching one as previous one
+          : dataProvider.state.preloadedSources[0];
 
       dataProvider.update(dataProvider.state.copyWith(
         streams: dataProvider.state.preloadedSources,

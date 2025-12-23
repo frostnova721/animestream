@@ -8,6 +8,18 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/types.dart';
 
+class AnilistApiException implements Exception {
+  final String message;
+  final int? statusCode;
+
+  const AnilistApiException(this.message, {this.statusCode});
+
+  bool get isUnauthorized => statusCode == 401;
+
+  @override
+  String toString() => 'AnilistApiException(statusCode: $statusCode, message: $message)';
+}
+
 class Anilist extends Database {
   Future<List<AnilistSearchResult>> search(String query) async {
     final gquery = '''
@@ -244,32 +256,32 @@ class Anilist extends Database {
     }
   }
 }''';
-      final res = await fetchQuery(query, RequestType.recentlyUpdatedAnime);
-      final List<dynamic> recentlyUpdatedAnimes = res;
+    final res = await fetchQuery(query, RequestType.recentlyUpdatedAnime);
+    final List<dynamic> recentlyUpdatedAnimes = res;
 
-      final List<RecentlyUpdatedResult> trendingList = [];
+    final List<RecentlyUpdatedResult> trendingList = [];
 
-      for (final recentlyUpdatedAnime in recentlyUpdatedAnimes) {
-        if (recentlyUpdatedAnime['media']['isAdult'] == true ||
-            recentlyUpdatedAnime['media']['countryOfOrigin'] != "JP") continue;
-        final RecentlyUpdatedResult data = RecentlyUpdatedResult(
-          episode: recentlyUpdatedAnime['episode'],
-          title: {
-            'english': recentlyUpdatedAnime['media']['title']['english'],
-            'romaji': recentlyUpdatedAnime['media']['title']['romaji'],
-            'native': recentlyUpdatedAnime['media']['title']['native'],
-          },
-          id: recentlyUpdatedAnime['media']['id'],
-          releaseStatus: recentlyUpdatedAnime['media']['status'],
-          type: recentlyUpdatedAnime['media']['type'],
-          banner: recentlyUpdatedAnime['media']['banner'],
-          cover: recentlyUpdatedAnime['media']['coverImage']['large'] ?? '',
-          genres: recentlyUpdatedAnime['media']['genres'],
-          rating: recentlyUpdatedAnime['media']['averageScore'],
-        );
-        trendingList.add(data);
-      }
-      return trendingList;
+    for (final recentlyUpdatedAnime in recentlyUpdatedAnimes) {
+      if (recentlyUpdatedAnime['media']['isAdult'] == true || recentlyUpdatedAnime['media']['countryOfOrigin'] != "JP")
+        continue;
+      final RecentlyUpdatedResult data = RecentlyUpdatedResult(
+        episode: recentlyUpdatedAnime['episode'],
+        title: {
+          'english': recentlyUpdatedAnime['media']['title']['english'],
+          'romaji': recentlyUpdatedAnime['media']['title']['romaji'],
+          'native': recentlyUpdatedAnime['media']['title']['native'],
+        },
+        id: recentlyUpdatedAnime['media']['id'],
+        releaseStatus: recentlyUpdatedAnime['media']['status'],
+        type: recentlyUpdatedAnime['media']['type'],
+        banner: recentlyUpdatedAnime['media']['banner'],
+        cover: recentlyUpdatedAnime['media']['coverImage']['large'] ?? '',
+        genres: recentlyUpdatedAnime['media']['genres'],
+        rating: recentlyUpdatedAnime['media']['averageScore'],
+      );
+      trendingList.add(data);
+    }
+    return trendingList;
   }
 
   Future<List<TrendingResult>> getTrending() async {
@@ -318,17 +330,12 @@ class Anilist extends Database {
 
   Future<dynamic> fetchQuery(String query, RequestType? type, {String? token}) async {
     GraphQLClient client;
-    if (token != null) {
-      client = GraphQLClient(
-        link: HttpLink("https://graphql.anilist.co", defaultHeaders: {'Authorization': 'Bearer $token'}),
-        cache: GraphQLCache(),
-      );
-    } else {
-      client = GraphQLClient(
-        link: HttpLink("https://graphql.anilist.co"),
-        cache: GraphQLCache(),
-      );
-    }
+    client = GraphQLClient(
+      link: HttpLink("https://graphql.anilist.co", defaultHeaders: {
+        if (token != null) 'Authorization': 'Bearer $token',
+      }),
+      cache: GraphQLCache(),
+    );
 
     QueryResult res;
 
@@ -337,7 +344,6 @@ class Anilist extends Database {
         document: gql(query),
       );
       res = await client.mutate(options);
-      return res.data;
     } else {
       final QueryOptions options = QueryOptions(
         document: gql(query),
@@ -345,11 +351,52 @@ class Anilist extends Database {
       res = await client.query(options);
     }
 
+    String _collectMessages(List<GraphQLError> errors) => errors.map((e) => e.message).join(", ");
+
+    int? _extractStatusCode() {
+      final ctxCode = res.context.entry<HttpLinkResponseContext>()?.statusCode;
+      if (ctxCode != null) return ctxCode;
+
+      final linkEx = res.exception?.linkException;
+      if (linkEx is ServerException) {
+        if(linkEx.statusCode != null) return linkEx.statusCode;
+        final parsed = linkEx.parsedResponse;
+        final parsedCtxCode = parsed?.context.entry<HttpLinkResponseContext>()?.statusCode;
+        if (parsedCtxCode != null) return parsedCtxCode;
+      }
+      return null;
+    }
+
     if (res.hasException) {
-      throw Exception(res.exception.toString());
+      final err = res.exception!;
+      final statusCode = _extractStatusCode();
+
+      if (err.linkException != null) {
+        if (err.linkException is ServerException) {
+          final serverErr = err.linkException as ServerException;
+          final parsed = serverErr.parsedResponse;
+          if (parsed != null) {
+            if (parsed.data != null) return parsed.data!;
+            if (parsed.errors != null && parsed.errors!.isNotEmpty) {
+              throw AnilistApiException("GraphQL error: ${_collectMessages(parsed.errors!)}", statusCode: statusCode);
+            }
+          }
+        }
+        throw AnilistApiException("Network error: ${err.linkException.toString()}", statusCode: statusCode);
+      }
+
+      if (err.graphqlErrors.isNotEmpty) {
+        throw AnilistApiException("GraphQL error: ${_collectMessages(err.graphqlErrors)}", statusCode: statusCode);
+      }
+
+      throw AnilistApiException("Unknown error", statusCode: statusCode);
     }
 
     if (type == null) return res.data;
+
+    if (type == RequestType.mutate) {
+      return res.data;
+    }
 
     if (type == RequestType.media) {
       final data = res.data?['Page']['media'];

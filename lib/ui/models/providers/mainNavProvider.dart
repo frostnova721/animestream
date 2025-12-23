@@ -155,10 +155,23 @@ class MainNavProvider extends ChangeNotifier {
                 loadListsForHome(userName: user.name),
                 // loadDiscoverItems(),
               })
-          .catchError((err) {
-        floatingSnackBar("couldnt load user profile");
+          .catchError((err) async {
+        if (err is AnilistApiException &&
+            (err.isUnauthorized || err.message.toLowerCase().contains("invalid token"))) {
+          // token is expired, invalid or has its access revoked!
+          floatingSnackBar("AniList token is invalid. Login again!");
+
+          await AniListLogin().removeToken();
+
+          loggedIn = false;
+          userProfile = null;
+        } else {
+          floatingSnackBar("couldnt load user profile");
+        }
         loadListsForHome();
-        // loadDiscoverItems(); // lets let the discover page be lazy loaded
+
+        // lets let the discover page be lazy loaded
+        // loadDiscoverItems(); 
 
         //return statement so that linter would shut up!
         return <void>{};
@@ -249,14 +262,14 @@ class MainNavProvider extends ChangeNotifier {
       // fetches "continue watching" list
       getWatchedList(userName: userName).onError((e, st) {
         recentlyWatched.state = LoadingState.error;
-        Logs.app.log("Error fetching watched list: $e");
+        Logs.app.log("Error fetching watched list. $e");
         return <UserAnimeListItem>[];
       }),
 
       // fetches "aired this season" list
       Anilist().getCurrentlyAiringAnime().onError((e, st) {
         currentlyAiring.state = LoadingState.error;
-        Logs.app.log("Error fetching currently airing list: $e");
+        Logs.app.log("Error fetching currently airing list. $e");
         return <CurrentlyAiringResult>[];
       }),
 
@@ -264,10 +277,12 @@ class MainNavProvider extends ChangeNotifier {
       if (userName != null)
         AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING).onError((e, st) {
           plannedList.state = LoadingState.error;
-          Logs.app.log("Error fetching planned list: $e");
+          Logs.app.log("Error fetching planned list. $e");
           return <UserAnimeList>[];
         }),
     ]);
+
+    notifyListeners();
 
     if (currentlyAiring.state.isError || recentlyWatched.state.isError || plannedList.state.isError) {
       if (currentUserSettings?.enableLogging ?? false) await Logs.app.writeLog();

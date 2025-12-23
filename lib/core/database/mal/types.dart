@@ -3,6 +3,19 @@ import 'dart:convert';
 
 import 'package:animestream/core/database/types.dart';
 
+class MalException implements Exception {
+  final String message;
+  final int statusCode;
+  MalException(this.message, this.statusCode);
+
+  bool get isUnauthorized => statusCode == 401;
+
+  @override
+  String toString() {
+    return "MalException: $message";
+  }
+}
+
 class MALAuthResponse {
   String accessToken;
   int expires_in;

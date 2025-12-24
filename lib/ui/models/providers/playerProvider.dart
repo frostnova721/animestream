@@ -176,8 +176,12 @@ class PlayerProvider extends ChangeNotifier {
 
       // print("${preferredServerLink}");
 
+      final sizeRegex = RegExp(r'\[(.*?)\]');
+
       final src = preferredServerLink.isNotEmpty
-          ? (preferredServerLink.firstWhereOrNull((e) => e.quality == dataProvider.state.currentStream.quality) ??
+          ? (preferredServerLink.firstWhereOrNull((e) =>
+                  e.quality.replaceAll(sizeRegex, "").trim() ==
+                  dataProvider.state.currentStream.quality.replaceAll(sizeRegex, "").trim()) ??
               preferredServerLink[0]) // pick the most matching one as previous one
           : dataProvider.state.preloadedSources[0];
 

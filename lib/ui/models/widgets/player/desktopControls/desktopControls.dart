@@ -193,7 +193,9 @@ class _DesktopControlsState extends State<DesktopControls> {
                             child: Padding(
                               padding: const EdgeInsets.only(left: 10, right: 10),
                               child: Slider(
-                                value: dataProvider.state.sliderValue.toDouble(),
+                                value: dataProvider.state.sliderValue.toDouble() > (provider.controller.duration ?? 0)
+                                    ? (provider.controller.duration ?? 0).toDouble()
+                                    : dataProvider.state.sliderValue.toDouble(),
                                 thumbColor: Colors.white,
                                 onChanged: (val) {
                                   provider.controller.seekTo(Duration(seconds: val.toInt()));

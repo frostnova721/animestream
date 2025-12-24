@@ -43,7 +43,7 @@ void main(List<String> args) async {
     // Initialise app version instance
     AppVersion.init();
 
-    await Hive.initFlutter(Platform.isWindows ? "/animestream" : null);
+    await Hive.initFlutter(!Platform.isAndroid ? "animestream" : null);
 
     await loadAndAssignSettings();
 
@@ -74,15 +74,15 @@ void main(List<String> args) async {
     //   await FlutterDiscordRPC.initialize("1362858832266657812");
     // }
 
-    FlutterError.onError = (FlutterErrorDetails details) async {
-      FlutterError.presentError(details);
+    // FlutterError.onError = (FlutterErrorDetails details) async {
+    //   FlutterError.presentError(details);
 
-      // force add these error to logs 
-      Logs.app.log(details.exceptionAsString() + "\n${details.stack.toString()}", addToBuffer: true);
-      await Logs.writeAllLogs();
+    //   // force add these error to logs 
+    //   Logs.app.log(details.exceptionAsString() + "\n${details.stack.toString()}", addToBuffer: true);
+    //   await Logs.writeAllLogs();
 
-      print("[ERROR] logged the error to logs folder");
-    };
+    //   print("[ERROR] logged the error to logs folder");
+    // };
 
     runApp(
       ChangeNotifierProvider(

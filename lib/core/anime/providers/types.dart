@@ -2,12 +2,31 @@
 import 'dart:convert';
 
 class VideoStream {
+  /// The quality of the video stream.
+  /// 
+  /// The format for quality is recommended to be "\<quality_string> [\<size>]".
+  ///
+  /// for example: "1080p [260 MB]" or "multi-quality"
+  /// 
+  /// the size part is optional and can be omitted if unknown
   final String quality;
+
+  /// The URL of the video. Can be a direct link to the video file or a stream playlist like m3u8 or dash
   final String url;
+
+  /// The URL of the subtitle file, if available
   final String? subtitle;
+
+  /// The format of the subtitle file, if available
   final String? subtitleFormat;
+
+  /// The server name or identifier
   final String server;
+
+  /// Whether this stream is a backup stream
   final bool backup;
+
+  /// The custom headers to be used when making requests to the video URL, optional unless required to access the stream
   final Map<String, String>? customHeaders;
 
   VideoStream({
@@ -45,7 +64,8 @@ class VideoStream {
       subtitleFormat: map['subtitleFormat'] != null ? map['subtitleFormat'] : null,
       server: map['server'] as String,
       backup: map['backup'] as bool,
-      customHeaders: map['customHeaders'] != null ? Map<String, String>.from((map['customHeaders'] as Map<String, String>)) : null,
+      customHeaders:
+          map['customHeaders'] != null ? Map<String, String>.from((map['customHeaders'] as Map<String, String>)) : null,
     );
   }
 
@@ -106,8 +126,16 @@ class EpisodeDetails {
       episodeNumber: episodeNumber is int ? episodeNumber : int.parse(episodeNumber),
       thumbnail: map['thumbnail'] != null ? map['thumbnail'] as String : null,
       episodeTitle: map['episodeTitle'] != null ? map['episodeTitle'] as String : null,
-      hasDub: map['hasDub'] != null ? map['hasDub'] is bool ? map['hasDub'] : bool.parse(map['hasDub']) : null,
-      isFiller: isFiller != null ? isFiller is bool ? isFiller : bool.parse(isFiller) : null,
+      hasDub: map['hasDub'] != null
+          ? map['hasDub'] is bool
+              ? map['hasDub']
+              : bool.parse(map['hasDub'])
+          : null,
+      isFiller: isFiller != null
+          ? isFiller is bool
+              ? isFiller
+              : bool.parse(isFiller)
+          : null,
       metadata: map['metadata'] != null ? map['metadata'] as String : null,
     );
   }

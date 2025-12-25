@@ -73,7 +73,9 @@ class PlayerDataProvider extends ChangeNotifier {
       mime = await getMediaMimeType(url, headers);
       print(mime);
     }
-    if (url.contains(".m3u8") || (mime != null && mime.contains("mpegurl"))) {
+
+    // gojo sources mostly doesnt contain an extension, and... its mime sometimes is video/mp2t instead of the mpegurl
+    if (url.contains(".m3u8") || (mime != null && mime.contains(RegExp(r"mp2t|mpegurl", caseSensitive: false)))) {
       final master = await parseMasterPlaylist(url, customHeader: headers);
       _state = _state.copyWith(qualities: master.qualityStreams, audioTracks: master.audioStreams);
     } else {
@@ -169,7 +171,7 @@ class PlayerDataProvider extends ChangeNotifier {
     }
     List<VideoStream> srcs = [];
     //its actually the getStreams function!
-    await SourceManager().getStreams(selectedSource, epLinks[index].episodeLink,
+    await SourceManager.instance.getStreams(selectedSource, epLinks[index].episodeLink,
         dub: preferDubs, metadata: epLinks[index].metadata, (list, finished) {
       srcs = srcs + list;
       if (finished) {

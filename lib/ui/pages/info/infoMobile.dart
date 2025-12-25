@@ -421,7 +421,7 @@ class _InfoMobileState extends State<InfoMobile> {
               provider.epSearcherror = false;
               provider.foundName = null;
             });
-            final links = await SourceManager().getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
+            final links = await SourceManager.instance.getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
             if (mounted)
               setState(() {
                 provider.paginate(links);

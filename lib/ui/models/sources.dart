@@ -10,10 +10,12 @@ import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:flutter/material.dart';
 
+/// This Singleton manages all the sources/providers
+/// Contains the list of sources and methods to interact with them
 class SourceManager {
-  static final SourceManager _instance = SourceManager._internal();
-  factory SourceManager() => _instance;
-  SourceManager._internal();
+  SourceManager._();
+
+  static final SourceManager instance = SourceManager._();
 
   final List<ProviderDetails> inbuiltSources = [
     "Animepahe",
@@ -21,7 +23,10 @@ class SourceManager {
     // "Aniplay", rip aniplay
     "AniZone",
     "Gojo",
-  ].map((e) => ProviderDetails(name: e, identifier: e.toLowerCase(), version: "0.0.0.0", supportDownloads: e != "AnimeOnsen")).toList();
+  ]
+      .map((e) => ProviderDetails(
+          name: e, identifier: e.toLowerCase() + "_inbuilt", version: "0.0.0.0", supportDownloads: e != "AnimeOnsen"))
+      .toList();
 
   /// Used till complete migration to remote providers is complete.
   bool _useInbuiltProviders = true;
@@ -98,15 +103,15 @@ class SourceManager {
 // ];
 
 final Map<String, AnimeProvider> sources = {
-    "animepahe": AnimePahe(),
-    "animeonsen": AnimeOnsen(),
-    "gojo": Gojo(),
-    "anizone": AniZone(),
-  };
+  "animepahe": AnimePahe(),
+  "animeonsen": AnimeOnsen(),
+  "gojo": Gojo(),
+  "anizone": AniZone(),
+};
 
 AnimeProvider getClass(String source) {
-  final match = sources[source];
-  if(match == null) {
+  final match = sources[source.replaceAll("_inbuilt", "")]; // for ignoring _inbuilt suffix
+  if (match == null) {
     throw Exception("Invalid Source!");
   }
 
@@ -129,14 +134,15 @@ AnimeProvider getClass(String source) {
 
 List<DropdownMenuEntry> getSourceDropdownList() {
   List<DropdownMenuEntry> widget = [];
-  final sources = SourceManager().sources;
+  final sources = SourceManager.instance.sources;
   int count = 0;
   for (final source in sources) {
     widget.add(
       DropdownMenuEntry(
         value: source,
         label: "${source.name}${source.version == "0.0.0.0" ? "" : " [Plugin]"}",
-        trailingIcon: source.identifier == currentUserSettings?.preferredProvider ? Icon(Icons.star_border_rounded) : null,
+        trailingIcon:
+            source.identifier == currentUserSettings?.preferredProvider ? Icon(Icons.star_border_rounded) : null,
         style: ButtonStyle(
           foregroundColor: WidgetStatePropertyAll(appTheme.textMainColor),
           textStyle: WidgetStatePropertyAll(

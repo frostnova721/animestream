@@ -144,7 +144,7 @@ class SourceSideWidget extends StatelessWidget {
                                   fontWeight: FontWeight.w500,
                                 ),
                                 padding: EdgeInsets.symmetric(horizontal: 16),
-                                items: SourceManager().sources
+                                items: SourceManager.instance.sources
                                     .map((source) => DropdownMenuItem(
                                           value: source,
                                           child: Padding(
@@ -269,7 +269,7 @@ class SourceSideWidget extends StatelessWidget {
                                 if (result == null) return;
                                 provider.epSearcherror = false;
                                 provider.foundName = null;
-                                final links = await SourceManager().getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
+                                final links = await SourceManager.instance.getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
 
                                 provider.paginate(links);
                                 provider.foundName = result['name'];
@@ -543,7 +543,7 @@ class SourceBodyWidget extends StatelessWidget {
                                 fontWeight: FontWeight.w500,
                               ),
                               padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                              items: SourceManager().sources
+                              items: SourceManager.instance.sources
                                   .map((source) => DropdownMenuItem(
                                         value: source,
                                         child: Padding(
@@ -602,7 +602,7 @@ class SourceBodyWidget extends StatelessWidget {
                           if (result == null) return;
                           provider.epSearcherror = false;
                           provider.foundName = null;
-                          final links = await SourceManager().getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
+                          final links = await SourceManager.instance.getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
 
                           provider.paginate(links);
                           provider.foundName = result['name'];

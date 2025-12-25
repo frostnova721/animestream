@@ -54,7 +54,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool enableDiscordPresence = false;
   bool enableLogging = false;
 
-  final sources = SourceManager().sources;
+  final sources = SourceManager.instance.sources;
 
   @override
   Widget build(BuildContext context) {
@@ -150,7 +150,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         );
                       },
                       label: "Default provider",
-                      description: currentUserSettings?.preferredProvider ?? sources.first.identifier,
+                      description: currentUserSettings?.preferredProvider ?? sources.first.name,
                       suffixIcon: Icon(Icons.arrow_drop_down),
                     ),
                     ClickableItem(

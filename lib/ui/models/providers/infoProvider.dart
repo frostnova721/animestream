@@ -22,7 +22,7 @@ class InfoProvider extends ChangeNotifier {
 
   late DatabaseInfo _data;
 
-  final sourceManager = SourceManager();
+  final sourceManager = SourceManager.instance;
 
   // Will be set in _init()
   late ProviderDetails _selectedSource;

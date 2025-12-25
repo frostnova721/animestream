@@ -34,7 +34,7 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
         searching = true;
       });
     try {
-      final res = await SourceManager().searchInSource(widget.source, searchTerm);
+      final res = await SourceManager.instance.searchInSource(widget.source, searchTerm);
       for (final item in res) {
         searchResults.add(
           GestureDetector(

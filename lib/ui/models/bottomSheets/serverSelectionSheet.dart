@@ -41,7 +41,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   List<VideoStream> streamSources = [];
   List<Map<String, String>> qualities = [];
 
-  final src = SourceManager();
+  final src = SourceManager.instance;
 
   Future<void> getStreams(InfoProvider provider, {bool directElseBlock = false}) async {
     streamSources = [];

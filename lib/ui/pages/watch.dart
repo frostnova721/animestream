@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
-import 'package:animestream/ui/models/doubleTapDectector.dart';
+import 'package:animestream/ui/models/widgets/doubleTapDectector.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
 import 'package:animestream/ui/models/widgets/player/controls.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';

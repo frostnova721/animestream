@@ -128,7 +128,7 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, Strin
     // final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
 
     for (int i = 0; i < lines.length; i++) {
-      final line = lines[i];
+      final line = lines[i].trim();
       if (line.startsWith("#")) {
         // we dont need these info yet
         // if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA") || line.startsWith("#EXT-X-VERSION"))

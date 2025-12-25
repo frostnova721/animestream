@@ -62,7 +62,7 @@ void main(List<String> args) async {
     NotificationService().init();
 
     /// Load sources. we adding inbuilt sources till migrated
-    final sm = SourceManager();
+    final sm = SourceManager.instance;
 
     sm
       ..addSources(sm.inbuiltSources)

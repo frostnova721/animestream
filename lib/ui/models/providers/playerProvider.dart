@@ -164,7 +164,7 @@ class PlayerProvider extends ChangeNotifier {
   /// Plays an episode from preloaded episode from the data provider
   void playPreloadedEpisode(PlayerDataProvider dataProvider) async {
     //just return if episode ended and next video is being loaded or the episode is the last one
-    if (dataProvider.state.currentEpIndex + 1 >= dataProvider.epLinks.length /**add autonext*/) {
+    if (dataProvider.state.currentEpIndex + 1 >= dataProvider.epLinks.length /* add autonext */) {
       return;
     }
     // calledAutoNext = true;

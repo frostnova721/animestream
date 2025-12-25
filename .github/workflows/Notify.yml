@@ -200,11 +200,11 @@ jobs:
         run: |
           # Determine role mention based on release type
           if [[ "${{ env.LATEST_TAG }}" == *alpha* ]]; then
-            role_mention=""
+            role_mention=""   # Replace with Alpha role ID <@&YOUR_ALPHA_ROLE_ID>
           elif [[ "${{ env.LATEST_TAG }}" == *beta* ]]; then
-            role_mention="<@&YOUR_BETA_ROLE_ID>"
+            role_mention=""   # Replace with Beta role ID <@&YOUR_Beta_ROLE_ID>
           else
-            role_mention="<@&YOUR_RELEASE_ROLE_ID>"
+            role_mention=""   # Replace with stable role ID <@&YOUR_stable_ROLE_ID>
           fi
           
           # Set color based on release type

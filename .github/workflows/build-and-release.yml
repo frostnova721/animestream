@@ -1,0 +1,621 @@
+name: Build and Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      create_release:
+        description: 'Create GitHub Release'
+        required: false
+        type: boolean
+        default: true
+  push:
+    tags:
+      - 'v*'
+
+env:
+  FLUTTER_VERSION: '3.29.0'
+  JAVA_VERSION: '17'
+  JAVA_DISTRIBUTION: 'temurin'
+
+jobs:
+  # Extract version from pubspec.yaml
+  extract-version:
+    name: Extract Version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get-version.outputs.version }}
+      version_code: ${{ steps.get-version.outputs.version_code }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+        
+      - name: Extract version
+        id: get-version
+        run: |
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //; s/+.*//')
+          VERSION_CODE=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "Extracted version: $VERSION+$VERSION_CODE"
+
+  # ANDROID BUILDS
+  build-android-apk:
+    name: Android Build
+    runs-on: ubuntu-latest
+    needs: extract-version
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: ${{ env.JAVA_DISTRIBUTION }}
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Setup env File
+        env:
+          SIMKL_CLIENT_SECRET: ${{ secrets.SIMKL_CLIENT_SECRET }}
+          SIMKL_CLIENT_ID: ${{ secrets.SIMKL_CLIENT_ID }}
+        shell: bash
+        run: |
+          echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
+          echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
+
+      - name: Decode and setup keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/release-keystore.jks
+            echo "storePassword=$STORE_PASSWORD" > android/key.properties
+            echo "keyPassword=$KEY_PASSWORD" >> android/key.properties
+            echo "keyAlias=$KEY_ALIAS" >> android/key.properties
+            echo "storeFile=release-keystore.jks" >> android/key.properties
+            echo "Keystore configured for signing"
+          else
+            echo "No keystore configured - using debug signing"
+            echo "storePassword=" > android/key.properties
+            echo "keyPassword=" >> android/key.properties
+            echo "keyAlias=androiddebugkey" >> android/key.properties
+            echo "storeFile=/tmp/debug.keystore" >> android/key.properties
+            keytool -genkey -v -keystore /tmp/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
+          fi
+          
+      - name: Build Universal APK
+        run: |
+          flutter build apk \
+            --release \
+            --build-number=${{ needs.extract-version.outputs.version_code }} \
+            --build-name=${{ needs.extract-version.outputs.version }}
+
+      - name: Build Split APKs
+        run: |
+          flutter build apk \
+            --release \
+            --split-per-abi \
+            --build-number=${{ needs.extract-version.outputs.version_code }} \
+            --build-name=${{ needs.extract-version.outputs.version }}
+
+      - name: Rename artifacts
+        run: |
+          cd build/app/outputs/flutter-apk
+          # Rename split + universal APKs
+          mv app-release.apk animestream-${{ needs.extract-version.outputs.version }}-universal.apk
+          mv app-armeabi-v7a-release.apk animestream-${{ needs.extract-version.outputs.version }}-armeabi-v7a.apk 2>/dev/null || true
+          mv app-arm64-v8a-release.apk animestream-${{ needs.extract-version.outputs.version }}-arm64-v8a.apk 2>/dev/null || true
+          mv app-x86_64-release.apk animestream-${{ needs.extract-version.outputs.version }}-x86_64.apk 2>/dev/null || true
+
+      - name: Upload Android artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: |
+            build/app/outputs/flutter-apk/animestream-*.apk
+          retention-days: 30
+          
+  # LINUX BUILDS
+  build-linux:
+    if: false   # ⛔ Linux build disabled
+    name: Linux Build
+    runs-on: ubuntu-latest
+    needs: extract-version
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libgtk-3-dev \
+            liblzma-dev \
+            libstdc++-12-dev \
+            libsecret-1-dev \
+            libwebkit2gtk-4.1-dev \
+            flatpak-builder \
+            flatpak
+
+      - name: Get Flutter version
+        run: flutter --version
+
+      - name: Enable Linux desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Setup env File
+        env:
+          SIMKL_CLIENT_SECRET: ${{ secrets.SIMKL_CLIENT_SECRET }}
+          SIMKL_CLIENT_ID: ${{ secrets.SIMKL_CLIENT_ID }}
+        shell: bash
+        run: |
+          echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
+          echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
+
+      - name: Build Linux
+        run: |
+          flutter build linux \
+            --release \
+            --build-number=${{ needs.extract-version.outputs.version_code }} \
+            --build-name=${{ needs.extract-version.outputs.version }}
+
+      - name: Create deb package
+        run: |
+          # Install packaging tools
+          sudo apt-get install -y dpkg-dev
+
+          # Create package structure
+          PKGDIR="deb-package"
+          mkdir -p "$PKGDIR/DEBIAN"
+          mkdir -p "$PKGDIR/opt/animestream"
+          mkdir -p "$PKGDIR/usr/share/applications"
+          mkdir -p "$PKGDIR/usr/share/icons/hicolor/512x512/apps"
+
+          # Copy files
+          cp -r build/linux/x64/release/bundle/* "$PKGDIR/opt/animestream/"
+
+          # Create control file
+          cat > "$PKGDIR/DEBIAN/control" << EOF
+          Package: animestream
+          Version: ${{ needs.extract-version.outputs.version }}
+          Architecture: amd64
+          Maintainer: FrostNova
+          Description: A app made to stream and download anime
+           Animestream is a Flutter project made to stream and download Anime.
+          Priority: optional
+          Section: video
+          EOF
+
+          # Create desktop file
+          cat > "$PKGDIR/usr/share/applications/animestream.desktop" << 'EOF'
+          [Desktop Entry]
+          Name=animestream
+          Exec=/opt/animestream/animestream
+          Icon=animestream
+          Type=Application
+          Categories=AudioVideo;Video;
+          EOF
+
+          # Copy icon
+          if [ -f "lib/assets/icons/logo.png" ]; then
+            cp lib/assets/icons/logo.png "$PKGDIR/usr/share/icons/hicolor/512x512/apps/animestream.png"
+          fi
+
+          # Build deb
+          dpkg-deb --build "$PKGDIR" "animestream-${{ needs.extract-version.outputs.version }}-amd64.deb"
+
+      - name: Create rpm package
+        run: |
+          # Install rpmbuild
+          sudo apt-get install -y rpm
+
+          # Create build directories
+          mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+          mkdir -p rpmbuild-root/opt/animestream
+          mkdir -p rpmbuild-root/usr/share/applications
+          mkdir -p rpmbuild-root/usr/share/icons/hicolor/512x512/apps
+
+          # Copy files
+          cp -r build/linux/x64/release/bundle/* rpmbuild-root/opt/animestream/
+
+          # Create desktop file
+          cat > rpmbuild-root/usr/share/applications/animestream.desktop << 'EOF'
+          [Desktop Entry]
+          Name=animestream
+          Exec=/opt/animestream/animestream
+          Icon=animestream
+          Type=Application
+          Categories=AudioVideo;Video;
+          EOF
+
+          # Copy icon
+          if [ -f "lib/assets/icons/logo.png" ]; then
+            cp lib/assets/icons/logo.png rpmbuild-root/usr/share/icons/hicolor/512x512/apps/animestream.png
+          fi
+
+          # Create spec file
+          cat > ~/rpmbuild/SPECS/animestream.spec << EOF
+          Name:           animestream
+          Version:        ${{ needs.extract-version.outputs.version }}
+          Release:        1%{?dist}
+          Summary:        An app made to stream and download anime
+          License:        GPL-3.0
+          URL:            https://github.com/Shebyyy/animestream
+          BuildRoot:      %{_tmppath}/%{name}-%{version}-%{release}-root
+
+          %description
+          Animestream is a Flutter project made to stream and download Anime.
+
+          %install
+          rm -rf \$RPM_BUILD_ROOT
+          mkdir -p \$RPM_BUILD_ROOT/opt/animestream
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/applications
+          mkdir -p \$RPM_BUILD_ROOT/usr/share/icons/hicolor/512x512/apps
+
+          cp -r $PWD/rpmbuild-root/opt/animestream/* \$RPM_BUILD_ROOT/opt/animestream/
+          cp $PWD/rpmbuild-root/usr/share/applications/animestream.desktop \$RPM_BUILD_ROOT/usr/share/applications/
+          cp $PWD/rpmbuild-root/usr/share/icons/hicolor/512x512/apps/animestream.png \$RPM_BUILD_ROOT/usr/share/icons/hicolor/512x512/apps/ 2>/dev/null || true
+
+          %files
+          /opt/animestream/*
+          /usr/share/applications/animestream.desktop
+          /usr/share/icons/hicolor/512x512/apps/animestream.png
+          EOF
+
+          # Build rpm
+          rpmbuild -bb ~/rpmbuild/SPECS/animestream.spec
+          cp ~/rpmbuild/RPMS/x86_64/animestream-*.rpm ./animestream-${{ needs.extract-version.outputs.version }}-x86_64.rpm
+
+      - name: Create portable zip
+        run: |
+          cd build/linux/x64/release
+          zip -r ../../../animestream-${{ needs.extract-version.outputs.version }}-linux-x64.zip bundle/
+
+      - name: Create Flatpak
+        run: |
+          # Install Flatpak dependencies
+          sudo apt-get update
+          sudo apt-get install -y flatpak flatpak-builder imagemagick
+          sudo flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo flatpak install -y flathub org.freedesktop.Platform//24.08 org.freedesktop.Sdk//24.08
+          
+          # Resize icon to 512x512 (Flatpak requirement)
+          convert lib/assets/icons/logo.png -resize 512x512 icon.png
+          
+          # Create desktop entry file
+          cat > com.example.animestream.desktop << 'EOF'
+          [Desktop Entry]
+          Name=AnimeStream
+          Comment=Watch anime with multiple sources
+          Exec=animestream
+          Icon=com.example.animestream
+          Type=Application
+          Categories=AudioVideo;Video;Player;
+          EOF
+          
+          # Create AppStream metadata
+          cat > com.example.animestream.metainfo.xml << 'EOF'
+          <?xml version="1.0" encoding="UTF-8"?>
+          <component type="desktop-application">
+            <id>com.example.animestream</id>
+            <name>AnimeStream</name>
+            <summary>Watch anime from multiple sources</summary>
+            <metadata_license>CC0-1.0</metadata_license>
+            <project_license>MIT</project_license>
+            <description>
+              <p>AnimeStream is a multi-source anime streaming application.</p>
+            </description>
+            <launchable type="desktop-id">com.example.animestream.desktop</launchable>
+            <provides>
+              <binary>animestream</binary>
+            </provides>
+          </component>
+          EOF
+          
+          # Create Flatpak manifest
+          cat > com.example.animestream.yaml << 'EOF'
+          app-id: com.example.animestream
+          runtime: org.freedesktop.Platform
+          runtime-version: '24.08'
+          sdk: org.freedesktop.Sdk
+          command: animestream
+          finish-args:
+            - --socket=wayland
+            - --socket=fallback-x11
+            - --share=ipc
+            - --share=network
+            - --device=dri
+            - --socket=pulseaudio
+            - --filesystem=xdg-download
+            - --filesystem=xdg-videos
+          modules:
+            - name: animestream
+              buildsystem: simple
+              build-commands:
+                - cp -r bundle /app/animestream
+                - mkdir -p /app/bin
+                - |
+                  cat > /app/bin/animestream << 'SCRIPT'
+                  #!/bin/bash
+                  exec /app/animestream/animestream "$@"
+                  SCRIPT
+                - chmod +x /app/bin/animestream
+                - install -Dm644 com.example.animestream.desktop /app/share/applications/com.example.animestream.desktop
+                - install -Dm644 icon.png /app/share/icons/hicolor/512x512/apps/com.example.animestream.png
+                - install -Dm644 com.example.animestream.metainfo.xml /app/share/metainfo/com.example.animestream.metainfo.xml
+              sources:
+                - type: dir
+                  path: build/linux/x64/release/bundle
+                  dest: bundle
+                - type: file
+                  path: com.example.animestream.desktop
+                - type: file
+                  path: icon.png
+                - type: file
+                  path: com.example.animestream.metainfo.xml
+          EOF
+          
+          # Build Flatpak
+          flatpak-builder --force-clean --repo=flatpak-repo build-dir com.example.animestream.yaml
+          
+          # Create single-file bundle
+          flatpak build-bundle flatpak-repo animestream-${{ needs.extract-version.outputs.version }}-x86_64.flatpak com.example.animestream
+    
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-builds
+          path: |
+            animestream-*.deb
+            animestream-*.rpm
+            build/animestream-*-linux-x64.zip
+            animestream-*.flatpak
+          retention-days: 30
+
+  # WINDOWS BUILDS
+  build-windows:
+    name: Windows Build
+    runs-on: windows-latest
+    needs: extract-version
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          channel: 'stable'
+          cache: true
+
+      - name: Get Flutter version
+        run: flutter --version
+
+      - name: Enable Windows desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Setup env File
+        env:
+          SIMKL_CLIENT_SECRET: ${{ secrets.SIMKL_CLIENT_SECRET }}
+          SIMKL_CLIENT_ID: ${{ secrets.SIMKL_CLIENT_ID }}
+        shell: bash
+        run: |
+          echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
+          echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
+
+      - name: Build Windows
+        shell: pwsh
+        run: flutter build windows --release --build-number=${{ needs.extract-version.outputs.version_code }} --build-name=${{ needs.extract-version.outputs.version }}
+
+      - name: Create portable zip
+        shell: pwsh
+        run: |
+          cd build/windows/x64/runner/Release
+          7z a ../../../animestream-${{ needs.extract-version.outputs.version }}-windows-x64-portable.zip .
+
+      - name: Create installer
+        shell: pwsh
+        run: dart run inno_bundle:build --release
+
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-builds
+          path: |
+            build/windows/animestream-*-windows-x64-portable.zip
+            build/windows/x64/installer/Release/*.exe
+          retention-days: 30
+
+
+  # CREATE RELEASE
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs:
+    - extract-version
+    - build-android-apk
+    # - build-linux    # ⛔ Linux build disabled
+    - build-windows
+    - post-release-notes 
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.create_release == true || github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Display artifacts
+        run: |
+          echo "Downloaded artifacts:"
+          find artifacts -type f
+
+      - name: Collect release assets
+        run: |
+          mkdir release-files
+          find artifacts -type f \
+            \( -name "*.apk" -o -name "*.deb" -o -name "*.rpm" -o -name "*.zip" -o -name "*.exe" -o -name "*.flatpak" \) \
+            -exec cp {} release-files/ \;
+
+          echo "Release files:"
+          ls -lh release-files
+
+      - name: Download changelog
+        uses: actions/download-artifact@v4
+        with:
+          name: changelog
+          path: .
+          
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.extract-version.outputs.version }}
+          name: v${{ needs.extract-version.outputs.version }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+          files: release-files/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  post-release-notes:
+    runs-on: ubuntu-latest
+    needs: extract-version
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Clear existing CHANGELOG.md
+        run: |
+          echo "" > CHANGELOG.md
+
+      - name: Get previous tag
+        id: get_prev_tag
+        run: |
+          echo "Getting previous tag..."
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^2>/dev/null || echo "")
+          if [ -z "$PREV_TAG" ]; then
+            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
+          fi
+          echo "prev_tag=$PREV_TAG" >> $GITHUB_ENV
+
+      - name: Get commit messages between tags
+        id: get_commits
+        run: |
+          COMMITS=$(git log ${{ env.prev_tag }}..HEAD --pretty=format:'%h %s' | tr '\n' '|')
+          echo "commits=$COMMITS" >> $GITHUB_ENV
+
+      - name: Categorize commits
+        id: categorize
+        run: |
+          echo "Categorizing commits..."
+          FEATURES=""
+          BUG_FIXES=""
+          REFACTORS=""
+          STYLE_CHANGES=""
+          PERFORMANCE=""
+          CHORES=""
+          REPO_URL="https://github.com/${{ github.repository }}"
+
+          IFS='|' read -ra COMMIT_LIST <<< "${{ env.commits }}"
+          echo "Commit list: ${COMMIT_LIST[@]}"
+          for LINE in "${COMMIT_LIST[@]}"; do
+            HASH=$(echo "$LINE" | awk '{print $1}')
+            MESSAGE=$(echo "$LINE" | cut -d' ' -f2-)
+            LINK="[$HASH]($REPO_URL/commit/$HASH)"
+
+            FORMATTED_COMMIT="* $LINK: $MESSAGE"
+            echo "Processing commit: $FORMATTED_COMMIT"
+            if [[ $MESSAGE == feat* ]]; then
+              FEATURES+="$FORMATTED_COMMIT\n"
+            elif [[ $MESSAGE == fix* || $MESSAGE == bug* || $MESSAGE == improvement* || $MESSAGE == patch* ]]; then
+              BUG_FIXES+="$FORMATTED_COMMIT\n"
+            elif [[ $MESSAGE == refactor* ]]; then
+              REFACTORS+="$FORMATTED_COMMIT\n"
+            elif [[ $MESSAGE == style* ]]; then
+              STYLE_CHANGES+="$FORMATTED_COMMIT\n"
+            elif [[ $MESSAGE == perf* ]]; then
+              PERFORMANCE+="$FORMATTED_COMMIT\n"
+            elif [[ $MESSAGE == chore* || $MESSAGE == docs* || $MESSAGE == build* || $MESSAGE == ci* ]]; then
+              CHORES+="$FORMATTED_COMMIT\n"
+            fi
+          done
+
+          # Write to CHANGELOG.md
+          if [ -n "$FEATURES" ]; then
+            echo "### 🎉 New Features" >> CHANGELOG.md
+            echo -e "$FEATURES" >> CHANGELOG.md
+          fi
+          if [ -n "$BUG_FIXES" ]; then
+            echo "### 🐛 Bug Fixes & Improvements" >> CHANGELOG.md
+            echo -e "$BUG_FIXES" >> CHANGELOG.md
+          fi
+          if [ -n "$REFACTORS" ]; then
+            echo "### 🔧 Refactors" >> CHANGELOG.md
+            echo -e "$REFACTORS" >> CHANGELOG.md
+          fi
+          if [ -n "$STYLE_CHANGES" ]; then
+            echo "### 🎨 Style Changes" >> CHANGELOG.md
+            echo -e "$STYLE_CHANGES" >> CHANGELOG.md
+          fi
+          if [ -n "$PERFORMANCE" ]; then
+            echo "### 🚀 Performance Improvements" >> CHANGELOG.md
+            echo -e "$PERFORMANCE" >> CHANGELOG.md
+          fi
+          if [ -n "$CHORES" ]; then
+            echo "### 🧹 Chores & Documentation" >> CHANGELOG.md
+            echo -e "$CHORES" >> CHANGELOG.md
+          fi
+
+          # Add footer
+          echo "---" >> CHANGELOG.md
+          echo "**Full Changelog**: $REPO_URL/compare/${{ env.prev_tag }}...v${{ needs.extract-version.outputs.version }}" >> CHANGELOG.md
+
+      - name: Upload changelog
+        uses: actions/upload-artifact@v4
+        with:
+          name: changelog
+          path: CHANGELOG.md
+
+      - name: Commit and push changelog
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git diff --staged --quiet || git commit -m "docs: update changelog for v${{ needs.extract-version.outputs.version }}"
+          git push origin HEAD:${{ github.event.repository.default_branch }} || echo "No changes to push"

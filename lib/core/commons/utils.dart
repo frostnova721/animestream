@@ -84,10 +84,8 @@ MediaStatus? assignItemEnum(String? valueInString) {
 
 Future<bool> isTv() async {
   if (!Platform.isAndroid) return false;
-  DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-  AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
-  bool isTV = androidInfo.systemFeatures.contains('android.software.leanback');
-  return isTV;
+  AndroidDeviceInfo androidInfo = await DeviceInfoPlugin().androidInfo;
+  return androidInfo.systemFeatures.contains('android.software.leanback');
 }
 
 Future<Directory> getDocumentsDirectory() async {

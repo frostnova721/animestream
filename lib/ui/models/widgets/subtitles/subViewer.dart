@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/subtitleParsers/subtitleParsers.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -69,7 +70,7 @@ class _SubViewerState extends State<SubViewer> {
         areSubsLoading = false;
       });
     } catch (err) {
-      print(err.toString());
+      Logs.player.log(err.toString());
       SchedulerBinding.instance.addPostFrameCallback((dur) {
         floatingSnackBar("Couldnt load the subtitles!");
       });

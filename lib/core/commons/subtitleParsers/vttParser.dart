@@ -1,5 +1,6 @@
 //GPT CODE!!!
 import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:collection/collection.dart';
 
 class VttRipper {
   List<Subtitle> parseVtt(String rawSource) {
@@ -10,15 +11,18 @@ class VttRipper {
     Duration? start;
     Duration? end;
 
+    SubtitleAlignment alignment = SubtitleAlignment.bottomCenter;
+
     for (final line in lines) {
       // Skip metadata lines
       if (line.startsWith('WEBVTT') || line.trim().isEmpty || line.startsWith('NOTE')) {
         // If we encounter an empty line, it's the end of a block
         if (currentDialogue != null && start != null && end != null) {
-          subtitles.add(Subtitle(start: start, end: end, dialogue: _removeHtml(currentDialogue)));
+          subtitles.add(Subtitle(start: start, end: end, dialogue: _removeHtml(currentDialogue), alignment: alignment));
           currentDialogue = null;
           start = null;
           end = null;
+          alignment = SubtitleAlignment.bottomCenter;
         }
         continue;
       }
@@ -29,8 +33,24 @@ class VttRipper {
         if (times.length != 2) {
           throw FormatException('Invalid timestamp line: $line');
         }
+        final formatting = times[1].trim().split(' ');
+
+        if (formatting.isNotEmpty) {
+          // Handle additional formatting if needed
+          // final align = formatting.firstWhereOrNull((e) => e.startsWith('align:'))?.replaceAll("align:", ""); // we aint usin align yet!
+          final position =
+              formatting.firstWhereOrNull((e) => e.startsWith('line:'))?.replaceAll(RegExp(r"line:|%"), "");
+
+          // push anything >50% to bottom center, else top center
+          alignment = position != null
+              ? (int.tryParse(position) ?? 100) > 50
+                  ? SubtitleAlignment.bottomCenter
+                  : SubtitleAlignment.topCenter
+              : SubtitleAlignment.bottomCenter;
+        }
+
         start = _parseTime(times[0].trim());
-        end = _parseTime(times[1].trim());
+        end = _parseTime(formatting[0].trim());
       } else if (start != null && end != null) {
         // Collect dialogue lines
         currentDialogue = (currentDialogue == null) ? line : '$currentDialogue\n$line';
@@ -39,7 +59,7 @@ class VttRipper {
 
     // Add the last subtitle if the file ends without an empty line
     if (start != null && end != null && currentDialogue != null) {
-      subtitles.add(Subtitle(start: start, end: end, dialogue: _removeHtml(currentDialogue)));
+      subtitles.add(Subtitle(start: start, end: end, dialogue: _removeHtml(currentDialogue), alignment: alignment));
     }
 
     return subtitles;

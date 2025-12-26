@@ -12,7 +12,7 @@ class Subtitle {
       });
 
   @override
-  String toString() => 'Subtitle(start: $start, end: $end, dialogue: $dialogue)';
+  String toString() => 'Subtitle(start: $start, end: $end, dialogue: $dialogue, alignment: $alignment)';
 }
 
 // numbers for numpad type alignment in srt/ass

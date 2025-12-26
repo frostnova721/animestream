@@ -150,7 +150,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         );
                       },
                       label: "Default provider",
-                      description: currentUserSettings?.preferredProvider ?? sources.first.name,
+                      description: (currentUserSettings?.preferredProvider ?? sources.first.identifier)
+                          .replaceAll('_', ' '),
                       suffixIcon: Icon(Icons.arrow_drop_down),
                     ),
                     ClickableItem(

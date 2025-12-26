@@ -404,6 +404,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                 // behavior: HitTestBehavior.opaque,
                 onTap: _handleTap,
                 onLongPressStart: (details) {
+                  if (Platform.isWindows) return;
                   if (playerProvider.state.playerState == PlayerState.playing) {
                     spedUp = true;
 
@@ -415,9 +416,26 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                     return;
                   }
                 },
+                // onLongPressMoveUpdate: (details) {
+                //   if (Platform.isWindows || !spedUp) return;
+
+                //   if(details.localOffsetFromOrigin.dy < -5) {
+                //     // increase speed, Dont allow the max values >10x
+                //     final currSpeed = playerProvider.state.speed;
+                //     if (currSpeed >= 5) return;
+                //     playerProvider.setSpeed(currSpeed * 2);
+                //     print("Increased speed to: ${playerProvider.state.speed}x");
+                //   } else if(details.localOffsetFromOrigin.dy > 5) {
+                //     // decrease speed, Dont allow the min values <0.25x
+                //     final currSpeed = playerProvider.state.speed;
+                //     if (currSpeed <= 1) return;
+                //     playerProvider.setSpeed(currSpeed / 2);
+                //     print("Decreased speed to: ${playerProvider.state.speed}x");
+                //   }
+                // },
                 onLongPressEnd: (details) {
                   // reset only if speed was increased
-                  if (!spedUp) return;
+                  if (!spedUp || Platform.isWindows) return;
                   spedUp = false;
                   // reset speed
                   playerProvider.setSpeed(playerProvider.state.speed / 2);
@@ -485,7 +503,14 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                           ),
                         ),
                         Expanded(
-                          child: Container(),
+                          child: Container(
+                            alignment: Alignment.topCenter,
+                            padding: EdgeInsets.only(top: 10),
+                            child: AnimatedOpacity(
+                                opacity: spedUp ? 1 : 0,
+                                duration: Duration(milliseconds: 100),
+                                child:  _playbackSpeedIndicator()),
+                          ),
                           flex: 1,
                         ),
                         Expanded(
@@ -506,11 +531,59 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                       ]),
                     ),
                     _skipIndicators(),
+                    // Positioned(
+                    //   right: 20,
+                    //   top: 20,
+                    //   child: AnimatedOpacity(
+                    //     opacity: spedUp ? 1 : 0,
+                    //     duration: Duration(milliseconds: 100),
+                    //     child: _playbackSpeedSlider(),
+                    //   ),
+                    // ),
                   ],
                 ),
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _playbackSpeedSlider() {
+    return RotatedBox(
+      quarterTurns: 3,
+      child: SliderTheme(
+        data: SliderThemeData(
+          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
+          trackHeight: 4,
+        ),
+        child: Slider(
+          value: context.read<PlayerProvider>().state.speed,
+          min: 1,
+          max: (currentUserSettings?.enableSuperSpeeds ?? false) ? 10.0 : 4.0,
+          divisions: context.read<PlayerProvider>().playbackSpeeds.length - 1,
+          label: "${context.read<PlayerProvider>().state.speed}x",
+          onChanged: (value) {
+            context.read<PlayerProvider>().setSpeed(value);
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _playbackSpeedIndicator() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: appTheme.backgroundSubColor.withAlpha(100),
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        "${context.read<PlayerProvider>().state.speed}x",
+        style: TextStyle(
+          fontFamily: "Rubik",
+          fontSize: 14,
         ),
       ),
     );
@@ -603,8 +676,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
-      if(!widget.localSource)
-        print("[PLAYER] SAVED WATCH DURATION");
+      if (!widget.localSource) print("[PLAYER] SAVED WATCH DURATION");
       controller.removeListener(_listener);
       controller.dispose();
       _controlsTimer?.cancel();

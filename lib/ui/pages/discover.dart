@@ -220,7 +220,8 @@ class _DiscoverState extends State<Discover> {
         scrollDirection: Axis.horizontal,
         itemBuilder: (context, index) {
           final trendingList = widget.mainNavProvider.trendingList;
-          final titles = trendingList[index % trendingList.length].title;
+          final moddedIndex = index % trendingList.length;
+          final titles = trendingList[moddedIndex].title;
           final title = titles['english'] ?? titles['romaji'] ?? '';
           final preferNative = currentUserSettings?.nativeTitle ?? false;
 
@@ -230,7 +231,7 @@ class _DiscoverState extends State<Discover> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => Info(
-                    id: trendingList[index % trendingList.length].id,
+                    id: trendingList[moddedIndex].id,
                   ),
                 ),
               );
@@ -246,8 +247,7 @@ class _DiscoverState extends State<Discover> {
                       child: ImageFiltered(
                         imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
                         child: Image.network(
-                          trendingList[index % trendingList.length].banner ??
-                              trendingList[index % trendingList.length].cover,
+                          trendingList[moddedIndex].banner ?? trendingList[moddedIndex].cover,
                           alignment: Alignment((index - page).clamp(-1, 1).toDouble(), 1),
                           opacity: AlwaysStoppedAnimation(0.5),
                           frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
@@ -273,7 +273,7 @@ class _DiscoverState extends State<Discover> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
                           child: Image.network(
-                            trendingList[index % trendingList.length].cover,
+                            trendingList[moddedIndex].cover,
                             height: 170,
                             width: 120,
                           ),
@@ -301,7 +301,7 @@ class _DiscoverState extends State<Discover> {
                                 ),
                               ),
                               Text(
-                                trendingList[index % trendingList.length].genres.join(', '),
+                                trendingList[moddedIndex].genres.join(', '),
                                 style: TextStyle(
                                     color: appTheme.textMainColor.withAlpha(145),
                                     fontFamily: 'NunitoSans',
@@ -321,7 +321,7 @@ class _DiscoverState extends State<Discover> {
                                       size: 20,
                                     ),
                                     Text(
-                                      "${trendingList[index % trendingList.length].rating != null ? trendingList[index % trendingList.length].rating! / 10 : '??'}",
+                                      "${trendingList[moddedIndex].rating != null ? trendingList[moddedIndex].rating! / 10 : '??'}",
                                       style:
                                           TextStyle(color: appTheme.textMainColor, fontFamily: "Rubik", fontSize: 17),
                                     ),

@@ -25,6 +25,9 @@ class _SourceTileState extends State<SourceTile> {
         onTap: widget.onTap,
         splashColor: Colors.transparent,
         splashFactory: NoSplash.splashFactory,
+        onFocusChange: (val) {
+          setState(() => hovered = val);
+        },
         onHover: (val) {
           setState(() => hovered = val);
         },

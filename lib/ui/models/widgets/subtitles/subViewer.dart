@@ -42,7 +42,7 @@ class _SubViewerState extends State<SubViewer> {
 
   List<Subtitle> subs = [];
 
-  Subtitle? activeSubtitle;
+  List<Subtitle> activeSubtitles = [];
   bool areSubsLoading = true;
 
   String? _loadedSubsUrl;
@@ -92,41 +92,53 @@ class _SubViewerState extends State<SubViewer> {
       return loadSubs();
     }
 
-    int i = lastLineIndex;
-
-    // Find the subtitle matching the current time
-    // Search forward if we're past the current subtitle
-    if (i < subs.length && currentPosition > subs[i].end.inMilliseconds) {
-      while (i < subs.length && currentPosition > subs[i].end.inMilliseconds) {
-        i++;
-      }
-    }
-    // Search backward if we're before the current subtitle
-    else if (i > 0 && currentPosition < subs[i].start.inMilliseconds) {
-      while (i > 0 && currentPosition < subs[i].start.inMilliseconds) {
-        i--;
-      }
+    // If we seeked backward (current time is before the last known start), reset hint.
+    if (lastLineIndex >= subs.length ||
+        (lastLineIndex > 0 && subs[lastLineIndex].start.inMilliseconds > currentPosition)) {
+      lastLineIndex = 0; // reset to start for safety
     }
 
-    lastLineIndex = i;
+    // Move forward past any subtitles that are over
+    while (lastLineIndex < subs.length && subs[lastLineIndex].end.inMilliseconds < currentPosition) {
+      lastLineIndex++;
+    }
 
-    // Check if we're within the current subtitle's time range
-    if (i < subs.length &&
-        currentPosition >= subs[i].start.inMilliseconds &&
-        currentPosition <= subs[i].end.inMilliseconds) {
+    List<Subtitle> newMatches = [];
+
+    // Start checking from our synced index.
+    for (int i = lastLineIndex; i < subs.length; i++) {
+      final sub = subs[i];
+
+      // If we hit a subtitle that starts in the future, we can stop looking entirely.
+      // Because the list is usually sorted, no subsequent subtitle can be active either.
+      if (sub.start.inMilliseconds > currentPosition) {
+        break;
+      }
+
+      // If we are here, the subtitle started before now.
+      // We just need to check if it hasn't ended yet.
+      if (sub.end.inMilliseconds >= currentPosition) {
+        newMatches.add(sub);
+      }
+    }
+
+    if (!_areSubtitleListsEqual(activeSubtitles, newMatches)) {
       if (mounted) {
         setState(() {
-          activeSubtitle = subs[i];
+          activeSubtitles = newMatches;
         });
       }
-      return;
     }
+  }
 
-    //clear line when nothings there!
-    if (mounted)
-      setState(() {
-        activeSubtitle = null;
-      });
+  // Helper to compare lists efficiently
+  bool _areSubtitleListsEqual(List<Subtitle> a, List<Subtitle> b) {
+    if (a.length != b.length) return false;
+    if (a.isEmpty && b.isEmpty) return true;
+
+    // compare the start times of the first and last subtitles
+    return a.first.start.inMilliseconds == b.first.start.inMilliseconds &&
+        a.last.start.inMilliseconds == b.last.start.inMilliseconds;
   }
 
   //i tried to make it beautiful! okay???
@@ -145,22 +157,27 @@ class _SubViewerState extends State<SubViewer> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      alignment: Alignment.bottomCenter,
-      margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
-      child: Container(
-        width: MediaQuery.of(context).size.width / 1.4,
-        alignment: getLineAlignment(activeSubtitle?.alignment ?? SubtitleAlignment.bottomCenter),
-        child: SubtitleText(
-          text: areSubsLoading ? "Loading Subs" : activeSubtitle?.dialogue ?? "",
-          style: subTextStyle(),
-          strokeColor: widget.settings.strokeColor,
-          strokeWidth: widget.settings.strokeWidth,
-          backgroundColor: widget.settings.backgroundColor,
-          backgroundTransparency: widget.settings.backgroundTransparency,
-          enableShadows: widget.settings.enableShadows,
-        ),
-      ),
+    return Stack(
+      children: [
+        for (final activeSubtitle in activeSubtitles)
+          Container(
+            alignment: Alignment.bottomCenter,
+            margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
+            child: Container(
+              width: MediaQuery.of(context).size.width / 1.4,
+              alignment: getLineAlignment(activeSubtitle.alignment),
+              child: SubtitleText(
+                text: areSubsLoading ? "Loading Subs" : activeSubtitle.dialogue,
+                style: subTextStyle(),
+                strokeColor: widget.settings.strokeColor,
+                strokeWidth: widget.settings.strokeWidth,
+                backgroundColor: widget.settings.backgroundColor,
+                backgroundTransparency: widget.settings.backgroundTransparency,
+                enableShadows: widget.settings.enableShadows,
+              ),
+            ),
+          ),
+      ],
     );
   }
 

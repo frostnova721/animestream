@@ -142,7 +142,7 @@ class MainNavProvider extends ChangeNotifier {
       currentlyAiring.state = LoadingState.error;
       recentlyWatched.state = LoadingState.error;
       plannedList.state = LoadingState.error;
-      return;
+      return notifyListeners();
     }
     loggedIn = await AniListLogin().isAnilistLoggedIn();
     if (loggedIn) {

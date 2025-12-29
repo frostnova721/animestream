@@ -67,7 +67,7 @@ class ScrollingList {
             ),
           ),
           Container(
-            height: 260,
+            height: 265,
             // width: size.width / (size.width > 1800 ? 1.75 : 1.3),
             child: ListView.builder(
               controller: controller,

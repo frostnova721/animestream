@@ -118,12 +118,12 @@ class _AnimeCardState extends State<AnimeCard> {
                     height: widget.isMobile
                         ? height
                         : isFocused
-                            ? height + 2
+                            ? height * 1.03
                             : height,
                     width: widget.isMobile
                         ? width
                         : isFocused
-                            ? width + 2
+                            ? width * 1.03
                             : width,
                     margin: EdgeInsets.only(bottom: 10, top: widget.isMobile ? 0 : 5),
                     decoration: BoxDecoration(

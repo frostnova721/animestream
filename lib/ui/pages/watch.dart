@@ -344,6 +344,8 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   int skipCount = 0;
 
+  double? _lastSpeedChangeOffset = 0.0;
+
   @override
   Widget build(BuildContext context) {
     final playerProvider = context.watch<PlayerProvider>();
@@ -416,23 +418,38 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                     return;
                   }
                 },
-                // onLongPressMoveUpdate: (details) {
-                //   if (Platform.isWindows || !spedUp) return;
+                onLongPressMoveUpdate: (details) {
+                  if (Platform.isWindows || !spedUp) return;
 
-                //   if(details.localOffsetFromOrigin.dy < -5) {
-                //     // increase speed, Dont allow the max values >10x
-                //     final currSpeed = playerProvider.state.speed;
-                //     if (currSpeed >= 5) return;
-                //     playerProvider.setSpeed(currSpeed * 2);
-                //     print("Increased speed to: ${playerProvider.state.speed}x");
-                //   } else if(details.localOffsetFromOrigin.dy > 5) {
-                //     // decrease speed, Dont allow the min values <0.25x
-                //     final currSpeed = playerProvider.state.speed;
-                //     if (currSpeed <= 1) return;
-                //     playerProvider.setSpeed(currSpeed / 2);
-                //     print("Decreased speed to: ${playerProvider.state.speed}x");
-                //   }
-                // },
+                  final offset = details.localOffsetFromOrigin.dx;
+
+                  // Initialize on first move
+                  if (_lastSpeedChangeOffset == null) {
+                    _lastSpeedChangeOffset = offset;
+                    return;
+                  }
+
+                  final delta = (offset - _lastSpeedChangeOffset!).abs();
+
+                  // Only trigger if 5px away from last change
+                  if (delta >= 10) {
+                    final currSpeed = playerProvider.state.speed;
+
+                    if (offset > _lastSpeedChangeOffset!) {
+                      // moved right - increase speed
+                      if (currSpeed >= 5) return;
+                      playerProvider.setSpeed(currSpeed * 2);
+                      print("Increased speed to: ${playerProvider.state.speed}x");
+                    } else {
+                      // moved left - decrease speed
+                      if (currSpeed <= 2) return;
+                      playerProvider.setSpeed((currSpeed / 2).roundToDouble());
+                      print("Decreased speed to: ${playerProvider.state.speed}x");
+                    }
+
+                    _lastSpeedChangeOffset = offset;
+                  }
+                },
                 onLongPressEnd: (details) {
                   // reset only if speed was increased
                   if (!spedUp || Platform.isWindows) return;
@@ -509,7 +526,10 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                             child: AnimatedOpacity(
                                 opacity: spedUp ? 1 : 0,
                                 duration: Duration(milliseconds: 100),
-                                child:  _playbackSpeedIndicator()),
+                                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                  _playbackSpeedIndicator(),
+                                  _playbackSpeedSlider(),
+                                ])),
                           ),
                           flex: 1,
                         ),
@@ -531,15 +551,6 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                       ]),
                     ),
                     _skipIndicators(),
-                    // Positioned(
-                    //   right: 20,
-                    //   top: 20,
-                    //   child: AnimatedOpacity(
-                    //     opacity: spedUp ? 1 : 0,
-                    //     duration: Duration(milliseconds: 100),
-                    //     child: _playbackSpeedSlider(),
-                    //   ),
-                    // ),
                   ],
                 ),
               ),
@@ -551,23 +562,25 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   }
 
   Widget _playbackSpeedSlider() {
-    return RotatedBox(
-      quarterTurns: 3,
-      child: SliderTheme(
-        data: SliderThemeData(
-          thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8),
-          trackHeight: 4,
-        ),
-        child: Slider(
-          value: context.read<PlayerProvider>().state.speed,
-          min: 1,
-          max: (currentUserSettings?.enableSuperSpeeds ?? false) ? 10.0 : 4.0,
-          divisions: context.read<PlayerProvider>().playbackSpeeds.length - 1,
-          label: "${context.read<PlayerProvider>().state.speed}x",
-          onChanged: (value) {
-            context.read<PlayerProvider>().setSpeed(value);
-          },
-        ),
+    final speed = context.read<PlayerProvider>().state.speed;
+    return SliderTheme(
+      data: SliderThemeData(
+        thumbShape: RoundSliderThumbShape(enabledThumbRadius: 5),
+        trackHeight: 4,
+        activeTrackColor: Colors.transparent,
+        inactiveTrackColor: Colors.transparent,
+        thumbColor: appTheme.accentColor,
+        year2023: false,
+      ),
+      child: Slider(
+        value: speed >= 2 ? speed : 2.0,
+        min: 2,
+        max: context.read<PlayerProvider>().playbackSpeeds.last,
+        divisions: context.read<PlayerProvider>().playbackSpeeds.where((e) => e >= 2).length - 1,
+        label: "${speed}x",
+        onChanged: (value) {
+          context.read<PlayerProvider>().setSpeed(value);
+        },
       ),
     );
   }

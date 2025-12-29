@@ -91,8 +91,8 @@ class TopControls extends StatelessWidget {
                         title: Text("VideoStream info", style: TextStyle(color: appTheme.accentColor)),
                         content: Text(
                           "Resolution: ${dataProvider.state.currentQuality.resolution}"
-                          "\nServer: ${dataProvider.state.preferredServer}"
-                          "\nSource: ${dataProvider.state.currentStream.server} ${dataProvider.state.currentStream.backup ? "\(backup\)" : ''}"
+                          "\nProvider: ${dataProvider.state.preferredServer}"
+                          "\nServer: ${dataProvider.state.currentStream.server} ${dataProvider.state.currentStream.backup ? "\(backup\)" : ''}"
                           "\nQuality: ${dataProvider.state.currentQuality.quality}"
                           "\nBandwidth: ${dataProvider.state.currentQuality.bandwidth ?? 'N/A'}"
                           "\nSubtitle: ${dataProvider.state.currentStream.subtitle != null ? "${dataProvider.state.currentStream.subtitleFormat}" : "N/A"}",

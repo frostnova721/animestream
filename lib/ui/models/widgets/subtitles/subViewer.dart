@@ -136,9 +136,11 @@ class _SubViewerState extends State<SubViewer> {
     if (a.length != b.length) return false;
     if (a.isEmpty && b.isEmpty) return true;
 
-    // compare the start times of the first and last subtitles
+    // compare the start n end times of the first and last subtitles
     return a.first.start.inMilliseconds == b.first.start.inMilliseconds &&
-        a.last.start.inMilliseconds == b.last.start.inMilliseconds;
+        a.first.end.inMilliseconds == b.first.end.inMilliseconds &&
+        a.last.start.inMilliseconds == b.last.start.inMilliseconds &&
+        a.last.end.inMilliseconds == b.last.end.inMilliseconds;
   }
 
   //i tried to make it beautiful! okay???
@@ -158,26 +160,27 @@ class _SubViewerState extends State<SubViewer> {
   @override
   Widget build(BuildContext context) {
     return Stack(
-      children: [
-        for (final activeSubtitle in activeSubtitles)
-          Container(
-            alignment: Alignment.bottomCenter,
-            margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
-            child: Container(
-              width: MediaQuery.of(context).size.width / 1.4,
-              alignment: getLineAlignment(activeSubtitle.alignment),
-              child: SubtitleText(
-                text: areSubsLoading ? "Loading Subs" : activeSubtitle.dialogue,
-                style: subTextStyle(),
-                strokeColor: widget.settings.strokeColor,
-                strokeWidth: widget.settings.strokeWidth,
-                backgroundColor: widget.settings.backgroundColor,
-                backgroundTransparency: widget.settings.backgroundTransparency,
-                enableShadows: widget.settings.enableShadows,
+      children: activeSubtitles
+          .map(
+            (activeSubtitle) => Container(
+              alignment: Alignment.bottomCenter,
+              margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
+              child: Container(
+                width: MediaQuery.of(context).size.width / 1.4,
+                alignment: getLineAlignment(activeSubtitle.alignment),
+                child: SubtitleText(
+                  text: areSubsLoading ? "Loading Subs" : activeSubtitle.dialogue,
+                  style: subTextStyle(),
+                  strokeColor: widget.settings.strokeColor,
+                  strokeWidth: widget.settings.strokeWidth,
+                  backgroundColor: widget.settings.backgroundColor,
+                  backgroundTransparency: widget.settings.backgroundTransparency,
+                  enableShadows: widget.settings.enableShadows,
+                ),
               ),
             ),
-          ),
-      ],
+          )
+          .toList(),
     );
   }
 

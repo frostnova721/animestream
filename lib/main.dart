@@ -235,92 +235,99 @@ class _AnimeStreamState extends State<AnimeStream> {
   // This widget is the root of *my* application.
   @override
   Widget build(BuildContext context) {
-    return DynamicColorBuilder(
-      builder: (lightScheme, darkScheme) {
-        late AnimeStreamTheme scheme;
-
-        //just checks for dark mode and sets the appTheme variable with suitable theme
-        if (currentUserSettings?.darkMode ?? true) {
-          scheme = AnimeStreamTheme(
-            accentColor: darkScheme?.primary ?? appTheme.accentColor,
-            backgroundColor: (currentUserSettings?.amoledBackground ?? false)
-                ? Colors.black
-                : darkScheme?.surface ?? appTheme.backgroundColor,
-            backgroundSubColor: darkScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
-            textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
-            textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,
-            modalSheetBackgroundColor: darkScheme?.surface ?? appTheme.modalSheetBackgroundColor,
-            onAccent: darkScheme?.onPrimary ?? appTheme.onAccent,
+    return AnnotatedRegion(
+      value: SystemUiOverlayStyle(
+        statusBarIconBrightness: (currentUserSettings?.darkMode ?? true) ? Brightness.light : Brightness.dark,
+        statusBarColor: Colors.black.withValues(alpha: 0.002),
+        systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
+      ),
+      child: DynamicColorBuilder(
+        builder: (lightScheme, darkScheme) {
+          late AnimeStreamTheme scheme;
+      
+          //just checks for dark mode and sets the appTheme variable with suitable theme
+          if (currentUserSettings?.darkMode ?? true) {
+            scheme = AnimeStreamTheme(
+              accentColor: darkScheme?.primary ?? appTheme.accentColor,
+              backgroundColor: (currentUserSettings?.amoledBackground ?? false)
+                  ? Colors.black
+                  : darkScheme?.surface ?? appTheme.backgroundColor,
+              backgroundSubColor: darkScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
+              textMainColor: darkScheme?.onSurface ?? appTheme.textMainColor,
+              textSubColor: darkScheme?.onSurfaceVariant ?? appTheme.textSubColor,
+              modalSheetBackgroundColor: darkScheme?.surface ?? appTheme.modalSheetBackgroundColor,
+              onAccent: darkScheme?.onPrimary ?? appTheme.onAccent,
+            );
+          } else {
+            scheme = AnimeStreamTheme(
+              accentColor: lightScheme?.primary ?? appTheme.accentColor,
+              backgroundColor: lightScheme?.surface ?? appTheme.accentColor,
+              backgroundSubColor: lightScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
+              textMainColor: lightScheme?.onSurface ?? appTheme.textMainColor,
+              textSubColor: lightScheme?.onSurfaceVariant ?? appTheme.textSubColor,
+              modalSheetBackgroundColor: lightScheme?.surface ?? appTheme.modalSheetBackgroundColor,
+              onAccent: lightScheme?.onPrimary ?? appTheme.onAccent,
+            );
+          }
+      
+          if (currentUserSettings?.materialTheme ?? false) {
+            appTheme = scheme;
+            // print("[THEME] Applying Material You Theme");
+          } else {
+            // lmao we can make it follow material theme XD
+            // final t = ThemeData.from(
+            //   colorScheme: ColorScheme.fromSeed(
+            //       seedColor: appTheme.accentColor,
+            //       brightness: (currentUserSettings?.darkMode ?? true) ? Brightness.dark : Brightness.light),
+            // ).colorScheme;
+            // appTheme = AnimeStreamTheme(
+            //   accentColor: t.primary,
+            //   backgroundColor: t.surface,
+            //   backgroundSubColor: t.secondaryContainer,
+            //   textMainColor: t.onSurface,
+            //   textSubColor: t.outline,
+            //   modalSheetBackgroundColor: t.surface,
+            //   onAccent: t.onPrimary,
+            // );
+          }
+      
+          final themeProvider = Provider.of<AppProvider>(context);
+      
+          //set status bar icon brightness (some devices do this automatically, some dont!
+          //so here it is for all of em!)
+          SystemChrome.setSystemUIOverlayStyle(
+            SystemUiOverlayStyle(
+              statusBarIconBrightness: themeProvider.isDark ? Brightness.light : Brightness.dark,
+              statusBarColor: Colors.black.withValues(alpha: 0.002),
+              systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
+            ),
           );
-        } else {
-          scheme = AnimeStreamTheme(
-            accentColor: lightScheme?.primary ?? appTheme.accentColor,
-            backgroundColor: lightScheme?.surface ?? appTheme.accentColor,
-            backgroundSubColor: lightScheme?.secondaryContainer ?? appTheme.backgroundSubColor,
-            textMainColor: lightScheme?.onSurface ?? appTheme.textMainColor,
-            textSubColor: lightScheme?.onSurfaceVariant ?? appTheme.textSubColor,
-            modalSheetBackgroundColor: lightScheme?.surface ?? appTheme.modalSheetBackgroundColor,
-            onAccent: lightScheme?.onPrimary ?? appTheme.onAccent,
-          );
-        }
-
-        if (currentUserSettings?.materialTheme ?? false) {
-          appTheme = scheme;
-          // print("[THEME] Applying Material You Theme");
-        } else {
-          // lmao we can make it follow material theme XD
-          // final t = ThemeData.from(
-          //   colorScheme: ColorScheme.fromSeed(
-          //       seedColor: appTheme.accentColor,
-          //       brightness: (currentUserSettings?.darkMode ?? true) ? Brightness.dark : Brightness.light),
-          // ).colorScheme;
-          // appTheme = AnimeStreamTheme(
-          //   accentColor: t.primary,
-          //   backgroundColor: t.surface,
-          //   backgroundSubColor: t.secondaryContainer,
-          //   textMainColor: t.onSurface,
-          //   textSubColor: t.outline,
-          //   modalSheetBackgroundColor: t.surface,
-          //   onAccent: t.onPrimary,
-          // );
-        }
-
-        final themeProvider = Provider.of<AppProvider>(context);
-
-        //set status bar icon brightness (some devices do this automatically, some dont!
-        //so here it is for all of em!)
-        SystemChrome.setSystemUIOverlayStyle(
-          SystemUiOverlayStyle(
-            statusBarIconBrightness: themeProvider.isDark ? Brightness.light : Brightness.dark,
-            statusBarColor: Colors.black.withValues(alpha: 0.002),
-            systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
-          ),
-        );
-
-        return MaterialApp(
-          title: 'Animestream',
-          navigatorKey: AnimeStream.navigatorKey,
-          scaffoldMessengerKey: AnimeStream.snackbarKey,
-          theme: ThemeData(
-              useMaterial3: true,
-              brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-              textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
-              scaffoldBackgroundColor: appTheme.backgroundColor,
-              bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
-              colorScheme: ColorScheme.fromSeed(
+      
+          return MaterialApp(
+            title: 'Animestream',
+            navigatorKey: AnimeStream.navigatorKey,
+            scaffoldMessengerKey: AnimeStream.snackbarKey,
+            theme: ThemeData(
+                useMaterial3: true,
                 brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-                seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
-              ),
-              iconTheme: IconThemeData(color: appTheme.textMainColor)),
-          home: ChangeNotifierProvider(
-            create: (context) => MainNavProvider(),
-            child: Platform.isWindows
-                ? AppWrapper(firstPage: MainNavigator())
-                : MainNavigator(),
-          ),
-          debugShowCheckedModeBanner: false,
-        );
-      },
+                textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
+                scaffoldBackgroundColor: appTheme.backgroundColor,
+                bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
+                colorScheme: ColorScheme.fromSeed(
+                  brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
+                  seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
+                ),
+                iconTheme: IconThemeData(color: appTheme.textMainColor)),
+            home: ChangeNotifierProvider(
+              create: (context) => MainNavProvider(),
+              child: Platform.isWindows
+                  ? AppWrapper(firstPage: MainNavigator())
+                  : MainNavigator(),
+            ),
+            debugShowCheckedModeBanner: false,
+          );
+        },
+      ),
     );
   }
 }

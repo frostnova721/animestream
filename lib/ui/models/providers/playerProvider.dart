@@ -42,6 +42,7 @@ class PlayerProvider extends ChangeNotifier {
 
   bool get isOffline => _isOffline;
 
+  /// Available playback speeds. This list is sorted!
   List<double> get playbackSpeeds => [
         1,
         1.25,
@@ -153,6 +154,12 @@ class PlayerProvider extends ChangeNotifier {
   void setSpeed(double val) {
     _state = _state.copyWith(speed: val);
     _controller.setSpeed(val);
+    notifyListeners();
+  }
+
+  void resetSpeed() {
+    _state = _state.copyWith(speed: 1);
+    _controller.setSpeed(1);
     notifyListeners();
   }
 

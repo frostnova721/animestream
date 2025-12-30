@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
@@ -78,7 +79,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
     final dataProvider = context.read<PlayerDataProvider>();
 
-    debugPrint("[PLAYER] Initializing stream ${dataProvider.state.currentStream}");
+    Logs.player.log("[PLAYER] Initializing stream ${dataProvider.state.currentStream}");
 
     dataProvider.initSubsettings();
 
@@ -102,7 +103,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks.first);
         controller.setAudioTrack(dataProvider.state.currentAudioTrack);
       } else {
-        print("[PLAYER] Couldnt find audio tracks for this stream");
+        Logs.player.log("[PLAYER] Couldnt find audio tracks for this stream");
       }
     } else {
       await controller.initiateVideo(dataProvider.state.currentStream.url, offline: true);
@@ -141,7 +142,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
           }
         });
       } catch (e) {
-        print("[PLAYER] PiP listener couldnt be added: $e");
+        Logs.player.log("[PLAYER] PiP listener couldnt be added: ${e.toString()}");
       }
     }
   }
@@ -214,14 +215,14 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
       if (isAtOp) {
         _isSkippingOpOrEd = true;
-        print(
+        Logs.player.log(
             "[PLAYER] Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
         playerProvider
             .fastForward(dataProvider.state.opSkip!.end - currentPositionInSeconds + 1)
             .then((_) => _isSkippingOpOrEd = false);
       } else if (isAtEd) {
         _isSkippingOpOrEd = true;
-        print(
+       Logs.player.log(
             "[PLAYER] Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
         playerProvider
             .fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds)
@@ -345,6 +346,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   int skipCount = 0;
 
   double? _lastSpeedChangeOffset = 0.0;
+  double lastSpeed = 1.0;
 
   @override
   Widget build(BuildContext context) {
@@ -409,11 +411,10 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                   if (Platform.isWindows) return;
                   if (playerProvider.state.playerState == PlayerState.playing) {
                     spedUp = true;
+                    lastSpeed = playerProvider.state.speed;
 
-                    // increase speed, Dont allow the max values >10x
-                    final currSpeed = playerProvider.state.speed;
-                    if (currSpeed >= 5) return;
-                    playerProvider.setSpeed(currSpeed * 2);
+                    // ensure atleast 2x speed on long press and max of 10x (max available speed)
+                    playerProvider.setSpeed((lastSpeed * 2).clamp(2, playerProvider.playbackSpeeds.last));
                   } else {
                     return;
                   }
@@ -432,19 +433,21 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                   final delta = (offset - _lastSpeedChangeOffset!).abs();
 
                   // Only trigger if 5px away from last change
-                  if (delta >= 10) {
+                  if (delta >= 40) {
                     final currSpeed = playerProvider.state.speed;
 
                     if (offset > _lastSpeedChangeOffset!) {
-                      // moved right - increase speed
-                      if (currSpeed >= 5) return;
-                      playerProvider.setSpeed(currSpeed * 2);
-                      print("Increased speed to: ${playerProvider.state.speed}x");
+                      // moved right - increase speed just to the next available speed
+                      playerProvider.setSpeed(playerProvider.playbackSpeeds.firstWhere(
+                        (speed) => speed > currSpeed,
+                        orElse: () => currSpeed,
+                      ));
                     } else {
-                      // moved left - decrease speed
-                      if (currSpeed <= 2) return;
-                      playerProvider.setSpeed((currSpeed / 2).roundToDouble());
-                      print("Decreased speed to: ${playerProvider.state.speed}x");
+                      // moved left - decrease speed just to the previous available speed
+                      playerProvider.setSpeed(playerProvider.playbackSpeeds.lastWhere(
+                        (speed) => speed < currSpeed && speed >= 2,
+                        orElse: () => currSpeed,
+                      ));
                     }
 
                     _lastSpeedChangeOffset = offset;
@@ -454,8 +457,9 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                   // reset only if speed was increased
                   if (!spedUp || Platform.isWindows) return;
                   spedUp = false;
+                  if (playerProvider.state.speed < 2) return;
                   // reset speed
-                  playerProvider.setSpeed(playerProvider.state.speed / 2);
+                  playerProvider.setSpeed(lastSpeed);
                   print("Reduced speed to: ${playerProvider.state.speed}x");
                 },
                 child: Stack(

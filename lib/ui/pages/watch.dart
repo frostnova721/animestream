@@ -527,13 +527,16 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                           child: Container(
                             alignment: Alignment.topCenter,
                             padding: EdgeInsets.only(top: 10),
-                            child: AnimatedOpacity(
-                                opacity: spedUp ? 1 : 0,
-                                duration: Duration(milliseconds: 100),
-                                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                  _playbackSpeedIndicator(),
-                                  _playbackSpeedSlider(),
-                                ])),
+                            child: IgnorePointer(
+                              ignoring: !spedUp,
+                              child: AnimatedOpacity(
+                                  opacity: spedUp ? 1 : 0,
+                                  duration: Duration(milliseconds: 100),
+                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                    _playbackSpeedIndicator(),
+                                    _playbackSpeedSlider(),
+                                  ])),
+                            ),
                           ),
                           flex: 1,
                         ),

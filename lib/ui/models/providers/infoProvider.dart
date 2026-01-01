@@ -255,7 +255,6 @@ class InfoProvider extends ChangeNotifier {
 
   // Messy asf function. dont touch, not even I have a clue what its doing!
   void paginate(List<EpisodeDetails> links) {
-    _visibleEpList = [];
     _epLinks = links;
 
     if (_epLinks.length > 24) {
@@ -283,7 +282,13 @@ class InfoProvider extends ChangeNotifier {
       }
       visibleEpList.add(pageOne);
     }
-    _currentPageIndex = _currentPageIndex >= _visibleEpList.length ? 0 : watched ~/ 25;
+    print("cpi $_currentPageIndex, vpl ${visibleEpList.length}");
+
+    if ((watched ~/ 25) > visibleEpList.length) {
+      _currentPageIndex = visibleEpList.length - 1;
+    } else {
+      _currentPageIndex = _currentPageIndex >= visibleEpList.length ? 0 : watched ~/ 25;
+    }
   }
 
   Future<void> _search(String query) async {

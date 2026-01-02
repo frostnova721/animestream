@@ -137,6 +137,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
             Future.delayed(Duration(milliseconds: 200), () {
               if (mounted) {
                 setWatchMode();
+                context.read<PlayerProvider>().handleWakelock();
               }
             });
           }

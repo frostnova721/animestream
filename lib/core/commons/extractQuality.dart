@@ -49,7 +49,8 @@ class AudioStream {
   });
 
   factory AudioStream.placeholder() {
-    return AudioStream(groupId: "who cares", name: "mic testing!", url: "placeholder", language: "english", channels: "stereo");
+    return AudioStream(
+        groupId: "who cares", name: "mic testing!", url: "placeholder", language: "english", channels: "stereo");
   }
 
   @override
@@ -107,12 +108,28 @@ class QualityStreamBuilder {
   void addAudioGroup(String audioGroup) => this.audioGroup = audioGroup;
 
   QualityStream build() {
-    if(quality == null || url == null || resolution == null) {
+    if (quality == null || url == null || resolution == null) {
       print("res: $resolution, url: $url, quality: $quality");
       throw Exception("One of the required arguments for the QualityStream was received as null");
     }
-    return QualityStream(quality: quality!, url: url!, resolution: resolution!, audioGroup: audioGroup, bandwidth: bandwidth);
+    return QualityStream(
+        quality: quality!, url: url!, resolution: resolution!, audioGroup: audioGroup, bandwidth: bandwidth);
   }
+}
+
+Future<bool> isM3u8Playlist(String url, {List<String>? contentLines, Map<String, String>? customHeader = null}) async {
+  if (url.toLowerCase().split('?').firstOrNull?.endsWith(".m3u8") ?? false) return true;
+
+  if (contentLines == null) {
+    try {
+    final content = (await get(Uri.parse(url), headers: customHeader)).body;
+    contentLines = [content.trim().split("\n").firstWhere((e) => e.isNotEmpty, orElse: () => "")];
+    } catch(e) {
+      return false;
+    }
+  }
+
+  return contentLines.first.trim() == "#EXTM3U";
 }
 
 Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, String>? customHeader = null}) async {
@@ -122,7 +139,10 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, Strin
     List<AudioStream> audioStreams = [];
     List<QualityStream> qualityStreams = [];
 
-    List<String> lines = content.split("\n");
+    List<String> lines = content.trim().split("\n").where((e) => e.isNotEmpty).toList();
+    if (!await isM3u8Playlist(streamUrl, contentLines: lines)) {
+      throw Exception("Not a valid m3u8 playlist");
+    }
     // lines = lines.where((it) => !it.startsWith("EXT-X-MEDIA")).toList().first.split("\n");
 
     // final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
@@ -168,16 +188,19 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, Strin
 
         final qsb = QualityStreamBuilder();
         final items = line.split(":")[1].split(",");
-        for(final it in items) {
+        for (final it in items) {
           final kvPair = it.split("=");
-          switch(kvPair[0]) {
-            case "BANDWIDTH": qsb.addBandwidth(int.parse(kvPair[1]));
-            case "RESOLUTION": qsb.addResolution(kvPair[1]);
-            case "AUDIO": qsb.addAudioGroup(kvPair[1]);
+          switch (kvPair[0]) {
+            case "BANDWIDTH":
+              qsb.addBandwidth(int.parse(kvPair[1]));
+            case "RESOLUTION":
+              qsb.addResolution(kvPair[1]);
+            case "AUDIO":
+              qsb.addAudioGroup(kvPair[1]);
           }
         }
 
-        final urlLine = lines[i+1];
+        final urlLine = lines[i + 1];
         final linkPart = urlLine.trim().replaceAll('"', '');
         if (linkPart.length > 1)
           qsb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
@@ -203,9 +226,8 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, Strin
     return grouped;
   } catch (err) {
     print(err);
-    return ParsedHlsMaster(audioStreams: [], qualityStreams: [
-      QualityStream(quality: "default", url: streamUrl, resolution: "??")
-    ]);
+    return ParsedHlsMaster(
+        audioStreams: [], qualityStreams: [QualityStream(quality: "default", url: streamUrl, resolution: "??")]);
   }
 }
 

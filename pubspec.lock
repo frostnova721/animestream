@@ -86,7 +86,7 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: b9d1fc470f1cef98e15c9da4049bdb8ea4b4193d
+      resolved-ref: cc8d8e8e2ccda633318bd704521ee484b9f793b0
       url: "https://github.com/frostnova721/betterplayer.git"
     source: git
     version: "1.0.0"

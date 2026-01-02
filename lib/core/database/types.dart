@@ -25,6 +25,20 @@ class AlternateDatabaseId {
     required this.database,
     required this.id,
   });
+
+  @override
+  bool operator ==(Object other) =>
+      (other is AlternateDatabaseId &&
+          database == other.database &&
+          id == other.id) || identical(this, other);
+
+  @override
+  int get hashCode => Object.hash(database, id);
+
+  @override
+  String toString() {
+    return 'AlternateDatabaseId{database: $database, id: $id}';
+  }
 }
 
 abstract class DatabaseMutationResult {

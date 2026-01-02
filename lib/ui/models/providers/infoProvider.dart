@@ -216,30 +216,35 @@ class InfoProvider extends ChangeNotifier {
   }
 
   Future<void> _getInfo(int id) async {
+    final s = _altDatabases.toSet();
+    Future<List<AlternateDatabaseId>>? simklFuture;
+
     try {
       if (currentUserSettings?.database == Databases.anilist && await AniListLogin().isAnilistLoggedIn()) {
         _loggedIn = true;
         //fetch ids from simkl and save em
-        try {
-          DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id").then((res) {
-            if (res.isEmpty) return;
-            DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id).then((r) {
-              final s = _altDatabases.toSet();
-              r.alternateDatabases.forEach((it) {
-                s.add(it);
-              });
-              _altDatabases = s.toList();
-            });
-          });
-        } catch (err) {
-          if (currentUserSettings?.showErrors ?? false) {
-            floatingSnackBar("Couldnt fetch simkl data");
+        simklFuture = () async {
+          try {
+            final res = await DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id");
+            if (res.isEmpty) return <AlternateDatabaseId>[];
+            final info = await DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id);
+            return info.alternateDatabases;
+          } catch (err) {
+            Logs.app.log("[INFO] couldnt fetch simkl data. ${err.toString()}");
+            if (currentUserSettings?.showErrors ?? false) {
+              floatingSnackBar("Couldnt fetch simkl data");
+            }
+            return <AlternateDatabaseId>[];
           }
-        }
+        }();
       }
 
-      final info = await DatabaseHandler().getAnimeInfo(id);
-      _altDatabases = info.alternateDatabases;
+      final futures = await Future.wait([DatabaseHandler().getAnimeInfo(id) ,if (simklFuture != null) simklFuture]);
+
+      final info = futures[0] as DatabaseInfo;
+      s.addAll(info.alternateDatabases);
+      s.addAll(futures.length > 1 ? futures[1] as List<AlternateDatabaseId> : <AlternateDatabaseId>[]);
+      _altDatabases = s.toList();
       _dataLoaded = true;
       _data = info;
       _mediaListStatus = assignItemEnum(data.mediaListStatus);
@@ -282,9 +287,9 @@ class InfoProvider extends ChangeNotifier {
       }
       visibleEpList.add(pageOne);
     }
-    print("cpi $_currentPageIndex, vpl ${visibleEpList.length}");
 
-    if ((watched ~/ 25) > visibleEpList.length) {
+    // fun fact, each condition was added after errors popped up across different versions :')
+    if ((watched ~/ 25) >= visibleEpList.length) {
       _currentPageIndex = visibleEpList.length - 1;
     } else {
       _currentPageIndex = _currentPageIndex >= visibleEpList.length ? 0 : watched ~/ 25;

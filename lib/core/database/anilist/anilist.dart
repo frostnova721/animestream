@@ -170,7 +170,7 @@ class Anilist extends Database {
           listId: info['mediaListEntry']?['id'],
           alternateDatabases: [
             AlternateDatabaseId(database: Databases.anilist, id: id),
-            if (info['idMal'] != null) AlternateDatabaseId(database: Databases.anilist, id: info['idMal']),
+            if (info['idMal'] != null) AlternateDatabaseId(database: Databases.mal, id: info['idMal']),
           ]);
 
       return convertedGuy;

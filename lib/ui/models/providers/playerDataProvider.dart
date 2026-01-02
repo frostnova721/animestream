@@ -1,4 +1,5 @@
 import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/commons/utils.dart';
@@ -73,12 +74,11 @@ class PlayerDataProvider extends ChangeNotifier {
       mime = await getMediaMimeType(url, headers);
       print(mime);
     }
-
-    // gojo sources mostly doesnt contain an extension, and... its mime sometimes is video/mp2t instead of the mpegurl
-    if (url.contains(".m3u8") || (mime != null && mime.contains(RegExp(r"mp2t|mpegurl", caseSensitive: false)))) {
+    try {
       final master = await parseMasterPlaylist(url, customHeader: headers);
       _state = _state.copyWith(qualities: master.qualityStreams, audioTracks: master.audioStreams);
-    } else {
+    } catch(e) {
+      // just a backup, the code shouldnt reach here, but my luck... brooo....
       _state = _state.copyWith(
         qualities: [QualityStream(url: url, resolution: 'default', quality: _state.currentStream.quality)],
       );
@@ -185,14 +185,14 @@ class PlayerDataProvider extends ChangeNotifier {
   Future<void> getSkipTimesForCurrentEpisode({double videoDuration = 0}) async {
     final malId = altDatabases.where((element) => element.database == Databases.mal).firstOrNull?.id;
     if (malId == null) {
-      print("No MAL id found for skip times");
+      Logs.player.log("No MAL id found for skip times");
       return;
     }
     final episodeNumber = epLinks[_state.currentEpIndex].episodeNumber;
     final skipTimes = await AniSkip().getSkipTimes(malId, episodeNumber, episodeLength: videoDuration / 1000);
-    print(skipTimes);
+    // print(skipTimes);
     if (skipTimes == null) {
-      print("No skip times found");
+      Logs.player.log("No skip times found");
       return;
     }
 

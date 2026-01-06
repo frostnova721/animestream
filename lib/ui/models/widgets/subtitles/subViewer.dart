@@ -43,6 +43,7 @@ class _SubViewerState extends State<SubViewer> {
   List<Subtitle> subs = [];
 
   List<Subtitle> activeSubtitles = [];
+
   bool areSubsLoading = true;
 
   String? _loadedSubsUrl;
@@ -159,28 +160,46 @@ class _SubViewerState extends State<SubViewer> {
 
   @override
   Widget build(BuildContext context) {
+    // I dont think this is a great idea to do this here, but oh boi!
+    final Map<SubtitleAlignment, List<Subtitle>> subsGrouped = {};
+    for (final sub in activeSubtitles) {
+      subsGrouped.putIfAbsent(sub.alignment, () => []).add(sub);
+    }
+
+    // Sort each group by start time for consistency
+    for (var list in subsGrouped.values) {
+        list.sort((a, b) => a.start.compareTo(b.start));
+    }
+
     return Stack(
-      children: activeSubtitles
-          .map(
-            (activeSubtitle) => Container(
-              alignment: Alignment.bottomCenter,
-              margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
-              child: Container(
-                width: MediaQuery.of(context).size.width / 1.4,
-                alignment: getLineAlignment(activeSubtitle.alignment),
-                child: SubtitleText(
-                  text: areSubsLoading ? "Loading Subs" : activeSubtitle.dialogue,
-                  style: subTextStyle(),
-                  strokeColor: widget.settings.strokeColor,
-                  strokeWidth: widget.settings.strokeWidth,
-                  backgroundColor: widget.settings.backgroundColor,
-                  backgroundTransparency: widget.settings.backgroundTransparency,
-                  enableShadows: widget.settings.enableShadows,
-                ),
-              ),
+      children: subsGrouped.entries.map((group) {
+        final alignment = group.key;
+        final subs = group.value;
+
+        return Align(
+          alignment: getLineAlignment(alignment),
+          child: Container(
+            width: MediaQuery.of(context).size.width / 1.4,
+            margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: subs
+                  .map(
+                    (sub) => SubtitleText(
+                      text: areSubsLoading ? "Loading Subs" : sub.dialogue,
+                      style: subTextStyle(),
+                      strokeColor: widget.settings.strokeColor,
+                      strokeWidth: widget.settings.strokeWidth,
+                      backgroundColor: widget.settings.backgroundColor,
+                      backgroundTransparency: widget.settings.backgroundTransparency,
+                      enableShadows: widget.settings.enableShadows,
+                    ),
+                  )
+                  .toList(),
             ),
-          )
-          .toList(),
+          ),
+        );
+      }).toList(),
     );
   }
 

@@ -529,7 +529,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                             alignment: Alignment.topCenter,
                             padding: EdgeInsets.only(top: 10),
                             child: IgnorePointer(
-                              ignoring: !spedUp,
+                              ignoring: true,
                               child: AnimatedOpacity(
                                   opacity: spedUp ? 1 : 0,
                                   duration: Duration(milliseconds: 100),
@@ -571,6 +571,8 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   Widget _playbackSpeedSlider() {
     final speed = context.read<PlayerProvider>().state.speed;
+    final playbackSpeeds = context.read<PlayerProvider>().playbackSpeeds;
+    final divisions = playbackSpeeds.where((e) => e >= 2).length - 1;
     return SliderTheme(
       data: SliderThemeData(
         thumbShape: RoundSliderThumbShape(enabledThumbRadius: 5),
@@ -581,10 +583,10 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         year2023: false,
       ),
       child: Slider(
-        value: speed >= 2 ? speed : 2.0,
+        value: speed.clamp(2, playbackSpeeds.last),
         min: 2,
-        max: context.read<PlayerProvider>().playbackSpeeds.last,
-        divisions: context.read<PlayerProvider>().playbackSpeeds.where((e) => e >= 2).length - 1,
+        max: playbackSpeeds.last,
+        divisions: divisions > 0 ? divisions : null,
         label: "${speed}x",
         onChanged: (value) {
           context.read<PlayerProvider>().setSpeed(value);

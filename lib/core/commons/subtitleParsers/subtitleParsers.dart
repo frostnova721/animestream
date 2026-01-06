@@ -37,12 +37,17 @@ class Subtitleparsers {
   }
 
   static Duration parseDuration(String timeString) {
-    final parts = timeString.split(':');
+    final parts = timeString.trim().split(':');
     final hours = int.parse(parts[0]);
     final minutes = int.parse(parts[1]);
-    final secondsParts = parts[2].split('.');
+    final secondsParts = parts[2].split(RegExp(r'[.,]'));
     final seconds = int.parse(secondsParts[0]);
-    final milliseconds = int.parse(secondsParts[1]);
+    final fractionStr = secondsParts.length > 1 ? secondsParts[1] : '0';
+    // Normalize fraction to milliseconds: pad/truncate to 3 digits (ASS uses centiseconds)
+    final msStr = (fractionStr.length >= 3)
+        ? fractionStr.substring(0, 3)
+        : fractionStr.padRight(3, '0');
+    final milliseconds = int.parse(msStr);
 
     return Duration(
       hours: hours,

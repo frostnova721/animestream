@@ -239,7 +239,7 @@ class InfoProvider extends ChangeNotifier {
         }();
       }
 
-      final futures = await Future.wait([DatabaseHandler().getAnimeInfo(id) ,if (simklFuture != null) simklFuture]);
+      final futures = await Future.wait([DatabaseHandler().getAnimeInfo(id), if (simklFuture != null) simklFuture]);
 
       final info = futures[0] as DatabaseInfo;
       s.addAll(info.alternateDatabases);
@@ -258,42 +258,38 @@ class InfoProvider extends ChangeNotifier {
     }
   }
 
-  // Messy asf function. dont touch, not even I have a clue what its doing!
+  // cleaned, refactored and pretty good ig
   void paginate(List<EpisodeDetails> links) {
     _epLinks = links;
+    _visibleEpList.clear();
 
-    if (_epLinks.length > 24) {
-      // We dealing with multiple pages
-      final totalPages = (_epLinks.length / 24).ceil();
-      int remainingItems = _epLinks.length;
-      for (int h = 0; h < totalPages; h++) {
-        List<Map<String, dynamic>> page = [];
-        for (int i = 0; i < 24 && remainingItems > 0; i++) {
-          if (_preferDubs && !(_epLinks[(h * 24) + i].hasDub ?? false)) {
-            remainingItems--;
-          } else {
-            page.add({'realIndex': (h * 24) + i, 'epLink': _epLinks[(h * 24) + i]});
-            remainingItems--;
-          }
-        }
-        visibleEpList.add(page);
+    final filteredList = <Map<String, dynamic>>[];
+    int? watchedProgressIndex; // js a variable to track the last watched episode in filtered list
+
+    // filter the list if dubs are available and user needs dubs (works for subs too)
+    for (int i = 0; i < _epLinks.length; i++) {
+      final hasDub = links[i].hasDub ?? false;
+      if (!_preferDubs || hasDub) {
+        if (watched == i) watchedProgressIndex = filteredList.length;
+        filteredList.add({'realIndex': i, 'epLink': links[i]});
       }
-    } else {
-      // Single pages case
-      List<Map<String, dynamic>> pageOne = [];
-      for (int i = 0; i < _epLinks.length; i++) {
-        if (preferDubs && (epLinks[i].hasDub ?? false) || !preferDubs)
-          pageOne.add({'realIndex': i, 'epLink': _epLinks[i]});
-      }
-      visibleEpList.add(pageOne);
     }
 
-    // fun fact, each condition was added after errors popped up across different versions :')
-    if ((watched ~/ 25) >= visibleEpList.length) {
-      _currentPageIndex = visibleEpList.length - 1;
-    } else {
-      _currentPageIndex = _currentPageIndex >= visibleEpList.length ? 0 : watched ~/ 25;
+    // Paginate to sections of 24 stuff
+    for (int i = 0; i < filteredList.length; i += 24) {
+      int end = (i + 24 < filteredList.length) ? i + 24 : filteredList.length;
+      _visibleEpList.add(filteredList.sublist(i, end));
     }
+
+    if (_visibleEpList.isEmpty) {
+      // to avoid errors ofcourse
+      _visibleEpList.add([]);
+      _currentPageIndex = 0;
+    } else {
+      _currentPageIndex = watchedProgressIndex != null ? (watchedProgressIndex ~/ 24) : 0;
+    }
+
+    // _currentPageIndex = _currentPageIndex >= _visibleEpList.length ? _visibleEpList.length-1 : _currentPageIndex;
   }
 
   Future<void> _search(String query) async {

@@ -6,7 +6,7 @@ import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleText.dart';
-import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -230,18 +230,24 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
                                     ],
                                   ),
                                 ),
-                                toggleItem("Bold", settings.bold, () {
-                                  setState(() {
-                                    settings = settings.copyWith(bold: !settings.bold);
-                                    saveSubSettings();
-                                  });
-                                }),
-                                toggleItem("Shadows", settings.enableShadows, () {
-                                  setState(() {
-                                    settings = settings.copyWith(enableShadows: !settings.enableShadows);
-                                    saveSubSettings();
-                                  });
-                                }),
+                                ToggleItem(
+                                    label: "Bold",
+                                    value: settings.bold,
+                                    onTapFunction: () {
+                                      setState(() {
+                                        settings = settings.copyWith(bold: !settings.bold);
+                                        saveSubSettings();
+                                      });
+                                    }),
+                                ToggleItem(
+                                    label: "Shadows",
+                                    value: settings.enableShadows,
+                                    onTapFunction: () {
+                                      setState(() {
+                                        settings = settings.copyWith(enableShadows: !settings.enableShadows);
+                                        saveSubSettings();
+                                      });
+                                    }),
                                 _itemTitle("Font Size"),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 20, right: 20, bottom: 40),

@@ -110,127 +110,141 @@ class _GenresPageState extends State<GenresPage> {
       backgroundColor: appTheme.backgroundColor,
       body: Padding(
         padding: pagePadding(context),
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          child: Column(
-            children: [
-              topRow(context, "Genres"),
-              Container(
-                padding: EdgeInsets.only(left: 15, right: 15, top: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Container(
-                      child: Text(
-                        "Results",
-                        style: TextStyle(
-                            color: appTheme.textMainColor,
-                            fontFamily: "NotoSans",
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold),
-                      ),
+        child: Column(
+          children: [
+            topRow(context, "Genres"),
+            Container(
+              padding: EdgeInsets.only(left: 15, right: 15, top: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    child: Text(
+                      "Results",
+                      style: TextStyle(
+                          color: appTheme.textMainColor,
+                          fontFamily: "NotoSans",
+                          fontSize: 22,
+                          fontWeight: FontWeight.bold),
                     ),
-                    ElevatedButton(
-                      onPressed: () {
-                        showModalBottomSheet(
-                          context: context,
-                          backgroundColor: appTheme.modalSheetBackgroundColor,
-                          isScrollControlled: true,
-                          showDragHandle: true,
-                          builder: (context) => StatefulBuilder(
-                            builder: (context, setChildState) => Container(
-                              width: double.infinity,
-                              padding:
-                                  EdgeInsets.only(left: 15, right: 15, bottom: MediaQuery.of(context).padding.bottom),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Text(
-                                    "Filters",
-                                    style: TextStyle(
-                                        color: appTheme.textMainColor,
-                                        fontFamily: "Rubik",
-                                        fontSize: 20,
-                                        fontWeight: FontWeight.bold),
-                                  ),
-                                  _scrollablelListWithTitle(setChildState,
-                                      title: "Genres", mainList: genres, selectedList: selectedGenres),
-                                  _scrollablelListWithTitle(setChildState,
-                                      title: "Tags", mainList: tags, selectedList: selectedTags),
-                                  _filterItemTitle("Rating range"),
-                                  RangeSlider(
-                                    values: ratingRange,
-                                    min: 1,
-                                    max: 10,
-                                    divisions: 9,
-                                    activeColor: appTheme.accentColor,
-                                    labels: RangeLabels(ratingRange.start.toString(), ratingRange.end.toString()),
-                                    onChanged: (rv) {
-                                      setChildState(() {
-                                        ratingRange = RangeValues(rv.start.roundToDouble(), rv.end.roundToDouble());
-                                      });
-                                    },
-                                  ),
-                                  Container(
-                                    margin: EdgeInsets.only(top: 25),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          margin: EdgeInsets.only(right: 20),
-                                          child: ElevatedButton(
-                                            onPressed: () {
-                                              Navigator.of(context).pop();
-                                            },
-                                            style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
-                                            child: Text(
-                                              "Cancel",
-                                              style: TextStyle(color: appTheme.backgroundColor, fontFamily: "Poppins"),
-                                            ),
-                                          ),
-                                        ),
-                                        ElevatedButton(
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      showModalBottomSheet(
+                        context: context,
+                        backgroundColor: appTheme.modalSheetBackgroundColor,
+                        isScrollControlled: true,
+                        showDragHandle: true,
+                        builder: (context) => StatefulBuilder(
+                          builder: (context, setChildState) => Container(
+                            width: double.infinity,
+                            padding:
+                                EdgeInsets.only(left: 15, right: 15, bottom: MediaQuery.of(context).padding.bottom),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  "Filters",
+                                  style: TextStyle(
+                                      color: appTheme.textMainColor,
+                                      fontFamily: "Rubik",
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                _scrollablelListWithTitle(setChildState,
+                                    title: "Genres", mainList: genres, selectedList: selectedGenres),
+                                _scrollablelListWithTitle(setChildState,
+                                    title: "Tags", mainList: tags, selectedList: selectedTags),
+                                _filterItemTitle("Rating range"),
+                                RangeSlider(
+                                  values: ratingRange,
+                                  min: 1,
+                                  max: 10,
+                                  divisions: 9,
+                                  activeColor: appTheme.accentColor,
+                                  labels: RangeLabels(ratingRange.start.toString(), ratingRange.end.toString()),
+                                  onChanged: (rv) {
+                                    setChildState(() {
+                                      ratingRange = RangeValues(rv.start.roundToDouble(), rv.end.roundToDouble());
+                                    });
+                                  },
+                                ),
+                                Container(
+                                  margin: EdgeInsets.only(top: 25),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        margin: EdgeInsets.only(right: 20),
+                                        child: ElevatedButton(
                                           onPressed: () {
-                                            getList().then((_) {
-                                              if (Platform.isWindows) getList(lazyLoaded: true);
-                                            });
                                             Navigator.of(context).pop();
                                           },
                                           style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
                                           child: Text(
-                                            "Apply",
+                                            "Cancel",
                                             style: TextStyle(color: appTheme.backgroundColor, fontFamily: "Poppins"),
                                           ),
                                         ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
+                                      ),
+                                      ElevatedButton(
+                                        onPressed: () {
+                                          getList().then((_) {
+                                            if (Platform.isWindows) getList(lazyLoaded: true);
+                                          });
+                                          Navigator.of(context).pop();
+                                        },
+                                        style: ElevatedButton.styleFrom(backgroundColor: appTheme.accentColor),
+                                        child: Text(
+                                          "Apply",
+                                          style: TextStyle(color: appTheme.backgroundColor, fontFamily: "Poppins"),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              ],
                             ),
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(backgroundColor: appTheme.backgroundColor),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Icon(
-                            Icons.filter_alt_rounded,
-                            color: appTheme.textMainColor,
-                          ),
-                          Text(
-                            "filters",
-                            style: TextStyle(color: appTheme.textMainColor),
-                          )
-                        ],
-                      ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(backgroundColor: appTheme.backgroundColor),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Icon(
+                          Icons.filter_alt_rounded,
+                          color: appTheme.textMainColor,
+                        ),
+                        Text(
+                          "filters",
+                          style: TextStyle(color: appTheme.textMainColor),
+                        )
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              Container(
-                padding: EdgeInsets.only(left: 10, right: 10, top: 20, bottom: MediaQuery.of(context).padding.bottom),
+            ),
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.only(
+                  left: 10,
+                  right: 10,
+                  top: 20,
+                ),
+                foregroundDecoration: BoxDecoration(
+                    gradient: LinearGradient(
+                        colors: [
+                          appTheme.backgroundColor,
+                          Colors.transparent,
+                          Colors.transparent,
+                          appTheme.backgroundColor
+                        ],
+                        begin: Alignment.bottomCenter,
+                        end: Alignment.topCenter,
+                        stops: [0.00, 0.04, 0.95, 1])),
                 child: searchResultsAsWidgets.isEmpty && !_searching
                     ? Container(
                         margin: EdgeInsets.only(top: 40),
@@ -259,37 +273,41 @@ class _GenresPageState extends State<GenresPage> {
                                 ),
                         ),
                       )
-                    : Column(
-                        children: [
-                          GridView.builder(
-                            physics: NeverScrollableScrollPhysics(),
-                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
-                                mainAxisExtent: Platform.isAndroid ? 220 : 260,
-                                // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
-                                childAspectRatio: 120 / 220,
-                                mainAxisSpacing: 10),
-                            padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
-                            shrinkWrap: true,
-                            itemCount: searchResultsAsWidgets.length,
-                            itemBuilder: (context, index) => Container(
-                              child: searchResultsAsWidgets[index],
-                            ),
-                          ),
-                          if (_searching)
-                            Container(
-                              margin: EdgeInsets.only(top: 40, bottom: MediaQuery.of(context).padding.bottom + 10),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  color: appTheme.accentColor,
-                                ),
+                    : SingleChildScrollView(
+                        controller: _scrollController,
+                        child: Column(
+                          children: [
+                            GridView.builder(
+                              physics: NeverScrollableScrollPhysics(),
+                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+                                  mainAxisExtent: Platform.isAndroid ? 220 : 260,
+                                  // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                                  // childAspectRatio: 120 / 220,
+                                  mainAxisSpacing: 10),
+                              padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
+                              shrinkWrap: true,
+                              itemCount: searchResultsAsWidgets.length,
+                              itemBuilder: (context, index) => Container(
+                                alignment: Alignment.center,
+                                child: searchResultsAsWidgets[index],
                               ),
-                            )
-                        ],
+                            ),
+                            if (_searching)
+                              Container(
+                                margin: EdgeInsets.only(top: 40, bottom: MediaQuery.of(context).padding.bottom + 10),
+                                child: Center(
+                                  child: CircularProgressIndicator(
+                                    color: appTheme.accentColor,
+                                  ),
+                                ),
+                              )
+                          ],
+                        ),
                       ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

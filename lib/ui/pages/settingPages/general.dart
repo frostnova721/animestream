@@ -68,20 +68,20 @@ class _GeneralSettingState extends State<GeneralSetting> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     settingPagesTitleHeader(context, "General"),
-                    toggleItem(
-                      "Show errors",
-                      showErrorsButtonState,
-                      () {
+                    ToggleItem(
+                      label: "Show errors",
+                      value: showErrorsButtonState,
+                      onTapFunction: () {
                         setState(() {
                           showErrorsButtonState = !showErrorsButtonState;
                         });
                         writeSettings(SettingsModal(showErrors: showErrorsButtonState));
                       },
                     ),
-                    toggleItem(
-                      "Receive beta updates",
-                      receivePreReleases,
-                      () {
+                    ToggleItem(
+                      label: "Receive beta updates",
+                      value: receivePreReleases,
+                      onTapFunction: () {
                         setState(() {
                           receivePreReleases = !receivePreReleases;
                         });
@@ -89,18 +89,26 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       },
                       description: "*maybe unstable",
                     ),
-                    toggleItem("Use faster downloading", fasterDownloads, () {
-                      setState(() {
-                        fasterDownloads = !fasterDownloads;
-                      });
-                      writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
-                    }, description: "*download 2x items per batch"),
-                    toggleItem("Queued downloads", useQueuedDownloads, description: "Download items one by one", () {
-                      setState(() {
-                        useQueuedDownloads = !useQueuedDownloads;
-                        writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
-                      });
-                    }),
+                    ToggleItem(
+                        label: "Use faster downloading",
+                        value: fasterDownloads,
+                        onTapFunction: () {
+                          setState(() {
+                            fasterDownloads = !fasterDownloads;
+                          });
+                          writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
+                        },
+                        description: "*download 2x items per batch"),
+                    ToggleItem(
+                        label: "Queued downloads",
+                        value: useQueuedDownloads,
+                        description: "Download items one by one",
+                        onTapFunction: () {
+                          setState(() {
+                            useQueuedDownloads = !useQueuedDownloads;
+                            writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
+                          });
+                        }),
                     InkWell(
                       onTap: () async {
                         String? dir;
@@ -150,8 +158,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         );
                       },
                       label: "Default provider",
-                      description: (currentUserSettings?.preferredProvider ?? sources.first.identifier)
-                          .replaceAll('_', ' '),
+                      description:
+                          (currentUserSettings?.preferredProvider ?? sources.first.identifier).replaceAll('_', ' '),
                       suffixIcon: Icon(Icons.arrow_drop_down),
                     ),
                     ClickableItem(

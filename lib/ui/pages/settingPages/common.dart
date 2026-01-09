@@ -90,50 +90,6 @@ Widget settingPagesTitleHeader(BuildContext context, String title) {
   );
 }
 
-// Let it be here, too lazy to migrate the current usages to widgets
-InkWell toggleItem(
-  String label,
-  bool value,
-  void Function() onTapFunction, {
-  String? description = null,
-  EdgeInsets? customPadding = const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
-}) {
-  return InkWell(
-    onTap: onTapFunction,
-    child: Container(
-      padding: customPadding,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: textStyle(),
-              ),
-              if (description != null)
-                Text(
-                  description,
-                  style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
-                ),
-            ],
-          ),
-          Switch(
-            value: value,
-            onChanged: (val) {
-              onTapFunction();
-            },
-            activeColor: appTheme.backgroundColor,
-            activeTrackColor: appTheme.accentColor,
-            inactiveTrackColor: appTheme.backgroundColor,
-          )
-        ],
-      ),
-    ),
-  );
-}
-
 TextStyle textStyle() {
   return TextStyle(
     color: appTheme.textMainColor,

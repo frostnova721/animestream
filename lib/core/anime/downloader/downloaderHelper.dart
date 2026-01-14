@@ -12,7 +12,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class DownloaderHelper {
-
   static final _idSet = <int>{};
 
   final NotificationService _notifierService = NotificationService();
@@ -53,7 +52,7 @@ class DownloaderHelper {
   // generate a unique id
   static int generateId() {
     int id = Random().nextInt(1 << 31); // rand 32 bit int
-    while(_idSet.contains(id)) {
+    while (_idSet.contains(id)) {
       id = Random().nextInt(1 << 31);
     }
     _idSet.add(id);
@@ -120,7 +119,10 @@ class DownloaderHelper {
   Future<Response> downloadSegment(String url, {Map<String, String> customHeaders = const {}}) async {
     try {
       final res = await get(Uri.parse(url), headers: customHeaders);
-      return res;
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        return res;
+      }
+      throw Exception("Segment download failed with status code ${res.statusCode}");
     } catch (err) {
       throw Exception("Failed to download segment: $err");
     }
@@ -165,7 +167,9 @@ class DownloaderHelper {
         if (line.contains("EXT")) continue;
 
         // feels weird, but adding cus a server used ts
-        if(line.endsWith(".m3u8")) return await getSegments(line.startsWith("http") ? line : makeBaseLink(url) + "/$line", customHeaders: customHeaders);
+        if (line.endsWith(".m3u8"))
+          return await getSegments(line.startsWith("http") ? line : makeBaseLink(url) + "/$line",
+              customHeaders: customHeaders);
         segments.add(line.trim());
       } else {
         //get the encryption key if it exists
@@ -216,11 +220,13 @@ class DownloaderHelper {
     return ext;
   }
 
-  Future<bool> checkRangeSupport(Uri url, { Map<String, String> customHeaders = const {} }) async {
+  Future<bool> checkRangeSupport(Uri url, {Map<String, String> customHeaders = const {}}) async {
     final client = HttpClient();
     try {
       final req = await client.headUrl(url);
-      customHeaders.forEach((k,v) { req.headers.add(k, v, preserveHeaderCase: true); });
+      customHeaders.forEach((k, v) {
+        req.headers.add(k, v, preserveHeaderCase: true);
+      });
       final res = await req.close();
       client.close();
       return res.headers.value('accept-ranges')?.toLowerCase() == "bytes";

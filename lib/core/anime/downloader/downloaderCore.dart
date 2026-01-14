@@ -133,8 +133,10 @@ class DownloaderCore {
             } else {
               buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
             }
-          } else
-            throw new Exception("ERR_REQ_FAILED. Status: ${res.statusCode} for segment: $segment");
+          } else {
+            print("Error for segment: $uri, body: ${res.body}, res head: ${res.headers}");
+            throw new Exception("ERR_REQ_FAILED. Got Status: ${res.statusCode} for segment: $segmentNumber");
+          }
         });
 
         //wait till whole batch is downloaded

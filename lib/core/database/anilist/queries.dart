@@ -276,7 +276,58 @@ class AnilistQueries {
   //   return genrePopular;
   // }
 
-  Future<List<AnimeCardData>> getAnimesWithGenresAndTags(List<String> genres, List<String> tags, {int page = 1, int ratingLow = 0, int ratingHigh = 10}) async {
+  /// DONT. JUST DONT! Lots of entries, like 1000+. Infeasible to show in UI 
+  /// Code commented, Just In Case of a future change in idea 
+  // Future<List<Map<String, dynamic>>> getStudiosList() async {
+  //   bool hasNext = false;
+
+  //   final animstudios = <Map<String, dynamic>>[];
+  //   int i = 0;
+
+  //   do {
+  //     try {
+  //       i++;
+  //       final q =
+  //           """{Page(perPage: 100, page: $i) { pageInfo { hasNextPage } studios {id name isAnimationStudio } } }""";
+  //       final res = await Anilist().fetchQuery(q, null);
+  //       final List<Map<dynamic, dynamic>> items = List.castFrom(res['Page']?['studios'] ?? []);
+  //       for (final item in items) {
+  //         if (item['isAnimationStudio']) {
+  //           animstudios.add({'id': item['id'], 'name': item['name']});
+  //         }
+  //       }
+  //       hasNext = res['Page']?['pageInfo']?['hasNextPage'] ?? false;
+  //       print("Page $i: done");
+  //       await Future.delayed(Duration(milliseconds: 1200));
+  //     } catch (err) {
+  //       if (err is AnilistApiException) {
+  //         if (err.statusCode == 429) {
+  //           i--;
+  //           print("Timeout err. wait a min");
+  //           await Future.delayed(Duration(minutes: 1));
+  //           continue;
+  //         } else {
+  //           print(err.toString());
+  //           hasNext = false;
+  //         }
+  //       }
+  //     }
+  //   } while (hasNext);
+
+  //   print("DONE");
+
+  //   return animstudios;
+  // }
+
+  Future<List<AnimeCardData>> advancedSearch({
+    List<String> genres = const [],
+    List<String> tags = const [],
+    int page = 1,
+    int ratingLow = 0,
+    int ratingHigh = 10,
+    AnilistSortType sort = AnilistSortType.trendingDesc,
+    String? query,
+  }) async {
     String genreString = "";
     String tagString = "";
     if (genres.isNotEmpty) {
@@ -288,7 +339,7 @@ class AnilistQueries {
 
     final query =
         """{ Page(perPage: 30, page: $page){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} \
-        sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP", averageScore_lesser: ${ratingHigh * 10}, averageScore_greater: ${ratingLow * 10}) { id coverImage { large } title { english romaji native } status averageScore } } }""";
+        sort: ${sort.value}, type: ANIME, countryOfOrigin:"JP", averageScore_lesser: ${ratingHigh * 10}, averageScore_greater: ${ratingLow * 10}) { id coverImage { large } title { english romaji native } status averageScore } } }""";
     final res = await Anilist().fetchQuery(query, RequestType.media);
     List<AnimeCardData> results = [];
     for (final item in res) {

@@ -313,7 +313,7 @@ class Downloader {
     // Fallback (ik this is more precise, but dont wanna send a unnecessary request most times)
     final mime = await _helper.getMimeType(item.url, item.customHeaders);
     if (mime == null) throw Exception("Couldnt identify the media type.");
-    if (mime.contains("mpegurl") || await isM3u8Playlist(item.url)) return _DownloadType.stream;
+    if (mime.contains("mpegurl") || await isM3u8Playlist(item.url, customHeader: item.customHeaders)) return _DownloadType.stream;
     if (mime.contains("video")) return _DownloadType.video;
     if (mime.contains("image")) return _DownloadType.image;
 

@@ -1,7 +1,9 @@
 import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
@@ -21,6 +23,13 @@ class _GenresPageState extends State<GenresPage> {
   void initState() {
     super.initState();
     _scrollController.addListener(scrollListener);
+
+    for (int i = 0; i < AnilistSortType.values.length; i++) {
+      final e = AnilistSortType.values[i];
+      final name = _toFriendlyString(e.value);
+      sortTypesString.add(name);
+      sortTypesMap.addAll({name: e});
+    }
   }
 
   void scrollListener() async {
@@ -50,12 +59,13 @@ class _GenresPageState extends State<GenresPage> {
         return;
       }
       print("loading page $currentLoadedPage");
-      final res = await AnilistQueries().getAnimesWithGenresAndTags(
-        selectedGenres,
-        selectedTags,
+      final res = await AnilistQueries().advancedSearch(
+        genres: selectedGenres,
+        tags: selectedTags,
         page: currentLoadedPage,
         ratingHigh: ratingRange.end.toInt(),
         ratingLow: ratingRange.start.toInt(),
+        sort: sortTypesMap[sortType]!,
       );
       res.forEach((e) {
         final defaultTitle = e.title['english'] ?? e.title['romaji'] ?? '';
@@ -75,7 +85,8 @@ class _GenresPageState extends State<GenresPage> {
         _searching = false;
         _isLazyLoading = false;
       });
-    } catch (err) {
+    } catch (err, st) {
+      print(st);
       if (currentUserSettings?.showErrors ?? false) {
         floatingSnackBar(err.toString());
       }
@@ -86,10 +97,20 @@ class _GenresPageState extends State<GenresPage> {
     }
   }
 
+  /// Change the AnilistSortType strings to a more userfriendly string
+  /// for example "TRENDING_DESC" -> "Trending Desc"
+  static String _toFriendlyString(String input) {
+    return input.split("_").map((e) => e.toLowerCase().capitalize()).join(" ");
+  }
+
   //genre and tags list will be read from genresAndTags.dart file
 
   List<String> selectedGenres = [];
   List<String> selectedTags = [];
+
+  String sortType = _toFriendlyString(AnilistSortType.trendingDesc.value);
+  List<String> sortTypesString = [];
+  Map<String, AnilistSortType> sortTypesMap = {};
 
   RangeValues ratingRange = RangeValues(1, 10);
 
@@ -155,6 +176,14 @@ class _GenresPageState extends State<GenresPage> {
                                     title: "Genres", mainList: genres, selectedList: selectedGenres),
                                 _scrollablelListWithTitle(setChildState,
                                     title: "Tags", mainList: tags, selectedList: selectedTags),
+                                _scrollablelRadioListWithTitle(
+                                    title: "Sort",
+                                    value: sortType,
+                                    setChildState: setChildState,
+                                    options: sortTypesString,
+                                    onTap: (e) {
+                                      sortType = e;
+                                    }),
                                 _filterItemTitle("Rating range"),
                                 RangeSlider(
                                   values: ratingRange,
@@ -189,6 +218,7 @@ class _GenresPageState extends State<GenresPage> {
                                       ),
                                       ElevatedButton(
                                         onPressed: () {
+                                          // call twice on windows cus of the screen size :)
                                           getList().then((_) {
                                             if (Platform.isWindows) getList(lazyLoaded: true);
                                           });
@@ -234,17 +264,6 @@ class _GenresPageState extends State<GenresPage> {
                   right: 10,
                   top: 20,
                 ),
-                foregroundDecoration: BoxDecoration(
-                    gradient: LinearGradient(
-                        colors: [
-                          appTheme.backgroundColor,
-                          Colors.transparent,
-                          Colors.transparent,
-                          appTheme.backgroundColor
-                        ],
-                        begin: Alignment.bottomCenter,
-                        end: Alignment.topCenter,
-                        stops: [0.00, 0.04, 0.95, 1])),
                 child: searchResultsAsWidgets.isEmpty && !_searching
                     ? Container(
                         margin: EdgeInsets.only(top: 40),
@@ -273,36 +292,49 @@ class _GenresPageState extends State<GenresPage> {
                                 ),
                         ),
                       )
-                    : SingleChildScrollView(
-                        controller: _scrollController,
-                        child: Column(
-                          children: [
-                            GridView.builder(
-                              physics: NeverScrollableScrollPhysics(),
-                              gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
-                                  mainAxisExtent: Platform.isAndroid ? 220 : 260,
-                                  // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
-                                  // childAspectRatio: 120 / 220,
-                                  mainAxisSpacing: 10),
-                              padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
-                              shrinkWrap: true,
-                              itemCount: searchResultsAsWidgets.length,
-                              itemBuilder: (context, index) => Container(
-                                alignment: Alignment.center,
-                                child: searchResultsAsWidgets[index],
-                              ),
-                            ),
-                            if (_searching)
-                              Container(
-                                margin: EdgeInsets.only(top: 40, bottom: MediaQuery.of(context).padding.bottom + 10),
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                    color: appTheme.accentColor,
-                                  ),
+                    : Container(
+                        foregroundDecoration: BoxDecoration(
+                            gradient: LinearGradient(
+                                colors: [
+                                  appTheme.backgroundColor,
+                                  Colors.transparent,
+                                  Colors.transparent,
+                                  appTheme.backgroundColor
+                                ],
+                                begin: Alignment.bottomCenter,
+                                end: Alignment.topCenter,
+                                stops: [0.00, 0.04, 0.95, 1])),
+                        child: SingleChildScrollView(
+                          controller: _scrollController,
+                          child: Column(
+                            children: [
+                              GridView.builder(
+                                physics: NeverScrollableScrollPhysics(),
+                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                    maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+                                    mainAxisExtent: Platform.isAndroid ? 220 : 260,
+                                    // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                                    // childAspectRatio: 120 / 220,
+                                    mainAxisSpacing: 10),
+                                padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
+                                shrinkWrap: true,
+                                itemCount: searchResultsAsWidgets.length,
+                                itemBuilder: (context, index) => Container(
+                                  alignment: Alignment.center,
+                                  child: searchResultsAsWidgets[index],
                                 ),
-                              )
-                          ],
+                              ),
+                              if (_searching)
+                                Container(
+                                  margin: EdgeInsets.only(top: 40, bottom: MediaQuery.of(context).padding.bottom + 10),
+                                  child: Center(
+                                    child: CircularProgressIndicator(
+                                      color: appTheme.accentColor,
+                                    ),
+                                  ),
+                                )
+                            ],
+                          ),
                         ),
                       ),
               ),
@@ -326,6 +358,66 @@ class _GenresPageState extends State<GenresPage> {
           fontWeight: FontWeight.bold,
         ),
       ),
+    );
+  }
+
+  Column _scrollablelRadioListWithTitle<T>(
+      {required StateSetter setChildState,
+      required String title,
+      required T value,
+      required List<String> options,
+      required void Function(String selectedItem) onTap}) {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.only(bottom: 15, top: 20, left: 20),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            title,
+            style: TextStyle(
+              color: appTheme.textMainColor,
+              fontFamily: "Rubik",
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: options
+                .map(
+                  (e) => Container(
+                    margin: EdgeInsets.only(left: 5, right: 5),
+                    child: GestureDetector(
+                      onTap: () {
+                        onTap(e);
+
+                        setChildState(() {});
+                      },
+                      child: AnimatedContainer(
+                        duration: Duration(milliseconds: 150),
+                        padding: EdgeInsets.only(left: 10, right: 10),
+                        height: 40,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            color: value == e ? appTheme.accentColor : appTheme.backgroundSubColor,
+                            borderRadius: BorderRadius.circular(13)),
+                        child: Text(
+                          e,
+                          style: TextStyle(
+                              color: value == e ? appTheme.backgroundColor : appTheme.textMainColor,
+                              fontFamily: "NotoSans",
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        ),
+      ],
     );
   }
 

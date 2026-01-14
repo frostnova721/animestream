@@ -1067,6 +1067,7 @@ class _InfoMobileState extends State<InfoMobile> {
                   _infoLeft('Duration'),
                   _infoRight('${provider.data.duration}'),
                 ),
+                _buildInfoItems(_infoLeft("Start Date"), _infoRight("${provider.data.aired['start']}")),
                 _buildInfoItems(
                   _infoLeft('Studios'),
                   _infoRight(provider.data.studios.isEmpty ? '??' : provider.data.studios[0] ?? '??'),

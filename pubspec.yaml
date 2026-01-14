@@ -15,7 +15,7 @@ dependencies:
   http: ^1.2.0
   graphql: ^5.1.3
   
-  html: ^0.15.4
+  html: ^0.15.6
   encrypt: ^5.0.3
   js_unpack: ^1.0.4
   url_launcher: ^6.3.1
@@ -25,19 +25,19 @@ dependencies:
   # Core utils
   path_provider: ^2.0.11
   awesome_notifications: ^0.10.1
-  package_info_plus: ^8.0.0
+  package_info_plus: ^9.0.0
   permission_handler: ^12.0.1
-  device_info_plus: ^11.5.0
+  device_info_plus: ^12.3.0
   provider: ^6.1.2
   file_picker: ^10.2.0
   dynamic_color: ^1.7.0
-  flutter_dotenv: ^5.2.1
-  app_links: ^6.3.2
+  flutter_dotenv: ^6.0.0
+  app_links: ^7.0.0
 
   # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  flutter_secure_storage: ^9.2.2
+  flutter_secure_storage: ^10.0.0
   flutter_svg: ^2.1.0
 
   # Media and player related
@@ -51,12 +51,11 @@ dependencies:
   better_player:
     git:
       url: https://github.com/frostnova721/betterplayer.git
-  # av_media_player: ^1.2.1 //use if needed
   video_player_win: ^3.1.1
 
   # UI
   pull_to_refresh: ^2.0.0
-  flutter_markdown: ^0.7.7+1
+  flutter_markdown_plus: ^1.0.7
   desktop_webview_window: ^0.2.3
   cached_network_image: ^3.3.1
   window_manager:
@@ -66,13 +65,13 @@ dependencies:
       ref: windows_fullscreen_fix
 
   # Misc
-  flutter_native_splash: ^2.4.0
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.4
-  inno_bundle: ^0.9.0
+  inno_bundle: ^0.11.2
 
 inno_bundle:
   id: "59cae0c0-fb9d-11ef-b95e-5f3937b12ea5"

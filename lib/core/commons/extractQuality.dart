@@ -1,4 +1,6 @@
 // ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:async';
+
 import 'package:http/http.dart';
 
 class ParsedHlsMaster {
@@ -6,6 +8,12 @@ class ParsedHlsMaster {
   final List<AudioStream> audioStreams;
 
   const ParsedHlsMaster({required this.audioStreams, required this.qualityStreams});
+
+  factory ParsedHlsMaster.defaultStream(String streamUrl) {
+    return ParsedHlsMaster(audioStreams: [], qualityStreams: [
+      QualityStream(quality: "default", url: streamUrl, resolution: "??"),
+    ]);
+  }
 }
 
 class AudioStreamBuilder {
@@ -117,118 +125,135 @@ class QualityStreamBuilder {
   }
 }
 
-Future<bool> isM3u8Playlist(String url, {List<String>? contentLines, Map<String, String>? customHeader = null}) async {
+Future<bool> isM3u8Playlist(String url, {Map<String, String>? customHeader = null}) async {
   if (url.toLowerCase().split('?').firstOrNull?.endsWith(".m3u8") ?? false) return true;
 
-  if (contentLines == null) {
-    try {
-    final content = (await get(Uri.parse(url), headers: customHeader)).body;
-    contentLines = [content.trim().split("\n").firstWhere((e) => e.isNotEmpty, orElse: () => "")];
-    } catch(e) {
+  // This is very weak, to video files. If they dont support the range header!
+  try {
+    final res = await get(Uri.parse(url), headers: {
+      ...?customHeader,
+      "Range": "bytes=0-8192" // read 8kb
+    });
+
+    if (res.statusCode <= 200 || res.statusCode >= 300) {
+      print(res.statusCode);
       return false;
     }
-  }
 
-  return contentLines.first.trim() == "#EXTM3U";
+    // StreamSubscription<Response>? sub;
+    // String body = "";
+    // int readLength = 0;
+    //   sub = get(Uri.parse(url), headers: customHeader).asStream().listen((res) {
+    //    readLength += res.bodyBytes.lengthInBytes;
+    //    body += res.body;
+
+    //    // read like 10kb
+    //    if(readLength >= 10000) {
+    //     sub?.cancel();
+    //    }
+    // });
+
+    final lines = res.body.trim().split("\n").where((e) => e.isNotEmpty);
+    return lines.first.trim() == "#EXTM3U";
+  } catch (e) {
+    return false;
+  }
 }
 
 Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, String>? customHeader = null}) async {
-  try {
-    final content = (await get(Uri.parse(streamUrl), headers: customHeader)).body;
+  List<AudioStream> audioStreams = [];
+  List<QualityStream> qualityStreams = [];
 
-    List<AudioStream> audioStreams = [];
-    List<QualityStream> qualityStreams = [];
+  if (!await isM3u8Playlist(streamUrl, customHeader: customHeader)) {
+    throw Exception("Not a valid m3u8 playlist");
+  }
 
-    List<String> lines = content.trim().split("\n").where((e) => e.isNotEmpty).toList();
-    if (!await isM3u8Playlist(streamUrl, contentLines: lines)) {
-      throw Exception("Not a valid m3u8 playlist");
-    }
-    // lines = lines.where((it) => !it.startsWith("EXT-X-MEDIA")).toList().first.split("\n");
+  final content = (await get(Uri.parse(streamUrl), headers: customHeader)).body;
+  List<String> lines = content.trim().split("\n").where((e) => e.isNotEmpty).toList();
+  // lines = lines.where((it) => !it.startsWith("EXT-X-MEDIA")).toList().first.split("\n");
 
-    // final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
+  // final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
 
-    for (int i = 0; i < lines.length; i++) {
-      final line = lines[i].trim();
-      if (line.startsWith("#")) {
-        // we dont need these info yet
-        // if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA") || line.startsWith("#EXT-X-VERSION"))
-        if (line.startsWith("#EXT-X-MEDIA:TYPE=AUDIO")) {
-          final asb = AudioStreamBuilder();
-          final items = line.split(",").sublist(1); // this will remove the "#EXT-X-MEDIA:TYPE=AUDIO" part
-          for (final it in items) {
-            final kvPair = it.split("=");
-            if (kvPair.length < 2) {
-              print("Possible malformed playlist. Skipping the element '$kvPair'.");
-              continue;
-            }
-
-            // in hopes that the playlist will contain everything we neeed!
-            switch (kvPair[0]) {
-              case "GROUP-ID":
-                asb.addGroupId(kvPair[1].replaceAll('"', ''));
-              case "LANGUAGE":
-                asb.addLanguage(kvPair[1].replaceAll('"', ''));
-              case "CHANNELS":
-                asb.addChannels(kvPair[1].replaceAll('"', ''));
-              case "NAME":
-                asb.addName(kvPair[1].replaceAll('"', ''));
-              case "URI":
-                {
-                  final linkPart = kvPair[1].replaceAll('"', '');
-                  asb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
-                }
-            }
-          }
-
-          audioStreams.add(asb.build());
-        }
-
-        // ignore all other stuff
-        if (!line.startsWith("#EXT-X-STREAM-INF")) continue;
-
-        final qsb = QualityStreamBuilder();
-        final items = line.split(":")[1].split(",");
+  for (int i = 0; i < lines.length; i++) {
+    final line = lines[i].trim();
+    if (line.startsWith("#")) {
+      // we dont need these info yet
+      // if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA") || line.startsWith("#EXT-X-VERSION"))
+      if (line.startsWith("#EXT-X-MEDIA:TYPE=AUDIO")) {
+        final asb = AudioStreamBuilder();
+        final items = line.split(",").sublist(1); // this will remove the "#EXT-X-MEDIA:TYPE=AUDIO" part
         for (final it in items) {
           final kvPair = it.split("=");
+          if (kvPair.length < 2) {
+            print("Possible malformed playlist. Skipping the element '$kvPair'.");
+            continue;
+          }
+
+          // in hopes that the playlist will contain everything we neeed!
           switch (kvPair[0]) {
-            case "BANDWIDTH":
-              qsb.addBandwidth(int.parse(kvPair[1]));
-            case "RESOLUTION":
-              qsb.addResolution(kvPair[1]);
-            case "AUDIO":
-              qsb.addAudioGroup(kvPair[1]);
+            case "GROUP-ID":
+              asb.addGroupId(kvPair[1].replaceAll('"', ''));
+            case "LANGUAGE":
+              asb.addLanguage(kvPair[1].replaceAll('"', ''));
+            case "CHANNELS":
+              asb.addChannels(kvPair[1].replaceAll('"', ''));
+            case "NAME":
+              asb.addName(kvPair[1].replaceAll('"', ''));
+            case "URI":
+              {
+                final linkPart = kvPair[1].replaceAll('"', '');
+                asb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
+              }
           }
         }
 
-        final urlLine = lines[i + 1];
-        final linkPart = urlLine.trim().replaceAll('"', '');
-        if (linkPart.length > 1)
-          qsb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
-
-        final quality = qsb.resolution != null ? qsb.resolution!.split('x')[1] + "p" : "default";
-        qsb.addQuality(quality);
-
-        qualityStreams.add(qsb.build());
-        // final match = regex.allMatches(line).first;
-        // resolutions.add(match.group(0)?.replaceAll("RESOLUTION=", '') ?? 'null');
-
-        i++; // skip the next iteration since it should be the link to video.
+        audioStreams.add(asb.build());
       }
+
+      // ignore all other stuff
+      if (!line.startsWith("#EXT-X-STREAM-INF")) continue;
+
+      final qsb = QualityStreamBuilder();
+      final items = line.split(":")[1].split(",");
+      for (final it in items) {
+        final kvPair = it.split("=");
+        switch (kvPair[0]) {
+          case "BANDWIDTH":
+            qsb.addBandwidth(int.parse(kvPair[1]));
+          case "RESOLUTION":
+            qsb.addResolution(kvPair[1]);
+          case "AUDIO":
+            qsb.addAudioGroup(kvPair[1]);
+        }
+      }
+
+      final urlLine = lines[i + 1];
+      final linkPart = urlLine.trim().replaceAll('"', '');
+      if (linkPart.length > 1)
+        qsb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
+
+      final quality = qsb.resolution != null ? qsb.resolution!.split('x')[1] + "p" : "default";
+      qsb.addQuality(quality);
+
+      qualityStreams.add(qsb.build());
+      // final match = regex.allMatches(line).first;
+      // resolutions.add(match.group(0)?.replaceAll("RESOLUTION=", '') ?? 'null');
+
+      i++; // skip the next iteration since it should be the link to video.
     }
-    // print(audioStreams);
-    // print(qualityStreams);
-
-    // throw an exception to return the default item
-    if (qualityStreams.isEmpty) throw Exception("The stream is of static quality.");
-
-    final grouped = ParsedHlsMaster(audioStreams: audioStreams, qualityStreams: qualityStreams);
-
-    return grouped;
-  } catch (err) {
-    print(err);
-    return ParsedHlsMaster(
-        audioStreams: [], qualityStreams: [QualityStream(quality: "default", url: streamUrl, resolution: "??")]);
   }
+  // print(audioStreams);
+  // print(qualityStreams);
+
+  // It should be a static stream
+  if (qualityStreams.isEmpty) {
+    print("The stream is of static quality.");
+    return ParsedHlsMaster.defaultStream(streamUrl);
+  }
+
+  final grouped = ParsedHlsMaster(audioStreams: audioStreams, qualityStreams: qualityStreams);
+
+  return grouped;
 }
 
 String _makeBaseLink(String uri) {

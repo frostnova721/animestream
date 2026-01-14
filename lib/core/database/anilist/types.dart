@@ -1,5 +1,26 @@
 import 'package:animestream/core/database/types.dart';
 
+enum AnilistSortType {
+  trending("TRENDING"),
+  trendingDesc("TRENDING_DESC"),
+  startDate("START_DATE"),
+  startDateDesc("START_DATE_DESC"),
+  endDate("END_DATE"),
+  endDateDesc("END_DATE_DESC"),
+  popularity("POPULARITY"),
+  popularityDesc("POPULARITY_DESC"),
+  score("SCORE"),
+  scoreDesc("SCORE_DESC");
+
+
+  final String _value;
+
+  /// The string of sort type for anilist query
+  String get value => _value;
+
+  const AnilistSortType(this._value);
+}
+
 class RecentlyUpdatedResult {
   final int episode;
   final Map<String, String?> title;

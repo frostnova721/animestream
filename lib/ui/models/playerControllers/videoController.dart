@@ -1,6 +1,4 @@
 import 'dart:async';
-// import 'package:av_media_player/player.dart';
-// import 'package:av_media_player/widget.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:flutter/material.dart';
 
@@ -84,65 +82,3 @@ abstract class VideoController {
 
   void setQuality(QualityStream qs);
 }
-
-
-// un comment this class if package is installed to run it! Im not using this pakcage cus it mandates the minSdk 26 for android
-
-// class AvPlayerWrapper implements VideoController {
-//   final AvMediaPlayer controller = AvMediaPlayer();
-
-//   @override
-//   Future<void> initiateVideo(String url, {Map<String, String>? headers = null}) async {
-//     return controller.open(url);
-//   }
-
-//   @override
-//   bool? get isBuffering => controller.loading.value;
-
-//   @override
-//   bool? get isPlaying => controller.playbackState.value == PlaybackState.playing;
-
-//   @override
-//   int? get position => controller.position.value;
-
-//   @override
-//   int? get duration => controller.mediaInfo.value?.duration;
-
-//   @override
-//   Future<void> pause() async {
-//     controller.pause();
-//   }
-
-//   @override
-//   Future<void> play() async {
-//     controller.play();
-//   }
-
-//   @override
-//   Future<void> seekTo(Duration duration) async {
-//     controller.seekTo(duration.inMilliseconds);
-//   }
-
-//   @override
-//   Future<void> setSpeed(double speed) async {
-//     controller.setSpeed(speed);
-//   }
-
-//   @override
-//   void dispose() {
-//     return controller.dispose();
-//   }
-
-//   @override
-//   Widget getWidget() {
-//     return AvMediaView(
-//       initPlayer: controller,
-//       initAutoPlay: true,
-//     );
-//   }
-
-//   @override
-//   void addListener(VoidCallback cb) {
-//     controller.loading.addListener(cb);
-//   }
-// }

@@ -134,7 +134,7 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Set pip mode
   Future<void> setPip(bool val) async {
-    if (!Platform.isAndroid && !Platform.isWindows) {
+    if (!Platform.isAndroid && !Platform.isWindows && !Platform.isLinux) {
       Logs.player.log("PiP not supported on this platform.");
     }
     ;

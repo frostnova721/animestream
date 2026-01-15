@@ -38,21 +38,23 @@ class AnilistQueries {
       final List<UserAnimeListItem> animes = [];
       element['entries'].forEach((e) {
         final media = e['media'];
-        animes.add(
-          UserAnimeListItem(
-            id: media['id'],
-            title: {
-              'english': media['title']['english'],
-              'romaji': media['title']['romaji'],
-              'native': media['title']['native'],
-            },
-            // releaseStatus: media['status'],
-            episodes: media['episodes'],
-            coverImage: media['coverImage']['large'],
-            watchProgress: e['progress'],
-            rating: media['averageScore'] != null ? (media['averageScore'] / 10)?.toDouble() : null,
-          ),
-        );
+        if (media != null) {
+          animes.add(
+            UserAnimeListItem(
+              id: media['id'],
+              title: {
+                'english': media['title']?['english'],
+                'romaji': media['title']?['romaji'],
+                'native': media['title']?['native'],
+              },
+              // releaseStatus: media['status'],
+              episodes: media['episodes'],
+              coverImage: media['coverImage']['large'],
+              watchProgress: e['progress'],
+              rating: media['averageScore'] != null ? (media['averageScore'] / 10).toDouble() : null,
+            ),
+          );
+        }
       });
       arrangedList.add(UserAnimeList(
         list: animes,
@@ -276,8 +278,8 @@ class AnilistQueries {
   //   return genrePopular;
   // }
 
-  /// DONT. JUST DONT! Lots of entries, like 1000+. Infeasible to show in UI 
-  /// Code commented, Just In Case of a future change in idea 
+  /// DONT. JUST DONT! Lots of entries, like 1000+. Infeasible to show in UI
+  /// Code commented, Just In Case of a future change in idea
   // Future<List<Map<String, dynamic>>> getStudiosList() async {
   //   bool hasNext = false;
 

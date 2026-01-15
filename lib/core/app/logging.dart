@@ -31,6 +31,9 @@ class Logbook {
 
   final List<String> _logBuffer = [];
 
+  // Notifier for state updation. Didnt use stream cus the updates arent that frequent
+  ValueNotifier<List<String>> logNotifier = ValueNotifier([]);
+
   /// Logs a message to console and adds to buffer according to preferences
   ///
   /// [message] is the message to log.
@@ -44,6 +47,8 @@ class Logbook {
         this._logBuffer.removeAt(0);
       }
       _logBuffer.add("[$tag]: $message");
+
+      logNotifier.value = List.unmodifiable(_logBuffer);
     }
 
     if (kDebugMode) {
@@ -52,7 +57,10 @@ class Logbook {
   }
 
   /// Clears the current log buffer
-  void clearLog() => _logBuffer.clear();
+  void clearLog() {
+    _logBuffer.clear();
+    logNotifier.value.clear();
+  }
 
   /// Writes the current log buffer to disk and flushes the buffer
   Future<void> writeLog() async {

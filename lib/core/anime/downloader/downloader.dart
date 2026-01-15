@@ -99,7 +99,7 @@ class Downloader {
 
     final task = _cookTask(item, path);
 
-    logger?.log('[DOWNLOADER] Queuing task $task with type: ${type.name}');
+    logger?.log('Queuing task $task with type: ${type.name}');
 
     // Run the downloading
     final isolate = await Isolate.spawn(downloadFunction, task);
@@ -185,10 +185,12 @@ class Downloader {
         {
           _maybeGetDownloadItem(msg.id)?.progress = msg.progress;
           _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
+          if(msg.progress % 10 == 0) logger?.log("<${msg.id}> Progress: ${msg.progress}.");
           break;
         }
       case 'downloading':
         _maybeGetDownloadItem(msg.id)?.status = DownloadStatus.downloading;
+        logger?.log("<${msg.id}> Changed download state to 'downloading'.");
         break;
 
       case 'complete':
@@ -227,10 +229,12 @@ class Downloader {
         }
       case 'paused':
         _pauseTask(msg.id, msg.progress, msg.extras.first as int, msg.extras[1] as String);
+        logger?.log("<${msg.id}> Download paused.");
         break;
 
       case 'retry':
         _retryDownload(msg.id);
+        logger?.log("<${msg.id}> Retrying download.");
         break;
 
       // Non download state stuff
@@ -240,6 +244,7 @@ class Downloader {
 
       case 'isolate_timeout':
         _cleanUp(msg.id, dequeue: false);
+        logger?.log("<${msg.id}> Isolate timed out. Nuking the isolate.");
         break;
 
       default:

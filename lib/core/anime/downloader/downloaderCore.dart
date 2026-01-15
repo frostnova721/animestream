@@ -181,7 +181,7 @@ class DownloaderCore {
       if (await output.exists()) output.delete();
 
       //send download failed notification
-      task.sendPort?.send(DownloadMessage(status: 'fail', message: "Download failed.", id: task.id));
+      task.sendPort?.send(DownloadMessage(status: 'fail', message: "Download failed. ${err.toString()}", id: task.id));
     }
   }
 

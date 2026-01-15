@@ -79,7 +79,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
     final dataProvider = context.read<PlayerDataProvider>();
 
-    Logs.player.log("[PLAYER] Initializing stream ${dataProvider.state.currentStream}");
+    Logs.player.log("Initializing stream ${dataProvider.state.currentStream}");
 
     dataProvider.initSubsettings();
 
@@ -103,7 +103,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks.first);
         controller.setAudioTrack(dataProvider.state.currentAudioTrack);
       } else {
-        Logs.player.log("[PLAYER] Couldnt find audio tracks for this stream");
+        Logs.player.log("Couldnt find audio tracks for this stream");
       }
     } else {
       await controller.initiateVideo(dataProvider.state.currentStream.url, offline: true);
@@ -143,7 +143,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
           }
         });
       } catch (e) {
-        Logs.player.log("[PLAYER] PiP listener couldnt be added: ${e.toString()}");
+        Logs.player.log("PiP listener couldnt be added: ${e.toString()}");
       }
     }
   }
@@ -217,14 +217,14 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
       if (isAtOp) {
         _isSkippingOpOrEd = true;
         Logs.player.log(
-            "[PLAYER] Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
+            "Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
         playerProvider
             .fastForward(dataProvider.state.opSkip!.end - currentPositionInSeconds + 1)
             .then((_) => _isSkippingOpOrEd = false);
       } else if (isAtEd) {
         _isSkippingOpOrEd = true;
        Logs.player.log(
-            "[PLAYER] Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
+            "Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
         playerProvider
             .fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds)
             .then((_) => _isSkippingOpOrEd = false);
@@ -699,7 +699,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         [DeviceOrientation.portraitUp, DeviceOrientation.landscapeRight, DeviceOrientation.landscapeLeft]);
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
-      if (!widget.localSource) print("[PLAYER] SAVED WATCH DURATION");
+      if (!widget.localSource) print("SAVED WATCH DURATION");
       controller.removeListener(_listener);
       controller.dispose();
       _controlsTimer?.cancel();

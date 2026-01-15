@@ -297,13 +297,13 @@ class _GenresPageState extends State<GenresPage> {
                             gradient: LinearGradient(
                                 colors: [
                                   appTheme.backgroundColor,
-                                  Colors.transparent,
-                                  Colors.transparent,
+                                  appTheme.backgroundColor.withAlpha(0),
+                                  appTheme.backgroundColor.withAlpha(0),
                                   appTheme.backgroundColor
                                 ],
                                 begin: Alignment.bottomCenter,
                                 end: Alignment.topCenter,
-                                stops: [0.00, 0.04, 0.95, 1])),
+                                stops: [0.00, 0.04, 0.96, 1])),
                         child: SingleChildScrollView(
                           controller: _scrollController,
                           child: Column(

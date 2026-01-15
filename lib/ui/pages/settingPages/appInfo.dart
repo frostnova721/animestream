@@ -3,6 +3,7 @@ import 'package:animestream/core/app/version.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
+import 'package:animestream/ui/pages/settingPages/logs.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -58,7 +59,10 @@ class _AppInfoSettingState extends State<AppInfoSetting> {
                           children: [
                             GestureDetector(
                               onTap: () {
-                                // devTapCounter++;
+                                devTapCounter++;
+                                if(devTapCounter % 5 == 0) {
+                                  Navigator.push(context, MaterialPageRoute(builder: (context) => LogScreen()));
+                                }
                                 // if (devTapCounter == 10) {
                                 //   Settings()
                                 //       .writeSettings(SettingsModal(isDev: !(currentUserSettings?.isDev ?? false)));

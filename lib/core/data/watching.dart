@@ -1,13 +1,14 @@
+import "package:hive/hive.dart";
+
 import "package:animestream/core/app/logging.dart";
 import "package:animestream/core/app/runtimeDatas.dart";
 import "package:animestream/core/commons/enums/hiveEnums.dart";
 import "package:animestream/core/database/anilist/login.dart";
 import "package:animestream/core/database/anilist/queries.dart";
 import "package:animestream/core/database/anilist/types.dart";
-import 'package:animestream/core/commons/enums.dart';
 import "package:animestream/core/database/handler/syncHandler.dart";
 import "package:animestream/core/database/types.dart";
-import "package:hive/hive.dart";
+import "package:animestream/core/commons/enums.dart";
 
 final String _boxName = HiveBox.animestream.boxName;
 
@@ -30,7 +31,7 @@ Future<void> storeWatching(
       if (!box.isOpen) {
         box = await Hive.openBox(_boxName);
       }
-      final List watchingList = box.get('watching') ?? [];
+      final List<dynamic> watchingList = List.castFrom(box.get('watching') ?? []);
       // final currList = watchingList.where((item) => item['id'] == id).toList();
       // if (currList.length != 0 && currList[0]['watched'] <= watched) {
       watchingList.removeWhere((item) => item['id'] == id);
@@ -42,7 +43,7 @@ Future<void> storeWatching(
         'watched': watched,
         'totalEpisodes': totalEpisodes,
       });
-      print(watchingList);
+      // print(watchingList);
       box.put('watching', watchingList);
       box.close();
     }
@@ -55,7 +56,7 @@ Future<void> updateWatching(int? id, String title, int watched, List<AlternateDa
   try {
     Logs.app.log("UPDATING WATCHED TO $watched");
     if (await AniListLogin().isAnilistLoggedIn()) {
-      if (id == null) throw new Exception("ERR_NO_ID_PROVIDED");
+      if (id == null) throw Exception("ERR_NO_ID_PROVIDED");
       SyncHandler().mutateAnimeList(
         id: id,
         status: MediaStatus.CURRENT,
@@ -68,7 +69,7 @@ Future<void> updateWatching(int? id, String title, int watched, List<AlternateDa
       if (!box.isOpen) {
         box = await Hive.openBox(_boxName);
       }
-      final List watchingList = box.get('watching') ?? [];
+      final List<dynamic> watchingList = List.castFrom(box.get('watching') ?? []);
       final index = watchingList.indexWhere((item) => item['title'] == title);
       if (index != -1) {
         watchingList[index]['watched'] = watched;
@@ -88,48 +89,47 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   if (await AniListLogin().isAnilistLoggedIn()) {
     if (userName != null) {
       List<UserAnimeList> watchedList = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.CURRENT);
-      final list = watchedList[0].list.reversed.toList();
-      if (list.length != 0) {
-        return list;
-      } else {
-        throw new Exception("COULDNT_FIND_ANY_ANIMES_IN_CURRENT_LIST");
+      if (watchedList.isEmpty) {
+        return [];
       }
+      final list = watchedList[0].list.reversed.toList();
+      return list;
     }
-    throw new Exception("ERR_USERNAME_IS_NULL");
+    throw Exception("ERR_USERNAME_IS_NULL");
   } else {
     final box = await Hive.openBox(_boxName);
-    List watching = box.get('watching') ?? [];
+    List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
 
-    if (watching.length != 0) {
-      watching.reversed.toList().forEach((e) {
+    if (watching.isNotEmpty) {
+      for(final e in watching.reversed) {
         recentlyWatched.add(UserAnimeListItem(
             id: e['id'],
             //just give the key as title since its just one
             title: {'title': e['title']},
             coverImage: e['imageUrl'],
             watchProgress: e['watched'],
-            rating: e['rating'] ?? null,
+            rating: e['rating'],
             episodes: e['totalEpisodes']));
-      });
-      box.close();
+      }
     }
+    box.close();
     return recentlyWatched;
   }
 }
 
 Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
   if (await AniListLogin().isAnilistLoggedIn() && status != null) {
-    if (storedUserData == null) throw new Exception("ERR_NO_USERDATA");
+    if (storedUserData == null) throw Exception("ERR_NO_USERDATA");
     final list = await AnilistQueries().getUserAnimeList(storedUserData!.name, status: status);
-    if (list.isEmpty)
-      throw new Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
-    else {
+    if (list.isEmpty) {
+      throw Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
+    } else {
       final item = list[0].list.where((item) => item.id == id).firstOrNull;
-      if (item != null) return item.watchProgress ?? 0;
+      return item?.watchProgress ?? 0;
     }
   } else {
     final box = await Hive.openBox(_boxName);
-    final List watching = box.get('watching') ?? [];
+    final List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
     final item = watching.where((item) => item['id'] == id).firstOrNull;
     await box.close();
     if (item != null) {

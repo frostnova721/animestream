@@ -142,16 +142,19 @@ class AnimePahe extends AnimeProvider {
       final downloadLink = _extractDownloadLink(e['link'] ?? '');
       downloadLink.then((val) {
         returns++;
-          update([
-            VideoStream(
-              quality: (e['quality'] ?? "unknown-quality") + " [${e['size']}]",
-              server: e['server'] ?? "unknown",
-              url: val,
-              backup: false,
-              subtitle: null,
-              subtitleFormat: null,
-            ),
-          ], returns == totalStreams);
+        update([
+          VideoStream(
+            quality: (e['quality'] ?? "unknown-quality") + " [${e['size']}]",
+            server: e['server'] ?? "unknown",
+            url: val.$1,
+            customHeaders: {
+              'Referer': val.$2,
+            },
+            backup: false,
+            subtitle: null,
+            subtitleFormat: null,
+          ),
+        ], returns == totalStreams);
       }).catchError((error) {
         print(error);
         returns++;
@@ -195,7 +198,7 @@ class AnimePahe extends AnimeProvider {
     return r;
   }
 
-  Future<String> _extractDownloadLink(String downloadLink) async {
+  Future<(String, String)> _extractDownloadLink(String downloadLink) async {
     if (downloadLink == '') throw new Exception("Invalid download link");
     final redirectRegex = RegExp(r'\("href","(.*?)"\)');
     final paramRegex = RegExp(r'\("(\w+)",\d+,"(\w+)",(\d+),(\d+),(\d+)\)');
@@ -237,7 +240,7 @@ class AnimePahe extends AnimeProvider {
       );
       final mp4Url = r2.headers['location'];
       if (mp4Url == null) throw new Exception("Couldnt extract media link");
-      return mp4Url;
+      return (mp4Url, kwikLink!);
     } catch (err) {
       print(err);
       rethrow;

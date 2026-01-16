@@ -34,7 +34,12 @@ class AnilistQueries {
     final res = await Anilist().fetchQuery(query, null);
     final List<dynamic> data = res['MediaListCollection']['lists'];
     final List<UserAnimeList> arrangedList = [];
-    data.forEach((element) {
+    for (final element in data) {
+      // We'll have to ignore the custom lists for now
+      if (element['status'] == null || element['name'] == null) {
+        continue;
+      }
+
       final List<UserAnimeListItem> animes = [];
       element['entries'].forEach((e) {
         final media = e['media'];
@@ -61,7 +66,8 @@ class AnilistQueries {
         name: element['name'],
         status: element['status'],
       ));
-    });
+    }
+    ;
     return arrangedList;
   }
 

@@ -9,12 +9,14 @@ class ClickableItem extends StatelessWidget {
   final String? description;
   final Icon? suffixIcon;
   final EdgeInsets? contentPadding;
+  final BorderRadius? borderRadius;
   const ClickableItem({
     super.key,
     required this.onTap,
     required this.label,
     this.description,
     this.suffixIcon,
+    this.borderRadius,
     this.contentPadding = const EdgeInsets.only(left: 20, right: 20, top: 10, bottom: 10),
   });
 
@@ -22,6 +24,7 @@ class ClickableItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
+      borderRadius: borderRadius,
       child: Container(
         padding: contentPadding,
         width: double.infinity,

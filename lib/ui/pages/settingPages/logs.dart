@@ -33,7 +33,7 @@ class _LogScreenState extends State<LogScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-            onPressed: () {},
+            onPressed: () => Navigator.pop(context),
             icon: Icon(
               Icons.arrow_back,
               color: appTheme.textMainColor,
@@ -75,7 +75,7 @@ class _LogScreenState extends State<LogScreen> {
         surfaceTintColor: Colors.transparent,
       ),
       body: Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+        padding: MediaQuery.paddingOf(context).copyWith(top: 0),
         child: Column(
           children: [
             SegmentedButton(

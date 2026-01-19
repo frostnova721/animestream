@@ -1,5 +1,9 @@
+import 'dart:io';
+
+import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 
 class LogScreen extends StatefulWidget {
@@ -28,10 +32,45 @@ class _LogScreenState extends State<LogScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+            onPressed: () {},
+            icon: Icon(
+              Icons.arrow_back,
+              color: appTheme.textMainColor,
+            )),
         title: Text(
           "Logs",
-          style: TextStyle(fontFamily: "Rubik"),
+          style: TextStyle(fontFamily: "Rubik", color: appTheme.textMainColor),
         ),
+        actionsPadding: EdgeInsets.only(right: 14),
+        actions: [
+          // IconButton(
+          //   icon: Icon(
+          //     Icons.list,
+          //     color: appTheme.textMainColor,
+          //   ),
+          //   onPressed: () {},
+          //   tooltip: "Show logs",
+          // ),
+          IconButton(
+            icon: Icon(
+              Icons.save,
+              color: appTheme.textMainColor,
+            ),
+            onPressed: () async {
+             final downloadPath = await DownloaderHelper().getDownloadsPath();
+             final dir = Directory(downloadPath + "/logs/${Logs.app.session}/");
+             await dir.create(recursive: true);
+             for(final l in loggers) {
+              l.log("Saving ${l.tag} log");
+              await File(dir.path + "/${l.tag}.txt").writeAsString(l.logNotifier.value.join("\n"), mode: FileMode.append);
+             }
+
+             floatingSnackBar("Logs saved to your downloads folder!");
+            },
+            tooltip: "Save logs",
+          ),
+        ],
         backgroundColor: appTheme.backgroundColor,
         surfaceTintColor: Colors.transparent,
       ),
@@ -42,7 +81,13 @@ class _LogScreenState extends State<LogScreen> {
             SegmentedButton(
                 showSelectedIcon: false,
                 segments: [
-                  for (final l in loggers) ButtonSegment(value: l.tag, label: Text("${l.tag}")),
+                  for (final l in loggers)
+                    ButtonSegment(
+                      value: l.tag,
+                      label: Text(
+                        "${l.tag}",
+                      ),
+                    ),
                 ],
                 selected: selectedLogger,
                 onSelectionChanged: (e) {

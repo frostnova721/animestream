@@ -185,7 +185,7 @@ class Downloader {
         {
           _maybeGetDownloadItem(msg.id)?.progress = msg.progress;
           _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
-          if(msg.progress % 10 == 0) logger?.log("<${msg.id}> Progress: ${msg.progress}.");
+          if(msg.progress % 10 == 0) logger?.log("<${msg.id}> Progress: ${msg.progress}%");
           break;
         }
       case 'downloading':

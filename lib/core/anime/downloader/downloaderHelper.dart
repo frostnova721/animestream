@@ -18,8 +18,8 @@ class DownloaderHelper {
 
   // Requests for file permission.
   Future<bool> checkAndRequestPermission() async {
-    // We have perm to store anywhere in windows ig
-    if (Platform.isWindows) return true;
+    // We have perm to store anywhere in windows n linux ig (not the root-ish path ofc)
+    if (Platform.isWindows || Platform.isLinux) return true;
 
     Permission fileAccessPermission;
 

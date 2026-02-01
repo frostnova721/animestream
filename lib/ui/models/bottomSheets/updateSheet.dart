@@ -33,7 +33,7 @@ class _UpdateSheetState extends State<UpdateSheet> {
 
   StreamSubscription<Response>? _sub;
 
-  // double progress;
+  double progress = 0;
 
   @override
   Widget build(BuildContext context) {

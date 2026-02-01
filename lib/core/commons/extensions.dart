@@ -42,6 +42,7 @@ extension StringExtensions on String {
 }
 
 extension DownloadStatusExtension on DownloadStatus {
+  bool get isCancelled => this == DownloadStatus.cancelled;
   bool get isActive => this == DownloadStatus.queued || this == DownloadStatus.downloading;
   bool get isPaused => this == DownloadStatus.paused;
   bool get isDead => this == DownloadStatus.cancelled || this == DownloadStatus.completed || this == DownloadStatus.failed;

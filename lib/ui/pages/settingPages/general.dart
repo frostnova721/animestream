@@ -114,6 +114,8 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         String? dir;
                         if (Platform.isWindows) {
                           dir = await FilePickerWindows().getDirectoryPath();
+                        } else if(Platform.isLinux) {
+                          dir = await FilePickerLinux().getDirectoryPath();
                         } else {
                           dir = await FilePickerIO().getDirectoryPath();
                         }

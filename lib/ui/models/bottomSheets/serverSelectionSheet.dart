@@ -65,7 +65,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                     qualities.add({
                       'url': element.url,
                       'server': "${element.server}  ${element.backup ? "- backup" : ""}",
-                      'quality': "${element.quality}"
+                      'quality': "${element.quality}",
+                      'headers': jsonEncode(element.customHeaders),
+                      'subtitle': element.subtitle ?? "",
                     });
                   });
                   if (mounted)

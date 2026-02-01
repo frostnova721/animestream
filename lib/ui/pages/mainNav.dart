@@ -43,6 +43,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                 data.description,
                 data.downloadLink,
                 data.preRelease,
+                data.latestVersion,
+                // forceTrigger: true
               ),
             }
         });

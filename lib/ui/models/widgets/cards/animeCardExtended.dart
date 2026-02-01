@@ -77,6 +77,9 @@ class AnimeCardExtended extends StatelessWidget {
                       opacity: 0.5,
                       child: CachedNetworkImage(
                         imageUrl: bannerImageUrl!,
+                        errorWidget: (context, url, error) {
+                          return Image.asset("lib/assets/images/broken_heart.png");
+                        },
                         fit: BoxFit.cover,
                         width: double.infinity,
                       ),
@@ -98,6 +101,9 @@ class AnimeCardExtended extends StatelessWidget {
                           fadeInCurve: Curves.easeIn,
                           width: 100,
                           height: 130,
+                          errorWidget: (context, url, error) {
+                          return Image.asset("lib/assets/images/broken_heart.png");
+                        },
                         ),
                       ),
                       Expanded(

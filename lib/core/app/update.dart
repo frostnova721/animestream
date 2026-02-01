@@ -4,11 +4,13 @@ import 'dart:io';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
+import 'package:animestream/ui/models/bottomSheets/updateSheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:open_file/open_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:path_provider/path_provider.dart';
 
 class UpdateCheckResult {
   final String latestVersion;
@@ -49,7 +51,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
       return null;
     }
 
-    bool triggerSheet = false; // Change this flag for triggering the sheet for debugging
+    bool triggerSheet = true; // Change this flag for triggering the sheet for debugging
     // int? currentVersionJoined, latestVersionJoined;
 
     final latestVersionCode = latestVersion.replaceAll('v', '');
@@ -90,7 +92,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
   }
 }
 
-// Naming Conventions? 
+// Naming Conventions?
 bool _checkIfTheNewVersionIsActuallyAnUpgrade(String newVersion, String oldVersion) {
   final oldParts = oldVersion.split('-').first.split('.');
   final newParts = newVersion.split('-').first.split('.');
@@ -131,41 +133,61 @@ bool _checkIfTheNewVersionIsActuallyAnUpgrade(String newVersion, String oldVersi
   return false;
 }
 
-showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre, {bool forceTrigger = false }) async {
+showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre, String version,
+    {bool forceTrigger = false}) async {
   //dont show the sheet if recievePreRelease if off and release is a pre release
   if (pre && pre != (currentUserSettings?.receivePreReleases! ?? false)) {
     return;
   }
 
+  // trigger if forced for debug
   if (kDebugMode && !forceTrigger) {
     return;
   }
 
   if (Platform.isWindows || await isTv()) {
     return showDialog(
-        context: context,
-        useRootNavigator: false,
-        builder: (context) => AlertDialog(
-              content: Container(
-                width: MediaQuery.sizeOf(context).width / 3,
-                child: _updateSheetContent(context, markdownText, downloadLink, pre, isDesktop: true),
-              ),
-              actions: [
-                TextButton(
-                    onPressed: () async {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text("maybe later")),
-                TextButton(
-                    onPressed: () async {
-                      final uri = Uri.parse(downloadLink);
-                      if (!(await launchUrl(uri))) {
-                        throw new Exception("Couldnt launch");
-                      }
-                    },
-                    child: Text("download")),
-              ],
-            ));
+      context: context,
+      useRootNavigator: false,
+      builder: (context) => AlertDialog(
+        content: Container(
+          width: MediaQuery.sizeOf(context).width / 3,
+          child: UpdateSheet(
+            downloadLink: downloadLink,
+            isDesktop: true,
+            markdownText: markdownText,
+            pre: pre,
+            version: version,
+          ),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () async {
+                Navigator.of(context).pop();
+              },
+              child: Text("maybe later")),
+          TextButton(
+              onPressed: () async {
+                final uri = Uri.parse(downloadLink);
+                final asset = await get(uri);
+
+                final tempPath = await getTemporaryDirectory();
+                final downloadPath = "${tempPath.path}/astrm_update.${Platform.isWindows ? "exe" : "apk"}";
+
+                await File(downloadPath).writeAsBytes(asset.bodyBytes);
+
+                final openRes = await OpenFile.open(downloadPath);
+                if (openRes.type == ResultType.done) {
+                  print("OK! stuff's done");
+                }
+                // if (!(await launchUrl(uri))) {
+                //   throw new Exception("Couldnt launch");
+                // }
+              },
+              child: Text("download")),
+        ],
+      ),
+    );
   }
   return showModalBottomSheet(
     showDragHandle: true,
@@ -173,116 +195,13 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
     isScrollControlled: true,
     context: context,
     builder: (context) {
-      return _updateSheetContent(context, markdownText, downloadLink, pre);
+      return UpdateSheet(
+        downloadLink: downloadLink,
+        isDesktop: false,
+        markdownText: markdownText,
+        pre: pre,
+         version: version,
+      );
     },
   );
-}
-
-Widget _updateSheetContent(BuildContext context, String markdownText, String downloadLink, bool pre,
-    {bool isDesktop = false}) {
-  return Padding(
-    padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom, left: 15, right: 15, top: 10),
-    child: SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (pre)
-            Text(
-              "Test Version",
-              style: TextStyle(color: appTheme.textSubColor, fontFamily: "Poppins"),
-            ),
-          Container(
-            height: 400,
-            child: ListView(
-              shrinkWrap: true,
-              children: [
-                MarkdownBody(
-                  data: markdownText,
-                  styleSheet: MarkdownStyleSheet(
-                    h1: style(),
-                    h2: style(),
-                    listBullet: style(),
-                    h3: style(),
-                    h4: style(),
-                    h5: style(),
-                    h6: style(),
-                    p: style(),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          if (!isDesktop)
-            Container(
-              margin: EdgeInsets.only(top: 20),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.only(right: 10),
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        final uri = Uri.parse(downloadLink);
-                        if (!(await launchUrl(uri))) {
-                          throw new Exception("Couldnt launch");
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appTheme.accentColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(
-                            color: appTheme.accentColor,
-                          ),
-                        ),
-                      ),
-                      child: Container(
-                        child: Text(
-                          "download",
-                          style: TextStyle(
-                            color: appTheme.onAccent,
-                            fontFamily: "Rubik",
-                            fontSize: 20,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 5),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: appTheme.accentColor,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          side: BorderSide(
-                            color: appTheme.accentColor,
-                          ),
-                        ),
-                      ),
-                      child: Container(
-                        child: Text("maybe later",
-                            style: TextStyle(
-                              color: appTheme.onAccent,
-                              fontFamily: "Rubik",
-                              fontSize: 20,
-                            )),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    ),
-  );
-}
-
-TextStyle style() {
-  return TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans");
 }

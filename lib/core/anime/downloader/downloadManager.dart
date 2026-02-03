@@ -46,6 +46,7 @@ class DownloadManager {
   }) async {
     if(!(await DownloaderHelper().checkAndRequestPermission())) {
       floatingSnackBar("Provide storage access for downloading...");
+      Logs.downloader.log("Storage permission not granted. Rejecting download request...");
       return;
     }
     final id = DownloaderHelper.generateId();

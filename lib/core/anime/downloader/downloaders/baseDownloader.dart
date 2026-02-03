@@ -65,10 +65,10 @@ abstract class BaseDownloader {
   }
 
   @nonVirtual
-  void setCompletedStatus(String finalPath) {
+  void setCompletedStatus(String finalPath, { bool silent = false}) {
     _status = DownloadStatus.completed;
     task.sendPort?.send(DownloadMessage(
-        status: 'complete', id: task.id, extras: [task.fileName, finalPath], message: "Download complete."));
+        status: 'complete', id: task.id, extras: [task.fileName, finalPath], message: "Download complete.", silent: false));
   }
 
   @nonVirtual

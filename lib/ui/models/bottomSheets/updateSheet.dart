@@ -1,14 +1,14 @@
 import 'dart:async';
-import 'dart:ffi';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:http/http.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class UpdateSheet extends StatefulWidget {
   final String markdownText;
@@ -30,10 +30,55 @@ class UpdateSheet extends StatefulWidget {
 }
 
 class _UpdateSheetState extends State<UpdateSheet> {
-
   StreamSubscription<Response>? _sub;
 
   double progress = 0;
+
+  void downloadAndInstallUpdate() async {
+    final uri = Uri.parse(widget.downloadLink);
+    final buffer = <int>[];
+    final completer = Completer();
+
+    double downloadedBytes = 0;
+
+    _sub = await get(uri).asStream().listen(
+      (res) {
+        downloadedBytes += res.bodyBytes.length;
+        progress = downloadedBytes / (res.contentLength ?? 1);
+        buffer.addAll(res.bodyBytes);
+      },
+      onError: (err) => {completer.completeError(err)},
+      onDone: () => completer.complete(),
+    );
+
+    try {
+      await completer.future;
+    } catch (err) {
+      floatingSnackBar("There was an issue downloading the update.");
+      return;
+    }
+
+    final tempPath = await getTemporaryDirectory();
+    final downloadPath = "${tempPath.path}/animestream_update.${Platform.isWindows ? "exe" : "apk"}";
+
+    await File(downloadPath).writeAsBytes(buffer);
+    print("download complete");
+
+    final openRes = await OpenFile.open(downloadPath);
+    if (openRes.type == ResultType.permissionDenied) {
+      await Permission.requestInstallPackages.request();
+    }
+    print(openRes.type);
+    if (openRes.type == ResultType.done) {
+      print("OK! stuff's done");
+    }
+  }
+  
+  @override
+  void dispose() {
+    _sub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -79,24 +124,7 @@ class _UpdateSheetState extends State<UpdateSheet> {
                     Padding(
                       padding: const EdgeInsets.only(right: 10),
                       child: ElevatedButton(
-                        onPressed: () async {
-                          final uri = Uri.parse(widget.downloadLink);
-                          final buffer = <int>[];
-
-                          _sub = await get(uri).asStream().listen((res) {
-                            buffer.addAll(res.bodyBytes);
-                          });
-
-                          final tempPath = await getTemporaryDirectory();
-                          final downloadPath = "${tempPath.path}/animestream_update.${Platform.isWindows ? "exe" : "apk"}";
-
-                          await File(downloadPath).writeAsBytes(buffer);
-
-                          final openRes = await OpenFile.open(downloadPath);
-                          if (openRes.type == ResultType.done) {
-                            print("OK! stuff's done");
-                          }
-                        },
+                        onPressed: downloadAndInstallUpdate,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: appTheme.accentColor,
                           shape: RoundedRectangleBorder(
@@ -134,7 +162,7 @@ class _UpdateSheetState extends State<UpdateSheet> {
                           ),
                         ),
                         child: Container(
-                          child: Text("maybe later",
+                          child: Text("nope",
                               style: TextStyle(
                                 color: appTheme.onAccent,
                                 fontFamily: "Rubik",

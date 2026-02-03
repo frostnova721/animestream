@@ -18,7 +18,7 @@ class DownloaderHelper {
 
   // Requests for file permission.
   Future<bool> checkAndRequestPermission() async {
-    // We have perm to store anywhere in windows n linux ig (not the root-ish path ofc)
+    // We have perm to store anywhere in windows n linux ig (not the root-ish paths ofc)
     if (Platform.isWindows || Platform.isLinux) return true;
 
     Permission fileAccessPermission;
@@ -34,16 +34,11 @@ class DownloaderHelper {
 
     final status = await fileAccessPermission.status;
 
-    if (status.isPermanentlyDenied) return false;
+    // if (status.isPermanentlyDenied) return false;
 
     if (status.isDenied) {
       showToast("Provide storage access for downloading!");
-      final req = await fileAccessPermission.request();
-
-      if (req.isGranted)
-        return true;
-      else
-        return false;
+      return (await fileAccessPermission.request()).isGranted;
     } else {
       return true;
     }

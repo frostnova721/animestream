@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
@@ -35,45 +36,51 @@ class _UpdateSheetState extends State<UpdateSheet> {
   double progress = 0;
 
   void downloadAndInstallUpdate() async {
-    final uri = Uri.parse(widget.downloadLink);
-    final buffer = <int>[];
-    final completer = Completer();
-
-    double downloadedBytes = 0;
-
-    _sub = await get(uri).asStream().listen(
-      (res) {
-        downloadedBytes += res.bodyBytes.length;
-        progress = downloadedBytes / (res.contentLength ?? 1);
-        buffer.addAll(res.bodyBytes);
-      },
-      onError: (err) => {completer.completeError(err)},
-      onDone: () => completer.complete(),
-    );
-
-    try {
-      await completer.future;
-    } catch (err) {
-      floatingSnackBar("There was an issue downloading the update.");
-      return;
-    }
-
+    final filename = "animestream_${widget.version}.${Platform.isWindows ? "exe" : "apk"}";
     final tempPath = await getTemporaryDirectory();
-    final downloadPath = "${tempPath.path}/animestream_update.${Platform.isWindows ? "exe" : "apk"}";
+    final downloadPath = "${tempPath.path}/$filename";
 
-    await File(downloadPath).writeAsBytes(buffer);
-    print("download complete");
+    if (File(filename).existsSync()) {
+      Logs.app.log("Patch already downloaded. Opening the file...");
+    } else {
+      Logs.app.log("Downloading patch v${widget.version}...");
+      final uri = Uri.parse(widget.downloadLink);
+      final buffer = <int>[];
+      final completer = Completer();
+
+      double downloadedBytes = 0;
+
+      _sub = await get(uri).asStream().listen(
+        (res) {
+          downloadedBytes += res.bodyBytes.length;
+          progress = downloadedBytes / (res.contentLength ?? 1);
+          buffer.addAll(res.bodyBytes);
+        },
+        onError: (err) => {completer.completeError(err)},
+        onDone: () => completer.complete(),
+      );
+
+      try {
+        await completer.future;
+      } catch (err) {
+        floatingSnackBar("There was an issue downloading the update.");
+        Logs.app.log("Error downloading the update: ${err.toString()}");
+        return;
+      }
+
+      await File(downloadPath).writeAsBytes(buffer);
+      Logs.app.log("nice... Download complete!");
+    }
 
     final openRes = await OpenFile.open(downloadPath);
     if (openRes.type == ResultType.permissionDenied) {
       await Permission.requestInstallPackages.request();
     }
-    print(openRes.type);
     if (openRes.type == ResultType.done) {
-      print("OK! stuff's done");
+      Logs.app.log("Update dialog invoked succesfully.");
     }
   }
-  
+
   @override
   void dispose() {
     _sub?.cancel();
@@ -89,6 +96,25 @@ class _UpdateSheetState extends State<UpdateSheet> {
           mainAxisAlignment: MainAxisAlignment.end,
           mainAxisSize: MainAxisSize.min,
           children: [
+            Text(
+              "Update Available",
+              style: TextStyle(fontSize: 24),
+            ),
+            Row(
+              children: [
+                Text(widget.version),
+                Container(
+                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(100),
+                      color: appTheme.accentColor,
+                    ),
+                    child: Text(
+                      widget.pre ? "beta" : "stable",
+                      style: TextStyle(color: appTheme.onAccent),
+                    )),
+              ],
+            ),
             if (widget.pre)
               Text(
                 "Test Version",
@@ -96,14 +122,16 @@ class _UpdateSheetState extends State<UpdateSheet> {
               ),
             Container(
               height: 400,
+              decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(25)),
+              padding: EdgeInsets.all(14),
               child: ListView(
                 shrinkWrap: true,
                 children: [
                   MarkdownBody(
                     data: widget.markdownText,
                     styleSheet: MarkdownStyleSheet(
-                      h1: style(),
-                      h2: style(),
+                      h1: style(bold: true),
+                      h2: style(bold: true),
                       listBullet: style(),
                       h3: style(),
                       h4: style(),
@@ -180,7 +208,11 @@ class _UpdateSheetState extends State<UpdateSheet> {
     );
   }
 
-  TextStyle style() {
-    return TextStyle(color: appTheme.textMainColor, fontFamily: "NotoSans");
+  TextStyle style({bool bold = false}) {
+    return TextStyle(
+      color: appTheme.textMainColor,
+      fontFamily: "NotoSans",
+      fontWeight: bold ? FontWeight.bold : null,
+    );
   }
 }

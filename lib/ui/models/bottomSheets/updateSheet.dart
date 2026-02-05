@@ -6,6 +6,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:http/http.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
@@ -31,40 +32,62 @@ class UpdateSheet extends StatefulWidget {
 }
 
 class _UpdateSheetState extends State<UpdateSheet> {
-  StreamSubscription<Response>? _sub;
+  StreamSubscription<List<int>>? _sub;
 
-  double progress = 0;
+  final ValueNotifier<double> progress = ValueNotifier(0);
 
-  void downloadAndInstallUpdate() async {
+  DownloadState downloadState = DownloadState.idle;
+
+  String downloadPath = "";
+
+  void downloadAndInstallUpdate({bool installOnly = false}) async {
     final filename = "animestream_${widget.version}.${Platform.isWindows ? "exe" : "apk"}";
     final tempPath = await getTemporaryDirectory();
-    final downloadPath = "${tempPath.path}/$filename";
+    downloadPath = "${tempPath.path}/$filename";
 
-    if (File(filename).existsSync()) {
+    if (File(downloadPath).existsSync()) {
       Logs.app.log("Patch already downloaded. Opening the file...");
     } else {
-      Logs.app.log("Downloading patch v${widget.version}...");
+      Logs.app.log("Downloading patch ${widget.version}...");
+
+      setState(() {
+        downloadState = DownloadState.downloading;
+      });
+
       final uri = Uri.parse(widget.downloadLink);
       final buffer = <int>[];
       final completer = Completer();
 
       double downloadedBytes = 0;
 
-      _sub = await get(uri).asStream().listen(
-        (res) {
-          downloadedBytes += res.bodyBytes.length;
-          progress = downloadedBytes / (res.contentLength ?? 1);
-          buffer.addAll(res.bodyBytes);
+      final req = Request("GET", uri);
+      final res = await req.send();
+      int totalBytes = res.contentLength ?? 1;
+
+      _sub = res.stream.listen(
+        (chunk) {
+          downloadedBytes += chunk.length;
+          progress.value = downloadedBytes / totalBytes;
+          buffer.addAll(chunk);
         },
-        onError: (err) => {completer.completeError(err)},
+        onError: (err) => completer.completeError(err),
         onDone: () => completer.complete(),
       );
 
       try {
         await completer.future;
+
+        setState(() {
+          downloadState = DownloadState.completed;
+        });
       } catch (err) {
         floatingSnackBar("There was an issue downloading the update.");
         Logs.app.log("Error downloading the update: ${err.toString()}");
+
+        setState(() {
+          downloadState = DownloadState.idle;
+        });
+
         return;
       }
 
@@ -94,32 +117,43 @@ class _UpdateSheetState extends State<UpdateSheet> {
       child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              "Update Available",
-              style: TextStyle(fontSize: 24),
-            ),
-            Row(
-              children: [
-                Text(widget.version),
-                Container(
-                    padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(100),
-                      color: appTheme.accentColor,
-                    ),
-                    child: Text(
-                      widget.pre ? "beta" : "stable",
-                      style: TextStyle(color: appTheme.onAccent),
-                    )),
-              ],
-            ),
-            if (widget.pre)
-              Text(
-                "Test Version",
-                style: TextStyle(color: appTheme.textSubColor, fontFamily: "Poppins"),
+            Padding(
+              padding: const EdgeInsets.only(left: 14),
+              child: Text(
+                "Update Available",
+                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
               ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 14, bottom: 12),
+              child: Row(
+                // mainAxisAlignment: ,
+                children: [
+                  Text(
+                    widget.version,
+                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                  ),
+                  Container(
+                      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                      margin: EdgeInsets.only(left: 12),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(100),
+                        color: appTheme.accentColor,
+                      ),
+                      child: Text(
+                        widget.pre ? "beta" : "stable",
+                        style: TextStyle(
+                          color: appTheme.onAccent,
+                          fontSize: 15,
+                          fontFamily: "NunitoSans",
+                        ),
+                      )),
+                ],
+              ),
+            ),
             Container(
               height: 400,
               decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(25)),
@@ -149,56 +183,52 @@ class _UpdateSheetState extends State<UpdateSheet> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Padding(
-                      padding: const EdgeInsets.only(right: 10),
-                      child: ElevatedButton(
-                        onPressed: downloadAndInstallUpdate,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: appTheme.accentColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            side: BorderSide(
-                              color: appTheme.accentColor,
-                            ),
-                          ),
-                        ),
-                        child: Container(
-                          child: Text(
-                            "download",
-                            style: TextStyle(
-                              color: appTheme.onAccent,
-                              fontFamily: "Rubik",
-                              fontSize: 20,
-                            ),
-                          ),
+                    Expanded(
+                      flex: 3,
+                      child: Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: ValueListenableBuilder(
+                          valueListenable: progress,
+                          builder: (ctx, val, child) {
+                            return LiquidDownloadButton(
+                              state: downloadState,
+                              progress: val,
+                              onPressed: () {
+                                // if the update is downloaded and state is install, it automatically opens
+                                // the available update file
+                                if (downloadState != DownloadState.downloading) return downloadAndInstallUpdate();
+                                // progress = 0;
+                                // while ((progress ?? 0) < 1.0) {
+                                //   await Future.delayed(Duration(milliseconds: 100));
+                                //   setState(() {
+                                //     progress = ((progress ?? 0) + 0.1).clamp(0, 1);
+                                //   });
+                                // }
+                              },
+                            );
+                          },
                         ),
                       ),
                     ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 5),
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.of(context).pop();
+                    Expanded(
+                      flex: 1,
+                      child: IconButton.outlined(
+                        onPressed: () async {
+                          downloadState = DownloadState.idle;
+                          progress.value = 0;
+                          if (downloadPath.isNotEmpty) await File(downloadPath).delete();
+                          setState(() {});
+                          Navigator.pop(context);
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: appTheme.accentColor,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(15),
-                            side: BorderSide(
-                              color: appTheme.accentColor,
-                            ),
-                          ),
+                        color: appTheme.accentColor,
+                        style: IconButton.styleFrom(
+                          side: BorderSide(color: appTheme.accentColor),
+                          fixedSize: Size.fromHeight(50),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                         ),
-                        child: Container(
-                          child: Text("nope",
-                              style: TextStyle(
-                                color: appTheme.onAccent,
-                                fontFamily: "Rubik",
-                                fontSize: 20,
-                              )),
-                        ),
+                        icon: Icon(Icons.close),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),
@@ -214,5 +244,75 @@ class _UpdateSheetState extends State<UpdateSheet> {
       fontFamily: "NotoSans",
       fontWeight: bold ? FontWeight.bold : null,
     );
+  }
+}
+
+enum DownloadState { idle, downloading, completed }
+
+class LiquidDownloadButton extends StatelessWidget {
+  final DownloadState state;
+  final double progress; // 0.0 to 1.0
+  final VoidCallback onPressed;
+
+  const LiquidDownloadButton({
+    super.key,
+    required this.state,
+    required this.progress,
+    required this.onPressed,
+  }): assert(progress >= 0 && progress <= 1, "Progress value must be between 0.0 and 1.0!");
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onPressed,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(15),
+        child: Container(
+          height: 50,
+          width: double.infinity,
+          color: state == DownloadState.idle ? appTheme.accentColor : appTheme.backgroundSubColor,
+          child: Stack(
+            children: [
+              if (state != DownloadState.idle)
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    return AnimatedContainer(
+                      duration: const Duration(milliseconds: 200),
+                      curve: Curves.easeOut,
+                      width: constraints.maxWidth * progress,
+                      height: constraints.maxHeight,
+                      color: appTheme.accentColor,
+                    );
+                  },
+                ),
+              Material(
+                color: Colors.transparent,
+                child: Center(
+                  child: Text(
+                    _getButtonText(),
+                    style: TextStyle(
+                      color: appTheme.onAccent,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _getButtonText() {
+    switch (state) {
+      case DownloadState.idle:
+        return "Download";
+      case DownloadState.downloading:
+        return "Downloading... ${(progress * 100).toInt()}%";
+      case DownloadState.completed:
+        return "Install";
+    }
   }
 }

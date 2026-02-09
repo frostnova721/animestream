@@ -146,7 +146,7 @@ class DownloaderHelper {
         return res;
       } catch (err) {
         if (currentAttempt >= totalAttempts) {
-          throw Exception("NUMBER OF DOWNLOAD ATTEMPTS EXCEEDED, KILLING THE DOWNLOADS");
+          throw Exception("NUMBER OF DOWNLOAD ATTEMPTS EXCEEDED, KILLING THE DOWNLOAD.");
         }
       }
     }

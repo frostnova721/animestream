@@ -118,7 +118,7 @@ class VideoDownloader extends BaseDownloader {
         completer.completeError(err);
         await sink.close();
         await file.delete();
-        setFailedStatus("Download failed!");
+        setFailedStatus(err.toString());
       });
 
       return completer.future;
@@ -128,7 +128,7 @@ class VideoDownloader extends BaseDownloader {
       print("From media url: ${task.url}");
       await sink.close();
       await file.delete();
-      setFailedStatus("Download failed!");
+      setFailedStatus(err.toString());
     }
   }
 }

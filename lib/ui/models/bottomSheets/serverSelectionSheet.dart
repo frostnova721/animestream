@@ -230,6 +230,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                     widget.episodeIndex,
                     totalEpisodes: widget.provider.data.episodes,
                     alternateDatabases: widget.provider.altDatabases,
+                    rating: widget.provider.data.rating,
                   );
 
                   final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();

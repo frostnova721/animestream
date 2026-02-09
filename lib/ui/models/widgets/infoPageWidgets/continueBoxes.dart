@@ -398,7 +398,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      "Continue Episode ${provider.watched + 1}",
+                      "Continue Episode ${provider.watched >= provider.epLinks.length ? provider.watched : provider.watched + 1}",
                       style: TextStyle(
                         color: appTheme.textMainColor,
                         fontFamily: "Poppins",

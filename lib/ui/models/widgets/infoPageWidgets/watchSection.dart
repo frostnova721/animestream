@@ -41,7 +41,9 @@ class WatchSection extends StatelessWidget {
                       SizedBox(width: 16),
                       Expanded(
                         flex: 1,
-                        child: ContinueWatchingBodyBox(provider: provider,),
+                        child: ContinueWatchingBodyBox(
+                          provider: provider,
+                        ),
                       ),
                     ],
                   ),
@@ -177,8 +179,7 @@ class WatchSection extends StatelessWidget {
                                 ),
                                 child: IconButton(
                                   style: IconButton.styleFrom(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                                  ),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                   onPressed: () {
                                     if (provider.currentPageIndex == 0) return;
                                     provider.currentPageIndex -= 1;
@@ -302,7 +303,7 @@ class WatchSection extends StatelessWidget {
                                   child: Row(
                                     children: [
                                       Text(
-                                        "${provider.visibleEpList[provider.currentPageIndex].first['realIndex'] + 1} - ${provider.visibleEpList[provider.currentPageIndex].last['realIndex'] + 1}",
+                                        "${(provider.visibleEpList[provider.currentPageIndex].firstOrNull?['realIndex'] ?? 0) + 1} - ${(provider.visibleEpList[provider.currentPageIndex].lastOrNull?['realIndex'] ?? 0) + 1}",
                                         style: TextStyle(
                                           color: appTheme.onAccent,
                                           fontWeight: FontWeight.w600,
@@ -328,8 +329,7 @@ class WatchSection extends StatelessWidget {
                                 ),
                                 child: IconButton(
                                   style: IconButton.styleFrom(
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))
-                                  ),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
                                   onPressed: () {
                                     if (provider.currentPageIndex >= provider.visibleEpList.length - 1) return;
                                     provider.currentPageIndex += 1;
@@ -347,8 +347,22 @@ class WatchSection extends StatelessWidget {
                         )
                       else
                         Expanded(
-                          child: Container(),
+                          child: SizedBox(),
                         ),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: appTheme.textMainColor.withAlpha(15),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                        margin: EdgeInsets.symmetric(horizontal: 10),
+                        child: Row(
+                          children: [
+                            _buildSubDubButton(false),
+                            _buildSubDubButton(true),
+                          ],
+                        ),
+                      ),
                       Container(
                         decoration: BoxDecoration(
                           color: appTheme.textMainColor.withAlpha(15),
@@ -407,6 +421,32 @@ class WatchSection extends StatelessWidget {
                 ),
               ],
             ),
+    );
+  }
+
+  Widget _buildSubDubButton(bool isDub) {
+    // provider.viewMode;
+    return Container(
+      margin: EdgeInsets.symmetric(horizontal: 2, vertical: 3),
+      decoration: BoxDecoration(
+        color: provider.preferDubs == isDub ? appTheme.accentColor : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      child: IconButton(
+          onPressed: () {
+            provider.preferDubs = isDub;
+          },
+          style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+          icon: Text(
+            isDub ? "dub" : "sub",
+            style: TextStyle(color: provider.preferDubs == isDub ? appTheme.onAccent : null, fontWeight: FontWeight.bold),
+          ),
+          padding: EdgeInsets.all(8),
+          constraints: BoxConstraints(
+            minWidth: 36,
+            minHeight: 36,
+          ),
+          tooltip: isDub ? "prefer dubs" : "prefer subs"),
     );
   }
 

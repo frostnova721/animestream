@@ -19,6 +19,7 @@ Future<void> storeWatching(
   int watched, {
   int? totalEpisodes,
   List<AlternateDatabaseId>? alternateDatabases,
+  double? rating,
 }) async {
   try {
     //add to anilist if the user is logged in
@@ -41,6 +42,7 @@ Future<void> storeWatching(
         'imageUrl': imageUrl,
         'id': id,
         'watched': watched,
+        'rating': rating,
         'totalEpisodes': totalEpisodes,
       });
       // print(watchingList);
@@ -74,7 +76,7 @@ Future<void> updateWatching(int? id, String title, int watched, List<AlternateDa
       if (index != -1) {
         watchingList[index]['watched'] = watched;
       } else {
-        Logs.app.log('noData');
+        Logs.app.log("Anime entry doesn't exists to make progress update");
       }
       box.put('watching', watchingList);
       box.close();
@@ -92,6 +94,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
       if (watchedList.isEmpty) {
         return [];
       }
+      // reversing it to get the last updated item first :)
       final list = watchedList[0].list.reversed.toList();
       return list;
     }

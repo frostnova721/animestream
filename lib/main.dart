@@ -293,16 +293,6 @@ class _AnimeStreamState extends State<AnimeStream> {
       
           final themeProvider = Provider.of<AppProvider>(context);
       
-          //set status bar icon brightness (some devices do this automatically, some dont!
-          //so here it is for all of em!)
-          SystemChrome.setSystemUIOverlayStyle(
-            SystemUiOverlayStyle(
-              statusBarIconBrightness: themeProvider.isDark ? Brightness.light : Brightness.dark,
-              statusBarColor: Colors.black.withValues(alpha: 0.002),
-              systemNavigationBarColor: Colors.black.withValues(alpha: 0.002),
-            ),
-          );
-      
           return MaterialApp(
             title: 'Animestream',
             navigatorKey: AnimeStream.navigatorKey,

@@ -30,6 +30,6 @@ class NeonRed implements ThemeItem {
         backgroundSubColor: Color.fromARGB(255, 102, 47, 47),
         textMainColor: Color(0xffffffff),
         textSubColor: Color.fromARGB(255, 212, 190, 190),
-        onAccent: Colors.black,
+        onAccent: Colors.white,
       );
 }

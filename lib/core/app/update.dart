@@ -7,10 +7,7 @@ import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/ui/models/bottomSheets/updateSheet.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart';
-import 'package:open_file/open_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:path_provider/path_provider.dart';
 
 class UpdateCheckResult {
   final String latestVersion;
@@ -51,7 +48,7 @@ Future<UpdateCheckResult?> checkForUpdates() async {
       return null;
     }
 
-    bool triggerSheet = true; // Change this flag for triggering the sheet for debugging
+    bool triggerSheet = false; // Change this flag for triggering the sheet for debugging
     // int? currentVersionJoined, latestVersionJoined;
 
     final latestVersionCode = latestVersion.replaceAll('v', '');
@@ -154,38 +151,38 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
           width: MediaQuery.sizeOf(context).width / 3,
           child: UpdateSheet(
             downloadLink: downloadLink,
-            isDesktop: true,
+            // isDesktop: true,
             markdownText: markdownText,
             pre: pre,
             version: version,
           ),
         ),
-        actions: [
-          TextButton(
-              onPressed: () async {
-                Navigator.of(context).pop();
-              },
-              child: Text("maybe later")),
-          TextButton(
-              onPressed: () async {
-                final uri = Uri.parse(downloadLink);
-                final asset = await get(uri);
+        // actions: [
+        //   TextButton(
+        //       onPressed: () async {
+        //         Navigator.of(context).pop();
+        //       },
+        //       child: Text("maybe later")),
+        //   TextButton(
+        //       onPressed: () async {
+        //         final uri = Uri.parse(downloadLink);
+        //         final asset = await get(uri);
 
-                final tempPath = await getTemporaryDirectory();
-                final downloadPath = "${tempPath.path}/astrm_update.${Platform.isWindows ? "exe" : "apk"}";
+        //         final tempPath = await getTemporaryDirectory();
+        //         final downloadPath = "${tempPath.path}/astrm_update.${Platform.isWindows ? "exe" : "apk"}";
 
-                await File(downloadPath).writeAsBytes(asset.bodyBytes);
+        //         await File(downloadPath).writeAsBytes(asset.bodyBytes);
 
-                final openRes = await OpenFile.open(downloadPath);
-                if (openRes.type == ResultType.done) {
-                  print("OK! stuff's done");
-                }
-                // if (!(await launchUrl(uri))) {
-                //   throw new Exception("Couldnt launch");
-                // }
-              },
-              child: Text("download")),
-        ],
+        //         final openRes = await OpenFile.open(downloadPath);
+        //         if (openRes.type == ResultType.done) {
+        //           print("OK! stuff's done");
+        //         }
+        //         // if (!(await launchUrl(uri))) {
+        //         //   throw new Exception("Couldnt launch");
+        //         // }
+        //       },
+        //       child: Text("download")),
+        // ],
       ),
     );
   }
@@ -197,7 +194,7 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
     builder: (context) {
       return UpdateSheet(
         downloadLink: downloadLink,
-        isDesktop: false,
+        // isDesktop: false,
         markdownText: markdownText,
         pre: pre,
          version: version,

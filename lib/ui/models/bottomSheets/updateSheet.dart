@@ -6,9 +6,9 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
-import 'package:hive_flutter/adapters.dart';
 import 'package:http/http.dart';
 import 'package:open_file/open_file.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -16,13 +16,11 @@ class UpdateSheet extends StatefulWidget {
   final String markdownText;
   final String downloadLink;
   final bool pre;
-  final bool isDesktop;
   final String version;
   const UpdateSheet({
     required this.downloadLink,
     required this.markdownText,
     required this.pre,
-    required this.isDesktop,
     required this.version,
     super.key,
   });
@@ -76,10 +74,6 @@ class _UpdateSheetState extends State<UpdateSheet> {
 
       try {
         await completer.future;
-
-        setState(() {
-          downloadState = DownloadState.completed;
-        });
       } catch (err) {
         floatingSnackBar("There was an issue downloading the update.");
         Logs.app.log("Error downloading the update: ${err.toString()}");
@@ -91,7 +85,21 @@ class _UpdateSheetState extends State<UpdateSheet> {
         return;
       }
 
+      // check and clean the old file (can pile up if not cleaned)
+      // this is also cleanable with the "clear cache" option
+      final oldVersion = File(
+          "${tempPath.path}/animestream_${(await PackageInfo.fromPlatform()).version}.${Platform.isWindows ? "exe" : "apk"}");
+      if (oldVersion.existsSync()) {
+        oldVersion.delete();
+      }
+
       await File(downloadPath).writeAsBytes(buffer);
+
+      // set completed state after saving to disk
+      setState(() {
+        downloadState = DownloadState.completed;
+      });
+
       Logs.app.log("nice... Download complete!");
     }
 
@@ -104,9 +112,17 @@ class _UpdateSheetState extends State<UpdateSheet> {
     }
   }
 
+  void _cancelDownload() {
+    _sub?.cancel();
+    _sub = null;
+    setState(() => downloadState = DownloadState.idle);
+    progress.value = 0;
+  }
+
   @override
   void dispose() {
     _sub?.cancel();
+    progress.dispose();
     super.dispose();
   }
 
@@ -177,61 +193,52 @@ class _UpdateSheetState extends State<UpdateSheet> {
                 ],
               ),
             ),
-            if (!widget.isDesktop)
-              Container(
-                margin: EdgeInsets.only(top: 20),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      flex: 3,
-                      child: Padding(
-                        padding: const EdgeInsets.only(right: 10),
-                        child: ValueListenableBuilder(
-                          valueListenable: progress,
-                          builder: (ctx, val, child) {
-                            return LiquidDownloadButton(
-                              state: downloadState,
-                              progress: val,
-                              onPressed: () {
-                                // if the update is downloaded and state is install, it automatically opens
-                                // the available update file
-                                if (downloadState != DownloadState.downloading) return downloadAndInstallUpdate();
-                                // progress = 0;
-                                // while ((progress ?? 0) < 1.0) {
-                                //   await Future.delayed(Duration(milliseconds: 100));
-                                //   setState(() {
-                                //     progress = ((progress ?? 0) + 0.1).clamp(0, 1);
-                                //   });
-                                // }
-                              },
-                            );
-                          },
-                        ),
+            Container(
+              margin: EdgeInsets.only(top: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.only(right: 10),
+                      child: ValueListenableBuilder(
+                        valueListenable: progress,
+                        builder: (ctx, val, child) {
+                          return LiquidDownloadButton(
+                            state: downloadState,
+                            progress: val,
+                            onPressed: () {
+                              // if the update is downloaded and state is install, it automatically opens
+                              // the available update file
+                              if (downloadState != DownloadState.downloading) return downloadAndInstallUpdate();
+                            },
+                          );
+                        },
                       ),
                     ),
-                    Expanded(
-                      flex: 1,
-                      child: IconButton.outlined(
-                        onPressed: () async {
-                          downloadState = DownloadState.idle;
-                          progress.value = 0;
-                          if (downloadPath.isNotEmpty) await File(downloadPath).delete();
-                          setState(() {});
-                          Navigator.pop(context);
-                        },
-                        color: appTheme.accentColor,
-                        style: IconButton.styleFrom(
-                          side: BorderSide(color: appTheme.accentColor),
-                          fixedSize: Size.fromHeight(50),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                        ),
-                        icon: Icon(Icons.close),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: IconButton.outlined(
+                      onPressed: () async {
+                        _cancelDownload();
+                        if (downloadPath.isNotEmpty && downloadState != DownloadState.completed) await File(downloadPath).delete();
+                        setState(() {});
+                        Navigator.pop(context);
+                      },
+                      color: appTheme.accentColor,
+                      style: IconButton.styleFrom(
+                        side: BorderSide(color: appTheme.accentColor),
+                        fixedSize: Size.fromHeight(50),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
                       ),
-                    )
-                  ],
-                ),
+                      icon: Icon(Icons.close),
+                    ),
+                  )
+                ],
               ),
+            ),
           ],
         ),
       ),
@@ -259,7 +266,7 @@ class LiquidDownloadButton extends StatelessWidget {
     required this.state,
     required this.progress,
     required this.onPressed,
-  }): assert(progress >= 0 && progress <= 1, "Progress value must be between 0.0 and 1.0!");
+  }) : assert(progress >= 0 && progress <= 1, "Progress value must be between 0.0 and 1.0!");
 
   @override
   Widget build(BuildContext context) {
@@ -285,16 +292,13 @@ class LiquidDownloadButton extends StatelessWidget {
                     );
                   },
                 ),
-              Material(
-                color: Colors.transparent,
-                child: Center(
-                  child: Text(
-                    _getButtonText(),
-                    style: TextStyle(
-                      color: appTheme.onAccent,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
-                    ),
+              Center(
+                child: Text(
+                  _getButtonText(),
+                  style: TextStyle(
+                    color: appTheme.onAccent,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
                   ),
                 ),
               ),

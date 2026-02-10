@@ -3,11 +3,11 @@ import 'dart:convert';
 
 class VideoStream {
   /// The quality of the video stream.
-  /// 
+  ///
   /// The format for quality is recommended to be "\<quality_string> [\<size>]".
   ///
   /// for example: "1080p [260 MB]" or "multi-quality"
-  /// 
+  ///
   /// the size part is optional and can be omitted if unknown
   final String quality;
 
@@ -87,6 +87,9 @@ class EpisodeDetails {
   /// Episode title, if available
   final String? episodeTitle;
 
+  /// Description about the episode. if any
+  final String? description;
+
   /// Dub availability
   final bool? hasDub;
 
@@ -104,6 +107,7 @@ class EpisodeDetails {
     this.hasDub = false,
     this.isFiller = false,
     this.metadata = null,
+    this.description = null,
   });
 
   Map<String, dynamic> toMap() {
@@ -115,6 +119,7 @@ class EpisodeDetails {
       'hasDub': hasDub,
       'isFiller': isFiller,
       'metadata': metadata,
+      'description': description,
     };
   }
 
@@ -137,6 +142,7 @@ class EpisodeDetails {
               : bool.parse(isFiller)
           : null,
       metadata: map['metadata'] != null ? map['metadata'] as String : null,
+      description: map['description'] as String?,
     );
   }
 
@@ -146,6 +152,6 @@ class EpisodeDetails {
 
   @override
   String toString() {
-    return 'EpisodeDetails(episodeLink: $episodeLink, episodeNumber: $episodeNumber, thumbnail: $thumbnail, episodeTitle: $episodeTitle, hasDub: $hasDub, isFiller: $isFiller, metadata: $metadata)';
+    return 'EpisodeDetails(episodeLink: $episodeLink, episodeNumber: $episodeNumber, thumbnail: $thumbnail, episodeTitle: $episodeTitle, description: $description, hasDub: $hasDub, isFiller: $isFiller, metadata: $metadata)';
   }
 }

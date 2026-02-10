@@ -197,7 +197,9 @@ class InfoPageEpisodeGrid extends StatelessWidget {
     final episode = provider.visibleEpList[provider.currentPageIndex][index]['epLink'] as EpisodeDetails;
     final episodeNumber = episode.episodeNumber;
     final thumbnail = episode.thumbnail ?? provider.data.cover;
-    final title = episode.episodeTitle != null && episode.episodeTitle!.isNotEmpty ? "$episodeNumber: ${episode.episodeTitle}" : 'Episode $episodeNumber';
+    final title = episode.episodeTitle != null && episode.episodeTitle!.isNotEmpty
+        ? "$episodeNumber: ${episode.episodeTitle}"
+        : 'Episode $episodeNumber';
     final isFiller = episode.isFiller ?? false;
 
     return MouseRegion(
@@ -219,6 +221,16 @@ class InfoPageEpisodeGrid extends StatelessWidget {
               height: double.infinity,
               color: hovered.value ? Colors.black.withAlpha(100) : null,
               colorBlendMode: BlendMode.darken,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.network(
+                  provider.data.cover,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                  color: hovered.value ? Colors.black.withAlpha(100) : null,
+                  colorBlendMode: BlendMode.darken,
+                );
+              },
             ),
           ),
           Positioned.fill(

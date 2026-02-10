@@ -8,13 +8,14 @@ import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
-  static const String apiUrl = "https://backend.animetsu.cc/api/anime";
+  static const String apiUrl = "https://ani.metsu.site/api/anime";
+  static const String _apiBaseUrl = "https://ani.metsu.site/api";
 
-  final baseUrl = "https://animetsu.cc";
+  final baseUrl = "https://animetsu.live";
 
   final headers = {
-    'Origin': 'https://animetsu.cc',
-    'Referer': 'https://animetsu.cc/',
+    'Origin': 'https://animetsu.live',
+    'Referer': 'https://animetsu.live/',
   };
 
   @override
@@ -22,13 +23,14 @@ class Gojo extends AnimeProvider {
 
   @override
   Future<List<Map<String, String>>> search(String query) async {
-    final res = await Anilist().search(query);
+    final res = await get(Uri.parse("$apiUrl/search/?query=$query"), headers: headers);
+    final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body)['results']);
     final List<Map<String, String>> sr = [];
-    for (final item in res) {
+    for (final item in json) {
       sr.add({
-        'name': item.title['english'] ?? item.title['romaji'] ?? '',
-        'alias': item.id.toString(),
-        'imageUrl': item.cover,
+        'name': item['title']['english'] ?? item['title']['romaji'] ?? '',
+        'alias': item['id'].toString(),
+        'imageUrl': item['cover_image']['medium'],
       });
     }
 
@@ -43,10 +45,13 @@ class Gojo extends AnimeProvider {
     final res = await get(url, headers: headers);
     final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body));
     final newSht = json.map<Map<String, dynamic>>((item) {
-      final int epNum = item['number']?.toInt();
-      final bool isFiller = item['isFiller'];
-      final String? img = item['image'];
-      final String? title = item['title'];
+      final int epNum = item['ep_num']?.toInt();
+      final bool isFiller = item['is_filler'];
+      String? img = item['img'];
+      if (img?.startsWith("/") ?? false) {
+        img = "$_apiBaseUrl/proxy" + img!;
+      }
+      final String? title = item['name'];
 
       return {
         'episodeLink': "$aliasId", // used for getting other stuff

@@ -3,13 +3,12 @@ import 'dart:convert';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
   static const String apiUrl = "https://ani.metsu.site/api/anime";
-  static const String _apiBaseUrl = "https://ani.metsu.site/api";
+  static const String _apiBaseUrl = "https://ani.metsu.site";
 
   final baseUrl = "https://animetsu.live";
 
@@ -106,7 +105,7 @@ class Gojo extends AnimeProvider {
             [
               VideoStream(
                 quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
-                url: i['url'],
+                url: (i['url'] as String).startsWith("/") ? "$_apiBaseUrl/proxy${i['url']}" : i['url'],
                 server: provider,
                 backup: false,
                 subtitleFormat: SubtitleFormat.VTT.name, // gojo uses vtt mainly

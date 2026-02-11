@@ -79,7 +79,7 @@ class Gojo extends AnimeProvider {
     final List<Map<String, dynamic>> serversJson = List.castFrom(jsonDecode(serverList.body));
     print(serversJson);
     serversJson.forEach((it) {
-      final url = "$apiUrl/oppai/$id/$epNum?server=${it['id']}&subType=${dub ? "dub" : "sub"}";
+      final url = "$apiUrl/oppai/$id/$epNum?server=${it['id']}&source_type=${dub ? "dub" : "sub"}";
       final res = get(Uri.parse(url), headers: headers);
       futures.add(res);
     });

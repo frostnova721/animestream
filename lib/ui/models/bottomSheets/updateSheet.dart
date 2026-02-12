@@ -11,6 +11,7 @@ import 'package:open_file/open_file.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class UpdateSheet extends StatefulWidget {
   final String markdownText;
@@ -38,7 +39,7 @@ class _UpdateSheetState extends State<UpdateSheet> {
 
   String downloadPath = "";
 
-  void downloadAndInstallUpdate({bool installOnly = false}) async {
+  void downloadAndInstallUpdate() async {
     final filename = "animestream_${widget.version}.${Platform.isWindows ? "exe" : "apk"}";
     final tempPath = await getTemporaryDirectory();
     downloadPath = "${tempPath.path}/$filename";
@@ -137,36 +138,60 @@ class _UpdateSheetState extends State<UpdateSheet> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Padding(
-              padding: const EdgeInsets.only(left: 14),
-              child: Text(
-                "Update Available",
-                style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-              ),
-            ),
-            Padding(
               padding: const EdgeInsets.only(left: 14, bottom: 12),
               child: Row(
-                // mainAxisAlignment: ,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    widget.version,
-                    style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
-                  ),
-                  Container(
-                      padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-                      margin: EdgeInsets.only(left: 12),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(100),
-                        color: appTheme.accentColor,
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "Update Available",
+                        style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
                       ),
-                      child: Text(
-                        widget.pre ? "beta" : "stable",
-                        style: TextStyle(
-                          color: appTheme.onAccent,
-                          fontSize: 15,
-                          fontFamily: "NunitoSans",
-                        ),
-                      )),
+
+                      // Padding(
+                      // padding: const EdgeInsets.only(left: 14, bottom: 12),
+                      // child:
+                      Row(
+                        // mainAxisAlignment: ,
+                        children: [
+                          Text(
+                            widget.version,
+                            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold),
+                          ),
+                          Container(
+                              padding: EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+                              margin: EdgeInsets.only(left: 12),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(100),
+                                color: appTheme.accentColor,
+                              ),
+                              child: Text(
+                                widget.pre ? "beta" : "stable",
+                                style: TextStyle(
+                                  color: appTheme.onAccent,
+                                  fontSize: 15,
+                                  fontFamily: "NunitoSans",
+                                ),
+                              )),
+                        ],
+                      ),
+                    ],
+                  ),
+                  IconButton(
+                    onPressed: () async {
+                      await launchUrl(
+                        Uri.parse("https://github.com/frostnova721/animestream/releases/latest"),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                    icon: Icon(
+                      Icons.launch_rounded,
+                      size: 28,
+                    ),
+                    tooltip: "Open In Browser",
+                  ),
                 ],
               ),
             ),
@@ -223,7 +248,8 @@ class _UpdateSheetState extends State<UpdateSheet> {
                     child: IconButton.outlined(
                       onPressed: () async {
                         _cancelDownload();
-                        if (downloadPath.isNotEmpty && downloadState != DownloadState.completed) await File(downloadPath).delete();
+                        if (downloadPath.isNotEmpty && downloadState != DownloadState.completed)
+                          await File(downloadPath).delete();
                         setState(() {});
                         Navigator.pop(context);
                       },

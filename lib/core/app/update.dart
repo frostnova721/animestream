@@ -10,11 +10,23 @@ import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 class UpdateCheckResult {
+  /// The version code of the latest release
   final String latestVersion;
+
+  /// The version code of the current package
   final String currentVersion;
+
+  /// Wether the release is a pre-release (beta versions)
   final bool preRelease;
+
+  /// The direct download link for the asset
   final String downloadLink;
+
+  /// The description markdown of the release
   final String description;
+
+  /// The hash of the asset in the [downloadLink]
+  final String hash;
 
   UpdateCheckResult({
     required this.latestVersion,
@@ -22,6 +34,7 @@ class UpdateCheckResult {
     required this.preRelease,
     required this.downloadLink,
     required this.description,
+    required this.hash,
   });
 
   @override
@@ -30,11 +43,12 @@ class UpdateCheckResult {
   }
 }
 
-/// Alright! the versioning is like: v?n.n.n(-stage?)
+/// Alright! the versioning is like: v?n.n.n(-stagen?) eg: 1.3.4-beta1
 /// n are the numbers. follows the scheme like super-major.okaish.minor (dependent on changes in quality)
 /// v is when the update is parsed from github api.
-/// stage can be alpha, beta, gamma(dev) (these are rare and arent present most time)
+/// stage can be beta followed by the iterative number (these are rare and arent present most time)
 Future<UpdateCheckResult?> checkForUpdates() async {
+  print(_checkIfTheNewVersionIsActuallyAnUpgrade("1.6.0-beta1", "1.6.0-beta1"));
   try {
     final releasesUrl = 'https://api.github.com/repos/frostnova721/animestream/releases';
     final packageInfo = await PackageInfo.fromPlatform();
@@ -52,7 +66,6 @@ Future<UpdateCheckResult?> checkForUpdates() async {
     // int? currentVersionJoined, latestVersionJoined;
 
     final latestVersionCode = latestVersion.replaceAll('v', '');
-    final versionNumber = latestVersionCode.split("-")[0];
 
     bool isAnUpgrade = false;
 
@@ -60,23 +73,26 @@ Future<UpdateCheckResult?> checkForUpdates() async {
       isAnUpgrade = _checkIfTheNewVersionIsActuallyAnUpgrade(latestVersionCode, currentVersion);
     } catch (err) {
       // old version check logic as a backup method!
+      final versionNumber = latestVersionCode.split("-")[0];
       if (currentVersion.split("-").firstOrNull != versionNumber) triggerSheet = true;
     }
 
     // we can assert not null since we do null check in try statement & the comparison wont occur if theres an issue
     if (triggerSheet || isAnUpgrade) {
       Logs.app.log("<UPDATE-CHECK> UPDATE AVAILABLE!!!");
-      final List<dynamic> apkItem = releasesRes['assets']
+      final List<dynamic> asset = releasesRes['assets']
           .where((item) => item['name'] == (Platform.isAndroid ? "app-release.apk" : "animestream-x86_64.exe"))
           .toList();
-      if (apkItem.isEmpty) return null;
-      final downloadLink = apkItem[0]['browser_download_url'];
+      if (asset.isEmpty) return null;
+      final downloadLink = asset[0]['browser_download_url'];
+      final hash = asset[0]['digest'] as String;
       return UpdateCheckResult(
         latestVersion: latestVersion,
         currentVersion: currentVersion,
         preRelease: pre,
         downloadLink: downloadLink,
         description: description,
+        hash: hash,
       );
     } else {
       Logs.app.log("<UPDATE-CHECK> APP IS ALREADY UP-TO-DATE!");
@@ -91,8 +107,11 @@ Future<UpdateCheckResult?> checkForUpdates() async {
 
 // Naming Conventions?
 bool _checkIfTheNewVersionIsActuallyAnUpgrade(String newVersion, String oldVersion) {
-  final oldParts = oldVersion.split('-').first.split('.');
-  final newParts = newVersion.split('-').first.split('.');
+  final oldSplit = oldVersion.split('-');
+  final newSplit = newVersion.split('-');
+
+  final oldParts = oldSplit.first.split('.');
+  final newParts = newSplit.first.split('.');
 
   if (oldParts.length < 3 || newParts.length < 3) {
     return false;
@@ -115,19 +134,66 @@ bool _checkIfTheNewVersionIsActuallyAnUpgrade(String newVersion, String oldVersi
   }
 
   // Compare by the parts
-  if (newMajor > oldMajor) {
-    return true;
-  } else if (newMajor == oldMajor) {
-    if (newMinor > oldMinor) {
-      return true;
-    } else if (newMinor == oldMinor) {
-      if (newPatch > oldPatch) {
-        return true;
-      }
-    }
+  if (newMajor > oldMajor) return true;
+  if (newMajor < oldMajor) return false;
+
+  // condition where the majors are same
+  if (newMinor > oldMinor) return true;
+  if (newMinor < oldMinor) return false;
+
+  // condition where minors are same
+  if (newPatch > oldPatch) return true;
+  if (newPatch < oldPatch) return false;
+
+  // condition where the versions are def equal. Time for stage check!
+
+  final isTheOldOneStable = oldSplit.length == 1;
+  final isTheNewOneStable = newSplit.length == 1;
+
+  if(isTheNewOneStable && isTheOldOneStable) return false;
+
+  // check if the the old ver is non-stable and new ver is stable
+  if (!isTheOldOneStable && isTheNewOneStable) {
+    return true; // new stable is always prefered than old unstables
   }
 
-  return false;
+  if(isTheOldOneStable && !isTheNewOneStable) {
+    return false; // prevent from downgrading to a beta of same version
+  }
+
+  final oldStage = oldSplit[1];
+  final newStage = newSplit[1];
+
+  final stageRegex = RegExp(r"([a-z]+)(\d+)?");
+
+  final oldVerMatches = stageRegex.allMatches(oldStage);
+  final newVerMatches = stageRegex.allMatches(newStage);
+
+  if (oldVerMatches.isEmpty || newVerMatches.isEmpty) {
+    return false;
+  }
+
+  final oldStageName = oldVerMatches.firstOrNull?.group(1) ?? '';
+  final newStageName = newVerMatches.firstOrNull?.group(1) ?? '';
+  final oldStageNum = int.tryParse(oldVerMatches.firstOrNull?.group(2) ?? '') ?? 0;
+  final newStageNum = int.tryParse(newVerMatches.firstOrNull?.group(2) ?? '') ?? 0;
+
+  // weights for stages, higher weight means newer stage. if the stage is not recognized, it gets 0 weight by default
+  final stageWeights = {
+    'alpha': 1,
+    'beta': 2,
+    // 'stable': 3,
+    'rc': 3, // release candidate
+  };
+
+  final oldStageWeight = stageWeights[oldStageName] ?? 0;
+  final newStageWeight = stageWeights[newStageName] ?? 0;
+
+  if (newStageWeight > oldStageWeight) return true;
+
+  if (newStageWeight < oldStageWeight) return false;
+
+  return newStageNum > oldStageNum;
 }
 
 showUpdateSheet(BuildContext context, String markdownText, String downloadLink, bool pre, String version,
@@ -151,38 +217,11 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
           width: MediaQuery.sizeOf(context).width / 3,
           child: UpdateSheet(
             downloadLink: downloadLink,
-            // isDesktop: true,
             markdownText: markdownText,
             pre: pre,
             version: version,
           ),
         ),
-        // actions: [
-        //   TextButton(
-        //       onPressed: () async {
-        //         Navigator.of(context).pop();
-        //       },
-        //       child: Text("maybe later")),
-        //   TextButton(
-        //       onPressed: () async {
-        //         final uri = Uri.parse(downloadLink);
-        //         final asset = await get(uri);
-
-        //         final tempPath = await getTemporaryDirectory();
-        //         final downloadPath = "${tempPath.path}/astrm_update.${Platform.isWindows ? "exe" : "apk"}";
-
-        //         await File(downloadPath).writeAsBytes(asset.bodyBytes);
-
-        //         final openRes = await OpenFile.open(downloadPath);
-        //         if (openRes.type == ResultType.done) {
-        //           print("OK! stuff's done");
-        //         }
-        //         // if (!(await launchUrl(uri))) {
-        //         //   throw new Exception("Couldnt launch");
-        //         // }
-        //       },
-        //       child: Text("download")),
-        // ],
       ),
     );
   }
@@ -194,11 +233,49 @@ showUpdateSheet(BuildContext context, String markdownText, String downloadLink, 
     builder: (context) {
       return UpdateSheet(
         downloadLink: downloadLink,
-        // isDesktop: false,
         markdownText: markdownText,
         pre: pre,
-         version: version,
+        version: version,
       );
     },
   );
+}
+
+// just for testing while development. Not used else where in prod
+// ignore: unused_element
+void _testVersionCheck() {
+  print("--- STANDARD UPGRADES (Expected: true) ---");
+  print("1.0.1 > 1.0.0: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.1", "1.0.0")}");
+  print("1.1.0 > 1.0.9: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.1.0", "1.0.9")}");
+  print("2.0.0 > 1.9.9: ${_checkIfTheNewVersionIsActuallyAnUpgrade("2.0.0", "1.9.9")}");
+
+  print("\n--- STAGE UPGRADES (Expected: true) ---");
+  print("1.0.0-beta > 1.0.0-alpha: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta", "1.0.0-alpha")}");
+  print("1.0.0-rc > 1.0.0-beta:    ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-rc", "1.0.0-beta")}");
+  print("1.0.0-beta2 > 1.0.0-beta1: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta2", "1.0.0-beta1")}");
+  print("1.0.0-beta10 > 1.0.0-beta2: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta10", "1.0.0-beta2")}"); // Numeric check
+
+  print("\n--- GRADUATION (Expected: true) ---");
+  print("1.0.0 > 1.0.0-rc:    ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0", "1.0.0-rc")}");
+  print("1.0.0 > 1.0.0-beta:  ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0", "1.0.0-beta")}");
+  print("1.0.0 > 1.0.0-alpha: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0", "1.0.0-alpha")}");
+
+  print("\n--- NO CHANGE / EQUAL (Expected: false) ---");
+  print("1.0.0 vs 1.0.0:       ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0", "1.0.0")}");
+  print("1.0.0-beta vs 1.0.0-beta: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta", "1.0.0-beta")}");
+  print("1.0.5 vs 1.0.5:       ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.5", "1.0.5")}");
+
+  print("\n--- DOWNGRADES (Expected: false) ---");
+  print("1.0.0 < 1.0.1:       ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0", "1.0.1")}");
+  print("0.9.9 < 1.0.0:       ${_checkIfTheNewVersionIsActuallyAnUpgrade("0.9.9", "1.0.0")}");
+  print("1.0.0-alpha < 1.0.0-beta: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-alpha", "1.0.0-beta")}");
+  print("1.0.0-beta1 < 1.0.0-beta2: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta1", "1.0.0-beta2")}");
+
+  print("\n--- STABILITY DOWNGRADES (Expected: false) ---");
+  print("1.0.0-beta < 1.0.0:  ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta", "1.0.0")}");
+  print("1.0.0-rc < 1.0.0:    ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-rc", "1.0.0")}");
+
+  print("\n--- EDGE CASES (Expected: varies) ---");
+  print("1.0.0-beta (implicit 0) < 1.0.0-beta1: ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.0-beta1", "1.0.0-beta")}"); // True
+  print("1.0.1-alpha > 1.0.0 (Version > Stage): ${_checkIfTheNewVersionIsActuallyAnUpgrade("1.0.1-alpha", "1.0.0")}"); // True (Core version is higher)
 }

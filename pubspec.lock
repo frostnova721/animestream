@@ -162,6 +162,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  commentum:
+    dependency: "direct main"
+    description:
+      path: "../../../RandomProjects/commentum-flutter"
+      relative: true
+    source: path
+    version: "1.0.0"
   convert:
     dependency: transitive
     description:

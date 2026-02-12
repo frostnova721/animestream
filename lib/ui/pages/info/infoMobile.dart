@@ -1,4 +1,5 @@
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/ui/models/bottomSheets/commentSection.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -421,7 +422,8 @@ class _InfoMobileState extends State<InfoMobile> {
               provider.epSearcherror = false;
               provider.foundName = null;
             });
-            final links = await SourceManager.instance.getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
+            final links =
+                await SourceManager.instance.getAnimeEpisodes(provider.selectedSource.identifier, result['alias']);
             if (mounted)
               setState(() {
                 provider.paginate(links);
@@ -606,19 +608,19 @@ class _InfoMobileState extends State<InfoMobile> {
                   ),
                 ),
               ),
-              if (provider.lastWatchedDurationMap?[provider.watched < provider.epLinks.length
-                      ? provider.watched + 1
-                      : provider.watched] !=
+              if (provider.lastWatchedDurationMap?[
+                      provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] !=
                   null)
                 Container(
-                  width: 285 * (() {
-                    final raw = provider.lastWatchedDurationMap?[
-                            provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
-                        0;
-                    final val = (raw is num) ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0.0;
-                    if (val.isNaN || val.isInfinite) return 0.0;
-                    return (val / 100).clamp(0.0, 1.0);
-                  })(),
+                  width: 285 *
+                      (() {
+                        final raw = provider.lastWatchedDurationMap?[
+                                provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched] ??
+                            0;
+                        final val = (raw is num) ? raw.toDouble() : double.tryParse(raw.toString()) ?? 0.0;
+                        if (val.isNaN || val.isInfinite) return 0.0;
+                        return (val / 100).clamp(0.0, 1.0);
+                      })(),
                   height: 1.8,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(100),
@@ -1262,8 +1264,7 @@ class _InfoMobileState extends State<InfoMobile> {
             child: Container(
                 width: 130,
                 child: recommended
-                    ? Cards.animeCard(item.id, getTitle(item.title), item.cover,
-                        rating: item.rating)
+                    ? Cards.animeCard(item.id, getTitle(item.title), item.cover, rating: item.rating)
                     : Cards.characterCard(
                         getTitle(item.title),
                         recommended ? item.type : item.relationType!,
@@ -1429,16 +1430,36 @@ class _InfoMobileState extends State<InfoMobile> {
         ),
         Container(
           margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
-          child: IconButton(
-            onPressed: () {
-              Navigator.of(context).pop();
-            },
-            iconSize: 27,
-            icon: Icon(
-              Icons.arrow_back_rounded,
-              color: Colors.white,
-            ),
-            style: IconButton.styleFrom(backgroundColor: Color.fromARGB(69, 0, 0, 0)),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                iconSize: 27,
+                icon: Icon(
+                  Icons.arrow_back_rounded,
+                  color: Colors.white,
+                ),
+                style: IconButton.styleFrom(backgroundColor: Color.fromARGB(69, 0, 0, 0)),
+              ),
+              IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return Commentsection(mediaId: provider.id, userId: storedUserData?.id);
+                      });
+                },
+                iconSize: 27,
+                icon: Icon(
+                  Icons.comment_rounded,
+                  color: Colors.white,
+                ),
+                style: IconButton.styleFrom(backgroundColor: Color.fromARGB(69, 0, 0, 0)),
+              ),
+            ],
           ),
         ),
       ],

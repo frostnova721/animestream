@@ -2,7 +2,7 @@ name: animestream
 description: "A app made to stream and download anime!"
 publish_to: "none" #Dont remove this!
 
-version: 1.4.3+1
+version: 1.4.4-beta1+1
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -66,6 +66,8 @@ dependencies:
 
   # Misc
   flutter_native_splash: ^2.4.7
+  commentum:
+    path: ../../../RandomProjects/commentum-flutter
 
 dev_dependencies:
   flutter_test:

@@ -162,13 +162,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
-  commentum:
+  commentum_client:
     dependency: "direct main"
     description:
-      path: "../../../RandomProjects/commentum-flutter"
-      relative: true
-    source: path
-    version: "1.0.0"
+      path: "."
+      ref: HEAD
+      resolved-ref: ad10acac7a2c73799c4c2b50fed109de418b9282
+      url: "https://github.com/commentum/commentum_client"
+    source: git
+    version: "1.0.3"
   convert:
     dependency: transitive
     description:
@@ -310,14 +312,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.4.1"
-  flutter_dotenv:
-    dependency: "direct main"
-    description:
-      name: flutter_dotenv
-      sha256: d4130c4a43e0b13fefc593bc3961f2cb46e30cb79e253d4a526b1b5d24ae1ce4
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.0"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:

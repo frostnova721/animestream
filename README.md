@@ -47,13 +47,13 @@ flutter pub get
 - To build the apk from the source code, simply run the command below:
 
 ```cmd
-flutter build apk
+flutter build apk --dart-define-from-file=.env
 ```
 
 - To build application for windows, run the following command:
 
 ```cmd
-flutter build windows
+flutter build windows --dart-define-from-file=.env
 ```
 
 - To package the windows application as a setup, run:

@@ -8,7 +8,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+// import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 import 'package:window_manager/window_manager.dart';
@@ -68,7 +68,7 @@ void main(List<String> args) async {
       ..addSources(sm.inbuiltSources)
       ..loadProviders(clearBeforeLoading: false);
 
-    await dotenv.load(fileName: ".env");
+    // await dotenv.load(fileName: ".env");
 
     // if (currentUserSettings?.enableDiscordPresence ?? false) {
     //   await FlutterDiscordRPC.initialize("1362858832266657812");

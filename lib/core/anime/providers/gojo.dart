@@ -7,8 +7,9 @@ import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
-  static const String apiUrl = "https://ani.metsu.site/api/anime";
-  static const String _apiBaseUrl = "https://ani.metsu.site";
+  static const String apiUrl = "https://b.animetsu.live/api/anime";
+  // static const String _apiBaseUrl = "https://b.animetsu.live";
+  static const String _proxyUrl = "https://ani.metsu.site/proxy";
 
   final baseUrl = "https://animetsu.live";
 
@@ -48,7 +49,7 @@ class Gojo extends AnimeProvider {
       final bool isFiller = item['is_filler'];
       String? img = item['img'];
       if (img?.startsWith("/") ?? false) {
-        img = "$_apiBaseUrl/proxy" + img!;
+        img = "$_proxyUrl" + img!;
       }
       final String? title = item['name'];
 
@@ -93,25 +94,30 @@ class Gojo extends AnimeProvider {
       final json = jsonDecode(item.body);
 
       final List<dynamic>? sources = json?['sources'];
-      final List<dynamic>? subtitles = json?['subtitles'];
+      final List<dynamic>? subtitles = json?['subs'];
 
       doneSources++;
 
       if (sources?.isEmpty == true) return update([], doneSources == totalSources);
 
       final provider = item.request?.url.queryParameters['server'] ?? '';
+      final subs = (subtitles?.where((it) => it['lang'] == "English").firstOrNull?['url'] ?? //pick only english
+          subtitles?.firstOrNull?['url']) as String?;
 
       sources?.forEach((i) => update(
             [
               VideoStream(
                 quality: i['quality']?.trim() == 'master' ? "multi-quality" : i['quality'],
-                url: (i['url'] as String).startsWith("/") ? "$_apiBaseUrl/proxy${i['url']}" : i['url'],
+                url: (i['url'] as String).startsWith("/") ? "$_proxyUrl${i['url']}" : i['url'],
                 server: provider,
                 backup: false,
                 subtitleFormat: SubtitleFormat.VTT.name, // gojo uses vtt mainly
                 customHeaders: headers,
-                subtitle: subtitles?.where((it) => it['lang'] == "English").firstOrNull?['url'] ?? //pick only english
-                    subtitles?.firstOrNull?['url'],
+                subtitle: subs != null
+                    ? subs.startsWith("/")
+                        ? "$_proxyUrl${subs}"
+                        : subs
+                    : null,
               )
             ],
             doneSources == totalSources,

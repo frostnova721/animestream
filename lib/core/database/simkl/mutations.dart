@@ -1,10 +1,10 @@
 import 'dart:convert';
 
+import 'package:animestream/core/app/env.dart';
 import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:http/http.dart';
 
-import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/database.dart';
@@ -121,7 +121,7 @@ class SimklMutation extends DatabaseMutation {
     return {
       'Content-Type': "application/json",
       'Authorization': "Bearer $token",
-      'simkl-api-key': simklClientId,
+      'simkl-api-key': AnimeStreamEnvironment.simklClientId,
     };
   }
 

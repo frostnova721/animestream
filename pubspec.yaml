@@ -31,7 +31,6 @@ dependencies:
   provider: ^6.1.2
   file_picker: ^10.2.0
   dynamic_color: ^1.7.0
-  flutter_dotenv: ^6.0.0
   app_links: ^7.0.0
 
   # Local storage
@@ -66,8 +65,9 @@ dependencies:
 
   # Misc
   flutter_native_splash: ^2.4.7
-  commentum:
-    path: ../../../RandomProjects/commentum-flutter
+  commentum_client:
+    git:
+      url: https://github.com/commentum/commentum_client
 
 dev_dependencies:
   flutter_test:
@@ -125,7 +125,6 @@ flutter:
     - lib/assets/images/fluent_max.svg
     - lib/assets/images/fluent_min.svg
     - lib/assets/images/fluent_close.svg
-    - .env
 
   fonts:
     - family: Inter

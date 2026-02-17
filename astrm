@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+if [ ! -f ".env" ]; then
+  echo ".env file not found in the directory. Creating a default .env file..."
+  echo "Please update the .env file with your actual API URL and Simkl credentials for the application to work properly."
+
+  cat <<EOF > .env
+COMMENTUM_API_URL=your_api_url
+SIMKL_CLIENT_ID=your_simkl_client_id
+SIMKL_CLIENT_SECRET=your_simkl_client_secret
+EOF
+fi
+
+echo Running command: flutter "$@" --dart-define-from-file=.env
+
+flutter "$@" --dart-define-from-file=.env

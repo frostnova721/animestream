@@ -167,8 +167,8 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: ad10acac7a2c73799c4c2b50fed109de418b9282
-      url: "https://github.com/commentum/commentum_client"
+      resolved-ref: "799b65232bd60ef8d905f967d2edcd898247519a"
+      url: "https://github.com/frostnova721/commentum_client"
     source: git
     version: "1.0.3"
   convert:

@@ -1,11 +1,16 @@
 import 'package:animestream/core/app/env.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/commentum/commentumTokenStore.dart';
+import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/comment.dart';
+import 'package:animestream/ui/models/widgets/loader.dart';
+import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:commentum_client/commentum_client.dart';
-import 'package:commentum_client/src/models/response.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class Commentsection extends StatefulWidget {
   final int mediaId;
@@ -26,8 +31,9 @@ class _CommentsectionState extends State<Commentsection> {
   @override
   void initState() {
     super.initState();
-    genfakeComments();
-    // fetchComments();
+    commentum.init();
+    // genfakeComments();
+    fetchComments();
   }
 
   final commentum = CommentumClient(
@@ -36,6 +42,7 @@ class _CommentsectionState extends State<Commentsection> {
       baseUrl: AnimeStreamEnvironment.commentumApiUrl,
       enableLogging: kDebugMode,
     ),
+    preferredProvider: CommentumProvider.anilist,
   );
 
   final List<CommentumResponse> paginatedComments = [];
@@ -49,6 +56,10 @@ class _CommentsectionState extends State<Commentsection> {
   bool errored = false;
 
   final _textController = TextEditingController();
+
+  bool showLogin = false;
+
+  bool loading = false;
 
   void genfakeComments() {
     final msgs = [
@@ -98,15 +109,25 @@ class _CommentsectionState extends State<Commentsection> {
   }
 
   Future<void> fetchComments({String? cursor}) async {
-    final res = await commentum.listComments(widget.mediaId.toString(),
-        cursor: cursor ?? paginatedComments.lastOrNull?.nextCursor);
+    setState(() {
+      loading = true;
+    });
 
-    // if (_nextPageCursor == null) reachedEnd = true;
-    paginatedComments.add(res);
-    comments.addAll(res.data);
-    totalComments = res.count;
+    try {
+      final res = await commentum.listComments(widget.mediaId.toString(),
+          cursor: cursor ?? paginatedComments.lastOrNull?.nextCursor);
 
-    setState(() {});
+      // if (_nextPageCursor == null) reachedEnd = true;
+      paginatedComments.add(res);
+      comments.addAll(res.data);
+      totalComments = res.count;
+    } catch (err) {
+      print("$err\nWhile fetching comments.");
+    }
+
+    setState(() {
+      loading = false;
+    });
   }
 
   @override
@@ -137,12 +158,59 @@ class _CommentsectionState extends State<Commentsection> {
               style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
             ),
             Expanded(
-              child: ListView.builder(
-                  itemCount: comments.length,
-                  itemBuilder: (context, index) {
-                    return CommentItem(comment: comments[index]);
-                  }),
-            ),
+                child: showLogin
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Align(
+                              alignment: Alignment.topLeft,
+                            ),
+                            Text(
+                              "Login to Commentum",
+                              style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                TextButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        showLogin = false;
+                                      });
+                                    },
+                                    child: Text("nah")),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    if(!(await AniListLogin().isAnilistLoggedIn())) {
+                                      Navigator.pop(context);
+                                      Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AccountSetting()));
+                                      floatingSnackBar("Login with anilist first!");
+                                    }
+                                    await commentum.login(CommentumProvider.anilist,
+                                        (await FlutterSecureStorage().read(key: SecureStorageKey.anilistToken.value))!);
+                                    if (commentum.isLoggedIn) {
+                                      setState(() {
+                                        showLogin = false;
+                                      });
+                                    }
+                                  },
+                                  child: Text("Login"),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: appTheme.accentColor,
+                                    foregroundColor: appTheme.onAccent,
+                                  ),
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
+                      )
+                    : loading ? Center(child: AnimeStreamLoading(color: appTheme.textMainColor,)) : ListView.builder(
+                        itemCount: comments.length,
+                        itemBuilder: (context, index) {
+                          return CommentItem(comment: comments[index], client: commentum);
+                        })),
             Row(
               children: [
                 CircleAvatar(
@@ -161,23 +229,6 @@ class _CommentsectionState extends State<Commentsection> {
                         hintText: "comment as ${storedUserData!.name}",
                         hintStyle: TextStyle(fontSize: 14, fontFamily: "NotoSans", color: appTheme.textSubColor),
                         focusColor: appTheme.accentColor,
-                        // suffixIcon: Container(
-                        //   decoration: BoxDecoration(
-                        //     borderRadius: BorderRadius.circular(14),
-                        //     // color: appTheme.textMainColor,
-                        //   ),
-                        //   clipBehavior: Clip.antiAlias,
-                        //   child: Material(
-                        //     color: Colors.transparent,
-                        //     child: InkWell(
-                        //       onTap: () {},
-                        //       child: Icon(
-                        //         Icons.send_rounded,
-                        //         color: appTheme.backgroundColor,
-                        //       ),
-                        //     ),
-                        //   ),
-                        // ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(16),
                           borderSide: BorderSide(color: appTheme.textMainColor),
@@ -203,40 +254,47 @@ class _CommentsectionState extends State<Commentsection> {
                           ? null
                           : () async {
                               try {
-                                // final cmt = await commentum.createComment(
-                                //     widget.mediaId.toString(), _textController.text.trim());
-
-                                final cmt = Comment(
-                                  id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                  content: value.text.trim(),
-                                  score: 0,
-                                  status: CommentStatus.active,
-                                  username: storedUserData!.name,
-                                  avatarUrl: storedUserData!.avatar,
-                                  createdAt: DateTime.now(),
-                                  updatedAt: DateTime.now(),
-                                  replies: [],
-                                  hasMoreReplies: false,
-                                  repliesCount: 0,
-                                  userVote: null,
+                                if (!commentum.isLoggedIn) {
+                                  setState(() {
+                                    showLogin = true;
+                                  });
+                                  return;
+                                }
+                                final content = _textController.text.trim();
+                                _textController.clear();
+                                final cmt = await commentum.createComment(
+                                  widget.mediaId.toString(),
+                                  content,
+                                  client: "animestream",
                                 );
 
+                                // final cmt = Comment(
+                                //   id: DateTime.now().millisecondsSinceEpoch.toString(),
+                                //   content: value.text.trim(),
+                                //   score: 0,
+                                //   status: CommentStatus.active,
+                                //   username: storedUserData!.name,
+                                //   avatarUrl: storedUserData!.avatar,
+                                //   createdAt: DateTime.now(),
+                                //   updatedAt: DateTime.now(),
+                                //   replies: [],
+                                //   hasMoreReplies: false,
+                                //   repliesCount: 0,
+                                //   userVote: null,
+                                // );
+
                                 comments.add(cmt);
-                                _textController.clear();
                               } catch (e) {
-                                setState(() {
-                                  errored = true;
-                                });
+                                errored = true;
                               }
+                              setState(() {});
                             },
                       icon: Icon(Icons.send_rounded),
                       style: IconButton.styleFrom(
                           backgroundColor: appTheme.textMainColor,
                           foregroundColor: appTheme.backgroundColor,
                           disabledForegroundColor: appTheme.backgroundColor,
-                          disabledBackgroundColor: appTheme.textMainColor.withAlpha(80)
-                          // shape: RoundedRectangleBorder(borderRadius: BorderRadiusGeometry.circular(12)),
-                          ),
+                          disabledBackgroundColor: appTheme.textMainColor.withAlpha(80)),
                     );
                   },
                 ),

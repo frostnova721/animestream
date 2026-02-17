@@ -1,7 +1,7 @@
 import 'package:commentum_client/commentum_client.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class CommentumTokenStore extends CommentumStorage {
+class CommentumTokenStore implements CommentumStorage {
   String _providerKey(CommentumProvider provider) => "commentum_${provider.name}_token";
 
   final _fss = const FlutterSecureStorage();
@@ -14,17 +14,18 @@ class CommentumTokenStore extends CommentumStorage {
   }
 
   @override
-  Future<void> deleteToken(CommentumProvider provider) {
-    return _fss.delete(key: _providerKey(provider));
+  Future<void> deleteToken(CommentumProvider provider) async {
+    return await _fss.delete(key: _providerKey(provider));
   }
 
   @override
-  Future<String?> getToken(CommentumProvider provider) {
-    return _fss.read(key: _providerKey(provider));
+  Future<String?> getToken(CommentumProvider provider) async {
+    final tkn = await  _fss.read(key: _providerKey(provider));
+    return tkn;
   }
 
   @override
-  Future<void> saveToken(CommentumProvider provider, String token) {
-    return _fss.write(key: _providerKey(provider), value: token);
+  Future<void> saveToken(CommentumProvider provider, String token) async {
+    return await _fss.write(key: _providerKey(provider), value: token);
   }
 }

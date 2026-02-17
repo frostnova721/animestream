@@ -4,13 +4,20 @@ import 'package:flutter/material.dart';
 
 class CommentItem extends StatefulWidget {
   final Comment comment;
-  const CommentItem({super.key, required this.comment});
+  final CommentumClient client;
+  const CommentItem({super.key, required this.comment, required this.client});
 
   @override
   State<CommentItem> createState() => _CommentItemState();
 }
 
 class _CommentItemState extends State<CommentItem> {
+  @override
+  void initState() {
+    voteState = widget.comment.userVote ?? 0;
+    super.initState();
+  }
+
   String _getFriendlyTimeDifference() {
     final diff = DateTime.now().difference(widget.comment.updatedAt);
     if (diff.inDays > 0) return "${diff.inDays} day${diff.inDays > 1 ? "s" : ''} ago";
@@ -18,6 +25,8 @@ class _CommentItemState extends State<CommentItem> {
     if (diff.inMinutes > 0) return "${diff.inMinutes} minute${diff.inMinutes > 1 ? "s" : ''} ago";
     return "just now";
   }
+
+  late int voteState; // 1 = upvote, 0 = no vote, -1 = downvote
 
   @override
   Widget build(BuildContext context) {
@@ -63,28 +72,45 @@ class _CommentItemState extends State<CommentItem> {
             child: Row(
               children: [
                 _buildVoteButton(
-                    icon: Icons.keyboard_arrow_up_rounded, active: widget.comment.userVote == 1, onPressed: () {}),
+                  icon: Icons.keyboard_arrow_up_rounded,
+                  active: voteState == 1,
+                  onPressed: () {
+                    setState(() {
+                      voteState = voteState == 1 ? 0 : 1;
+                      widget.comment.upVote(widget.client).catchError((err) {
+                        // do nothing for now atleast
+                        print(err);
+                      });
+                    });
+                  },
+                ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Text("${widget.comment.score}"),
+                  child: Text("${widget.comment.score + voteState}"),
                 ),
                 _buildVoteButton(
                     icon: Icons.keyboard_arrow_down_rounded,
-                    active: widget.comment.userVote == -1,
+                    active: voteState == -1,
                     onPressed: () {
-                      // Handle downvote logic
+                      setState(() {
+                        voteState = voteState == -1 ? 0 : -1;
+                        widget.comment.downVote(widget.client).catchError((err) {
+                        // do nothing for now atleast
+                        print(err);
+                      });;
+                      });
                     }),
                 Spacer(),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(color: appTheme.backgroundColor, borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(color: appTheme.backgroundColor, borderRadius: BorderRadius.circular(12)),
                     child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("${widget.comment.repliesCount} "),
-                    Icon(Icons.reply_rounded),
-                  ],
-                )),
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text("${widget.comment.repliesCount} "),
+                        Icon(Icons.reply_rounded),
+                      ],
+                    )),
               ],
             ),
           )

@@ -44,23 +44,28 @@ flutter pub get
 
 - Setup key.properties in `android/` directory
 
+> `./astrm` is just a script to run the flutter commands without needing to add the dart define args everytime! 
+
 - To build the apk from the source code, simply run the command below:
 
 ```cmd
-flutter build apk --dart-define-from-file=.env
+./astrm build apk
 ```
 
 - To build application for windows, run the following command:
 
 ```cmd
-flutter build windows --dart-define-from-file=.env
+./astrm build windows
 ```
 
 - To package the windows application as a setup, run:
 
 ```cmd
-dart run inno_bundle:build --release
+dart run inno_bundle:build --release --build-args="--dart-define-from-file=.env"
 ```
+
+If you havent installed inno setup on your machine, install it first before building the windows setup:
+[install inno setup](https://github.com/hahouari/inno_bundle/wiki/Install-Inno-Setup)
 
 PS: Your machine needs to have flutter installed. [Install flutter](https://docs.flutter.dev/get-started/install)
 

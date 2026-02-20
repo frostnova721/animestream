@@ -954,6 +954,7 @@ class _InfoMobileState extends State<InfoMobile> {
                             child: Image.network(
                               provider.visibleEpList[provider.currentPageIndex][index]['epLink'].thumbnail ??
                                   provider.data.cover,
+                                  headers: { "User-Agent" : "Mozilla"},
                               fit: BoxFit.cover,
                               width: 165,
                               height: 110,

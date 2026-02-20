@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
+import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -278,39 +281,80 @@ class _HomeState extends State<Home> {
                   strokeWidth: 2,
                 ),
               ),
+            Spacer(),
+            IconButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                      context: context,
+                      showDragHandle: true,
+                      builder: (context) {
+                        return Column(
+                          children: [
+                            Text(title),
+                            Expanded(
+                              child: GridView.builder(
+                                padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
+                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                                  maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+                                  mainAxisExtent: Platform.isAndroid ? 220 : 260,
+                                  // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                                  childAspectRatio: 120 / 220,
+                                  mainAxisSpacing: 10,
+                                ),
+                                itemCount: list.items.length,
+                                itemBuilder: (context, index) {
+                                  final item = list.items[index];
+                                  return Center(
+                                    child: Cards.animeCard(
+                                      item.id,
+                                      item.title['english'] ?? item.title['romaji'] ?? "",
+                                      item.coverImage,
+                                      rating: item.rating,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ],
+                        );
+                      });
+                },
+                icon: Icon(
+                  Icons.arrow_forward_ios,
+                  size: 18,
+                ))
           ],
         ),
         Container(
           height: 160,
-          child:
-               list.state.isError
-                  ? Center(
-                      child: Container(
-                        alignment: Alignment.center,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Image.asset(
-                              "lib/assets/images/ghost.png",
-                              color: Color.fromARGB(255, 80, 80, 80),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 10.0),
-                              child: Text(
-                                "Aww... Something's wrong!",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                  fontFamily: "NunitoSans",
-                                  fontWeight: FontWeight.w500,
-                                  color: Color.fromARGB(255, 80, 80, 80),
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ),
-                          ],
+          child: list.state.isError
+              ? Center(
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Image.asset(
+                          "lib/assets/images/ghost.png",
+                          color: Color.fromARGB(255, 80, 80, 80),
                         ),
-                      ),
-                    )
+                        Padding(
+                          padding: const EdgeInsets.only(top: 10.0),
+                          child: Text(
+                            "Aww... Something's wrong!",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: "NunitoSans",
+                              fontWeight: FontWeight.w500,
+                              color: Color.fromARGB(255, 80, 80, 80),
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                )
               : list.state.isLoaded
                   ? list.items.length > 0
                       // condition where list loaded and has items
@@ -363,7 +407,7 @@ class _HomeState extends State<Home> {
                           ),
                         )
 
-                    // Still in loading phase!
+                  // Still in loading phase!
                   : Center(
                       child: CircularProgressIndicator(
                         color: appTheme.accentColor,

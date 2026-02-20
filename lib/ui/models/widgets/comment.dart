@@ -15,6 +15,7 @@ class _CommentItemState extends State<CommentItem> {
   @override
   void initState() {
     voteState = widget.comment.userVote ?? 0;
+    score = widget.comment.score;
     super.initState();
   }
 
@@ -27,6 +28,7 @@ class _CommentItemState extends State<CommentItem> {
   }
 
   late int voteState; // 1 = upvote, 0 = no vote, -1 = downvote
+  late int score;
 
   @override
   Widget build(BuildContext context) {
@@ -75,29 +77,45 @@ class _CommentItemState extends State<CommentItem> {
                   icon: Icons.keyboard_arrow_up_rounded,
                   active: voteState == 1,
                   onPressed: () {
+                    final prevState = voteState;
+
                     setState(() {
+                      score = voteState == 1 ? score - 1 : score + 1;
                       voteState = voteState == 1 ? 0 : 1;
-                      widget.comment.upVote(widget.client).catchError((err) {
-                        // do nothing for now atleast
-                        print(err);
+                    });
+
+                    widget.comment.upVote(widget.client).catchError((err) {
+                      // do nothing for now atleast
+                      print(err);
+                      setState(() {
+                        voteState = prevState;
+                        score = voteState == 1 ? score + 1 : score - 1;
                       });
                     });
                   },
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 2),
-                  child: Text("${widget.comment.score + voteState}"),
+                  child: Text("${score}"),
                 ),
                 _buildVoteButton(
                     icon: Icons.keyboard_arrow_down_rounded,
                     active: voteState == -1,
                     onPressed: () {
+                      final prevState = voteState;
+
                       setState(() {
+                        score = voteState == -1 ? score + 1 : score - 1;
                         voteState = voteState == -1 ? 0 : -1;
-                        widget.comment.downVote(widget.client).catchError((err) {
+                      });
+
+                      widget.comment.downVote(widget.client).catchError((err) {
                         // do nothing for now atleast
                         print(err);
-                      });;
+                        setState(() {
+                          voteState = prevState;
+                          score = voteState == -1 ? score - 1 : score + 1;
+                        });
                       });
                     }),
                 Spacer(),

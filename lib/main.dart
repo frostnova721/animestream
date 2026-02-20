@@ -32,6 +32,15 @@ import 'package:animestream/ui/theme/lime.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
 
+class _HttpOverrides extends HttpOverrides {
+  @override
+  HttpClient createHttpClient(SecurityContext? context) {
+    return super.createHttpClient(context)
+      ..userAgent =
+          'Mozilla/5.0 (Linux; Android 15; Pixel 9 Pro Build/AD1A.240418.003; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/124.0.6367.54 Mobile Safari/537.36';
+  }
+}
+
 void main(List<String> args) async {
   try {
     if (runWebViewTitleBarWidget(args)) {
@@ -68,6 +77,8 @@ void main(List<String> args) async {
       ..addSources(sm.inbuiltSources)
       ..loadProviders(clearBeforeLoading: false);
 
+    HttpOverrides.global = _HttpOverrides();
+
     // await dotenv.load(fileName: ".env");
 
     // if (currentUserSettings?.enableDiscordPresence ?? false) {
@@ -77,7 +88,7 @@ void main(List<String> args) async {
     // FlutterError.onError = (FlutterErrorDetails details) async {
     //   FlutterError.presentError(details);
 
-    //   // force add these error to logs 
+    //   // force add these error to logs
     //   Logs.app.log(details.exceptionAsString() + "\n${details.stack.toString()}", addToBuffer: true);
     //   await Logs.writeAllLogs();
 
@@ -244,7 +255,7 @@ class _AnimeStreamState extends State<AnimeStream> {
       child: DynamicColorBuilder(
         builder: (lightScheme, darkScheme) {
           late AnimeStreamTheme scheme;
-      
+
           //just checks for dark mode and sets the appTheme variable with suitable theme
           if (currentUserSettings?.darkMode ?? true) {
             scheme = AnimeStreamTheme(
@@ -269,7 +280,7 @@ class _AnimeStreamState extends State<AnimeStream> {
               onAccent: lightScheme?.onPrimary ?? appTheme.onAccent,
             );
           }
-      
+
           if (currentUserSettings?.materialTheme ?? false) {
             appTheme = scheme;
             // print("[THEME] Applying Material You Theme");
@@ -290,9 +301,9 @@ class _AnimeStreamState extends State<AnimeStream> {
             //   onAccent: t.onPrimary,
             // );
           }
-      
+
           final themeProvider = Provider.of<AppProvider>(context);
-      
+
           return MaterialApp(
             title: 'Animestream',
             navigatorKey: AnimeStream.navigatorKey,
@@ -310,9 +321,7 @@ class _AnimeStreamState extends State<AnimeStream> {
                 iconTheme: IconThemeData(color: appTheme.textMainColor)),
             home: ChangeNotifierProvider(
               create: (context) => MainNavProvider(),
-              child: Platform.isWindows
-                  ? AppWrapper(firstPage: MainNavigator())
-                  : MainNavigator(),
+              child: Platform.isWindows ? AppWrapper(firstPage: MainNavigator()) : MainNavigator(),
             ),
             debugShowCheckedModeBanner: false,
           );

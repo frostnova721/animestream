@@ -31,9 +31,10 @@ class _CommentsectionState extends State<Commentsection> {
   @override
   void initState() {
     super.initState();
-    commentum.init();
+    commentum.init().then((_) {
+      fetchComments();
+    });
     // genfakeComments();
-    fetchComments();
   }
 
   final commentum = CommentumClient(
@@ -41,6 +42,8 @@ class _CommentsectionState extends State<Commentsection> {
     config: CommentumConfig(
       baseUrl: AnimeStreamEnvironment.commentumApiUrl,
       enableLogging: kDebugMode,
+      verboseLogging: kDebugMode,
+      appClient: "animestream",
     ),
     preferredProvider: CommentumProvider.anilist,
   );
@@ -182,7 +185,7 @@ class _CommentsectionState extends State<Commentsection> {
                                     child: Text("nah")),
                                 ElevatedButton(
                                   onPressed: () async {
-                                    if(!(await AniListLogin().isAnilistLoggedIn())) {
+                                    if (!(await AniListLogin().isAnilistLoggedIn())) {
                                       Navigator.pop(context);
                                       Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AccountSetting()));
                                       floatingSnackBar("Login with anilist first!");
@@ -206,11 +209,16 @@ class _CommentsectionState extends State<Commentsection> {
                           ],
                         ),
                       )
-                    : loading ? Center(child: AnimeStreamLoading(color: appTheme.textMainColor,)) : ListView.builder(
-                        itemCount: comments.length,
-                        itemBuilder: (context, index) {
-                          return CommentItem(comment: comments[index], client: commentum);
-                        })),
+                    : loading
+                        ? Center(
+                            child: AnimeStreamLoading(
+                            color: appTheme.textMainColor,
+                          ))
+                        : ListView.builder(
+                            itemCount: comments.length,
+                            itemBuilder: (context, index) {
+                              return CommentItem(comment: comments[index], client: commentum);
+                            })),
             Row(
               children: [
                 CircleAvatar(
@@ -264,8 +272,8 @@ class _CommentsectionState extends State<Commentsection> {
                                 _textController.clear();
                                 final cmt = await commentum.createComment(
                                   widget.mediaId.toString(),
+                                  "anilist",
                                   content,
-                                  client: "animestream",
                                 );
 
                                 // final cmt = Comment(

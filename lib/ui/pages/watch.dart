@@ -47,6 +47,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initialize();
+      _initCallbacks(context);
     });
 
     WidgetsBinding.instance.addObserver(this);
@@ -55,14 +56,30 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
+    print(state);
 
-    if (state == AppLifecycleState.inactive && (currentUserSettings?.enablePipOnMinimize ?? false)) {
-      context.read<PlayerProvider>().setPip(true);
+    // only android and ios has the 'paused' state
+    if (state == (Platform.isWindows ? AppLifecycleState.inactive : AppLifecycleState.hidden) &&
+        (currentUserSettings?.enablePipOnMinimize ?? false)) {
+      // context.read<PlayerProvider>().setPip(true);
     }
-    // else if(state == AppLifecycleState.resumed) {
-    //   context.read<PlayerProvider>().setPip(false);
-    //   setWatchMode();
+    // else if (state == AppLifecycleState.resumed) {
+    // context.read<PlayerProvider>().setPip(false);
+    // setWatchMode();
     // }
+  }
+
+  final _channel = MethodChannel('animestream.app/utils');
+
+  void _initCallbacks(BuildContext context) {
+    _channel.setMethodCallHandler((call) async {
+      if (call.method == "onUserLeaveHint") {
+        if (currentUserSettings?.enablePipOnMinimize ?? false) {
+           context.read<PlayerProvider>().setPip(true);
+          // await _channel.invokeMethod('enterPip');
+        }
+      }
+    });
   }
 
   void setWatchMode() {
@@ -134,7 +151,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         (controller as BetterPlayerWrapper).controller.addEventsListener((ev) {
           if (ev.betterPlayerEventType == BetterPlayerEventType.pipStop) {
             // The delay is required (cus its ignored without the delay for some reason)
-            Future.delayed(Duration(milliseconds: 200), () {
+            Future.delayed(Duration(milliseconds: 250), () {
               if (mounted) {
                 setWatchMode();
                 context.read<PlayerProvider>().handleWakelock();
@@ -216,15 +233,15 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
       if (isAtOp) {
         _isSkippingOpOrEd = true;
-        Logs.player.log(
-            "Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
+        Logs.player
+            .log("Auto skipping OP from ${dataProvider.state.opSkip!.start}s to ${dataProvider.state.opSkip!.end}s");
         playerProvider
             .fastForward(dataProvider.state.opSkip!.end - currentPositionInSeconds + 1)
             .then((_) => _isSkippingOpOrEd = false);
       } else if (isAtEd) {
         _isSkippingOpOrEd = true;
-       Logs.player.log(
-            "Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
+        Logs.player
+            .log("Auto skipping ED from ${dataProvider.state.edSkip!.start}s to ${dataProvider.state.edSkip!.end}s");
         playerProvider
             .fastForward(dataProvider.state.edSkip!.end - currentPositionInSeconds)
             .then((_) => _isSkippingOpOrEd = false);

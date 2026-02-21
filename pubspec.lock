@@ -165,9 +165,11 @@ packages:
   commentum_client:
     dependency: "direct main"
     description:
-      path: "../../commentum_client"
-      relative: true
-    source: path
+      path: "."
+      ref: HEAD
+      resolved-ref: "290e5a7520b94b395657776398998805f9e61d17"
+      url: "https://github.com/frostnova721/commentum_client"
+    source: git
     version: "1.0.4"
   convert:
     dependency: transitive

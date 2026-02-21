@@ -66,9 +66,9 @@ dependencies:
   # Misc
   flutter_native_splash: ^2.4.7
   commentum_client:
-    path: ../../commentum_client
-    # git:
-      # url: https://github.com/frostnova721/commentum_client
+    # path: ../../commentum_client
+    git:
+      url: https://github.com/frostnova721/commentum_client
 
 dev_dependencies:
   flutter_test:

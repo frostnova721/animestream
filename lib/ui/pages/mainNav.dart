@@ -231,7 +231,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
           accentColor: appTheme.accentColor,
           backgroundColor:
               appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
-          borderRadius: 10,
+          borderRadius: 12,
           items: [
             BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
             BottomBarItem(title: 'Discover', icon: Icon(Icons.auto_awesome)),

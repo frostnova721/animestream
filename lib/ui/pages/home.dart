@@ -2,7 +2,6 @@ import 'dart:io';
 
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
-import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -289,11 +288,15 @@ class _HomeState extends State<Home> {
                       showDragHandle: true,
                       builder: (context) {
                         return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(title),
+                            Padding(
+                              padding: const EdgeInsets.only(left: 16, bottom: 12),
+                              child: Text(title, style: textStyle(),),
+                            ),
                             Expanded(
                               child: GridView.builder(
-                                padding: EdgeInsets.only(top: 20, bottom: MediaQuery.of(context).padding.bottom),
+                                padding: EdgeInsets.only( bottom: MediaQuery.of(context).padding.bottom),
                                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
                                   mainAxisExtent: Platform.isAndroid ? 220 : 260,

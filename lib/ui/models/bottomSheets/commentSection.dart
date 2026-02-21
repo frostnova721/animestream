@@ -60,56 +60,11 @@ class _CommentsectionState extends State<Commentsection> {
 
   final _textController = TextEditingController();
 
+  String? commentContentCache;
+
   bool showLogin = false;
 
   bool loading = false;
-
-  void genfakeComments() {
-    final msgs = [
-      "goated anime",
-      "ts so trash",
-      "wasted my time lmao",
-      "who ever drew ts needs a raise",
-      "the mc is so based",
-      "the op slaps",
-      "the ed is a bop",
-      "the animation is god tier",
-      "the story is so good",
-      "the characters are so well written",
-      "fuck this anime and everyone who likes it.asdddddddddddddddddddddddddddddddddddddddddddddddddd",
-    ];
-
-    final usernames = [
-      "animeFan123",
-      "otakuGirl",
-      "mangaLover",
-      "weebMaster",
-      "kawaiiSenpai",
-      "shonenKing",
-      "shojoQueen",
-      "animeAddict",
-      "cosplayPro",
-      "animeCritic",
-      "niggasOnMyAnime",
-    ];
-
-    for (int i = 0; i < msgs.length; i++) {
-      comments.add(Comment(
-        id: i.toString(),
-        createdAt: DateTime.now().subtract(Duration(minutes: i * 5)),
-        hasMoreReplies: false,
-        replies: [],
-        repliesCount: 0,
-        score: i * 5,
-        userVote: i % 2 == 0 ? 1 : -1,
-        status: CommentStatus.active,
-        content: msgs[i],
-        username: usernames[i],
-        avatarUrl: "https://i.pravatar.cc/150?img=$i",
-        updatedAt: DateTime.now().subtract(Duration(minutes: i * 5)),
-      ));
-    }
-  }
 
   Future<void> fetchComments({String? cursor}) async {
     setState(() {
@@ -125,7 +80,7 @@ class _CommentsectionState extends State<Commentsection> {
       comments.addAll(res.data);
       totalComments = res.count;
     } catch (err) {
-      print("$err\nWhile fetching comments.");
+      print("$err While fetching comments.");
     }
 
     setState(() {
@@ -261,40 +216,29 @@ class _CommentsectionState extends State<Commentsection> {
                       onPressed: value.text.isEmpty
                           ? null
                           : () async {
+                              if (!commentum.isLoggedIn) {
+                                setState(() {
+                                  showLogin = true;
+                                });
+                                return;
+                              }
+
+                              final content = _textController.text.trim();
+                              commentContentCache = content;
+                              _textController.clear();
+
                               try {
-                                if (!commentum.isLoggedIn) {
-                                  setState(() {
-                                    showLogin = true;
-                                  });
-                                  return;
-                                }
-                                final content = _textController.text.trim();
-                                _textController.clear();
                                 final cmt = await commentum.createComment(
                                   widget.mediaId.toString(),
                                   "anilist",
                                   content,
                                 );
-
-                                // final cmt = Comment(
-                                //   id: DateTime.now().millisecondsSinceEpoch.toString(),
-                                //   content: value.text.trim(),
-                                //   score: 0,
-                                //   status: CommentStatus.active,
-                                //   username: storedUserData!.name,
-                                //   avatarUrl: storedUserData!.avatar,
-                                //   createdAt: DateTime.now(),
-                                //   updatedAt: DateTime.now(),
-                                //   replies: [],
-                                //   hasMoreReplies: false,
-                                //   repliesCount: 0,
-                                //   userVote: null,
-                                // );
-
                                 comments.add(cmt);
                               } catch (e) {
                                 errored = true;
+                                commentContentCache = content;
                               }
+
                               setState(() {});
                             },
                       icon: Icon(Icons.send_rounded),

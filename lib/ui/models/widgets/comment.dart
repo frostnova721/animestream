@@ -78,10 +78,11 @@ class _CommentItemState extends State<CommentItem> {
                   active: voteState == 1,
                   onPressed: () {
                     final prevState = voteState;
+                    final prevScore = score;
 
                     setState(() {
-                      score = voteState == 1 ? score - 1 : score + 1;
                       voteState = voteState == 1 ? 0 : 1;
+                      score += (voteState - prevState);
                     });
 
                     widget.comment.upVote(widget.client).catchError((err) {
@@ -89,7 +90,7 @@ class _CommentItemState extends State<CommentItem> {
                       print(err);
                       setState(() {
                         voteState = prevState;
-                        score = voteState == 1 ? score + 1 : score - 1;
+                        score = prevScore;
                       });
                     });
                   },
@@ -103,10 +104,11 @@ class _CommentItemState extends State<CommentItem> {
                     active: voteState == -1,
                     onPressed: () {
                       final prevState = voteState;
+                      final prevScore = score;
 
                       setState(() {
-                        score = voteState == -1 ? score + 1 : score - 1;
                         voteState = voteState == -1 ? 0 : -1;
+                        score += (voteState - prevState);
                       });
 
                       widget.comment.downVote(widget.client).catchError((err) {
@@ -114,7 +116,7 @@ class _CommentItemState extends State<CommentItem> {
                         print(err);
                         setState(() {
                           voteState = prevState;
-                          score = voteState == -1 ? score - 1 : score + 1;
+                          score = prevScore;
                         });
                       });
                     }),

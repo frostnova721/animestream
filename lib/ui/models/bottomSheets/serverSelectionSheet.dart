@@ -161,9 +161,19 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
           Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.only(bottom: 10, left: 10),
-            child: Text(
-              "Select Server",
-              style: textStyle().copyWith(fontSize: 23),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "Select Server",
+                  style: textStyle().copyWith(fontSize: 23),
+                ),
+                Text(
+                  "Episode ${widget.episodeIndex + 1}",
+                 style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik")
+                ),
+              ],
             ),
           ),
           _isLoading
@@ -353,7 +363,8 @@ class _DownloadTile extends StatelessWidget {
               children: [
                 Padding(
                   padding: EdgeInsets.only(top: 5),
-                  child: Row(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         "${quality['server']}",
@@ -364,7 +375,7 @@ class _DownloadTile extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        "• ${quality['quality']}",
+                        "${quality['quality']}",
                         style: TextStyle(
                           color: appTheme.textMainColor,
                           fontSize: 18,

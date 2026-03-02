@@ -44,7 +44,7 @@ class AnimePahe extends AnimeProvider {
     final int totalPages = bodyDecoded['last_page'];
 
     for (int i = 1; i < totalPages; i++) {
-      if (i > 5) break; //sorry long episoded anime fans, its just not worth 40 requests. the time it gon take is huge!
+      if (i > 6) break; //sorry long episoded anime fans, its just not worth 40 requests. the time it gon take is huge!
       final res = await http.get(Uri.parse("$url&page=${i + 1}"), headers: _headers);
       list.add(json.decode(res.body)['data']);
     }

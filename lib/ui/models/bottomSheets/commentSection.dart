@@ -1,4 +1,5 @@
 import 'package:animestream/core/app/env.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/login.dart';
@@ -66,6 +67,10 @@ class _CommentsectionState extends State<Commentsection> {
 
   bool loading = false;
 
+  bool replyMode = false;
+
+  int? activeCommentIndex;
+
   Future<void> fetchComments({String? cursor}) async {
     setState(() {
       loading = true;
@@ -90,169 +95,206 @@ class _CommentsectionState extends State<Commentsection> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-      child: Container(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-          left: 24,
-          right: 24,
-          top: 24,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              "Comments",
-              style: TextStyle(
-                color: appTheme.textMainColor,
-                fontFamily: "Rubik",
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              "${totalComments ?? comments.length} items",
-              style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
-            ),
-            Expanded(
-                child: showLogin
-                    ? Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Align(
-                              alignment: Alignment.topLeft,
-                            ),
-                            Text(
-                              "Login to Commentum",
-                              style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TextButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        showLogin = false;
-                                      });
-                                    },
-                                    child: Text("nah")),
-                                ElevatedButton(
-                                  onPressed: () async {
-                                    if (!(await AniListLogin().isAnilistLoggedIn())) {
-                                      Navigator.pop(context);
-                                      Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AccountSetting()));
-                                      floatingSnackBar("Login with anilist first!");
-                                    }
-                                    await commentum.login(CommentumProvider.anilist,
-                                        (await FlutterSecureStorage().read(key: SecureStorageKey.anilistToken.value))!);
-                                    if (commentum.isLoggedIn) {
-                                      setState(() {
-                                        showLogin = false;
-                                      });
-                                    }
-                                  },
-                                  child: Text("Login"),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: appTheme.accentColor,
-                                    foregroundColor: appTheme.onAccent,
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      )
-                    : loading
-                        ? Center(
-                            child: AnimeStreamLoading(
-                            color: appTheme.textMainColor,
-                          ))
-                        : ListView.builder(
-                            itemCount: comments.length,
-                            itemBuilder: (context, index) {
-                              return CommentItem(comment: comments[index], client: commentum);
-                            })),
-            Row(
-              children: [
-                CircleAvatar(
-                  foregroundImage: NetworkImage(storedUserData!.avatar!),
-                  minRadius: 22,
+    return PopScope(
+      canPop: !replyMode,
+      onPopInvokedWithResult: (didPop, result) {
+        setState(() {
+          if (replyMode) replyMode = false;
+        });
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        child: Container(
+          padding: EdgeInsets.only(
+            bottom: MediaQuery.of(context).viewInsets.bottom,
+            left: 24,
+            right: 24,
+            top: 24,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                replyMode ? "Replies" : "Comments",
+                style: TextStyle(
+                  color: appTheme.textMainColor,
+                  fontFamily: "Rubik",
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
                 ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 8, right: 8),
-                    child: TextField(
-                      controller: _textController,
-                      onTapOutside: (event) {
-                        FocusManager.instance.primaryFocus?.unfocus();
-                      },
-                      decoration: InputDecoration(
-                        hintText: "comment as ${storedUserData!.name}",
-                        hintStyle: TextStyle(fontSize: 14, fontFamily: "NotoSans", color: appTheme.textSubColor),
-                        focusColor: appTheme.accentColor,
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: appTheme.textMainColor),
+              ),
+              Text(
+                "${replyMode ? comments[activeCommentIndex!].replies.length : totalComments ?? comments.length} items",
+                style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
+              ),
+              Expanded(
+                  child: showLogin
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Align(
+                                alignment: Alignment.topLeft,
+                              ),
+                              Text(
+                                "Login to Commentum",
+                                style: TextStyle(fontSize: 18, fontFamily: "Poppins"),
+                              ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  TextButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          showLogin = false;
+                                        });
+                                      },
+                                      child: Text("nah")),
+                                  ElevatedButton(
+                                    onPressed: () async {
+                                      if (!(await AniListLogin().isAnilistLoggedIn())) {
+                                        Navigator.pop(context);
+                                        Navigator.of(context)
+                                            .push(MaterialPageRoute(builder: (ctx) => AccountSetting()));
+                                        floatingSnackBar("Login with anilist first!");
+                                      }
+                                      await commentum.login(
+                                          CommentumProvider.anilist,
+                                          (await FlutterSecureStorage()
+                                              .read(key: SecureStorageKey.anilistToken.value))!);
+                                      if (commentum.isLoggedIn) {
+                                        setState(() {
+                                          showLogin = false;
+                                        });
+                                      }
+                                    },
+                                    child: Text("Login"),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor: appTheme.accentColor,
+                                      foregroundColor: appTheme.onAccent,
+                                    ),
+                                  ),
+                                ],
+                              )
+                            ],
+                          ),
+                        )
+                      : loading
+                          ? Center(
+                              child: AnimeStreamLoading(
+                              color: appTheme.textMainColor,
+                            ))
+                          : replyMode
+                              ? ListView.builder(
+                                  itemCount: comments[activeCommentIndex!].replies.length,
+                                  itemBuilder: (context, index) {
+                                    return CommentItem(
+                                        comment: comments[activeCommentIndex!].replies[index], client: commentum);
+                                  })
+                              : ListView.builder(
+                                  itemCount: comments.length,
+                                  itemBuilder: (context, index) {
+                                    return GestureDetector(
+                                        onTap: () {
+                                          if (kDebugMode)
+                                            setState(() {
+                                              activeCommentIndex = index;
+                                              replyMode = true;
+                                            });
+                                        },
+                                        child: CommentItem(comment: comments[index], client: commentum));
+                                  })),
+              Row(
+                children: [
+                  CircleAvatar(
+                    foregroundImage: NetworkImage(storedUserData!.avatar!),
+                    minRadius: 22,
+                  ),
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.only(left: 8, right: 8),
+                      child: TextField(
+                        controller: _textController,
+                        onTapOutside: (event) {
+                          FocusManager.instance.primaryFocus?.unfocus();
+                        },
+                        decoration: InputDecoration(
+                          hintText: replyMode
+                              ? "reply to @${comments[activeCommentIndex!].username}"
+                              : "comment as ${storedUserData!.name}",
+                          hintStyle: TextStyle(fontSize: 14, fontFamily: "NotoSans", color: appTheme.textSubColor),
+                          focusColor: appTheme.accentColor,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: appTheme.textMainColor),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: appTheme.textMainColor),
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(16),
+                            borderSide: BorderSide(color: appTheme.textMainColor),
+                          ),
+                          contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                         ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: appTheme.textMainColor),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(16),
-                          borderSide: BorderSide(color: appTheme.textMainColor),
-                        ),
-                        contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 0),
                       ),
                     ),
                   ),
-                ),
-                ValueListenableBuilder(
-                  valueListenable: _textController,
-                  builder: (context, value, child) {
-                    return IconButton.filled(
-                      onPressed: value.text.isEmpty
-                          ? null
-                          : () async {
-                              if (!commentum.isLoggedIn) {
-                                setState(() {
-                                  showLogin = true;
-                                });
-                                return;
-                              }
+                  ValueListenableBuilder(
+                    valueListenable: _textController,
+                    builder: (context, value, child) {
+                      return IconButton.filled(
+                        onPressed: value.text.isEmpty
+                            ? null
+                            : () async {
+                                // if (replyMode) return print("${comments[activeCommentIndex!].parentId}");
+                                if (!commentum.isLoggedIn) {
+                                  print("Not logged in with commentum.");
+                                  setState(() {
+                                    showLogin = true;
+                                  });
+                                  return;
+                                }
 
-                              final content = _textController.text.trim();
-                              commentContentCache = content;
-                              _textController.clear();
-
-                              try {
-                                final cmt = await commentum.createComment(
-                                  widget.mediaId.toString(),
-                                  "anilist",
-                                  content,
-                                );
-                                comments.add(cmt);
-                              } catch (e) {
-                                errored = true;
+                                final content = _textController.text.trim();
                                 commentContentCache = content;
-                              }
+                                _textController.clear();
 
-                              setState(() {});
-                            },
-                      icon: Icon(Icons.send_rounded),
-                      style: IconButton.styleFrom(
-                          backgroundColor: appTheme.textMainColor,
-                          foregroundColor: appTheme.backgroundColor,
-                          disabledForegroundColor: appTheme.backgroundColor,
-                          disabledBackgroundColor: appTheme.textMainColor.withAlpha(80)),
-                    );
-                  },
-                ),
-              ],
-            )
-          ],
+                                try {
+                                  if (replyMode) {
+                                    final cmt = await commentum.createReply(comments[activeCommentIndex!].id, content);
+                                    print("cmt: $cmt");
+                                    comments[activeCommentIndex!].replies.add(cmt);
+                                  } else {
+                                    final cmt = await commentum.createComment(
+                                      widget.mediaId.toString(),
+                                      "anilist",
+                                      content,
+                                    );
+                                    comments.add(cmt);
+                                  }
+                                } catch (e) {
+                                  errored = true;
+                                  _textController.text = content;
+                                  Logs.app.log(e.toString());
+                                }
+
+                                setState(() {});
+                              },
+                        icon: Icon(Icons.send_rounded),
+                        style: IconButton.styleFrom(
+                            backgroundColor: appTheme.textMainColor,
+                            foregroundColor: appTheme.backgroundColor,
+                            disabledForegroundColor: appTheme.backgroundColor,
+                            disabledBackgroundColor: appTheme.textMainColor.withAlpha(80)),
+                      );
+                    },
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

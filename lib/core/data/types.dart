@@ -72,6 +72,9 @@ class SettingsModal {
   /// Enable logging throughout the app
   final bool? enableLogging;
 
+  /// Tap and Hold to speed up the player 
+  final bool? enableHoldToSpeedUp;
+
   SettingsModal({
     this.megaSkipDuration,
     this.skipDuration,
@@ -95,6 +98,7 @@ class SettingsModal {
     this.enablePipOnMinimize,
     this.autoOpEdSkip,
     this.enableLogging,
+    this.enableHoldToSpeedUp,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -121,6 +125,7 @@ class SettingsModal {
       enablePipOnMinimize: map['enablePipOnMinimize'] ?? false,
       autoOpEdSkip: map['autoOpEdSkip'] ?? false,
       enableLogging: map['enableLogging'] ?? false,
+      enableHoldToSpeedUp: map['enableHoldToSpeedUp'] ?? true,
     );
   }
 
@@ -148,6 +153,7 @@ class SettingsModal {
       'enablePipOnMinimize': enablePipOnMinimize,
       'autoOpEdSkip': autoOpEdSkip,
       'enableLogging': enableLogging,
+      'enableHoldToSpeedUp': enableHoldToSpeedUp,
     };
   }
 }

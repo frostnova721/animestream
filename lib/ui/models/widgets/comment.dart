@@ -127,7 +127,7 @@ class _CommentItemState extends State<CommentItem> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text("${widget.comment.repliesCount} "),
+                        Text("${widget.comment.replies.length} "),
                         Icon(Icons.reply_rounded),
                       ],
                     )),

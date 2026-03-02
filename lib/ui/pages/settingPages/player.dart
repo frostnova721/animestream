@@ -44,6 +44,7 @@ class PlayerSettingState extends State<PlayerSetting> {
   late bool doubleTapToSkip;
   late bool enablePipOnMinimize;
   late bool autoOpEdSkip;
+  late bool enableHoldToSpeedUp;
 
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
@@ -58,6 +59,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       doubleTapToSkip = settings.doubleTapToSkip ?? true;
       enablePipOnMinimize = settings.enablePipOnMinimize ?? false;
       autoOpEdSkip = settings.autoOpEdSkip ?? false;
+      enableHoldToSpeedUp = settings.enableHoldToSpeedUp ?? true;
     });
   }
 
@@ -290,6 +292,15 @@ class PlayerSettingState extends State<PlayerSetting> {
                               writeSettings(SettingsModal(autoOpEdSkip: autoOpEdSkip));
                             },
                           ),
+                          ToggleItem(
+                            onTapFunction: () {
+                              enableHoldToSpeedUp = !enableHoldToSpeedUp;
+                              writeSettings(SettingsModal(enableHoldToSpeedUp: enableHoldToSpeedUp));
+                            },
+                            label: "Hold to Speed Up",
+                            description: "Long press the player to speed up the video",
+                            value: enableHoldToSpeedUp,
+                          )
                         ],
                       ),
                     )

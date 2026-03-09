@@ -1,4 +1,3 @@
-import 'package:animestream/core/app/values.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
@@ -39,7 +38,7 @@ class BetterPlayerWrapper implements VideoController {
   Future<void> initiateVideo(String url, {Map<String, String>? headers, bool offline = false}) async {
     final ds = offline
         ? BetterPlayerDataSource.file(url)
-        : await dataSourceConfig(url, headers: {...?headers, "User-Agent": AppValues.defaultClientUserAgent});
+        : await dataSourceConfig(url, headers: headers);
     await controller.setupDataSource(ds);
   }
 

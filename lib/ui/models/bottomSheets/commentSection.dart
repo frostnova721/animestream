@@ -114,18 +114,37 @@ class _CommentsectionState extends State<Commentsection> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                replyMode ? "Replies" : "Comments",
-                style: TextStyle(
-                  color: appTheme.textMainColor,
-                  fontFamily: "Rubik",
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "${replyMode ? comments[activeCommentIndex!].replies.length : totalComments ?? comments.length} items",
-                style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        replyMode ? "Replies" : "Comments",
+                        style: TextStyle(
+                          color: appTheme.textMainColor,
+                          fontFamily: "Rubik",
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        "${replyMode ? comments[activeCommentIndex!].replies.length : totalComments ?? comments.length} items",
+                        style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
+                      ),
+                    ],
+                  ),
+                  if (replyMode)
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          replyMode = false;
+                        });
+                      },
+                      icon: Icon(Icons.arrow_back_ios_new_rounded),
+                    ),
+                ],
               ),
               Expanded(
                   child: showLogin

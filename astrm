@@ -10,6 +10,8 @@ SIMKL_CLIENT_SECRET=your_simkl_client_secret
 EOF
 fi
 
+# Inno bundle packing cant be done from linux!
+
 echo Running command: flutter "$@" --dart-define-from-file=.env
 
 flutter "$@" --dart-define-from-file=.env

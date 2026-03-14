@@ -208,12 +208,15 @@ class _CommentsectionState extends State<Commentsection> {
                                   itemCount: comments[activeCommentIndex!].replies.length,
                                   itemBuilder: (context, index) {
                                     return CommentItem(
-                                        comment: comments[activeCommentIndex!].replies[index], client: commentum);
+                                        comment: comments[activeCommentIndex!].replies[index], client: commentum,
+                                        replyMode: true,
+                                        );
                                   })
                               : ListView.builder(
                                   itemCount: comments.length,
                                   itemBuilder: (context, index) {
                                     return GestureDetector(
+                                      behavior: HitTestBehavior.translucent,
                                         onTap: () {
                                           if (kDebugMode)
                                             setState(() {

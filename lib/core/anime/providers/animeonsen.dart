@@ -88,7 +88,7 @@ class AnimeOnsen extends AnimeProvider {
         server: "animeonsen",
         backup: false,
         subtitle: subtitleUrl,
-        customHeaders: { 'Referer': "https://animeonsen.xyz" },
+        customHeaders: { 'Referer': "https://www.animeonsen.xyz/" },
         subtitleFormat: SubtitleFormat.ASS.name);
 
     update([result], true);

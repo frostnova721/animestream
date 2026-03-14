@@ -47,6 +47,8 @@ class Gojo extends AnimeProvider {
     final res = await get(url, headers: headers);
     final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body));
     final newSht = json.map<Map<String, dynamic>>((item) {
+      if(item['is_filler'])
+        print(item);
       final int epNum = item['ep_num']?.toInt();
       final bool isFiller = item['is_filler'];
       String? img = item['img'];
@@ -58,7 +60,7 @@ class Gojo extends AnimeProvider {
       return {
         'episodeLink': "$aliasId", // used for getting other stuff
         'episodeNumber': epNum,
-        'filler': isFiller,
+        'isFiller': isFiller,
         'thumbnail': img,
         'episodeTitle': title,
         'hasDub': true,

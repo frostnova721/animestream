@@ -2,7 +2,7 @@ name: animestream
 description: "A app made to stream and download anime!"
 publish_to: "none" #Dont remove this!
 
-version: 1.4.4-beta2+2
+version: 1.4.4-beta3+2
 
 environment:
   sdk: ">=3.2.0 <4.0.0"

@@ -914,7 +914,9 @@ class _InfoMobileState extends State<InfoMobile> {
               margin: EdgeInsets.only(top: 10, left: 10, right: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: appTheme.backgroundColor,
+                color: (provider.visibleEpList[provider.currentPageIndex][index]['epLink'].isFiller ?? false)
+                    ? appTheme.accentColor.withAlpha(40)
+                    : appTheme.backgroundColor,
               ),
               alignment: Alignment.center,
               child: Material(
@@ -975,18 +977,29 @@ class _InfoMobileState extends State<InfoMobile> {
                             Container(
                               width: 140,
                             ),
-                            Text(
-                              "Episode ${provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1}",
-                              style: TextStyle(
-                                color: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1 >
-                                        provider.watched
-                                    ? appTheme.textMainColor
-                                    : appTheme.textSubColor,
-                                fontFamily: "Poppins",
-                                fontSize: 18,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Episode ${provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1}",
+                                  style: TextStyle(
+                                    color: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1 >
+                                            provider.watched
+                                        ? appTheme.textMainColor
+                                        : appTheme.textSubColor,
+                                    fontFamily: "Poppins",
+                                    fontSize: 18,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if(provider.visibleEpList[provider.currentPageIndex][index]['epLink'].isFiller ?? false)
+                                Text(
+                                  "filler",
+                                  style: TextStyle(fontFamily: "Rubik", color: appTheme.textSubColor),
+                                ),
+                              ],
                             ),
                             if (provider.selectedSource.supportDownloads)
                               Container(

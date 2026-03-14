@@ -7,34 +7,41 @@ import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 import 'package:http/http.dart';
 
 class Subtitleparsers {
-  Future<List<Subtitle>> parseAss(String assSource, { Map<String, String> headers = const {}}) async {
+  Future<List<Subtitle>> parseAss(String assSource, {Map<String, String> headers = const {}}) async {
     if (assSource.startsWith("https://")) {
       //its a link
-      final res = await get(Uri.parse(assSource), headers: headers);
+      final res = await fetch(assSource, headers: headers);
       final sub = ASSRIPPER().parseASS(utf8.decode(res.bodyBytes));
       return sub;
     }
-    ;
     return ASSRIPPER().parseASS(assSource);
   }
 
-  Future<List<Subtitle>> parseVtt(String source, { Map<String, String> headers = const {}}) async {
+  Future<List<Subtitle>> parseVtt(String source, {Map<String, String> headers = const {}}) async {
     if (source.startsWith('https://')) {
-      final res = await get(Uri.parse(source), headers: headers);
+      final res = await fetch(source, headers: headers);
       final subs = VttRipper().parseVtt(utf8.decode(res.bodyBytes));
       return subs;
     }
     return VttRipper().parseVtt(source);
   }
 
-  Future<List<Subtitle>> parseSrt(String source, { Map<String, String> headers = const {}}) async {
+  Future<List<Subtitle>> parseSrt(String source, {Map<String, String> headers = const {}}) async {
     if (source.startsWith('https://')) {
-      final res = await get(Uri.parse(source), headers: headers);
+      final res = await fetch(source, headers: headers);
       final subs = SrtRipper().parseSrt(utf8.decode(res.bodyBytes));
       return subs;
     }
     return VttRipper().parseVtt(source);
   }
+
+  Future<Response> fetch(String url, { Map<String, String> headers = const {} }) async {
+    final res = await get(Uri.parse(url), headers: headers);
+    if(res.statusCode >= 200 && res.statusCode <= 299) {
+      return res;
+    }
+    throw Exception("Couldnt fetch the subtitles file. Server responded with status ${res.statusCode}");
+  } 
 
   static Duration parseDuration(String timeString) {
     final parts = timeString.trim().split(':');
@@ -44,9 +51,7 @@ class Subtitleparsers {
     final seconds = int.parse(secondsParts[0]);
     final fractionStr = secondsParts.length > 1 ? secondsParts[1] : '0';
     // Normalize fraction to milliseconds: pad/truncate to 3 digits (ASS uses centiseconds)
-    final msStr = (fractionStr.length >= 3)
-        ? fractionStr.substring(0, 3)
-        : fractionStr.padRight(3, '0');
+    final msStr = (fractionStr.length >= 3) ? fractionStr.substring(0, 3) : fractionStr.padRight(3, '0');
     final milliseconds = int.parse(msStr);
 
     return Duration(
@@ -57,4 +62,3 @@ class Subtitleparsers {
     );
   }
 }
-

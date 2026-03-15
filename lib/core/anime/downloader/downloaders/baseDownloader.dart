@@ -13,6 +13,8 @@ abstract class BaseDownloader {
 
   Future<void> download();
 
+  Future<void> onCancel();
+
   /// If the item is in this class, it's default state is definitely downloading
   DownloadStatus _status = DownloadStatus.downloading;
 
@@ -97,6 +99,7 @@ abstract class BaseDownloader {
         switch (msg) {
           case 'cancel':
             {
+              onCancel();
               if (_status == DownloadStatus.paused) {
                 final file = File(await helper.makeDirectory(fileName: task.fileName, downloadPath: task.downloadPath));
                 if (await file.exists()) await file.delete();

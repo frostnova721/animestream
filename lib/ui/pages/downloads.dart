@@ -12,6 +12,7 @@ import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/fileExplorer.dart';
+import 'package:animestream/ui/pages/settingPages/logs.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -71,6 +72,21 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
               color: appTheme.textMainColor,
             ),
           ),
+          actions: [
+            // if (kDebugMode)
+              IconButton(
+                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                    builder: (context) => LogScreen(
+                          initialTabBarIndex: 1,
+                        ))),
+                icon: Icon(
+                  Icons.book_rounded,
+                  size: 28,
+                  color: appTheme.textMainColor,
+                ),
+                tooltip: "Logs",
+              ),
+          ],
           surfaceTintColor: Colors.transparent,
           backgroundColor: appTheme.backgroundColor,
         ),
@@ -218,7 +234,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                           child: Padding(
                             padding: const EdgeInsets.only(right: 8),
                             child: IconButton.filled(
-                              onPressed: () =>_playVideo(item.filePath!),
+                              onPressed: () => _playVideo(item.filePath!),
                               icon: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
@@ -236,7 +252,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                         ),
                         Expanded(
                           child: IconButton.filled(
-                            onPressed: () =>_deleteDialog(item.filePath!, item.id),
+                            onPressed: () => _deleteDialog(item.filePath!, item.id),
                             icon: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -294,7 +310,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   }
 
   void _playVideo(String filepath) {
-    if(!File(filepath).existsSync()) {
+    if (!File(filepath).existsSync()) {
       floatingSnackBar("File Not Found!");
       return;
     }
@@ -307,8 +323,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
             ChangeNotifierProvider(
               create: (context) => PlayerDataProvider(
                 initialStreams: [],
-                initialStream:
-                    VideoStream(quality: "default", url: filepath, server: "local", backup: false),
+                initialStream: VideoStream(quality: "default", url: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
                 showTitle: filename,
                 showId: 0, // doesnt matter
@@ -435,10 +450,10 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   TextStyle _titleStyle() => TextStyle(fontFamily: "NunitoSans", fontWeight: FontWeight.bold, fontSize: 18);
 
   ButtonStyle _iconButtonStyle() => IconButton.styleFrom(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      backgroundColor: appTheme.accentColor,
-      foregroundColor: appTheme.onAccent,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        backgroundColor: appTheme.accentColor,
+        foregroundColor: appTheme.onAccent,
       );
 }

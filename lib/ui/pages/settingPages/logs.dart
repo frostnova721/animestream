@@ -7,13 +7,22 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
 
 class LogScreen extends StatefulWidget {
-  const LogScreen({super.key});
+  final int initialTabBarIndex;
+  const LogScreen({super.key, this.initialTabBarIndex = 0});
 
   @override
   State<LogScreen> createState() => _LogScreenState();
 }
 
 class _LogScreenState extends State<LogScreen> {
+  @override
+  void initState() {
+    super.initState();
+    int idx = 0;
+    if(widget.initialTabBarIndex >= 0 && widget.initialTabBarIndex <= 2) idx = widget.initialTabBarIndex;
+    selectedLogger = {loggers[idx].tag};
+  }
+
   final loggers = [
     Logs.app,
     Logs.downloader,
@@ -26,7 +35,7 @@ class _LogScreenState extends State<LogScreen> {
     "PLAYER": Logs.player,
   };
 
-  Set<String> selectedLogger = {Logs.app.tag};
+  Set<String> selectedLogger = {};
 
   @override
   Widget build(BuildContext context) {

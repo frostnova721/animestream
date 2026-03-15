@@ -34,7 +34,7 @@ class DownloaderHelper {
 
     final status = await fileAccessPermission.status;
 
-    // if (status.isPermanentlyDenied) return false;
+    if (status.isPermanentlyDenied) return false;
 
     if (status.isDenied) {
       showToast("Provide storage access for downloading!");
@@ -238,7 +238,7 @@ class DownloaderHelper {
 
   void sendCancelledNotif(int id, {bool failed = false}) {
     _notifierService.pushBasicNotification(id, "Download ${failed ? 'Failed' : 'Cancelled'}",
-        "Download ${failed ? "failed due to an error" : "was cancelled"}");
+        "Download ${failed ? "failed due to an error. Check logs for details" : "was cancelled"}");
   }
 
   void sendCompletedNotif(int id, String fileName, String downloadPath) {

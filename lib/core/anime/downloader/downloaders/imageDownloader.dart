@@ -29,4 +29,11 @@ class ImageDownloader extends BaseDownloader {
       throw Exception("Couldnt download image. $err");
     }
   }
+
+  @override
+  Future<void> onCancel() async {
+    // Nuh-uh!
+    print("HOW?!");
+    return;
+  }
 }

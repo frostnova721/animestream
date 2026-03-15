@@ -8,6 +8,8 @@ import 'package:http/http.dart';
 class VideoDownloader extends BaseDownloader {
   VideoDownloader(DownloadTaskIsolate task) : super(task);
 
+  late IOSink sink;
+
   @override
   Future<void> download() async {
     await setUpPorts(task);
@@ -40,7 +42,7 @@ class VideoDownloader extends BaseDownloader {
 
     final file = File(filepath);
 
-    final sink = file.openWrite(mode: task.resumeFrom == 0 ? FileMode.write : FileMode.append);
+    sink = file.openWrite(mode: task.resumeFrom == 0 ? FileMode.write : FileMode.append);
 
     // just to catch any OS errors like file access
     try {
@@ -58,13 +60,7 @@ class VideoDownloader extends BaseDownloader {
       final completer = Completer<void>();
 
       subscription = res.stream.listen((chunk) async {
-        // Write the data since its already fetched!
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
-
-        final progress = (downloadedBytes / totalSize * 100).toInt();
-
-        // Handle commands
+        // First, check if download is cancelled. if yes, flush the stuff
         if (status == DownloadStatus.cancelled) {
           await subscription?.cancel();
           await sink.close();
@@ -74,7 +70,15 @@ class VideoDownloader extends BaseDownloader {
 
           setCancelledStatus();
           return;
-        } else if (status == DownloadStatus.paused) {
+        }
+        // Write the data since its already fetched!
+        sink.add(chunk);
+        downloadedBytes += chunk.length;
+
+        final progress = (downloadedBytes / totalSize * 100).toInt();
+        
+        // on pause command
+         if (status == DownloadStatus.paused) {
           subscription?.pause();
 
           setPausedStatus(progress, downloadedBytes, filepath);
@@ -98,7 +102,8 @@ class VideoDownloader extends BaseDownloader {
           }
         }
 
-        if (progress > lastProgress) {
+        // Only send progress every 2% to reduce isolate-to-main thread overhead
+        if (progress > lastProgress && progress - lastProgress >= 2) {
           // just to reduce the logging from 100 to 10
           if (progress >= lastPrintedProgress) {
             print("[DOWNLOADER]<${task.id}> Progress: ${progress}%");
@@ -111,7 +116,7 @@ class VideoDownloader extends BaseDownloader {
         await sink.close();
         print("[DOWNLOADER] succesfully written the file to disk");
         completer.complete();
-        setCompletedStatus(filepath);
+        setCompletedStatus(filepath, silent: false);
       }, onError: (err) async {
         print(err);
         print("From media url: ${task.url}");
@@ -130,5 +135,11 @@ class VideoDownloader extends BaseDownloader {
       await file.delete();
       setFailedStatus(err.toString());
     }
+  }
+
+  @override
+  Future<void> onCancel() async {
+    await sink.close();
+    return;
   }
 }

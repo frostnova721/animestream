@@ -9,6 +9,8 @@ import 'package:http/http.dart';
 class StreamDownloader extends BaseDownloader {
   StreamDownloader(DownloadTaskIsolate task) : super(task);
 
+  
+
   @override
   Future<void> download() async {
     await super.setUpPorts(task);
@@ -17,7 +19,7 @@ class StreamDownloader extends BaseDownloader {
         await helper.makeDirectory(fileName: task.fileName, fileExtension: "mp4", downloadPath: task.downloadPath);
 
     // Download subtitles if available
-    if (task.subsUrl != null) downloadSubs(task.subsUrl!, task.fileName, finalPath);
+    if (task.subsUrl != null) await downloadSubs(task.subsUrl!, task.fileName, finalPath);
 
     final output = File(finalPath);
 
@@ -89,10 +91,9 @@ class StreamDownloader extends BaseDownloader {
 
           final progress = ((segmentNumber / entries.length) * 100).toInt();
 
-          if (progress > lastUpdatedProgress) {
-            // Update download progress thru the notification
+          // Only send progress every 2% to reduce isolate-to-main thread overhead
+          if (progress > lastUpdatedProgress && progress - lastUpdatedProgress >= 2) {
             updateProgress(progress, finalPath);
-
             lastUpdatedProgress = progress;
           }
 
@@ -172,5 +173,10 @@ class StreamDownloader extends BaseDownloader {
     } catch (err) {
       print("[DOWNLOADER] Failed to download $fileName subs!");
     }
+  }
+
+  @override
+  Future<void> onCancel() async {
+    return; // nothing to do
   }
 }

@@ -61,8 +61,10 @@ flutter pub get
 - To package the windows application as a setup, run:
 
 ```cmd
-dart run inno_bundle:build --release --build-args="--dart-define-from-file=.env"
+./astrm pack windows
 ```
+
+*pack* argument only works for windows. For other platforms, just use the "*build*" argument.
 
 If you havent installed inno setup on your machine, install it first before building the windows setup:
 [install inno setup](https://github.com/hahouari/inno_bundle/wiki/Install-Inno-Setup)

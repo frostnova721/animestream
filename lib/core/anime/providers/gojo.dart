@@ -8,7 +8,7 @@ import 'package:http/http.dart';
 
 //use anilist for searching
 class Gojo extends AnimeProvider {
-  static const String apiUrl = "https://b.animetsu.live/api/anime";
+  static const String apiUrl = "https://animetsu.live/v2/api/anime";
   // static const String _apiBaseUrl = "https://b.animetsu.live";
   static const String _proxyUrl = "https://ani.metsu.site/proxy";
 
@@ -47,6 +47,8 @@ class Gojo extends AnimeProvider {
     final res = await get(url, headers: headers);
     final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body));
     final newSht = json.map<Map<String, dynamic>>((item) {
+      if(item['is_filler'])
+        print(item);
       final int epNum = item['ep_num']?.toInt();
       final bool isFiller = item['is_filler'];
       String? img = item['img'];
@@ -58,7 +60,7 @@ class Gojo extends AnimeProvider {
       return {
         'episodeLink': "$aliasId", // used for getting other stuff
         'episodeNumber': epNum,
-        'filler': isFiller,
+        'isFiller': isFiller,
         'thumbnail': img,
         'episodeTitle': title,
         'hasDub': true,

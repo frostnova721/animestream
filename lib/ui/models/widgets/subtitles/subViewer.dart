@@ -37,7 +37,7 @@ class _SubViewerState extends State<SubViewer> {
     super.initState();
     widget.controller.addListener(_updateSubtitle);
     loadSubs();
-    print("subs initialized");
+    print("[SUBVIEWER]: subs initialized");
   }
 
   List<Subtitle> subs = [];
@@ -54,7 +54,7 @@ class _SubViewerState extends State<SubViewer> {
         areSubsLoading = true;
       });
       subs.clear(); // clear the old subs (if any)
-      print("loading ${widget.format.name} subs");
+      print("[SUBVIEWER]: Loading ${widget.format.name} subs");
       switch (widget.format) {
         case SubtitleFormat.ASS:
           subs = await Subtitleparsers().parseAss(widget.subtitleSource, headers: widget.headers ?? {});

@@ -39,6 +39,10 @@ class Downloader {
   /// Count of Refetching failed segments
   static int MAX_RETRY_ATTEMPTS = 10;
 
+  /// Map which stores the last progress update of each download
+  /// Used for throttling the download progress notification
+  final Map<int, int> _lastProgressUpdate = {};
+
   DownloadItem _getDownloadItem(int id) {
     final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
     if (item != null) return item;
@@ -145,7 +149,7 @@ class Downloader {
     _resumeTask(id);
   }
 
-  Future<void> _pauseTask(int id, int progress, int nextSegmentIndex, String filePath) async {
+  Future<void> _pauseTask(int id, int progress, int nextSegmentIndex, String? filePath) async {
     final item = _getDownloadItem(id);
     item.status = DownloadStatus.paused;
     item.lastDownloadedPart = nextSegmentIndex == -1 ? null : nextSegmentIndex;
@@ -174,6 +178,8 @@ class Downloader {
     _fireUpIsolate(item);
   }
 
+  
+
   Future<void> _handleMessage(dynamic msg) async {
     if (!(msg is DownloadMessage)) {
       print("Recieved message. But not as DownloadMessage!\nMessage: $msg");
@@ -184,15 +190,24 @@ class Downloader {
       case 'progress':
         {
           _maybeGetDownloadItem(msg.id)?.progress = msg.progress;
-          _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
-          if(msg.progress % 10 == 0) logger?.log("<${msg.id}> Progress: ${msg.progress}%");
+          // Only update system notification every 2% to reduce overhead
+          if (msg.progress % 2 == 0) {
+            // update on each second (prevents stuck on 100%)
+            final now = DateTime.now().millisecondsSinceEpoch;
+            if ((now - (_lastProgressUpdate[msg.id] ?? 0)) >= 1000) {
+              _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
+               _lastProgressUpdate[msg.id] = now;
+            }
+          }
+          if (msg.progress % 10 == 0) logger?.log("<${msg.id}> Progress: ${msg.progress}%");
           break;
         }
       case 'downloading':
-        _maybeGetDownloadItem(msg.id)?.status = DownloadStatus.downloading;
-        logger?.log("<${msg.id}> Changed download state to 'downloading'.");
-        break;
-
+        {
+          _maybeGetDownloadItem(msg.id)?.status = DownloadStatus.downloading;
+          logger?.log("<${msg.id}> Changed download state to 'downloading'.");
+          break;
+        }
       case 'complete':
         {
           if (!msg.silent) {
@@ -201,22 +216,22 @@ class Downloader {
                 _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String));
           }
           _endTask(msg.id);
-          logger?.log("Download completed for task ${msg.id}.");
+          logger?.log("Download completed for task ${msg.id}.", addToBuffer: true);
           break;
         }
       case 'error':
         {
           _endTask(msg.id);
           print("Welp, something went wrong..");
-          logger?.log("Download error for ${msg.id}. Reason: ${msg.message} \n StackTrace: ${msg.extras[0] as String}");
-          await logger?.writeLog();
+          logger?.log("Download error for ${msg.id}. Reason: ${msg.message} \n StackTrace: ${msg.extras[0] as String}",
+              addToBuffer: true);
           break;
         }
       case 'fail':
         {
           _helper.sendCancelledNotif(msg.id, failed: true);
           _endTask(msg.id);
-          logger?.log("Download failed for ${msg.id}. Reason: ${msg.message}");
+          logger?.log("Download failed for ${msg.id}. Reason: ${msg.message}", addToBuffer: true);
           break;
         }
       case 'cancel':
@@ -318,7 +333,8 @@ class Downloader {
     // Fallback (ik this is more precise, but dont wanna send a unnecessary request most times)
     final mime = await _helper.getMimeType(item.url, item.customHeaders);
     if (mime == null) throw Exception("Couldnt identify the media type.");
-    if (mime.contains("mpegurl") || await isM3u8Playlist(item.url, customHeader: item.customHeaders)) return _DownloadType.stream;
+    if (mime.contains("mpegurl") || await isM3u8Playlist(item.url, customHeader: item.customHeaders))
+      return _DownloadType.stream;
     if (mime.contains("video")) return _DownloadType.video;
     if (mime.contains("image")) return _DownloadType.image;
 

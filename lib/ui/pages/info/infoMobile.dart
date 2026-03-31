@@ -1,6 +1,7 @@
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/ui/models/bottomSheets/commentSection.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -327,6 +328,40 @@ class _InfoMobileState extends State<InfoMobile> {
                               child: Text(provider.preferDubs ? "dub" : "sub",
                                   style: TextStyle(color: appTheme.backgroundColor, fontWeight: FontWeight.bold)),
                             ),
+                          ),
+                          if(kDebugMode)
+                          IconButton(
+                            tooltip: "Batch download",
+                            onPressed: () {
+                              showModalBottomSheet(
+                                  context: context,
+                                  showDragHandle: true,
+                                  builder: (context) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(left: 8, right: 8),
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            "Batch Download",
+                                            style: TextStyle(
+                                              color: appTheme.textMainColor,
+                                              fontFamily: "Rubik",
+                                              fontSize: 23,
+                                              fontWeight: FontWeight.bold,
+                                            ),
+                                          ),
+                                          Row(),
+                                        ],
+                                      ),
+                                    );
+                                  });
+                            },
+                            icon: Icon(
+                              Icons.file_download_outlined,
+                            ),
+                            color: appTheme.textMainColor,
+                            iconSize: 28,
                           ),
                           Padding(
                             padding: const EdgeInsets.only(right: 10),
@@ -914,7 +949,9 @@ class _InfoMobileState extends State<InfoMobile> {
               margin: EdgeInsets.only(top: 10, left: 10, right: 10),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(15),
-                color: appTheme.backgroundColor,
+                color: (provider.visibleEpList[provider.currentPageIndex][index]['epLink'].isFiller ?? false)
+                    ? appTheme.accentColor.withAlpha(40)
+                    : appTheme.backgroundColor,
               ),
               alignment: Alignment.center,
               child: Material(
@@ -975,18 +1012,30 @@ class _InfoMobileState extends State<InfoMobile> {
                             Container(
                               width: 140,
                             ),
-                            Text(
-                              "Episode ${provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1}",
-                              style: TextStyle(
-                                color: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1 >
-                                        provider.watched
-                                    ? appTheme.textMainColor
-                                    : appTheme.textSubColor,
-                                fontFamily: "Poppins",
-                                fontSize: 18,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Episode ${provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1}",
+                                  style: TextStyle(
+                                    color: provider.visibleEpList[provider.currentPageIndex][index]['realIndex'] + 1 >
+                                            provider.watched
+                                        ? appTheme.textMainColor
+                                        : appTheme.textSubColor,
+                                    fontFamily: "Poppins",
+                                    fontSize: 18,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                if (provider.visibleEpList[provider.currentPageIndex][index]['epLink'].isFiller ??
+                                    false)
+                                  Text(
+                                    "filler",
+                                    style: TextStyle(fontFamily: "Rubik", color: appTheme.textSubColor),
+                                  ),
+                              ],
                             ),
                             if (provider.selectedSource.supportDownloads)
                               Container(

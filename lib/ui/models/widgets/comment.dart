@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 class CommentItem extends StatefulWidget {
   final Comment comment;
   final CommentumClient client;
-  const CommentItem({super.key, required this.comment, required this.client});
+  final bool replyMode;
+  const CommentItem({super.key, required this.comment, required this.client, this.replyMode = false});
 
   @override
   State<CommentItem> createState() => _CommentItemState();
@@ -120,17 +121,20 @@ class _CommentItemState extends State<CommentItem> {
                         });
                       });
                     }),
-                Spacer(),
-                Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(color: appTheme.backgroundColor, borderRadius: BorderRadius.circular(12)),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text("${widget.comment.replies.length} "),
-                        Icon(Icons.reply_rounded),
-                      ],
-                    )),
+                if (!widget.replyMode) ...[
+                  Spacer(),
+                  Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                      decoration:
+                          BoxDecoration(color: appTheme.backgroundColor, borderRadius: BorderRadius.circular(12)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text("${widget.comment.replies.length} "),
+                          Icon(Icons.reply_rounded),
+                        ],
+                      )),
+                ],
               ],
             ),
           )

@@ -36,9 +36,7 @@ import 'package:animestream/ui/theme/types.dart';
 class _HttpOverrides extends HttpOverrides {
   @override
   HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..userAgent =
-          AppValues.defaultClientUserAgent;
+    return super.createHttpClient(context)..userAgent = AppValues.defaultClientUserAgent;
   }
 }
 

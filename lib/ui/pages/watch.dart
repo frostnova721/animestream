@@ -426,11 +426,10 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                 // behavior: HitTestBehavior.opaque,
                 onTap: _handleTap,
                 onLongPressStart: (details) {
-                  if (Platform.isWindows || !(currentUserSettings?.enableHoldToSpeedUp ?? true)) return;
+                  if (Platform.isWindows || playerDataProvider.state.controlsLocked || !(currentUserSettings?.enableHoldToSpeedUp ?? true)) return;
                   if (playerProvider.state.playerState == PlayerState.playing) {
                     spedUp = true;
                     lastSpeed = playerProvider.state.speed;
-
                     // ensure atleast 2x speed on long press and max of 10x (max available speed)
                     playerProvider.setSpeed((lastSpeed * 2).clamp(2, playerProvider.playbackSpeeds.last));
                   } else {

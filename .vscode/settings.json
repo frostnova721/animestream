@@ -1,5 +1,5 @@
 {
   "java.configuration.updateBuildConfiguration": "interactive",
   "cmake.ignoreCMakeListsMissing": true,
-  "dart.flutterSdkPath": ".fvm/versions/3.38.9"
+  "dart.flutterSdkPath": ".fvm/versions/3.41.6"
 }

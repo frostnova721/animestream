@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 import 'package:animestream/core/anime/providers/providerDetails.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
@@ -14,7 +16,6 @@ import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
-import 'package:flutter/material.dart';
 
 class InfoProvider extends ChangeNotifier {
   int id;

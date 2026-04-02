@@ -6,7 +6,10 @@ class CommentItem extends StatefulWidget {
   final Comment comment;
   final CommentumClient client;
   final bool replyMode;
-  const CommentItem({super.key, required this.comment, required this.client, this.replyMode = false});
+
+  final Function showLoginDialog;
+  const CommentItem(
+      {super.key, required this.comment, required this.client, required this.showLoginDialog, this.replyMode = false});
 
   @override
   State<CommentItem> createState() => _CommentItemState();
@@ -147,7 +150,12 @@ class _CommentItemState extends State<CommentItem> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6),
       child: InkWell(
-        onTap: onPressed,
+        onTap: () {
+          if (!widget.client.isLoggedIn) {
+            widget.showLoginDialog();
+          }
+          onPressed();
+        },
         borderRadius: BorderRadius.circular(100),
         child: Icon(
           icon,

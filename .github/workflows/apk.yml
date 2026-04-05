@@ -1,25 +1,45 @@
-name: Build APK
+name: Build APK (Debug)
 
 on:
   push:
     branches:
       - feature/add-consumet
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      # 1. Checkout code
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+      # 2. Setup Java (required for Android build)
+      - name: Setup Java
+        uses: actions/setup-java@v4
         with:
-          flutter-version: stable
+          distribution: temurin
+          java-version: '17'
 
-      - run: flutter pub get
-      - run: flutter build apk --debug
-
-      - uses: actions/upload-artifact@v4
+      # 3. Setup Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
-          name: app-debug
+          channel: stable
+          cache: true
+
+      # 4. Install dependencies
+      - name: Get dependencies
+        run: flutter pub get
+
+      # 5. Build debug APK (no keystore needed)
+      - name: Build APK
+        run: flutter build apk --debug
+
+      # 6. Upload APK
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug.apk
           path: build/app/outputs/flutter-apk/app-debug.apk

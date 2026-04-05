@@ -7,8 +7,9 @@ class Consumet extends AnimeProvider {
   @override
   String providerName = "consumet";
 
-  final baseUrl = "https://api.consumet.org/anime/gogoanime";
+  final String baseUrl = "https://api.consumet.org/anime/gogoanime";
 
+  /// SEARCH
   @override
   Future<List<Map<String, String?>>> search(String query) async {
     final res = await http.get(Uri.parse("$baseUrl/$query"));
@@ -18,13 +19,14 @@ class Consumet extends AnimeProvider {
 
     return results.map<Map<String, String?>>((e) {
       return {
-        "name": e["title"],
-        "alias": e["id"], // important
-        "imageUrl": e["image"],
+        'name': e['title'],
+        'alias': e['id'],
+        'imageUrl': e['image'],
       };
     }).toList();
   }
 
+  /// EPISODES
   @override
   Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String id, {bool dub = false}) async {
     final res = await http.get(Uri.parse("$baseUrl/info/$id"));
@@ -34,38 +36,57 @@ class Consumet extends AnimeProvider {
 
     return episodes.map<Map<String, dynamic>>((e) {
       return {
-        "episodeLink": e["id"], // pass directly
-        "episodeNumber": e["number"],
-        "thumbnail": null,
-        "episodeTitle": null,
-        "isFiller": false,
-        "hasDub": false,
+        'episodeLink': e['id'],
+        'episodeNumber': e['number'],
+        'thumbnail': null,
+        'episodeTitle': null,
+        'isFiller': false,
+        'hasDub': false,
       };
     }).toList();
   }
 
+  /// STREAMS (MAIN PART)
   @override
   Future<void> getStreams(
     String episodeId,
-    Function(List<VideoStream> list, bool) update,
-    {bool dub = false, String? metadata}
-  ) async {
-    final res = await http.get(Uri.parse("$baseUrl/watch/$episodeId"));
-    final data = jsonDecode(res.body);
+    Function(List<VideoStream>, bool) update, {
+    bool dub = false,
+    String? metadata,
+  }) async {
+    try {
+      final res = await http.get(Uri.parse("$baseUrl/watch/$episodeId"));
+      final data = jsonDecode(res.body);
 
-    final List sources = data["sources"] ?? [];
+      final List sources = data["sources"] ?? [];
 
-    final streams = sources.map<VideoStream>((s) {
-      return VideoStream(
-        url: s["url"],
-        quality: s["quality"] ?? "auto",
-        server: "Consumet",
-        backup: false,
-        subtitle: null,
-        subtitleFormat: null,
-      );
-    }).toList();
+      List<VideoStream> streams = sources.map<VideoStream>((e) {
+        return VideoStream(
+          quality: e['quality'] ?? "unknown",
+          server: "Consumet",
+          url: e['url'],
+          customHeaders: {},
+          backup: false,
+          subtitle: null,
+          subtitleFormat: null,
+        );
+      }).toList();
 
-    update(streams, true);
+      update(streams, true);
+    } catch (e) {
+      print("Consumet error: $e");
+      update([], true);
+    }
+  }
+
+  /// DOWNLOADS (disabled safely)
+  @override
+  Future<void> getDownloadSources(
+    String episodeUrl,
+    Function(List<VideoStream>, bool) update, {
+    bool dub = false,
+    String? metadata,
+  }) async {
+    update([], true);
   }
 }

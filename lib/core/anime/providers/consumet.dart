@@ -9,23 +9,21 @@ class Consumet extends AnimeProvider {
 
   final String baseUrl = "https://api.consumet.org/anime/gogoanime";
 
-  /// SEARCH
   @override
   Future<List<Map<String, String?>>> search(String query) async {
     final res = await http.get(Uri.parse("$baseUrl/$query"));
     final data = jsonDecode(res.body);
 
-    final List results = data["results"] ?? [];
+    final List results = data is List ? data : (data["results"] ?? []);
 
     return results.map<Map<String, String?>>((e) {
       return {
-        'name': e['title'],
-        'alias': e['id'],
-        'imageUrl': e['image'],
+        'name': e['title'] ?? '',
+        'alias': e['id'] ?? '',
+        'imageUrl': e['image'] ?? '',
       };
     }).toList();
   }
-
   /// EPISODES
   @override
   Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String id, {bool dub = false}) async {

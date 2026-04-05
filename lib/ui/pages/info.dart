@@ -16,7 +16,7 @@ class Info extends StatelessWidget {
     return ChangeNotifierProvider(
       create: (context) => InfoProvider(id)..init(),
       builder: (context, child) {
-        if (Platform.isWindows)
+        if (Platform.isWindows || Platform.isLinux)
           return InfoDesktop();
         else
           return InfoMobile();

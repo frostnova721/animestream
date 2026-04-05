@@ -55,7 +55,7 @@ void main(List<String> args) async {
 
     await loadAndAssignSettings();
 
-    if (Platform.isWindows) {
+    if (Platform.isWindows || Platform.isLinux) {
       await windowManager.ensureInitialized();
       await windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
 

@@ -41,8 +41,8 @@ class AnimeCard extends StatefulWidget {
 
 class _AnimeCardState extends State<AnimeCard> {
   bool isFocused = false;
-  double width = Platform.isWindows ? 150 : 110;
-  double height = Platform.isWindows ? 200 : 160;
+  double width = Platform.isWindows || Platform.isLinux ? 150 : 110;
+  double height = Platform.isWindows || Platform.isLinux ? 200 : 160;
 
   void updateFocus(bool val) {
     return setState(() {
@@ -127,7 +127,7 @@ class _AnimeCardState extends State<AnimeCard> {
                             : width,
                     margin: EdgeInsets.only(bottom: 10, top: widget.isMobile ? 0 : 5),
                     decoration: BoxDecoration(
-                      border: widget.isMobile || Platform.isWindows
+                      border: widget.isMobile || Platform.isWindows || Platform.isLinux
                           ? null
                           : isFocused
                               ? Border.all(

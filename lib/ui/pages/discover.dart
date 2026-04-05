@@ -95,7 +95,7 @@ class _DiscoverState extends State<Discover> {
                 children: [
                   Container(
                     // margin: EdgeInsets.only(top: 30),
-                    height: Platform.isWindows ? 450 : 370,
+                    height: (Platform.isWindows || Platform.isLinux) ? 450 : 370,
                     // width: double.infinity,
                     child: widget.mainNavProvider.trendingList.length > 0
                         ? _trendingAnimesPageView()
@@ -372,7 +372,7 @@ class _DiscoverState extends State<Discover> {
             title,
             style: basicTextStyle("Rubik", 20),
           ),
-          if (Platform.isWindows) ScrollingList.scrollButtons(controller) else SizedBox.shrink()
+          if (Platform.isWindows || Platform.isLinux) ScrollingList.scrollButtons(controller) else SizedBox.shrink()
         ],
       ),
     );

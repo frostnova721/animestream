@@ -131,7 +131,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
         popTimeoutWindow();
       },
       child: Scaffold(
-        body: MediaQuery.of(context).orientation == Orientation.landscape || Platform.isWindows
+        body: MediaQuery.of(context).orientation == Orientation.landscape || Platform.isWindows || Platform.isLinux
             ? Row(
                 children: [
                   // AnimeStreamNavRail(

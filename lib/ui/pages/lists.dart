@@ -241,7 +241,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  if (!Platform.isWindows)
+                  if (!Platform.isWindows || !Platform.isLinux)
                     Container(
                       margin: EdgeInsets.only(top: 10),
                       child: TabBar(
@@ -296,7 +296,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        if (Platform.isWindows)
+                        if (Platform.isWindows || Platform.isLinux)
                           AnimeStreamNavRail(
                               shouldExpand: true,
                               destinations: [
@@ -320,7 +320,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                                 ),
                               )
                             : Expanded(
-                                child: Platform.isWindows
+                                child: (Platform.isWindows || Platform.isLinux)
                                     ? Container(
                                         margin: EdgeInsets.all(12),
                                         padding: EdgeInsets.only(bottom: 22, top: 5, right: 10, left: 10),

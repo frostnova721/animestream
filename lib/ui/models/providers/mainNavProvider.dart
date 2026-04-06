@@ -415,7 +415,7 @@ class MainNavProvider extends ChangeNotifier {
       await loadListsForHome(userName: userProfile!.name);
     } else if (loggedIn && userProfile != null) {
       //just load the list if the user was already signed in.
-      //also dont refrest the list if user just visited the settings page and were already logged in
+      //also dont refresh the list if user just visited the settings page and were already logged in
       if (fromSettings) return;
 
       await loadListsForHome(userName: userProfile!.name);

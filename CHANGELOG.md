@@ -1,10 +1,19 @@
 
 ### 🎉 New Features
+* [7d8a9ac](https://github.com/frostnova721/animestream/commit/7d8a9ac): feat: rollback animepahe to HLS streams
+* [bf77d31](https://github.com/frostnova721/animestream/commit/bf77d31): feat: + linux support
 * [68077ae](https://github.com/frostnova721/animestream/commit/68077ae): feat: alignment parsing for VTT subs, speed indicator in watch page
 * [a66782a](https://github.com/frostnova721/animestream/commit/a66782a): feat: still on downloader (UI!!)
 * [8414845](https://github.com/frostnova721/animestream/commit/8414845): feat: new theme, some tweaks
 
 ### 🐛 Bug Fixes & Improvements
+* [bc8abd2](https://github.com/frostnova721/animestream/commit/bc8abd2): fix: animeonsen
+* [5a9e2bc](https://github.com/frostnova721/animestream/commit/5a9e2bc): fix: gojo, speedup when in lock mode on watch page
+* [2e7a5bf](https://github.com/frostnova721/animestream/commit/2e7a5bf): fix comment scoring logic
+* [3a453b4](https://github.com/frostnova721/animestream/commit/3a453b4): fix: pip on inactive instead of pause, gojo source fix
+* [481916d](https://github.com/frostnova721/animestream/commit/481916d): fixed gojo
+* [5d16bf9](https://github.com/frostnova721/animestream/commit/5d16bf9): fixes and addition
+* [b6f366c](https://github.com/frostnova721/animestream/commit/b6f366c): fix linux downloader
 * [1a3ab5c](https://github.com/frostnova721/animestream/commit/1a3ab5c): fix: animepahe, anilist list load error for custom list
 * [97c026a](https://github.com/frostnova721/animestream/commit/97c026a): fix indexing error to edge case where episodes available < episode watched
 * [d71dace](https://github.com/frostnova721/animestream/commit/d71dace): fix preload quality selection edgecase
@@ -59,6 +68,7 @@
 * [d5cbf62](https://github.com/frostnova721/animestream/commit/d5cbf62): fixed completed notification
 
 ### 🔧 Refactors
+* [d671f3d](https://github.com/frostnova721/animestream/commit/d671f3d): refactoring... nothing new
 * [20e9c3b](https://github.com/frostnova721/animestream/commit/20e9c3b): refactor episodes paging
 * [d2aa5fb](https://github.com/frostnova721/animestream/commit/d2aa5fb): refactor and additions
 * [17b506e](https://github.com/frostnova721/animestream/commit/17b506e): refactor
@@ -67,8 +77,9 @@
 * [ac87b61](https://github.com/frostnova721/animestream/commit/ac87b61): refactor and changes
 
 ### 🧹 Chores & Documentation
+* [5c1c5f3](https://github.com/frostnova721/animestream/commit/5c1c5f3): docs: update changelog for v1.4.3
 * [4922f0d](https://github.com/frostnova721/animestream/commit/4922f0d): docs: remove placeholder role mentions
 * [30e9e37](https://github.com/frostnova721/animestream/commit/30e9e37): chore: add build & release workflows with Discord notifications
 
 ---
-**Full Changelog**: https://github.com/frostnova721/animestream/compare/5fecc3929cb7ecbdcf809811e8aec0f78b302f51...v1.4.3
+**Full Changelog**: https://github.com/frostnova721/animestream/compare/5fecc3929cb7ecbdcf809811e8aec0f78b302f51...v1.4.4

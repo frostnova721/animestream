@@ -204,7 +204,7 @@ jobs:
           elif [[ "${{ env.LATEST_TAG }}" == *beta* ]]; then
             role_mention=""   # Replace with Beta role ID <@&YOUR_Beta_ROLE_ID>
           else
-            role_mention=""   # Replace with stable role ID <@&YOUR_stable_ROLE_ID>
+            role_mention="<@&1354536001825145003>"   # Replace with stable role ID <@&YOUR_stable_ROLE_ID>
           fi
           
           # Set color based on release type

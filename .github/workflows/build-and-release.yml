@@ -13,7 +13,7 @@ on:
       - 'v*'
 
 env:
-  FLUTTER_VERSION: '3.38.6'
+  FLUTTER_VERSION: '3.41.6'
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'temurin'
 

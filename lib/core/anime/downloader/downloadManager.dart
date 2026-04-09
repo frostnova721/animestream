@@ -45,7 +45,7 @@ class DownloadManager {
     Map<String, String> customHeaders = const {},
   }) async {
     if(!(await DownloaderHelper().checkAndRequestPermission())) {
-      floatingSnackBar("Provide storage access for downloading...");
+      floatingSnackBar("Allow 'All files access' to download files.");
       Logs.downloader.log("Storage permission not granted. Rejecting download request...");
       return;
     }

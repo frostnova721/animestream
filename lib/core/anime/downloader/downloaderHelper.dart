@@ -34,7 +34,9 @@ class DownloaderHelper {
 
     final status = await fileAccessPermission.status;
 
-    if (status.isPermanentlyDenied) return false;
+    if (status.isPermanentlyDenied) {
+      return false;
+    }
 
     if (status.isDenied) {
       showToast("Provide storage access for downloading!");

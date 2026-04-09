@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:math';
 
+import 'package:animestream/core/anime/extractors/kwik.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:http/http.dart' as http;
@@ -75,12 +76,28 @@ class AnimePahe extends AnimeProvider {
   @override
   Future<void> getStreams(String episodeUrl, Function(List<VideoStream> list, bool) update,
       {bool dub = false, String? metadata}) async {
-    return await getDownloadSources(episodeUrl, update, dub: dub, metadata: metadata);
-    // final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
-    // final document = html.parse(data.body);
-    // final streams = document.querySelectorAll('div#resolutionMenu > button');
-    // final links = [];
-    // streams.forEach((e) {
+    // return await getDownloadSources(episodeUrl, update, dub: dub, metadata: metadata);
+
+    final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
+    final document = html.parse(data.body);
+    final streams = document.querySelectorAll('div#resolutionMenu > button');
+    final links = [];
+    streams.forEach((e) {
+      final link = e.attributes['data-src'] ?? '';
+      final text = e.text;
+      final server = text.split('·')[0].trim();
+      final quality = text.split('·')[1].trim();
+
+      final hasDub = quality.split(' ').contains("eng");
+      
+      // filter dubs
+      if(dub == hasDub)
+      links.add({'link': link, 'server': server, 'quality': quality});
+    });
+
+    // final servers = document.querySelectorAll('div#pickProvider > button');
+
+    // servers.forEach((e) {
     //   final link = e.attributes['data-src'] ?? '';
     //   final text = e.text;
     //   final server = text.split('·')[0].trim();
@@ -88,79 +105,70 @@ class AnimePahe extends AnimeProvider {
     //   links.add({'link': link, 'server': server, 'quality': quality});
     // });
 
-    // // final servers = document.querySelectorAll('div#pickProvider > button');
-
-    // // servers.forEach((e) {
-    // //   final link = e.attributes['data-src'] ?? '';
-    // //   final text = e.text;
-    // //   final server = text.split('·')[0].trim();
-    // //   final quality = text.split('·')[1].trim();
-    // //   links.add({'link': link, 'server': server, 'quality': quality});
-    // // });
-
-    // final totalStreams = links.length;
-    // int returns = 0;
-
-    // links.forEach((e) {
-    //   final extracted = Kwik().extract(e['link'], server: e['server'], quality: e['quality']);
-    //   extracted.then((res) {
-    //     returns++;
-    //     update(res, returns == totalStreams);
-    //   }).catchError((error) {
-    //     print(error);
-    //     returns++;
-    //     update([], returns == totalStreams);
-    //   });
-    // });
-  }
-
-  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> list, bool) update,
-      {bool dub = false, String? metadata}) async {
-    final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
-    final document = html.parse(data.body);
-    final downloadQualities = document.querySelectorAll('div#pickDownload > a');
-    final List<Map<String, String>> links = [];
-    downloadQualities.forEach((e) {
-      final link = e.attributes['href'] ?? '';
-      final text = e.text;
-      final quality = text.split('·')[1].trim().replaceAll(RegExp(r'\(\d+MB\)'), "");
-      final server = text.split('·')[0].trim();
-      final size = RegExp(r'(\d+MB)').firstMatch(text);
-      links.add({'link': link, 'quality': quality, 'server': server, 'size': size?.group(1) ?? '?? MB'});
-    });
-
     final totalStreams = links.length;
     int returns = 0;
 
-    for (final e in links) {
-      final isDub = e['quality']?.toLowerCase().contains('eng') ?? false;
-      if (isDub != dub) {
+    links.forEach((e) {
+      final extracted = Kwik().extract(e['link'], server: e['server'], quality: e['quality']);
+      extracted.then((res) {
         returns++;
-        if (returns == totalStreams) update([], totalStreams == returns);
-        continue;
-      }
-      final downloadLink = _extractDownloadLink(e['link'] ?? '');
-      downloadLink.then((val) {
-        returns++;
-        update([
-          VideoStream(
-            quality: (e['quality'] ?? "unknown-quality") + " [${e['size']}]",
-            server: e['server'] ?? "unknown",
-            url: val.$1,
-            customHeaders: {
-              'Referer': val.$2,
-            },
-            backup: false,
-            subtitle: null,
-            subtitleFormat: null,
-          ),
-        ], returns == totalStreams);
+        update(res, returns == totalStreams);
       }).catchError((error) {
         print(error);
         returns++;
         update([], returns == totalStreams);
       });
-    }
+    });
+  }
+
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> list, bool) update,
+      {bool dub = false, String? metadata}) async {
+        throw UnimplementedError("Direct Download Extractor is Broken");
+    // final data = await http.get(Uri.parse(episodeUrl), headers: _headers);
+    // final document = html.parse(data.body);
+    // final downloadQualities = document.querySelectorAll('div#pickDownload > a');
+    // final List<Map<String, String>> links = [];
+    // downloadQualities.forEach((e) {
+    //   final link = e.attributes['href'] ?? '';
+    //   final text = e.text;
+    //   final quality = text.split('·')[1].trim().replaceAll(RegExp(r'\(\d+MB\)'), "");
+    //   final server = text.split('·')[0].trim();
+    //   final size = RegExp(r'(\d+MB)').firstMatch(text);
+    //   links.add({'link': link, 'quality': quality, 'server': server, 'size': size?.group(1) ?? '?? MB'});
+    // });
+
+    // final totalStreams = links.length;
+    // int returns = 0;
+
+    // for (final e in links) {
+    //   final isDub = e['quality']?.toLowerCase().contains('eng') ?? false;
+    //   if (isDub != dub) {
+    //     returns++;
+    //     if (returns == totalStreams) update([], totalStreams == returns);
+    //     continue;
+    //   }
+    //   final downloadLink = _extractDownloadLink(e['link'] ?? '');
+    //   downloadLink.then((val) {
+    //     returns++;
+    //     update([
+    //       VideoStream(
+    //         quality: (e['quality'] ?? "unknown-quality") + " [${e['size']}]",
+    //         server: e['server'] ?? "unknown",
+    //         url: val.$1,
+    //         customHeaders: {
+    //           'Referer': val.$2,
+    //         },
+    //         backup: false,
+    //         subtitle: null,
+    //         subtitleFormat: null,
+    //       ),
+    //     ], returns == totalStreams);
+    //   }).catchError((error) {
+    //     print(error);
+    //     returns++;
+    //     update([], returns == totalStreams);
+    //   });
+    // }
   }
 
   final _map = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ+/";
@@ -198,6 +206,7 @@ class AnimePahe extends AnimeProvider {
     return r;
   }
 
+  // ignore: unused_element
   Future<(String, String)> _extractDownloadLink(String downloadLink) async {
     if (downloadLink == '') throw new Exception("Invalid download link");
     final redirectRegex = RegExp(r'\("href","(.*?)"\)');

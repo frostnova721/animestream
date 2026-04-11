@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_window
   dynamic_color
   flutter_secure_storage_linux
+  fvp
   gtk
   open_file_linux
   screen_retriever_linux

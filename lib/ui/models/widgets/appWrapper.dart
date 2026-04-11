@@ -13,10 +13,12 @@ class AppWrapper extends StatelessWidget {
 
   static final navKey = GlobalKey<NavigatorState>();
 
+  static final _isDesktop = defaultTargetPlatform == TargetPlatform.windows || defaultTargetPlatform == TargetPlatform.linux;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: (defaultTargetPlatform == TargetPlatform.windows &&
+      appBar: (_isDesktop &&
               !Provider.of<AppProvider>(context).isFullScreen &&
               !Provider.of<AppProvider>(context).showTitleBar)
           ? PreferredSize(

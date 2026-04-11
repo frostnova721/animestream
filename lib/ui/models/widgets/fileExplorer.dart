@@ -4,7 +4,7 @@ import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
-import 'package:animestream/ui/models/playerControllers/videoPlayerWin.dart';
+import 'package:animestream/ui/models/playerControllers/fvp.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -204,9 +204,14 @@ class _FileExplorerState extends State<FileExplorer> {
                       );
                     },
                     items: [
-                      PopupMenuItem(onTap: () {
-                        _deleteDialog(entity, null).then((val) => _readDir());
-                      }, child: Text("Delete", style: TextStyle(fontFamily: "NotoSans", color: appTheme.textMainColor),)),
+                      PopupMenuItem(
+                          onTap: () {
+                            _deleteDialog(entity, null).then((val) => _readDir());
+                          },
+                          child: Text(
+                            "Delete",
+                            style: TextStyle(fontFamily: "NotoSans", color: appTheme.textMainColor),
+                          )),
                     ]);
               },
               child: Icon(Icons.more_vert_rounded))
@@ -320,8 +325,9 @@ class _FileExplorerState extends State<FileExplorer> {
   }
 
   void _playVideo(String filepath) {
-    final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
-    final filename = _getFileName(filepath);
+    final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
+    final filename = _getFileName(filepath).split('.').first;
+    final filenameSplit = filename.split(" EP ");
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MultiProvider(
@@ -331,7 +337,7 @@ class _FileExplorerState extends State<FileExplorer> {
                 initialStreams: [],
                 initialStream: VideoStream(quality: "default", url: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
-                showTitle: filename,
+                showTitle: filenameSplit[0],
                 showId: 0, // doesnt matter
                 selectedSource: "default", //doesnt matter
                 startIndex: 0, // does matter! [change with episode number, need to fw download methods]

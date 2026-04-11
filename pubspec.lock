@@ -434,6 +434,15 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.17.0"
+  fvp:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: HEAD
+      resolved-ref: "78d0bc531e5f3ffa010b7e20a7ddd76e2982b88f"
+      url: "https://github.com/frostnova721/fvp.git"
+    source: git
+    version: "0.35.2"
   gql:
     dependency: transitive
     description:
@@ -1215,6 +1224,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
+  video_player:
+    dependency: transitive
+    description:
+      name: video_player
+      sha256: "48a7bdaa38a3d50ec10c78627abdbfad863fdf6f0d6e08c7c3c040cfd80ae36f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.11.1"
+  video_player_android:
+    dependency: transitive
+    description:
+      name: video_player_android
+      sha256: "877a6c7ba772456077d7bfd71314629b3fe2b73733ce503fc77c3314d43a0ca0"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.5"
+  video_player_avfoundation:
+    dependency: transitive
+    description:
+      name: video_player_avfoundation
+      sha256: af0e5b8a7a4876fb37e7cc8cb2a011e82bb3ecfa45844ef672e32cb14a1f259e
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.9.4"
   video_player_platform_interface:
     dependency: transitive
     description:
@@ -1223,14 +1256,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.6.0"
-  video_player_win:
-    dependency: "direct main"
+  video_player_web:
+    dependency: transitive
     description:
-      name: video_player_win
-      sha256: a4caca55ead1eb469d10060592e7ecdcbcd4493c6e2b63e4e666ff5446c790f1
+      name: video_player_web
+      sha256: "9f3c00be2ef9b76a95d94ac5119fb843dca6f2c69e6c9968f6f2b6c9e7afbdeb"
       url: "https://pub.dev"
     source: hosted
-    version: "3.2.2"
+    version: "2.4.0"
   visibility_detector:
     dependency: transitive
     description:

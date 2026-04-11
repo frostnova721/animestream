@@ -7,7 +7,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
-import 'package:animestream/ui/models/playerControllers/videoPlayerWin.dart';
+import 'package:animestream/ui/models/playerControllers/fvp.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -314,8 +314,9 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       floatingSnackBar("File Not Found!");
       return;
     }
-    final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
-    final filename = filepath.split("/").last;
+    final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
+    final filename = filepath.split("/").last.split(".").first;
+    final filenameSplit = filename.split(" EP ");
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MultiProvider(
@@ -325,7 +326,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                 initialStreams: [],
                 initialStream: VideoStream(quality: "default", url: filepath, server: "local", backup: false),
                 epLinks: [], // doesnt matter
-                showTitle: filename,
+                showTitle: filenameSplit.first,
                 showId: 0, // doesnt matter
                 selectedSource: "default", //doesnt matter
                 startIndex: 0, // does matter! [change with episode number, need to fw download methods]

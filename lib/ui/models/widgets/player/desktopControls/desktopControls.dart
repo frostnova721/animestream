@@ -24,8 +24,6 @@ class DesktopControls extends StatefulWidget {
 }
 
 class _DesktopControlsState extends State<DesktopControls> {
-  // late VideoController controller;
-
   @override
   void initState() {
     super.initState();

@@ -32,6 +32,7 @@ import 'package:animestream/ui/pages/mainNav.dart';
 import 'package:animestream/ui/theme/lime.dart';
 import 'package:animestream/ui/theme/themes.dart';
 import 'package:animestream/ui/theme/types.dart';
+import 'package:fvp/fvp.dart' as fvp;
 
 class _HttpOverrides extends HttpOverrides {
   @override
@@ -55,7 +56,9 @@ void main(List<String> args) async {
 
     await loadAndAssignSettings();
 
-    if (Platform.isWindows) {
+    fvp.registerWith(options: { 'platforms': ['linux', 'windows' ]});
+
+    if (Platform.isWindows || Platform.isLinux) {
       await windowManager.ensureInitialized();
       await windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
 
@@ -320,7 +323,7 @@ class _AnimeStreamState extends State<AnimeStream> {
                 iconTheme: IconThemeData(color: appTheme.textMainColor)),
             home: ChangeNotifierProvider(
               create: (context) => MainNavProvider(),
-              child: Platform.isWindows ? AppWrapper(firstPage: MainNavigator()) : MainNavigator(),
+              child: Platform.isWindows || Platform.isLinux ? AppWrapper(firstPage: MainNavigator()) : MainNavigator(),
             ),
             debugShowCheckedModeBanner: false,
           );

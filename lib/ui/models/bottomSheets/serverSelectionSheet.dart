@@ -9,7 +9,7 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
-import 'package:animestream/ui/models/playerControllers/videoPlayerWin.dart';
+import 'package:animestream/ui/models/playerControllers/fvp.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
@@ -243,7 +243,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                     rating: widget.provider.data.rating,
                   );
 
-                  final controller = Platform.isWindows ? VideoPlayerWindowsWrapper() : BetterPlayerWrapper();
+                  final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
                   final provider = widget.provider;
                   final navigatorState = (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
 

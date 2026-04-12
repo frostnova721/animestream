@@ -398,8 +398,9 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
           child: Listener(
             onPointerHover: (event) {
               // show controls on mouse movement
-              // playerProvider.toggleControlsVisibility(action: true);
-              hideControlsOnTimeout(playerDataProvider, playerProvider, timeoutSeconds: 2);
+              if (!playerProvider.state.controlsVisible)
+                playerProvider.toggleControlsVisibility(action: true);
+              hideControlsOnTimeout(playerDataProvider, playerProvider, timeoutSeconds: 3);
 
               // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
               // if (playerProvider.state.controlsVisible) return;

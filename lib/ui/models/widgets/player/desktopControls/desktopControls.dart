@@ -195,6 +195,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                                     ? (provider.controller.duration ?? 0).toDouble()
                                     : dataProvider.state.sliderValue.toDouble(),
                                 thumbColor: Colors.white,
+                                secondaryTrackValue: provider.controller.buffered?.toDouble(),
                                 onChanged: (val) {
                                   provider.controller.seekTo(Duration(seconds: val.toInt()));
                                 },
@@ -313,7 +314,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                                     provider.updateVolume(restorableVolume);
                                   }
                                 },
-                                child: makeIcon(Icons.volume_up_sharp)),
+                                child: makeIcon(provider.state.volume == 0 ? Icons.volume_off_sharp : Icons.volume_up_sharp)),
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: SliderTheme(

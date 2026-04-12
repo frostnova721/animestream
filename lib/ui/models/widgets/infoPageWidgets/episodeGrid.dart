@@ -36,7 +36,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
           ),
           child: GestureDetector(
             onTap: () {
-              provider.selectedEpisodeToLoadStreams = index;
+              provider.selectedEpisodeToLoadStreams = index + (provider.currentPageIndex * 24);
               showDialog(
                 context: context,
                 useRootNavigator: false,
@@ -48,7 +48,7 @@ class InfoPageEpisodeGrid extends StatelessWidget {
                       width: size.width / 3,
                       child: ServerSelectionBottomSheet(
                         provider: provider,
-                        episodeIndex: index,
+                        episodeIndex: index + (provider.currentPageIndex * 24),
                         type: ServerSheetType.watch,
                       ),
                     ),

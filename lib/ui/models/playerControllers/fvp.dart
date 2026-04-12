@@ -16,7 +16,7 @@ class FvpWrapper implements VideoController {
   String? get activeMediaUrl => controller.dataSource;
 
   @override
-  int? get buffered => controller.value.buffered.lastOrNull?.end.inMilliseconds;
+  int? get buffered => controller.value.buffered.lastOrNull?.end.inSeconds;
 
   @override
   void dispose() async {
@@ -28,7 +28,7 @@ class FvpWrapper implements VideoController {
 
   @override
   Widget getWidget() {
-    return VideoPlayer(controller);
+    return AspectRatio(aspectRatio: 16/9 ,child: VideoPlayer(controller));
   }
 
   @override

@@ -59,72 +59,75 @@ class VideoDownloader extends BaseDownloader {
 
       final completer = Completer<void>();
 
-      subscription = res.stream.listen((chunk) async {
-        // First, check if download is cancelled. if yes, flush the stuff
-        if (status == DownloadStatus.cancelled) {
-          await subscription?.cancel();
-          await sink.close();
-          file.deleteSync();
+      subscription = res.stream.listen(
+          (chunk) async {
+            // First, check if download is cancelled. if yes, flush the stuff
+            if (status == DownloadStatus.cancelled) {
+              await subscription?.cancel();
+              await sink.close();
+              file.deleteSync();
 
-          completer.complete();
+              completer.complete();
 
-          setCancelledStatus();
-          return;
-        }
-        // Write the data since its already fetched!
-        sink.add(chunk);
-        downloadedBytes += chunk.length;
+              setCancelledStatus();
+              return;
+            }
+            // Write the data since its already fetched!
+            sink.add(chunk);
+            downloadedBytes += chunk.length;
 
-        final progress = (downloadedBytes / totalSize * 100).toInt();
-        
-        // on pause command
-         if (status == DownloadStatus.paused) {
-          subscription?.pause();
+            final progress = (downloadedBytes / totalSize * 100).toInt();
 
-          setPausedStatus(progress, downloadedBytes, filepath);
+            // on pause command
+            if (status == DownloadStatus.paused) {
+              subscription?.pause();
 
-          super.completer = Completer();
-          try {
-            timer = Timer(Duration(minutes: 1), () => super.completer?.completeError(Exception("Timeout!")));
-            await super.completer!.future;
-            subscription?.resume();
-            super.completer = null;
-            timer?.cancel();
-            timer = null;
-          } catch (err) {
-            print("Isolate Timeout! Error: ${err.toString()}");
-            print("Self destructing isolate...");
-            super.completer = null;
-            timer?.cancel();
-            timer = null;
-            subscription?.cancel();
-            task.sendPort?.send(DownloadMessage(status: 'isolate_timeout', id: task.id));
-          }
-        }
+              setPausedStatus(progress, downloadedBytes, filepath);
 
-        // Only send progress every 2% to reduce isolate-to-main thread overhead
-        if (progress > lastProgress && progress - lastProgress >= 2) {
-          // just to reduce the logging from 100 to 10
-          if (progress >= lastPrintedProgress) {
-            print("[DOWNLOADER]<${task.id}> Progress: ${progress}%");
-            lastPrintedProgress += 10;
-          }
-          updateProgress(progress, filepath);
-          lastProgress = progress;
-        }
-      }, onDone: () async {
-        await sink.close();
-        print("[DOWNLOADER] succesfully written the file to disk");
-        completer.complete();
-        setCompletedStatus(filepath, silent: false);
-      }, onError: (err) async {
-        print(err);
-        print("From media url: ${task.url}");
-        completer.completeError(err);
-        await sink.close();
-        await file.delete();
-        setFailedStatus(err.toString());
-      });
+              super.completer = Completer();
+              try {
+                timer = Timer(Duration(minutes: 1), () => super.completer?.completeError(Exception("Timeout!")));
+                await super.completer!.future;
+                subscription?.resume();
+                super.completer = null;
+                timer?.cancel();
+                timer = null;
+              } catch (err) {
+                print("Isolate Timeout! Error: ${err.toString()}");
+                print("Self destructing isolate...");
+                super.completer = null;
+                timer?.cancel();
+                timer = null;
+                subscription?.cancel();
+                task.sendPort?.send(DownloadMessage(status: 'isolate_timeout', id: task.id));
+              }
+            }
+
+            // Only send progress every 2% to reduce isolate-to-main thread overhead
+            if (progress > lastProgress && progress - lastProgress >= 2) {
+              // just to reduce the logging from 100 to 10
+              if (progress >= lastPrintedProgress) {
+                print("[DOWNLOADER]<${task.id}> Progress: ${progress}%");
+                lastPrintedProgress += 10;
+              }
+              updateProgress(progress, filepath);
+              lastProgress = progress;
+            }
+          },
+          onDone: () async {
+            await sink.close();
+            print("[DOWNLOADER] succesfully written the file to disk");
+            completer.complete();
+            return setCompletedStatus(filepath, silent: false);
+          },
+          onError: (err) async {
+            print(err);
+            print("From media url: ${task.url}");
+            completer.completeError(err);
+            await sink.close();
+            await file.delete();
+            return setFailedStatus(err.toString());
+          });
 
       return completer.future;
     } catch (err) {

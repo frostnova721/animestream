@@ -85,6 +85,8 @@ class _HomeState extends State<Home> {
     }
   }
 
+  AnimeListData<HomePageList>? selectedList;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -99,47 +101,92 @@ class _HomeState extends State<Home> {
           backgroundColor: appTheme.backgroundSubColor,
           color: appTheme.accentColor,
         ),
-        child: SingleChildScrollView(
-          child: Container(
-            padding: pagePadding(context).copyWith(left: 0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                buildHeader("Home", context, afterNavigation: () {
-                  if (mounted) setState(() {});
-                }),
-                AnimatedSwitcher(
-                  duration: Duration(milliseconds: 400),
-                  child: storedUserData != null
-                      ? Align(
-                          alignment: Alignment.center,
-                          child: Container(
-                            margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-                            constraints: BoxConstraints(maxWidth: 450),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _accountCard(),
-                                _listButton(),
-                              ],
-                            ),
-                          ),
-                        )
-                      : null,
+        child: Container(
+          padding: pagePadding(context).copyWith(left: 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                flex: 2,
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      buildHeader("Home", context, afterNavigation: () {
+                        if (mounted) setState(() {});
+                      }),
+                      AnimatedSwitcher(
+                        duration: Duration(milliseconds: 400),
+                        child: storedUserData != null
+                            ? Align(
+                                alignment: Alignment.center,
+                                child: Container(
+                                  margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                                  constraints: BoxConstraints(maxWidth: 450),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      _accountCard(),
+                                      _listButton(),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : null,
+                      ),
+                      _titleAndList("Continue Watching", widget.mainNavProvider.recentlyWatched,
+                          showRefreshIndication: refreshing),
+                      divider(),
+                      _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
+                      if (widget.mainNavProvider.loggedIn) ...[
+                        divider(),
+                        _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
+                      ],
+                      footSpace(),
+                    ],
+                  ),
                 ),
-                _titleAndList("Continue Watching", widget.mainNavProvider.recentlyWatched,
-                    showRefreshIndication: refreshing),
-                divider(),
-                _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
-                if (widget.mainNavProvider.loggedIn) ...[
-                  divider(),
-                  _titleAndList("From Your Planned", widget.mainNavProvider.plannedList),
-                ],
-                footSpace(),
-              ],
-            ),
+              ),
+              if(selectedList != null)
+              Expanded(
+                flex: selectedList == null ? 0 : 1,
+                child: _rightPanel(),
+              )
+            ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _rightPanel() {
+    return AnimatedContainer(
+      duration: Duration(milliseconds: 200),
+      decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(16)),
+      margin: EdgeInsets.all(24),
+      padding: EdgeInsets.all(8),
+      width: selectedList != null ? null : 0,
+      child:selectedList == null ? Container() :  GridView.builder(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+          mainAxisExtent: Platform.isAndroid ? 220 : 265,
+          // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+          childAspectRatio: 120 / 220,
+          mainAxisSpacing: 10,
+        ),
+        itemCount: selectedList!.items.length,
+        itemBuilder: (context, index) {
+          final item = selectedList!.items[index];
+          return Center(
+            child: Cards.animeCard(
+              item.id,
+              item.title['english'] ?? item.title['romaji'] ?? "",
+              item.coverImage,
+              rating: item.rating,
+            ),
+          );
+        },
       ),
     );
   }
@@ -283,6 +330,12 @@ class _HomeState extends State<Home> {
             Spacer(),
             IconButton(
                 onPressed: () {
+                  if(Platform.isWindows) {
+                    setState(() {
+                       selectedList = list;
+                    });
+                    return;
+                  }
                   showModalBottomSheet(
                       context: context,
                       showDragHandle: true,
@@ -292,11 +345,14 @@ class _HomeState extends State<Home> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.only(left: 16, bottom: 12),
-                              child: Text(title, style: textStyle(),),
+                              child: Text(
+                                title,
+                                style: textStyle(),
+                              ),
                             ),
                             Expanded(
                               child: GridView.builder(
-                                padding: EdgeInsets.only( bottom: MediaQuery.of(context).padding.bottom),
+                                padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
                                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
                                   maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
                                   mainAxisExtent: Platform.isAndroid ? 220 : 260,

@@ -10,7 +10,7 @@ import 'package:http/http.dart';
 class Gojo extends AnimeProvider {
   static const String apiUrl = "https://animetsu.live/v2/api/anime";
   // static const String _apiBaseUrl = "https://b.animetsu.live";
-  static const String _proxyUrl = "https://ani.metsu.site/proxy";
+  static const String _proxyUrl = "https://mega-cloud.top/proxy";
 
   final baseUrl = "https://animetsu.live";
 
@@ -47,8 +47,6 @@ class Gojo extends AnimeProvider {
     final res = await get(url, headers: headers);
     final List<Map<String, dynamic>> json = List.castFrom(jsonDecode(res.body));
     final newSht = json.map<Map<String, dynamic>>((item) {
-      if(item['is_filler'])
-        print(item);
       final int epNum = item['ep_num']?.toInt();
       final bool isFiller = item['is_filler'];
       String? img = item['img'];
@@ -82,7 +80,7 @@ class Gojo extends AnimeProvider {
 
     final serverList = await get(Uri.parse("$apiUrl/servers/$id/$epNum"), headers: headers);
     final List<Map<String, dynamic>> serversJson = List.castFrom(jsonDecode(serverList.body));
-    print(serversJson);
+    // print(serversJson);
     serversJson.forEach((it) {
       final url = "$apiUrl/oppai/$id/$epNum?server=${it['id']}&source_type=${dub ? "dub" : "sub"}";
       final res = get(Uri.parse(url), headers: headers);

@@ -241,7 +241,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
-                  if (!Platform.isWindows || !Platform.isLinux)
+                  if (!Platform.isWindows && !Platform.isLinux)
                     Container(
                       margin: EdgeInsets.only(top: 10),
                       child: TabBar(
@@ -383,7 +383,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
           shrinkWrap: true,
           gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
               maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
-              mainAxisExtent: Platform.isAndroid ? 220 : 260,
+              mainAxisExtent: Platform.isAndroid ? 220 : 265,
               // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
               childAspectRatio: 120 / 220,
               mainAxisSpacing: 10),

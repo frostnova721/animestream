@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
@@ -14,6 +15,7 @@ import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/fileExplorer.dart';
 import 'package:animestream/ui/pages/settingPages/logs.dart';
 import 'package:animestream/ui/pages/watch.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -49,16 +51,19 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // floatingActionButton: kDebugMode ? FloatingActionButton(
-        //   onPressed: () {
-        //     // final url =
-        //     //     "https://vault-14.kwikie.ru/stream/14/04/949408bf3775e6800948c22550842b1147995c801349d3de960e76760b81de14/uwu.m3u8";
-        //     // DownloadManager().addDownloadTask(url, "Down$dc");
-        //     dc++;
-        //     setState(() {});
-        //   },
-        //   child: Icon(Icons.run_circle_outlined),
-        // ) : null,
+        floatingActionButton: kDebugMode
+            ? FloatingActionButton(
+                onPressed: () {
+                  // final url =
+                  //     "https://vault-14.kwikie.ru/stream/14/04/949408bf3775e6800948c22550842b1147995c801349d3de960e76760b81de14/uwu.m3u8";
+                  // DownloadManager().addDownloadTask(url, "Down$dc");
+                  final id = Random().nextInt(6969);
+                  DownloadManager().addDownloadTask("", "mock_${id}", mock: true);
+                  setState(() {});
+                },
+                child: Icon(Icons.download),
+              )
+            : null,
         appBar: AppBar(
           title: Text(
             "Downloads",
@@ -74,18 +79,18 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
           ),
           actions: [
             // if (kDebugMode)
-              IconButton(
-                onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                    builder: (context) => LogScreen(
-                          initialTabBarIndex: 1,
-                        ))),
-                icon: Icon(
-                  Icons.book_rounded,
-                  size: 28,
-                  color: appTheme.textMainColor,
-                ),
-                tooltip: "Logs",
+            IconButton(
+              onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => LogScreen(
+                        initialTabBarIndex: 1,
+                      ))),
+              icon: Icon(
+                Icons.book_rounded,
+                size: 28,
+                color: appTheme.textMainColor,
               ),
+              tooltip: "Logs",
+            ),
           ],
           surfaceTintColor: Colors.transparent,
           backgroundColor: appTheme.backgroundColor,

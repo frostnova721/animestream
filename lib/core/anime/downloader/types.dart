@@ -54,6 +54,8 @@ class DownloadItem {
     statusNotifier.value = newStatus;
   }
 
+  final bool mock;
+
   DownloadItem({
     required this.id,
     required this.url,
@@ -63,6 +65,7 @@ class DownloadItem {
     int progress = 0,
     this.subtitleUrl,
     this.lastDownloadedPart,
+    this.mock = false,
   }) {
     progressNotifier.value = progress;
     statusNotifier.value = status;

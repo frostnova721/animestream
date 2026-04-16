@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:animestream/core/anime/downloader/downloaders/imageDownloader.dart';
+import 'package:animestream/core/anime/downloader/downloaders/mockDownloader.dart';
 import 'package:animestream/core/anime/downloader/downloaders/streamDownloader.dart';
 import 'package:animestream/core/anime/downloader/downloaders/videoDownloader.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
@@ -13,6 +14,7 @@ class DownloaderCore {
   static Future<void> downloadStream(DownloadTaskIsolate task) => StreamDownloader(task).download();
   static Future<void> downloadVideo(DownloadTaskIsolate task) => VideoDownloader(task).download();
   static Future<void> downloadImage(DownloadTaskIsolate task) => ImageDownloader(task).download();
+  static Future<void> downloadMock(DownloadTaskIsolate task) => MockDownloader(task).download();
 
   // // If the item is in this class, it's default state is definitely downloading
   // DownloadStatus _status = DownloadStatus.downloading;

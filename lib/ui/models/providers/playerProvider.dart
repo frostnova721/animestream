@@ -218,19 +218,32 @@ class PlayerProvider extends ChangeNotifier {
 
   // Cache the window size before entering pip
   Size _windowSizeBefore = Size(1280, 720);
+  bool _wasMaximized = false;
+  Offset _positionBefore = Offset(0, 0);
 
-  void _disablePip() {
+  
+
+  void _disablePip() async {
     windowManager.setAlwaysOnTop(false);
-    windowManager.setSize(_windowSizeBefore);
+    await windowManager.setSize(_windowSizeBefore);
+    windowManager.setPosition(_positionBefore);
     windowManager.setResizable(true);
+    if(_wasMaximized) {
+      await windowManager.maximize();
+    }
     Provider.of<AppProvider>(AppWrapper.navKey.currentContext!, listen: false).showTitleBar = false;
   }
 
   void _enablePip() async {
-    windowManager.setAlwaysOnTop(true);
+    if(_wasMaximized = await windowManager.isMaximized()) {
+      await windowManager.unmaximize();
+    }
+    await windowManager.setAlwaysOnTop(true);
     _windowSizeBefore = await windowManager.getSize();
+    _positionBefore = await windowManager.getPosition();
     windowManager.setSize(Size(500, 300));
     windowManager.setResizable(false);
+    windowManager.setAlignment(Alignment.bottomRight);
     Provider.of<AppProvider>(AppWrapper.navKey.currentContext!, listen: false).showTitleBar = true;
   }
 }

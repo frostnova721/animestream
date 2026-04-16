@@ -9,8 +9,6 @@ import 'package:http/http.dart';
 class StreamDownloader extends BaseDownloader {
   StreamDownloader(DownloadTaskIsolate task) : super(task);
 
-  
-
   @override
   Future<void> download() async {
     await super.setUpPorts(task);

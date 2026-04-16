@@ -43,6 +43,7 @@ class DownloadManager {
     String filename, {
     String? subtitleUrl,
     Map<String, String> customHeaders = const {},
+    bool mock = false, 
   }) async {
     if(!(await DownloaderHelper().checkAndRequestPermission())) {
       floatingSnackBar("Allow 'All files access' to download files.");
@@ -59,6 +60,7 @@ class DownloadManager {
       customHeaders: customHeaders,
       progress: 0,
       subtitleUrl: subtitleUrl,
+      mock: mock,
     );
 
     await _downloader.startDownload(item);

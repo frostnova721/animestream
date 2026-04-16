@@ -13,7 +13,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
 
-enum _DownloadType { stream, video, image }
+enum _DownloadType { stream, video, image, mock }
 
 /// Manages the downloads, Isolates, Queueing
 class Downloader {
@@ -85,29 +85,37 @@ class Downloader {
   }
 
   Future<void> _fireUpIsolate(DownloadItem item) async {
-    Future<void> Function(DownloadTaskIsolate) downloadFunction;
+    try {
+      Future<void> Function(DownloadTaskIsolate) downloadFunction;
 
-    final type = await _getDownloadType(item);
+      final type = await _getDownloadType(item);
 
-    // Infer the type
-    switch (type) {
-      case _DownloadType.image:
-        downloadFunction = DownloaderCore.downloadImage;
-      case _DownloadType.video:
-        downloadFunction = DownloaderCore.downloadVideo;
-      case _DownloadType.stream:
-        downloadFunction = DownloaderCore.downloadStream;
+      // Infer the type
+      switch (type) {
+        case _DownloadType.image:
+          downloadFunction = DownloaderCore.downloadImage;
+        case _DownloadType.video:
+          downloadFunction = DownloaderCore.downloadVideo;
+        case _DownloadType.stream:
+          downloadFunction = DownloaderCore.downloadStream;
+        case _DownloadType.mock:
+          downloadFunction = DownloaderCore.downloadMock;
+      }
+
+      final path = await _helper.getDownloadsPath();
+
+      final task = _cookTask(item, path);
+
+      logger?.log('Queuing task $task with type: ${type.name}');
+
+      // Run the downloading
+      final isolate = await Isolate.spawn(downloadFunction, task);
+      _isolates[item.id] = isolate;
+    } catch (err) {
+      Logs.downloader.log(err.toString());
+      // just incase to handle the situation if sht goes down before downloading has started
+      _cleanUp(item.id);
     }
-
-    final path = await _helper.getDownloadsPath();
-
-    final task = _cookTask(item, path);
-
-    logger?.log('Queuing task $task with type: ${type.name}');
-
-    // Run the downloading
-    final isolate = await Isolate.spawn(downloadFunction, task);
-    _isolates[item.id] = isolate;
   }
 
   Future<void> _cleanUp(int id, {bool dequeue = true}) async {
@@ -178,8 +186,6 @@ class Downloader {
     _fireUpIsolate(item);
   }
 
-  
-
   Future<void> _handleMessage(dynamic msg) async {
     if (!(msg is DownloadMessage)) {
       print("Recieved message. But not as DownloadMessage!\nMessage: $msg");
@@ -196,7 +202,7 @@ class Downloader {
             final now = DateTime.now().millisecondsSinceEpoch;
             if ((now - (_lastProgressUpdate[msg.id] ?? 0)) >= 1000) {
               _helper.sendProgressNotif(msg.id, msg.progress, msg.extras[0] as String, msg.extras[1] as String);
-               _lastProgressUpdate[msg.id] = now;
+              _lastProgressUpdate[msg.id] = now;
             }
           }
           if (msg.progress % 10 == 0) logger?.log("<${msg.id}> Progress: ${msg.progress}%");
@@ -320,6 +326,7 @@ class Downloader {
   }
 
   Future<_DownloadType> _getDownloadType(DownloadItem item) async {
+    if (item.mock) return _DownloadType.mock;
     final ext = _helper.extractExtension(item.url);
     final videoExtensions = ['mp4', 'mkv', 'avi', 'webm', 'flv'];
     final streamExtensions = ['m3u8', 'm3u'];

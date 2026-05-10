@@ -188,12 +188,14 @@ class _InfoMobileState extends State<InfoMobile> {
                                             content: Padding(
                                               padding: const EdgeInsets.all(10),
                                               child: Text.rich(
-                                                TextSpan(text: "Remove \"", style: TextStyle(fontSize: 15),
-                                                children: [
-                                                  TextSpan(text: "${getTitle(provider.data.title)}", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                                                  TextSpan(text: "\" from your watch history?", style: TextStyle(fontSize: 15)),
-                                                ]
-                                                ),
+                                                TextSpan(text: "Remove \"", style: TextStyle(fontSize: 15), children: [
+                                                  TextSpan(
+                                                      text: "${getTitle(provider.data.title)}",
+                                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                                  TextSpan(
+                                                      text: "\" from your watch history?",
+                                                      style: TextStyle(fontSize: 15)),
+                                                ]),
                                               ),
                                             ),
                                           );

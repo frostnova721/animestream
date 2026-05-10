@@ -56,7 +56,9 @@ void main(List<String> args) async {
 
     await loadAndAssignSettings();
 
-    fvp.registerWith(options: { 'platforms': ['linux', 'windows' ]});
+    if (!Platform.isAndroid) {
+      fvp.registerWith();
+    }
 
     if (Platform.isWindows || Platform.isLinux) {
       await windowManager.ensureInitialized();

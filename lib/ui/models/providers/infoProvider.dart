@@ -195,8 +195,8 @@ class InfoProvider extends ChangeNotifier {
         _started = false;
       }
       final item = await getAnimeWatchProgress(id, _mediaListStatus);
-      _watched = item == 0 ? 0 : item;
-      _started = item != 0;
+      _watched = item == -1 ? 0 : item;
+      _started = item != -1;
 
       final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
 

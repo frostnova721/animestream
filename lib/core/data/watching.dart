@@ -104,7 +104,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
     List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
 
     if (watching.isNotEmpty) {
-      for(final e in watching.reversed) {
+      for (final e in watching.reversed) {
         recentlyWatched.add(UserAnimeListItem(
             id: e['id'],
             //just give the key as title since its just one
@@ -120,6 +120,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   }
 }
 
+/// Returns the watch progress. -1 is returned if entry doesnt exist
 Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
   if (await AniListLogin().isAnilistLoggedIn() && status != null) {
     if (storedUserData == null) throw Exception("ERR_NO_USERDATA");
@@ -128,7 +129,7 @@ Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
       throw Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
     } else {
       final item = list[0].list.where((item) => item.id == id).firstOrNull;
-      return item?.watchProgress ?? 0;
+      return item?.watchProgress ?? -1;
     }
   } else {
     final box = await Hive.openBox(_boxName);
@@ -139,5 +140,17 @@ Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
       return item['watched'];
     }
   }
-  return 0;
+  return -1;
+}
+
+Future<void> removeWatching(int id) async {
+  try {
+  final box = await Hive.openBox(_boxName);
+  final List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
+  watching.removeWhere((i) => i['id'] == id);
+  await box.put("watching", watching);
+  await box.close();
+  } catch(err) {
+    Logs.app.log("${err.toString()} while removing from local watching list");
+  }
 }

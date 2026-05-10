@@ -1,4 +1,5 @@
 import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/commentSection.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/foundation.dart';
@@ -158,6 +159,60 @@ class _InfoMobileState extends State<InfoMobile> {
                                       color: appTheme.accentColor,
                                       size: 28,
                                     ),
+                                  ),
+                                ),
+                              if (!provider.loggedIn && provider.started)
+                                ElevatedButton(
+                                  onPressed: () {
+                                    showDialog(
+                                        context: context,
+                                        builder: (context) {
+                                          return AlertDialog(
+                                            actions: [
+                                              TextButton(
+                                                  onPressed: () => Navigator.of(context).pop(), child: Text("No")),
+                                              TextButton(
+                                                onPressed: () async {
+                                                  await removeWatching(provider.id);
+                                                  provider.clearLastWatchDuration();
+                                                  await provider.getWatched(refreshLastWatchDuration: true);
+                                                  Navigator.pop(context);
+                                                },
+                                                child: Text("Yes"),
+                                                style: TextButton.styleFrom(
+                                                  backgroundColor: appTheme.accentColor,
+                                                  foregroundColor: appTheme.onAccent,
+                                                ),
+                                              )
+                                            ],
+                                            content: Padding(
+                                              padding: const EdgeInsets.all(10),
+                                              child: Text.rich(
+                                                TextSpan(text: "Remove \"", style: TextStyle(fontSize: 15),
+                                                children: [
+                                                  TextSpan(text: "${getTitle(provider.data.title)}", style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                                  TextSpan(text: "\" from your watch history?", style: TextStyle(fontSize: 15)),
+                                                ]
+                                                ),
+                                              ),
+                                            ),
+                                          );
+                                        });
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    shape: CircleBorder(
+                                      side: BorderSide(
+                                        color: appTheme.accentColor,
+                                      ),
+                                    ),
+                                    fixedSize: Size(50, 50),
+                                    backgroundColor: appTheme.backgroundColor,
+                                    padding: EdgeInsets.zero,
+                                  ),
+                                  child: Icon(
+                                    Icons.delete_outline_rounded,
+                                    color: appTheme.accentColor,
+                                    size: 28,
                                   ),
                                 )
                             ],
@@ -329,40 +384,40 @@ class _InfoMobileState extends State<InfoMobile> {
                                   style: TextStyle(color: appTheme.backgroundColor, fontWeight: FontWeight.bold)),
                             ),
                           ),
-                          if(kDebugMode)
-                          IconButton(
-                            tooltip: "Batch download",
-                            onPressed: () {
-                              showModalBottomSheet(
-                                  context: context,
-                                  showDragHandle: true,
-                                  builder: (context) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(left: 8, right: 8),
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            "Batch Download",
-                                            style: TextStyle(
-                                              color: appTheme.textMainColor,
-                                              fontFamily: "Rubik",
-                                              fontSize: 23,
-                                              fontWeight: FontWeight.bold,
+                          if (kDebugMode)
+                            IconButton(
+                              tooltip: "Batch download",
+                              onPressed: () {
+                                showModalBottomSheet(
+                                    context: context,
+                                    showDragHandle: true,
+                                    builder: (context) {
+                                      return Padding(
+                                        padding: const EdgeInsets.only(left: 8, right: 8),
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Batch Download",
+                                              style: TextStyle(
+                                                color: appTheme.textMainColor,
+                                                fontFamily: "Rubik",
+                                                fontSize: 23,
+                                                fontWeight: FontWeight.bold,
+                                              ),
                                             ),
-                                          ),
-                                          Row(),
-                                        ],
-                                      ),
-                                    );
-                                  });
-                            },
-                            icon: Icon(
-                              Icons.file_download_outlined,
+                                            Row(),
+                                          ],
+                                        ),
+                                      );
+                                    });
+                              },
+                              icon: Icon(
+                                Icons.file_download_outlined,
+                              ),
+                              color: appTheme.textMainColor,
+                              iconSize: 28,
                             ),
-                            color: appTheme.textMainColor,
-                            iconSize: 28,
-                          ),
                           Padding(
                             padding: const EdgeInsets.only(right: 10),
                             child: IconButton(

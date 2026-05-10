@@ -6,6 +6,9 @@ import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
+import 'package:animestream/ui/models/widgets/floatyBar/controller.dart';
+import 'package:animestream/ui/models/widgets/floatyBar/floatyBarView.dart';
+import 'package:animestream/ui/models/widgets/floatyBar/floatyBottomBar.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/discover.dart';
@@ -54,6 +57,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
     provider.init();
   }
 
+  final _floatyBarController = FloatyBottomBarController(length: 3);
   AnimeStreamBottomBarController _barController = AnimeStreamBottomBarController(length: 3);
 
   bool popInvoked = false;
@@ -211,8 +215,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   Widget _bottomBar(BuildContext context, double blurSigmaValue) {
     return Stack(
       children: [
-        BottomBarView(
-          controller: _barController,
+        FloatyBarView(
+          controller: _floatyBarController,
           children: [
             Home(
               key: ValueKey("0"),
@@ -227,16 +231,16 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
             ),
           ],
         ),
-        AnimeStreamBottomBar(
-          controller: _barController,
+        FloatyBottomBar(
+          controller:  _floatyBarController,
           accentColor: appTheme.accentColor,
           backgroundColor:
               appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
-          borderRadius: 12,
+          // borderRadius: 12,
           items: [
-            BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
-            BottomBarItem(title: 'Discover', icon: Icon(Icons.auto_awesome)),
-            BottomBarItem(title: 'Search', icon: Icon(Icons.search)),
+            FloatyBarItem(title: 'Home', icon: Icons.home),
+            FloatyBarItem(title: 'Discover', icon: Icons.auto_awesome),
+            FloatyBarItem(title: 'Search', icon: Icons.search),
           ],
         )
       ],

@@ -359,11 +359,12 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                         if (selectedValue != null || progress != provider.watched || provider.mediaListStatus == null) {
                           SyncHandler()
                               .mutateAnimeList(
-                                  id: provider.id,
-                                  status: assignItemEnum(selectedValue ?? initialSelection!),
-                                  previousStatus: assignItemEnum(initialSelection),
-                                  progress: progress,
-                                  otherIds: provider.altDatabases)
+                            id: provider.id,
+                            status: assignItemEnum(selectedValue ?? initialSelection!),
+                            previousStatus: assignItemEnum(initialSelection),
+                            progress: progress,
+                            otherIds: provider.altDatabases,
+                          )
                               .then((value) {
                             initialSelection = selectedValue ?? initialSelection;
                             provider.refreshListStatus(selectedValue ?? initialSelection!, progress);

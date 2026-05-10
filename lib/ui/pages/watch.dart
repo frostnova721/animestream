@@ -56,7 +56,6 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
-    print(state);
 
     // only android and ios has the 'paused' state
     if (state == (Platform.isWindows ? AppLifecycleState.inactive : AppLifecycleState.hidden) &&

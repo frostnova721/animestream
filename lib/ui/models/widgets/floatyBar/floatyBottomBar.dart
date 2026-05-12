@@ -103,6 +103,7 @@ class _FloatyBottomBarState extends State<FloatyBottomBar> {
               final leftNeighborIsActive = i > 0 && (i - 1) == _currentIndex;
               final rightNeighborIsActive = i < lastIndex && (i + 1) == _currentIndex;
               final segmentRadius = Radius.circular(isActive ? widget.activeRadius : widget.outerRadius);
+              final activeFacingCornerRadius = Radius.circular(widget.outerRadius / 2);
 
               return GestureDetector(
                 onTap: () => _onItemTap(i),
@@ -119,22 +120,22 @@ class _FloatyBottomBarState extends State<FloatyBottomBar> {
                     color: (isActive ? appTheme.accentColor : widget.accentColor.withAlpha(80)),
                     borderRadius: BorderRadius.only(
                       topLeft: (!isActive && leftNeighborIsActive)
-                          ? Radius.zero
+                          ? activeFacingCornerRadius
                           : (i == 0 || hasLeftGap)
                               ? segmentRadius
                               : Radius.zero,
                       bottomLeft: (!isActive && leftNeighborIsActive)
-                          ? Radius.zero
+                          ? activeFacingCornerRadius
                           : (i == 0 || hasLeftGap)
                               ? segmentRadius
                               : Radius.zero,
                       topRight: (!isActive && rightNeighborIsActive)
-                          ? Radius.zero
+                          ? activeFacingCornerRadius
                           : (i == lastIndex || hasRightGap)
                               ? segmentRadius
                               : Radius.zero,
                       bottomRight: (!isActive && rightNeighborIsActive)
-                          ? Radius.zero
+                          ? activeFacingCornerRadius
                           : (i == lastIndex || hasRightGap)
                               ? segmentRadius
                               : Radius.zero,

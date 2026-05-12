@@ -10,7 +10,7 @@ import 'package:http/http.dart';
 class Gojo extends AnimeProvider {
   static const String apiUrl = "https://animetsu.live/v2/api/anime";
   // static const String _apiBaseUrl = "https://b.animetsu.live";
-  static const String _proxyUrl = "https://mega-cloud.top/proxy";
+  static const String _proxyUrl = "https://swiftstream.top/proxy";
 
   final baseUrl = "https://animetsu.live";
 

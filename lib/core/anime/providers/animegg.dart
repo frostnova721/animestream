@@ -139,7 +139,6 @@ class Animegg implements AnimeProvider {
   @override
   Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) {
-    // TODO: implement getDownloadSources
     throw UnimplementedError();
   }
 }

@@ -372,9 +372,13 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16),
                         child: Center(
-                          child: CircularProgressIndicator(
-                            year2023: false,
-                            value: item.progress / 100,
+                          child: ProgressIndicatorTheme(
+                            data: ProgressIndicatorThemeData(
+                              year2023: false,
+                            ),
+                            child: CircularProgressIndicator(
+                              value: item.progress / 100,
+                            ),
                           ),
                         ),
                       ),

@@ -56,7 +56,7 @@ class CustomSliderState extends State<CustomSlider> {
           fontWeight: FontWeight.bold,
           fontSize: 14,
         ),
-        showValueIndicator: ShowValueIndicator.always,
+        showValueIndicator: ShowValueIndicator.alwaysVisible,
         valueIndicatorColor: appTheme.accentColor,
         trackHeight: 13,
         thumbShape: RoundedRectangularThumbShape(width: 10, radius: 4),

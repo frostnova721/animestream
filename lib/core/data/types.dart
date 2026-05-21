@@ -6,73 +6,73 @@ import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 
 class SettingsModal {
-  /// Skip duration in seconds for the player
+  /// Skip duration in seconds for the player [defaults to 10 seconds]
   final int? skipDuration;
 
-  /// Mega skip duration in seconds for the player
+  /// Mega skip duration in seconds for the player [defaults to 85 seconds]
   final int? megaSkipDuration;
 
-  /// Error display errors as snackbars
+  /// Error display errors as snackbars [defaults to false]
   final bool? showErrors;
 
-  /// Enable pre-release update notifications
+  /// Enable pre-release update notifications [defaults to false]
   final bool? receivePreReleases;
 
-  /// AMOLED background for dark mode
+  /// AMOLED background for dark mode [defaults to false]
   final bool? amoledBackground;
 
-  /// Preferred quality for the player
+  /// Preferred quality for the player [defaults to 720p]
   final String? preferredQuality; // 1080p | 720p |480p | 360p as string
 
-  /// The trasparency of the homescreen navbar
+  /// The trasparency of the homescreen navbar 
   final double? navbarTranslucency; //value from 0 to 1
 
-  /// Enable faster downloads using increased batch size
+  /// Enable faster downloads using increased batch size [defaults to false]
   final bool? fasterDownloads;
 
-  /// Preferred source provider for playback
+  /// Preferred source provider for playback [defaults to most stable provider available]
   final String? preferredProvider;
 
-  /// App's dark mode state
+  /// App's dark mode state [defaults to true]
   final bool? darkMode;
 
-  /// Use material you theming (just the pallette)
+  /// Use material you theming (just the pallette) [defaults to false]
   final bool? materialTheme;
 
-  /// Dev access
+  /// Dev access [defaults to false]
   final bool? isDev;
 
-  /// The preferred download path for anime/banner downloads
+  /// The preferred download path for anime/banner downloads [defaults to the OS download path]
   final String? downloadPath;
 
-  /// The preferred database provider (SIMKL/MAL/AL)
+  /// The preferred database provider (SIMKL/MAL/AL) [defaults to Anilist]
   final Databases? database;
 
-  /// Enable extra speed options in player (4x,5x,8x,10x)
+  /// Enable extra speed options in player (4x,5x,8x,10x) [defaults to false]
   final bool? enableSuperSpeeds;
 
-  /// Download items one by one instead of parallel downloads
+  /// Download items one by one instead of parallel downloads [defaults to false]
   final bool? useQueuedDownloads;
 
-  /// Use frameless window (Windows only, not used rn)
+  /// Use frameless window (Windows only, not used rn) 
   final bool? useFramelessWindow;
 
-  /// Enable double tap to skip in player (Not available for desktops)
+  /// Enable double tap to skip in player (Not available for desktops) [defaults to true]
   final bool? doubleTapToSkip;
 
-  /// Use native titles (japanese/korean) when available instead of romaji/english
+  /// Use native titles (japanese/korean) when available instead of romaji/english [defaults to false]
   final bool? nativeTitle;
 
-  /// Enable picture in picture mode on minimize (Not available for desktops)
+  /// Enable picture in picture mode on minimize (Not available for desktops) [defaults to false]
   final bool? enablePipOnMinimize;
 
-  /// Automatically skip opening and ending themes
+  /// Automatically skip opening and ending themes [defaults to false]
   final bool? autoOpEdSkip;
 
-  /// Enable logging throughout the app
+  /// Enable logging throughout the app [defaults to false]
   final bool? enableLogging;
 
-  /// Tap and Hold to speed up the player 
+  /// Tap and Hold to speed up the player [defaults to true]
   final bool? enableHoldToSpeedUp;
 
   SettingsModal({

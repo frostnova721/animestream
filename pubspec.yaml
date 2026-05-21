@@ -69,6 +69,7 @@ dependencies:
 
   # Misc
   flutter_native_splash: ^2.4.7
+  screen_brightness: ^2.1.8
   commentum_client:
     # path: ../../commentum_client
     git:

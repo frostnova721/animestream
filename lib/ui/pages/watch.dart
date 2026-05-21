@@ -5,9 +5,9 @@ import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
-import 'package:animestream/ui/models/widgets/doubleTapDectector.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
 import 'package:animestream/ui/models/widgets/player/controls.dart';
+import 'package:animestream/ui/models/widgets/player/gestureOverlay.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
@@ -21,6 +21,7 @@ import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
+import 'package:screen_brightness/screen_brightness.dart';
 
 class Watch extends StatefulWidget {
   final VideoController controller;
@@ -74,7 +75,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     _channel.setMethodCallHandler((call) async {
       if (call.method == "onUserLeaveHint") {
         if (currentUserSettings?.enablePipOnMinimize ?? false) {
-           context.read<PlayerProvider>().setPip(true);
+          context.read<PlayerProvider>().setPip(true);
         }
       }
     });
@@ -250,6 +251,8 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   // Mutex to avoid multiple skips at once
   bool _isSkippingOpOrEd = false;
 
+  bool get isDesktop => Platform.isWindows || Platform.isLinux;
+
   void hideControlsOnTimeout(PlayerDataProvider dp, PlayerProvider pp, {int timeoutSeconds = 5}) {
     if (_controlsTimer == null && (controller.isPlaying ?? false)) {
       _controlsTimer = Timer(Duration(seconds: timeoutSeconds), () {
@@ -346,7 +349,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   }
 
   void _handleDoubleTap() {
-    if (!Platform.isWindows) return;
+    if (!isDesktop) return;
     if (context.read<PlayerProvider>().state.pip) return;
     final themeProvider = context.read<AppProvider>();
     themeProvider.setFullScreen(!themeProvider.isFullScreen);
@@ -363,6 +366,27 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   double? _lastSpeedChangeOffset = 0.0;
   double lastSpeed = 1.0;
+
+  double? _displayVolume;
+  double? _displayBrightness;
+  Timer? _indicatorTimer;
+
+  void _showIndicator({double? volume, double? brightness}) {
+    setState(() {
+      if (volume != null) _displayVolume = volume;
+      if (brightness != null) _displayBrightness = brightness;
+    });
+
+    _indicatorTimer?.cancel();
+    _indicatorTimer = Timer(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _displayVolume = null;
+          _displayBrightness = null;
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -394,11 +418,73 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         backgroundColor: Colors.black,
         body: Padding(
           padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
-          child: Listener(
+          child: GestureOverlay(
+            isDesktop: isDesktop,
+            controlsLocked: playerDataProvider.state.controlsLocked,
+            enableHoldToSpeedUp: currentUserSettings?.enableHoldToSpeedUp ?? true,
+            getInitialBrightness: () => ScreenBrightness.instance.application,
+            getInitialVolume: () async => playerProvider.state.volume,
+            onBrightnessUpdate: (val) {
+              ScreenBrightness.instance.setApplicationScreenBrightness(val);
+              _showIndicator(brightness: val);
+            },
+            onDoubleTapCenter: _handleDoubleTap,
+            onDoubleTapLeft: () {
+              // desktop shouldnt be having double tap to skip functionality
+              if (playerDataProvider.state.controlsLocked || isDesktop) return;
+              if (currentUserSettings?.doubleTapToSkip ?? true) {
+                playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
+                if (!_showRewindAnim) skipCount = 0;
+                _showFastForwardAnim(false);
+              }
+            },
+            onDoubleTapRight: () {
+              // desktop shouldnt be having double tap to skip functionality
+              if (playerDataProvider.state.controlsLocked || isDesktop) return;
+              if (currentUserSettings?.doubleTapToSkip ?? true) {
+                playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
+                if (!_showForwardAnim) skipCount = 0;
+                _showFastForwardAnim(true);
+              }
+            },
+            onSingleTap: () => _handleSingleTap(),
+            onSpeedChange: (increase) {
+              final currSpeed = playerProvider.state.speed;
+              if (increase) {
+                playerProvider
+                    .setSpeed(playerProvider.playbackSpeeds.firstWhere((s) => s > currSpeed, orElse: () => currSpeed));
+              } else {
+                playerProvider.setSpeed(
+                    playerProvider.playbackSpeeds.lastWhere((s) => s < currSpeed && s >= 2, orElse: () => currSpeed));
+              }
+              print(increase);
+            },
+            onSpeedUpStart: () {
+              if (playerProvider.state.playerState == PlayerState.playing &&
+                  !isDesktop &&
+                  !playerDataProvider.state.controlsLocked) {
+                spedUp = true;
+                lastSpeed = playerProvider.state.speed;
+                // ensure atleast 2x speed on long press and max of 10x (max available speed)
+                playerProvider.setSpeed((lastSpeed * 2).clamp(2, playerProvider.playbackSpeeds.last));
+              }
+            },
+            onSpeedUpEnd: () {
+              if (!spedUp || isDesktop) return;
+              spedUp = false;
+              if (playerProvider.state.speed < 2) return;
+              // reset speed
+              playerProvider.setSpeed(lastSpeed);
+              print("Reduced speed to: ${playerProvider.state.speed}x");
+            },
+            onVerticalDragEnd: () {},
+            onVolumeUpdate: (val) {
+              playerProvider.updateVolume(val);
+              _showIndicator(volume: val);
+            },
             onPointerHover: (event) {
               // show controls on mouse movement
-              if (!playerProvider.state.controlsVisible)
-                playerProvider.toggleControlsVisibility(action: true);
+              if (!playerProvider.state.controlsVisible) playerProvider.toggleControlsVisibility(action: true);
               hideControlsOnTimeout(playerDataProvider, playerProvider, timeoutSeconds: 3);
 
               // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
@@ -421,164 +507,114 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
               cursor: playerProvider.state.controlsVisible || !hidePointer
                   ? SystemMouseCursors.basic
                   : SystemMouseCursors.none,
-              child: GestureDetector(
-                // behavior: HitTestBehavior.opaque,
-                onTap: _handleTap,
-                onLongPressStart: (details) {
-                  if (Platform.isWindows || playerDataProvider.state.controlsLocked || !(currentUserSettings?.enableHoldToSpeedUp ?? true)) return;
-                  if (playerProvider.state.playerState == PlayerState.playing) {
-                    spedUp = true;
-                    lastSpeed = playerProvider.state.speed;
-                    // ensure atleast 2x speed on long press and max of 10x (max available speed)
-                    playerProvider.setSpeed((lastSpeed * 2).clamp(2, playerProvider.playbackSpeeds.last));
-                  } else {
-                    return;
-                  }
-                },
-                onLongPressMoveUpdate: (details) {
-                  if (Platform.isWindows || !spedUp) return;
-
-                  final offset = details.localOffsetFromOrigin.dx;
-
-                  // Initialize on first move
-                  if (_lastSpeedChangeOffset == null) {
-                    _lastSpeedChangeOffset = offset;
-                    return;
-                  }
-
-                  final delta = (offset - _lastSpeedChangeOffset!).abs();
-
-                  // Only trigger if 5px away from last change
-                  if (delta >= 40) {
-                    final currSpeed = playerProvider.state.speed;
-
-                    if (offset > _lastSpeedChangeOffset!) {
-                      // moved right - increase speed just to the next available speed
-                      playerProvider.setSpeed(playerProvider.playbackSpeeds.firstWhere(
-                        (speed) => speed > currSpeed,
-                        orElse: () => currSpeed,
-                      ));
-                    } else {
-                      // moved left - decrease speed just to the previous available speed
-                      playerProvider.setSpeed(playerProvider.playbackSpeeds.lastWhere(
-                        (speed) => speed < currSpeed && speed >= 2,
-                        orElse: () => currSpeed,
-                      ));
-                    }
-
-                    _lastSpeedChangeOffset = offset;
-                  }
-                },
-                onLongPressEnd: (details) {
-                  // reset only if speed was increased
-                  if (!spedUp || Platform.isWindows) return;
-                  spedUp = false;
-                  if (playerProvider.state.speed < 2) return;
-                  // reset speed
-                  playerProvider.setSpeed(lastSpeed);
-                  print("Reduced speed to: ${playerProvider.state.speed}x");
-                },
-                child: Stack(
-                  children: [
-                    Player(controller),
-                    if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
-                      SubViewer(
-                        controller: controller,
-                        format: SubtitleFormat.fromName(
-                            playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
-                        subtitleSource: playerDataProvider.state.currentStream.subtitle!,
-                        settings: playerDataProvider.subtitleSettings,
-                        headers: playerDataProvider.state.currentStream.customHeaders,
-                      ),
-                    isInitiated
-                        ? AnimatedOpacity(
-                            duration: Duration(milliseconds: 150),
-                            opacity: playerProvider.state.controlsVisible ? 1 : 0,
-                            child: Stack(
-                              children: [
-                                IgnorePointer(ignoring: true, child: overlay()),
-                                IgnorePointer(ignoring: !playerProvider.state.controlsVisible, child: Controls()),
-                              ],
-                            ),
-                          )
-                        : (Platform.isWindows || Platform.isLinux)
-                            ? Column(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 10, left: 10),
-                                    child: IconButton(
-                                        onPressed: () => Navigator.pop(context),
-                                        icon: Icon(
-                                          Icons.arrow_back,
-                                          color: Colors.white,
-                                          size: 35,
-                                        )),
-                                  ),
-                                  PlayerLoadingWidget(),
-                                  SizedBox.shrink()
-                                ],
-                              )
-                            : Container(),
-                    Container(
-                      // margin: MediaQuery.paddingOf(context),
-                      child: Row(children: [
-                        Expanded(
-                          flex: 2,
-                          child: DoubleTapDectector(
-                            behavior: HitTestBehavior.translucent,
-                            onDoubleTap: () {
-                              // windows shouldnt be having double tap to skip functionality
-                              if (playerDataProvider.state.controlsLocked || Platform.isWindows) return;
-                              if (currentUserSettings?.doubleTapToSkip ?? true) {
-                                playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
-                                if (!_showRewindAnim) skipCount = 0;
-                                _showFastForwardAnim(false);
-                              }
-                            },
-                          ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            alignment: Alignment.topCenter,
-                            padding: EdgeInsets.only(top: 10),
-                            child: IgnorePointer(
-                              ignoring: true,
-                              child: AnimatedOpacity(
-                                  opacity: spedUp ? 1 : 0,
-                                  duration: Duration(milliseconds: 100),
-                                  child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                    _playbackSpeedIndicator(),
-                                    _playbackSpeedSlider(),
-                                  ])),
-                            ),
-                          ),
-                          flex: 1,
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: DoubleTapDectector(
-                            behavior: HitTestBehavior.translucent,
-                            onDoubleTap: () {
-                              // windows shouldnt be having double tap to skip functionality
-                              if (playerDataProvider.state.controlsLocked || Platform.isWindows) return;
-                              if (currentUserSettings?.doubleTapToSkip ?? true) {
-                                playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
-                                if (!_showForwardAnim) skipCount = 0;
-                                _showFastForwardAnim(true);
-                              }
-                            },
-                          ),
-                        ),
-                      ]),
+              child: Stack(
+                children: [
+                  Player(controller),
+                  if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
+                    SubViewer(
+                      controller: controller,
+                      format: SubtitleFormat.fromName(
+                          playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
+                      subtitleSource: playerDataProvider.state.currentStream.subtitle!,
+                      settings: playerDataProvider.subtitleSettings,
+                      headers: playerDataProvider.state.currentStream.customHeaders,
                     ),
-                    _skipIndicators(),
-                  ],
-                ),
+                  isInitiated
+                      ? AnimatedOpacity(
+                          duration: Duration(milliseconds: 150),
+                          opacity: playerProvider.state.controlsVisible ? 1 : 0,
+                          child: Stack(
+                            children: [
+                              IgnorePointer(ignoring: true, child: overlay()),
+                              IgnorePointer(ignoring: !playerProvider.state.controlsVisible, child: Controls()),
+                            ],
+                          ),
+                        )
+                      : (isDesktop)
+                          ? Column(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.only(top: 10, left: 10),
+                                  child: IconButton(
+                                      onPressed: () => Navigator.pop(context),
+                                      icon: Icon(
+                                        Icons.arrow_back,
+                                        color: Colors.white,
+                                        size: 35,
+                                      )),
+                                ),
+                                PlayerLoadingWidget(),
+                                SizedBox.shrink()
+                              ],
+                            )
+                          : Container(),
+                  _buildSpeedIndicator(),
+                  _skipIndicators(),
+                  _buildVolumeBrightnessIndicators(),
+                ],
               ),
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildVolumeBrightnessIndicators() {
+    if (_displayVolume == null && _displayBrightness == null) return const SizedBox.shrink();
+
+    final isVolume = _displayVolume != null;
+    final value = isVolume ? _displayVolume! : _displayBrightness!;
+    final icon = isVolume ? (value == 0 ? Icons.volume_off : Icons.volume_up) : Icons.light_mode;
+
+    return IgnorePointer(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          decoration: BoxDecoration(
+            color: appTheme.backgroundSubColor.withAlpha(220),
+            borderRadius: BorderRadius.circular(50),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 28),
+              const SizedBox(width: 16),
+              Text(
+                "${(value * 100).toInt()}%",
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontFamily: "Rubik",
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Align _buildSpeedIndicator() {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+        width: 200,
+        alignment: Alignment.topCenter,
+        padding: EdgeInsets.only(top: 10),
+        child: IgnorePointer(
+          ignoring: true,
+          child: AnimatedOpacity(
+              opacity: spedUp ? 1 : 0,
+              duration: Duration(milliseconds: 100),
+              child: Column(mainAxisSize: MainAxisSize.min, children: [
+                _playbackSpeedIndicator(),
+                _playbackSpeedSlider(),
+              ])),
         ),
       ),
     );

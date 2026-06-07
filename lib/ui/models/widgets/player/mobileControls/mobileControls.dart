@@ -6,7 +6,6 @@ import 'package:animestream/ui/models/widgets/player/mobileControls/topControls.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:screen_brightness/screen_brightness.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';

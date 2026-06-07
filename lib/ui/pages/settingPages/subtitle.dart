@@ -85,7 +85,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
 
   TextStyle subTextStyle() {
     return TextStyle(
-      fontSize: Platform.isWindows ? settings.fontSize * 1.5 : settings.fontSize,
+      fontSize: (Platform.isWindows || Platform.isLinux) ? settings.fontSize * 1.5 : settings.fontSize,
       fontFamily: settings.fontFamily ?? "Rubik",
       color: settings.textColor,
       fontWeight: settings.bold ? FontWeight.w700 : FontWeight.w500,

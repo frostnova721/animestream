@@ -75,6 +75,9 @@ class SettingsModal {
   /// Tap and Hold to speed up the player [defaults to true]
   final bool? enableHoldToSpeedUp;
 
+  /// Enable volume and brightness gestures in player screen
+  final bool? enablePlayerGestures;
+
   SettingsModal({
     this.megaSkipDuration,
     this.skipDuration,
@@ -99,6 +102,7 @@ class SettingsModal {
     this.autoOpEdSkip,
     this.enableLogging,
     this.enableHoldToSpeedUp,
+    this.enablePlayerGestures,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -126,6 +130,7 @@ class SettingsModal {
       autoOpEdSkip: map['autoOpEdSkip'] ?? false,
       enableLogging: map['enableLogging'] ?? false,
       enableHoldToSpeedUp: map['enableHoldToSpeedUp'] ?? true,
+      enablePlayerGestures: map['enablePlayerGestures'] ?? false,
     );
   }
 
@@ -154,6 +159,7 @@ class SettingsModal {
       'autoOpEdSkip': autoOpEdSkip,
       'enableLogging': enableLogging,
       'enableHoldToSpeedUp': enableHoldToSpeedUp,
+      'enablePlayerGestures': enablePlayerGestures,
     };
   }
 }

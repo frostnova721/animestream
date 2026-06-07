@@ -275,7 +275,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
   Timer? _tapTimer;
   int lastTapTime = 0;
   final int doubleTapThreshold = 300; // in ms
-  bool _waitingForSecondTap = false;
+  // bool _waitingForSecondTap = false;
 
   bool _showRewindAnim = false;
   bool _showForwardAnim = false;
@@ -306,38 +306,38 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     });
   }
 
-  void _handleTap() {
-    // New Logic Baby!
-    if (_waitingForSecondTap) {
-      // event where the 2nd tap is detected
-      _waitingForSecondTap = false;
-      _tapTimer?.cancel();
-      _handleDoubleTap();
-      return;
-    }
+  // void _handleTap() {
+  //   // New Logic Baby!
+  //   if (_waitingForSecondTap) {
+  //     // event where the 2nd tap is detected
+  //     _waitingForSecondTap = false;
+  //     _tapTimer?.cancel();
+  //     _handleDoubleTap();
+  //     return;
+  //   }
 
-    _handleSingleTap();
-    _waitingForSecondTap = true;
-    _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
-      // after threshold time, if no 2nd tap, treat it as succesful single tap
-      if (mounted) {
-        setState(() {
-          _waitingForSecondTap = false;
-        });
-      }
-    });
+  //   _handleSingleTap();
+  //   _waitingForSecondTap = true;
+  //   _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
+  //     // after threshold time, if no 2nd tap, treat it as succesful single tap
+  //     if (mounted) {
+  //       setState(() {
+  //         _waitingForSecondTap = false;
+  //       });
+  //     }
+  //   });
 
-    // if (_tapTimer != null && _tapTimer!.isActive) {
-    //   // Double tap
-    //   _tapTimer!.cancel();
-    //   _handleDoubleTap();
-    // } else {
-    //   // Single tap
-    //   _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
-    //     _handleSingleTap();
-    //   });
-    // }
-  }
+  //   // if (_tapTimer != null && _tapTimer!.isActive) {
+  //   //   // Double tap
+  //   //   _tapTimer!.cancel();
+  //   //   _handleDoubleTap();
+  //   // } else {
+  //   //   // Single tap
+  //   //   _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
+  //   //     _handleSingleTap();
+  //   //   });
+  //   // }
+  // }
 
   void _handleSingleTap() {
     final playerProvider = context.read<PlayerProvider>();
@@ -364,7 +364,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   int skipCount = 0;
 
-  double? _lastSpeedChangeOffset = 0.0;
+  // double? _lastSpeedChangeOffset = 0.0;
   double lastSpeed = 1.0;
 
   double? _displayVolume;

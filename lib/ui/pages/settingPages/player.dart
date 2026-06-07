@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
@@ -45,6 +43,7 @@ class PlayerSettingState extends State<PlayerSetting> {
   late bool enablePipOnMinimize;
   late bool autoOpEdSkip;
   late bool enableHoldToSpeedUp;
+  late bool enablePlayerGestures;
 
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
@@ -60,6 +59,7 @@ class PlayerSettingState extends State<PlayerSetting> {
       enablePipOnMinimize = settings.enablePipOnMinimize ?? false;
       autoOpEdSkip = settings.autoOpEdSkip ?? false;
       enableHoldToSpeedUp = settings.enableHoldToSpeedUp ?? true;
+      enablePlayerGestures = settings.enablePlayerGestures ?? false;
     });
   }
 
@@ -264,7 +264,6 @@ class PlayerSettingState extends State<PlayerSetting> {
                                 enableSuperSpeeds = !enableSuperSpeeds;
                                 writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
                               }),
-                          if (Platform.isAndroid)
                             ToggleItem(
                               onTapFunction: () {
                                 doubleTapToSkip = !doubleTapToSkip;
@@ -273,6 +272,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                               label: "Double tap to seek",
                               description: "Double tap left/right to jump $skipDuration seconds",
                               value: doubleTapToSkip,
+                              mobileOnly: true,
                             ),
                           ToggleItem(
                             label: "Auto Picture-in-Picture",
@@ -300,7 +300,17 @@ class PlayerSettingState extends State<PlayerSetting> {
                             label: "Hold to Speed Up",
                             description: "Long press the player to speed up the video",
                             value: enableHoldToSpeedUp,
-                          )
+                          ),
+                          ToggleItem(
+                            onTapFunction: () {
+                              enablePlayerGestures = !enablePlayerGestures;
+                              writeSettings(SettingsModal(enablePlayerGestures: enablePlayerGestures));
+                            },
+                            label: "Player Gestures",
+                            description: "Gestures for brightness & volume controls",
+                            value: enablePlayerGestures,
+                            mobileOnly: true,
+                            )
                         ],
                       ),
                     )

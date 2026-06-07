@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,7 @@ class ToggleItem extends StatelessWidget {
   final String label;
   final String? description;
   final bool value;
+  final bool mobileOnly;
 
   const ToggleItem({
     super.key,
@@ -14,10 +17,12 @@ class ToggleItem extends StatelessWidget {
     required this.label,
     this.description,
     required this.value,
+    this.mobileOnly = false,
   });
 
   @override
   Widget build(BuildContext context) {
+    if(mobileOnly && !Platform.isAndroid) return SizedBox.shrink();
     return InkWell(
       onTap: onTapFunction,
       child: Container(

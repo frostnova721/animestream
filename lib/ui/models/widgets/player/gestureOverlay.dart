@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 
+import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
@@ -78,6 +80,10 @@ class _GestureOverlayState extends State<GestureOverlay> {
   bool _isLeftHalfDrag = false;
 
   final double _verticalDragSensitivity = 300.0;
+
+  final disableGestures = !(currentUserSettings?.enablePlayerGestures ?? false);
+
+  final isDesktop = Platform.isWindows || Platform.isLinux;
 
   void _handleTapDown(TapDownDetails details) {
     _lastTapPosition = details.localPosition;
@@ -191,9 +197,9 @@ class _GestureOverlayState extends State<GestureOverlay> {
         behavior: HitTestBehavior.translucent,
         onTapDown: _handleTapDown,
         onTap: _handleTap,
-        onVerticalDragStart: _onVerticalDragStart,
-        onVerticalDragUpdate: _onVerticalDragUpdate,
-        onVerticalDragEnd: _onVerticalDragEnd,
+        onVerticalDragStart: isDesktop || disableGestures ? null : _onVerticalDragStart,
+        onVerticalDragUpdate: isDesktop || disableGestures ? null : _onVerticalDragUpdate,
+        onVerticalDragEnd: isDesktop || disableGestures ? null : _onVerticalDragEnd,
         onLongPressStart: _onLongPressStart,
         onLongPressMoveUpdate: _onLongPressMoveUpdate,
         onLongPressEnd: _onLongPressEnd,

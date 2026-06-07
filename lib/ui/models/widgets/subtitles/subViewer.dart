@@ -147,7 +147,7 @@ class _SubViewerState extends State<SubViewer> {
   //i tried to make it beautiful! okay???
   TextStyle subTextStyle() {
     return TextStyle(
-      fontSize: Platform.isWindows ? widget.settings.fontSize * 1.5 : widget.settings.fontSize,
+      fontSize: (Platform.isWindows || Platform.isLinux) ? widget.settings.fontSize * 1.5 : widget.settings.fontSize,
       fontFamily: widget.settings.fontFamily ?? "Rubik",
       color: widget.settings.textColor,
       fontWeight: widget.settings.bold ? FontWeight.w700 : FontWeight.w500,

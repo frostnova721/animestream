@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:html/parser.dart';
@@ -21,11 +23,23 @@ class AniZone extends AnimeProvider {
     final List<Map<String, String?>> searchRes = [];
 
     for (final child in children) {
+      final divData = child.attributes['x-data'];
+
+      final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
+
+      final match = matchRegEx.firstMatch(divData ?? "");
+
+      if (match == null) {
+        throw Exception("Couldn't find anime data");
+      }
+
+      final title = jsonDecode( match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
+
       final a = child.querySelector("a");
       if (a == null) {
         throw Exception("Found null item.");
       }
-      final title = a.attributes['title'];
+
       final href = a.attributes['href'];
 
       final img = child.querySelector("img")?.attributes['src'];
@@ -45,7 +59,6 @@ class AniZone extends AnimeProvider {
 
   @override
   Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
-    print(aliasId);
     final url = aliasId;
     final res = await get(Uri.parse(url));
     final doc = parse(res.body);
@@ -59,9 +72,22 @@ class AniZone extends AnimeProvider {
     int i = 1;
 
     for (final item in list) {
+
+      final divData = item.attributes['x-data'];
+
+      final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
+
+      final match = matchRegEx.firstMatch(divData ?? "");
+
+      if (match == null) {
+        throw Exception("Couldn't find anime data");
+      }
+
+      final title = jsonDecode( match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
+
       final epLink = item.querySelector("a")?.attributes['href'];
       final epImg = item.querySelector("img")?.attributes['src'];
-      final title = item.querySelector("h3")?.text;
+      // final title = item.querySelector("h3")?.text;
       epList.add({
         'episodeLink': epLink,
         'episodeNumber': i,

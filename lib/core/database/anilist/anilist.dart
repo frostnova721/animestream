@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/values.dart';
 import 'package:graphql/client.dart';
 
 import 'package:animestream/core/commons/enums.dart';
@@ -333,6 +334,7 @@ class Anilist extends Database {
     client = GraphQLClient(
       link: HttpLink("https://graphql.anilist.co", defaultHeaders: {
         if (token != null) 'Authorization': 'Bearer $token',
+        'User-Agent': AppValues.defaultClientUserAgent,
       }),
       cache: GraphQLCache(),
     );
@@ -359,7 +361,7 @@ class Anilist extends Database {
 
       final linkEx = res.exception?.linkException;
       if (linkEx is ServerException) {
-        if(linkEx.statusCode != null) return linkEx.statusCode;
+        if (linkEx.statusCode != null) return linkEx.statusCode;
         final parsed = linkEx.parsedResponse;
         final parsedCtxCode = parsed?.context.entry<HttpLinkResponseContext>()?.statusCode;
         if (parsedCtxCode != null) return parsedCtxCode;

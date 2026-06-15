@@ -31,7 +31,7 @@ class AnilistQueries {
   }
 }''';
 
-    final res = await Anilist().fetchQuery(query, null);
+    final res = await Anilist().fetchQuery(query, null, token: await getSecureVal(SecureStorageKey.anilistToken));
     final List<dynamic> data = res['MediaListCollection']['lists'];
     final List<UserAnimeList> arrangedList = [];
     for (final element in data) {

@@ -247,7 +247,7 @@ class AnilistQueries {
   }
 }''';
 
-    final Map<String, dynamic> res = await Anilist().fetchQuery(query, null);
+    final Map<String, dynamic> res = await Anilist().fetchQuery(query, null, token: await getSecureVal(SecureStorageKey.anilistToken));
     final Map<String, dynamic> stats = res['User']['statistics']['anime'];
     List<GenreWatchStats> genres = [];
     for (final genre in stats['genres']) {

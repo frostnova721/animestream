@@ -136,87 +136,110 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
               ),
             ),
             const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    padding: EdgeInsets.only(right: 8),
-                    child: markedDelete
-                        ? Text(
-                            "REMOVED",
-                            style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins", fontSize: 16),
-                          )
-                        : DropdownMenu(
-                            controller: menuController,
-                            onSelected: (value) {
-                              if (value != initialSelection) selectedValue = value;
-                            },
-                            enableSearch: false,
-                            menuStyle: MenuStyle(
-                              backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
-                              shape: WidgetStatePropertyAll(
-                                RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  side: BorderSide(
-                                    width: 1,
-                                    color: appTheme.textMainColor.withAlpha(51),
+            SizedBox(
+              height: 55, // fk it imma hardcode it
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      padding: EdgeInsets.only(right: 8),
+                      child: markedDelete
+                          ? Text(
+                              "REMOVED",
+                              style: TextStyle(fontWeight: FontWeight.bold, fontFamily: "Poppins", fontSize: 16),
+                            )
+                          : LayoutBuilder(
+                            builder:(context, constraints) => DropdownMenu(
+                                controller: menuController,
+                                onSelected: (value) {
+                                  if (value != initialSelection) selectedValue = value;
+                                },
+                                width: constraints.maxWidth,
+                                enableSearch: false,
+                                menuStyle: MenuStyle(
+                                  backgroundColor: WidgetStatePropertyAll(appTheme.backgroundColor),
+                                  shape: WidgetStatePropertyAll(
+                                    RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      side: BorderSide(
+                                        width: 1,
+                                        color: appTheme.textMainColor.withAlpha(51),
+                                      ),
+                                    ),
                                   ),
+                                  elevation: WidgetStatePropertyAll(8),
+                                  // padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8)),
                                 ),
-                              ),
-                              elevation: WidgetStatePropertyAll(8),
-                              // padding: WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 8)),
-                            ),
-                            textStyle: TextStyle(
-                              color: appTheme.textMainColor,
-                              fontFamily: "Poppins",
-                              fontSize: 16,
-                            ),
-                            inputDecorationTheme: InputDecorationTheme(
-                              filled: true,
-                              fillColor: appTheme.backgroundColor,
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide(width: 1, color: appTheme.textMainColor.withAlpha(51)),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  width: 1,
-                                  color: appTheme.textMainColor.withAlpha(51),
+                                textStyle: TextStyle(
+                                  color: appTheme.textMainColor,
+                                  fontFamily: "Poppins",
+                                  fontSize: 16,
                                 ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderSide: BorderSide(
-                                  width: 1.5,
-                                  color: appTheme.accentColor,
+                                inputDecorationTheme: InputDecorationTheme(
+                                  filled: true,
+                                  fillColor: appTheme.backgroundColor,
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(width: 1, color: appTheme.textMainColor.withAlpha(51)),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 1,
+                                      color: appTheme.textMainColor.withAlpha(51),
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      width: 1.5,
+                                      color: appTheme.accentColor,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                                 ),
-                                borderRadius: BorderRadius.circular(12),
+                                initialSelection: getInitialSelection(),
+                                dropdownMenuEntries: itemList,
                               ),
-                              contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                            ),
-                            width: double.infinity,
-                            initialSelection: getInitialSelection(),
-                            dropdownMenuEntries: itemList,
                           ),
+                    ),
                   ),
-                ),
-                _ProgressButton(
-                  icon: Icons.delete_outline_rounded,
-                  onPressed: () async {
-                    setState(() {
-                      markedDelete = !markedDelete;
-                    });
-                  },
-                  color: markedDelete ? appTheme.modalSheetBackgroundColor : appTheme.accentColor,
-                  backgroundColor: markedDelete ? appTheme.accentColor : appTheme.backgroundColor,
-                  border: Border.all(
-                    color: appTheme.textMainColor.withAlpha(51),
+                  IconButton.outlined(
+                    style: ButtonStyle(
+                      side: WidgetStatePropertyAll(BorderSide(color: appTheme.textMainColor.withAlpha(51))),
+                      shape: WidgetStatePropertyAll(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                      padding: WidgetStatePropertyAll(EdgeInsets.zero),
+                      minimumSize: WidgetStatePropertyAll(Size(55, 55)),
+                      backgroundColor: WidgetStatePropertyAll(markedDelete ? appTheme.accentColor : appTheme.backgroundColor),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        markedDelete = !markedDelete;
+                      });
+                    },
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: markedDelete ? appTheme.onAccent : appTheme.accentColor,
+                    ),
                   ),
-                )
-              ],
+                  // _ProgressButton(
+                  //   icon: Icons.delete_outline_rounded,
+                  //   onPressed: () async {
+                  //     setState(() {
+                  //       markedDelete = !markedDelete;
+                  //     });
+                  //   },
+                  //   color: markedDelete ? appTheme.modalSheetBackgroundColor : appTheme.accentColor,
+                  //   backgroundColor: markedDelete ? appTheme.accentColor : appTheme.backgroundColor,
+                  //   border: Border.all(
+                  //     color: appTheme.textMainColor.withAlpha(51),
+                  //   ),
+                  // )
+                ],
+              ),
             ),
 
             // Progress Section
@@ -232,10 +255,10 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
             ),
             const SizedBox(height: 12),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+              padding: EdgeInsets.symmetric(horizontal: 9, vertical: 8),
               decoration: BoxDecoration(
                 color: appTheme.backgroundColor,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(18),
                 border: Border.all(
                   color: appTheme.textMainColor.withAlpha(25),
                   width: 1,
@@ -258,7 +281,7 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                   Row(
                     children: [
                       Container(
-                        height: 48,
+                        // height: 55,
                         width: 80,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(12),
@@ -402,14 +425,12 @@ class _ProgressButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color color;
   final Color backgroundColor;
-  final Border? border;
 
   const _ProgressButton({
     required this.icon,
     required this.onPressed,
     required this.color,
     required this.backgroundColor,
-    this.border,
   });
 
   @override
@@ -420,12 +441,11 @@ class _ProgressButton extends StatelessWidget {
         onTap: onPressed,
         borderRadius: BorderRadius.circular(12),
         child: Container(
-          width: 48,
-          height: 48,
+          width: 55,
+          height: 55,
           decoration: BoxDecoration(
             color: backgroundColor,
             borderRadius: BorderRadius.circular(12),
-            border: this.border,
           ),
           child: Icon(
             icon,

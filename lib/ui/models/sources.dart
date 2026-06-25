@@ -1,3 +1,4 @@
+import 'package:animestream/core/anime/providers/anikoto.dart';
 import 'package:animestream/core/anime/providers/animegg.dart';
 import 'package:animestream/core/anime/providers/animeonsen.dart';
 import 'package:animestream/core/anime/providers/animepahe.dart';
@@ -25,6 +26,7 @@ class SourceManager {
     "AniZone",
     "Animegg",
     "Gojo",
+    "Anikoto",
   ]
       .map((e) => ProviderDetails(
           name: e, identifier: e.toLowerCase() + "_inbuilt", version: "0.0.0.0", supportDownloads: e != "AnimeOnsen"))
@@ -110,6 +112,7 @@ final Map<String, AnimeProvider> sources = {
   "gojo": Gojo(),
   "anizone": AniZone(),
   "animegg": Animegg(),
+  "anikoto": Anikoto(),
 };
 
 AnimeProvider getClass(String source) {

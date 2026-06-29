@@ -78,8 +78,8 @@ class _CommentsectionState extends State<Commentsection> {
     });
 
     try {
-      final res = await commentum.listComments(widget.mediaId.toString(),
-          cursor: cursor ?? paginatedComments.lastOrNull?.nextCursor);
+      final res = await commentum.listComments(
+          mediaId: widget.mediaId.toString(), cursor: cursor ?? paginatedComments.lastOrNull?.nextCursor);
 
       // if (_nextPageCursor == null) reachedEnd = true;
       paginatedComments.add(res);
@@ -182,10 +182,10 @@ class _CommentsectionState extends State<Commentsection> {
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
                                           // if (kDebugMode)
-                                            setState(() {
-                                              activeCommentIndex = index;
-                                              replyMode = true;
-                                            });
+                                          setState(() {
+                                            activeCommentIndex = index;
+                                            replyMode = true;
+                                          });
                                         },
                                         child: CommentItem(
                                           comment: comments[index],
@@ -253,15 +253,15 @@ class _CommentsectionState extends State<Commentsection> {
 
                                   try {
                                     if (replyMode) {
-                                      final cmt =
-                                          await commentum.createReply(comments[activeCommentIndex!].id, content);
+                                      final cmt = await commentum.createReply(
+                                          parentId: comments[activeCommentIndex!].id, content: content);
                                       // print("cmt: $cmt");
                                       comments[activeCommentIndex!].replies.add(cmt);
                                     } else {
                                       final cmt = await commentum.createComment(
-                                        widget.mediaId.toString(),
-                                        "anilist",
-                                        content,
+                                        mediaId: widget.mediaId.toString(),
+                                        mediaProvider: "anilist",
+                                        content: content,
                                       );
                                       comments.add(cmt);
                                     }

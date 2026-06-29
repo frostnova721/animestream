@@ -28,4 +28,12 @@ class CommentumTokenStore implements CommentumStorage {
   Future<void> saveToken(CommentumProvider provider, String token) async {
     return await _fss.write(key: _providerKey(provider), value: token);
   }
+  
+  @override
+  Future<Map<CommentumProvider, String>> getAllTokens() {
+    return Future.wait(CommentumProvider.values.map((provider) async {
+      final token = await getToken(provider);
+      return MapEntry(provider, token ?? "");
+    })).then((entries) => Map.fromEntries(entries));
+  }
 }

@@ -167,10 +167,10 @@ packages:
     description:
       path: "."
       ref: HEAD
-      resolved-ref: "290e5a7520b94b395657776398998805f9e61d17"
+      resolved-ref: "6cd43f44cc05db301271807fdced125e28fbde9e"
       url: "https://github.com/frostnova721/commentum_client"
     source: git
-    version: "1.0.4"
+    version: "1.1.0"
   convert:
     dependency: transitive
     description:

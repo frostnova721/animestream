@@ -47,9 +47,9 @@ class MainNavProvider extends ChangeNotifier {
 
   //home items
 
-  AnimeListData<HomePageList> _currentlyAiring = AnimeListData();
-  AnimeListData<HomePageList> _recentlyWatched = AnimeListData();
-  AnimeListData<HomePageList> _plannedList = AnimeListData();
+  AnimeListData<HomePageList> _currentlyAiring = AnimeListData(title: "Currently Airing");
+  AnimeListData<HomePageList> _recentlyWatched = AnimeListData(title: "Continue Watching");
+  AnimeListData<HomePageList> _plannedList = AnimeListData(title: "From Your Planned");
 
   // bool _homePageError = false;
   // bool _homeDataLoaded = false;

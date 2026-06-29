@@ -1554,6 +1554,7 @@ class _InfoMobileState extends State<InfoMobile> {
                 onPressed: () {
                   showModalBottomSheet(
                       context: context,
+                      useSafeArea: true,
                       builder: (context) {
                         return Commentsection(mediaId: provider.id, userId: storedUserData?.id);
                       });

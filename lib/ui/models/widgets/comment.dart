@@ -25,6 +25,9 @@ class _CommentItemState extends State<CommentItem> {
 
   String _getFriendlyTimeDifference() {
     final diff = DateTime.now().difference(widget.comment.updatedAt);
+    if (diff.inDays > 365) return "${diff.inDays ~/ 365} year${diff.inDays ~/ 365 > 1 ? "s" : ''} ago";
+    if (diff.inDays > 30) return "${diff.inDays ~/ 30} month${diff.inDays ~/ 30 > 1 ? "s" : ''} ago";
+    if (diff.inDays > 7) return "${diff.inDays ~/ 7} week${diff.inDays ~/ 7 > 1 ? "s" : ''} ago";
     if (diff.inDays > 0) return "${diff.inDays} day${diff.inDays > 1 ? "s" : ''} ago";
     if (diff.inHours > 0) return "${diff.inHours} hour${diff.inHours > 1 ? "s" : ''} ago";
     if (diff.inMinutes > 0) return "${diff.inMinutes} minute${diff.inMinutes > 1 ? "s" : ''} ago";

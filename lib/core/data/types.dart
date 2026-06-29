@@ -78,6 +78,9 @@ class SettingsModal {
   /// Enable volume and brightness gestures in player screen
   final bool? enablePlayerGestures;
 
+  /// Use the old navbar instead of the new one (Not available for desktops) [defaults to false]
+  final bool? useOldNavbar;
+
   SettingsModal({
     this.megaSkipDuration,
     this.skipDuration,
@@ -103,6 +106,7 @@ class SettingsModal {
     this.enableLogging,
     this.enableHoldToSpeedUp,
     this.enablePlayerGestures,
+    this.useOldNavbar,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -131,6 +135,7 @@ class SettingsModal {
       enableLogging: map['enableLogging'] ?? false,
       enableHoldToSpeedUp: map['enableHoldToSpeedUp'] ?? true,
       enablePlayerGestures: map['enablePlayerGestures'] ?? false,
+      useOldNavbar: map['useOldNavbar'] ?? false,
     );
   }
 
@@ -160,6 +165,7 @@ class SettingsModal {
       'enableLogging': enableLogging,
       'enableHoldToSpeedUp': enableHoldToSpeedUp,
       'enablePlayerGestures': enablePlayerGestures,
+      'useOldNavbar': useOldNavbar,
     };
   }
 }

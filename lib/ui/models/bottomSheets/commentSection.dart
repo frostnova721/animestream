@@ -124,23 +124,26 @@ class _CommentsectionState extends State<Commentsection> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        replyMode ? "Replies" : "Comments",
-                        style: TextStyle(
-                          color: appTheme.textMainColor,
-                          fontFamily: "Rubik",
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 8.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          replyMode ? "Replies" : "Comments",
+                          style: TextStyle(
+                            color: appTheme.textMainColor,
+                            fontFamily: "Rubik",
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      Text(
-                        "${replyMode ? comments[activeCommentIndex!].replies.length : totalComments ?? comments.length} items",
-                        style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
-                      ),
-                    ],
+                        Text(
+                          "${replyMode ? comments[activeCommentIndex!].replies.length : totalComments ?? comments.length} items",
+                          style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik"),
+                        ),
+                      ],
+                    ),
                   ),
                   if (replyMode)
                     IconButton(
@@ -178,7 +181,7 @@ class _CommentsectionState extends State<Commentsection> {
                                     return GestureDetector(
                                         behavior: HitTestBehavior.translucent,
                                         onTap: () {
-                                          if (kDebugMode)
+                                          // if (kDebugMode)
                                             setState(() {
                                               activeCommentIndex = index;
                                               replyMode = true;

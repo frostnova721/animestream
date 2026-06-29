@@ -121,6 +121,27 @@ class _GestureOverlayState extends State<GestureOverlay> {
     if (widget.controlsLocked) return;
     
     final screenWidth = MediaQuery.sizeOf(context).width;
+    final screenHeight = MediaQuery.sizeOf(context).height;
+
+    // the middle part of screen is free from gestures.
+    final freeSpace = screenWidth / 3;
+    
+    // Add dead zones at top and bottom to prevent accidental triggers (like status bar pulldown)
+    final verticalSafeArea = (screenHeight * 0.1).clamp(40.0, 80.0);
+    if (details.localPosition.dy < verticalSafeArea || 
+        details.localPosition.dy > screenHeight - verticalSafeArea) {
+      return;
+    }
+
+    final isAtFreeSpace = details.localPosition.dx > freeSpace && details.localPosition.dx < (screenWidth - freeSpace);
+    
+    // Add dead zones at left and right edges to prevent interference with system 'back' gestures
+    final horizontalSafeArea = 40.0;
+    if (details.localPosition.dx < horizontalSafeArea ||
+        details.localPosition.dx > screenWidth - horizontalSafeArea || isAtFreeSpace) {
+      return;
+    }
+
     _dragStartY = details.localPosition.dy;
     _isLeftHalfDrag = details.localPosition.dx < (screenWidth / 2);
 
@@ -151,7 +172,7 @@ class _GestureOverlayState extends State<GestureOverlay> {
     widget.onVerticalDragEnd();
   }
 
-  // --- LONG PRESS (Speed Control) ---
+  // Speed Control
   void _onLongPressStart(LongPressStartDetails details) {
     if (widget.isDesktop || widget.controlsLocked || !widget.enableHoldToSpeedUp) return;
     

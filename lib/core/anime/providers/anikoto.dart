@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:animestream/core/anime/extractors/kwik.dart';
 import 'package:animestream/core/anime/extractors/vidtube.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
@@ -12,7 +11,7 @@ class Anikoto implements AnimeProvider {
   @override
   final String providerName = "Anikoto";
 
-  final _baseUrl = "https://anikototv.to";
+  //final _baseUrl = "https://anikototv.to";
   final _ajaxUrl = "https://anikototv.to/ajax";
   final _mapperUrl = "https://mapper.nekostream.site/";
 

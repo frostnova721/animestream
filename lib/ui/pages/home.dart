@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
+import 'package:animestream/ui/models/screenType.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -147,11 +148,11 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-              if(selectedList != null)
-              Expanded(
-                flex: selectedList == null ? 0 : 1,
-                child: _rightPanel(),
-              )
+              if (selectedList != null)
+                Expanded(
+                  flex: selectedList == null ? 0 : 1,
+                  child: _rightPanel(),
+                )
             ],
           ),
         ),
@@ -159,35 +160,73 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Widget _rightPanel() {
+  AnimatedContainer _rightPanel() {
     return AnimatedContainer(
       duration: Duration(milliseconds: 200),
-      decoration: BoxDecoration(color: appTheme.backgroundSubColor, borderRadius: BorderRadius.circular(16)),
+      decoration: BoxDecoration(
+        color: appTheme.backgroundSubColor.withAlpha(150),
+        borderRadius: BorderRadius.circular(16),
+      ),
       margin: EdgeInsets.all(24),
       padding: EdgeInsets.all(8),
       width: selectedList != null ? null : 0,
-      child:selectedList == null ? Container() :  GridView.builder(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-        gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-          maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
-          mainAxisExtent: Platform.isAndroid ? 220 : 265,
-          // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
-          childAspectRatio: 120 / 220,
-          mainAxisSpacing: 10,
-        ),
-        itemCount: selectedList!.items.length,
-        itemBuilder: (context, index) {
-          final item = selectedList!.items[index];
-          return Center(
-            child: Cards.animeCard(
-              item.id,
-              item.title['english'] ?? item.title['romaji'] ?? "",
-              item.coverImage,
-              rating: item.rating,
+      child: selectedList == null
+          ? Container()
+          : Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      onPressed: () {
+                        setState(() {
+                          selectedList = null;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        color: appTheme.textMainColor,
+                        size: 20,
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 12),
+                      child: Text(
+                        selectedList!.title ?? "Which list might this be?",
+                        style: TextStyle(fontFamily: "Rubik", fontSize: 20, color: appTheme.textMainColor),
+                      ),
+                    ),
+                  ],
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 12),
+                    child: GridView.builder(
+                      padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                        maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+                        mainAxisExtent: Platform.isAndroid ? 220 : 265,
+                        // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                        childAspectRatio: 120 / 220,
+                        mainAxisSpacing: 10,
+                      ),
+                      itemCount: selectedList!.items.length,
+                      itemBuilder: (context, index) {
+                        final item = selectedList!.items[index];
+                        return Center(
+                          child: Cards.animeCard(
+                            item.id,
+                            item.title['english'] ?? item.title['romaji'] ?? "",
+                            item.coverImage,
+                            rating: item.rating,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
     );
   }
 
@@ -330,9 +369,9 @@ class _HomeState extends State<Home> {
             Spacer(),
             IconButton(
                 onPressed: () {
-                  if(Platform.isWindows) {
+                  if (context.screenType == ScreenType.expanded || context.screenType == ScreenType.large) {
                     setState(() {
-                       selectedList = list;
+                      selectedList = list;
                     });
                     return;
                   }

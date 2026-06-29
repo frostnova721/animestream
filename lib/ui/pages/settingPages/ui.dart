@@ -48,6 +48,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
     darkMode = currentUserSettings?.darkMode ?? true;
     materialTheme = currentUserSettings?.materialTheme ?? false;
     nativeTitle = currentUserSettings?.nativeTitle ?? false;
+    useOldNavbar = currentUserSettings?.useOldNavbar ?? false;
     // borderlessWindow = currentUserSettings?.useFramelessWindow ?? true;
   }
 
@@ -70,6 +71,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
   late bool materialTheme;
   late bool useNewHomeScreen;
   late bool nativeTitle;
+  late bool useOldNavbar;
   // late bool borderlessWindow;
 
   @override
@@ -187,21 +189,20 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             },
                             description: "Full black background",
                           ),
-                          // if (Platform.isWindows)
-                          //   _toggleItem(
-                          //       "Borderless Window",
-                          //       description: "*Resizing window will be affected",
-                          //       borderlessWindow, () async {
-                          //     setState(() {
-                          //       borderlessWindow = !borderlessWindow;
-                          //     });
-                          //     if (borderlessWindow)
-                          //       windowManager.setAsFrameless();
-                          //     else
-                          //       windowManager.setTitleBarStyle(TitleBarStyle.hidden, windowButtonVisibility: false);
-                          //     await Settings().writeSettings(SettingsModal(useFramelessWindow: borderlessWindow));
-                          //   }),
-                          if (Platform.isAndroid)
+                          ToggleItem(
+                            onTapFunction: () async {
+                              setState(() {
+                                useOldNavbar = !useOldNavbar;
+                              });
+                              await Settings().writeSettings(SettingsModal(useOldNavbar: useOldNavbar));
+                              Provider.of<AppProvider>(context, listen: false).justRefresh();
+                            },
+                            label: "Use Old Navbar",
+                            value: useOldNavbar,
+                            mobileOnly: true,
+                          ),
+
+                          if (Platform.isAndroid && useOldNavbar)
                             Padding(
                               padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),
                               child: _sliderItem("Navbar Transparency", navbarTranslucency,
@@ -290,14 +291,12 @@ class _ThemeSettingState extends State<ThemeSetting> {
           isScrollControlledSheet: true,
           showSheetHandle: true,
           builder: (BuildContext context) => Container(
-            // height: MediaQuery.of(context).orientation == Orientation.landscape
-            //     ? MediaQuery.of(context).size.height / 2 + 100
-            //     : MediaQuery.of(context).size.height / 3 + 100,
             width: Platform.isWindows ? MediaQuery.sizeOf(context).width / 3 : null,
             padding: EdgeInsets.only(
-              top: 10,
+              top: 12,
               left: 20,
               right: 20,
+              bottom: 12,
             ),
             margin: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
             child: Column(

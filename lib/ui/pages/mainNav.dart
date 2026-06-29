@@ -58,7 +58,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   }
 
   final _floatyBarController = FloatyBottomBarController(length: 3);
-  AnimeStreamBottomBarController _barController = AnimeStreamBottomBarController(length: 3);
+  final _barController = AnimeStreamBottomBarController(length: 3);
 
   bool popInvoked = false;
   // late bool tv;
@@ -213,37 +213,69 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
   }
 
   Widget _bottomBar(BuildContext context, double blurSigmaValue) {
-    return Stack(
-      children: [
-        FloatyBarView(
-          controller: _floatyBarController,
-          children: [
-            Home(
-              key: ValueKey("0"),
-              mainNavProvider: mainNavProvider,
-            ),
-            Discover(
-              key: ValueKey("1"),
-              mainNavProvider: mainNavProvider,
-            ),
-            Search(
-              key: ValueKey("2"),
-            ),
-          ],
-        ),
-        FloatyBottomBar(
-          controller:  _floatyBarController,
-          accentColor: appTheme.accentColor,
-          backgroundColor:
-              appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
-          // borderRadius: 12,
-          items: [
-            FloatyBarItem(title: 'Home', icon: Icons.home),
-            FloatyBarItem(title: 'Discover', icon: Icons.auto_awesome),
-            FloatyBarItem(title: 'Search', icon: Icons.search),
-          ],
-        )
-      ],
-    );
+    return (currentUserSettings?.useOldNavbar ?? false)
+        ? Stack(
+            children: [
+              BottomBarView(
+                controller: _barController,
+                children: [
+                  Home(
+                    key: ValueKey("0"),
+                    mainNavProvider: mainNavProvider,
+                  ),
+                  Discover(
+                    key: ValueKey("1"),
+                    mainNavProvider: mainNavProvider,
+                  ),
+                  Search(
+                    key: ValueKey("2"),
+                  ),
+                ],
+              ),
+              AnimeStreamBottomBar(
+                borderRadius: 12,
+                accentColor: appTheme.accentColor,
+                backgroundColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
+                items: [
+                  BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
+                  BottomBarItem(title: 'Discover', icon: Icon(Icons.auto_awesome)),
+                  BottomBarItem(title: 'Search', icon: Icon(Icons.search))
+                ],
+                controller: _barController,
+              )
+            ],
+          )
+        : Stack(
+            children: [
+              FloatyBarView(
+                controller: _floatyBarController,
+                children: [
+                  Home(
+                    key: ValueKey("0"),
+                    mainNavProvider: mainNavProvider,
+                  ),
+                  Discover(
+                    key: ValueKey("1"),
+                    mainNavProvider: mainNavProvider,
+                  ),
+                  Search(
+                    key: ValueKey("2"),
+                  ),
+                ],
+              ),
+              FloatyBottomBar(
+                controller: _floatyBarController,
+                accentColor: appTheme.accentColor,
+                backgroundColor:
+                    appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
+                // borderRadius: 12,
+                items: [
+                  FloatyBarItem(title: 'Home', icon: Icons.home),
+                  FloatyBarItem(title: 'Discover', icon: Icons.auto_awesome),
+                  FloatyBarItem(title: 'Search', icon: Icons.search),
+                ],
+              )
+            ],
+          );
   }
 }

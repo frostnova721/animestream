@@ -147,7 +147,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
                   //   ],
                   //   controller: _barController,
                   //   initialIndex: 0,
-                  //   shouldExpand: true,
+                  //   shouldExpand: false,
                   // ),
                   NavigationRail(
                     onDestinationSelected: (value) {

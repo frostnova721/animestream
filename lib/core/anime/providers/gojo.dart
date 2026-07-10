@@ -132,6 +132,8 @@ class Gojo extends AnimeProvider {
               .firstOrNull?['url'] ?? //pick only english
           subtitles?.firstOrNull?['url']) as String?;
 
+          print("$provider: $sources");
+
       sources?.forEach((i) => update(
             [
               VideoStream(

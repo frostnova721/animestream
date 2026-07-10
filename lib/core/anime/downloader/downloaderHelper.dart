@@ -87,13 +87,15 @@ class DownloaderHelper {
     // split the anime name
     final animeName = fileName.replaceAll(RegExp(r'\s+ep\s*\d+\s*$', caseSensitive: false), '').trim();
 
+    final sp = Platform.pathSeparator;
+
     // The check was BS since non existing directory cant be selected!
-    final directory = Directory("${downPath.path}/$animeName");
+    final directory = Directory("${downPath.path}$sp$animeName");
     if (!(await directory.exists())) {
       await directory.create(recursive: true);
     }
 
-    finalPath = '$basePath/$animeName/$fileName.$ext';
+    finalPath = '$basePath$sp$animeName$sp$fileName.$ext';
     return finalPath;
   }
 

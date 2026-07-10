@@ -17,6 +17,7 @@ class SubViewer extends StatefulWidget {
   final Map<String, String>? headers;
   final SubtitleFormat format;
   final SubtitleSettings settings;
+  final bool isOffline;
 
   const SubViewer({
     super.key,
@@ -25,6 +26,7 @@ class SubViewer extends StatefulWidget {
     required this.subtitleSource,
     required this.settings,
     this.headers = const {},
+    this.isOffline = false,
   });
 
   @override
@@ -55,17 +57,14 @@ class _SubViewerState extends State<SubViewer> {
       });
       subs.clear(); // clear the old subs (if any)
       print("[SUBVIEWER]: Loading ${widget.format.name} subs");
-      switch (widget.format) {
-        case SubtitleFormat.ASS:
-          subs = await Subtitleparsers().parseAss(widget.subtitleSource, headers: widget.headers ?? {});
-        case SubtitleFormat.VTT:
-          subs = await Subtitleparsers().parseVtt(widget.subtitleSource, headers: widget.headers ?? {});
-        case SubtitleFormat.SRT:
-          subs = await Subtitleparsers().parseSrt(widget.subtitleSource, headers: widget.headers ?? {});
-        // default:
-        // throw Exception("Not implemented!");
+      if (widget.isOffline) {
+        subs = await Subtitleparsers().parseSubsFromFile(widget.subtitleSource, widget.format);
+      } else {
+        subs = await Subtitleparsers()
+            .parseSubsFromUrl(widget.subtitleSource, widget.format, headers: widget.headers ?? {});
       }
-      print(widget.subtitleSource);
+
+      print("Loaded subs from: ${widget.subtitleSource}");
       _loadedSubsUrl = widget.subtitleSource; // for changing subs when episode changes
       setState(() {
         areSubsLoading = false;
@@ -168,7 +167,7 @@ class _SubViewerState extends State<SubViewer> {
 
     // Sort each group by start time for consistency
     for (var list in subsGrouped.values) {
-        list.sort((a, b) => a.start.compareTo(b.start));
+      list.sort((a, b) => a.start.compareTo(b.start));
     }
 
     return Stack(

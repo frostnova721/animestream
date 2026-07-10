@@ -10,7 +10,7 @@ class CacheConfig {
   final bool bypassCache;
 
   const CacheConfig({
-    this.maxCacheSize = 1024 * 1024 * 1024,
+    this.maxCacheSize = 200 * 1024 * 1024,
     this.enableCaching = true,
     this.bypassCache = false,
   });

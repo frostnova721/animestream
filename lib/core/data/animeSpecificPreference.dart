@@ -11,6 +11,8 @@ const int _animeInfoLruCapacity = 40;
 
 final String _boxName = HiveBox.animeInfo.boxName;
 
+// final _cache = <String, AnimeSpecificPreference?>{};
+
 /// Retruns an object of [AnimeSpecificPreference] if it exists!
 Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) async {
   //just handle anilist
@@ -45,11 +47,15 @@ Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) as
   await box.close();
 
   return AnimeSpecificPreference(
-      lastWatchDuration: lastWatch, manualSearchQuery: manSearch, preferredProvider: provider);
+      lastWatchDuration: lastWatch,
+      manualSearchQuery: manSearch,
+      preferredProvider: provider,
+      previouslyUsedServer: item['previouslyUsedServer']);
 }
 
 Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreference preference) async {
-  Map<dynamic, dynamic> map = Map.castFrom(await getVal(HiveKey.animeSpecificPreference, boxName: HiveBox.animeInfo) ?? {});
+  Map<dynamic, dynamic> map =
+      Map.castFrom(await getVal(HiveKey.animeSpecificPreference, boxName: HiveBox.animeInfo) ?? {});
 
   // print(map);
 

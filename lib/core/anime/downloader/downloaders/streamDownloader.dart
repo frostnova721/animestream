@@ -181,8 +181,8 @@ class StreamDownloader extends BaseDownloader {
       fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '') + " Subtitles";
 
       final ext = url.split(".").lastOrNull ?? "txt";
-      final file = File("${folder.path}/$fileName.$ext");
-      await file.writeAsString((await get(Uri.parse(url))).body);
+      final file = File("${folder.path}${Platform.pathSeparator}$fileName.$ext");
+      await file.writeAsString((await get(Uri.parse(url), headers: task.customHeaders)).body);
       return;
     } catch (err) {
       print("[DOWNLOADER] Failed to download $fileName subs!");

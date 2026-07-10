@@ -21,6 +21,7 @@ import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:provider/provider.dart';
+import 'package:collection/collection.dart';
 
 class ServerSelectionBottomSheet extends StatefulWidget {
   final InfoProvider provider;
@@ -89,10 +90,19 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
           dub: provider.preferDubs, metadata: provider.epLinks[widget.episodeIndex].metadata, (list, finished) {
         if (mounted)
           setState(() {
+            streamSources = streamSources + list;
             if (finished) {
               _isLoading = (widget.type == ServerSheetType.download) ? true : false;
+
+              if (widget.provider.previouslyUsedServer != null && userPreferences?.autoSelectPreviouslyUsedServer == true) {
+                final autoSelected =
+                    streamSources.firstWhereOrNull((element) => element.server == widget.provider.previouslyUsedServer);
+
+                if (autoSelected != null) {
+                  _navigateToPlayer(title, streamSources.indexOf(autoSelected));
+                }
+              }
             }
-            streamSources = streamSources + list;
             if (widget.type == ServerSheetType.download) {
               list.forEach((element) async {
                 // auto or multi quality would mean multiple qualities
@@ -121,7 +131,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   Future<void> getQualities(VideoStream source) async {
     List<Map<String, String>> mainList = [];
 
-    final ParsedHlsMaster list = await parseMasterPlaylist(source.url, customHeader: source.customHeaders).catchError((e) {
+    final ParsedHlsMaster list =
+        await parseMasterPlaylist(source.url, customHeader: source.customHeaders).catchError((e) {
       Logs.app.log("${source.server}: $e");
       return ParsedHlsMaster(audioStreams: [], qualityStreams: []);
     });
@@ -143,12 +154,74 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   @override
   void initState() {
     super.initState();
+
+    final titles = widget.provider.data.title;
+    final defaulTitle = titles['english'] ?? titles['romaji'] ?? "";
+    title = (currentUserSettings?.nativeTitle ?? false) ? titles['native'] ?? defaulTitle : defaulTitle;
+
     getStreams(widget.provider);
   }
+
+  late String title;
 
   bool _isLoading = true;
 
   int? hoveredIndex;
+
+  Future<void> _navigateToPlayer(String title, int index) async {
+    // return print(streamSources[index]);
+
+    await storeWatching(
+      title,
+      widget.provider.data.cover,
+      widget.provider.id,
+      widget.episodeIndex,
+      totalEpisodes: widget.provider.data.episodes,
+      alternateDatabases: widget.provider.altDatabases,
+      rating: widget.provider.data.rating,
+    );
+
+    final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
+    final provider = widget.provider;
+    final navigatorState = (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
+
+    Navigator.pop(context, true);
+
+    navigatorState
+        ?.push(
+      MaterialPageRoute(
+        builder: (context) => MultiProvider(
+          providers: [
+            ChangeNotifierProvider(
+              create: (context) => PlayerDataProvider(
+                initialStreams: streamSources,
+                initialStream: streamSources[index],
+                epLinks: provider.epLinks,
+                showTitle: title,
+                coverImageUrl: widget.provider.data.cover,
+                showId: provider.id,
+                selectedSource: provider.selectedSource.identifier,
+                startIndex: widget.episodeIndex,
+                altDatabases: provider.altDatabases,
+                preferDubs: provider.preferDubs,
+                lastWatchDuration: provider.lastWatchedDurationMap?[
+                    provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched],
+              ),
+            ),
+            ChangeNotifierProvider(
+              create: (context) => PlayerProvider(controller, true),
+            ),
+          ],
+          child: Watch(
+            controller: controller,
+          ),
+        ),
+      ),
+    )
+        .then((value) {
+      provider.getWatched(refreshLastWatchDuration: true);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,10 +242,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   "Select Server",
                   style: textStyle().copyWith(fontSize: 23),
                 ),
-                Text(
-                  "Episode ${widget.episodeIndex + 1}",
-                 style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik")
-                ),
+                Text("Episode ${widget.episodeIndex + 1}",
+                    style: TextStyle(color: appTheme.textSubColor, fontFamily: "Rubik")),
               ],
             ),
           ),
@@ -216,10 +287,6 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   }
 
   ListView _list() {
-    final titles = widget.provider.data.title;
-    final defaulTitle = titles['english'] ?? titles['romaji'] ?? "";
-    final title = (currentUserSettings?.nativeTitle ?? false) ? titles['native'] ?? defaulTitle : defaulTitle;
-
     return widget.type == ServerSheetType.watch
         ? ListView.builder(
             padding: EdgeInsets.symmetric(vertical: 10, horizontal: Platform.isAndroid ? 10 : 15),
@@ -231,58 +298,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               return SourceTile(
                 source: source,
                 onTap: () async {
-                  // return print(streamSources[index]);
-
-                  await storeWatching(
-                    title,
-                    widget.provider.data.cover,
-                    widget.provider.id,
-                    widget.episodeIndex,
-                    totalEpisodes: widget.provider.data.episodes,
-                    alternateDatabases: widget.provider.altDatabases,
-                    rating: widget.provider.data.rating,
-                  );
-
-                  final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
-                  final provider = widget.provider;
-                  final navigatorState = (Platform.isWindows ? AppWrapper.navKey.currentState : Navigator.of(context));
-
-                  Navigator.pop(context, true);
-
-                  navigatorState
-                      ?.push(
-                    MaterialPageRoute(
-                      builder: (context) => MultiProvider(
-                        providers: [
-                          ChangeNotifierProvider(
-                            create: (context) => PlayerDataProvider(
-                              initialStreams: streamSources,
-                              initialStream: streamSources[index],
-                              epLinks: provider.epLinks,
-                              showTitle: title,
-                              coverImageUrl: widget.provider.data.cover,
-                              showId: provider.id,
-                              selectedSource: provider.selectedSource.identifier,
-                              startIndex: widget.episodeIndex,
-                              altDatabases: provider.altDatabases,
-                              preferDubs: provider.preferDubs,
-                              lastWatchDuration: provider.lastWatchedDurationMap?[
-                                  provider.watched < provider.epLinks.length ? provider.watched + 1 : provider.watched],
-                            ),
-                          ),
-                          ChangeNotifierProvider(
-                            create: (context) => PlayerProvider(controller, true),
-                          ),
-                        ],
-                        child: Watch(
-                          controller: controller,
-                        ),
-                      ),
-                    ),
-                  )
-                      .then((value) {
-                    provider.getWatched(refreshLastWatchDuration: true);
-                  });
+                 await widget.provider.updatePrevUsedServer(source.server);
+                  return _navigateToPlayer(title, index);
                 },
               );
             },

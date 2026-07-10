@@ -85,6 +85,9 @@ class InfoProvider extends ChangeNotifier {
   /// The name found from the search in the source
   String? get foundName => _foundName;
 
+  /// Previously used server in the respective provider
+  String? get previouslyUsedServer => _previouslyUsedServer;
+
   /// Currently selected source
   ProviderDetails get selectedSource => _selectedSource;
 
@@ -94,6 +97,7 @@ class InfoProvider extends ChangeNotifier {
   bool _initCalled = false;
 
   String? aspProvider;
+  String? _previouslyUsedServer;
 
   set selectedSource(ProviderDetails val) {
     _selectedSource = val;
@@ -103,6 +107,15 @@ class InfoProvider extends ChangeNotifier {
     // we just using this condition for validation (too lazy to add a field for it)
     sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0";
     notifyListeners();
+  }
+
+  set previouslyUsedServer(String? val) {
+    if (_previouslyUsedServer == null && _previouslyUsedServer == val) return;
+    _previouslyUsedServer = val;
+    saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: val)).then((v) {
+      notifyListeners();
+    });
+    // notifyListeners();
   }
 
   set viewMode(int newIndex) {
@@ -158,6 +171,8 @@ class InfoProvider extends ChangeNotifier {
 
     aspProvider = asp?.preferredProvider;
 
+    _previouslyUsedServer = asp?.previouslyUsedServer;
+
     // Set up sources.
     final sources = sourceManager.sources;
     final matchedSource = sources
@@ -185,6 +200,13 @@ class InfoProvider extends ChangeNotifier {
     if (await isTv()) {
       // _watchInfoButtonFocusNode.requestFocus();
     }
+    notifyListeners();
+  }
+
+  Future<void> updatePrevUsedServer(String? val) async {
+    if (val == null) return;
+    previouslyUsedServer = val;
+    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: val));
     notifyListeners();
   }
 

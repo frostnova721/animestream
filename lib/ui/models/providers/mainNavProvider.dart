@@ -386,6 +386,10 @@ class MainNavProvider extends ChangeNotifier {
   RefreshController homeRefreshController = RefreshController(initialRefresh: false);
   RefreshController discoverRefreshController = RefreshController(initialRefresh: false);
 
+  void refreshTree() {
+    notifyListeners();
+  }
+
   /// refresh [0 = home, 1 = discover]
   Future<void> refresh({required int refreshPage, bool fromSettings = false}) async {
     if (refreshPage != 0 && refreshPage != 1) return;

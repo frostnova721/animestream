@@ -1,6 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/network/caching/cache_config.dart';
 import 'package:animestream/core/network/caching/cache_manager.dart';
+import 'package:animestream/ui/models/popup.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/toggleItem.dart';
@@ -19,7 +20,7 @@ class _CacheSettingState extends State<CacheSetting> {
   bool loaded = false;
   bool enableCaching = true;
   bool bypassCache = false;
-  int maxCacheSize = 1024 * 1024 * 1024;
+  int maxCacheSize = 200 * 1024 * 1024;
 
   int _currentSizeBytes = 0;
   int _entryCount = 0;
@@ -28,10 +29,12 @@ class _CacheSettingState extends State<CacheSetting> {
   final List<int> sizeOptions = [
     50 * 1024 * 1024,
     100 * 1024 * 1024,
+    150 * 1024 * 1024,
+    200 * 1024 * 1024,
     250 * 1024 * 1024,
-    500 * 1024 * 1024,
-    1024 * 1024 * 1024,
-    2 * 1024 * 1024 * 1024,
+    // 500 * 1024 * 1024,
+    // 1024 * 1024 * 1024,
+    // 2 * 1024 * 1024 * 1024,
   ];
 
   @override
@@ -187,10 +190,10 @@ class _CacheSettingState extends State<CacheSetting> {
                     ),
                     ClickableItem(
                       onTap: () {
-                        showModalBottomSheet(
+                        showPopup(
                           context: context,
-                          showDragHandle: true,
-                          isScrollControlled: true,
+                          showSheetHandle: true,
+                          isScrollControlledSheet: true,
                           builder: (context) => _sizeSheet(context),
                         );
                       },

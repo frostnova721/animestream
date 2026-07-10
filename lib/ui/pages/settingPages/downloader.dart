@@ -26,7 +26,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
 
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
-    setState(() {
+    setState(() async {
       fasterDownloads = settings.fasterDownloads!;
       useQueuedDownloads = settings.useQueuedDownloads!;
     });
@@ -88,7 +88,8 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                     if (dir == null) return;
                     print("Path set to: $dir");
                     await Settings().writeSettings(SettingsModal(downloadPath: dir));
-                    setState(() {});
+                    setState(() {
+                    });
                     floatingSnackBar("might need to provide 'allow access to all files' while downloading!");
                   },
                   child: Container(
@@ -105,7 +106,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                               style: textStyle(),
                             ),
                             Text(
-                              currentUserSettings?.downloadPath ?? '/storage/emulated/0/Download/animestream',
+                              currentUserSettings?.downloadPath ?? "Default downloads directory",
                               style: textStyle().copyWith(color: appTheme.textSubColor, fontSize: 12),
                               overflow: TextOverflow.ellipsis,
                             ),

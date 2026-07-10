@@ -1,15 +1,13 @@
-import 'dart:io';
-
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
-import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/toggleItem.dart';
+import 'package:animestream/ui/pages/settingPages/cache.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/plugin.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSetting extends StatefulWidget {
@@ -89,6 +87,17 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       },
                       description: "*maybe unstable",
                     ),
+                    ToggleItem(
+                      label: "Quick play",
+                      description: "Automatically play the episodes using the last server you used",
+                      value: userPreferences?.autoSelectPreviouslyUsedServer ?? false,
+                      onTapFunction: () async {
+                        await UserPreferences.saveUserPreferences(UserPreferencesModal(
+                          autoSelectPreviouslyUsedServer: !(userPreferences?.autoSelectPreviouslyUsedServer ?? false),
+                        ));
+                        setState(() {});
+                      },
+                    ),
                     ClickableItem(
                       onTap: () {
                         showModalBottomSheet(
@@ -111,6 +120,20 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       description: "Add or remove providers",
                       suffixIcon: Icon(Icons.navigate_next_rounded),
                     ),
+                    ClickableItem(
+                      label: "Cache Manager",
+                      onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (context) => CacheSetting())),
+                      description: "Manage network & API cache",
+                      suffixIcon: Icon(Icons.navigate_next_rounded),
+                    ),
+                    // Got clowned for this decision
+                    // ClickableItem(
+                    //   label: "Downloader",
+                    //   onTap: () =>
+                    //       Navigator.of(context).push(MaterialPageRoute(builder: (context) => DownloaderSettings())),
+                    //   description: "Configure your downloads",
+                    //   suffixIcon: Icon(Icons.navigate_next_rounded),
+                    // ),
                     ToggleItem(
                       onTapFunction: () {
                         setState(() {

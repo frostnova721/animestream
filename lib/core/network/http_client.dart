@@ -2,8 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-export 'package:http/http.dart'
-    hide Response, Client, get, post, put, patch, delete, head;
+export 'package:http/http.dart' hide Response, Client, get, post, put, patch, delete, head;
 
 import 'package:animestream/core/app/values.dart';
 import 'package:animestream/core/network/caching/cache_manager.dart';
@@ -72,10 +71,7 @@ class HTTP {
     final key = _buildKey(urlString, queryParameters, body);
     final uri = Uri.parse(urlString).replace(queryParameters: queryParameters);
 
-    if (shouldCache &&
-        _cache != null &&
-        !_cache.cacheConfig.bypassCache &&
-        (method == 'GET' || method == 'POST')) {
+    if (shouldCache && _cache != null && !_cache.cacheConfig.bypassCache && (method == 'GET' || method == 'POST')) {
       final cached = await _cache.get(key);
       if (cached != null) {
         final bodyStr = utf8.decode(cached.bodyBytes);
@@ -102,13 +98,10 @@ class HTTP {
     headers?.forEach(req.headers.set);
 
     if (body != null) {
-      final contentTypeEntry = headers?.entries
-          .where((e) => e.key.toLowerCase() == 'content-type')
-          .firstOrNull;
+      final contentTypeEntry = headers?.entries.where((e) => e.key.toLowerCase() == 'content-type').firstOrNull;
       final contentType = contentTypeEntry?.value.toLowerCase() ?? '';
 
-      if (contentType.contains('application/x-www-form-urlencoded') &&
-          body is Map) {
+      if (contentType.contains('application/x-www-form-urlencoded') && body is Map) {
         final queryStr = Uri(
           queryParameters: body.map(
             (k, v) => MapEntry(k.toString(), v.toString()),
@@ -138,9 +131,7 @@ class HTTP {
       resBody,
       bodyBytes: Uint8List.fromList(bytes),
       reasonPhrase: res.reasonPhrase,
-      headers: res.headers.contentType == null
-          ? {}
-          : {'content-type': res.headers.contentType!.mimeType},
+      headers: res.headers.contentType == null ? {} : {'content-type': res.headers.contentType!.mimeType},
       request: HttpRequestInfo(uri),
     );
 

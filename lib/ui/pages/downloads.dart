@@ -83,59 +83,60 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
             ),
           ),
           actions: [
-            IconButton(
-                onPressed: () {
-                  showDialog(
-                      context: context,
-                      builder: (context) {
-                        return AlertDialog(
-                          title: Text("Download"),
-                          actions: [
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: Text("Cancel"),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                DownloadManager().addDownloadTask(_linkTfController.text, _titleTfController.text,
-                                    customHeaders: Map.castFrom(jsonDecode(_headerTfController.text)));
-                                Navigator.pop(context);
-                              },
-                              child: Text("Download"),
-                            ),
-                          ],
-                          content: Container(
-                            padding: EdgeInsets.all(16),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                TextField(
-                                  controller: _titleTfController,
-                                  decoration: InputDecoration(
-                                    labelText: "File name",
+            if (kDebugMode)
+              IconButton(
+                  onPressed: () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            title: Text("Download"),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text("Cancel"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  DownloadManager().addDownloadTask(_linkTfController.text, _titleTfController.text,
+                                      customHeaders: Map.castFrom(jsonDecode(_headerTfController.text)));
+                                  Navigator.pop(context);
+                                },
+                                child: Text("Download"),
+                              ),
+                            ],
+                            content: Container(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: _titleTfController,
+                                    decoration: InputDecoration(
+                                      labelText: "File name",
+                                    ),
                                   ),
-                                ),
-                                TextField(
-                                  controller: _linkTfController,
-                                  decoration: InputDecoration(
-                                    labelText: "Link",
+                                  TextField(
+                                    controller: _linkTfController,
+                                    decoration: InputDecoration(
+                                      labelText: "Link",
+                                    ),
                                   ),
-                                ),
-                                TextField(
-                                  controller: _headerTfController,
-                                  decoration: InputDecoration(
-                                    labelText: "Header",
+                                  TextField(
+                                    controller: _headerTfController,
+                                    decoration: InputDecoration(
+                                      labelText: "Header",
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      });
-                },
-                icon: Icon(Icons.wash_rounded)),
+                          );
+                        });
+                  },
+                  icon: Icon(Icons.wash_rounded)),
             // if (kDebugMode)
             IconButton(
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
@@ -220,7 +221,11 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
               ? Center(
                   child: Text("Just like the search history!"),
                 )
-              : ListView.builder(
+              : GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: (MediaQuery.of(context).size.width ~/ 350).clamp(1, 10),
+                      mainAxisExtent: 160,
+                      childAspectRatio: 3),
                   itemCount: values.length,
                   padding: EdgeInsets.only(top: 16),
                   itemBuilder: (context, index) {
@@ -378,8 +383,31 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
       return;
     }
     final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
-    final filename = filepath.split("/").last.split(".").first;
+    final fullFilename = filepath.split(Platform.pathSeparator).last;
+    final lastDotIndex = fullFilename.lastIndexOf('.');
+    final filename = lastDotIndex != -1 ? fullFilename.substring(0, lastDotIndex) : fullFilename;
     final filenameSplit = filename.split(" EP ");
+    String? subsPath;
+
+    final targetSubPrefix = "$filename Subtitles.";
+
+    final dir = File(filepath).parent;
+
+    try {
+      for (final f in dir.listSync()) {
+        if (f is File) {
+          final fName = f.path.split(Platform.pathSeparator).last;
+
+          if (fName.startsWith(targetSubPrefix)) {
+            subsPath = f.path;
+            break;
+          }
+        }
+      }
+    } catch (e) {
+      print("Error while scanning for subs: $e");
+    }
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => MultiProvider(
@@ -387,12 +415,19 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
             ChangeNotifierProvider(
               create: (context) => PlayerDataProvider(
                 initialStreams: [],
-                initialStream: VideoStream(quality: "default", url: filepath, server: "local", backup: false),
+                initialStream: VideoStream(
+                    quality: "default",
+                    url: filepath,
+                    server: "local",
+                    backup: false,
+                    subtitle: subsPath,
+                    subtitleFormat: subsPath?.split(".").lastOrNull ?? "vtt"),
                 epLinks: [], // doesnt matter
                 showTitle: filenameSplit.first,
                 showId: 0, // doesnt matter
                 selectedSource: "default", //doesnt matter
-                startIndex: 0, // does matter! [change with episode number, need to fw download methods]
+                startIndex: ((int.tryParse(filenameSplit.last) ?? 0) - 1)
+                    .clamp(0, 9999), // does matter! [change with episode number, need to fw download methods]
                 altDatabases: [], // doesnt matter
                 preferDubs: false, // doesnt matter
                 lastWatchDuration: null, // does matter!

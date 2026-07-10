@@ -518,6 +518,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
                       subtitleSource: playerDataProvider.state.currentStream.subtitle!,
                       settings: playerDataProvider.subtitleSettings,
                       headers: playerDataProvider.state.currentStream.customHeaders,
+                      isOffline: widget.localSource,
                     ),
                   isInitiated
                       ? AnimatedOpacity(

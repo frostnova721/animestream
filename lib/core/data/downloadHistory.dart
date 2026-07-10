@@ -16,11 +16,14 @@ class DownloadHistory {
 
   static List<DownloadHistoryItem> getDownloadHistory({DownloadStatus status = DownloadStatus.completed}) {
     final box = Hive.box(_boxName);
-    final filtered = <DownloadHistoryItem>[];
-    box.values.forEach((e) {
-      if (e['status'] == status.name) filtered.add(DownloadHistoryItem.fromMap(Map.castFrom(e)));
-    });
-    return filtered;
+    final filteredItems = box.values
+      .where((e) => e['status'] == status.name)
+      .map((e) => DownloadHistoryItem.fromMap(Map<String, dynamic>.from(e as Map)))
+      .toList();
+
+    filteredItems.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return filteredItems;
   }
 
   static Future<void> saveItem(DownloadHistoryItem item) async {

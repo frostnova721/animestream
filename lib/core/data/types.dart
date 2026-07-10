@@ -24,7 +24,7 @@ class SettingsModal {
   /// Preferred quality for the player [defaults to 720p]
   final String? preferredQuality; // 1080p | 720p |480p | 360p as string
 
-  /// The trasparency of the homescreen navbar 
+  /// The trasparency of the homescreen navbar
   final double? navbarTranslucency; //value from 0 to 1
 
   /// Enable faster downloads using increased batch size [defaults to false]
@@ -54,7 +54,7 @@ class SettingsModal {
   /// Download items one by one instead of parallel downloads [defaults to false]
   final bool? useQueuedDownloads;
 
-  /// Use frameless window (Windows only, not used rn) 
+  /// Use frameless window (Windows only, not used rn)
   final bool? useFramelessWindow;
 
   /// Enable double tap to skip in player (Not available for desktops) [defaults to true]
@@ -82,7 +82,7 @@ class SettingsModal {
   final bool? useOldNavbar;
 
   /// Use experimental mkv video convertion
-  final bool? useMkvRemuxer; 
+  final bool? useMkvRemuxer;
 
   SettingsModal({
     this.megaSkipDuration,
@@ -181,12 +181,13 @@ class UserPreferencesModal {
   final SubtitleSettings? subtitleSettings;
   final bool? preferDubs;
   final bool? searchPageListMode;
-
+  final bool? autoSelectPreviouslyUsedServer;
   UserPreferencesModal({
     this.episodesViewMode,
     this.subtitleSettings,
     this.preferDubs,
     this.searchPageListMode,
+    this.autoSelectPreviouslyUsedServer,
   });
 
   factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
@@ -196,6 +197,7 @@ class UserPreferencesModal {
           map['subtitleSettings'] != null ? SubtitleSettings.fromMap(map['subtitleSettings']) : SubtitleSettings(),
       preferDubs: map['preferDubs'] ?? false,
       searchPageListMode: map['searchPageListMode'] ?? false,
+      autoSelectPreviouslyUsedServer: map['autoSelectPreviouslyUsedServer'] ?? false,
     );
   }
 
@@ -205,6 +207,7 @@ class UserPreferencesModal {
       preferDubs: false,
       searchPageListMode: false,
       subtitleSettings: SubtitleSettings(),
+      autoSelectPreviouslyUsedServer: false,
     );
   }
 
@@ -214,6 +217,7 @@ class UserPreferencesModal {
       'subtitleSettings': subtitleSettings?.toMap(),
       'preferDubs': preferDubs,
       'searchPageListMode': searchPageListMode,
+      'autoSelectPreviouslyUsedServer': autoSelectPreviouslyUsedServer,
     };
   }
 
@@ -246,26 +250,27 @@ class AnimeSpecificPreference {
   final Map? lastWatchDuration;
   final String? manualSearchQuery;
   final String? preferredProvider;
+  final String? previouslyUsedServer;
 
-  AnimeSpecificPreference({
-    this.lastWatchDuration,
-    this.manualSearchQuery,
-    this.preferredProvider,
-  });
+  AnimeSpecificPreference(
+      {this.lastWatchDuration, this.manualSearchQuery, this.preferredProvider, this.previouslyUsedServer});
 
   @override
   String toString() =>
-      'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery, preferredProvider: $preferredProvider)';
+      'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery, '
+      'preferredProvider: $preferredProvider, previouslyUsedServer: $previouslyUsedServer)';
 
   AnimeSpecificPreference copyWith({
     Map? lastWatchDuration,
     String? manualSearchQuery,
     String? preferredProvider,
+    String? previouslyUsedServer,
   }) {
     return AnimeSpecificPreference(
       lastWatchDuration: lastWatchDuration ?? this.lastWatchDuration,
       manualSearchQuery: manualSearchQuery ?? this.manualSearchQuery,
       preferredProvider: preferredProvider ?? this.preferredProvider,
+      previouslyUsedServer: previouslyUsedServer ?? this.previouslyUsedServer,
     );
   }
 
@@ -274,6 +279,7 @@ class AnimeSpecificPreference {
       'lastWatchDuration': lastWatchDuration,
       'manualSearchQuery': manualSearchQuery,
       'preferredProvider': preferredProvider,
+      'previouslyUsedServer': previouslyUsedServer,
     };
   }
 
@@ -283,6 +289,7 @@ class AnimeSpecificPreference {
           map['lastWatchDuration'] != null ? Map.from(map['lastWatchDuration'] as Map<dynamic, dynamic>) : null,
       manualSearchQuery: map['manualSearchQuery'] != null ? map['manualSearchQuery'] as String : null,
       preferredProvider: map['preferredProvider'] != null ? map['preferredProvider'] as String : null,
+      previouslyUsedServer: map['previouslyUsedServer'] != null ? map['previouslyUsedServer'] as String : null,
     );
   }
 

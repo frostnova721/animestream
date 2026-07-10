@@ -1,7 +1,6 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/pages/settingPages/account.dart';
 import 'package:animestream/ui/pages/settingPages/appInfo.dart';
-import 'package:animestream/ui/pages/settingPages/cache.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/downloader.dart';
 import 'package:animestream/ui/pages/settingPages/general.dart';
@@ -57,11 +56,11 @@ class _SettingsPageState extends State<SettingsPage> {
         label: "General",
         description: "Basic tweaks",
         navigateTo: GeneralSetting()),
-    SettingItem(
-        icon: Icons.storage_rounded,
-        label: "Cache Manager",
-        description: "Network & API cache",
-        navigateTo: CacheSetting()),
+    // SettingItem(
+    //     icon: Icons.storage_rounded,
+    //     label: "Cache Manager",
+    //     description: "Network & API cache",
+    //     navigateTo: CacheSetting()),
     SettingItem(
         icon: Icons.info_outline_rounded,
         label: "App Info",

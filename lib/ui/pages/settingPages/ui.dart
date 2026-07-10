@@ -201,7 +201,6 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             value: useOldNavbar,
                             mobileOnly: true,
                           ),
-
                           if (Platform.isAndroid && useOldNavbar)
                             Padding(
                               padding: EdgeInsets.only(top: 10, bottom: 10, left: 10, right: 10),

@@ -24,7 +24,7 @@ class _NewHomeState extends State<NewHome> {
   }
 
   void _listener() {
-       if (_carouselController.position.hasPixels) {
+    if (_carouselController.position.hasPixels) {
       // Calculate current index based on pixels and item width
       final int index = (_carouselController.position.pixels / _carouselItemWidth).round();
       if (_currentIndex != index) {
@@ -32,7 +32,7 @@ class _NewHomeState extends State<NewHome> {
           _currentIndex = index;
         });
       }
-       }
+    }
   }
 
   final CarouselController _carouselController = CarouselController(initialItem: 0);
@@ -52,12 +52,18 @@ class _NewHomeState extends State<NewHome> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(widget.mainNavProvider.userProfile?.name ?? "no usah", style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),),
+                Text(
+                  widget.mainNavProvider.userProfile?.name ?? "no usah",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                ),
                 IconButton(
                     onPressed: () {
                       Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => SettingsPage()));
                     },
-                    icon: Icon(Icons.settings_rounded, size: 36,)),
+                    icon: Icon(
+                      Icons.settings_rounded,
+                      size: 36,
+                    )),
               ],
             ),
             _title("Continue Watching"),
@@ -68,57 +74,86 @@ class _NewHomeState extends State<NewHome> {
                 itemExtent: _carouselItemWidth,
                 scrollDirection: Axis.horizontal,
                 itemSnapping: true,
-                children: List.generate(provider.recentlyWatched.items.length,(idx) {
+                children: List.generate(provider.recentlyWatched.items.length, (idx) {
                   final it = provider.recentlyWatched.items[idx];
                   final title = it.title['english'] ?? it.title['romaji'] ?? "";
                   return Container(
                       width: 300,
-                      padding: EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         image: DecorationImage(
                             image: CachedNetworkImageProvider(it.coverImage), opacity: 0.6, fit: BoxFit.cover),
                       ),
-                      child: idx != _currentIndex ? null : Column(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          SizedBox.shrink(),
-                          Align(
-                            alignment: Alignment.bottomLeft,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  (currentUserSettings?.nativeTitle ?? false) ? it.title['native'] ?? title : title,
-                                  style: TextStyle(fontFamily: "Rubik", fontSize: 22, overflow: TextOverflow.ellipsis),
-                                  maxLines: 2,
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                      decoration: BoxDecoration(
-                                        color: appTheme.accentColor,
-                                        borderRadius: BorderRadius.circular(10)
-                                      ),
-                                      child: Text(it.rating?.toString() ?? "??",
+                      child: idx != _currentIndex
+                          ? null
+                          : Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      stops: [0.1, 1],
+                                      colors: [appTheme.backgroundColor, appTheme.backgroundColor.withAlpha(0)])),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  SizedBox.shrink(),
+                                  Align(
+                                    alignment: Alignment.bottomLeft,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          (currentUserSettings?.nativeTitle ?? false)
+                                              ? it.title['native'] ?? title
+                                              : title,
                                           style: TextStyle(
-                                            color: appTheme.onAccent,
-                                            fontSize: 20
-                                          )),
+                                              fontFamily: "Rubik", fontSize: 22, overflow: TextOverflow.ellipsis),
+                                          maxLines: 2,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              height: 30,
+                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              decoration: BoxDecoration(
+                                                  color: appTheme.accentColor, borderRadius: BorderRadius.circular(10)),
+                                              child: Row(
+                                                children: [
+                                                  Icon(Icons.star_rounded, size: 18, color: appTheme.onAccent),
+                                                  Text(" ${it.rating?.toString() ?? "??"}",
+                                                      style: TextStyle(
+                                                          color: appTheme.onAccent,
+                                                          fontSize: 18,
+                                                          fontWeight: FontWeight.bold)),
+                                                ],
+                                              ),
+                                            ),
+                                            Container(
+                                              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                              margin: EdgeInsets.only(left: 12),
+                                              height: 30,
+                                              decoration: BoxDecoration(
+                                                  color: appTheme.accentColor, borderRadius: BorderRadius.circular(10)),
+                                              child: Text(
+                                                "${it.watchedEpisodeCount ?? "~"} | ${it.totalEpisodes ?? "??"}",
+                                                style: TextStyle(
+                                                    fontSize: 18, fontFamily: "Rubik", color: appTheme.onAccent),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ));
+                                  ),
+                                ],
+                              ),
+                            ));
                 }).toList(),
               ),
             ),
             _title("Trending"),
             SizedBox(
-              height: 400,
+              height: 300,
               child: GridView.builder(
                 scrollDirection: Axis.horizontal,
                 gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
@@ -159,11 +194,7 @@ class _NewHomeState extends State<NewHome> {
   Widget _title(String text) {
     return Padding(
       padding: EdgeInsets.only(top: 20, bottom: 5),
-      child: Text(text, style: TextStyle(
-        fontFamily: "Rubik",
-        fontWeight: FontWeight.bold,
-        fontSize: 24
-      )),
+      child: Text(text, style: TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 24)),
     );
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/settings.dart';
@@ -50,6 +52,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
   bool fasterDownloads = false;
   bool useQueuedDownloads = false;
   bool enableDiscordPresence = false;
+  bool useDesktopNativeDiscordPresence = false;
   bool enableLogging = false;
 
   final sources = SourceManager.instance.sources;
@@ -98,6 +101,16 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         setState(() {});
                       },
                     ),
+                    if (Platform.isWindows || Platform.isLinux)
+                      ToggleItem(
+                        label: "Enable Discord Rich Presence",
+                        value: currentUserSettings?.enableDiscordRichPresence ?? false,
+                        onTapFunction: () async {
+                          await writeSettings(SettingsModal(
+                              enableDiscordRichPresence: !(currentUserSettings!.enableDiscordRichPresence ?? false)));
+                          setState(() {});
+                        },
+                      ),
                     ClickableItem(
                       onTap: () {
                         showModalBottomSheet(

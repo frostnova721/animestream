@@ -2,7 +2,7 @@ name: animestream
 description: "A app made to stream and download anime!"
 publish_to: "none" #Dont remove this!
 
-version: 1.4.5-beta8+2
+version: 1.4.5+2
 
 environment:
   sdk: ">=3.2.0 <4.0.0"
@@ -32,6 +32,9 @@ dependencies:
   file_picker: ^10.2.0
   dynamic_color: ^1.7.0
   app_links: ^7.0.0
+
+  # Misc
+  dart_discord_presence: ^1.2.0
 
   # Local storage
   hive: ^2.2.3

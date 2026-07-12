@@ -235,7 +235,8 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
               AnimeStreamBottomBar(
                 borderRadius: 12,
                 accentColor: appTheme.accentColor,
-                backgroundColor: appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
+                backgroundColor:
+                    appTheme.backgroundSubColor.withValues(alpha: currentUserSettings?.navbarTranslucency ?? 0.5),
                 items: [
                   BottomBarItem(title: 'Home', icon: Icon(Icons.home)),
                   BottomBarItem(title: 'Discover', icon: Icon(Icons.auto_awesome)),
@@ -250,6 +251,7 @@ class MainNavigatorState extends State<MainNavigator> with TickerProviderStateMi
               FloatyBarView(
                 controller: _floatyBarController,
                 children: [
+                  // NewHome(mainNavProvider: mainNavProvider),
                   Home(
                     key: ValueKey("0"),
                     mainNavProvider: mainNavProvider,

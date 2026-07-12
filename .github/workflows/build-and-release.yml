@@ -8,6 +8,16 @@ on:
         required: false
         type: boolean
         default: true
+      send_notification:
+        description: 'Send Discord Notification'
+        required: false
+        type: boolean
+        default: false
+      tag_name:
+        description: 'Tag to build (empty = latest pushed tag)'
+        required: false
+        type: string
+        default: ''
   push:
     tags:
       - 'v*'
@@ -25,10 +35,30 @@ jobs:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       version_code: ${{ steps.get-version.outputs.version_code }}
+      tag: ${{ steps.get-tag.outputs.tag }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
         
+      - name: Determine tag
+        id: get-tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.tag_name }}" ]; then
+            TARGET_TAG="${{ inputs.tag_name }}"
+          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            TARGET_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            TARGET_TAG=${GITHUB_REF#refs/tags/}
+          fi
+          echo "tag=$TARGET_TAG" >> $GITHUB_OUTPUT
+          echo "Target tag: $TARGET_TAG"
+
+      - name: Checkout target tag
+        if: ${{ steps.get-tag.outputs.tag != '' }}
+        run: git checkout ${{ steps.get-tag.outputs.tag }}
+
       - name: Extract version
         id: get-version
         run: |
@@ -46,6 +76,8 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.extract-version.outputs.tag }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -67,10 +99,14 @@ jobs:
         env:
           SIMKL_CLIENT_SECRET: ${{ secrets.SIMKL_CLIENT_SECRET }}
           SIMKL_CLIENT_ID: ${{ secrets.SIMKL_CLIENT_ID }}
+          COMMENTUM_API_URL: ${{ secrets.COMMENTUM_API_URL }}
+          DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID }}
         shell: bash
         run: |
           echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
           echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
+          echo "COMMENTUM_API_URL=$COMMENTUM_API_URL" >> .env
+          echo "DISCORD_APP_ID=$DISCORD_APP_ID" >> .env
 
       - name: Decode and setup keystore
         env:
@@ -99,6 +135,7 @@ jobs:
         run: |
           flutter build apk \
             --release \
+            --dart-define-from-file=.env \
             --build-number=${{ needs.extract-version.outputs.version_code }} \
             --build-name=${{ needs.extract-version.outputs.version }}
 
@@ -107,6 +144,7 @@ jobs:
           flutter build apk \
             --release \
             --split-per-abi \
+            --dart-define-from-file=.env \
             --build-number=${{ needs.extract-version.outputs.version_code }} \
             --build-name=${{ needs.extract-version.outputs.version }}
 
@@ -114,7 +152,7 @@ jobs:
         run: |
           cd build/app/outputs/flutter-apk
           # Rename split + universal APKs
-          mv app-release.apk animestream-${{ needs.extract-version.outputs.version }}-universal.apk
+          cp app-release.apk animestream-${{ needs.extract-version.outputs.version }}-universal.apk
           mv app-armeabi-v7a-release.apk animestream-${{ needs.extract-version.outputs.version }}-armeabi-v7a.apk 2>/dev/null || true
           mv app-arm64-v8a-release.apk animestream-${{ needs.extract-version.outputs.version }}-arm64-v8a.apk 2>/dev/null || true
           mv app-x86_64-release.apk animestream-${{ needs.extract-version.outputs.version }}-x86_64.apk 2>/dev/null || true
@@ -125,6 +163,7 @@ jobs:
           name: android-builds
           path: |
             build/app/outputs/flutter-apk/animestream-*.apk
+            build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
           
   # LINUX BUILDS
@@ -136,6 +175,8 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.extract-version.outputs.tag }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -173,15 +214,19 @@ jobs:
         env:
           SIMKL_CLIENT_SECRET: ${{ secrets.SIMKL_CLIENT_SECRET }}
           SIMKL_CLIENT_ID: ${{ secrets.SIMKL_CLIENT_ID }}
+          COMMENTUM_API_URL: ${{ secrets.COMMENTUM_API_URL }}
+          DISCORD_CLIENT_ID: ${{secrets.DISCORD_}}
         shell: bash
         run: |
           echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
           echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
+          echo "COMMENTUM_API_URL=$COMMENTUM_API_URL" >> .env
 
       - name: Build Linux
         run: |
           flutter build linux \
             --release \
+            --dart-define-from-file=.env \
             --build-number=${{ needs.extract-version.outputs.version_code }} \
             --build-name=${{ needs.extract-version.outputs.version }}
 
@@ -406,6 +451,8 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.extract-version.outputs.tag }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -434,7 +481,7 @@ jobs:
 
       - name: Build Windows
         shell: pwsh
-        run: flutter build windows --release --build-number=${{ needs.extract-version.outputs.version_code }} --build-name=${{ needs.extract-version.outputs.version }}
+        run: flutter build windows --release --dart-define-from-file=.env --build-number=${{ needs.extract-version.outputs.version_code }} --build-name=${{ needs.extract-version.outputs.version }}
 
       - name: Create portable zip
         shell: pwsh
@@ -470,6 +517,8 @@ jobs:
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.extract-version.outputs.tag }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -518,6 +567,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
+          ref: ${{ needs.extract-version.outputs.tag }}
           fetch-depth: 0
 
       - name: Clear existing CHANGELOG.md
@@ -619,3 +669,10 @@ jobs:
           git add CHANGELOG.md
           git diff --staged --quiet || git commit -m "docs: update changelog for v${{ needs.extract-version.outputs.version }}"
           git push origin HEAD:${{ github.event.repository.default_branch }} || echo "No changes to push"
+
+  notify:
+    name: Notify Release
+    needs: [create-release, post-release-notes]
+    if: ${{ always() && (needs.create-release.result == 'success' || needs.post-release-notes.result == 'success') && (github.event_name == 'push' || inputs.send_notification == true) }}
+    uses: ./.github/workflows/Notify.yml
+    secrets: inherit

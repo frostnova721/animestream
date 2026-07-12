@@ -94,7 +94,11 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
             if (finished) {
               _isLoading = (widget.type == ServerSheetType.download) ? true : false;
 
-              if (widget.provider.previouslyUsedServer != null && userPreferences?.autoSelectPreviouslyUsedServer == true) {
+              // we're checking for "_isLoading" since its on download mode if its still on loading.
+              // by doing this, we can just skip a equality check.
+              if (widget.provider.previouslyUsedServer != null &&
+                  userPreferences?.autoSelectPreviouslyUsedServer == true &&
+                  !_isLoading) {
                 final autoSelected =
                     streamSources.firstWhereOrNull((element) => element.server == widget.provider.previouslyUsedServer);
 
@@ -298,7 +302,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               return SourceTile(
                 source: source,
                 onTap: () async {
-                 await widget.provider.updatePrevUsedServer(source.server);
+                  await widget.provider.updatePrevUsedServer(source.server);
                   return _navigateToPlayer(title, index);
                 },
               );

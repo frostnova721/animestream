@@ -7,8 +7,10 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/database/aniskip/aniskip.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/types.dart';
+import 'package:animestream/core/integrations/discord/desktopRPC.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
+import 'package:dart_discord_presence/dart_discord_presence.dart';
 import 'package:flutter/material.dart';
 
 /// Handle the state of player. manages datas like quality, servers etc..
@@ -55,6 +57,8 @@ class PlayerDataProvider extends ChangeNotifier {
 
   PlayerDataProviderState get state => _state;
 
+  final discord = (currentUserSettings?.enableDiscordRichPresence ?? false) ? DiscordDesktopRPC() : null;
+
   late SubtitleSettings subtitleSettings;
 
   /// Call this to refresh/init subs settings
@@ -77,7 +81,7 @@ class PlayerDataProvider extends ChangeNotifier {
     try {
       final master = await parseMasterPlaylist(url, customHeader: headers);
       _state = _state.copyWith(qualities: master.qualityStreams, audioTracks: master.audioStreams);
-    } catch(e) {
+    } catch (e) {
       // just a backup, the code shouldnt reach here, but my luck... brooo....
       _state = _state.copyWith(
         qualities: [QualityStream(url: url, resolution: 'default', quality: _state.currentStream.quality)],
@@ -128,6 +132,7 @@ class PlayerDataProvider extends ChangeNotifier {
   /// Update the state of currentEpIndex
   void updateCurrentEpIndex(int newIndex) {
     _state = _state.copyWith(currentEpIndex: newIndex, preloadStarted: false, preloadedSources: []);
+    if (discord != null) updatePresence();
     notifyListeners();
   }
 
@@ -176,7 +181,7 @@ class PlayerDataProvider extends ChangeNotifier {
       srcs = srcs + list;
       if (finished) {
         _state = _state.copyWith(preloadedSources: srcs);
-        print("[PlAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
+        print("[PLAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
       }
     });
   }
@@ -197,6 +202,28 @@ class PlayerDataProvider extends ChangeNotifier {
     }
 
     _state = _state.copyWith(opSkip: skipTimes.op, edSkip: skipTimes.ed);
+  }
+
+  Future<void> startRPC() async {
+    await discord?.initiateConnection();
+  }
+
+  Future<void> updatePresence() async {
+    await discord?.updatePresence(
+      DiscordPresence(
+        type: DiscordActivityType.watching,
+        details: "$showTitle",
+        statusDisplayType: DiscordStatusDisplayType.details,
+        state: "Episode ${_state.currentEpIndex + 1}",
+        largeAsset: DiscordAsset.fromUrl(coverImageUrl),
+        smallAsset: DiscordAsset.fromKey("app_icon"),
+        timestamps: DiscordTimestamps(start: DateTime.now().millisecondsSinceEpoch ~/ 1000),
+      ),
+    );
+  }
+
+  Future<void> stopRPC() async {
+    await discord?.dispose();
   }
 
   /// Update subtitle settings

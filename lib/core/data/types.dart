@@ -84,6 +84,9 @@ class SettingsModal {
   /// Use experimental mkv video convertion
   final bool? useMkvRemuxer;
 
+  /// Enable discord rich presence
+  final bool? enableDiscordRichPresence;
+
   SettingsModal({
     this.megaSkipDuration,
     this.skipDuration,
@@ -111,6 +114,7 @@ class SettingsModal {
     this.enablePlayerGestures,
     this.useOldNavbar,
     this.useMkvRemuxer,
+    this.enableDiscordRichPresence,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -141,6 +145,7 @@ class SettingsModal {
       enablePlayerGestures: map['enablePlayerGestures'] ?? false,
       useOldNavbar: map['useOldNavbar'] ?? false,
       useMkvRemuxer: map['useMkvRemuxer'] ?? true,
+      enableDiscordRichPresence: map['enableDiscordRichPresence'] ?? false,
     );
   }
 
@@ -172,6 +177,7 @@ class SettingsModal {
       'enablePlayerGestures': enablePlayerGestures,
       'useOldNavbar': useOldNavbar,
       'useMkvRemuxer': useMkvRemuxer,
+      'enableDiscordRichPresence': enableDiscordRichPresence,
     };
   }
 }

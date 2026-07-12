@@ -22,7 +22,7 @@ class ToggleItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if(mobileOnly && !Platform.isAndroid) return SizedBox.shrink();
+    if (mobileOnly && !Platform.isAndroid) return SizedBox.shrink();
     return InkWell(
       onTap: onTapFunction,
       child: Container(

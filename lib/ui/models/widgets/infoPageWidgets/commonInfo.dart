@@ -99,7 +99,7 @@ class CommonInfo extends StatelessWidget {
                           builder: (context) => Dialog(
                             backgroundColor: appTheme.backgroundColor,
                             child: Container(
-                              padding: EdgeInsets.all(20),
+                              // padding: EdgeInsets.all(20),
                               width: size.width / 3,
                               child: MediaListStatusBottomSheet(
                                 provider: provider,

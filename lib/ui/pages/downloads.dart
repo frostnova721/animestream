@@ -224,7 +224,7 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
               : GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: (MediaQuery.of(context).size.width ~/ 350).clamp(1, 10),
-                      mainAxisExtent: 160,
+                      mainAxisExtent: 170,
                       childAspectRatio: 3),
                   itemCount: values.length,
                   padding: EdgeInsets.only(top: 16),
@@ -236,7 +236,9 @@ class _DownloadsPageState extends State<DownloadsPage> with TickerProviderStateM
   }
 
   Widget _buildDownloads() {
-    return FileExplorer();
+    return FileExplorer(
+      playVideo: _playVideo,
+    );
   }
 
   Container _tabBarItem(String label) {

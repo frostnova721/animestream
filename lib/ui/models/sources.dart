@@ -39,7 +39,7 @@ class SourceManager {
           name: e,
           identifier: e.toLowerCase() + "_inbuilt",
           version: "0.0.0.0",
-          supportDownloads: _undownloadableSources.contains(e.toLowerCase())))
+          supportDownloads: !_undownloadableSources.contains(e.toLowerCase())))
       .toList();
 
   /// Used till complete migration to remote providers is complete.

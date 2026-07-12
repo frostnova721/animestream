@@ -63,8 +63,7 @@ class Anikoto implements AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
-      {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
     final url = Uri.parse(aliasId);
 
     final webRes = await get(
@@ -74,8 +73,7 @@ class Anikoto implements AnimeProvider {
     );
 
     final html = parse(webRes.body);
-    final id =
-        html.querySelector("div#watch-main")?.attributes['data-id']?.trim();
+    final id = html.querySelector("div#watch-main")?.attributes['data-id']?.trim();
 
     if (id == null) {
       throw Exception("Failed to fetch anime episode link. No data-id found.");
@@ -140,8 +138,7 @@ class Anikoto implements AnimeProvider {
   }
 
   @override
-  Future<void> getStreams(
-      String episodeId, Function(List<VideoStream>, bool) update,
+  Future<void> getStreams(String episodeId, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) async {
     // do this mf async-ly it should be giving a response till we got the other streams
     Future<Map<String, dynamic>>? kiwires;
@@ -191,18 +188,13 @@ class Anikoto implements AnimeProvider {
           continue;
         }
 
-        servers.add(
-            {"srv_name": serverName, "link_id": linkId, "group_name": grpName});
+        servers.add({"srv_name": serverName, "link_id": linkId, "group_name": grpName});
       }
 
       // it should be recieving the kiwires data in parallel, so we can update the streams as soon as we get them
       final kiwiresData = await kiwires;
       if (kiwiresData != null && kiwiresData.isNotEmpty) {
-        servers.add({
-          "srv_name": "Kiwi",
-          "link_id": kiwiresData['sub']?['url']?.toString(),
-          "group_name": "Kiwi"
-        });
+        servers.add({"srv_name": "Kiwi", "link_id": kiwiresData['sub']?['url']?.toString(), "group_name": "Kiwi"});
       }
     }
 
@@ -228,21 +220,19 @@ class Anikoto implements AnimeProvider {
         continue;
       }
 
-      update(
-          await _extractStreams(streamUrl, server: server['srv_name']), false);
+      update(await _extractStreams(streamUrl, server: server['srv_name']), false);
     }
 
     update([], true);
   }
 
   Future<List<VideoStream>> _extractStreams(String streamUrl,
-      {String quality = "default", String? server}) async {
+      {String quality = "multi-quality", String? server}) async {
     final host = Uri.parse(streamUrl).host.toLowerCase().split(".").first;
 
     switch (host.toLowerCase()) {
       case "vidtube":
-        return await VidtubeExtractor()
-            .extract(streamUrl, quality: quality, server: server);
+        return await VidtubeExtractor().extract(streamUrl, quality: quality, server: server);
       // case "mewcdn":
       //   return Kwik().extract(streamUrl, quality: quality, server: server);
       default:
@@ -254,8 +244,7 @@ class Anikoto implements AnimeProvider {
   }
 
   Future<Map<String, dynamic>> _getKiwiStreamId(String malId, int ep) async {
-    final mapperApiUrl =
-        "$_mapperUrl/api/mal/$malId/$ep/${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
+    final mapperApiUrl = "$_mapperUrl/api/mal/$malId/$ep/${DateTime.now().millisecondsSinceEpoch ~/ 1000}";
 
     // remove the XMLHTTPRequest header if causing issues
     final mapperRes = await get(
@@ -270,8 +259,7 @@ class Anikoto implements AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(
-      String episodeUrl, Function(List<VideoStream>, bool) update,
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream>, bool) update,
       {bool dub = false, String? metadata}) async {
     throw UnimplementedError();
   }

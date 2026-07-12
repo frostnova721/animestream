@@ -161,6 +161,9 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
       } catch (e) {
         Logs.player.log("PiP listener couldnt be added: ${e.toString()}");
       }
+    } else if (Platform.isWindows || Platform.isLinux) {
+      await dataProvider.startRPC();
+      await dataProvider.updatePresence();
     }
   }
 
@@ -412,7 +415,8 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         await context.read<AppProvider>()
           ..setFullScreen(false)
           ..setTitlebarColor(null);
-        // playerDataProvider.clearDiscordPresence();
+
+        await playerDataProvider.stopRPC();
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -752,11 +756,12 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     if (controller.duration != null && controller.duration! > 0) {
       //store the exact percentage of watched
       if (!widget.localSource) print("SAVED WATCH DURATION");
-      controller.removeListener(_listener);
-      controller.dispose();
-      _controlsTimer?.cancel();
-      _tapTimer?.cancel();
     }
+
+    controller.removeListener(_listener);
+    controller.dispose();
+    _controlsTimer?.cancel();
+    _tapTimer?.cancel();
 
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();

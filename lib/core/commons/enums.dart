@@ -30,6 +30,7 @@ enum SecureStorageKey {
   simklToken("simkl_token"),
   anilistToken("anilist_token"),
   malToken("mal_token"),
+  discordToken("discord_token"),
 
   //auth objects
   malAuthResponse("mal_auth_response"),

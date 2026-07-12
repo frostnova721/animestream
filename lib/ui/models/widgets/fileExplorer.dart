@@ -1,19 +1,13 @@
 import 'dart:io';
 
-import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/downloadHistory.dart';
-import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
-import 'package:animestream/ui/models/playerControllers/fvp.dart';
-import 'package:animestream/ui/models/providers/playerDataProvider.dart';
-import 'package:animestream/ui/models/providers/playerProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class FileExplorer extends StatefulWidget {
-  const FileExplorer({super.key});
+  final void Function(String) playVideo;
+  const FileExplorer({super.key, required this.playVideo});
 
   @override
   State<FileExplorer> createState() => _FileExplorerState();
@@ -233,7 +227,7 @@ class _FileExplorerState extends State<FileExplorer> {
         // file should have an extension and be included in supported type! doesnt prevent the user from fw the extension
         final ext = entity.path.split(".").lastOrNull;
         if (ext != null && _supportedFiles.contains(ext)) {
-          _playVideo(entity.path);
+          widget.playVideo(entity.path);
         } else {
           floatingSnackBar("Unsupported file type!");
         }
@@ -322,41 +316,6 @@ class _FileExplorerState extends State<FileExplorer> {
                 child: Text('Are you sure to delete "${_getFileName(entity.path)}" from your device?'),
               ),
             ));
-  }
-
-  void _playVideo(String filepath) {
-    final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();
-    final filename = _getFileName(filepath).split('.').first;
-    final filenameSplit = filename.split(" EP ");
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => MultiProvider(
-          providers: [
-            ChangeNotifierProvider(
-              create: (context) => PlayerDataProvider(
-                initialStreams: [],
-                initialStream: VideoStream(quality: "default", url: filepath, server: "local", backup: false),
-                epLinks: [], // doesnt matter
-                showTitle: filenameSplit[0],
-                showId: 0, // doesnt matter
-                selectedSource: "default", //doesnt matter
-                startIndex: 0, // does matter! [change with episode number, need to fw download methods]
-                altDatabases: [], // doesnt matter
-                preferDubs: false, // doesnt matter
-                lastWatchDuration: null, // does matter!
-              ),
-            ),
-            ChangeNotifierProvider(
-              create: (context) => PlayerProvider(controller, true),
-            ),
-          ],
-          child: Watch(
-            controller: controller,
-            localSource: true,
-          ),
-        ),
-      ),
-    );
   }
 
   String _toMegs(int sizeInBytes) => (sizeInBytes / (1024 * 1024)).toStringAsFixed(1);

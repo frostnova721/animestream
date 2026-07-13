@@ -36,7 +36,7 @@ class AniSkip {
     for (final item in results) {
       final type = item['skipType'] as String;
       final id = item['skipId'] as String;
-      final length = item['episodeLength'] as double;
+      final length = (item['episodeLength'] ?? 0).toDouble();
 
       final skipInterval = SkipInterval(
         // These values are always a double, but dart automatically converts some values

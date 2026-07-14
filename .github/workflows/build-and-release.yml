@@ -673,6 +673,6 @@ jobs:
   notify:
     name: Notify Release
     needs: [create-release, post-release-notes]
-    if: ${{ always() && (needs.create-release.result == 'success' || needs.post-release-notes.result == 'success') && (github.event_name == 'push' || inputs.send_notification == true) }}
+    if: ${{ always() && (needs.create-release.result == 'success' || needs.post-release-notes.result == 'success') && inputs.send_notification == true }}
     uses: ./.github/workflows/Notify.yml
     secrets: inherit

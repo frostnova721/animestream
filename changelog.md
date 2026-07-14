@@ -1,5 +1,10 @@
 
 ### 🎉 New Features
+* [f2f43d7](https://github.com/frostnova721/animestream/commit/f2f43d7): feat(ui): cache manager settings
+* [42790b9](https://github.com/frostnova721/animestream/commit/42790b9): feat(core): network caching
+* [3781696](https://github.com/frostnova721/animestream/commit/3781696): feat (new src)
+* [58c1bd7](https://github.com/frostnova721/animestream/commit/58c1bd7): feat(windows/linux): additions & fixes
+* [de58fa2](https://github.com/frostnova721/animestream/commit/de58fa2): feat (win/linux): add player support, version bump
 * [7d8a9ac](https://github.com/frostnova721/animestream/commit/7d8a9ac): feat: rollback animepahe to HLS streams
 * [bf77d31](https://github.com/frostnova721/animestream/commit/bf77d31): feat: + linux support
 * [68077ae](https://github.com/frostnova721/animestream/commit/68077ae): feat: alignment parsing for VTT subs, speed indicator in watch page
@@ -7,6 +12,14 @@
 * [8414845](https://github.com/frostnova721/animestream/commit/8414845): feat: new theme, some tweaks
 
 ### 🐛 Bug Fixes & Improvements
+* [b44db26](https://github.com/frostnova721/animestream/commit/b44db26): fix: medialist bottomsheet ui inconsistencies
+* [c986b30](https://github.com/frostnova721/animestream/commit/c986b30): fix stats page not loading for pvt accounts
+* [419591e](https://github.com/frostnova721/animestream/commit/419591e): fixed anizone, removed gesture actions for desktop & so on
+* [c9b557b](https://github.com/frostnova721/animestream/commit/c9b557b): fix some problems
+* [397c46e](https://github.com/frostnova721/animestream/commit/397c46e): fix: gojo, round the navbar a bit
+* [728fbc9](https://github.com/frostnova721/animestream/commit/728fbc9): fix: logical issues, feet: remove local watching entries
+* [bd8f5c5](https://github.com/frostnova721/animestream/commit/bd8f5c5): fix download button using wrong index in dextop
+* [1728cee](https://github.com/frostnova721/animestream/commit/1728cee): fix: gojo source, downloader issue, pip (desktop)
 * [bc8abd2](https://github.com/frostnova721/animestream/commit/bc8abd2): fix: animeonsen
 * [5a9e2bc](https://github.com/frostnova721/animestream/commit/5a9e2bc): fix: gojo, speedup when in lock mode on watch page
 * [2e7a5bf](https://github.com/frostnova721/animestream/commit/2e7a5bf): fix comment scoring logic
@@ -77,9 +90,10 @@
 * [ac87b61](https://github.com/frostnova721/animestream/commit/ac87b61): refactor and changes
 
 ### 🧹 Chores & Documentation
+* [1784d5b](https://github.com/frostnova721/animestream/commit/1784d5b): docs: update changelog for v1.4.4
 * [5c1c5f3](https://github.com/frostnova721/animestream/commit/5c1c5f3): docs: update changelog for v1.4.3
 * [4922f0d](https://github.com/frostnova721/animestream/commit/4922f0d): docs: remove placeholder role mentions
 * [30e9e37](https://github.com/frostnova721/animestream/commit/30e9e37): chore: add build & release workflows with Discord notifications
 
 ---
-**Full Changelog**: https://github.com/frostnova721/animestream/compare/5fecc3929cb7ecbdcf809811e8aec0f78b302f51...v1.4.4
+**Full Changelog**: https://github.com/frostnova721/animestream/compare/5fecc3929cb7ecbdcf809811e8aec0f78b302f51...v1.4.5

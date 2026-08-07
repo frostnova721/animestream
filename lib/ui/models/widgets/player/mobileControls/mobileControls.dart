@@ -34,6 +34,8 @@ class _MobileControlsState extends State<MobileControls> {
   int? skipDuration = currentUserSettings?.skipDuration ?? 10;
   int? megaSkipDuration = currentUserSettings?.megaSkipDuration ?? 85;
 
+  Future<void>? _pendingSeek = null; 
+
   @override
   void dispose() {
     super.dispose();
@@ -173,15 +175,21 @@ class _MobileControlsState extends State<MobileControls> {
                                         secondaryTrackValue: provider.controller.buffered?.toDouble(),
                                         onChanged: (val) {
                                           setState(() {
-                                            // provider.state = provider.state.copyWith();
-                                            provider.controller.seekTo(Duration(seconds: val.toInt()));
+                                            _pendingSeek = provider.controller.seekTo(Duration(seconds: val.toInt()));
                                           });
                                         },
                                         onChangeStart: (value) {
                                           provider.controller.pause();
                                         },
-                                        onChangeEnd: (value) {
-                                          provider.controller.play();
+                                        onChangeEnd: (value) async {
+                                          if (_pendingSeek != null) {
+                                            await _pendingSeek;
+                                          }
+
+                                          // just to make sure its on the same page...
+                                          await provider.controller.seekTo(Duration(seconds: value.toInt()));
+                                          
+                                          await provider.controller.play();
                                         },
                                         min: 0,
                                         max: (provider.controller.duration ?? 0) / 1000,

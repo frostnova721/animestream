@@ -278,9 +278,21 @@ jobs:
         shell: pwsh
         run: |
           Invoke-WebRequest -Uri "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z/download" -OutFile "mdk-sdk.7z"
-          7z x mdk-sdk.7z -omdk-temp
-          New-Item -ItemType Directory -Force -Path "windows\flutter\ephemeral\.plugin_symlinks\fvp\windows\mdk-sdk"
-          Copy-Item -Path "mdk-temp\mdk-sdk\*" -Destination "windows\flutter\ephemeral\.plugin_symlinks\fvp\windows\mdk-sdk\" -Recurse -Force
+          $fvpLine = Get-Content .flutter-plugins | Where-Object { $_ -match "^fvp=" }
+          if ($fvpLine) {
+              $fvpPath = $fvpLine -replace "^fvp=",""
+              $fvpPath = $fvpPath.Trim("`"","'")
+              Write-Host "FVP path: $fvpPath"
+              if (Test-Path "$fvpPath/windows") {
+                  7z x mdk-sdk.7z -o"$fvpPath/windows" -y
+              } else {
+                  Write-Host "FVP windows path not found at $fvpPath/windows!"
+                  exit 1
+              }
+          } else {
+              Write-Host "FVP not found in .flutter-plugins!"
+              exit 1
+          }
 
       - name: Build Windows
         shell: pwsh

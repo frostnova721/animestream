@@ -28,9 +28,11 @@ jobs:
           
       - name: Get Release Information
         id: get_release
+        env:
+          REPO: ${{ github.repository }}
         run: |
           RELEASE_DATA=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}")
+            "https://api.github.com/repos/$REPO/releases/tags/$LATEST_TAG")
           
           echo "$RELEASE_DATA" | jq -r '.body' > release_notes.txt
           
@@ -42,10 +44,12 @@ jobs:
 
       - name: Get All Release Assets
         id: get_assets
+        env:
+          REPO: ${{ github.repository }}
         run: |
           curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
             -H "Accept: application/vnd.github.v3+json" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ env.LATEST_TAG }}" -o release.json
+            "https://api.github.com/repos/$REPO/releases/tags/$LATEST_TAG" -o release.json
           
           bytes_to_hr() {
             awk -v size="$1" 'BEGIN{
@@ -171,7 +175,7 @@ jobs:
           section=$(format_section "🧹 Chores" "$CHORES")
           [ -n "$section" ] && DISCORD_NOTES+="$section"$'\n\n'
       
-          DISCORD_NOTES+="\n📋 [View full changelog on GitHub](https://github.com/${{ github.repository }}/releases/tag/${{ env.LATEST_TAG }})"
+          DISCORD_NOTES+="\n📋 [View full changelog on GitHub](https://github.com/${{ github.repository }}/releases/tag/$LATEST_TAG)"
       
           echo "DISCORD_NOTES<<EOF" >> $GITHUB_ENV
           echo -e "$DISCORD_NOTES" >> $GITHUB_ENV
@@ -203,12 +207,12 @@ jobs:
           # Create Discord embed
           discord_data=$(jq -nc \
             --arg role "$role_mention" \
-            --arg title "🚀 New Release: ${{ env.LATEST_TAG }}" \
+            --arg title "🚀 New Release: $LATEST_TAG" \
             --arg description "$DISCORD_NOTES" \
             --arg footer "AnimeStream • $(date -u +%Y-%m-%d)" \
             --arg timestamp "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)" \
             --argjson color "$color" \
-            --arg url "https://github.com/${{ github.repository }}/releases/tag/${{ env.LATEST_TAG }}" \
+            --arg url "https://github.com/${{ github.repository }}/releases/tag/$LATEST_TAG" \
             '{"content":$role,"embeds":[{"title":$title,"description":$description,"color":$color,"url":$url,"footer":{"text":$footer},"timestamp":$timestamp}]}')
           
           # Send to Discord
@@ -255,7 +259,7 @@ jobs:
           fi
           
           # Add footer
-          MESSAGE="${MESSAGE}[📋 View all assets on GitHub](https://github.com/${{ github.repository }}/releases/tag/${{ env.LATEST_TAG }})"
+          MESSAGE="${MESSAGE}[📋 View all assets on GitHub](https://github.com/${{ github.repository }}/releases/tag/$LATEST_TAG)"
           
           # Create and send Discord message
           PAYLOAD=$(jq -n --arg content "$MESSAGE" '{"content":$content}')

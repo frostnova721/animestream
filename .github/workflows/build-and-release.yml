@@ -44,12 +44,15 @@ jobs:
         
       - name: Determine tag
         id: get-tag
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          INPUT_TAG: ${{ inputs.tag_name }}
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ -n "${{ inputs.tag_name }}" ]; then
-            TARGET_TAG="${{ inputs.tag_name }}"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_TAG" ]; then
+            TARGET_TAG="$INPUT_TAG"
+          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
             TARGET_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
-          elif [ "${{ github.event_name }}" = "push" ]; then
+          elif [ "$EVENT_NAME" = "push" ]; then
             TARGET_TAG=${GITHUB_REF#refs/tags/}
           fi
           echo "tag=$TARGET_TAG" >> $GITHUB_OUTPUT
@@ -57,7 +60,9 @@ jobs:
 
       - name: Checkout target tag
         if: ${{ steps.get-tag.outputs.tag != '' }}
-        run: git checkout ${{ steps.get-tag.outputs.tag }}
+        env:
+          TARGET_TAG: ${{ steps.get-tag.outputs.tag }}
+        run: git checkout "$TARGET_TAG"
 
       - name: Extract version
         id: get-version
@@ -357,11 +362,19 @@ jobs:
           ref: ${{ needs.extract-version.outputs.tag }}
           fetch-depth: 0
 
-      - name: Clear existing CHANGELOG.md
+      - name: Check for custom release notes
+        id: check_custom
         run: |
-          echo "" > CHANGELOG.md
+          if [ -f "RELEASE_NOTES.md" ]; then
+            echo "custom=true" >> $GITHUB_OUTPUT
+            cp RELEASE_NOTES.md CHANGELOG.md
+          else
+            echo "custom=false" >> $GITHUB_OUTPUT
+            echo "" > CHANGELOG.md
+          fi
 
       - name: Get previous tag
+        if: steps.check_custom.outputs.custom == 'false'
         id: get_prev_tag
         run: |
           echo "Getting previous tag..."
@@ -372,12 +385,14 @@ jobs:
           echo "prev_tag=$PREV_TAG" >> $GITHUB_ENV
 
       - name: Get commit messages between tags
+        if: steps.check_custom.outputs.custom == 'false'
         id: get_commits
         run: |
           COMMITS=$(git log ${{ env.prev_tag }}..HEAD --pretty=format:'%h %s' | tr '\n' '|')
           echo "commits=$COMMITS" >> $GITHUB_ENV
 
       - name: Categorize commits
+        if: steps.check_custom.outputs.custom == 'false'
         id: categorize
         run: |
           echo "Categorizing commits..."
@@ -450,12 +465,15 @@ jobs:
           path: CHANGELOG.md
 
       - name: Commit and push changelog
+        env:
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          VERSION: ${{ needs.extract-version.outputs.version }}
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add CHANGELOG.md
-          git diff --staged --quiet || git commit -m "docs: update changelog for v${{ needs.extract-version.outputs.version }}"
-          git push origin HEAD:${{ github.event.repository.default_branch }} || echo "No changes to push"
+          git diff --staged --quiet || git commit -m "docs: update changelog for v$VERSION"
+          git push origin HEAD:"$DEFAULT_BRANCH" || echo "No changes to push"
 
   notify:
     name: Notify Release

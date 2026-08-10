@@ -274,6 +274,14 @@ jobs:
           echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
           echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
 
+      - name: Fix FVP CMake Symlink Issue (Download mdk-sdk manually)
+        shell: pwsh
+        run: |
+          Invoke-WebRequest -Uri "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z/download" -OutFile "mdk-sdk.7z"
+          7z x mdk-sdk.7z -omdk-temp
+          New-Item -ItemType Directory -Force -Path "windows\flutter\ephemeral\.plugin_symlinks\fvp\windows\mdk-sdk"
+          Copy-Item -Path "mdk-temp\mdk-sdk\*" -Destination "windows\flutter\ephemeral\.plugin_symlinks\fvp\windows\mdk-sdk\" -Recurse -Force
+
       - name: Build Windows
         shell: pwsh
         run: flutter build windows --release --dart-define-from-file=.env --build-number=${{ needs.extract-version.outputs.version_code }} --build-name=${{ needs.extract-version.outputs.version }}

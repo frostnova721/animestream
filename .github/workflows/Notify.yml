@@ -77,27 +77,29 @@ jobs:
           while IFS= read -r line; do
             ASSET_URL=$(echo "$line" | jq -r '.browser_download_url')
             ASSET_SIZE=$(echo "$line" | jq -r '.size')
-            FILE_NAME=$(basename "$ASSET_URL")
+            FILE_NAME=$(echo "$line" | jq -r '.name')
             SIZE_HR=$(bytes_to_hr "$ASSET_SIZE")
+            
+            echo "Found asset: $FILE_NAME"
             
             # Categorize assets
             case "$FILE_NAME" in
-              app-release.apk)
+              *app-release.apk* | *universal*.apk)
                 APK_UNIVERSAL="[Universal APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              app-arm64-v8a-release.apk)
+              *arm64-v8a*.apk)
                 APK_ARM64="[ARM64 APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              app-armeabi-v7a-release.apk)
+              *armeabi-v7a*.apk)
                 APK_ARM32="[ARM32 APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              app-x86_64-release.apk)
+              *x86_64*.apk)
                 APK_X86="[x86_64 APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              animestream-x86_64.exe)
+              *.exe)
                 WINDOWS_SETUP="[Windows Installer]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              linux.zip)
+              *.zip)
                 LINUX_PORTABLE="[Linux Portable]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
             esac

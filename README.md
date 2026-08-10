@@ -97,3 +97,5 @@ This project is licensed under the **GNU Public License version 3.0**.
 ## Contributors
 
 - [FrostNova](https://github.com/frostnova721)
+- [DarkxDev](https://github.com/roshancodespace)
+- [Sheby](https://github.com/Shebyyy)

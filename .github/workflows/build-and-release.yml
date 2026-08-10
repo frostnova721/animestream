@@ -277,7 +277,7 @@ jobs:
       - name: Fix FVP CMake Symlink Issue (Download mdk-sdk manually)
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z/download" -OutFile "mdk-sdk.7z"
+          curl.exe -L -o mdk-sdk.7z "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z/download"
           $config = Get-Content ".dart_tool\package_config.json" -Raw | ConvertFrom-Json
           $fvpPackage = $config.packages | Where-Object { $_.name -eq 'fvp' }
           if ($fvpPackage) {

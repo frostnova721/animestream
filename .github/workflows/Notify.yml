@@ -78,34 +78,22 @@ jobs:
             
             # Categorize assets
             case "$FILE_NAME" in
-              *universal*.apk)
+              app-release.apk)
                 APK_UNIVERSAL="[Universal APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              *arm64-v8a*.apk)
+              app-arm64-v8a-release.apk)
                 APK_ARM64="[ARM64 APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              *armeabi-v7a*.apk)
+              app-armeabi-v7a-release.apk)
                 APK_ARM32="[ARM32 APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              *x86_64*.apk)
+              app-x86_64-release.apk)
                 APK_X86="[x86_64 APK]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              *.exe)
+              animestream-x86_64.exe)
                 WINDOWS_SETUP="[Windows Installer]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
-              *windows*portable*.zip)
-                WINDOWS_PORTABLE="[Windows Portable]($ASSET_URL) \`$SIZE_HR\`"
-                ;;
-              *.deb)
-                LINUX_DEB="[Linux DEB]($ASSET_URL) \`$SIZE_HR\`"
-                ;;
-              *.rpm)
-                LINUX_RPM="[Linux RPM]($ASSET_URL) \`$SIZE_HR\`"
-                ;;
-              *.flatpak)
-                LINUX_FLATPAK="[Linux Flatpak]($ASSET_URL) \`$SIZE_HR\`"
-                ;;
-              *linux*x64*.zip)
+              linux.zip)
                 LINUX_PORTABLE="[Linux Portable]($ASSET_URL) \`$SIZE_HR\`"
                 ;;
             esac

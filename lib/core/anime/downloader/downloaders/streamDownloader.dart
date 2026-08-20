@@ -17,9 +17,6 @@ class StreamDownloader extends BaseDownloader {
     final finalPath = await helper.makeDirectory(
         fileName: task.fileName, fileExtension: task.useMkvRemuxer ? "mkv" : "mp4", downloadPath: task.downloadPath);
 
-    // Download subtitles if available
-    if (task.subsUrl != null) await downloadSubs(task.subsUrl!, task.fileName, finalPath);
-
     File? output;
     TsToMkvRemuxer? remuxed;
 
@@ -27,6 +24,14 @@ class StreamDownloader extends BaseDownloader {
       remuxed = TsToMkvRemuxer(finalPath);
     } else {
       output = File(finalPath);
+    }
+
+    // Download subtitles if available
+    if (task.subsUrl != null) {
+      final downloadedSubsPath = await downloadSubs(task.subsUrl!, task.fileName, finalPath);
+      if (task.writeSubtitleTrackToVideo && remuxed != null) {
+        await remuxed.loadSubtitles(downloadedSubsPath);
+      }
     }
 
     // open the write mode
@@ -136,11 +141,12 @@ class StreamDownloader extends BaseDownloader {
         //sort the buffers
         buffers.sort((a, b) => a.index.compareTo(b.index));
 
-        // final dir = finalPath.split("/").sublist(0, finalPath.split("/").length - 1).join("/");
+        print(finalPath);
+        // final dir = finalPath.split(Platform.pathSeparator).sublist(0, finalPath.split(Platform.pathSeparator).length - 1).join(Platform.pathSeparator);
 
         // Write the downloaded buffers
         for (final b in buffers) {
-          //  await File("${dir}/segment_${b.index}.ts").writeAsBytes(b.buffer);
+          //  await File("${dir}/${b.index}.ts").writeAsBytes(b.buffer);
           task.useMkvRemuxer ? await remuxed?.processChunk(b.buffer) : out?.add(b.buffer);
         }
 
@@ -175,7 +181,7 @@ class StreamDownloader extends BaseDownloader {
     }
   }
 
-  Future<void> downloadSubs(String url, String fileName, String downloadPath) async {
+  Future<String> downloadSubs(String url, String fileName, String downloadPath) async {
     try {
       final folder = File(downloadPath).parent;
       fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '') + " Subtitles";
@@ -183,9 +189,10 @@ class StreamDownloader extends BaseDownloader {
       final ext = url.split(".").lastOrNull ?? "txt";
       final file = File("${folder.path}${Platform.pathSeparator}$fileName.$ext");
       await file.writeAsString((await get(Uri.parse(url), headers: task.customHeaders)).body);
-      return;
+      return file.path;
     } catch (err) {
       print("[DOWNLOADER] Failed to download $fileName subs!");
+      return "";
     }
   }
 

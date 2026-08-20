@@ -106,6 +106,7 @@ class DownloadTaskIsolate {
   final SendPort? sendPort;
   final int resumeFrom;
   final bool useMkvRemuxer;
+  final bool writeSubtitleTrackToVideo; // only for remuxed videos
   String downloadPath;
 
   DownloadTaskIsolate({
@@ -120,11 +121,12 @@ class DownloadTaskIsolate {
     required this.downloadPath,
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
     this.useMkvRemuxer = false,
+    this.writeSubtitleTrackToVideo = false,
   });
 
   @override
   String toString() {
-    return 'DownloadTaskIsolate(url: $url, fileName: $fileName, id: $id, customHeaders: $customHeaders, retryAttempts: $retryAttempts, parallelBatches: $parallelBatches, subsUrl: $subsUrl, sendPort: $sendPort, resumeFrom: $resumeFrom, downloadPath: $downloadPath, remux: $useMkvRemuxer)';
+    return 'DownloadTaskIsolate(url: $url, fileName: $fileName, id: $id, customHeaders: $customHeaders, retryAttempts: $retryAttempts, parallelBatches: $parallelBatches, subsUrl: $subsUrl, sendPort: $sendPort, resumeFrom: $resumeFrom, downloadPath: $downloadPath, remux: $useMkvRemuxer), writeSubtitleTrackToVideo: $writeSubtitleTrackToVideo';
   }
 }
 

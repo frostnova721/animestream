@@ -7,8 +7,8 @@ class ASSRIPPER {
   // Cache field order from Format line: field name -> index
   Map<String, int>? _fieldOrder;
 
-  List<Subtitle> parseASS(String rawAss) {
-    final subtitles = <Subtitle>[];
+  List<SubtitleCue> parseASS(String rawAss) {
+    final subtitles = <SubtitleCue>[];
     final lines = rawAss.split('\n');
     
     // Parse Format line from [Events] section only
@@ -81,7 +81,7 @@ class ASSRIPPER {
     return SubtitleAlignment.bottomCenter;
   }
 
-  Subtitle _parseASSEventLine(String line) {
+  SubtitleCue _parseASSEventLine(String line) {
     int fieldCount = 10; // maximum params
 
     if(_fieldOrder != null && _fieldOrder!.isNotEmpty) {
@@ -143,6 +143,6 @@ class ASSRIPPER {
     // Clean formatting tags from dialogue and normalize explicit ASS newline markers
     final dialogue = _removeASSFormatting(rawText).replaceAll(r"\N", "\n").trim();
 
-    return Subtitle(dialogue: dialogue, end: end, start: start, alignment: alignment);
+    return SubtitleCue(dialogue: dialogue, end: end, start: start, alignment: alignment);
   }
 }

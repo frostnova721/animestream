@@ -99,9 +99,9 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               if (widget.provider.previouslyUsedServer != null &&
                   userPreferences?.autoSelectPreviouslyUsedServer == true &&
                   !_isLoading) {
-                final autoSelected =
-                    streamSources.firstWhereOrNull((element) => element.server == widget.provider.previouslyUsedServer);
-
+                final autoSelected = streamSources.firstWhereOrNull((element) =>
+                    element.server == widget.provider.previouslyUsedServer &&
+                    element.quality == widget.provider.previouslyUsedServerQuality);
                 if (autoSelected != null) {
                   _navigateToPlayer(title, streamSources.indexOf(autoSelected));
                 }
@@ -160,8 +160,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
     super.initState();
 
     final titles = widget.provider.data.title;
-    final defaulTitle = titles['english'] ?? titles['romaji'] ?? "";
-    title = (currentUserSettings?.nativeTitle ?? false) ? titles['native'] ?? defaulTitle : defaulTitle;
+    final defaultTitle = titles['english'] ?? titles['romaji'] ?? "";
+    title = (currentUserSettings?.nativeTitle ?? false) ? titles['native'] ?? defaultTitle : defaultTitle;
 
     getStreams(widget.provider);
   }
@@ -302,7 +302,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
               return SourceTile(
                 source: source,
                 onTap: () async {
-                  await widget.provider.updatePrevUsedServer(source.server);
+                  await widget.provider.updatePrevUsedServer(source.server, source.quality);
                   return _navigateToPlayer(title, index);
                 },
               );

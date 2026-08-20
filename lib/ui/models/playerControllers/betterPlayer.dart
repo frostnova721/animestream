@@ -1,3 +1,4 @@
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
@@ -25,7 +26,7 @@ class BetterPlayerWrapper implements VideoController {
     },
     eventListener: (ev) {
       if (ev.betterPlayerEventType == BetterPlayerEventType.exception) {
-        print("[PLAYER] Oooooooh! We've got some issues!!! \n$ev.parameters");
+        Logs.player.log("[PLAYER] Oooooooh! We've got some issues!!! \n${ev.parameters}");
       }
     },
     autoDispose: true,

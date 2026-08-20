@@ -87,6 +87,9 @@ class SettingsModal {
   /// Enable discord rich presence
   final bool? enableDiscordRichPresence;
 
+  /// Write the subtitle track to video file (only works when using remuxer)
+  final bool? writeSubtitleTrackToVideo;
+
   SettingsModal({
     this.megaSkipDuration,
     this.skipDuration,
@@ -115,6 +118,7 @@ class SettingsModal {
     this.useOldNavbar,
     this.useMkvRemuxer,
     this.enableDiscordRichPresence,
+    this.writeSubtitleTrackToVideo,
   });
 
   factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
@@ -146,6 +150,7 @@ class SettingsModal {
       useOldNavbar: map['useOldNavbar'] ?? false,
       useMkvRemuxer: map['useMkvRemuxer'] ?? true,
       enableDiscordRichPresence: map['enableDiscordRichPresence'] ?? false,
+      writeSubtitleTrackToVideo: map['writeSubtitleTrackToVideo'] ?? false,
     );
   }
 
@@ -178,6 +183,7 @@ class SettingsModal {
       'useOldNavbar': useOldNavbar,
       'useMkvRemuxer': useMkvRemuxer,
       'enableDiscordRichPresence': enableDiscordRichPresence,
+      'writeSubtitleTrackToVideo': writeSubtitleTrackToVideo,
     };
   }
 }
@@ -257,26 +263,33 @@ class AnimeSpecificPreference {
   final String? manualSearchQuery;
   final String? preferredProvider;
   final String? previouslyUsedServer;
+  final String? previouslyUsedServerQuality;
 
   AnimeSpecificPreference(
-      {this.lastWatchDuration, this.manualSearchQuery, this.preferredProvider, this.previouslyUsedServer});
+      {this.lastWatchDuration,
+      this.manualSearchQuery,
+      this.preferredProvider,
+      this.previouslyUsedServer,
+      this.previouslyUsedServerQuality});
 
   @override
   String toString() =>
       'AnimeSpecificPreference(lastWatchDuration: $lastWatchDuration, manualSearchQuery: $manualSearchQuery, '
-      'preferredProvider: $preferredProvider, previouslyUsedServer: $previouslyUsedServer)';
+      'preferredProvider: $preferredProvider, previouslyUsedServer: $previouslyUsedServer, previouslyUsedServerQuality: $previouslyUsedServerQuality)';
 
   AnimeSpecificPreference copyWith({
     Map? lastWatchDuration,
     String? manualSearchQuery,
     String? preferredProvider,
     String? previouslyUsedServer,
+    String? previouslyUsedServerQuality,
   }) {
     return AnimeSpecificPreference(
       lastWatchDuration: lastWatchDuration ?? this.lastWatchDuration,
       manualSearchQuery: manualSearchQuery ?? this.manualSearchQuery,
       preferredProvider: preferredProvider ?? this.preferredProvider,
       previouslyUsedServer: previouslyUsedServer ?? this.previouslyUsedServer,
+      previouslyUsedServerQuality: previouslyUsedServerQuality ?? this.previouslyUsedServerQuality,
     );
   }
 
@@ -286,17 +299,19 @@ class AnimeSpecificPreference {
       'manualSearchQuery': manualSearchQuery,
       'preferredProvider': preferredProvider,
       'previouslyUsedServer': previouslyUsedServer,
+      'previouslyUsedServerQuality': previouslyUsedServerQuality,
     };
   }
 
   factory AnimeSpecificPreference.fromMap(Map<String, dynamic> map) {
     return AnimeSpecificPreference(
-      lastWatchDuration:
-          map['lastWatchDuration'] != null ? Map.from(map['lastWatchDuration'] as Map<dynamic, dynamic>) : null,
-      manualSearchQuery: map['manualSearchQuery'] != null ? map['manualSearchQuery'] as String : null,
-      preferredProvider: map['preferredProvider'] != null ? map['preferredProvider'] as String : null,
-      previouslyUsedServer: map['previouslyUsedServer'] != null ? map['previouslyUsedServer'] as String : null,
-    );
+        lastWatchDuration:
+            map['lastWatchDuration'] != null ? Map.from(map['lastWatchDuration'] as Map<dynamic, dynamic>) : null,
+        manualSearchQuery: map['manualSearchQuery'] != null ? map['manualSearchQuery'] as String : null,
+        preferredProvider: map['preferredProvider'] != null ? map['preferredProvider'] as String : null,
+        previouslyUsedServer: map['previouslyUsedServer'] != null ? map['previouslyUsedServer'] as String : null,
+        previouslyUsedServerQuality:
+            map['previouslyUsedServerQuality'] != null ? map['previouslyUsedServerQuality'] as String : null);
   }
 
   String toJson() => json.encode(toMap());

@@ -87,6 +87,7 @@ class InfoProvider extends ChangeNotifier {
 
   /// Previously used server in the respective provider
   String? get previouslyUsedServer => _previouslyUsedServer;
+  String? get previouslyUsedServerQuality => _previouslyUsedServerQuality;
 
   /// Currently selected source
   ProviderDetails get selectedSource => _selectedSource;
@@ -97,26 +98,30 @@ class InfoProvider extends ChangeNotifier {
   bool _initCalled = false;
 
   String? aspProvider;
-  String? _previouslyUsedServer;
+  String? _previouslyUsedServer, _previouslyUsedServerQuality;
 
   set selectedSource(ProviderDetails val) {
     _selectedSource = val;
     if (aspProvider != val.identifier) {
-      saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(preferredProvider: val.identifier));
+      saveAnimeSpecificPreference(
+          id.toString(),
+          AnimeSpecificPreference(
+            preferredProvider: val.identifier,
+          ));
     }
     // we just using this condition for validation (too lazy to add a field for it)
     sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0";
     notifyListeners();
   }
 
-  set previouslyUsedServer(String? val) {
-    if (_previouslyUsedServer == null && _previouslyUsedServer == val) return;
-    _previouslyUsedServer = val;
-    saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: val)).then((v) {
-      notifyListeners();
-    });
-    // notifyListeners();
-  }
+  // set previouslyUsedServer(String? val) {
+  //   if (_previouslyUsedServer == null && _previouslyUsedServer == val) return;
+  //   _previouslyUsedServer = val;
+  //   saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: val)).then((v) {
+  //     notifyListeners();
+  //   });
+  //   // notifyListeners();
+  // }
 
   set viewMode(int newIndex) {
     _viewMode = newIndex;
@@ -203,10 +208,13 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> updatePrevUsedServer(String? val) async {
-    if (val == null) return;
-    previouslyUsedServer = val;
-    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: val));
+  Future<void> updatePrevUsedServer(String? server, String? quality) async {
+    if (server == null) return;
+    _previouslyUsedServer = server;
+    _previouslyUsedServerQuality = quality;
+    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: server,
+    previouslyUsedServerQuality: quality,
+    ));
     notifyListeners();
   }
 

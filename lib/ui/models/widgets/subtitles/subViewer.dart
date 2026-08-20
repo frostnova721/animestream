@@ -42,9 +42,9 @@ class _SubViewerState extends State<SubViewer> {
     print("[SUBVIEWER]: subs initialized");
   }
 
-  List<Subtitle> subs = [];
+  List<SubtitleCue> subs = [];
 
-  List<Subtitle> activeSubtitles = [];
+  List<SubtitleCue> activeSubtitles = [];
 
   bool areSubsLoading = true;
 
@@ -103,7 +103,7 @@ class _SubViewerState extends State<SubViewer> {
       lastLineIndex++;
     }
 
-    List<Subtitle> newMatches = [];
+    List<SubtitleCue> newMatches = [];
 
     // Start checking from our synced index.
     for (int i = lastLineIndex; i < subs.length; i++) {
@@ -132,7 +132,7 @@ class _SubViewerState extends State<SubViewer> {
   }
 
   // Helper to compare lists efficiently
-  bool _areSubtitleListsEqual(List<Subtitle> a, List<Subtitle> b) {
+  bool _areSubtitleListsEqual(List<SubtitleCue> a, List<SubtitleCue> b) {
     if (a.length != b.length) return false;
     if (a.isEmpty && b.isEmpty) return true;
 
@@ -160,7 +160,7 @@ class _SubViewerState extends State<SubViewer> {
   @override
   Widget build(BuildContext context) {
     // I dont think this is a great idea to do this here, but oh boi!
-    final Map<SubtitleAlignment, List<Subtitle>> subsGrouped = {};
+    final Map<SubtitleAlignment, List<SubtitleCue>> subsGrouped = {};
     for (final sub in activeSubtitles) {
       subsGrouped.putIfAbsent(sub.alignment, () => []).add(sub);
     }

@@ -3,9 +3,9 @@ import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 import 'package:collection/collection.dart';
 
 class VttRipper {
-  List<Subtitle> parseVtt(String rawSource) {
+  List<SubtitleCue> parseVtt(String rawSource) {
     final lines = rawSource.split('\n');
-    final subtitles = <Subtitle>[];
+    final subtitles = <SubtitleCue>[];
 
     String? currentDialogue;
     Duration? start;
@@ -18,7 +18,7 @@ class VttRipper {
       if (line.startsWith('WEBVTT') || line.trim().isEmpty || line.startsWith('NOTE')) {
         // If we encounter an empty line, it's the end of a block
         if (currentDialogue != null && start != null && end != null) {
-          subtitles.add(Subtitle(start: start, end: end, dialogue: _removeHtml(currentDialogue), alignment: alignment));
+          subtitles.add(SubtitleCue(start: start, end: end, dialogue: _removeHtml(currentDialogue), alignment: alignment));
           currentDialogue = null;
           start = null;
           end = null;
@@ -59,7 +59,7 @@ class VttRipper {
 
     // Add the last subtitle if the file ends without an empty line
     if (start != null && end != null && currentDialogue != null) {
-      subtitles.add(Subtitle(start: start, end: end, dialogue: _removeHtml(currentDialogue), alignment: alignment));
+      subtitles.add(SubtitleCue(start: start, end: end, dialogue: _removeHtml(currentDialogue), alignment: alignment));
     }
 
     return subtitles;

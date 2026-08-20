@@ -1,4 +1,5 @@
 import 'package:animestream/core/app/env.dart';
+import 'package:animestream/core/app/logging.dart';
 import 'package:dart_discord_presence/dart_discord_presence.dart';
 
 class DiscordDesktopRPC {
@@ -6,10 +7,10 @@ class DiscordDesktopRPC {
   bool _isInitialized = false;
 
   Future<void> initiateConnection() async {
-    _discord.onError.listen((e) => print(e.message));
+    _discord.onError.listen((e) => Logs.app.log(e.message));
 
     _discord.onReady.listen((val) {
-      print("RPC Client connected as ${val.user.username}.");
+      Logs.app.log("RPC Client connected as ${val.user.username}.");
     });
 
     await _discord.initialize(AnimeStreamEnvironment.discordApplicationId);

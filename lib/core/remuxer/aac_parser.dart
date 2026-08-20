@@ -45,9 +45,11 @@ class AacParser {
         if (offset + frameLength <= data.length) {
           final rawFrame = data.sublist(offset + headerLength, offset + frameLength);
           
+          _parsePceIfNeeded(rawFrame);
+
           if (_nextPts != null && _nextDts != null) {
             frames.add(ParsedAacFrame(rawFrame, _nextPts!, _nextDts!));
-            double sr = getSamplingRate();
+            double sr = getCoreSamplingRate();
             if (sr > 0) {
               int offsetPts = (1024 * 90000 ~/ sr);
               _nextPts = _nextPts! + offsetPts;
@@ -73,19 +75,89 @@ class AacParser {
     return frames;
   }
 
+  bool _pceParsed = false;
+
+  void _parsePceIfNeeded(List<int> rawFrame) {
+    if (_pceParsed || rawFrame.isEmpty) return;
+    _pceParsed = true;
+
+    if (channelConfiguration != 0) return;
+
+    final br = _BitReader(rawFrame);
+    int id = br.readBits(3);
+    if (id == 5) { // PCE
+      br.readBits(4); 
+      br.readBits(2); 
+      int sfIndex = br.readBits(4);
+      samplingFrequencyIndex = sfIndex; 
+      channelConfiguration = 2; 
+    } else {
+      channelConfiguration = 2; 
+    }
+  }
+
   List<int>? buildAudioSpecificConfig() {
     if (audioObjectType == null || samplingFrequencyIndex == null || channelConfiguration == null) {
       return null;
     }
 
-    final b1 = (audioObjectType! << 3) | ((samplingFrequencyIndex! >> 1) & 0x07);
-    final b2 = ((samplingFrequencyIndex! & 0x01) << 7) | (channelConfiguration! << 3);
+    // Force core AOT to 2 (AAC-LC) if it was incorrectly parsed as 1 (AAC-Main)
+    // HE-AAC relies on LC as its core, and ADTS headers for HE-AAC streams
+    // occasionally contain profile 0 (AOT 1) incorrectly.
+    int coreAot = audioObjectType! == 1 ? 2 : audioObjectType!; 
+    int coreSrIndex = samplingFrequencyIndex!;
+    int coreChannels = channelConfiguration! == 0 ? 2 : channelConfiguration!; // Fallback to stereo if PCE (0)
 
-    return [b1, b2];
+    // Stronger Heuristic for ADTS with PCE (channelConfiguration == 0):
+    // Encoders often incorrectly write the EXTENSION sample rate (44.1k/48k) in the ADTS header instead of the core.
+    if (channelConfiguration! == 0) {
+      if (coreSrIndex == 4) coreSrIndex = 7; // 44100 -> 22050 (HE-AAC core)
+      else if (coreSrIndex == 3) coreSrIndex = 6; // 48000 -> 24000 (HE-AAC core)
+    }
+
+    // Use implicit signaling for HE-AAC. We simply output the core AAC-LC AudioSpecificConfig.
+    // Modern decoders will read this basic config, parse the bitstream, and implicitly
+    // discover SBR and PS data to upscale the audio appropriately.
+    final bw = _BitWriter();
+    bw.writeBits(coreAot, 5);
+    bw.writeBits(coreSrIndex, 4);
+    bw.writeBits(coreChannels, 4);
+    bw.flush();
+    return bw.bytes;
+  }
+
+  int getOutputChannels() {
+    int coreChannels = channelConfiguration ?? 2;
+    if (coreChannels == 0) coreChannels = 2; // Default to stereo if PCE (0)
+    int index = samplingFrequencyIndex ?? 4;
+    bool isHeAac = index >= 6 && index <= 8;
+    bool isPs = isHeAac && coreChannels == 1;
+    return isPs ? 2 : coreChannels;
+  }
+
+  double getCoreSamplingRate() {
+    int index = samplingFrequencyIndex ?? 4;
+    if (channelConfiguration == 0) {
+      if (index == 4) index = 7;
+      else if (index == 3) index = 6;
+    }
+    return _sampleRateForIndex(index);
   }
 
   double getSamplingRate() {
-    switch (samplingFrequencyIndex) {
+    int index = samplingFrequencyIndex ?? 4;
+    if (channelConfiguration == 0) {
+      if (index == 4) index = 7;
+      else if (index == 3) index = 6;
+    }
+    if (index >= 6 && index <= 8) {
+      index = index - 3; // SBR doubles the sample rate
+    }
+    return _sampleRateForIndex(index);
+  }
+
+  double _sampleRateForIndex(int index) {
+    switch (index) {
       case 0: return 96000;
       case 1: return 88200;
       case 2: return 64000;
@@ -112,3 +184,52 @@ class ParsedAacFrame {
   ParsedAacFrame(this.data, this.pts, this.dts);
 }
 
+class _BitReader {
+  final List<int> data;
+  int _byteOffset = 0;
+  int _bitOffset = 0;
+
+  _BitReader(this.data);
+
+  int readBits(int numBits) {
+    int result = 0;
+    for (int i = 0; i < numBits; i++) {
+      if (_byteOffset >= data.length) return result;
+      int bit = (data[_byteOffset] >> (7 - _bitOffset)) & 1;
+      result = (result << 1) | bit;
+      _bitOffset++;
+      if (_bitOffset == 8) {
+        _bitOffset = 0;
+        _byteOffset++;
+      }
+    }
+    return result;
+  }
+}
+
+class _BitWriter {
+  int _data = 0;
+  int _bits = 0;
+  final List<int> bytes = [];
+
+  void writeBits(int value, int numBits) {
+    for (int i = numBits - 1; i >= 0; i--) {
+      int bit = (value >> i) & 1;
+      _data = (_data << 1) | bit;
+      _bits++;
+      if (_bits == 8) {
+        bytes.add(_data);
+        _data = 0;
+        _bits = 0;
+      }
+    }
+  }
+
+  void flush() {
+    if (_bits > 0) {
+      _data <<= (8 - _bits);
+      bytes.add(_data);
+      _bits = 0;
+    }
+  }
+}

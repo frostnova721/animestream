@@ -1,10 +1,10 @@
-class Subtitle {
+class SubtitleCue {
   final Duration start;
   final Duration end;
   final String dialogue;
   final SubtitleAlignment alignment;
 
-  Subtitle(
+  SubtitleCue(
       {required this.dialogue,
       required this.end,
       required this.start,

@@ -17,6 +17,14 @@ class DownloaderSettings extends StatefulWidget {
 }
 
 class _DownloaderSettingsState extends State<DownloaderSettings> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    readSettings();
+  }
+
   Future<void> writeSettings(SettingsModal settings) async {
     await Settings().writeSettings(settings);
     setState(() {
@@ -26,14 +34,18 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
 
   Future<void> readSettings() async {
     final settings = await Settings().getSettings();
-    setState(() async {
+    setState(() {
       fasterDownloads = settings.fasterDownloads!;
       useQueuedDownloads = settings.useQueuedDownloads!;
+      writeSubtitleTrackToVideo = settings.writeSubtitleTrackToVideo!;
+      useRemuxer = settings.useMkvRemuxer!;
     });
   }
 
   bool fasterDownloads = false;
   bool useQueuedDownloads = false;
+  bool writeSubtitleTrackToVideo = false;
+  bool useRemuxer = true;
 
   @override
   Widget build(BuildContext context) {
@@ -62,19 +74,31 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                     onTapFunction: () {
                       setState(() {
                         useQueuedDownloads = !useQueuedDownloads;
-                        writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
                       });
+                      writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
                     }),
 
                 // f**k experimental notice
                 ToggleItem(
-                  label: "Use MKV Remuxer",
-                  value: currentUserSettings?.useMkvRemuxer ?? false,
-                  description: "Remux streams to MKV",
-                  onTapFunction: () => setState(() async {
-                    await writeSettings(SettingsModal(useMkvRemuxer: !(currentUserSettings?.useMkvRemuxer ?? true)));
-                  }),
-                ),
+                    label: "Use MKV Remuxer",
+                    value: useRemuxer,
+                    description: "Remux streams to MKV",
+                    onTapFunction: () {
+                      setState(() async {
+                        useRemuxer = !useRemuxer;
+                      });
+                      writeSettings(SettingsModal(useMkvRemuxer: useRemuxer));
+                    }),
+                ToggleItem(
+                    label: "Write subtitle to video",
+                    value: writeSubtitleTrackToVideo,
+                    description: "only works while remuxing",
+                    onTapFunction: () {
+                      setState(() async {
+                        writeSubtitleTrackToVideo = !writeSubtitleTrackToVideo;
+                      });
+                      writeSettings(SettingsModal(writeSubtitleTrackToVideo: writeSubtitleTrackToVideo));
+                    }),
                 InkWell(
                   onTap: () async {
                     String? dir;
@@ -88,8 +112,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                     if (dir == null) return;
                     print("Path set to: $dir");
                     await Settings().writeSettings(SettingsModal(downloadPath: dir));
-                    setState(() {
-                    });
+                    setState(() {});
                     floatingSnackBar("might need to provide 'allow access to all files' while downloading!");
                   },
                   child: Container(

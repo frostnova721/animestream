@@ -297,7 +297,8 @@ class Downloader {
       // rootIsolateToken: rootIsolateToken,
       downloadPath: downloadPath,
       resumeFrom: item.lastDownloadedPart ?? 0,
-      useMkvRemuxer: currentUserSettings?.useMkvRemuxer ?? false,
+      useMkvRemuxer: currentUserSettings?.useMkvRemuxer ?? true,
+      writeSubtitleTrackToVideo: currentUserSettings?.writeSubtitleTrackToVideo ?? false
     );
 
     return task;

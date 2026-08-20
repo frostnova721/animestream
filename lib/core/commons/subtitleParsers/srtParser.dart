@@ -3,8 +3,8 @@ import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 // import 'package:flutter/widgets.dart';
 
 class SrtRipper {
-  List<Subtitle> parseSrt(String rawSource) {
-    final List<Subtitle> subs = [];
+  List<SubtitleCue> parseSrt(String rawSource) {
+    final List<SubtitleCue> subs = [];
     final sections = rawSource.split(RegExp(r"\r\n\r\n|\n\n|\r\r"));
     for (final section in sections) {
       final lines = section.split(RegExp(r"\n|\r\n|\r"));
@@ -28,7 +28,7 @@ class SrtRipper {
         // }
         text = text.replaceAll(RegExp(r'</?\w+>|{\\an\d+}'), "");
       }
-      subs.add(Subtitle(dialogue: text, end: end, start: start, alignment: alignment,));
+      subs.add(SubtitleCue(dialogue: text, end: end, start: start, alignment: alignment,));
     }
     return subs;
   }

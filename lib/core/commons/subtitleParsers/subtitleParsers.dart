@@ -9,7 +9,7 @@ import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
 import 'package:animestream/core/network/network.dart';
 
 class Subtitleparsers {
-  Future<List<Subtitle>> parseSubs(String source, SubtitleFormat format) async {
+  Future<List<SubtitleCue>> parseSubs(String source, SubtitleFormat format) async {
     switch (format) {
       case SubtitleFormat.ASS:
         return ASSRIPPER().parseASS(source);
@@ -20,12 +20,12 @@ class Subtitleparsers {
     }
   }
 
-  Future<List<Subtitle>> parseSubsFromUrl(String url, SubtitleFormat format, {Map<String, String> headers = const {}}) async {
+  Future<List<SubtitleCue>> parseSubsFromUrl(String url, SubtitleFormat format, {Map<String, String> headers = const {}}) async {
     final res = await fetch(url, headers: headers);
     return parseSubs(utf8.decode(res.bodyBytes), format);
   }
 
-  Future<List<Subtitle>> parseSubsFromFile(String filePath, SubtitleFormat format) async {
+  Future<List<SubtitleCue>> parseSubsFromFile(String filePath, SubtitleFormat format) async {
     final res = await File(filePath).readAsBytes();
     return parseSubs(utf8.decode(res), format);
   }

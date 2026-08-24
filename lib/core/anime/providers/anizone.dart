@@ -17,42 +17,39 @@ class AniZone extends AnimeProvider {
     );
 
     final doc = parse(res.body);
-    final grid = doc.querySelector("div.grid.grid-cols-1.gap-4");
-    if (grid == null) {
-      throw Exception("Got list of children as null.");
+    // final grid = doc.querySelector("ul.grid.grid-cols-1.gap-4");
+    // if (grid == null) {
+    //   throw Exception("Got list of children as null.");
+    // }
+    // final children = grid.querySelectorAll("li");
+
+    final data = doc.querySelector("main")?.children[1];
+
+    final divData = data?.attributes['x-data'];
+
+    final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
+
+    final match = matchRegEx.firstMatch(divData ?? "");
+
+    if (match == null) {
+      throw Exception("Couldn't find anime data");
     }
-    final children = grid.children;
+
+    final parsedJson = List.castFrom(jsonDecode(match.group(1)!.replaceAll(r'\u0022', '"')));
 
     final List<Map<String, String?>> searchRes = [];
 
-    for (final child in children) {
-      final divData = child.attributes['x-data'];
-
-      final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
-
-      final match = matchRegEx.firstMatch(divData ?? "");
-
-      if (match == null) {
-        throw Exception("Couldn't find anime data");
-      }
-
-      final title = jsonDecode(match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
-
-      final a = child.querySelector("a");
-      if (a == null) {
-        throw Exception("Found null item.");
-      }
-
-      final href = a.attributes['href'];
-
-      final img = child.querySelector("img")?.attributes['src'];
+    for (final item in parsedJson) {
+      final title = item['main_title'];
+      final img = item['cover'];
+      final href = item['url'];
       if (img == null || href == null || title == null) {
         throw Exception("Found null image/title/url.");
       }
 
       searchRes.add({
         'name': title,
-        'alias': href,
+        'alias': href.replaceAll("\\", ""),
         'imageUrl': img,
       });
     }
@@ -61,8 +58,7 @@ class AniZone extends AnimeProvider {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId,
-      {bool dub = false}) async {
+  Future<List<Map<String, dynamic>>> getAnimeEpisodeLink(String aliasId, {bool dub = false}) async {
     final url = aliasId;
     final res = await get(
       Uri.parse(url),
@@ -110,15 +106,13 @@ class AniZone extends AnimeProvider {
   }
 
   @override
-  Future<void> getDownloadSources(
-      String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
+  Future<void> getDownloadSources(String episodeUrl, Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) {
     throw UnimplementedError();
   }
 
   @override
-  Future<void> getStreams(
-      String episodeId, Function(List<VideoStream> p1, bool p2) update,
+  Future<void> getStreams(String episodeId, Function(List<VideoStream> p1, bool p2) update,
       {bool dub = false, String? metadata}) async {
     final url = episodeId;
     final res = await get(
@@ -127,45 +121,34 @@ class AniZone extends AnimeProvider {
     );
     final doc = parse(res.body);
 
-    final mediaPlayer = doc.querySelector("media-player");
-    if (mediaPlayer == null) {
-      throw Exception("Couldnt find media player");
+    final dataDiv = doc.querySelector("div.mb-8")?.children[0];
+    final datas = dataDiv?.attributes['x-data'];
+
+    if (datas == null) {
+      throw Exception("Couldnt find data for the stream");
     }
 
-    final src = mediaPlayer.attributes['src'];
+    final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
 
-    if (src == null) {
-      throw Exception("Failed to resolve the source link");
+    final match = matchRegEx.firstMatch(datas);
+
+    if (match == null || match.group(1) == null) {
+      throw Exception("Couldn't find anime data");
     }
 
-    final tracks = mediaPlayer.querySelectorAll("track");
+    final streamData = jsonDecode(match.group(1)!.replaceAll(r"\u0022", '"'));
 
-    final List<Map<String, String>> subs = [];
+    final src = streamData['src']?.replaceAll("\\", "");
+    final subs = List.castFrom(streamData['subtitles']).where((it) => it['language'] == 'en');
 
-    for (final track in tracks) {
-      if (track.attributes['srclang'] == "en" &&
-          track.attributes['kind'] == "subtitles" &&
-          track.attributes.containsKey("default")) {
-        subs.add({
-          'url': track.attributes['src']!,
-          'type': track.attributes['data-type']!
-        });
-      }
-    }
-
-    final srcName = doc
-            .querySelector(
-                ".flex.gap-2.relative.items-center.p-3.rounded-lg.text-white.bg-teal-600")
-            ?.text
-            .trim() ??
-        "single";
+    final srcName = doc.querySelector("button.flex.gap-2.relative")?.text.trim() ?? "Default";
 
     update([
       VideoStream(
           quality: "multi-quality",
           url: src,
           server: srcName,
-          subtitle: subs.first['url'],
+          subtitle: subs.first['file']?.replaceAll("\\", ""),
           subtitleFormat: subs.first['type'],
           backup: false)
     ], true);

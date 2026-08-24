@@ -26,14 +26,11 @@ class SourceManager {
   ];
 
   final List<ProviderDetails> inbuiltSources = [
-    // "Animepahe", // well...
     "AnimeOnsen",
-    // "Aniplay", rip aniplay
     "AniZone",
     "Anikoto",
     "Animegg",
     "AniDB",
-    "Gojo",
   ]
       .map((e) => ProviderDetails(
           name: e,

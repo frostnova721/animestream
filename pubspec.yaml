@@ -12,47 +12,50 @@ dependencies:
     sdk: flutter
 
   # Network, parsing, cryptographic deps
-  http: ^1.2.0
+  http: ^1.6.0
   # graphql: ^5.1.3
   
   html: ^0.15.6
   encrypt: ^5.0.3
   js_unpack: ^1.0.4
-  url_launcher: ^6.3.1
-  flutter_web_auth_2: ^4.0.1
+  url_launcher: ^6.3.2
+  url_launcher_android: ^6.3.32
+  flutter_web_auth_2: ^6.0.0-alpha.0
   crypto: ^3.0.6
 
   # Core utils
-  path_provider: ^2.0.11
-  awesome_notifications: ^0.10.1
-  package_info_plus: ^9.0.0
-  permission_handler: ^12.0.1
-  device_info_plus: ^12.3.0
+  path_provider: ^2.1.6
+  awesome_notifications: ^0.12.1
+  package_info_plus: ^10.2.1
+  permission_handler: ^13.0.1
+  device_info_plus: ^13.2.0
   provider: ^6.1.2
-  file_picker: ^10.2.0
-  dynamic_color: ^1.7.0
-  app_links: ^7.0.0
+  file_picker: ^12.0.0
+  dynamic_color: ^2.1.0
+  app_links: ^7.2.1
 
   # Misc
-  dart_discord_presence: ^1.2.0
+  dart_discord_presence:
+    git:
+      url: https://github.com/frostnova721/dart_discord_presence.git
 
   # Local storage
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  flutter_secure_storage: ^10.0.0
-  flutter_svg: ^2.1.0
+  flutter_secure_storage: ^11.0.0
+  flutter_svg: ^2.3.0
 
   # Media and player related
-  open_file: ^3.5.10
-  wakelock_plus: ^1.2.10
+  open_file: ^4.0.0
+  wakelock_plus: ^1.7.0
 
   # Dont mind... for local dev testing of better_player
-  # better_player:
-  #   path: ../../betterplayer
-
   better_player:
-    git:
-      url: https://github.com/frostnova721/betterplayer.git
+    path: ../../betterplayer
+  video_player: ^2.14.0
+  # better_player:
+  #   git:
+  #     url: https://github.com/frostnova721/betterplayer.git
   # video_player_win: ^3.1.1
   fvp: 
     # path: "../../fvp"
@@ -61,9 +64,9 @@ dependencies:
 
   # UI
   pull_to_refresh: ^2.0.0
-  flutter_markdown_plus: ^1.0.7
-  desktop_webview_window: ^0.2.3
-  cached_network_image: ^3.3.1
+  flutter_markdown_plus: ^1.0.12
+  desktop_webview_window: ^0.3.0
+  cached_network_image: ^3.4.1
   window_manager:
     git:
       url: https://github.com/YuiHrsw/window_manager.git
@@ -71,8 +74,8 @@ dependencies:
       ref: windows_fullscreen_fix
 
   # Misc
-  flutter_native_splash: ^2.4.7
-  screen_brightness: ^2.1.8
+  flutter_native_splash: ^2.4.8
+  screen_brightness: ^2.1.11
   commentum_client:
     # path: ../../commentum_client
     git:
@@ -82,7 +85,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_launcher_icons: ^0.14.4
-  inno_bundle: ^0.11.2
+  inno_bundle: ^0.12.0
 
 inno_bundle:
   id: "59cae0c0-fb9d-11ef-b95e-5f3937b12ea5"

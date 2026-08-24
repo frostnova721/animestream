@@ -129,7 +129,7 @@ class VideoDownloader extends BaseDownloader {
             return setFailedStatus(err.toString());
           });
 
-      return completer.future;
+      return await completer.future;
     } catch (err) {
       // same stuff as on error
       print(err);

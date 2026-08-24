@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
@@ -102,13 +100,13 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                 InkWell(
                   onTap: () async {
                     String? dir;
-                    if (Platform.isWindows) {
-                      dir = await FilePickerWindows().getDirectoryPath();
-                    } else if (Platform.isLinux) {
-                      dir = await FilePickerLinux().getDirectoryPath();
-                    } else {
-                      dir = await FilePickerIO().getDirectoryPath();
-                    }
+                    // if (Platform.isWindows) {
+                    //   dir = await FilePickerWindows().getDirectoryPath();
+                    // } else if (Platform.isLinux) {
+                    //   dir = await FilePickerLinux().getDirectoryPath();
+                    // } else {
+                      dir = await FilePicker.getDirectoryPath();
+                    // }
                     if (dir == null) return;
                     print("Path set to: $dir");
                     await Settings().writeSettings(SettingsModal(downloadPath: dir));

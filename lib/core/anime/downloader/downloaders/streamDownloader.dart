@@ -30,7 +30,18 @@ class StreamDownloader extends BaseDownloader {
     if (task.subsUrl != null) {
       final downloadedSubsPath = await downloadSubs(task.subsUrl!, task.fileName, finalPath);
       if (task.writeSubtitleTrackToVideo && remuxed != null) {
-        await remuxed.loadSubtitles(downloadedSubsPath);
+        final ext = downloadedSubsPath.split(".").lastOrNull?.toLowerCase();
+        if (ext == "srt" || ext == "vtt") {
+          await remuxed.loadSubtitles(downloadedSubsPath);
+        } else {
+          task.sendPort?.send(DownloadMessage(
+              status: 'error',
+              id: task.id,
+              message:
+                  "Cannot write subtitles to the video file. Only SRT and VTT subtitles are supported by the remuxer.",
+                  extras: ["No stack trace needed btw... maybe.. the extension we got is: '$ext'"]
+                  ));
+        }
       }
     }
 

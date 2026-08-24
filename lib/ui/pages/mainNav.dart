@@ -13,7 +13,6 @@ import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/pages/discover.dart';
 import 'package:animestream/ui/pages/home.dart';
-import 'package:animestream/ui/pages/newHome.dart';
 import 'package:animestream/ui/pages/search.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

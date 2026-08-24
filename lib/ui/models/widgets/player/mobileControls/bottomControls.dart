@@ -92,7 +92,7 @@ class BottomControls extends StatelessWidget {
                                             style: TextStyle(
                                               color: dataProvider.state.qualities[index].url ==
                                                       dataProvider.state.currentQuality.url
-                                                  ? Colors.black
+                                                  ? appTheme.onAccent
                                                   : appTheme.accentColor,
                                               fontFamily: "Poppins",
                                             ),

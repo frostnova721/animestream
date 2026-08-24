@@ -227,9 +227,9 @@ class Downloader {
         }
       case 'error':
         {
-          _endTask(msg.id);
-          print("Welp, something went wrong..");
-          logger?.log("Download error for ${msg.id}. Reason: ${msg.message} \n StackTrace: ${msg.extras[0] as String}",
+          // _endTask(msg.id);
+          // print("Welp, something went wrong..");
+          logger?.log("Download error for ${msg.id}. \nError: ${msg.message} \n StackTrace: ${msg.extras[0] as String}",
               addToBuffer: true);
           break;
         }

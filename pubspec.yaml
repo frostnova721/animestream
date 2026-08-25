@@ -50,13 +50,13 @@ dependencies:
   wakelock_plus: ^1.7.0
 
   # Dont mind... for local dev testing of better_player
-  better_player:
-    path: ../../betterplayer
-  video_player: ^2.14.0
   # better_player:
-  #   git:
-  #     url: https://github.com/frostnova721/betterplayer.git
-  # video_player_win: ^3.1.1
+  #   path: ../../betterplayer
+  video_player: ^2.14.0
+  better_player:
+    git:
+      url: https://github.com/frostnova721/betterplayer.git
+
   fvp: 
     # path: "../../fvp"
     git:

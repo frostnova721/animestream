@@ -233,6 +233,8 @@ class Anikoto implements AnimeProvider {
     switch (host.toLowerCase()) {
       case "vidtube":
         return await VidtubeExtractor().extract(streamUrl, quality: quality, server: server);
+      case "megaplay":
+        return await _extractMegaPlayStream(streamUrl, quality, server);
       // case "mewcdn":
       //   return Kwik().extract(streamUrl, quality: quality, server: server);
       default:
@@ -241,6 +243,84 @@ class Anikoto implements AnimeProvider {
           return [];
         }
     }
+  }
+
+  Future<List<VideoStream>> _extractMegaPlayStream(String url, String quality, String? server) async {
+    final getSourcesUrl = "https://megaplay.buzz/stream/getSources?id=";
+    final res = await get(
+      Uri.parse(url),
+      headers: _headers,
+      cacheDuration: Duration(minutes: 30),
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      return [];
+    }
+
+    final html = parse(res.body);
+    final playerDiv = html.querySelector("#megaplay-player");
+
+    if (playerDiv == null) {
+      Logs.app.log("[Megaplay] Couldnt find player div");
+      return [];
+    }
+
+    final mediaId = playerDiv.attributes['data-id'];
+
+    if (mediaId == null) {
+      Logs.app.log("[Megaplay] Couldnt find data-id");
+      return [];
+    }
+
+    final sourcesRes = await get(Uri.parse("$getSourcesUrl$mediaId"),
+        headers: {'X-Requested-With': "XMLHttpRequest", 'Referer': "https://megaplay.buzz/"},
+        cacheDuration: Duration(minutes: 30));
+
+    final sourcesJson = jsonDecode(sourcesRes.body);
+
+    final String? streamUrl = sourcesJson['sources']?['file'];
+
+    if (streamUrl == null) {
+      Logs.app.log("[Megaplay] No source file found from /getSources.");
+      return [];
+    }
+
+    final List<Map<String, dynamic>> subs = List.castFrom(sourcesJson['tracks'] ?? []);
+
+    final engSub = subs.firstWhere(
+      (it) => it['kind'] == "captions" && (it['label'] ?? "").toLowerCase() == "english",
+      orElse: () {
+        return subs.firstWhere((ite) => ite['kind'] == "captions" && ite['default'] == true, orElse: () => {});
+      },
+    );
+
+    if (engSub.isEmpty) {
+      print("No subs available");
+    }
+
+    final cleanedSubLink = (engSub['file'] as String?)?.replaceAll(r"\", "");
+
+    const formats = {'srt', 'vtt', 'ass'};
+
+    final uri = Uri.tryParse(cleanedSubLink ?? '');
+    final fileName = uri?.pathSegments.last;
+    final ext = fileName?.split('.').last.toLowerCase();
+
+    final subtitleFormat = formats.contains(ext) ? ext : null;
+
+    return [
+      VideoStream(
+        quality: quality,
+        url: streamUrl.replaceAll(r"\", ""),
+        server: server ?? "Megaplay",
+        backup: false,
+        customHeaders: {
+          'Referer': 'https://megaplay.buzz/',
+        },
+        subtitle: cleanedSubLink,
+        subtitleFormat: subtitleFormat ?? "vtt",
+      )
+    ];
   }
 
   Future<Map<String, dynamic>> _getKiwiStreamId(String malId, int ep) async {

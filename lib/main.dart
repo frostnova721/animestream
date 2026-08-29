@@ -57,7 +57,9 @@ void main(List<String> args) async {
     await loadAndAssignSettings();
 
     if (!Platform.isAndroid) {
-      fvp.registerWith();
+      fvp.registerWith(options: {
+        'fastSeek': true,
+      });
     }
 
     if (Platform.isWindows || Platform.isLinux) {

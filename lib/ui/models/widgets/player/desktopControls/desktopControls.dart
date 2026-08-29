@@ -185,7 +185,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                               thumbColor: Colors.white,
                               overlayColor: Colors.white.withAlpha(20),
                               inactiveTrackColor: appTheme.textSubColor,
-                              secondaryActiveTrackColor: Colors.white,
+                              secondaryActiveTrackColor: appTheme.backgroundSubColor,
                               overlayShape: RoundSliderOverlayShape(overlayRadius: 10)),
                           child: Expanded(
                             child: Padding(
@@ -195,7 +195,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                                     ? (provider.controller.duration ?? 0).toDouble()
                                     : dataProvider.state.sliderValue.toDouble(),
                                 thumbColor: Colors.white,
-                                secondaryTrackValue: provider.controller.buffered?.toDouble(),
+                                secondaryTrackValue: null,
                                 onChanged: (val) {
                                   provider.controller.seekTo(Duration(seconds: val.toInt()));
                                 },
@@ -394,7 +394,7 @@ class _DesktopControlsState extends State<DesktopControls> {
           color: appTheme.modalSheetBackgroundColor,
           padding: EdgeInsets.all(15),
           child: DefaultTabController(
-            length: 3,
+            length: 4,
             initialIndex: initialIndex,
             child: Builder(builder: (context) {
               const textStyle = TextStyle(fontWeight: FontWeight.bold);
@@ -411,14 +411,14 @@ class _DesktopControlsState extends State<DesktopControls> {
                               )
                             : Icon(Icons.hd_outlined),
                       ),
-                      // Tab(
-                      //   child: DefaultTabController.of(context).index == 1
-                      //       ? Text(
-                      //           "Audio Tracks",
-                      //           style: textStyle,
-                      //         )
-                      //       : Icon(Icons.music_note_outlined),
-                      // ),
+                      Tab(
+                        child: DefaultTabController.of(context).index == 1
+                            ? Text(
+                                "Audio Tracks",
+                                style: textStyle,
+                              )
+                            : Icon(Icons.music_note_outlined),
+                      ),
                       Tab(
                         child: DefaultTabController.of(context).index == 1
                             ? Text(
@@ -478,19 +478,36 @@ class _DesktopControlsState extends State<DesktopControls> {
                               );
                             },
                           ),
-                          // ListView.builder(
-                          //   itemCount: 0,
-                          //   itemBuilder: (context, index) {
-                          //     final audTrack = dataProvider.state.audioTracks[index];
-                          //     return GestureDetector(
-                          //       onTap: () {
-                          //         (provider.controller as FvpWrapper).setAudioTrack(audTrack);
-                          //       },
-                          //       child: Text(
-                          //       audTrack.language
-                          //     ));
-                          //   },
-                          // ),
+                          ListView.builder(
+                            itemCount: dataProvider.state.audioTracks.length,
+                            itemBuilder: (context, index) {
+                              final audTrack = dataProvider.state.audioTracks[index];
+                              return GestureDetector(
+                                onTap: () {
+                                  (provider.controller).setAudioTrack(audTrack);
+                                  dataProvider.updateCurrentAudioTrack(audTrack);
+                                },
+                                child: Container(
+                                    color:
+                                        dataProvider.state.audioTracks[index].url == dataProvider.state.currentAudioTrack.url
+                                            ? appTheme.accentColor
+                                            : null,
+                                    height: 40,
+                                    alignment: Alignment.center,
+                                    child: Text(
+                                      "${dataProvider.state.audioTracks[index].name}",
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: dataProvider.state.audioTracks[index].url ==
+                                                dataProvider.state.currentAudioTrack.url
+                                            ? appTheme.onAccent
+                                            : appTheme.textMainColor,
+                                        fontFamily: "Poppins",
+                                      ),
+                                    ),
+                                  ),);
+                            },
+                          ),
                           ListView.builder(
                             itemCount: dataProvider.state.streams.length,
                             itemBuilder: (context, index) {

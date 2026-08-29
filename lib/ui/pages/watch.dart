@@ -119,7 +119,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks.first);
         controller.setAudioTrack(dataProvider.state.currentAudioTrack);
       } else {
-        Logs.player.log("Couldnt find audio tracks for this stream");
+        Logs.player.log("Couldnt find seperate audio tracks for this stream");
       }
     } else {
       await controller.initiateVideo(dataProvider.state.currentStream.url, offline: true);

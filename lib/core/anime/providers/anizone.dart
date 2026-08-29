@@ -139,7 +139,9 @@ class AniZone extends AnimeProvider {
     final streamData = jsonDecode(match.group(1)!.replaceAll(r"\u0022", '"'));
 
     final src = streamData['src']?.replaceAll("\\", "");
-    final subs = List.castFrom(streamData['subtitles']).where((it) => it['language'] == 'en');
+    final subs = List.castFrom(streamData['subtitles']).where((it) => it['language'] == 'en' && it['default'] == true);
+    final String? firstSubUrl = subs.firstOrNull?['file']?.replaceAll("\\", "");
+    // print(subs);
 
     final srcName = doc.querySelector("button.flex.gap-2.relative")?.text.trim() ?? "Default";
 
@@ -148,8 +150,8 @@ class AniZone extends AnimeProvider {
           quality: "multi-quality",
           url: src,
           server: srcName,
-          subtitle: subs.first['file']?.replaceAll("\\", ""),
-          subtitleFormat: subs.first['type'],
+          subtitle: firstSubUrl,
+          subtitleFormat: subs.first['format'],
           backup: false)
     ], true);
   }

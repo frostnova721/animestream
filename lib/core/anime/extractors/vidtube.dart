@@ -16,7 +16,7 @@ class VidtubeExtractor implements AnimeExtractor {
     final uri = Uri.parse(streamUrl);
     final streamSite = await get(
       uri,
-      cacheDuration: const Duration(hours: 1),
+      cacheDuration: const Duration(minutes: 30),
     );
 
     final doc = parse(streamSite.body);

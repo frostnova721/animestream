@@ -32,7 +32,7 @@ class AniZone extends AnimeProvider {
     final match = matchRegEx.firstMatch(divData ?? "");
 
     if (match == null) {
-      throw Exception("Couldn't find anime data");
+      throw Exception("Couldn't find anime data while searching");
     }
 
     final parsedJson = List.castFrom(jsonDecode(match.group(1)!.replaceAll(r'\u0022', '"')));
@@ -66,36 +66,49 @@ class AniZone extends AnimeProvider {
     );
     final doc = parse(res.body);
 
-    final list = doc.querySelector("ul.grid.grid-cols-1")?.children;
+    final dataDiv = doc.querySelector("main")?.children.firstOrNull;
+
+    if (dataDiv == null) {
+      throw Exception("Coudlnt find the data div for episodes.");
+    }
+
+    final divData = dataDiv.attributes['x-data'];
+    final matchRegEx = RegExp(r"items:\s*JSON\.parse\('(.+?)'\)", dotAll: true);
+
+    final match = matchRegEx.firstMatch(divData ?? "");
+
+    if (match == null || match.group(1) == null) {
+      throw Exception("Couldn't find episodes data");
+    }
+
+    final matchedStr = match.group(1)!.replaceAll(r'\u0022', '"');
+
+    final List<Map<String, dynamic>> list = List.castFrom(jsonDecode(matchedStr));
 
     final epList = <Map<String, dynamic>>[];
-
-    if (list == null) return [];
 
     int i = 1;
 
     for (final item in list) {
-      final divData = item.attributes['x-data'];
+      final title = item['title_list']?['1'];
 
-      final matchRegEx = RegExp(r"JSON\.parse\('(.+?)'\)", dotAll: true);
+      final epLink = item['url'];
 
-      final match = matchRegEx.firstMatch(divData ?? "");
-
-      if (match == null) {
-        throw Exception("Couldn't find anime data");
+      if(epLink == null) {
+        print("NAH now way.... No epLink for the episode?!");
+        continue;
       }
 
-      final title = jsonDecode(match.group(1)!.replaceAll(r'\u0022', '"'))['1'];
+      final epImg = item['snapshot']?.replaceAll(r"\", "");
 
-      final epLink = item.querySelector("a")?.attributes['href'];
-      final epImg = item.querySelector("img")?.attributes['src'];
+      final isFiller = item['type']?.toLowerCase() == "filler";
       // final title = item.querySelector("h3")?.text;
       epList.add({
-        'episodeLink': epLink,
+        'episodeLink': epLink.replaceAll(r"\", ""),
         'episodeNumber': i,
         'thumbnail': epImg,
         'episodeTitle': title,
-        'isFiller': false,
+        'isFiller': isFiller,
         'hasDub': false,
       });
 

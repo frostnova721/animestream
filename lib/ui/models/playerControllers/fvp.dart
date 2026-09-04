@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
+import 'package:fvp/fvp.dart';
 import 'package:fvp/mdk.dart' as mdk;
 import 'package:flutter/material.dart';
+import 'package:video_player/video_player.dart';
 
 class FvpWrapper implements VideoController {
   // VideoPlayerController controller = VideoPlayerController.networkUrl(Uri.parse(""));
@@ -43,23 +46,36 @@ class FvpWrapper implements VideoController {
     return AspectRatio(
         aspectRatio: 16 / 9,
         child: ValueListenableBuilder(
-          valueListenable: _player.textureId,
-          builder: (context, value, child) {
-            return value != null
-                ? Texture(
-                    textureId: value,
-                  )
-                : Container();
-          }
-        ));
+            valueListenable: _player.textureId,
+            builder: (context, value, child) {
+              return value != null
+                  ? Texture(
+                      textureId: value,
+                    )
+                  : Container();
+            }));
   }
-
 
   @override
   Future<void> initiateVideo(String url, {Map<String, String>? headers = null, bool offline = false}) async {
+    _player.state = mdk.PlaybackState.stopped;
+
+    _player.setMedia('', mdk.MediaType.audio);
+
     if (controllerInitialized) {
       _player.state = mdk.PlaybackState.stopped;
       controllerInitialized = false;
+    } else {
+      // Enable hardware decoding! This is critical for smooth seeking and playback.
+      // 'auto' will let MDK choose the best hardware decoder (VideoToolbox for iOS, MediaCodec for Android)
+      _player.videoDecoders = ['auto'];
+      _player.setProperty('av.sync', 'video');
+
+      // _player.setProperty('reader.starts_with_key', '1');
+
+      // EITHER remove the buffer.duration line entirely (recommended),
+      // OR increase it to at least 10-15 seconds for network streaming:
+      // _player.setProperty('buffer.duration', '15000');
     }
 
     if (headers != null && headers.isNotEmpty) {
@@ -87,7 +103,7 @@ class FvpWrapper implements VideoController {
 
   @override
   Future<void> pause() async {
-     _player.state = mdk.PlaybackState.paused;
+    _player.state = mdk.PlaybackState.paused;
   }
 
   @override
@@ -110,21 +126,26 @@ class FvpWrapper implements VideoController {
 
   @override
   Future<void> seekTo(Duration duration) async {
-    final wasPlaying = _player.state == mdk.PlaybackState.playing;
-    _player.state = mdk.PlaybackState.paused;
+    // DO NOT manually pause and play. Just let the player handle the seek natively.
+    // SeekFlag.fast seeks to the nearest keyframe, which is perfect for network streams.
     await _player.seek(
       position: duration.inMilliseconds,
-      flags: const mdk.SeekFlag(mdk.SeekFlag.defaultFlags)
+      flags: const mdk.SeekFlag(mdk.SeekFlag.defaultFlags),
     );
-    if (wasPlaying) {
-      _player.state = mdk.PlaybackState.playing;
-    }
   }
 
   @override
   void setAudioTrack(AudioStream aud) async {
     print("Setting audio track: ${aud.language}");
+    
+    final currentPos = _player.position ?? 0;
+    final wasPlaying = _player.state == mdk.PlaybackState.playing;
+
+    // RULE 1 & 2: You cannot hot-swap tracks. You MUST stop before prepare.
+    _player.state = mdk.PlaybackState.stopped;
+
     if (aud.url != "placeholder" && aud.url.isNotEmpty) {
+      // Set the external network audio track
       _player.setMedia(aud.url, mdk.MediaType.audio);
     } else {
       final audioTracks = _player.mediaInfo.audio;
@@ -133,7 +154,7 @@ class FvpWrapper implements VideoController {
           final lang = track.metadata['language'] ?? track.metadata['LANGUAGE'];
           if (lang == aud.language || track.index.toString() == aud.groupId) {
             _player.activeAudioTracks = [track.index];
-            return;
+            break; // Stop looping once found
           }
         }
       }
@@ -152,11 +173,11 @@ class FvpWrapper implements VideoController {
 
   @override
   void setQuality(QualityStream qs) async {
-    await initiateVideo(qs.url,offline: false);
+    await initiateVideo(qs.url, offline: false);
   }
 
   @override
-  Future<void> setSpeed(double speed)async {
+  Future<void> setSpeed(double speed) async {
     _player.playbackRate = speed;
   }
 

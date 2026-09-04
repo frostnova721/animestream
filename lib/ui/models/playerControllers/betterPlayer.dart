@@ -162,6 +162,12 @@ class BetterPlayerWrapper implements VideoController {
   }
 
   BetterPlayerAsmsAudioTrack _asToAsmsAudioTrack(AudioStream aud) {
-    return controller.betterPlayerAsmsAudioTracks!.firstWhere((element) => element.language == aud.language);
+    return controller.betterPlayerAsmsAudioTracks!.firstWhere(
+      (element) => element.label == aud.name && element.language == aud.language,
+      orElse: () => controller.betterPlayerAsmsAudioTracks!.firstWhere(
+        (element) => element.language == aud.language,
+        orElse: () => controller.betterPlayerAsmsAudioTracks!.first,
+      ),
+    );
   }
 }

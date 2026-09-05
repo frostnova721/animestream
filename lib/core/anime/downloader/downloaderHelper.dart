@@ -154,10 +154,14 @@ class DownloaderHelper {
         if (line.contains("EXT")) continue;
 
         // feels weird, but adding cus a server used ts
-        if (line.endsWith(".m3u8"))
+        if (line.endsWith(".m3u8")) {
           return await getSegments(line.startsWith("http") ? line : makeBaseLink(url) + "/$line",
               customHeaders: customHeaders);
-        segments.add(line.trim());
+        }
+
+        // if (line.isNotEmpty) {
+          segments.add(line.trim());
+        // }
       } else {
         //get the encryption key if it exists
         if (encryptionKey == null && line.startsWith("#EXT-X-KEY:METHOD=")) {

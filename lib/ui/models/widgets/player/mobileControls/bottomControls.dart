@@ -239,60 +239,7 @@ class BottomControls extends StatelessWidget {
                         color: Colors.white,
                       ),
                     ),
-                     IconButton(
-                      onPressed: () async {
-                        showModalBottomSheet(
-                            context: context,
-                            builder: (context) {
-                              return ListView.builder(
-                                itemCount: dataProvider.state.audioTracks.length,
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext context, index) {
-                                  return Container(
-                                    padding: EdgeInsets.only(left: 25, right: 25),
-                                    child: ElevatedButton(
-                                      onPressed: () async {
-                                        // final src = dataProvider.state.qualities[index].url;
-                                        dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks[index]);
-                                        playerProvider.controller.setAudioTrack(dataProvider.state.currentAudioTrack);
-                                        // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
-                                        // dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                        // playerProvider.playVideo(src,
-                                        //     currentStream: dataProvider.state.currentStream,
-                                        //     preserveProgress: true);
-                                        Navigator.pop(context);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                          // side: BorderSide(color: Colors.white)
-                                        ),
-                                        backgroundColor: dataProvider.state.audioTracks[index].url ==
-                                                dataProvider.state.currentAudioTrack.url
-                                            ? appTheme.accentColor
-                                            : appTheme.backgroundSubColor,
-                                      ),
-                                      child: Text(
-                                        "${dataProvider.state.audioTracks[index].name} (${dataProvider.state.audioTracks[index].language})",
-                                        style: TextStyle(
-                                          color: dataProvider.state.audioTracks[index].url ==
-                                                  dataProvider.state.currentAudioTrack.url
-                                              ? Colors.black
-                                              : appTheme.accentColor,
-                                          fontFamily: "Poppins",
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
-                              );
-                            });
-                      },
-                      icon: Icon(Icons.audiotrack_rounded),
-                      tooltip: "Audio Tracks",
-                      color: Colors.white,
-                    ), IconButton(
+                    IconButton(
                       onPressed: () async {
                         showModalBottomSheet(
                             context: context,
@@ -391,73 +338,73 @@ class BottomControls extends StatelessWidget {
     return Container(
       height: MediaQuery.of(context).size.height / 2,
       child: AlertDialog(
-        backgroundColor: appTheme.modalSheetBackgroundColor,
+          backgroundColor: appTheme.modalSheetBackgroundColor,
           content: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(bottom: 10),
-            child: Text(
-              "Speed",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),
-            ),
-          ),
-          Expanded(
-            child: StatefulBuilder(
-              builder: (context, setState) => Container(
-                // height: 230,
-                width: 250,
-                child: ListView.builder(
-                  itemCount: playbackSpeeds.length,
-                  itemBuilder: (context, index) {
-                    return Container(
-                      margin: EdgeInsets.only(bottom: 5),
-                      clipBehavior: Clip.hardEdge,
-                      decoration: BoxDecoration(
-                        color: appTheme.backgroundSubColor,
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Material(
-                        color: Colors.transparent,
-                        child: InkWell(
-                          onTap: () {
-                            pp.setSpeed(playbackSpeeds[index]);
-                            setState(() {});
-                          },
-                          child: Row(
-                            children: [
-                              Radio<double>(
-                                value: playbackSpeeds[index],
-                                groupValue: pp.state.speed,
-                                onChanged: (val) {
-                                  pp.setSpeed(val ?? 1);
-                                  setState(() {});
-                                },
-                              ),
-                              Text(playbackSpeeds[index].toString() + "x"),
-                            ],
-                          ),
-                        ),
-                      ),
-                    );
-                  },
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: Text(
+                  "Speed",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, fontFamily: "Rubik"),
                 ),
               ),
-            ),
-          ),
-          Container(
-            margin: EdgeInsets.only(top: 5),
-            alignment: Alignment.center,
-            child: TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                "close",
-                style: TextStyle(fontSize: 16),
+              Expanded(
+                child: StatefulBuilder(
+                  builder: (context, setState) => Container(
+                    // height: 230,
+                    width: 250,
+                    child: ListView.builder(
+                      itemCount: playbackSpeeds.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          margin: EdgeInsets.only(bottom: 5),
+                          clipBehavior: Clip.hardEdge,
+                          decoration: BoxDecoration(
+                            color: appTheme.backgroundSubColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Material(
+                            color: Colors.transparent,
+                            child: InkWell(
+                              onTap: () {
+                                pp.setSpeed(playbackSpeeds[index]);
+                                setState(() {});
+                              },
+                              child: Row(
+                                children: [
+                                  Radio<double>(
+                                    value: playbackSpeeds[index],
+                                    groupValue: pp.state.speed,
+                                    onChanged: (val) {
+                                      pp.setSpeed(val ?? 1);
+                                      setState(() {});
+                                    },
+                                  ),
+                                  Text(playbackSpeeds[index].toString() + "x"),
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               ),
-            ),
-          )
-        ],
-      )),
+              Container(
+                margin: EdgeInsets.only(top: 5),
+                alignment: Alignment.center,
+                child: TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text(
+                    "close",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                ),
+              )
+            ],
+          )),
     );
   }
 }

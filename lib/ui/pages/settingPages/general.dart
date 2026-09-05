@@ -4,12 +4,14 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/database/database.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:animestream/ui/pages/settingPages/cache.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/plugin.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSetting extends StatefulWidget {
@@ -111,6 +113,20 @@ class _GeneralSettingState extends State<GeneralSetting> {
                           setState(() {});
                         },
                       ),
+                    if (kDebugMode)
+                      ClickableItem(
+                        onTap: () {
+                          showModalBottomSheet(
+                            context: context,
+                            showDragHandle: true,
+                            isScrollControlled: true,
+                            builder: (context) => _databaseSheet(context),
+                          );
+                        },
+                        label: "Default database",
+                        description: (currentUserSettings?.database?.name ?? Databases.anilist.name),
+                        suffixIcon: Icon(Icons.arrow_drop_down),
+                      ),
                     ClickableItem(
                       onTap: () {
                         showModalBottomSheet(
@@ -163,6 +179,71 @@ class _GeneralSettingState extends State<GeneralSetting> {
               ),
             )
           : Container(),
+    );
+  }
+
+  StatefulBuilder _databaseSheet(BuildContext context) {
+    return StatefulBuilder(
+      builder: (context, setcState) => Container(
+        padding: const EdgeInsets.only(
+          top: 10,
+          left: 20,
+          right: 20,
+        ),
+        margin: EdgeInsets.only(bottom: MediaQuery.paddingOf(context).bottom),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: Text(
+                "Select Database",
+                style: textStyle().copyWith(fontSize: 23),
+                textAlign: TextAlign.left,
+              ),
+            ),
+            ListView.builder(
+                shrinkWrap: true,
+                itemCount: Databases.values.length,
+                itemBuilder: (context, index) {
+                  final activeDatabase = currentUserSettings?.database?.name ?? Databases.anilist.name;
+                  return Container(
+                    margin: const EdgeInsets.symmetric(vertical: 5),
+                    clipBehavior: Clip.hardEdge,
+                    decoration: BoxDecoration(
+                      color: Databases.values[index].name == activeDatabase
+                          ? appTheme.accentColor
+                          : appTheme.backgroundSubColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(20),
+                        onTap: () async {
+                          await writeSettings(SettingsModal(database: Databases.values[index]));
+                          setState(() {});
+                          setcState(() {});
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          child: Text(
+                            Databases.values[index].name,
+                            style: textStyle().copyWith(
+                              color: Databases.values[index].name == activeDatabase
+                                  ? appTheme.onAccent
+                                  : appTheme.textMainColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+          ],
+        ),
+      ),
     );
   }
 

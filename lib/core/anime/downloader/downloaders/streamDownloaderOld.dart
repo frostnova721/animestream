@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:collection';
 import 'dart:io';
 
 import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
@@ -59,29 +58,20 @@ class StreamDownloader extends BaseDownloader {
         if (segments[i].isNotEmpty) segmentsFiltered[i] = segments[i];
       }
 
-      final entriesList = segmentsFiltered.entries.toList();
+      final entries = segmentsFiltered.entries.toList();
 
       final parallelDownloadsBatchSize = task.parallelBatches;
 
       int lastUpdatedProgress = 0; // Dont notify if progress is same
+
       int lastDownloadedSegmentIndex = -1;
 
-      final Map<int, BufferItem> buffers = {};
-      final Set<Future<void>> activeDownloads = {};
-      int currentIndex = task.resumeFrom.toInt();
-      int nextExpectedIndex = task.resumeFrom.toInt();
-      int totalSegments = entriesList.length;
-
-      Object? downloadError;
-
-      while (nextExpectedIndex < totalSegments) {
-        if (downloadError != null) {
-          throw downloadError!;
-        }
+      for (int i = task.resumeFrom.toInt(); i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
+        final List<BufferItem> buffers = [];
 
         // Handle commands
         if (status == DownloadStatus.cancelled) {
-          break;
+          break; // just break out of the loop, the case is handled after loop close
         } else if (status == DownloadStatus.paused) {
           if (completer != null && !completer!.isCompleted) {
             print("Already waiting. Skipping duplicate pause.");
@@ -106,78 +96,73 @@ class StreamDownloader extends BaseDownloader {
           }
         }
 
-        // Limit the window lookahead to avoid unbounded memory usage if a single segment is too slow.
-        // E.g., we allow fetching up to parallelDownloadsBatchSize * 2 segments ahead of the next expected one.
-        final maxLookahead = parallelDownloadsBatchSize * 2;
+        // calculate batch's length
+        final batchEnd = (i + parallelDownloadsBatchSize < segmentsFiltered.length)
+            ? i + parallelDownloadsBatchSize
+            : segmentsFiltered.length;
 
-        // Fill the window
-        while (activeDownloads.length < parallelDownloadsBatchSize && 
-               currentIndex < totalSegments && 
-               (currentIndex - nextExpectedIndex) < maxLookahead) {
-          final entryIndex = currentIndex;
-          final entry = entriesList[currentIndex];
-          currentIndex++;
+        final batch = entries.sublist(i, batchEnd);
 
-          final future = () async {
-            try {
-              final segment = entry.value;
-              final segmentNumber = entry.key + 1;
+        print("[DOWNLOADER]<${task.id}> fetching segments [$i-$batchEnd of ${entries.length}]");
 
-              final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
+        final futures = batch.map((entry) async {
+          final segment = entry.value;
+          final segmentNumber = entry.key + 1;
 
-              final res =
-                  await helper.downloadSegmentWithRetries(uri, task.retryAttempts, customHeaders: task.customHeaders);
+          final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
 
-              if (status == DownloadStatus.cancelled) {
-                return;
-              }
+          final progress = ((segmentNumber / entries.length) * 100).toInt();
 
-              if (res.statusCode >= 200 && res.statusCode < 300) {
-                // Decrypt if theres an encryption
-                final buffer = helper.encryptionKey != null ? helper.decryptSegment(res.bodyBytes) : res.bodyBytes;
-                buffers[entryIndex] = BufferItem(index: segmentNumber, buffer: buffer);
-              } else {
-                print("Error for segment: $uri, body: ${res.body}, res head: ${res.headers}");
-                throw Exception("ERR_REQ_FAILED. Got Status: ${res.statusCode} for segment: $segmentNumber");
-              }
-            } catch (e) {
-              downloadError = e;
-            }
-          }();
-
-          activeDownloads.add(future);
-          future.whenComplete(() {
-            activeDownloads.remove(future);
-          });
-        }
-
-        // Write sequential completed segments to file
-        bool wroteSomething = false;
-        while (buffers.containsKey(nextExpectedIndex)) {
-          final b = buffers.remove(nextExpectedIndex)!;
-          
-          task.useMkvRemuxer ? await remuxed?.processChunk(b.buffer) : out?.add(b.buffer);
-
-          nextExpectedIndex++;
-          lastDownloadedSegmentIndex = nextExpectedIndex;
-          wroteSomething = true;
-
-          // Update progress
-          final progress = ((nextExpectedIndex / totalSegments) * 100).toInt();
+          // Only send progress every 2% to reduce isolate-to-main thread overhead
           if (progress > lastUpdatedProgress && progress - lastUpdatedProgress >= 2) {
             updateProgress(progress, finalPath);
             lastUpdatedProgress = progress;
           }
+
+          final res =
+              await helper.downloadSegmentWithRetries(uri, task.retryAttempts, customHeaders: task.customHeaders);
+
+          // Imo this is one of the best place to execute cancellation
+          if (status == DownloadStatus.cancelled) {
+            return false;
+          }
+
+          if (res.statusCode >= 200 && res.statusCode < 300) {
+            // Decrypt if theres an encryption
+            if (helper.encryptionKey != null) {
+              buffers.add(BufferItem(index: segmentNumber, buffer: helper.decryptSegment(res.bodyBytes)));
+            } else {
+              buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
+            }
+          } else {
+            print("Error for segment: $uri, body: ${res.body}, res head: ${res.headers}");
+            throw new Exception("ERR_REQ_FAILED. Got Status: ${res.statusCode} for segment: $segmentNumber");
+          }
+        });
+
+        //wait till whole batch is downloaded
+        await Future.wait(futures);
+
+        // Beak the downloading if cancelled
+        if (status == DownloadStatus.cancelled) {
+          buffers.clear();
+          break;
         }
 
-        if (downloadError != null) {
-          throw downloadError!;
+        //sort the buffers
+        buffers.sort((a, b) => a.index.compareTo(b.index));
+
+        print(finalPath);
+        // final dir = finalPath.split(Platform.pathSeparator).sublist(0, finalPath.split(Platform.pathSeparator).length - 1).join(Platform.pathSeparator);
+
+        // Write the downloaded buffers
+        for (final b in buffers) {
+          //  await File("${dir}/${b.index}.ts").writeAsBytes(b.buffer);
+          task.useMkvRemuxer ? await remuxed?.processChunk(b.buffer) : out?.add(b.buffer);
         }
 
-        // Wait for at least one download to complete if we didn't write anything and downloads are active
-        if (!wroteSomething && activeDownloads.isNotEmpty) {
-          await Future.any(activeDownloads.map((f) => f.catchError((_) {})));
-        }
+        // Start from next batch ig
+        lastDownloadedSegmentIndex = i + parallelDownloadsBatchSize;
       }
 
       // send the completion/cancelled notification

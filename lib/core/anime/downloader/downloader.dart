@@ -43,6 +43,10 @@ class Downloader {
   /// Used for throttling the download progress notification
   final Map<int, int> _lastProgressUpdate = {};
 
+  int get activeCount => DownloadManager.downloadingItems
+    .where((item) => item.status == DownloadStatus.downloading)
+    .length;
+
   DownloadItem _getDownloadItem(int id) {
     final item = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.id == id);
     if (item != null) return item;
@@ -60,7 +64,7 @@ class Downloader {
 
   // The heart of this class
   Future<void> _processQueue() async {
-    final isFull = DownloadManager.downloadsCount.value >= MAX_DOWNLOADS_COUNT;
+    final isFull = activeCount >= MAX_DOWNLOADS_COUNT;
 
     if (isFull) return; // ignore download request if batch is full
 
@@ -75,7 +79,7 @@ class Downloader {
       await _fireUpIsolate(item);
     } else {
       // Download items till tummy is filled (MAX_COUNT reached)
-      while (DownloadManager.downloadsCount.value < MAX_DOWNLOADS_COUNT) {
+      while (activeCount < MAX_DOWNLOADS_COUNT) {
         final next = DownloadManager.downloadingItems.firstWhereOrNull((it) => it.isQueued);
         if (next == null) break;
         next.status = DownloadStatus.downloading;

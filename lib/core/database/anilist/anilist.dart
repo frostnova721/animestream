@@ -353,6 +353,7 @@ class Anilist extends Database {
       if (token != null) 'Authorization': 'Bearer $token',
       'User-Agent': AppValues.defaultClientUserAgent,
       'Content-Type': 'application/json',
+      'Referer': "https://anilist.co/",
     };
 
     final res = await post(

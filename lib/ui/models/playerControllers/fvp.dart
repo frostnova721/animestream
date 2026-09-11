@@ -1,164 +1,104 @@
-import 'dart:async';
 import 'dart:io';
+
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
-import 'package:fvp/fvp.dart';
-import 'package:fvp/mdk.dart' as mdk;
-import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
+import 'package:flutter/material.dart';
 
 class FvpWrapper implements VideoController {
-  // VideoPlayerController controller = VideoPlayerController.networkUrl(Uri.parse(""));
-  mdk.Player _player = mdk.Player();
+  VideoPlayerController controller = VideoPlayerController.networkUrl(Uri.parse(""));
 
   bool controllerInitialized = false;
-  Timer? _timer;
 
   final List<VoidCallback> listeners = [];
 
-  FvpWrapper() {
-    _timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
-      if (controllerInitialized && listeners.isNotEmpty) {
-        for (var cb in listeners) {
-          cb();
-        }
-      }
-    });
+  @override
+  String? get activeMediaUrl => controller.dataSource;
+
+  @override
+  int? get buffered => controller.value.buffered.lastOrNull?.end.inSeconds;
+
+  @override
+  void dispose() async {
+    await controller.dispose();
   }
 
   @override
-  String? get activeMediaUrl => _player.media;
-
-  @override
-  int? get buffered => _player.buffered();
-
-  @override
-  void dispose() {
-    _timer?.cancel();
-    _player.dispose();
-  }
-
-  @override
-  int? get duration => _player.mediaInfo.duration;
+  int? get duration => controller.value.duration.inMilliseconds;
 
   @override
   Widget getWidget() {
-    return AspectRatio(
-        aspectRatio: 16 / 9,
-        child: ValueListenableBuilder(
-            valueListenable: _player.textureId,
-            builder: (context, value, child) {
-              return value != null
-                  ? Texture(
-                      textureId: value,
-                    )
-                  : Container();
-            }));
+    return AspectRatio(aspectRatio: 16/9 ,child: VideoPlayer(controller));
   }
 
   @override
   Future<void> initiateVideo(String url, {Map<String, String>? headers = null, bool offline = false}) async {
-    _player.state = mdk.PlaybackState.stopped;
+    final vol = controllerInitialized ? controller.value.volume : 0.8;
 
-    _player.setMedia('', mdk.MediaType.audio);
-
-    if (controllerInitialized) {
-      _player.state = mdk.PlaybackState.stopped;
+    // kill the last controller
+    if(controllerInitialized) {
+      await controller.dispose();
       controllerInitialized = false;
-    } else {
-      // Enable hardware decoding! This is critical for smooth seeking and playback.
-      // 'auto' will let MDK choose the best hardware decoder (VideoToolbox for iOS, MediaCodec for Android)
-      _player.videoDecoders = ['auto'];
-      _player.setProperty('av.sync', 'video');
-
-      // _player.setProperty('reader.starts_with_key', '1');
-
-      // EITHER remove the buffer.duration line entirely (recommended),
-      // OR increase it to at least 10-15 seconds for network streaming:
-      // _player.setProperty('buffer.duration', '15000');
     }
 
-    if (headers != null && headers.isNotEmpty) {
-      final headerStr = headers.entries.map((e) => '${e.key}: ${e.value}').join('\r\n') + '\r\n';
-      _player.setProperty('avio.headers', headerStr);
-      _player.setProperty('headers', headerStr);
-    }
+    controller = offline
+        ? VideoPlayerController.file(File(url))
+        : VideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers ?? {},);
 
-    _player.media = url;
     controllerInitialized = true;
 
-    await _player.prepare();
-    await _player.updateTexture();
-    _player.state = mdk.PlaybackState.playing;
+    await controller.initialize();
+
+    for(int i=0; i<listeners.length; i++) {
+      controller.addListener(listeners[i]);
+    }
+    await controller.setVolume(vol);
+    await controller.play();
   }
 
   @override
-  bool? get isBuffering => _player.mediaStatus.test(mdk.MediaStatus.buffering);
+  bool? get isBuffering => controller.value.isBuffering;
 
   @override
-  bool? get isInitialized => _player.mediaStatus.test(mdk.MediaStatus.prepared);
+  bool? get isInitialized => controller.value.isInitialized;
 
   @override
-  bool? get isPlaying => _player.state == mdk.PlaybackState.playing;
+  bool? get isPlaying => controller.value.isPlaying;
 
   @override
-  Future<void> pause() async {
-    _player.state = mdk.PlaybackState.paused;
+  Future<void> pause() {
+    return controller.pause();
   }
 
   @override
-  Future<void> play() async {
-    _player.state = mdk.PlaybackState.playing;
+  Future<void> play() {
+    return controller.play();
   }
 
   @override
-  int? get position => _player.position;
+  int? get position => controller.value.position.inMilliseconds;
 
-  @override
+   @override
   void addListener(VoidCallback cb) {
+    controller.addListener(cb);
     listeners.add(cb);
   }
 
+
   @override
   void removeListener(VoidCallback cb) {
+    controller.removeListener(cb);
     listeners.remove(cb);
   }
 
   @override
-  Future<void> seekTo(Duration duration) async {
-    // DO NOT manually pause and play. Just let the player handle the seek natively.
-    // SeekFlag.fast seeks to the nearest keyframe, which is perfect for network streams.
-    await _player.seek(
-      position: duration.inMilliseconds,
-      flags: const mdk.SeekFlag(mdk.SeekFlag.defaultFlags),
-    );
+  Future<void> seekTo(Duration duration) {
+    return controller.seekTo(duration);
   }
 
   @override
   void setAudioTrack(AudioStream aud) async {
-    print("Setting audio track: ${aud.language}");
-    
-    final currentPos = _player.position ?? 0;
-    final wasPlaying = _player.state == mdk.PlaybackState.playing;
-
-    // RULE 1 & 2: You cannot hot-swap tracks. You MUST stop before prepare.
-    _player.state = mdk.PlaybackState.stopped;
-
-    if (aud.url != "placeholder" && aud.url.isNotEmpty) {
-      // Set the external network audio track
-      _player.setMedia(aud.url, mdk.MediaType.audio);
-    } else {
-      final audioTracks = _player.mediaInfo.audio;
-      if (audioTracks != null) {
-        for (var track in audioTracks) {
-          final lang = track.metadata['language'] ?? track.metadata['LANGUAGE'];
-          if (lang == aud.language || track.index.toString() == aud.groupId) {
-            _player.activeAudioTracks = [track.index];
-            break; // Stop looping once found
-          }
-        }
-      }
-    }
+    return await controller.selectAudioTrack(aud.groupId);
   }
 
   @override
@@ -173,19 +113,19 @@ class FvpWrapper implements VideoController {
 
   @override
   void setQuality(QualityStream qs) async {
-    await initiateVideo(qs.url, offline: false);
+    await initiateVideo(qs.url, headers: controller.httpHeaders, offline: false);
   }
 
   @override
-  Future<void> setSpeed(double speed) async {
-    _player.playbackRate = speed;
+  Future<void> setSpeed(double speed) {
+    return controller.setPlaybackSpeed(speed);
   }
 
   @override
-  Future<void> setVolume(double volume) async {
-    _player.volume = volume;
+  Future<void> setVolume(double volume) {
+    return controller.setVolume(volume);
   }
 
   @override
-  double? get volume => _player.volume;
+  double? get volume => controller.value.volume;
 }

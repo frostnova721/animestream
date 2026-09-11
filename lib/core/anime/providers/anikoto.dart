@@ -246,7 +246,6 @@ class Anikoto implements AnimeProvider {
   }
 
   Future<List<VideoStream>> _extractMegaPlayStream(String url, String quality, String? server) async {
-    final getSourcesUrl = "https://megaplay.buzz/stream/getSources?id=";
     final res = await get(
       Uri.parse(url),
       headers: _headers,
@@ -272,18 +271,35 @@ class Anikoto implements AnimeProvider {
       return [];
     }
 
+    final getSourcesUrl = "https://megaplay.buzz/stream/getSources?id=";
+
     final sourcesRes = await get(Uri.parse("$getSourcesUrl$mediaId"),
         headers: {'X-Requested-With': "XMLHttpRequest", 'Referer': "https://megaplay.buzz/"},
         cacheDuration: Duration(minutes: 30));
 
     final sourcesJson = jsonDecode(sourcesRes.body);
 
-    final String? streamUrl = sourcesJson['sources']?['file'];
+    final String? defStreamUrl = sourcesJson['sources']?['file'];
 
-    if (streamUrl == null) {
+    if (defStreamUrl == null) {
       Logs.app.log("[Megaplay] No source file found from /getSources.");
-      return [];
     }
+
+    // try again with a new url
+    final newSourcesRes = await get(Uri.parse("https://megaplay.buzz/stream/getSourcesNew?id=$mediaId"),
+        headers: {'X-Requested-With': "XMLHttpRequest", 'Referer': "https://megaplay.buzz/"},
+        cacheDuration: Duration(minutes: 30));
+
+    final newSourcesJson = jsonDecode(newSourcesRes.body);
+
+    final String? newStreamUrl = newSourcesJson['sources']?['file'];
+
+    if (newStreamUrl == null) {
+        Logs.app.log("[Megaplay] No source file found from /getSourcesNew.");
+        return [];
+    }
+
+    final streamUrl = defStreamUrl ?? newStreamUrl;
 
     final List<Map<String, dynamic>> subs = List.castFrom(sourcesJson['tracks'] ?? []);
 

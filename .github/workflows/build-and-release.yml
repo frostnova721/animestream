@@ -235,7 +235,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: linux-builds
-          path: linux.zip
+          path: build/linux.zip
+          if-no-files-found: error
           retention-days: 30
 
   # WINDOWS BUILDS
@@ -243,6 +244,10 @@ jobs:
     name: Windows Build
     runs-on: windows-latest
     needs: extract-version
+    env:
+      # permission_handler_windows still uses /await. Keep older release tags
+      # compatible with MSVC's STL1011 check until the plugin is migrated.
+      CL: /D_SILENCE_EXPERIMENTAL_COROUTINE_DEPRECATION_WARNINGS
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
@@ -269,15 +274,20 @@ jobs:
         env:
           SIMKL_CLIENT_SECRET: ${{ secrets.SIMKL_CLIENT_SECRET }}
           SIMKL_CLIENT_ID: ${{ secrets.SIMKL_CLIENT_ID }}
+          COMMENTUM_API_URL: ${{ secrets.COMMENTUM_API_URL }}
+          DISCORD_APP_ID: ${{ secrets.DISCORD_APP_ID }}
         shell: bash
         run: |
           echo "SIMKL_CLIENT_SECRET=$SIMKL_CLIENT_SECRET" > .env
           echo "SIMKL_CLIENT_ID=$SIMKL_CLIENT_ID" >> .env
+          echo "COMMENTUM_API_URL=$COMMENTUM_API_URL" >> .env
+          echo "DISCORD_APP_ID=$DISCORD_APP_ID" >> .env
 
       - name: Fix FVP CMake Symlink Issue (Download mdk-sdk manually)
         shell: pwsh
         run: |
-          curl.exe -L -o mdk-sdk.7z "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z/download"
+          curl.exe --fail --location --retry 3 -o mdk-sdk.7z "https://sourceforge.net/projects/mdk-sdk/files/nightly/mdk-sdk-windows-x64.7z/download"
+          if ($LASTEXITCODE -ne 0) { throw "Failed to download the MDK SDK" }
           $config = Get-Content ".dart_tool\package_config.json" -Raw | ConvertFrom-Json
           $fvpPackage = $config.packages | Where-Object { $_.name -eq 'fvp' }
           if ($fvpPackage) {
@@ -290,6 +300,10 @@ jobs:
               Write-Host "FVP path: $fvpPath"
               if (Test-Path "$fvpPath\windows") {
                   7z x mdk-sdk.7z -o"$fvpPath\windows" -y
+                  if ($LASTEXITCODE -ne 0) { throw "Failed to extract the MDK SDK" }
+                  if (!(Test-Path -LiteralPath "$fvpPath\windows\mdk-sdk\lib\cmake\FindMDK.cmake")) {
+                      throw "Extracted MDK SDK is missing FindMDK.cmake"
+                  }
               } else {
                   Write-Host "FVP windows path not found at $fvpPath\windows!"
                   exit 1
@@ -305,18 +319,26 @@ jobs:
 
       - name: Create installer
         shell: pwsh
-        run: dart run inno_bundle:build --release
+        # Package the existing build so a second build cannot drop dart defines.
+        run: dart run inno_bundle:build --release --no-app
 
       - name: Rename installer
         shell: pwsh
         run: |
-          Get-ChildItem -Path "build\windows\x64\installer\Release\*.exe" | Rename-Item -NewName "animestream-x86_64.exe"
+          $installers = @(Get-ChildItem -Path "build\windows\x64\installer\Release\*.exe" -File)
+          if ($installers.Count -ne 1) {
+              throw "Expected one Windows installer, found $($installers.Count)"
+          }
+          if ($installers[0].Name -ne "animestream-x86_64.exe") {
+              Rename-Item -LiteralPath $installers[0].FullName -NewName "animestream-x86_64.exe"
+          }
 
       - name: Upload Windows artifacts
         uses: actions/upload-artifact@v4
         with:
           name: windows-builds
           path: build/windows/x64/installer/Release/animestream-x86_64.exe
+          if-no-files-found: error
           retention-days: 30
 
 

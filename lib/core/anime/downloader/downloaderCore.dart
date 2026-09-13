@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:animestream/core/anime/downloader/downloaders/imageDownloader.dart';
 import 'package:animestream/core/anime/downloader/downloaders/mockDownloader.dart';
-import 'package:animestream/core/anime/downloader/downloaders/streamDownloader.dart';
+import 'package:animestream/core/anime/downloader/downloaders/streamDownloaderOld.dart';
 import 'package:animestream/core/anime/downloader/downloaders/videoDownloader.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 

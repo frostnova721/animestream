@@ -1,4 +1,5 @@
 import 'package:animestream/ui/theme/amethyst.dart';
+import 'package:animestream/ui/theme/astral.dart';
 import 'package:animestream/ui/theme/coldPurple.dart';
 import 'package:animestream/ui/theme/hotPink.dart';
 import 'package:animestream/ui/theme/lime.dart';
@@ -27,6 +28,7 @@ List<ThemeItem> availableThemes = [
   Star(),
   NeonRed(),
   CozyKoala(),
+  Astral(),
 ];
 // Represents a generic light theme (used only for its values)
 AnimeStreamTheme lightModeValues = AnimeStreamTheme(

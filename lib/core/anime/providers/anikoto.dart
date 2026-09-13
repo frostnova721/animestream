@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:animestream/core/anime/extractors/megaplayCrypto.dart';
 import 'package:animestream/core/anime/extractors/vidtube.dart';
 import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/types.dart';
@@ -271,35 +272,33 @@ class Anikoto implements AnimeProvider {
       return [];
     }
 
-    final getSourcesUrl = "https://megaplay.buzz/stream/getSources?id=";
-
-    final sourcesRes = await get(Uri.parse("$getSourcesUrl$mediaId"),
-        headers: {'X-Requested-With': "XMLHttpRequest", 'Referer': "https://megaplay.buzz/"},
-        cacheDuration: Duration(minutes: 30));
-
-    final sourcesJson = jsonDecode(sourcesRes.body);
-
-    final String? defStreamUrl = sourcesJson['sources']?['file'];
-
-    if (defStreamUrl == null) {
-      Logs.app.log("[Megaplay] No source file found from /getSources.");
+    final pageUri = Uri.parse(url);
+    Map<String, dynamic>? sourcesJson;
+    String? streamUrl;
+    for (final endpoint in ['getSources', 'getSourcesNew']) {
+      try {
+        final sourceUri = pageUri.resolve('/stream/$endpoint').replace(queryParameters: {
+          'id': mediaId,
+          if (pageUri.queryParameters['s'] != null) 's': pageUri.queryParameters['s']!,
+        });
+        final sourcesRes = await get(sourceUri,
+            headers: {'X-Requested-With': 'XMLHttpRequest', 'Referer': url},
+            cacheDuration: const Duration(minutes: 30));
+        if (sourcesRes.statusCode < 200 || sourcesRes.statusCode >= 300) continue;
+        final response = jsonDecode(sourcesRes.body) as Map<String, dynamic>;
+        final file = MegaplayCrypto.sourceFile(response);
+        if (file == null || file.isEmpty) continue;
+        streamUrl = file;
+        sourcesJson = response;
+        break;
+      } catch (error) {
+        Logs.app.log('[Megaplay] Failed to extract $endpoint: $error');
+      }
     }
-
-    // try again with a new url
-    final newSourcesRes = await get(Uri.parse("https://megaplay.buzz/stream/getSourcesNew?id=$mediaId"),
-        headers: {'X-Requested-With': "XMLHttpRequest", 'Referer': "https://megaplay.buzz/"},
-        cacheDuration: Duration(minutes: 30));
-
-    final newSourcesJson = jsonDecode(newSourcesRes.body);
-
-    final String? newStreamUrl = newSourcesJson['sources']?['file'];
-
-    if (newStreamUrl == null) {
-        Logs.app.log("[Megaplay] No source file found from /getSourcesNew.");
-        return [];
+    if (streamUrl == null || sourcesJson == null) {
+      Logs.app.log('[Megaplay] No source file found.');
+      return [];
     }
-
-    final streamUrl = defStreamUrl ?? newStreamUrl;
 
     final List<Map<String, dynamic>> subs = List.castFrom(sourcesJson['tracks'] ?? []);
 
@@ -319,7 +318,7 @@ class Anikoto implements AnimeProvider {
     const formats = {'srt', 'vtt', 'ass'};
 
     final uri = Uri.tryParse(cleanedSubLink ?? '');
-    final fileName = uri?.pathSegments.last;
+    final fileName = uri != null && uri.pathSegments.isNotEmpty ? uri.pathSegments.last : null;
     final ext = fileName?.split('.').last.toLowerCase();
 
     final subtitleFormat = formats.contains(ext) ? ext : null;
@@ -327,11 +326,12 @@ class Anikoto implements AnimeProvider {
     return [
       VideoStream(
         quality: quality,
-        url: streamUrl.replaceAll(r"\", ""),
+        url: MegaplayCrypto.signUrl(streamUrl.replaceAll(r"\", "")),
         server: server ?? "Megaplay",
         backup: false,
         customHeaders: {
           'Referer': 'https://megaplay.buzz/',
+          'Origin': 'https://megaplay.buzz',
         },
         subtitle: cleanedSubLink,
         subtitleFormat: subtitleFormat ?? "vtt",

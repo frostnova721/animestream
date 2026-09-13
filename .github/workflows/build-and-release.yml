@@ -339,13 +339,15 @@ jobs:
           name: windows-builds
           path: build/windows/x64/installer/Release/animestream-x86_64.exe
           if-no-files-found: error
-          retention-days: 30
+          retention-days: 30
 
 
   # CREATE RELEASE
   create-release:
     name: Create GitHub Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     needs:
     - extract-version
     - build-android-apk

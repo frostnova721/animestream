@@ -14,7 +14,7 @@ on:
         type: boolean
         default: false
       tag_name:
-        description: 'Tag to build (empty = latest pushed tag)'
+        description: 'Existing tag to build (empty = selected branch/commit, version from pubspec.yaml)'
         required: false
         type: string
         default: ''
@@ -23,7 +23,7 @@ on:
       - 'v*'
 
 env:
-  FLUTTER_VERSION: '3.41.6'
+  FLUTTER_VERSION: '3.47.1'
   JAVA_VERSION: '17'
   JAVA_DISTRIBUTION: 'temurin'
 
@@ -35,14 +35,16 @@ jobs:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       version_code: ${{ steps.get-version.outputs.version_code }}
-      tag: ${{ steps.get-tag.outputs.tag }}
+      tag: ${{ steps.get-version.outputs.tag }}
+      sha: ${{ steps.get-version.outputs.sha }}
+      prerelease: ${{ steps.get-version.outputs.prerelease }}
     steps:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
         
-      - name: Determine tag
+      - name: Select source
         id: get-tag
         env:
           EVENT_NAME: ${{ github.event_name }}
@@ -50,28 +52,46 @@ jobs:
         run: |
           if [ "$EVENT_NAME" = "workflow_dispatch" ] && [ -n "$INPUT_TAG" ]; then
             TARGET_TAG="$INPUT_TAG"
-          elif [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            TARGET_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
           elif [ "$EVENT_NAME" = "push" ]; then
             TARGET_TAG=${GITHUB_REF#refs/tags/}
+          else
+            TARGET_TAG=""
           fi
-          echo "tag=$TARGET_TAG" >> $GITHUB_OUTPUT
-          echo "Target tag: $TARGET_TAG"
-
-      - name: Checkout target tag
-        if: ${{ steps.get-tag.outputs.tag != '' }}
-        env:
-          TARGET_TAG: ${{ steps.get-tag.outputs.tag }}
-        run: git checkout "$TARGET_TAG"
+          if [ -n "$TARGET_TAG" ]; then
+            git check-ref-format "refs/tags/$TARGET_TAG"
+            git rev-parse --verify "refs/tags/$TARGET_TAG^{commit}"
+            git checkout --detach "refs/tags/$TARGET_TAG"
+          fi
+          echo "tag=$TARGET_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Extract version
         id: get-version
+        env:
+          SOURCE_TAG: ${{ steps.get-tag.outputs.tag }}
+        shell: python
         run: |
-          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //; s/+.*//')
-          VERSION_CODE=$(grep '^version:' pubspec.yaml | sed 's/.*+//')
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "Extracted version: $VERSION+$VERSION_CODE"
+          import os
+          import re
+          import subprocess
+          from pathlib import Path
+
+          values = re.findall(r'^version:\s*([^\r\n#]+)', Path('pubspec.yaml').read_text(), re.M)
+          value = values[0].strip().strip("\"'") if len(values) == 1 else ''
+          match = re.fullmatch(r'(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)\+([1-9]\d*)', value)
+          if not match:
+              raise SystemExit('Expected one pubspec version in the form 1.2.3[-prerelease]+build-number')
+          version, code = match.groups()
+          tag = f'v{version}'
+          source_tag = os.environ['SOURCE_TAG']
+          if source_tag and source_tag != tag:
+              raise SystemExit(f'Tag {source_tag} does not match pubspec version {value} (expected {tag})')
+          sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
+          existing = subprocess.run(['git', 'rev-parse', '--verify', f'refs/tags/{tag}^{{commit}}'], capture_output=True, text=True)
+          if existing.returncode == 0 and existing.stdout.strip() != sha:
+              raise SystemExit(f'{tag} already points to another commit. Bump pubspec version or explicitly build that tag.')
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write(f'version={version}\nversion_code={code}\ntag={tag}\nsha={sha}\nprerelease={str("-" in version).lower()}\n')
+          print(f'Building commit {sha}: {value}, release tag {tag}')
 
   # ANDROID BUILDS
   build-android-apk:
@@ -82,7 +102,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.extract-version.outputs.tag }}
+          ref: ${{ needs.extract-version.outputs.sha }}
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -129,8 +149,8 @@ jobs:
             echo "Keystore configured for signing"
           else
             echo "No keystore configured - using debug signing"
-            echo "storePassword=" > android/key.properties
-            echo "keyPassword=" >> android/key.properties
+            echo "storePassword=android" > android/key.properties
+            echo "keyPassword=android" >> android/key.properties
             echo "keyAlias=androiddebugkey" >> android/key.properties
             echo "storeFile=/tmp/debug.keystore" >> android/key.properties
             keytool -genkey -v -keystore /tmp/debug.keystore -storepass android -alias androiddebugkey -keypass android -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US"
@@ -171,7 +191,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.extract-version.outputs.tag }}
+          ref: ${{ needs.extract-version.outputs.sha }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -252,7 +272,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.extract-version.outputs.tag }}
+          ref: ${{ needs.extract-version.outputs.sha }}
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -359,7 +379,7 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.extract-version.outputs.tag }}
+          ref: ${{ needs.extract-version.outputs.sha }}
 
       - name: Download all artifacts
         uses: actions/download-artifact@v4
@@ -390,11 +410,12 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ needs.extract-version.outputs.version }}
-          name: v${{ needs.extract-version.outputs.version }}
+          tag_name: ${{ needs.extract-version.outputs.tag }}
+          target_commitish: ${{ needs.extract-version.outputs.sha }}
+          name: ${{ needs.extract-version.outputs.tag }}
           body_path: CHANGELOG.md
           draft: false
-          prerelease: false
+          prerelease: ${{ needs.extract-version.outputs.prerelease == 'true' }}
           files: release-files/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -408,7 +429,7 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ needs.extract-version.outputs.tag }}
+          ref: ${{ needs.extract-version.outputs.sha }}
           fetch-depth: 0
 
       - name: Check for custom release notes
@@ -422,90 +443,58 @@ jobs:
             echo "" > CHANGELOG.md
           fi
 
-      - name: Get previous tag
+      - name: Generate changelog
         if: steps.check_custom.outputs.custom == 'false'
-        id: get_prev_tag
+        env:
+          RELEASE_TAG: ${{ needs.extract-version.outputs.tag }}
+        shell: python
         run: |
-          echo "Getting previous tag..."
-          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^2>/dev/null || echo "")
-          if [ -z "$PREV_TAG" ]; then
-            PREV_TAG=$(git rev-list --max-parents=0 HEAD)
-          fi
-          echo "prev_tag=$PREV_TAG" >> $GITHUB_ENV
+          import os
+          import subprocess
+          from pathlib import Path
 
-      - name: Get commit messages between tags
-        if: steps.check_custom.outputs.custom == 'false'
-        id: get_commits
-        run: |
-          COMMITS=$(git log ${{ env.prev_tag }}..HEAD --pretty=format:'%h %s' | tr '\n' '|')
-          echo "commits=$COMMITS" >> $GITHUB_ENV
+          def git(*args):
+              return subprocess.check_output(['git', *args], text=True, encoding='utf-8').strip()
 
-      - name: Categorize commits
-        if: steps.check_custom.outputs.custom == 'false'
-        id: categorize
-        run: |
-          echo "Categorizing commits..."
-          FEATURES=""
-          BUG_FIXES=""
-          REFACTORS=""
-          STYLE_CHANGES=""
-          PERFORMANCE=""
-          CHORES=""
-          REPO_URL="https://github.com/${{ github.repository }}"
-
-          IFS='|' read -ra COMMIT_LIST <<< "${{ env.commits }}"
-          echo "Commit list: ${COMMIT_LIST[@]}"
-          for LINE in "${COMMIT_LIST[@]}"; do
-            HASH=$(echo "$LINE" | awk '{print $1}')
-            MESSAGE=$(echo "$LINE" | cut -d' ' -f2-)
-            LINK="[$HASH]($REPO_URL/commit/$HASH)"
-
-            FORMATTED_COMMIT="* $LINK: $MESSAGE"
-            echo "Processing commit: $FORMATTED_COMMIT"
-            if [[ $MESSAGE == feat* ]]; then
-              FEATURES+="$FORMATTED_COMMIT\n"
-            elif [[ $MESSAGE == fix* || $MESSAGE == bug* || $MESSAGE == improvement* || $MESSAGE == patch* ]]; then
-              BUG_FIXES+="$FORMATTED_COMMIT\n"
-            elif [[ $MESSAGE == refactor* ]]; then
-              REFACTORS+="$FORMATTED_COMMIT\n"
-            elif [[ $MESSAGE == style* ]]; then
-              STYLE_CHANGES+="$FORMATTED_COMMIT\n"
-            elif [[ $MESSAGE == perf* ]]; then
-              PERFORMANCE+="$FORMATTED_COMMIT\n"
-            elif [[ $MESSAGE == chore* || $MESSAGE == docs* || $MESSAGE == build* || $MESSAGE == ci* ]]; then
-              CHORES+="$FORMATTED_COMMIT\n"
-            fi
-          done
-
-          # Write to CHANGELOG.md
-          if [ -n "$FEATURES" ]; then
-            echo "### 🎉 New Features" >> CHANGELOG.md
-            echo -e "$FEATURES" >> CHANGELOG.md
-          fi
-          if [ -n "$BUG_FIXES" ]; then
-            echo "### 🐛 Bug Fixes & Improvements" >> CHANGELOG.md
-            echo -e "$BUG_FIXES" >> CHANGELOG.md
-          fi
-          if [ -n "$REFACTORS" ]; then
-            echo "### 🔧 Refactors" >> CHANGELOG.md
-            echo -e "$REFACTORS" >> CHANGELOG.md
-          fi
-          if [ -n "$STYLE_CHANGES" ]; then
-            echo "### 🎨 Style Changes" >> CHANGELOG.md
-            echo -e "$STYLE_CHANGES" >> CHANGELOG.md
-          fi
-          if [ -n "$PERFORMANCE" ]; then
-            echo "### 🚀 Performance Improvements" >> CHANGELOG.md
-            echo -e "$PERFORMANCE" >> CHANGELOG.md
-          fi
-          if [ -n "$CHORES" ]; then
-            echo "### 🧹 Chores & Documentation" >> CHANGELOG.md
-            echo -e "$CHORES" >> CHANGELOG.md
-          fi
-
-          # Add footer
-          echo "---" >> CHANGELOG.md
-          echo "**Full Changelog**: $REPO_URL/compare/${{ env.prev_tag }}...v${{ needs.extract-version.outputs.version }}" >> CHANGELOG.md
+          previous = subprocess.run(
+              ['git', 'describe', '--tags', '--match', 'v*', '--abbrev=0', 'HEAD^'],
+              capture_output=True, text=True,
+          )
+          previous_tag = previous.stdout.strip() if previous.returncode == 0 else ''
+          revision = f'{previous_tag}..HEAD' if previous_tag else 'HEAD'
+          commits = git('log', revision, '--format=%h %s')
+          repo_url = f'https://github.com/{os.environ["GITHUB_REPOSITORY"]}'
+          sections = {
+              'New Features': [], 'Bug Fixes & Improvements': [],
+              'Refactors': [], 'Style Changes': [],
+              'Performance Improvements': [], 'Chores & Documentation': [],
+              'Other Changes': [],
+          }
+          for line in commits.splitlines():
+              commit, message = line.split(' ', 1)
+              if message.startswith('feat'):
+                  section = 'New Features'
+              elif message.startswith(('fix', 'bug', 'improvement', 'patch')):
+                  section = 'Bug Fixes & Improvements'
+              elif message.startswith('refactor'):
+                  section = 'Refactors'
+              elif message.startswith('style'):
+                  section = 'Style Changes'
+              elif message.startswith('perf'):
+                  section = 'Performance Improvements'
+              elif message.startswith(('chore', 'docs', 'build', 'ci')):
+                  section = 'Chores & Documentation'
+              else:
+                  section = 'Other Changes'
+              sections[section].append(f'* [{commit}]({repo_url}/commit/{commit}): {message}')
+          lines = []
+          for section, entries in sections.items():
+              if entries:
+                  lines.extend([f'### {section}', *entries, ''])
+          tag = os.environ['RELEASE_TAG']
+          history_url = f'{repo_url}/compare/{previous_tag}...{tag}' if previous_tag else f'{repo_url}/commits/{tag}'
+          lines.extend(['---', f'**Full Changelog**: {history_url}'])
+          Path('CHANGELOG.md').write_text('\n'.join(lines) + '\n', encoding='utf-8')
 
       - name: Upload changelog
         uses: actions/upload-artifact@v4
@@ -526,7 +515,9 @@ jobs:
 
   notify:
     name: Notify Release
-    needs: [create-release, post-release-notes]
-    if: ${{ always() && (needs.create-release.result == 'success' || needs.post-release-notes.result == 'success') && inputs.send_notification == true }}
+    needs: [create-release, extract-version]
+    if: ${{ needs.create-release.result == 'success' && inputs.send_notification == true }}
     uses: ./.github/workflows/Notify.yml
+    with:
+      tag_name: ${{ needs.extract-version.outputs.tag }}
     secrets: inherit

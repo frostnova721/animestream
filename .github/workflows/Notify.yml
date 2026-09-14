@@ -2,7 +2,17 @@ name: Notify Release
 
 on:
   workflow_call:
+    inputs:
+      tag_name:
+        description: 'Published release tag'
+        required: true
+        type: string
   workflow_dispatch:
+    inputs:
+      tag_name:
+        description: 'Published release tag (empty = nearest tag on selected ref)'
+        required: false
+        type: string
 
 jobs:
   notify:
@@ -15,8 +25,14 @@ jobs:
       
       - name: Get Latest Tag
         id: get_tag
+        env:
+          RELEASE_TAG: ${{ inputs.tag_name }}
         run: |
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          LATEST_TAG="$RELEASE_TAG"
+          if [ -z "$LATEST_TAG" ]; then
+            LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+          fi
+          git check-ref-format "refs/tags/$LATEST_TAG"
           
           if [ -z "$LATEST_TAG" ]; then
             echo "No tags found"

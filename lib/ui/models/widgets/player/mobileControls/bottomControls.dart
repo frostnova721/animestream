@@ -240,52 +240,64 @@ class BottomControls extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () async {
+                      onPressed: () {
                         showModalBottomSheet(
                             context: context,
+                            isScrollControlled: true,
                             builder: (context) {
-                              return ListView.builder(
-                                itemCount: dataProvider.state.audioTracks.length,
-                                shrinkWrap: true,
-                                physics: NeverScrollableScrollPhysics(),
-                                itemBuilder: (BuildContext context, index) {
-                                  return Container(
-                                    padding: EdgeInsets.only(left: 25, right: 25),
-                                    child: ElevatedButton(
-                                      onPressed: () async {
-                                        // final src = dataProvider.state.qualities[index].url;
-                                        dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks[index]);
-                                        playerProvider.controller.setAudioTrack(dataProvider.state.currentAudioTrack);
-                                        // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
-                                        // dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                        // playerProvider.playVideo(src,
-                                        //     currentStream: dataProvider.state.currentStream,
-                                        //     preserveProgress: true);
-                                        Navigator.pop(context);
-                                      },
-                                      style: ElevatedButton.styleFrom(
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10),
-                                          // side: BorderSide(color: Colors.white)
+                              return Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Padding(
+                                  padding: const EdgeInsets.only(bottom: 20, top: 20),
+                                  child: Text(
+                                    "Audio Track",
+                                    style: textStyle().copyWith(fontSize: 23),
+                                  ),
+                                ),
+                                  ListView.builder(
+                                    itemCount: dataProvider.state.audioTracks.length,
+                                    shrinkWrap: true,
+                                    itemBuilder: (BuildContext context, index) {
+                                      return Container(
+                                        padding: EdgeInsets.only(left: 25, right: 25),
+                                        child: ElevatedButton(
+                                          onPressed: () async {
+                                            // final src = dataProvider.state.qualities[index].url;
+                                            dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks[index]);
+                                            playerProvider.controller.setAudioTrack(dataProvider.state.currentAudioTrack);
+                                            // selectedQuality = dataProvider.state.qualities[index]['quality'] ?? '720';
+                                            // dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
+                                            // playerProvider.playVideo(src,
+                                            //     currentStream: dataProvider.state.currentStream,
+                                            //     preserveProgress: true);
+                                            Navigator.pop(context);
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            shape: RoundedRectangleBorder(
+                                              borderRadius: BorderRadius.circular(10),
+                                              // side: BorderSide(color: Colors.white)
+                                            ),
+                                            backgroundColor: dataProvider.state.audioTracks[index].url ==
+                                                    dataProvider.state.currentAudioTrack.url
+                                                ? appTheme.accentColor
+                                                : appTheme.backgroundSubColor,
+                                          ),
+                                          child: Text(
+                                            "${dataProvider.state.audioTracks[index].name} (${dataProvider.state.audioTracks[index].language})",
+                                            style: TextStyle(
+                                              color: dataProvider.state.audioTracks[index].url ==
+                                                      dataProvider.state.currentAudioTrack.url
+                                                  ? appTheme.onAccent
+                                                  : appTheme.accentColor,
+                                              fontFamily: "Poppins",
+                                            ),
+                                          ),
                                         ),
-                                        backgroundColor: dataProvider.state.audioTracks[index].url ==
-                                                dataProvider.state.currentAudioTrack.url
-                                            ? appTheme.accentColor
-                                            : appTheme.backgroundSubColor,
-                                      ),
-                                      child: Text(
-                                        "${dataProvider.state.audioTracks[index].name} (${dataProvider.state.audioTracks[index].language})",
-                                        style: TextStyle(
-                                          color: dataProvider.state.audioTracks[index].url ==
-                                                  dataProvider.state.currentAudioTrack.url
-                                              ? Colors.black
-                                              : appTheme.accentColor,
-                                          fontFamily: "Poppins",
-                                        ),
-                                      ),
-                                    ),
-                                  );
-                                },
+                                      );
+                                    },
+                                  ),
+                                ],
                               );
                             });
                       },

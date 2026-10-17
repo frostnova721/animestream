@@ -82,6 +82,7 @@ class AniZone extends AnimeProvider {
     }
 
     final matchedStr = match.group(1)!.replaceAll(r'\u0022', '"');
+    // print(matchedStr);
 
     final List<Map<String, dynamic>> list = List.castFrom(jsonDecode(matchedStr));
 
@@ -90,7 +91,14 @@ class AniZone extends AnimeProvider {
     int i = 1;
 
     for (final item in list) {
-      final title = item['title_list']?['1'];
+      final titleList = item['title_list'];
+      String? title;
+
+      if(titleList != null && titleList is Map) {
+        title = titleList['1'];
+      } else if (titleList != null && titleList is List) {
+        title = titleList.firstOrNull;
+      }
 
       final epLink = item['url'];
 

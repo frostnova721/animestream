@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
+import 'package:fvp/fvp.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 
@@ -48,6 +49,10 @@ class FvpWrapper implements VideoController {
     controllerInitialized = true;
 
     await controller.initialize();
+    try {
+      // disable the native default subtitles rendering
+      controller.setSubtitleTracks([]);
+    } catch (_) {}
 
     for(int i=0; i<listeners.length; i++) {
       controller.addListener(listeners[i]);

@@ -72,6 +72,20 @@ class PlayerDataProvider extends ChangeNotifier {
   Future<void> extractCurrentStreamQualities() async {
     final url = _state.currentStream.url;
     final headers = _state.currentStream.customHeaders;
+
+    // Direct container files (MKV, MP4, WebM) do not have HLS master playlists.
+    final isContainer = url.contains(RegExp(r'\.(mkv|mp4|mov|webm)', caseSensitive: false)) ||
+        _state.currentStream.server.contains('[MKV]') ||
+        _state.currentStream.server.contains('[MP4]');
+
+    if (isContainer) {
+      _state = _state.copyWith(
+        qualities: [QualityStream(url: url, resolution: 'default', quality: _state.currentStream.quality)],
+      );
+      notifyListeners();
+      return;
+    }
+
     String? mime;
     if (!url.contains(RegExp(r'\.(mkv|mp4|mov|webm|dash|m3u|m3u8)', caseSensitive: false))) {
       //get mime if none is mentioned

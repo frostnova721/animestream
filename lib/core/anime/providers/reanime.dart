@@ -184,23 +184,41 @@ class ReAnime implements AnimeProvider {
       return;
     }
 
-    for (final server in targetServers) {
+    final extractedMap = <String, VideoStream>{};
+    await Future.wait(targetServers.map((server) async {
       final String? dataLink = server['dataLink'];
-      if (dataLink == null || dataLink.isEmpty) continue;
+      if (dataLink == null || dataLink.isEmpty) return;
 
       final serverName = server['serverName']?.toString() ?? 'Default';
       final isServerDub = (server['dataType'] as String?)?.toLowerCase() == 'dub';
-      // final audioTag = isServerDub ? '[Dub]' : '[Sub]';
-      // final softsubTag = (server['softsub'] == true) ? ' [Softsub]' : '';
       final label = '$serverName';
+
+      // Deduplicate: if this exact dataLink was already extracted, reuse stream info with updated label
+      if (extractedMap.containsKey(dataLink)) {
+        final cached = extractedMap[dataLink]!;
+        update([
+          VideoStream(
+            quality: cached.quality,
+            url: cached.url,
+            server: '$label [MKV]',
+            backup: cached.backup,
+            subtitle: cached.subtitle,
+            subtitleFormat: cached.subtitleFormat,
+            dub: isServerDub,
+            customHeaders: cached.customHeaders,
+          )
+        ], false);
+        return;
+      }
 
       try {
         final ddlStream = await _extractDdl(dataLink, label, isDub: isServerDub);
         if (ddlStream != null) {
+          extractedMap[dataLink] = ddlStream;
           update([ddlStream], false);
         }
       } catch (_) {}
-    }
+    }));
 
     update([], true);
   }
@@ -276,7 +294,7 @@ class ReAnime implements AnimeProvider {
 
     if (!ready) return null;
 
-    final downloadUrl = '$base/download/$fileId?token=$token';
+    final downloadUrl = '$base/download/$fileId?token=$token&file=.mkv';
     final qualityStr = resolution ?? '1080p';
 
     return VideoStream(

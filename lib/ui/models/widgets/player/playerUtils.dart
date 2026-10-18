@@ -5,31 +5,60 @@ import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 
 Future<BetterPlayerDataSource> dataSourceConfig(String url, {Map<String, String>? headers = null}) async {
+  final format = await _getFormat(url, headers);
+  final isHlsOrDash = format == BetterPlayerVideoFormat.hls || format == BetterPlayerVideoFormat.dash;
+
   return BetterPlayerDataSource(
     BetterPlayerDataSourceType.network,
     url,
-    videoFormat: await _getFormat(url, headers),
+    videoFormat: format,
+    videoExtension: _getVideoExtension(url),
     useAsmsAudioTracks: true,
     useAsmsTracks: true,
-    bufferingConfiguration: BetterPlayerBufferingConfiguration(
+    bufferingConfiguration: const BetterPlayerBufferingConfiguration(
+      minBufferMs: 15000,
       maxBufferMs: 120000,
+      bufferForPlaybackMs: 2000,
+      bufferForPlaybackAfterRebufferMs: 4000,
     ),
-    cacheConfiguration: BetterPlayerCacheConfiguration(
-      useCache: true,
-      maxCacheFileSize: 50 * 1024 * 1024,
-      maxCacheSize: 50 * 1024 * 1024,
-    ),
+    cacheConfiguration: isHlsOrDash
+        ? const BetterPlayerCacheConfiguration(
+            useCache: true,
+            maxCacheFileSize: 50 * 1024 * 1024,
+            maxCacheSize: 50 * 1024 * 1024,
+          )
+        : null,
     headers: headers,
     placeholder: PlayerLoadingWidget(),
   );
 }
 
+String? _getVideoExtension(String url) {
+  final lower = url.toLowerCase();
+  if (lower.contains('.mkv')) return 'mkv';
+  if (lower.contains('.mp4')) return 'mp4';
+  if (lower.contains('.webm')) return 'webm';
+  if (lower.contains('.mov')) return 'mov';
+  return null;
+}
+
 Future<BetterPlayerVideoFormat> _getFormat(String url, Map<String, String>? headers) async {
+  final lower = url.toLowerCase();
+  if (lower.contains('.mkv') || lower.contains('.mp4') || lower.contains('.webm') || lower.contains('.mov')) {
+    return BetterPlayerVideoFormat.other;
+  }
+  if (lower.contains('.m3u8') || lower.contains('.m3u')) {
+    return BetterPlayerVideoFormat.hls;
+  }
+  if (lower.contains('.mpd') || lower.contains('.dash')) {
+    return BetterPlayerVideoFormat.dash;
+  }
+
   final mime = (await getMediaMimeType(url, headers))?.toLowerCase();
 
   // lets assume stuff if something goes wrong
   if (mime == null || mime.contains("octet-stream")) {
-    final urlPath = Uri.parse(url).path.toLowerCase(); //wrong variable name btw!
+    final urlPath = Uri.parse(url).path.toLowerCase();
 
     //guessing game
     if (urlPath.endsWith(".m3u8") || urlPath.endsWith(".m3u")) return BetterPlayerVideoFormat.hls;

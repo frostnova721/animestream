@@ -3,6 +3,7 @@ import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 import 'package:better_player/better_player.dart';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 class BetterPlayerWrapper implements VideoController {
@@ -127,10 +128,41 @@ class BetterPlayerWrapper implements VideoController {
   }
 
   @override
+  Future<List<AudioStream>> getAudioTracks() async {
+    try {
+      final tracks = await controller.getAudioTracks();
+      return tracks.map((t) {
+        return AudioStream(
+          groupId: (t.id ?? 0).toString(),
+          name: t.label ?? t.language ?? "Track ${t.id}",
+          url: "${controller.betterPlayerDataSource?.url}#track_${t.id}",
+          language: t.language ?? "und",
+          channels: "stereo",
+        );
+      }).toList();
+    } catch (e) {
+      Logs.player.log("Failed to get audio tracks in BetterPlayerWrapper: $e");
+      return [];
+    }
+  }
+
+  @override
   Future<void> setAudioTrack(AudioStream aud) async {
-    final toLang = _asToAsmsAudioTrack(aud);
-    print("Setting to ${toLang.language}, ${toLang.id}");
-    return controller.setAudioTrack(toLang);
+    final asmsTracks = await controller.getAudioTracks();
+    if (asmsTracks.isEmpty) return;
+
+    final track = asmsTracks.firstWhereOrNull(
+      (element) =>
+          (element.id != null && element.id.toString() == aud.groupId) ||
+          (element.label != null && element.label == aud.name && element.language == aud.language),
+    ) ?? asmsTracks.firstWhereOrNull(
+      (element) => element.language == aud.language,
+    ) ?? asmsTracks.firstWhereOrNull(
+      (element) => element.id != null && element.id.toString() == aud.groupId,
+    ) ?? asmsTracks.first;
+
+    print("Setting audio track to ${track.label} (${track.language}, id=${track.id})");
+    return controller.setAudioTrack(track);
   }
 
   @override
@@ -159,15 +191,5 @@ class BetterPlayerWrapper implements VideoController {
     }
     // return BetterPlayerAsmsTrack('', int.tryParse(qs.resolution.split("x").first) ?? 0,
     //     int.tryParse(qs.resolution.split("x").last) ?? 0, qs.bandwidth ?? 0, 0, '', '');
-  }
-
-  BetterPlayerAsmsAudioTrack _asToAsmsAudioTrack(AudioStream aud) {
-    return controller.betterPlayerAsmsAudioTracks!.firstWhere(
-      (element) => element.label == aud.name && element.language == aud.language,
-      orElse: () => controller.betterPlayerAsmsAudioTracks!.firstWhere(
-        (element) => element.language == aud.language,
-        orElse: () => controller.betterPlayerAsmsAudioTracks!.first,
-      ),
-    );
   }
 }

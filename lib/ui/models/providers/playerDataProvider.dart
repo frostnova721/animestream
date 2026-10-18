@@ -105,6 +105,12 @@ class PlayerDataProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Update the list of available audio tracks!
+  void updateAudioTracks(List<AudioStream> tracks) {
+    _state = _state.copyWith(audioTracks: tracks);
+    notifyListeners();
+  }
+
   /// Update the current audio track!
   void updateCurrentAudioTrack(AudioStream track) {
     _state = _state.copyWith(currentAudioTrack: track);

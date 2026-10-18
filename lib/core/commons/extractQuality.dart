@@ -76,6 +76,14 @@ class AudioStream {
         channels: "stereo");
   }
 
+  bool get isEnglish {
+    final l = language.trim().toLowerCase();
+    if (l == 'en' || l == 'eng' || l == 'english' || l.startsWith('en-') || l.startsWith('en_')) {
+      return true;
+    }
+    return RegExp(r'\b(en|eng|english|dub)\b', caseSensitive: false).hasMatch(name);
+  }
+
   @override
   String toString() {
     return 'AudioStream(language: $language, url: $url, name: $name, channels: $channels, groupId: $groupId)';

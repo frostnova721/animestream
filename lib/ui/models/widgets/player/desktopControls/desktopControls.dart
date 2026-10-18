@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/customControlsSheet.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
@@ -484,8 +485,10 @@ class _DesktopControlsState extends State<DesktopControls> {
                               final audTrack = dataProvider.state.audioTracks[index];
                               return GestureDetector(
                                 onTap: () {
-                                  (provider.controller).setAudioTrack(audTrack);
+                                  provider.controller.setAudioTrack(audTrack);
+                                  Logs.player.log("Change audio track to ${audTrack.language}");
                                   dataProvider.updateCurrentAudioTrack(audTrack);
+                                  setState((){});
                                 },
                                 child: Container(
                                     color:

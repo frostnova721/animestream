@@ -78,6 +78,8 @@ abstract class VideoController {
 
   // List<QualityStream> get qualities;
 
+  Future<List<AudioStream>> getAudioTracks();
+
   void setAudioTrack(AudioStream aud);
 
   void setQuality(QualityStream qs);

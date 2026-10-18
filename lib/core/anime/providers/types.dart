@@ -26,6 +26,9 @@ class VideoStream {
   /// Whether this stream is a backup stream
   final bool backup;
 
+  /// Wether this stream is a dub variant (defaults to false)
+  final bool dub;
+
   /// The custom headers to be used when making requests to the video URL, optional unless required to access the stream
   final Map<String, String>? customHeaders;
 
@@ -37,11 +40,12 @@ class VideoStream {
     this.subtitleFormat = null,
     this.subtitle = null,
     this.customHeaders = null,
+    this.dub = false,
   });
 
   @override
   String toString() {
-    return 'VideoStream(quality: $quality, url: $url, subtitle: $subtitle, subtitleFormat: $subtitleFormat, server: $server, backup: $backup, customHeaders: $customHeaders)';
+    return 'VideoStream(quality: $quality, url: $url, subtitle: $subtitle, subtitleFormat: $subtitleFormat, server: $server, backup: $backup, dub: $dub, customHeaders: $customHeaders)';
   }
 
   Map<String, dynamic> toMap() {
@@ -52,6 +56,7 @@ class VideoStream {
       'subtitleFormat': subtitleFormat,
       'server': server,
       'backup': backup,
+      'dub': dub,
       'customHeaders': customHeaders,
     };
   }
@@ -64,6 +69,7 @@ class VideoStream {
       subtitleFormat: map['subtitleFormat'] != null ? map['subtitleFormat'] : null,
       server: map['server'] as String,
       backup: map['backup'] as bool,
+      dub: (map['dub'] ?? false) as bool,
       customHeaders:
           map['customHeaders'] != null ? Map<String, String>.from((map['customHeaders'] as Map<String, String>)) : null,
     );

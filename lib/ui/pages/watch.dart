@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:collection/collection.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
@@ -114,15 +116,36 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
       // Fetch those skips
       dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
 
+      if (dataProvider.state.audioTracks.isEmpty) {
+        final playerAudio = await controller.getAudioTracks();
+        if (playerAudio.isNotEmpty) {
+          dataProvider.updateAudioTracks(playerAudio);
+        }
+      }
+
       if (dataProvider.state.audioTracks.isNotEmpty) {
-        // gamble on this setting :)
-        dataProvider.updateCurrentAudioTrack(dataProvider.state.audioTracks.first);
-        controller.setAudioTrack(dataProvider.state.currentAudioTrack);
+        final isDubStream = dataProvider.state.currentStream.dub;
+        AudioStream? selectedTrack;
+        if (isDubStream || dataProvider.preferDubs) {
+          selectedTrack = dataProvider.state.audioTracks.firstWhereOrNull((t) => t.isEnglish);
+        }
+        selectedTrack ??= dataProvider.state.audioTracks.first;
+
+        dataProvider.updateCurrentAudioTrack(selectedTrack);
+        controller.setAudioTrack(selectedTrack);
+
+        Logs.player.log("Change audio track to ${selectedTrack.language}");
       } else {
         Logs.player.log("Couldnt find seperate audio tracks for this stream");
       }
     } else {
       await controller.initiateVideo(dataProvider.state.currentStream.url, offline: true);
+      final playerAudio = await controller.getAudioTracks();
+      if (playerAudio.isNotEmpty) {
+        dataProvider.updateAudioTracks(playerAudio);
+        dataProvider.updateCurrentAudioTrack(playerAudio.first);
+        controller.setAudioTrack(playerAudio.first);
+      }
     }
 
     final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);

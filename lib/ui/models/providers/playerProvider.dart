@@ -211,6 +211,25 @@ class PlayerProvider extends ChangeNotifier {
 
       controller.setQuality(q);
       dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
+
+      if (dataProvider.state.audioTracks.isEmpty) {
+        final playerAudio = await controller.getAudioTracks();
+        if (playerAudio.isNotEmpty) {
+          dataProvider.updateAudioTracks(playerAudio);
+        }
+      }
+
+      if (dataProvider.state.audioTracks.isNotEmpty) {
+        final isDubStream = dataProvider.state.currentStream.dub;
+        AudioStream? selectedTrack;
+        if (isDubStream || dataProvider.preferDubs) {
+          selectedTrack = dataProvider.state.audioTracks.firstWhereOrNull((t) => t.isEnglish);
+        }
+        selectedTrack ??= dataProvider.state.audioTracks.first;
+
+        dataProvider.updateCurrentAudioTrack(selectedTrack);
+        controller.setAudioTrack(selectedTrack);
+      }
     } else {
       Logs.player.log("No preloaded sources found!");
     }

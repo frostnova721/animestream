@@ -61,6 +61,7 @@ class VidtubeExtractor implements AnimeExtractor {
         backup: false,
         subtitle: sub,
         subtitleFormat: sub != null ? "vtt" : null, // hopes n dreams
+        dub: type == "dub",
         customHeaders: {
           "Referer": "https://vidtube.site/",
           "Origin": "https://vidtube.site",

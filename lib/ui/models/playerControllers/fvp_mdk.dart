@@ -132,6 +132,23 @@ class FvpWrapper implements VideoController {
   }
 
   @override
+  Future<List<AudioStream>> getAudioTracks() async {
+    final audioTracks = _player.mediaInfo.audio;
+    if (audioTracks == null || audioTracks.isEmpty) return [];
+    return audioTracks.map((track) {
+      final lang = track.metadata['language'] ?? track.metadata['LANGUAGE'] ?? 'und';
+      final title = track.metadata['title'] ?? track.metadata['TITLE'] ?? lang;
+      return AudioStream(
+        groupId: track.index.toString(),
+        name: title,
+        url: "${activeMediaUrl}#track_${track.index}",
+        language: lang,
+        channels: track.codec.channels.toString(),
+      );
+    }).toList();
+  }
+
+  @override
   void setAudioTrack(AudioStream aud) async {
     print("Setting audio track: ${aud.language}");
     

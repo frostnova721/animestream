@@ -233,14 +233,14 @@ class Anikoto implements AnimeProvider {
   }
 
   Future<List<VideoStream>> _extractStreams(String streamUrl,
-      {String quality = "multi-quality", String? server}) async {
+      {String quality = "multi-quality", String? server, bool isDub = false}) async {
     final host = Uri.parse(streamUrl).host.toLowerCase().split(".").first;
 
     switch (host.toLowerCase()) {
       case "vidtube":
         return await VidtubeExtractor().extract(streamUrl, quality: quality, server: server);
       case "megaplay":
-        return await _extractMegaPlayStream(streamUrl, quality, server);
+        return await _extractMegaPlayStream(streamUrl, quality, server, isDub);
       // case "mewcdn":
       //   return Kwik().extract(streamUrl, quality: quality, server: server);
       default:
@@ -251,7 +251,7 @@ class Anikoto implements AnimeProvider {
     }
   }
 
-  Future<List<VideoStream>> _extractMegaPlayStream(String url, String quality, String? server) async {
+  Future<List<VideoStream>> _extractMegaPlayStream(String url, String quality, String? server, bool isDub) async {
     final res = await get(
       Uri.parse(url),
       headers: _headers,
@@ -339,6 +339,7 @@ class Anikoto implements AnimeProvider {
           'Origin': 'https://megaplay.buzz',
         },
         subtitle: cleanedSubLink,
+        dub: isDub,
         subtitleFormat: subtitleFormat ?? "vtt",
       )
     ];

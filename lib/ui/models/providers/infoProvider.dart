@@ -103,6 +103,7 @@ class InfoProvider extends ChangeNotifier {
   set selectedSource(ProviderDetails val) {
     _selectedSource = val;
     if (aspProvider != val.identifier) {
+      aspProvider = val.identifier;
       saveAnimeSpecificPreference(
           id.toString(),
           AnimeSpecificPreference(

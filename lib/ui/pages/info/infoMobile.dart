@@ -506,6 +506,7 @@ class _InfoMobileState extends State<InfoMobile> {
               setState(() {
                 provider.paginate(links);
                 provider.foundName = result['name'];
+                provider.manualSearchQuery = result['name'];
               });
           });
         },

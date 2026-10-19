@@ -9,6 +9,7 @@ import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/core/integrations/discord/desktopRPC.dart';
 import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:dart_discord_presence/dart_discord_presence.dart';
 import 'package:flutter/material.dart';
@@ -59,7 +60,7 @@ class PlayerDataProvider extends ChangeNotifier {
 
   final discord = (currentUserSettings?.enableDiscordRichPresence ?? false) ? DiscordDesktopRPC() : null;
 
-  late SubtitleSettings subtitleSettings;
+  SubtitleSettings subtitleSettings = const SubtitleSettings();
 
   /// Call this to refresh/init subs settings
   void initSubsettings() => UserPreferences.getUserPreferences().then((val) {
@@ -164,6 +165,7 @@ class PlayerDataProvider extends ChangeNotifier {
 
   /// Update the state of time stamps
   void updateTimeStamps(String current, String max) {
+    if (_state.currentTimeStamp == current && _state.maxTimeStamp == max) return;
     _state = _state.copyWith(
       currentTimeStamp: current,
       maxTimeStamp: max,
@@ -173,7 +175,25 @@ class PlayerDataProvider extends ChangeNotifier {
 
   /// Update slider value
   void updateSliderValue(int val) {
+    if (_state.sliderValue == val) return;
     _state = _state.copyWith(sliderValue: val);
+    notifyListeners();
+  }
+
+  /// Update time stamps and slider value only if they have changed
+  void updateProgress({required int positionInSeconds, required int durationInSeconds}) {
+    final current = getFormattedTime(positionInSeconds);
+    final max = getFormattedTime(durationInSeconds);
+    if (_state.sliderValue == positionInSeconds &&
+        _state.currentTimeStamp == current &&
+        _state.maxTimeStamp == max) {
+      return;
+    }
+    _state = _state.copyWith(
+      sliderValue: positionInSeconds,
+      currentTimeStamp: current,
+      maxTimeStamp: max,
+    );
     notifyListeners();
   }
 

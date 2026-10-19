@@ -38,8 +38,8 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
       for (final item in res) {
         searchResults.add(
           GestureDetector(
-            onTap: () {
-              saveAnimeSpecificPreference(widget.anilistId, AnimeSpecificPreference(manualSearchQuery: item['name'] ?? searchTerm));
+            onTap: () async {
+              await saveAnimeSpecificPreference(widget.anilistId, AnimeSpecificPreference(manualSearchQuery: item['name'] ?? searchTerm));
               Navigator.of(context).pop(item);
             },
             child: Container(
@@ -57,6 +57,15 @@ class _ManualSearchSheetState extends State<ManualSearchSheet> {
                       fit: BoxFit.cover,
                       height: 140,
                       width: 100,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Center(child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Image.asset("lib/assets/images/ghost.png", color: appTheme.textMainColor,),
+                            Text("Couldn't load image", textAlign: TextAlign.center, style: TextStyle(fontSize: 12),),
+                          ],
+                        ));
+                      },
                     ),
                   ),
                   Text(

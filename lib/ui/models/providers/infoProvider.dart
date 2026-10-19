@@ -34,8 +34,8 @@ class InfoProvider extends ChangeNotifier {
   MediaStatus? _mediaListStatus;
 
   List<EpisodeDetails> _epLinks = [];
-  List<VideoStream> _streamSources = [];
-  List<Map<String, String>> _qualities = [];
+  // List<VideoStream> _streamSources = [];
+  // List<Map<String, String>> _qualities = [];
   List<List<Map<String, dynamic>>> _visibleEpList = [];
   List<AlternateDatabaseId> _altDatabases = [];
 
@@ -52,7 +52,7 @@ class InfoProvider extends ChangeNotifier {
   bool _epSearcherror = false;
   bool _loggedIn = false;
   bool _dataLoaded = false;
-  bool _infoPage = true;
+  // bool _infoPage = true;
   bool _infoLoadError = false;
   bool _preferDubs = false;
 
@@ -62,7 +62,7 @@ class InfoProvider extends ChangeNotifier {
   bool get epSearcherror => _epSearcherror;
   bool get loggedIn => _loggedIn;
   bool get dataLoaded => _dataLoaded;
-  bool get infoPage => _infoPage;
+  // bool get infoPage => _infoPage;
   bool get preferDubs => _preferDubs;
 
   Map? get lastWatchedDurationMap => _lastWatchedDurationMap;
@@ -73,8 +73,8 @@ class InfoProvider extends ChangeNotifier {
   int get viewModeIndexLength => 3;
   int? get selectedEpisodeToLoadStreams => _selectedEpisodeToLoadStreams;
 
-  List<VideoStream> get streamSources => _streamSources;
-  List<Map<String, String>> get qualities => _qualities;
+  // List<VideoStream> get streamSources => _streamSources;
+  // List<Map<String, String>> get qualities => _qualities;
   List<List<Map<String, dynamic>>> get visibleEpList => _visibleEpList;
   List<AlternateDatabaseId> get altDatabases => _altDatabases;
   List<EpisodeDetails> get epLinks => _epLinks;
@@ -164,6 +164,11 @@ class InfoProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  set manualSearchQuery(String? query) {
+    _manualSearchQuery = query;
+    notifyListeners();
+  }
+
   /// Called in the init state
   void init() async {
     if (_initCalled) throw Exception("The initialization was already done");
@@ -212,9 +217,12 @@ class InfoProvider extends ChangeNotifier {
     if (server == null) return;
     _previouslyUsedServer = server;
     _previouslyUsedServerQuality = quality;
-    await saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(previouslyUsedServer: server,
-    previouslyUsedServerQuality: quality,
-    ));
+    await saveAnimeSpecificPreference(
+        id.toString(),
+        AnimeSpecificPreference(
+          previouslyUsedServer: server,
+          previouslyUsedServerQuality: quality,
+        ));
     notifyListeners();
   }
 
@@ -282,10 +290,9 @@ class InfoProvider extends ChangeNotifier {
       notifyListeners();
     } catch (err) {
       Logs.app.log(err.toString());
-      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) floatingSnackBar(err.toString());
+      if (currentUserSettings?.showErrors ?? false) floatingSnackBar(err.toString());
       _infoLoadError = true;
       notifyListeners();
-      rethrow;
     }
   }
 
@@ -325,6 +332,12 @@ class InfoProvider extends ChangeNotifier {
 
   Future<void> _search(String query) async {
     final sr = await sourceManager.searchInSource(selectedSource.identifier, query);
+    if (sr.isEmpty) {
+      _foundName = null;
+      notifyListeners();
+      throw Exception("Search results were empty!");
+    }
+
     //to find a exact match
     List<Map<String, String?>> match = sr
         .where(
@@ -347,7 +360,6 @@ class InfoProvider extends ChangeNotifier {
         searchTitle = _manualSearchQuery!;
       }
       await _search(searchTitle);
-      notifyListeners();
     } catch (err) {
       Logs.app.log(err.toString());
 
@@ -360,7 +372,6 @@ class InfoProvider extends ChangeNotifier {
         // try once more with romaji title if english title failed
         try {
           await _search(data.title['romaji'] ?? '');
-          notifyListeners();
           return;
         } catch (e) {
           Logs.app.log(e.toString());
@@ -369,7 +380,7 @@ class InfoProvider extends ChangeNotifier {
 
       _epSearcherror = true;
       notifyListeners();
-      if (currentUserSettings!.showErrors != null && currentUserSettings!.showErrors!) {
+      if (currentUserSettings?.showErrors ?? false) {
         floatingSnackBar(err.toString());
       }
     }
@@ -400,6 +411,7 @@ class InfoProvider extends ChangeNotifier {
   void refreshListStatus(String? status, int progress) {
     _mediaListStatus = assignItemEnum(status);
     _watched = progress;
+    _started = progress > 0;
     notifyListeners();
   }
 }

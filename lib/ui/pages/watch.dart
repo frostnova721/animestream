@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
@@ -11,6 +12,7 @@ import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
 import 'package:animestream/ui/models/widgets/player/controls.dart';
 import 'package:animestream/ui/models/widgets/player/gestureOverlay.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subViewer.dart';
+import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:better_player/better_player.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -134,7 +136,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
         dataProvider.updateCurrentAudioTrack(selectedTrack);
         controller.setAudioTrack(selectedTrack);
 
-        Logs.player.log("Change audio track to ${selectedTrack.language}");
+        Logs.player.log("set audio track to ${selectedTrack.language}");
       } else {
         Logs.player.log("Couldnt find seperate audio tracks for this stream");
       }
@@ -211,16 +213,14 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     final currentPositionInSeconds = (controller.position ?? 0) ~/ 1000;
     final durationInSeconds = (controller.duration ?? 0) ~/ 1000;
 
-    final newState = dataProvider.state.copyWith(
-      currentTimeStamp: getFormattedTime(currentPositionInSeconds),
-      maxTimeStamp: getFormattedTime(durationInSeconds),
-      sliderValue: currentPositionInSeconds,
-    );
-
-    // Update timestamps and slider position
-    dataProvider.update(newState);
-
-    playerProvider.handleWakelock(); // Yes, it handles wakelock state
+    // Only update timestamps and slider if controls are visible!
+    // When controls are hidden, nothing displays these values, saving CPU & GPU rebuilds.
+    if (playerProvider.state.controlsVisible) {
+      dataProvider.updateProgress(
+        positionInSeconds: currentPositionInSeconds,
+        durationInSeconds: durationInSeconds,
+      );
+    }
 
     if (!widget.localSource) {
       final currentByTotal = (controller.position ?? 0) / (controller.duration ?? 0);
@@ -332,43 +332,18 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     });
   }
 
-  // void _handleTap() {
-  //   // New Logic Baby!
-  //   if (_waitingForSecondTap) {
-  //     // event where the 2nd tap is detected
-  //     _waitingForSecondTap = false;
-  //     _tapTimer?.cancel();
-  //     _handleDoubleTap();
-  //     return;
-  //   }
-
-  //   _handleSingleTap();
-  //   _waitingForSecondTap = true;
-  //   _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
-  //     // after threshold time, if no 2nd tap, treat it as succesful single tap
-  //     if (mounted) {
-  //       setState(() {
-  //         _waitingForSecondTap = false;
-  //       });
-  //     }
-  //   });
-
-  //   // if (_tapTimer != null && _tapTimer!.isActive) {
-  //   //   // Double tap
-  //   //   _tapTimer!.cancel();
-  //   //   _handleDoubleTap();
-  //   // } else {
-  //   //   // Single tap
-  //   //   _tapTimer = Timer(Duration(milliseconds: doubleTapThreshold), () {
-  //   //     _handleSingleTap();
-  //   //   });
-  //   // }
-  // }
-
   void _handleSingleTap() {
     final playerProvider = context.read<PlayerProvider>();
+    final dataProvider = context.read<PlayerDataProvider>();
     playerProvider.toggleControlsVisibility();
-    if (!playerProvider.state.controlsVisible) {
+    if (playerProvider.state.controlsVisible) {
+      final currentPositionInSeconds = (controller.position ?? 0) ~/ 1000;
+      final durationInSeconds = (controller.duration ?? 0) ~/ 1000;
+      dataProvider.updateProgress(
+        positionInSeconds: currentPositionInSeconds,
+        durationInSeconds: durationInSeconds,
+      );
+    } else {
       _controlsTimer?.cancel();
       _controlsTimer = null;
     }
@@ -416,22 +391,26 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    final playerProvider = context.watch<PlayerProvider>();
-    final playerDataProvider = context.watch<PlayerDataProvider>();
+    final controlsVisible = context.select<PlayerProvider, bool>((p) => p.state.controlsVisible);
+    final showSubs = context.select<PlayerProvider, bool>((p) => p.state.showSubs);
+    final controlsLocked = context.select<PlayerDataProvider, bool>((p) => p.state.controlsLocked);
+    final currentStream = context.select<PlayerDataProvider, VideoStream>((p) => p.state.currentStream);
+    final subtitleSettings = context.select<PlayerDataProvider, SubtitleSettings>((p) => p.subtitleSettings);
 
     return PopScope(
       canPop: true,
       onPopInvokedWithResult: (didPop, result) async {
         // save the last watched duration
         if (isInitiated && (controller.duration ?? 0) > 0) {
+          final dp = context.read<PlayerDataProvider>();
           final pos = (controller.position ?? 0).toDouble();
           final dur = controller.duration!.toDouble();
           double watchPercentage = (dur <= 0) ? 0.0 : (pos / dur);
           watchPercentage = watchPercentage.clamp(0.0, 1.0);
           await saveAnimeSpecificPreference(
-            playerDataProvider.showId.toString(),
+            dp.showId.toString(),
             AnimeSpecificPreference(
-              lastWatchDuration: {playerDataProvider.state.currentEpIndex + 1: watchPercentage * 100},
+              lastWatchDuration: {dp.state.currentEpIndex + 1: watchPercentage * 100},
             ),
           );
         }
@@ -439,7 +418,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
           ..setFullScreen(false)
           ..setTitlebarColor(null);
 
-        await playerDataProvider.stopRPC();
+        await context.read<PlayerDataProvider>().stopRPC();
       },
       child: Scaffold(
         backgroundColor: Colors.black,
@@ -447,10 +426,10 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
           padding: EdgeInsets.only(top: MediaQuery.paddingOf(context).top),
           child: GestureOverlay(
             isDesktop: isDesktop,
-            controlsLocked: playerDataProvider.state.controlsLocked,
+            controlsLocked: controlsLocked,
             enableHoldToSpeedUp: currentUserSettings?.enableHoldToSpeedUp ?? true,
             getInitialBrightness: () => ScreenBrightness.instance.application,
-            getInitialVolume: () async => playerProvider.state.volume,
+            getInitialVolume: () async => context.read<PlayerProvider>().state.volume,
             onBrightnessUpdate: (val) {
               ScreenBrightness.instance.setApplicationScreenBrightness(val);
               _showIndicator(brightness: val);
@@ -458,64 +437,76 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
             onDoubleTapCenter: _handleDoubleTap,
             onDoubleTapLeft: () {
               // desktop shouldnt be having double tap to skip functionality
-              if (playerDataProvider.state.controlsLocked || isDesktop) return;
+              if (context.read<PlayerDataProvider>().state.controlsLocked || isDesktop) return;
               if (currentUserSettings?.doubleTapToSkip ?? true) {
-                playerProvider.fastForward(-(currentUserSettings?.skipDuration ?? 10));
+                context.read<PlayerProvider>().fastForward(-(currentUserSettings?.skipDuration ?? 10));
                 if (!_showRewindAnim) skipCount = 0;
                 _showFastForwardAnim(false);
               }
             },
             onDoubleTapRight: () {
               // desktop shouldnt be having double tap to skip functionality
-              if (playerDataProvider.state.controlsLocked || isDesktop) return;
+              if (context.read<PlayerDataProvider>().state.controlsLocked || isDesktop) return;
               if (currentUserSettings?.doubleTapToSkip ?? true) {
-                playerProvider.fastForward(currentUserSettings?.skipDuration ?? 10);
+                context.read<PlayerProvider>().fastForward(currentUserSettings?.skipDuration ?? 10);
                 if (!_showForwardAnim) skipCount = 0;
                 _showFastForwardAnim(true);
               }
             },
             onSingleTap: () => _handleSingleTap(),
             onSpeedChange: (increase) {
-              final currSpeed = playerProvider.state.speed;
+              final pp = context.read<PlayerProvider>();
+              final currSpeed = pp.state.speed;
               if (increase) {
-                playerProvider
-                    .setSpeed(playerProvider.playbackSpeeds.firstWhere((s) => s > currSpeed, orElse: () => currSpeed));
+                pp.setSpeed(pp.playbackSpeeds.firstWhere((s) => s > currSpeed, orElse: () => currSpeed));
               } else {
-                playerProvider.setSpeed(
-                    playerProvider.playbackSpeeds.lastWhere((s) => s < currSpeed && s >= 2, orElse: () => currSpeed));
+                pp.setSpeed(pp.playbackSpeeds.lastWhere((s) => s < currSpeed && s >= 2, orElse: () => currSpeed));
               }
               print(increase);
             },
             onSpeedUpStart: () {
-              if (playerProvider.state.playerState == PlayerState.playing &&
+              final pp = context.read<PlayerProvider>();
+              final dp = context.read<PlayerDataProvider>();
+              if (pp.state.playerState == PlayerState.playing &&
                   !isDesktop &&
-                  !playerDataProvider.state.controlsLocked) {
+                  !dp.state.controlsLocked) {
                 spedUp = true;
-                lastSpeed = playerProvider.state.speed;
+                lastSpeed = pp.state.speed;
                 // ensure atleast 2x speed on long press and max of 10x (max available speed)
-                playerProvider.setSpeed((lastSpeed * 2).clamp(2, playerProvider.playbackSpeeds.last));
+                pp.setSpeed((lastSpeed * 2).clamp(2, pp.playbackSpeeds.last));
               }
             },
             onSpeedUpEnd: () {
               if (!spedUp || isDesktop) return;
               spedUp = false;
-              if (playerProvider.state.speed < 2) return;
+              final pp = context.read<PlayerProvider>();
+              if (pp.state.speed < 2) return;
               // reset speed
-              playerProvider.setSpeed(lastSpeed);
-              print("Reduced speed to: ${playerProvider.state.speed}x");
+              pp.setSpeed(lastSpeed);
+              print("Reduced speed to: ${pp.state.speed}x");
             },
             onVerticalDragEnd: () {},
             onVolumeUpdate: (val) {
-              playerProvider.updateVolume(val);
+              context.read<PlayerProvider>().updateVolume(val);
               _showIndicator(volume: val);
             },
             onPointerHover: (event) {
+              final pp = context.read<PlayerProvider>();
+              final dp = context.read<PlayerDataProvider>();
               // show controls on mouse movement
-              if (!playerProvider.state.controlsVisible) playerProvider.toggleControlsVisibility(action: true);
-              hideControlsOnTimeout(playerDataProvider, playerProvider, timeoutSeconds: 3);
+              if (!pp.state.controlsVisible) {
+                pp.toggleControlsVisibility(action: true);
+                final currentPositionInSeconds = (controller.position ?? 0) ~/ 1000;
+                final durationInSeconds = (controller.duration ?? 0) ~/ 1000;
+                dp.updateProgress(
+                  positionInSeconds: currentPositionInSeconds,
+                  durationInSeconds: durationInSeconds,
+                );
+              }
+              hideControlsOnTimeout(dp, pp, timeoutSeconds: 3);
 
               // Hide the pointer when controls arent visible and mouse is unmoved for 3 seconds
-              // if (playerProvider.state.controlsVisible) return;
+              // if (pp.state.controlsVisible) return;
               if (hidePointer) {
                 setState(() {
                   hidePointer = false;
@@ -531,30 +522,30 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
               });
             },
             child: MouseRegion(
-              cursor: playerProvider.state.controlsVisible || !hidePointer
+              cursor: controlsVisible || !hidePointer
                   ? SystemMouseCursors.basic
                   : SystemMouseCursors.none,
               child: Stack(
                 children: [
                   Player(controller),
-                  if (playerProvider.state.showSubs && playerDataProvider.state.currentStream.subtitle != null)
+                  if (showSubs && currentStream.subtitle != null)
                     SubViewer(
                       controller: controller,
                       format: SubtitleFormat.fromName(
-                          playerDataProvider.state.currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
-                      subtitleSource: playerDataProvider.state.currentStream.subtitle!,
-                      settings: playerDataProvider.subtitleSettings,
-                      headers: playerDataProvider.state.currentStream.customHeaders,
+                          currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
+                      subtitleSource: currentStream.subtitle!,
+                      settings: subtitleSettings,
+                      headers: currentStream.customHeaders,
                       isOffline: widget.localSource,
                     ),
                   isInitiated
                       ? AnimatedOpacity(
                           duration: Duration(milliseconds: 150),
-                          opacity: playerProvider.state.controlsVisible ? 1 : 0,
+                          opacity: controlsVisible ? 1 : 0,
                           child: Stack(
                             children: [
                               IgnorePointer(ignoring: true, child: overlay()),
-                              IgnorePointer(ignoring: !playerProvider.state.controlsVisible, child: Controls()),
+                              IgnorePointer(ignoring: !controlsVisible, child: Controls()),
                             ],
                           ),
                         )

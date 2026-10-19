@@ -105,19 +105,25 @@ class PlayerProvider extends ChangeNotifier {
   }
 
   void updatePlayState(PlayerState playState) {
+    if (_state.playerState == playState) return;
     _state = _state.copyWith(playerState: playState);
+    handleWakelock();
     notifyListeners();
   }
 
   /// Toggle visibility of controls
   void toggleControlsVisibility({bool? action = null}) {
-    _state = _state.copyWith(controlsVisible: action ?? !_state.controlsVisible);
+    final next = action ?? !_state.controlsVisible;
+    if (_state.controlsVisible == next) return;
+    _state = _state.copyWith(controlsVisible: next);
     notifyListeners();
   }
 
   /// Toggle subtitle visibility
   void toggleSubs({bool? action = null}) {
-    _state = _state.copyWith(showSubs: action ?? !_state.showSubs);
+    final next = action ?? !_state.showSubs;
+    if (_state.showSubs == next) return;
+    _state = _state.copyWith(showSubs: next);
     notifyListeners();
   }
 

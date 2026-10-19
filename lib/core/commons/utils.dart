@@ -79,6 +79,8 @@ MediaStatus? assignItemEnum(String? valueInString) {
       return MediaStatus.DROPPED;
     case "COMPLETED":
       return MediaStatus.COMPLETED;
+    case "PAUSED":
+      return MediaStatus.PAUSED;
     default:
       throw new Exception("ERR_BAD_STRING");
   }

@@ -67,7 +67,12 @@ Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreferen
   if (prefMap['lastWatchDuration'] != null) {
     final Map<dynamic, dynamic> existing = Map<dynamic, dynamic>.from(item['lastWatchDuration'] ?? {});
     final Map<dynamic, dynamic> incoming = Map<dynamic, dynamic>.from(prefMap['lastWatchDuration'] as Map);
+
+    if(incoming.isEmpty) {
+      existing.clear();
+    } else {
     existing.addAll(incoming);
+    }
     item['lastWatchDuration'] = existing;
   }
 

@@ -22,13 +22,13 @@ class AnilistMutations extends DatabaseMutation {
   }) async {
     // multiply score by 10 to convert to Anilist's scale (0-100)
     final rawScore = score != null ? score * 10 : null;
-    
+
     final query = '''
       mutation {
         SaveMediaListEntry(mediaId: $id, status: ${status?.name ?? MediaStatus.CURRENT.name}, progress: ${progress ?? 0}, ${score != null ? "scoreRaw: ${rawScore}" : ""}) {
           status
           progress
-          scoreRaw
+          score
         }
       }
     ''';

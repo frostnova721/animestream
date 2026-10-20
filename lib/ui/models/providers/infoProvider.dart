@@ -11,7 +11,10 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/anilist/login.dart';
+import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/simkl/login.dart';
+import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
@@ -230,34 +233,34 @@ class InfoProvider extends ChangeNotifier {
   Future<void> getWatched({bool refreshLastWatchDuration = false}) async {
     try {
       final isLoggedInAnilist = await AniListLogin().isAnilistLoggedIn();
-      if (isLoggedInAnilist && _mediaListStatus == null) {
-        _watched = 0;
-        _started = false;
-      }
 
-      int progress;
-
-      if(!isLoggedInAnilist) {
-        progress = await getAnimeWatchProgress(id, _mediaListStatus);
+      if (!isLoggedInAnilist) {
+        final progress = await getAnimeWatchProgress(id, _mediaListStatus);
+        _watched = progress == -1 ? 0 : progress;
+        _started = progress != -1;
       } else {
-        progress = data.progress ?? 0;
+        if (_mediaListStatus == null || data.progress == null) {
+          _watched = 0;
+          _started = false;
+        } else {
+          _watched = data.progress ?? 0;
+          _started = true;
+        }
       }
-      
-      _watched = progress == -1 ? 0 : progress;
-      _started = progress != -1;
 
       final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
-      _currentPageIndex = supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex;
+      _currentPageIndex = visibleEpList.isEmpty
+          ? 0
+          : (supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex);
 
       if (refreshLastWatchDuration) {
         _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
       }
     } catch (err) {
-      floatingSnackBar("Couldn't fetch watch progress.");
-      Logs.app.log(err.toString());
+      Logs.app.log("[WATCH PROGRESS] $err");
       if (currentUserSettings?.showErrors ?? false) {
-        floatingSnackBar(err.toString(), waitForPreviousToFinish: true);
+        floatingSnackBar("Couldn't fetch watch progress: $err", waitForPreviousToFinish: true);
       }
     }
 
@@ -265,44 +268,54 @@ class InfoProvider extends ChangeNotifier {
   }
 
   Future<void> _getInfo(int id) async {
-    final s = _altDatabases.toSet();
-    Future<List<AlternateDatabaseId>>? simklFuture;
-
     try {
-      if (currentUserSettings?.database == Databases.anilist && await AniListLogin().isAnilistLoggedIn()) {
-        _loggedIn = true;
-        //fetch ids from simkl and save em
-        simklFuture = () async {
-          try {
-            final res = await DatabaseHandler(database: Databases.simkl).search("https://anilist.co/anime/$id");
-            if (res.isEmpty) return <AlternateDatabaseId>[];
-            final info = await DatabaseHandler(database: Databases.simkl).getAnimeInfo(res[0].id);
-            return info.alternateDatabases;
-          } catch (err) {
-            Logs.app.log("[INFO] couldnt fetch simkl data. ${err.toString()}");
-            if (currentUserSettings?.showErrors ?? false) {
-              floatingSnackBar("Couldnt fetch simkl data");
-            }
-            return <AlternateDatabaseId>[];
-          }
-        }();
+      if (currentUserSettings?.database == Databases.anilist) {
+        _loggedIn = await AniListLogin().isAnilistLoggedIn();
+      } else if (currentUserSettings?.database == Databases.mal) {
+        _loggedIn = (await getSecureVal(SecureStorageKey.malToken)) != null;
+      } else if (currentUserSettings?.database == Databases.simkl) {
+        _loggedIn = await SimklLogin.isLoggedIn();
       }
 
-      final futures = await Future.wait([DatabaseHandler().getAnimeInfo(id), if (simklFuture != null) simklFuture]);
-
-      final info = futures[0] as DatabaseInfo;
+      // Fetch anime details directly without waiting on auxiliary trackers
+      final info = await DatabaseHandler().getAnimeInfo(id);
+      final s = _altDatabases.toSet();
       s.addAll(info.alternateDatabases);
-      s.addAll(futures.length > 1 ? futures[1] as List<AlternateDatabaseId> : <AlternateDatabaseId>[]);
       _altDatabases = s.toList();
       _dataLoaded = true;
       _data = info;
       _mediaListStatus = assignItemEnum(data.mediaListStatus);
       notifyListeners();
+
+      // Resolve Simkl ID asynchronously
+      final anilistId = currentUserSettings?.database == Databases.anilist
+          ? id
+          : _altDatabases.where((d) => d.database == Databases.anilist).firstOrNull?.id;
+      final malId = currentUserSettings?.database == Databases.mal
+          ? id
+          : _altDatabases.where((d) => d.database == Databases.mal).firstOrNull?.id;
+      _resolveSimklId(anilistId: anilistId, malId: malId);
     } catch (err) {
       Logs.app.log(err.toString());
       if (currentUserSettings?.showErrors ?? false) floatingSnackBar(err.toString());
       _infoLoadError = true;
       notifyListeners();
+    }
+  }
+
+  void _resolveSimklId({int? anilistId, int? malId}) async {
+    try {
+      if (_altDatabases.any((db) => db.database == Databases.simkl)) return;
+
+      final simklId = await Simkl().getIdFromRedirect(anilistId: anilistId, malId: malId);
+      if (simklId != null) {
+        final s = _altDatabases.toSet();
+        s.add(AlternateDatabaseId(database: Databases.simkl, id: simklId));
+        _altDatabases = s.toList();
+        notifyListeners();
+      }
+    } catch (err) {
+      Logs.app.log("[INFO] couldn't resolve simkl id: $err");
     }
   }
 
@@ -378,10 +391,11 @@ class InfoProvider extends ChangeNotifier {
       final hasEnglishTitle = data.title['english'] != null;
       final didUseManualQuery = _manualSearchQuery != null;
 
-      if (hasEnglishTitle && !didUseManualQuery) {
-        // try once more with romaji title if english title failed
+      final romajiTitle = data.title['romaji'];
+      if (hasEnglishTitle && !didUseManualQuery && romajiTitle != null && romajiTitle != data.title['english']) {
+        // try once more with romaji title if english title failed and romaji is different
         try {
-          await _search(data.title['romaji'] ?? '');
+          await _search(romajiTitle);
           return;
         } catch (e) {
           Logs.app.log(e.toString());
@@ -413,6 +427,8 @@ class InfoProvider extends ChangeNotifier {
         return Icons.done_all_rounded;
       case "DROPPED":
         return Icons.close_rounded;
+      case "PAUSED":
+        return Icons.pause_circle_outline_rounded;
       default:
         return Icons.add_rounded;
     }

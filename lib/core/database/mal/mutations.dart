@@ -7,16 +7,24 @@ import 'package:animestream/core/database/types.dart';
 import 'package:animestream/core/network/network.dart';
 
 class MALMutation extends DatabaseMutation {
+  /// Mutates the anime list entry for a given anime [id] with the provided parameters.
+  ///
+  /// Updates the entry with the new [score] (on a scale of 1-10), a new [status]
+  /// (which defaults to `CURRENT`), and the new [progress] (defaults to 0).
+  ///
+  /// You can optionally provide the [previousStatus] if tracking status history.
   @override
   Future<MALMutationResult?> mutateAnimeList(
       {required int id,
       MediaStatus? status = MediaStatus.CURRENT,
       int? progress = 0,
+      int? score,
       MediaStatus? previousStatus}) async {
     final url = "https://api.myanimelist.net/v2/anime/$id/my_list_status";
     final body = {
       'status': stringifyMediaStatus(status!),
-      'num_watched_episodes': '$progress'
+      'num_watched_episodes': '$progress',
+      if (score != null) 'score': '$score',
     };
     final header = {
       ...(await MAL.getHeader()),
@@ -27,7 +35,7 @@ class MALMutation extends DatabaseMutation {
       headers: header,
       body: body,
     );
-    print(res.statusCode);
+    // print(res.statusCode);
     if (res.statusCode == 401) {
       // Retry after refreshing token
       await MALLogin().refreshToken();

@@ -172,7 +172,7 @@ class InfoProvider extends ChangeNotifier {
 
   /// Called in the init state
   void init() async {
-    if (_initCalled) throw Exception("The initialization was already done");
+    if (_initCalled) return;
     _initCalled = true;
 
     // Load manualsearch query and last watch
@@ -229,13 +229,22 @@ class InfoProvider extends ChangeNotifier {
 
   Future<void> getWatched({bool refreshLastWatchDuration = false}) async {
     try {
-      if (await AniListLogin().isAnilistLoggedIn()) if (_mediaListStatus == null) {
+      final isLoggedInAnilist = await AniListLogin().isAnilistLoggedIn();
+      if (isLoggedInAnilist && _mediaListStatus == null) {
         _watched = 0;
         _started = false;
       }
-      final item = await getAnimeWatchProgress(id, _mediaListStatus);
-      _watched = item == -1 ? 0 : item;
-      _started = item != -1;
+
+      int progress;
+
+      if(!isLoggedInAnilist) {
+        progress = await getAnimeWatchProgress(id, _mediaListStatus);
+      } else {
+        progress = data.progress ?? 0;
+      }
+      
+      _watched = progress == -1 ? 0 : progress;
+      _started = progress != -1;
 
       final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
@@ -413,6 +422,9 @@ class InfoProvider extends ChangeNotifier {
     _mediaListStatus = assignItemEnum(status);
     _watched = progress;
     _started = progress > 0;
+
+    // recalculate the page index based on updated value
+    paginate(epLinks);
     notifyListeners();
   }
 }

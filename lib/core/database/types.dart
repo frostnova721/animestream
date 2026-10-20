@@ -66,6 +66,8 @@ abstract class DatabaseInfo {
   String? get synopsis;
   List<String>? tags;
   String? mediaListStatus;
+  int? progress;
+  int? userScore;
   List<AlternateDatabaseId> get alternateDatabases;
   int? listId;
 }

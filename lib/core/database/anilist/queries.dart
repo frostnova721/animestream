@@ -186,6 +186,8 @@ class AnilistQueries {
       mediaListEntry {
         id
         status
+        progress
+        score
       }
     }
   }

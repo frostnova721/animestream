@@ -141,6 +141,8 @@ class AnilistInfo extends DatabaseInfo {
   final List<AnilistAnimeRelatedRecommendation> recommended;
   final List<AnilistAnimeRelatedRecommendation> related;
   final String? status;
+  final int? progress;
+  final int? userScore;
   final String type;
   final List<String?> studios;
   final List<Object?> synonyms;
@@ -172,6 +174,8 @@ class AnilistInfo extends DatabaseInfo {
     required this.type,
     required this.alternateDatabases,
     required this.listId,
+    required this.progress,
+    required this.userScore,
   });
 }
 

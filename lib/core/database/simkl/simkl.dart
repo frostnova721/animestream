@@ -1,17 +1,20 @@
 import 'dart:convert';
 
 import 'package:animestream/core/app/env.dart';
+import 'package:animestream/core/app/version.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/types.dart';
 import 'package:animestream/core/network/network.dart';
 
 class Simkl extends Database {
+  static final _appHeader = "app-name=animestream&app-version=${AppVersion.instance.version}";
+
   static String imageLink(String url, {bool fanart = false}) =>
       "https://wsrv.nl/?url=https://simkl.in/${fanart ? "fanart" : "posters"}/${url}${fanart ? "_w" : "_ca"}.webp";
 
   Future<List<SimklSearchResult>> search(String query) async {
     final url =
-        "https://api.simkl.com/search/anime?q=$query&client_id=${AnimeStreamEnvironment.simklClientId}";
+        "https://api.simkl.com/search/anime?q=$query&client_id=${AnimeStreamEnvironment.simklClientId}&$_appHeader";
     final List<dynamic> res = await fetch(url);
     List<SimklSearchResult> sr = [];
     res.forEach((it) {
@@ -30,7 +33,7 @@ class Simkl extends Database {
 
   Future<SimklInfo> getAnimeInfo(int id) async {
     final url =
-        "https://api.simkl.com/anime/$id?extended=full&client_id=${AnimeStreamEnvironment.simklClientId}";
+        "https://api.simkl.com/anime/$id?extended=full&client_id=${AnimeStreamEnvironment.simklClientId}&$_appHeader";
     final res = await fetch(url);
     final datafied = SimklInfo.fromJson(res);
     return datafied;

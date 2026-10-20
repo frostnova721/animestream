@@ -182,7 +182,10 @@ class Anilist extends Database {
           alternateDatabases: [
             AlternateDatabaseId(database: Databases.anilist, id: id),
             if (info['idMal'] != null) AlternateDatabaseId(database: Databases.mal, id: info['idMal']),
-          ]);
+          ],
+          progress: info['mediaListEntry']?['progress'],
+          userScore: info['mediaListEntry']?['score'],
+          );
 
       return convertedGuy;
     }

@@ -15,6 +15,7 @@ class SimklMutation extends DatabaseMutation {
   Future<SimklMutationResult?> mutateAnimeList({
     required int id,
     int? progress = 0,
+    int? score,
     MediaStatus? status,
     MediaStatus? previousStatus,
   }) async {

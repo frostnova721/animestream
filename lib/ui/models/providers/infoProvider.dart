@@ -10,10 +10,7 @@ import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/data/watching.dart';
-import 'package:animestream/core/database/anilist/login.dart';
-import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/database.dart';
-import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
@@ -232,21 +229,21 @@ class InfoProvider extends ChangeNotifier {
 
   Future<void> getWatched({bool refreshLastWatchDuration = false}) async {
     try {
-      final isLoggedInAnilist = await AniListLogin().isAnilistLoggedIn();
+      // final isLoggedInAnilist = await AnilistLogin().isLoggedIn();
 
-      if (!isLoggedInAnilist) {
-        final progress = await getAnimeWatchProgress(id, _mediaListStatus);
-        _watched = progress == -1 ? 0 : progress;
-        _started = progress != -1;
-      } else {
-        if (_mediaListStatus == null || data.progress == null) {
-          _watched = 0;
-          _started = false;
-        } else {
-          _watched = data.progress ?? 0;
-          _started = true;
-        }
-      }
+      final (watched, status) = await getAnimeWatchProgress(id);
+      _watched = watched;
+      _started = watched > 0;
+      _mediaListStatus = status;
+      // } else {
+      //   if (_mediaListStatus == null || data.progress == null) {
+      //     _watched = 0;
+      //     _started = false;
+      //   } else {
+      //     _watched = data.progress ?? 0;
+      //     _started = true;
+      //   }
+      // }
 
       final supposedPageIndex = watched ~/ 25; //index increases when the episodes are >24
 
@@ -269,13 +266,7 @@ class InfoProvider extends ChangeNotifier {
 
   Future<void> _getInfo(int id) async {
     try {
-      if (currentUserSettings?.database == Databases.anilist) {
-        _loggedIn = await AniListLogin().isAnilistLoggedIn();
-      } else if (currentUserSettings?.database == Databases.mal) {
-        _loggedIn = (await getSecureVal(SecureStorageKey.malToken)) != null;
-      } else if (currentUserSettings?.database == Databases.simkl) {
-        _loggedIn = await SimklLogin.isLoggedIn();
-      }
+      _loggedIn = await DatabaseHandler().isLoggedIn();
 
       // Fetch anime details directly without waiting on auxiliary trackers
       final info = await DatabaseHandler().getAnimeInfo(id);
@@ -284,7 +275,9 @@ class InfoProvider extends ChangeNotifier {
       _altDatabases = s.toList();
       _dataLoaded = true;
       _data = info;
-      _mediaListStatus = assignItemEnum(data.mediaListStatus);
+
+      // cache fuck this up :)
+      // _mediaListStatus = assignItemEnum(data.mediaListStatus);
       notifyListeners();
 
       // Resolve Simkl ID asynchronously

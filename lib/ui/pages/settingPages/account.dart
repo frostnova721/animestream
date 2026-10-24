@@ -77,13 +77,13 @@ class _AccountSettingState extends State<AccountSetting> {
 
   Future<void> _fetchAnilistProfile() async {
     try {
-      final res = await AniListLogin().getUserProfile();
+      final res = await AnilistLogin().getUserProfile();
       if (mounted) setState(() => user = res);
     } catch (err) {
       if (err is AnilistApiException) {
         if (err.statusCode == 401 || err.message.toLowerCase().contains("invalid token")) {
           floatingSnackBar("Anilist token is invalid. Login again!");
-          await AniListLogin().removeToken();
+          await AnilistLogin().removeToken();
           if (mounted) setState(() => anilistLoggedIn = false);
         }
       } else {
@@ -121,7 +121,7 @@ class _AccountSettingState extends State<AccountSetting> {
   void _handleLogout(Databases db) async {
     switch (db) {
       case Databases.anilist:
-        await AniListLogin().removeToken();
+        await AnilistLogin().removeToken();
         if (mounted) setState(() => anilistLoggedIn = false);
         break;
       case Databases.simkl:
@@ -141,7 +141,7 @@ class _AccountSettingState extends State<AccountSetting> {
     try {
       switch (db) {
         case Databases.anilist:
-          logged = await AniListLogin().initiateLogin();
+          logged = await AnilistLogin().initiateLogin();
           break;
         case Databases.simkl:
           logged = await SimklLogin().initiateLogin();

@@ -47,7 +47,7 @@ class InfoSection extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.only(left: 15, right: 15),
                           child: Text(
-                            provider.data.type,
+                            provider.data.type.toUpperCase(),
                             style: _textStyle(),
                           ),
                         ),
@@ -150,7 +150,7 @@ class InfoSection extends StatelessWidget {
                 ),
               ),
               if (size.width < splitWidth)
-                _tagsNgenresBuilder("Tags", provider.data.tags!,
+                _tagsNgenresBuilder("Tags", provider.data.tags ?? [],
                     unconstrainedWidth: true, padLeft: false, context: context),
               ScrollingList.character(
                   context, splitWidth, charactersScrollController, provider.data.characters),

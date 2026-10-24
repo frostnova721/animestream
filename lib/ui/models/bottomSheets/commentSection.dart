@@ -330,7 +330,7 @@ class _CommentsectionState extends State<Commentsection> {
                               loggingIn = true;
                             });
 
-                            if (!(await AniListLogin().isAnilistLoggedIn())) {
+                            if (!(await AnilistLogin().isLoggedIn())) {
                               Navigator.pop(context);
                               Navigator.of(context).push(MaterialPageRoute(builder: (ctx) => AccountSetting()));
                               floatingSnackBar("Login with anilist first!");

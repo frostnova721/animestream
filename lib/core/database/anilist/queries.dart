@@ -4,8 +4,33 @@ import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/commons/enums.dart';
 
 class AnilistQueries {
-  Future<List<UserAnimeList>> getUserAnimeList(String userName,
-      {MediaStatus? status}) async {
+  Future<AnilistAnimeWatchProgress> getAnimeWatchProgress(int anilistId) async {
+    final query = '''
+      query {
+        Media(id: $anilistId) {
+          episodes
+          mediaListEntry {
+            status
+            progress
+          }
+        }
+      }
+    ''';
+
+    final res = await Anilist().fetchQuery(query, null, token: await getSecureVal(SecureStorageKey.anilistToken));
+
+    final mediaListEntry = res['Media']['mediaListEntry'];
+    final progress = AnilistAnimeWatchProgress(
+      id: anilistId,
+      progress: mediaListEntry?['progress'],
+      totalEpisodes: res['Media']['episodes'],
+      status: mediaListEntry?['status'],
+    );
+
+    return progress;
+  }
+
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) async {
     final query = '''query {
   MediaListCollection(userName: "$userName", type: ANIME ${status != null ? ", status: ${status.name}" : ''}, sort: UPDATED_TIME) {
     lists {
@@ -32,8 +57,7 @@ class AnilistQueries {
   }
 }''';
 
-    final res = await Anilist().fetchQuery(query, null,
-        token: await getSecureVal(SecureStorageKey.anilistToken));
+    final res = await Anilist().fetchQuery(query, null, token: await getSecureVal(SecureStorageKey.anilistToken));
     final List<dynamic> data = res['MediaListCollection']['lists'];
     final List<UserAnimeList> arrangedList = [];
     for (final element in data) {
@@ -58,9 +82,7 @@ class AnilistQueries {
               episodes: media['episodes'],
               coverImage: media['coverImage']['large'],
               watchProgress: e['progress'],
-              rating: media['averageScore'] != null
-                  ? (media['averageScore'] / 10).toDouble()
-                  : null,
+              rating: media['averageScore'] != null ? (media['averageScore'] / 10).toDouble() : null,
             ),
           );
         }
@@ -214,8 +236,7 @@ class AnilistQueries {
   }
 }''';
     final String? token = await getSecureVal(SecureStorageKey.anilistToken);
-    final res = await Anilist().fetchQuery(query, null,
-        token: token, cacheDuration: const Duration(hours: 6));
+    final res = await Anilist().fetchQuery(query, null, token: token, cacheDuration: const Duration(hours: 6));
     final recommendations = res['Page']['recommendations'];
     List<AnilistRecommendations> recommendationList = [];
     for (final item in recommendations) {
@@ -254,15 +275,13 @@ class AnilistQueries {
   }
 }''';
 
-    final Map<String, dynamic> res = await Anilist().fetchQuery(query, null,
-        token: await getSecureVal(SecureStorageKey.anilistToken));
+    final Map<String, dynamic> res =
+        await Anilist().fetchQuery(query, null, token: await getSecureVal(SecureStorageKey.anilistToken));
     final Map<String, dynamic> stats = res['User']['statistics']['anime'];
     List<GenreWatchStats> genres = [];
     for (final genre in stats['genres']) {
-      genres.add(GenreWatchStats(
-          count: genre['count'],
-          genre: genre['genre'],
-          minutesWatched: genre['minutesWatched']));
+      genres
+          .add(GenreWatchStats(count: genre['count'], genre: genre['genre'], minutesWatched: genre['minutesWatched']));
     }
     return AnilistUserStats(
       episodesWatched: stats['episodesWatched'],
@@ -349,8 +368,7 @@ class AnilistQueries {
     String genreString = "";
     String tagString = "";
     if (genres.isNotEmpty) {
-      genreString =
-          "genre_in: " + genres.map((e) => '"$e"').toList().toString();
+      genreString = "genre_in: " + genres.map((e) => '"$e"').toList().toString();
     }
     if (tags.isNotEmpty) {
       tagString = "tag_in: " + tags.map((e) => '"$e"').toList().toString();
@@ -359,8 +377,7 @@ class AnilistQueries {
     final query =
         """{ Page(perPage: 30, page: $page){media(${genreString.isNotEmpty ? "${genreString}," : ''} ${tagString.isNotEmpty ? "${tagString}," : ''} \
         sort: ${sort.value}, type: ANIME, countryOfOrigin:"JP", averageScore_lesser: ${ratingHigh * 10}, averageScore_greater: ${ratingLow * 10}) { id coverImage { large } title { english romaji native } status averageScore } } }""";
-    final res = await Anilist().fetchQuery(query, RequestType.media,
-        cacheDuration: const Duration(minutes: 10));
+    final res = await Anilist().fetchQuery(query, RequestType.media, cacheDuration: const Duration(minutes: 10));
     List<AnimeCardData> results = [];
     for (final item in res) {
       results.add(
@@ -368,8 +385,7 @@ class AnilistQueries {
           cover: item['coverImage']['large'],
           id: item['id'],
           status: item['status'],
-          rating:
-              item['averageScore'] is int ? item['averageScore'] / 10 : null,
+          rating: item['averageScore'] is int ? item['averageScore'] / 10 : null,
           title: {
             'english': item['title']['english'],
             'romaji': item['title']['romaji'],
@@ -408,8 +424,7 @@ class AnilistQueries {
   Future<List<String>> getGenreThumbnail(String genre) async {
     final query =
         """{ Page(perPage: 10){media(genre:"$genre", status: RELEASING, sort: TRENDING_DESC, type: ANIME, countryOfOrigin:"JP") {bannerImage} } }""";
-    final res = await Anilist().fetchQuery(query, RequestType.media,
-        cacheDuration: const Duration(hours: 6));
+    final res = await Anilist().fetchQuery(query, RequestType.media, cacheDuration: const Duration(hours: 6));
     List<String> banners = [];
     for (final item in res) {
       if (item['bannerImage'] != null) {

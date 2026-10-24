@@ -260,3 +260,13 @@ class AnilistUserStats {
   AnilistUserStats(
       {required this.episodesWatched, required this.genres, required this.minutesWatched, required this.notInPlanned});
 }
+
+class AnilistAnimeWatchProgress extends DatabaseAnimeWatchProgress {
+  final int id;
+  final int? progress;
+  final int? totalEpisodes;
+  final String? status;
+
+  AnilistAnimeWatchProgress(
+      { required this.id,required this.progress, required this.totalEpisodes, required this.status});
+}

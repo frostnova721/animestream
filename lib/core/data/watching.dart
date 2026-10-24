@@ -1,3 +1,5 @@
+import "package:animestream/core/commons/utils.dart";
+import "package:animestream/core/database/handler/handler.dart";
 import "package:hive/hive.dart";
 
 import "package:animestream/core/app/logging.dart";
@@ -23,7 +25,7 @@ Future<void> storeWatching(
   try {
     //add to anilist if the user is logged in
     Logs.app.log("SETTING WATCHED TO $watched");
-    if (await AniListLogin().isAnilistLoggedIn()) {
+    if (await DatabaseHandler().isLoggedIn()) {
       SyncHandler()
           .mutateAnimeList(id: id, status: MediaStatus.CURRENT, progress: watched, otherIds: alternateDatabases);
     } else {
@@ -56,7 +58,7 @@ Future<void> storeWatching(
 Future<void> updateWatching(int? id, String title, int watched, List<AlternateDatabaseId> otherIds) async {
   try {
     Logs.app.log("UPDATING WATCHED TO $watched");
-    if (await AniListLogin().isAnilistLoggedIn()) {
+    if (await DatabaseHandler().isLoggedIn()) {
       if (id == null) throw Exception("ERR_NO_ID_PROVIDED");
       SyncHandler().mutateAnimeList(
         id: id,
@@ -87,7 +89,7 @@ Future<void> updateWatching(int? id, String title, int watched, List<AlternateDa
 
 Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   final List<UserAnimeListItem> recentlyWatched = [];
-  if (await AniListLogin().isAnilistLoggedIn()) {
+  if (await AnilistLogin().isLoggedIn()) {
     if (userName != null) {
       List<UserAnimeList> watchedList = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.CURRENT);
       if (watchedList.isEmpty) {
@@ -119,37 +121,35 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   }
 }
 
-/// Returns the watch progress. -1 is returned if entry doesnt exist
-Future<int> getAnimeWatchProgress(int id, MediaStatus? status) async {
-  // if (await AniListLogin().isAnilistLoggedIn() && status != null) {
-  //   if (storedUserData == null) throw Exception("ERR_NO_USERDATA");
-  //   final list = await AnilistQueries().getUserAnimeList(storedUserData!.name, status: status);
-  //   if (list.isEmpty) {
-  //     throw Exception("ERR_${status.name.toUpperCase()}_LIST_IS_EMPTY");
-  //   } else {
-  //     final item = list[0].list.where((item) => item.id == id).firstOrNull;
-  //     return item?.watchProgress ?? -1;
-  //   }
-  // } else {
+
+/// Returns the watch progress and media status. -1 is returned if entry doesnt exist
+Future<(int, MediaStatus?)> getAnimeWatchProgress(int id) async {
+  if (await DatabaseHandler().isLoggedIn()) {
+    // if (storedUserData == null) throw Exception("ERR_NO_USERDATA");
+    final item = await DatabaseHandler().getAnimeWatchProgress(id);
+    return (item.progress ?? 0, assignItemEnum(item.status));
+  } else {
     final box = await Hive.openBox(_boxName);
     final List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
     final item = watching.where((item) => item['id'] == id).firstOrNull;
     await box.close();
     if (item != null) {
-      return item['watched'];
+      // we only store current stuff in local storage, besides its not 
+      // even required when using the app without logging in.
+      return (item['watched'] as int, MediaStatus.CURRENT);
     }
-  // }
-  return -1;
+  }
+  return (0, MediaStatus.CURRENT);
 }
 
 Future<void> removeWatching(int id) async {
   try {
-  final box = await Hive.openBox(_boxName);
-  final List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
-  watching.removeWhere((i) => i['id'] == id);
-  await box.put("watching", watching);
-  await box.close();
-  } catch(err) {
+    final box = await Hive.openBox(_boxName);
+    final List<dynamic> watching = List.castFrom(box.get('watching') ?? []);
+    watching.removeWhere((i) => i['id'] == id);
+    await box.put("watching", watching);
+    await box.close();
+  } catch (err) {
     Logs.app.log("${err.toString()} while removing from local watching list");
   }
 }

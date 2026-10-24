@@ -15,6 +15,12 @@ import 'package:animestream/core/network/network.dart';
 class MALLogin extends DatabaseLogin {
   final _clientId = "165c40bb79c803049c4badcaa90cfd74";
 
+  Future<bool> isLoggedIn() async {
+    final token = await getSecureVal(SecureStorageKey.malToken);
+    if (token == null) return false;
+    return true;
+  }
+
   @override
   Future<bool> initiateLogin() async {
     final verifier = generateCodeVerifier();

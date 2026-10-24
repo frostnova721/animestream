@@ -1,6 +1,7 @@
 //contains base structure for a database
 
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/types.dart';
 
 enum Databases {
@@ -28,12 +29,17 @@ abstract class DatabaseLogin {
   Future<bool> initiateLogin();
   Future<void> removeToken();
   Future<void>? refreshToken();
+  Future<bool> isLoggedIn();
 }
 
 abstract class Database {
   Future<List<DatabaseSearchResult>> search(String query);
 
   Future<DatabaseInfo> getAnimeInfo(int id);
+
+  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id);
+
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status});
 }
 
 abstract class DatabaseMutation {

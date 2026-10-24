@@ -146,46 +146,46 @@ class Anilist extends Database {
       });
 
       final convertedGuy = AnilistInfo(
-          title: {
-            'english': info['title']['english'],
-            'native': info['title']['native'],
-            'romaji': info['title']['romaji'],
-          },
-          aired: {
-            'start':
-                '${info['startDate']['day'] ?? ''} ${MonthnumberToMonthName(info['startDate']['month'])?['short'] ?? ''} ${info['startDate']['year'] ?? ''}',
-            'end':
-                '${info['endDate']['day'] ?? ''} ${MonthnumberToMonthName(info['endDate']['month'])?['short'] ?? ''} ${info['endDate']['year'] ?? ''}',
-          },
-          banner: info['bannerImage'] ?? null,
-          cover: info['coverImage']['large'] ?? info['coverImage']['medium'],
-          duration: '${info['duration'] ?? ''} minutes',
-          episodes: info['episodes'],
-          genres: info['genres'],
-          characters: characters,
-          nextAiringEpisode: (
-            airingAt: info['nextAiringEpisode']?['airingAt'] ?? '',
-            timeLeft: info['nextAiringEpisode']?['timeUntilAiring'] ?? '',
-            episode: info['nextAiringEpisode']?['episode'] ?? '',
-          ),
-          rating: info['averageScore'] != null ? (info['averageScore'] / 10)?.toDouble() : null,
-          recommended: recommended,
-          related: relations,
-          status: info['status'],
-          type: info['type'],
-          studios: studios,
-          synonyms: info['synonyms'],
-          synopsis: info['description'].replaceAll(RegExp(r'<[^>]*>'), "").replaceAll(RegExp(r'\n+'), '\n'),
-          tags: tags,
-          mediaListStatus: info['mediaListEntry']?['status'],
-          listId: info['mediaListEntry']?['id'],
-          alternateDatabases: [
-            AlternateDatabaseId(database: Databases.anilist, id: id),
-            if (info['idMal'] != null) AlternateDatabaseId(database: Databases.mal, id: info['idMal']),
-          ],
-          progress: info['mediaListEntry']?['progress'],
-          userScore: info['mediaListEntry']?['score'],
-          );
+        title: {
+          'english': info['title']['english'],
+          'native': info['title']['native'],
+          'romaji': info['title']['romaji'],
+        },
+        aired: {
+          'start':
+              '${info['startDate']['day'] ?? ''} ${MonthnumberToMonthName(info['startDate']['month'])?['short'] ?? ''} ${info['startDate']['year'] ?? ''}',
+          'end':
+              '${info['endDate']['day'] ?? ''} ${MonthnumberToMonthName(info['endDate']['month'])?['short'] ?? ''} ${info['endDate']['year'] ?? ''}',
+        },
+        banner: info['bannerImage'] ?? null,
+        cover: info['coverImage']['large'] ?? info['coverImage']['medium'],
+        duration: '${info['duration'] ?? ''} minutes',
+        episodes: info['episodes'],
+        genres: info['genres'],
+        characters: characters,
+        nextAiringEpisode: (
+          airingAt: info['nextAiringEpisode']?['airingAt'] ?? '',
+          timeLeft: info['nextAiringEpisode']?['timeUntilAiring'] ?? '',
+          episode: info['nextAiringEpisode']?['episode'] ?? '',
+        ),
+        rating: info['averageScore'] != null ? (info['averageScore'] / 10)?.toDouble() : null,
+        recommended: recommended,
+        related: relations,
+        status: info['status'],
+        type: info['type'],
+        studios: studios,
+        synonyms: info['synonyms'],
+        synopsis: info['description'].replaceAll(RegExp(r'<[^>]*>'), "").replaceAll(RegExp(r'\n+'), '\n'),
+        tags: tags,
+        mediaListStatus: info['mediaListEntry']?['status'],
+        listId: info['mediaListEntry']?['id'],
+        alternateDatabases: [
+          AlternateDatabaseId(database: Databases.anilist, id: id),
+          if (info['idMal'] != null) AlternateDatabaseId(database: Databases.mal, id: info['idMal']),
+        ],
+        progress: info['mediaListEntry']?['progress'],
+        userScore: info['mediaListEntry']?['score'],
+      );
 
       return convertedGuy;
     }
@@ -385,4 +385,11 @@ class Anilist extends Database {
     if (type == RequestType.media) return data?['Page']?['media'];
     if (type == RequestType.recentlyUpdatedAnime) return data?['Page']?['airingSchedules'];
   }
+
+  @override
+  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) => AnilistQueries().getAnimeWatchProgress(id);
+
+  @override
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) =>
+      AnilistQueries().getUserAnimeList(userName, status: status);
 }

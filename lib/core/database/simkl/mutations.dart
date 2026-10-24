@@ -27,7 +27,7 @@ class SimklMutation extends DatabaseMutation {
     // '${now.minute.toString().padLeft(2, '0')}:'
     // '${now.second.toString().padLeft(2, '0')}';
 
-    if (!(await SimklLogin.isLoggedIn())) return null;
+    if (!(await SimklLogin().isLoggedIn())) return null;
 
     //this condition works only for currently watching animes
     if (previousStatus?.name == status?.name)

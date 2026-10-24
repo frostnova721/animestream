@@ -144,9 +144,9 @@ class MainNavProvider extends ChangeNotifier {
       plannedList.state = LoadingState.error;
       return notifyListeners();
     }
-    loggedIn = await AniListLogin().isAnilistLoggedIn();
+    loggedIn = await AnilistLogin().isLoggedIn();
     if (loggedIn) {
-      AniListLogin()
+      AnilistLogin()
           .getUserProfile()
           .then((user) => {
                 _userProfile = user,
@@ -161,7 +161,7 @@ class MainNavProvider extends ChangeNotifier {
           // token is expired, invalid or has its access revoked!
           floatingSnackBar("AniList token is invalid. Login again!");
 
-          await AniListLogin().removeToken();
+          await AnilistLogin().removeToken();
 
           loggedIn = false;
           userProfile = null;
@@ -410,10 +410,10 @@ class MainNavProvider extends ChangeNotifier {
     }
 
     // yes a bit expensive... we could check the userProfile nullability first. but meh
-    loggedIn = await AniListLogin().isAnilistLoggedIn();
+    loggedIn = await AnilistLogin().isLoggedIn();
     if (loggedIn && userProfile == null) {
       //load the userprofile and list if the user just signed in!
-      userProfile = await AniListLogin().getUserProfile();
+      userProfile = await AnilistLogin().getUserProfile();
       storedUserData = userProfile;
       Logs.app.log("[AUTHENTICATION] ${storedUserData?.name} Login Successful");
       await loadListsForHome(userName: userProfile!.name);

@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:animestream/core/app/env.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/version.dart';
+import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/types.dart';
+import 'package:animestream/core/database/types.dart';
 import 'package:animestream/core/network/network.dart';
 
 class Simkl extends Database {
@@ -77,5 +80,17 @@ class Simkl extends Database {
       throw Exception("ERR_COULDNT_FETCH_SIMKL");
     }
     return jsonDecode(res.body);
+  }
+
+  @override
+  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) {
+    // TODO: implement getAnimeWatchProgress
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) {
+    // TODO: implement getUserAnimeList
+    throw UnimplementedError();
   }
 }

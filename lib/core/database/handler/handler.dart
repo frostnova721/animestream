@@ -1,9 +1,14 @@
 //Call the database functions from this!
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/anilist.dart';
+import 'package:animestream/core/database/anilist/login.dart';
+import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/mal/mal.dart';
+import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/types.dart';
 
@@ -29,6 +34,23 @@ class DatabaseHandler extends Database {
     }
   }
 
+  static DatabaseLogin getDatabaseLoginInstance(Databases dbs) {
+    switch (dbs) {
+      case Databases.anilist:
+        return AnilistLogin();
+      case Databases.simkl:
+        return SimklLogin();
+      case Databases.mal:
+        return MALLogin();
+      // default:
+      //   throw Exception("NOT_AN_OPTION_LIL_BRO");
+    }
+  }
+
+  Future<bool> isLoggedIn() async {
+    return await getDatabaseLoginInstance(db).isLoggedIn();
+  }
+
   @override
   Future<List<DatabaseSearchResult>> search(String query) async {
     return await getDatabaseInstance(db).search(query);
@@ -37,5 +59,15 @@ class DatabaseHandler extends Database {
   @override
   Future<DatabaseInfo> getAnimeInfo(int id) async {
     return await getDatabaseInstance(db).getAnimeInfo(id);
+  }
+
+  @override
+  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) async {
+    return await getDatabaseInstance(db).getAnimeWatchProgress(id);
+  }
+
+  @override
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) async {
+    return await getDatabaseInstance(db).getUserAnimeList(userName, status: status);
   }
 }

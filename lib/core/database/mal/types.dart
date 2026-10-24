@@ -49,3 +49,29 @@ class MALAuthResponse {
 class MALMutationResult extends DatabaseMutationResult {
   //idk
 }
+
+class MALAnimeWatchProgress extends DatabaseAnimeWatchProgress {
+  final int id;
+  final int? progress;
+  final int? totalEpisodes;
+  final String? status;
+
+  MALAnimeWatchProgress({
+    required this.id,
+    required this.progress,
+    required this.totalEpisodes,
+    required this.status,
+  });
+
+  factory MALAnimeWatchProgress.fromJson(String jsonString) {
+    final Map<String, dynamic> data = json.decode(jsonString);
+    final myListStatus = data['my_list_status'];
+
+    return MALAnimeWatchProgress(
+      id: data['id'],
+      progress: myListStatus != null ? myListStatus['num_episodes_watched'] : null,
+      totalEpisodes: data['num_episodes'],
+      status: myListStatus != null ? myListStatus['status'] : null,
+    );
+  }
+}

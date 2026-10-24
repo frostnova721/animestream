@@ -11,7 +11,6 @@ import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:animestream/ui/pages/settingPages/cache.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/plugin.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 class GeneralSetting extends StatefulWidget {
@@ -113,7 +112,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                           setState(() {});
                         },
                       ),
-                    if (kDebugMode)
+                    // if (kDebugMode)
                       ClickableItem(
                         onTap: () {
                           showModalBottomSheet(
@@ -123,7 +122,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                             builder: (context) => _databaseSheet(context),
                           );
                         },
-                        label: "Default database",
+                        label: "Default database [Beta]",
                         description: (currentUserSettings?.database?.name ?? Databases.anilist.name),
                         suffixIcon: Icon(Icons.arrow_drop_down),
                       ),

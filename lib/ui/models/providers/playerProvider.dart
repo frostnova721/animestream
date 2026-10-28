@@ -218,12 +218,12 @@ class PlayerProvider extends ChangeNotifier {
       controller.setQuality(q);
       dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
 
-      if (dataProvider.state.audioTracks.isEmpty) {
+      // if (dataProvider.state.audioTracks.isEmpty) {
         final playerAudio = await controller.getAudioTracks();
         if (playerAudio.isNotEmpty) {
           dataProvider.updateAudioTracks(playerAudio);
         }
-      }
+      // }
 
       if (dataProvider.state.audioTracks.isNotEmpty) {
         final isDubStream = dataProvider.state.currentStream.dub;

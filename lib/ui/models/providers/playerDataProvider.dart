@@ -95,7 +95,7 @@ class PlayerDataProvider extends ChangeNotifier {
     }
     try {
       final master = await parseMasterPlaylist(url, customHeader: headers);
-      _state = _state.copyWith(qualities: master.qualityStreams, audioTracks: master.audioStreams);
+      _state = _state.copyWith(qualities: master.qualityStreams);
     } catch (e) {
       // just a backup, the code shouldnt reach here, but my luck... brooo....
       _state = _state.copyWith(

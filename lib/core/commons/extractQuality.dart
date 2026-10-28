@@ -7,8 +7,7 @@ class ParsedHlsMaster {
   final List<QualityStream> qualityStreams;
   final List<AudioStream> audioStreams;
 
-  const ParsedHlsMaster(
-      {required this.audioStreams, required this.qualityStreams});
+  const ParsedHlsMaster({required this.audioStreams, required this.qualityStreams});
 
   factory ParsedHlsMaster.defaultStream(String streamUrl) {
     return ParsedHlsMaster(audioStreams: [], qualityStreams: [
@@ -25,20 +24,10 @@ class AudioStreamBuilder {
   String? groupId;
 
   AudioStream build() {
-    if (language == null ||
-        url == null ||
-        name == null ||
-        channels == null ||
-        groupId == null) {
-      throw Exception(
-          "One of the required arguments for the AudioStream was received as null");
+    if (language == null || url == null || name == null || channels == null || groupId == null) {
+      throw Exception("One of the required arguments for the AudioStream was received as null");
     }
-    return AudioStream(
-        groupId: groupId!,
-        name: name!,
-        url: url!,
-        language: language!,
-        channels: channels!);
+    return AudioStream(groupId: groupId!, name: name!, url: url!, language: language!, channels: channels!);
   }
 
   void addGroupId(String groupId) => this.groupId = groupId;
@@ -69,11 +58,7 @@ class AudioStream {
 
   factory AudioStream.placeholder() {
     return AudioStream(
-        groupId: "who cares",
-        name: "mic testing!",
-        url: "placeholder",
-        language: "english",
-        channels: "stereo");
+        groupId: "who cares", name: "mic testing!", url: "placeholder", language: "english", channels: "stereo");
   }
 
   bool get isEnglish {
@@ -141,22 +126,15 @@ class QualityStreamBuilder {
   QualityStream build() {
     if (quality == null || url == null || resolution == null) {
       print("res: $resolution, url: $url, quality: $quality");
-      throw Exception(
-          "One of the required arguments for the QualityStream was received as null");
+      throw Exception("One of the required arguments for the QualityStream was received as null");
     }
     return QualityStream(
-        quality: quality!,
-        url: url!,
-        resolution: resolution!,
-        audioGroup: audioGroup,
-        bandwidth: bandwidth);
+        quality: quality!, url: url!, resolution: resolution!, audioGroup: audioGroup, bandwidth: bandwidth);
   }
 }
 
-Future<bool> isM3u8Playlist(String url,
-    {Map<String, String>? customHeader = null}) async {
-  if (url.toLowerCase().split('?').firstOrNull?.endsWith(".m3u8") ?? false)
-    return true;
+Future<bool> isM3u8Playlist(String url, {Map<String, String>? customHeader = null}) async {
+  if (url.toLowerCase().split('?').firstOrNull?.endsWith(".m3u8") ?? false) return true;
 
   // This is very weak, to video files. If they dont support the range header!
   try {
@@ -194,8 +172,15 @@ Future<bool> isM3u8Playlist(String url,
   }
 }
 
-Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl,
-    {Map<String, String>? customHeader = null}) async {
+Map<String, String> _parseAttributes(String line) {
+  final attrs = <String, String>{};
+  for (final m in RegExp(r'([A-Z0-9\-]+)=(".*?"|[^,]*)').allMatches(line)) {
+    attrs[m.group(1)!] = m.group(2)!.replaceAll('"', '');
+  }
+  return attrs;
+}
+
+Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl, {Map<String, String>? customHeader = null}) async {
   List<AudioStream> audioStreams = [];
   List<QualityStream> qualityStreams = [];
 
@@ -209,8 +194,7 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl,
     cacheDuration: const Duration(hours: 1),
   ))
       .body;
-  List<String> lines =
-      content.trim().split("\n").where((e) => e.isNotEmpty).toList();
+  List<String> lines = content.trim().split("\n").where((e) => e.isNotEmpty).toList();
   // lines = lines.where((it) => !it.startsWith("EXT-X-MEDIA")).toList().first.split("\n");
 
   // final regex = RegExp(r'RESOLUTION=(\d+x\d+)');
@@ -222,36 +206,31 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl,
       // if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA") || line.startsWith("#EXT-X-VERSION"))
       if (line.startsWith("#EXT-X-MEDIA:TYPE=AUDIO")) {
         final asb = AudioStreamBuilder();
-        final items = line
-            .split(",")
-            .sublist(1); // this will remove the "#EXT-X-MEDIA:TYPE=AUDIO" part
-        for (final it in items) {
-          final kvPair = it.split("=");
-          if (kvPair.length < 2) {
-            print(
-                "Possible malformed playlist. Skipping the element '$kvPair'.");
-            continue;
-          }
+        final attrs = _parseAttributes(line);
+        // final items = line
+        //     .split(RegExp(r',(?=(?:[^"]*"[^"]*")*[^"]*$)')).sublist(1); // this will remove the "#EXT-X-MEDIA:TYPE=AUDIO" part
+        // for (final it in items) {
+        // final kvPair = it.split("=");
+        // if (kvPair.length < 2) {
+        //   print(
+        //       "Possible malformed playlist. Skipping the audio element '$kvPair'.");
+        //   continue;
+        // }
 
-          // in hopes that the playlist will contain everything we neeed!
-          switch (kvPair[0]) {
-            case "GROUP-ID":
-              asb.addGroupId(kvPair[1].replaceAll('"', ''));
-            case "LANGUAGE":
-              asb.addLanguage(kvPair[1].replaceAll('"', ''));
-            case "CHANNELS":
-              asb.addChannels(kvPair[1].replaceAll('"', ''));
-            case "NAME":
-              asb.addName(kvPair[1].replaceAll('"', ''));
-            case "URI":
-              {
-                final linkPart = kvPair[1].replaceAll('"', '');
-                asb.addUrl(linkPart.startsWith('http')
-                    ? linkPart
-                    : "${_makeBaseLink(streamUrl)}/$linkPart");
-              }
-          }
+        // in hopes that the playlist will contain everything we neeed!
+        if (attrs.containsKey("GROUP-ID")) asb.addGroupId(attrs["GROUP-ID"]!);
+
+        if (attrs.containsKey("LANGUAGE")) asb.addLanguage(attrs["LANGUAGE"]!);
+
+        if (attrs.containsKey("CHANNELS")) asb.addChannels(attrs["CHANNELS"]!);
+
+        if (attrs.containsKey("NAME")) asb.addName(attrs["NAME"]!);
+        if (attrs.containsKey("URI")) {
+          final linkPart = attrs["URI"]!;
+          asb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
         }
+        // }
+        // }
 
         audioStreams.add(asb.build());
       }
@@ -276,13 +255,9 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl,
       final urlLine = lines[i + 1];
       final linkPart = urlLine.trim().replaceAll('"', '');
       if (linkPart.length > 1)
-        qsb.addUrl(linkPart.startsWith('http')
-            ? linkPart
-            : "${_makeBaseLink(streamUrl)}/$linkPart");
+        qsb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
 
-      final quality = qsb.resolution != null
-          ? qsb.resolution!.split('x')[1] + "p"
-          : "default";
+      final quality = qsb.resolution != null ? qsb.resolution!.split('x')[1] + "p" : "default";
       qsb.addQuality(quality);
 
       qualityStreams.add(qsb.build());
@@ -301,8 +276,7 @@ Future<ParsedHlsMaster> parseMasterPlaylist(String streamUrl,
     return ParsedHlsMaster.defaultStream(streamUrl);
   }
 
-  final grouped = ParsedHlsMaster(
-      audioStreams: audioStreams, qualityStreams: qualityStreams);
+  final grouped = ParsedHlsMaster(audioStreams: audioStreams, qualityStreams: qualityStreams);
 
   return grouped;
 }

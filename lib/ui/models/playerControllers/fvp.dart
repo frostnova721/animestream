@@ -1,10 +1,13 @@
 import 'dart:io';
 
+import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:fvp/fvp.dart';
+import 'package:fvp/mdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
+import 'package:collection/collection.dart';
 
 class FvpWrapper implements VideoController {
   VideoPlayerController controller = VideoPlayerController.networkUrl(Uri.parse(""));
@@ -29,7 +32,7 @@ class FvpWrapper implements VideoController {
 
   @override
   Widget getWidget() {
-    return AspectRatio(aspectRatio: 16/9 ,child: VideoPlayer(controller));
+    return AspectRatio(aspectRatio: 16 / 9, child: VideoPlayer(controller));
   }
 
   @override
@@ -37,14 +40,17 @@ class FvpWrapper implements VideoController {
     final vol = controllerInitialized ? controller.value.volume : 0.8;
 
     // kill the last controller
-    if(controllerInitialized) {
+    if (controllerInitialized) {
       await controller.dispose();
       controllerInitialized = false;
     }
 
     controller = offline
         ? VideoPlayerController.file(File(url))
-        : VideoPlayerController.networkUrl(Uri.parse(url), httpHeaders: headers ?? {},);
+        : VideoPlayerController.networkUrl(
+            Uri.parse(url),
+            httpHeaders: headers ?? {},
+          );
 
     controllerInitialized = true;
 
@@ -54,7 +60,7 @@ class FvpWrapper implements VideoController {
       controller.setSubtitleTracks([]);
     } catch (_) {}
 
-    for(int i=0; i<listeners.length; i++) {
+    for (int i = 0; i < listeners.length; i++) {
       controller.addListener(listeners[i]);
     }
     await controller.setVolume(vol);
@@ -83,12 +89,11 @@ class FvpWrapper implements VideoController {
   @override
   int? get position => controller.value.position.inMilliseconds;
 
-   @override
+  @override
   void addListener(VoidCallback cb) {
     controller.addListener(cb);
     listeners.add(cb);
   }
-
 
   @override
   void removeListener(VoidCallback cb) {
@@ -109,7 +114,7 @@ class FvpWrapper implements VideoController {
       if (audioTracks == null || audioTracks.isEmpty) return [];
       return audioTracks.map((info) {
         final lang = info.metadata['language'] ?? info.metadata['LANGUAGE'] ?? 'und';
-        final title = info.metadata['title'] ?? info.metadata['TITLE'] ?? lang;
+        final title = info.metadata['title'] ?? info.metadata['TITLE'] ?? info.metadata['comment'] ?? info.metadata['COMMENT'] ?? "Track ${info.index}";
         return AudioStream(
           groupId: info.index.toString(),
           name: title,
@@ -126,8 +131,12 @@ class FvpWrapper implements VideoController {
   @override
   void setAudioTrack(AudioStream aud) async {
     final idx = int.tryParse(aud.groupId);
+    print(idx);
     if (idx != null) {
       controller.setAudioTracks([idx]);
+    } else {
+      Logs.player
+          .log("Failed to set audio track in FvpWrapper: No index found for track '${aud.name}' (${aud.language})");
     }
   }
 
@@ -143,7 +152,10 @@ class FvpWrapper implements VideoController {
 
   @override
   void setQuality(QualityStream qs) async {
-    await initiateVideo(qs.url, headers: controller.httpHeaders, offline: false);
+    final videoTracks = await controller.getMediaInfo();
+    // final videoTrack = videoTracks?.video.firstWhereOrNull((t) => t.index.toString() == qs.groupId);
+    // await controller.selectVideoTrack();
+    // await initiateVideo(qs.url, headers: controller.httpHeaders, offline: false);
   }
 
   @override

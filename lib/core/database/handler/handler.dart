@@ -67,7 +67,7 @@ class DatabaseHandler extends Database {
   }
 
   @override
-  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) async {
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) async {
     return await getDatabaseInstance(db).getUserAnimeList(userName, status: status);
   }
 }

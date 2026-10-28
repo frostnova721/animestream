@@ -65,7 +65,7 @@ class MAL extends Database {
   }
 
   @override
-  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) {
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) {
     // TODO: implement getUserAnimeList
     throw UnimplementedError();
   }

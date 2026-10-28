@@ -146,3 +146,76 @@ class SimklInfo extends DatabaseInfo {
 
 //idk just leave this mf here
 class SimklMutationResult extends DatabaseMutationResult {}
+
+
+class SimklAnimeWatchProgress extends DatabaseAnimeWatchProgress {
+  final int id;
+  final int? progress;
+  final int? totalEpisodes;
+  final String? status;
+
+  SimklAnimeWatchProgress({
+    required this.id,
+    required this.progress,
+    required this.totalEpisodes,
+    required this.status,
+  });
+
+  factory SimklAnimeWatchProgress.fromJson(int animeId, dynamic data) {
+    Map<String, dynamic>? item;
+
+    if (data is List && data.isNotEmpty) {
+      final match = data.firstWhere(
+        (it) =>
+            it is Map &&
+            (it['ids']?['simkl'] == animeId || it['anime']?['ids']?['simkl'] == animeId),
+        orElse: () => data.first,
+      );
+      if (match is Map<String, dynamic>) {
+        item = match;
+      }
+    } else if (data is Map<String, dynamic>) {
+      if (data['anime'] is List && (data['anime'] as List).isNotEmpty) {
+        final first = (data['anime'] as List).first;
+        if (first is Map<String, dynamic>) item = first;
+      } else if (data['shows'] is List && (data['shows'] as List).isNotEmpty) {
+        final first = (data['shows'] as List).first;
+        if (first is Map<String, dynamic>) item = first;
+      } else if (data.containsKey('list') ||
+          data.containsKey('status') ||
+          data.containsKey('episodes_watched')) {
+        item = data;
+      }
+    }
+
+    int? parseInt(dynamic val) {
+      if (val == null) return null;
+      if (val is int) return val;
+      return int.tryParse(val.toString());
+    }
+
+    int? progress;
+    int? totalEpisodes;
+    String? status;
+
+    if (item != null) {
+      progress = parseInt(item['episodes_watched'] ??
+          item['episodes_watched_count'] ??
+          item['watched_episodes_count']);
+      totalEpisodes = parseInt(item['episodes_total'] ??
+          item['total_episodes_count'] ??
+          item['total_episodes'] ??
+          item['anime']?['episodes_total'] ??
+          item['anime']?['total_episodes'] ??
+          item['show']?['episodes_total']);
+      status = (item['list'] ?? item['status'])?.toString();
+    }
+
+    return SimklAnimeWatchProgress(
+      id: animeId,
+      progress: progress,
+      totalEpisodes: totalEpisodes,
+      status: status,
+    );
+  }
+}

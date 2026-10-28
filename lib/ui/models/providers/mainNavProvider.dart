@@ -275,7 +275,7 @@ class MainNavProvider extends ChangeNotifier {
 
       // fetches "from your planned" list
       if (userName != null)
-        AnilistQueries().getUserAnimeList(userName, status: MediaStatus.PLANNING).onError((e, st) {
+        AnilistQueries().getUserAnimeList(userName, status: [MediaStatus.PLANNING]).onError((e, st) {
           plannedList.state = LoadingState.error;
           Logs.app.log("Error fetching planned list. $e");
           return <UserAnimeList>[];

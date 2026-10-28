@@ -91,7 +91,7 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
   final List<UserAnimeListItem> recentlyWatched = [];
   if (await AnilistLogin().isLoggedIn()) {
     if (userName != null) {
-      List<UserAnimeList> watchedList = await AnilistQueries().getUserAnimeList(userName, status: MediaStatus.CURRENT);
+      List<UserAnimeList> watchedList = await AnilistQueries().getUserAnimeList(userName, status: [MediaStatus.CURRENT]);
       if (watchedList.isEmpty) {
         return [];
       }
@@ -125,7 +125,6 @@ Future<List<UserAnimeListItem>> getWatchedList({String? userName}) async {
 /// Returns the watch progress and media status. -1 is returned if entry doesnt exist
 Future<(int, MediaStatus?)> getAnimeWatchProgress(int id) async {
   if (await DatabaseHandler().isLoggedIn()) {
-    // if (storedUserData == null) throw Exception("ERR_NO_USERDATA");
     final item = await DatabaseHandler().getAnimeWatchProgress(id);
     return (item.progress ?? 0, assignItemEnum(item.status));
   } else {
@@ -139,7 +138,7 @@ Future<(int, MediaStatus?)> getAnimeWatchProgress(int id) async {
       return (item['watched'] as int, MediaStatus.CURRENT);
     }
   }
-  return (0, MediaStatus.CURRENT);
+  return (0, null);
 }
 
 Future<void> removeWatching(int id) async {

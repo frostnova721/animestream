@@ -14,6 +14,7 @@ class HttpResponse {
   final Uint8List bodyBytes;
   final String? reasonPhrase;
   final HttpRequestInfo? request;
+  final bool cached;
 
   HttpResponse(
     this.statusCode,
@@ -22,6 +23,7 @@ class HttpResponse {
     Uint8List? bodyBytes,
     this.reasonPhrase,
     this.request,
+    this.cached = false,
   })  : headers = headers ?? {},
         bodyBytes = bodyBytes ?? Uint8List.fromList(utf8.encode(body));
 

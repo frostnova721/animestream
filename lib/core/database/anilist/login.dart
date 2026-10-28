@@ -55,7 +55,7 @@ class AnilistLogin extends DatabaseLogin {
     final String? token = await getSecureVal(SecureStorageKey.anilistToken);
     if (token == null) throw new Exception("ERR_COULDNT_GET_TOKEN");
 
-    final res = await Anilist().fetchQuery(query, null, token: token);
+    final res = await Anilist().fetchQuery(query, null, token: token, cacheDuration: const Duration(hours: 12));
 
     final data = res['Viewer'];
     return UserModal(

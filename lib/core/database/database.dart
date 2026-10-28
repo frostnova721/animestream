@@ -39,7 +39,7 @@ abstract class Database {
 
   Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id);
 
-  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status});
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status});
 }
 
 abstract class DatabaseMutation {

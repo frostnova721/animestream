@@ -5,6 +5,9 @@ import 'package:animestream/core/app/env.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/version.dart';
 import 'package:animestream/core/commons/enums.dart';
+import 'package:animestream/core/app/values.dart';
+import 'package:animestream/core/data/secureStorage.dart';
+
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/types.dart';
@@ -26,7 +29,7 @@ class Simkl extends Database {
 
       final client = HttpClient();
       client.connectionTimeout = const Duration(seconds: 4);
-      final uri = Uri.parse("https://api.simkl.com/redirect?$queryParam");
+      final uri = Uri.parse("https://api.simkl.com/redirect?$queryParam&$_appHeader");
       final request = await client.getUrl(uri).timeout(const Duration(seconds: 4));
       request.followRedirects = false;
       final response = await request.close().timeout(const Duration(seconds: 4));
@@ -54,17 +57,14 @@ class Simkl extends Database {
       sr.add(SimklSearchResult(
         cover: imageLink(it['poster']),
         id: it['ids']['simkl_id'],
-        title: {
-          'english': it['title_en'] ?? it['title'],
-          'romaji': it['title_romaji'] ?? it['title']
-        },
+        title: {'english': it['title_en'] ?? it['title'], 'romaji': it['title_romaji'] ?? it['title']},
       ));
     });
 
     return sr;
   }
 
-  Future<SimklInfo> getAnimeInfo(int id) async {
+  Future<SimklInfo> getAnimeInfo(int id, {Duration? cacheDuration = Duration.zero}) async {
     final url =
         "https://api.simkl.com/anime/$id?extended=full&client_id=${AnimeStreamEnvironment.simklClientId}&$_appHeader";
     final res = await fetch(url);
@@ -83,13 +83,70 @@ class Simkl extends Database {
   }
 
   @override
-  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) {
-    // TODO: implement getAnimeWatchProgress
-    throw UnimplementedError();
+  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) async {
+    final token = await getSecureVal(SecureStorageKey.simklToken);
+    if (token == null || token.isEmpty) {
+      return SimklAnimeWatchProgress(
+        id: id,
+        progress: null,
+        totalEpisodes: null,
+        status: null,
+      );
+    }
+
+    final url =
+        "https://api.simkl.com/sync/watched?extended=counters&client_id=${AnimeStreamEnvironment.simklClientId}&$_appHeader";
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer $token',
+      'simkl-api-key': AnimeStreamEnvironment.simklClientId,
+      if (AppValues.defaultClientUserAgent.isNotEmpty)
+        'User-Agent': AppValues.defaultClientUserAgent,
+    };
+
+    final body = jsonEncode([
+      {
+        'ids': {'simkl': id}
+      }
+    ]);
+
+    final res = await post(Uri.parse(url), headers: headers, body: body);
+
+    if (res.statusCode == 404) {
+      return SimklAnimeWatchProgress(
+        id: id,
+        progress: null,
+        totalEpisodes: null,
+        status: null,
+      );
+    }
+
+    if (res.statusCode < 200 || res.statusCode > 299) {
+      if (res.statusCode == 401) {
+        throw SimklException("Unauthorized - Invalid Token", 401);
+      }
+      throw SimklException(
+        "Failed to fetch Simkl watch progress: ${res.statusCode}",
+        res.statusCode,
+      );
+    }
+
+    if (res.body.trim().isEmpty) {
+      return SimklAnimeWatchProgress(
+        id: id,
+        progress: null,
+        totalEpisodes: null,
+        status: null,
+      );
+    }
+
+    final decoded = jsonDecode(res.body);
+    return SimklAnimeWatchProgress.fromJson(id, decoded);
   }
 
   @override
-  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) {
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) {
     // TODO: implement getUserAnimeList
     throw UnimplementedError();
   }

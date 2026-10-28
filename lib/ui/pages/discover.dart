@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/scrollingList.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
@@ -272,10 +273,14 @@ class _DiscoverState extends State<Discover> {
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(20),
-                          child: Image.network(
-                            trendingList[moddedIndex].cover,
+                          child: CachedNetworkImage(
+                            imageUrl: trendingList[moddedIndex].cover,
                             height: 170,
                             width: 120,
+                            fit: BoxFit.cover,
+                            placeholder: (context, url) => Container(
+                              color: appTheme.backgroundSubColor,
+                            )
                           ),
                         ),
                         Container(

@@ -81,6 +81,7 @@ class HTTP {
           bodyBytes: Uint8List.fromList(cached.bodyBytes),
           headers: {'content-type': 'application/json'},
           request: HttpRequestInfo(uri),
+          cached: true,
         );
       }
     }
@@ -126,12 +127,18 @@ class HTTP {
       (buffer, element) => buffer..addAll(element),
     );
     final resBody = utf8.decode(bytes, allowMalformed: true);
+
+    final responseHeaders = <String, String>{};
+    res.headers.forEach((name, values) {
+      responseHeaders[name.toLowerCase()] = values.join(', ');
+    });
+
     final response = HttpResponse(
       res.statusCode,
       resBody,
       bodyBytes: Uint8List.fromList(bytes),
       reasonPhrase: res.reasonPhrase,
-      headers: res.headers.contentType == null ? {} : {'content-type': res.headers.contentType!.mimeType},
+      headers: responseHeaders,
       request: HttpRequestInfo(uri),
     );
 

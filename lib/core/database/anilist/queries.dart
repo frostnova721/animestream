@@ -30,9 +30,15 @@ class AnilistQueries {
     return progress;
   }
 
-  Future<List<UserAnimeList>> getUserAnimeList(String userName, {MediaStatus? status}) async {
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) async {
+    final statusStr = 
+        (status != null && status.isNotEmpty)
+            ? status.length > 1
+                ? ", status_in: [${status.map((s) => s.name).join(', ')}]"
+                : ", status: ${status.first.name}"
+            : "";
     final query = '''query {
-  MediaListCollection(userName: "$userName", type: ANIME ${status != null ? ", status: ${status.name}" : ''}, sort: UPDATED_TIME) {
+  MediaListCollection(userName: "$userName", type: ANIME${statusStr}, sort: UPDATED_TIME) {
     lists {
       name
       entries {
@@ -275,8 +281,9 @@ class AnilistQueries {
   }
 }''';
 
-    final Map<String, dynamic> res =
-        await Anilist().fetchQuery(query, null, token: await getSecureVal(SecureStorageKey.anilistToken));
+    // cache this req for 4 hours since, they rarely update
+    final Map<String, dynamic> res = await Anilist().fetchQuery(query, null,
+        token: await getSecureVal(SecureStorageKey.anilistToken), cacheDuration: Duration(hours: 4));
     final Map<String, dynamic> stats = res['User']['statistics']['anime'];
     List<GenreWatchStats> genres = [];
     for (final genre in stats['genres']) {

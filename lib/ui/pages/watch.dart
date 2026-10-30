@@ -103,61 +103,15 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
     dataProvider.initSubsettings();
 
-    if (!widget.localSource) {
-      await dataProvider.extractCurrentStreamQualities();
-
-      final q = dataProvider.getPreferredQualityStreamFromQualities();
-
-      dataProvider.updateCurrentQuality(q);
-
-      await controller.initiateVideo(dataProvider.state.currentStream.url,
-          headers: dataProvider.state.currentStream.customHeaders);
-
-      controller.setQuality(q);
-
-      // Fetch those skips
-      dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
-
-      // if (dataProvider.state.audioTracks.isEmpty) {
-        final playerAudio = await controller.getAudioTracks();
-        if (playerAudio.isNotEmpty) {
-          dataProvider.updateAudioTracks(playerAudio);
-        }
-      // }
-
-      if (dataProvider.state.audioTracks.isNotEmpty) {
-        final isDubStream = dataProvider.state.currentStream.dub;
-        AudioStream? selectedTrack;
-        if (isDubStream || dataProvider.preferDubs) {
-          selectedTrack = dataProvider.state.audioTracks.firstWhereOrNull((t) => t.isEnglish);
-        }
-        selectedTrack ??= dataProvider.state.audioTracks.first;
-
-        dataProvider.updateCurrentAudioTrack(selectedTrack);
-        controller.setAudioTrack(selectedTrack);
-
-        Logs.player.log("set audio track to ${selectedTrack.language}");
-      } else {
-        Logs.player.log("Couldnt find seperate audio tracks for this stream");
-      }
-    } else {
-      await controller.initiateVideo(dataProvider.state.currentStream.url, offline: true);
-      final playerAudio = await controller.getAudioTracks();
-      if (playerAudio.isNotEmpty) {
-        dataProvider.updateAudioTracks(playerAudio);
-        dataProvider.updateCurrentAudioTrack(playerAudio.first);
-        controller.setAudioTrack(playerAudio.first);
-      }
-    }
-
     final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);
     final totalMs = controller.duration ?? 0;
     final lastWatchDuration = totalMs <= 0 ? 0 : ((lastWatchPct / 100) * totalMs).toInt();
-
-    // await dataProvider.updateDiscordPresence();
-
-    // Seek to last watched part
-    await controller.seekTo(Duration(milliseconds: lastWatchDuration)); //percentage to value
+    await context.read<PlayerProvider>().playVideo(
+          stream: dataProvider.state.currentStream,
+          dataProvider: dataProvider,
+          offline: widget.localSource,
+          startFromMs: lastWatchDuration,
+        );
 
     if (mounted) context.read<PlayerProvider>().toggleSubs(action: dataProvider.state.currentStream.subtitle != null);
 
@@ -467,9 +421,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
             onSpeedUpStart: () {
               final pp = context.read<PlayerProvider>();
               final dp = context.read<PlayerDataProvider>();
-              if (pp.state.playerState == PlayerState.playing &&
-                  !isDesktop &&
-                  !dp.state.controlsLocked) {
+              if (pp.state.playerState == PlayerState.playing && !isDesktop && !dp.state.controlsLocked) {
                 spedUp = true;
                 lastSpeed = pp.state.speed;
                 // ensure atleast 2x speed on long press and max of 10x (max available speed)
@@ -522,17 +474,14 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
               });
             },
             child: MouseRegion(
-              cursor: controlsVisible || !hidePointer
-                  ? SystemMouseCursors.basic
-                  : SystemMouseCursors.none,
+              cursor: controlsVisible || !hidePointer ? SystemMouseCursors.basic : SystemMouseCursors.none,
               child: Stack(
                 children: [
                   Player(controller),
                   if (showSubs && currentStream.subtitle != null)
                     SubViewer(
                       controller: controller,
-                      format: SubtitleFormat.fromName(
-                          currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
+                      format: SubtitleFormat.fromName(currentStream.subtitleFormat ?? SubtitleFormat.ASS.name),
                       subtitleSource: currentStream.subtitle!,
                       settings: subtitleSettings,
                       headers: currentStream.customHeaders,

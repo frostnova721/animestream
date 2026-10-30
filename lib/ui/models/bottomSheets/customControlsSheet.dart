@@ -56,7 +56,8 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
       currentSources = dp.state.streams;
       _isLoading = false;
     } else {
-      await SourceManager.instance.getStreams(dp.selectedSource, dp.epLinks[index].episodeLink, dub: dp.preferDubs, metadata: dp.epLinks[index].metadata,(list, finished) {
+      await SourceManager.instance.getStreams(dp.selectedSource, dp.epLinks[index].episodeLink,
+          dub: dp.preferDubs, metadata: dp.epLinks[index].metadata, (list, finished) {
         if (list.length > 0) {
           if (mounted)
             setState(() {
@@ -81,35 +82,12 @@ class CustomControls_BottomSheetState extends State<CustomControlsBottomSheet> {
   }
 
   void play() async {
-    await dp.extractCurrentStreamQualities().then((val) async {
-      // final q = dp.getPreferredQualityStreamFromQualities();
-      final q = dp.getPreferredQualityStreamFromQualities();
-
-      // start the stream with the desired quality
-      await pp.playVideo(dp.state.currentStream.url,
-          currentStream: dp.state.currentStream, preserveProgress: index == dp.state.currentEpIndex);
-      
-      // update audio tracks
-      final audioTracks = await pp.controller.getAudioTracks();
-      dp.updateAudioTracks(audioTracks);
-      if(audioTracks.isNotEmpty) {
-        final prevAudioTrack = dp.state.currentAudioTrack;
-        final preferredAudioTrack = audioTracks.firstWhere((e) => e.language == prevAudioTrack.language);
-        dp.updateCurrentAudioTrack(preferredAudioTrack);
-      }
-      await pp.setQuality(q);
-
-      dp.getSkipTimesForCurrentEpisode(videoDuration: (pp.controller.duration ?? 0).toDouble());
-
-      dp.update(dp.state.copyWith(
-        currentQuality: q,
-        currentEpIndex: index,
-        preloadStarted: false,
-        preloadedSources: [],
-        sliderValue: index == dp.state.currentEpIndex ? null : 0,
-      ));
-      // dp.updateDiscordPresence();
-    });
+    await pp.playVideo(
+      stream: dp.state.currentStream,
+      dataProvider: dp,
+      episodeIndex: index,
+      preserveProgress: index == dp.state.currentEpIndex,
+    );
   }
 
   @override

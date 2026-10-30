@@ -58,7 +58,7 @@ class AudioStream {
 
   factory AudioStream.placeholder() {
     return AudioStream(
-        groupId: "who cares", name: "mic testing!", url: "placeholder", language: "english", channels: "stereo");
+        groupId: "who cares", name: "mic testing!", url: "placeholder", language: "gibberish", channels: "stereo");
   }
 
   bool get isEnglish {

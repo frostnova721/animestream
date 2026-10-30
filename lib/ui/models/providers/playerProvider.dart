@@ -53,21 +53,75 @@ class PlayerProvider extends ChangeNotifier {
       ];
 
   /// Play a media
-  Future<void> playVideo(
-    String url, {
-    required VideoStream currentStream,
+  Future<void> playVideo({
+    required VideoStream stream,
+    required PlayerDataProvider dataProvider,
     bool offline = false,
     bool preserveProgress = false,
-    // List<VideoStream>? streams,
+    int? episodeIndex,
+    int? startFromMs,
   }) async {
-    int? seekTime = null;
+    int? seekTime = startFromMs;
     if (preserveProgress) {
       seekTime = _controller.position ?? 0;
       await _controller.pause();
     }
-    await _controller.initiateVideo(url, headers: currentStream.customHeaders, offline: offline);
+
+    final targetEpIndex = episodeIndex ?? dataProvider.state.currentEpIndex;
+
+    dataProvider.update(dataProvider.state.copyWith(
+      currentEpIndex: targetEpIndex,
+      currentStream: stream,
+      preloadStarted: false,
+      preloadedSources: [],
+      sliderValue: seekTime != null ? seekTime : 0,
+    ));
+
+    // quality extraction
+    if (!offline) {
+      await dataProvider.extractCurrentStreamQualities();
+    } else {
+      dataProvider.update(dataProvider.state.copyWith(qualities: [
+        QualityStream(
+          url: stream.url,
+          resolution: "default",
+          quality: stream.quality,
+        )
+      ]));
+    }
+
+    final q = dataProvider.getPreferredQualityStreamFromQualities();
+    dataProvider.updateCurrentQuality(q);
+
+    await _controller.initiateVideo(stream.url, headers: stream.customHeaders, offline: offline);
 
     if (seekTime != null) await _controller.seekTo(Duration(milliseconds: seekTime));
+
+    controller.setQuality(dataProvider.state.currentQuality);
+
+    // get aniskip timestamps
+    if (!offline) dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
+
+    final audioTracks = await _controller.getAudioTracks();
+    if (audioTracks.isNotEmpty) {
+      dataProvider.updateAudioTracks(audioTracks);
+
+      // apply dub if possible
+      if (stream.dub || dataProvider.preferDubs) {
+        final dubTrack = audioTracks.firstWhereOrNull((t) => t.isEnglish);
+        if (dubTrack != null) {
+          dataProvider.updateCurrentAudioTrack(dubTrack);
+          _controller.setAudioTrack(dubTrack);
+          return;
+        }
+      }
+
+      // otherwise fallback to a prev used or first audio track
+      final prevAudioTrack = dataProvider.state.currentAudioTrack;
+      final preferred = audioTracks.firstWhereOrNull((it) => it.language == prevAudioTrack.language);
+      dataProvider.updateCurrentAudioTrack(preferred ?? audioTracks.first);
+      _controller.setAudioTrack(preferred ?? audioTracks.first);
+    }
   }
 
   /// Fast forward / Seek n seconds
@@ -206,36 +260,12 @@ class PlayerProvider extends ChangeNotifier {
         preloadedSources: [],
       ));
 
-      await dataProvider.extractCurrentStreamQualities();
-
-      final q = dataProvider.getPreferredQualityStreamFromQualities();
-
-      dataProvider.updateCurrentQuality(q);
-
-      // Start the video and set the preffered quality
-      await controller.initiateVideo(src.url, headers: src.customHeaders);
-
-      controller.setQuality(q);
-      dataProvider.getSkipTimesForCurrentEpisode(videoDuration: (controller.duration ?? 0).toDouble());
-
-      // if (dataProvider.state.audioTracks.isEmpty) {
-        final playerAudio = await controller.getAudioTracks();
-        if (playerAudio.isNotEmpty) {
-          dataProvider.updateAudioTracks(playerAudio);
-        }
-      // }
-
-      if (dataProvider.state.audioTracks.isNotEmpty) {
-        final isDubStream = dataProvider.state.currentStream.dub;
-        AudioStream? selectedTrack;
-        if (isDubStream || dataProvider.preferDubs) {
-          selectedTrack = dataProvider.state.audioTracks.firstWhereOrNull((t) => t.isEnglish);
-        }
-        selectedTrack ??= dataProvider.state.audioTracks.first;
-
-        dataProvider.updateCurrentAudioTrack(selectedTrack);
-        controller.setAudioTrack(selectedTrack);
-      }
+      await playVideo(
+        stream: src,
+        dataProvider: dataProvider,
+        episodeIndex: dataProvider.state.currentEpIndex + 1,
+        preserveProgress: false,
+      );
     } else {
       Logs.player.log("No preloaded sources found!");
     }
@@ -246,21 +276,19 @@ class PlayerProvider extends ChangeNotifier {
   bool _wasMaximized = false;
   Offset _positionBefore = Offset(0, 0);
 
-  
-
   void _disablePip() async {
     windowManager.setAlwaysOnTop(false);
     await windowManager.setSize(_windowSizeBefore);
     windowManager.setPosition(_positionBefore);
     windowManager.setResizable(true);
-    if(_wasMaximized) {
+    if (_wasMaximized) {
       await windowManager.maximize();
     }
     Provider.of<AppProvider>(AppWrapper.navKey.currentContext!, listen: false).showTitleBar = false;
   }
 
   void _enablePip() async {
-    if(_wasMaximized = await windowManager.isMaximized()) {
+    if (_wasMaximized = await windowManager.isMaximized()) {
       await windowManager.unmaximize();
     }
     await windowManager.setAlwaysOnTop(true);

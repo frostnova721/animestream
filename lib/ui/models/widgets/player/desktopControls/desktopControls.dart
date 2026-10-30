@@ -315,7 +315,8 @@ class _DesktopControlsState extends State<DesktopControls> {
                                     provider.updateVolume(restorableVolume);
                                   }
                                 },
-                                child: makeIcon(provider.state.volume == 0 ? Icons.volume_off_sharp : Icons.volume_up_sharp)),
+                                child: makeIcon(
+                                    provider.state.volume == 0 ? Icons.volume_off_sharp : Icons.volume_up_sharp)),
                             Padding(
                               padding: const EdgeInsets.only(right: 10),
                               child: SliderTheme(
@@ -452,8 +453,7 @@ class _DesktopControlsState extends State<DesktopControls> {
                                   behavior: HitTestBehavior.translucent,
                                   onTap: () async {
                                     dataProvider.updateCurrentQuality(dataProvider.state.qualities[index]);
-                                    provider.playVideo(dataProvider.state.qualities[index].url,
-                                        currentStream: dataProvider.state.currentStream, preserveProgress: true);
+                                    provider.setQuality(dataProvider.state.qualities[index]);
                                     setState(() {});
                                   },
                                   child: Container(
@@ -488,27 +488,28 @@ class _DesktopControlsState extends State<DesktopControls> {
                                   provider.controller.setAudioTrack(audTrack);
                                   Logs.player.log("Change audio track to ${audTrack.language}");
                                   dataProvider.updateCurrentAudioTrack(audTrack);
-                                  setState((){});
+                                  setState(() {});
                                 },
                                 child: Container(
-                                    color:
-                                        dataProvider.state.audioTracks[index].url == dataProvider.state.currentAudioTrack.url
-                                            ? appTheme.accentColor
-                                            : null,
-                                    height: 40,
-                                    alignment: Alignment.center,
-                                    child: Text(
-                                      "${dataProvider.state.audioTracks[index].name}",
-                                      style: TextStyle(
-                                        fontSize: 18,
-                                        color: dataProvider.state.audioTracks[index].url ==
-                                                dataProvider.state.currentAudioTrack.url
-                                            ? appTheme.onAccent
-                                            : appTheme.textMainColor,
-                                        fontFamily: "Poppins",
-                                      ),
+                                  color: dataProvider.state.audioTracks[index].url ==
+                                          dataProvider.state.currentAudioTrack.url
+                                      ? appTheme.accentColor
+                                      : null,
+                                  height: 40,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    "${dataProvider.state.audioTracks[index].name}",
+                                    style: TextStyle(
+                                      fontSize: 18,
+                                      color: dataProvider.state.audioTracks[index].url ==
+                                              dataProvider.state.currentAudioTrack.url
+                                          ? appTheme.onAccent
+                                          : appTheme.textMainColor,
+                                      fontFamily: "Poppins",
                                     ),
-                                  ),);
+                                  ),
+                                ),
+                              );
                             },
                           ),
                           ListView.builder(
@@ -522,11 +523,11 @@ class _DesktopControlsState extends State<DesktopControls> {
                                 child: GestureDetector(
                                   onTap: () async {
                                     dataProvider.updateCurrentStream(dataProvider.state.streams[index]);
-                                    await dataProvider.extractCurrentStreamQualities();
-                                    final q = dataProvider.getPreferredQualityStreamFromQualities();
-                                    await provider.playVideo(q.url,
-                                        preserveProgress: true, currentStream: dataProvider.state.streams[index]);
-                                    setState(() {});
+                                    await provider.playVideo(
+                                      stream: dataProvider.state.streams[index],
+                                      dataProvider: dataProvider,
+                                      preserveProgress: true,
+                                    );
                                   },
                                   child: Container(
                                     color: sources[index].server == current.server &&

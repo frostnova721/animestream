@@ -4,7 +4,6 @@ import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/commons/extractQuality.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:fvp/fvp.dart';
-import 'package:fvp/mdk.dart';
 import 'package:video_player/video_player.dart';
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
@@ -114,7 +113,11 @@ class FvpWrapper implements VideoController {
       if (audioTracks == null || audioTracks.isEmpty) return [];
       return audioTracks.map((info) {
         final lang = info.metadata['language'] ?? info.metadata['LANGUAGE'] ?? 'und';
-        final title = info.metadata['title'] ?? info.metadata['TITLE'] ?? info.metadata['comment'] ?? info.metadata['COMMENT'] ?? "Track ${info.index}";
+        final title = info.metadata['title'] ??
+            info.metadata['TITLE'] ??
+            info.metadata['comment'] ??
+            info.metadata['COMMENT'] ??
+            "Track ${info.index}";
         return AudioStream(
           groupId: info.index.toString(),
           name: title,
@@ -131,7 +134,6 @@ class FvpWrapper implements VideoController {
   @override
   void setAudioTrack(AudioStream aud) async {
     final idx = int.tryParse(aud.groupId);
-    print(idx);
     if (idx != null) {
       controller.setAudioTracks([idx]);
     } else {
@@ -152,10 +154,29 @@ class FvpWrapper implements VideoController {
 
   @override
   void setQuality(QualityStream qs) async {
+    final resolutionSplit = qs.resolution.split('x');
+    final qualityHeight = resolutionSplit.length > 1 ? int.tryParse(resolutionSplit[1]) : null;
+
+    if(qualityHeight == null) {
+      Logs.player.log("Failed to set quality in FvpWrapper: Invalid resolution '${qs.resolution}'");
+      return;
+    }
+
     final videoTracks = await controller.getMediaInfo();
-    // final videoTrack = videoTracks?.video.firstWhereOrNull((t) => t.index.toString() == qs.groupId);
-    // await controller.selectVideoTrack();
-    // await initiateVideo(qs.url, headers: controller.httpHeaders, offline: false);
+    final videoTrack = videoTracks?.video?.firstWhereOrNull((t) => t.codec.height == qualityHeight);
+
+    print("Quality Required: $qualityHeight, Video Track found: ${videoTrack?.codec.height}");
+
+    if (videoTrack == null) {
+      Logs.player
+          .log("Failed to set quality in FvpWrapper: No video track found for resolution '${qs.resolution}'");
+      return;
+    }
+
+    await controller.pause();
+    controller.setVideoTracks([videoTrack.index]);
+    print(controller.getActiveVideoTracks());
+    await controller.play();
   }
 
   @override

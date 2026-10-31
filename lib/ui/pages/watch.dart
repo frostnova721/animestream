@@ -4,8 +4,6 @@ import 'dart:io';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
-import 'package:collection/collection.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/types.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';

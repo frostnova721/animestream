@@ -7,8 +7,9 @@ import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/remuxer/remuxer.dart';
 import 'package:http/http.dart';
 
-class StreamDownloader extends BaseDownloader {
-  StreamDownloader(DownloadTaskIsolate task) : super(task);
+// ignore: unused_element
+class _StreamDownloader extends BaseDownloader {
+  _StreamDownloader(DownloadTaskIsolate task) : super(task);
 
   @override
   Future<void> download() async {

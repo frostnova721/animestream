@@ -1,7 +1,8 @@
 import 'dart:io';
 
 import 'package:animestream/core/app/logging.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/core/commons/hlsParser/audioStream.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:fvp/fvp.dart';
 import 'package:video_player/video_player.dart';

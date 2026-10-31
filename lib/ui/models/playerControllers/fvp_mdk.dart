@@ -1,5 +1,6 @@
 import 'dart:async';
-import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/core/commons/hlsParser/audioStream.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:fvp/mdk.dart' as mdk;
 import 'package:flutter/material.dart';

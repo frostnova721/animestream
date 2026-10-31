@@ -5,7 +5,7 @@ publish_to: "none" #Dont remove this!
 version: 1.4.8-beta2+2
 
 environment:
-  sdk: ">=3.2.0 <4.0.0"
+  sdk: ">=3.13.0 <4.0.0"
 
 dependencies:
   flutter:
@@ -81,6 +81,7 @@ dependencies:
     git:
       url: https://github.com/frostnova721/commentum_client
 
+  collection: any
 dev_dependencies:
   flutter_test:
     sdk: flutter

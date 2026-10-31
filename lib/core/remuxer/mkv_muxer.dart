@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'ebml.dart';
 
@@ -10,10 +11,55 @@ class CuePoint {
   CuePoint(this.timecode, this.clusterPos);
 }
 
+/// Represents an audio track configuration in the MKV container.
+class MkvAudioTrack {
+  final int trackNumber;
+  final int? trackUid;
+  final List<int>? codecPrivate; // e.g., AudioSpecificConfig for AAC
+  final double sampleRate;
+  final int channels;
+  final String codecId;
+  final String? name; // e.g. "Japanese (Original)", "English (Dub)"
+  final String? language; // ISO 639-2 language code, e.g. "jpn", "eng"
+  final bool isDefault;
+
+  MkvAudioTrack({
+    required this.trackNumber,
+    this.trackUid,
+    this.codecPrivate,
+    this.sampleRate = 44100.0,
+    this.channels = 2,
+    this.codecId = 'A_AAC',
+    this.name,
+    this.language,
+    this.isDefault = false,
+  });
+}
+
+/// Represents a subtitle track configuration in the MKV container.
+class MkvSubtitleTrack {
+  final int trackNumber;
+  final int? trackUid;
+  final String codecId; // e.g. 'S_TEXT/UTF8', 'D_WEBVTT/SUBTITLES'
+  final String? name;
+  final String? language;
+  final bool isDefault;
+
+  MkvSubtitleTrack({
+    required this.trackNumber,
+    this.trackUid,
+    this.codecId = 'S_TEXT/UTF8',
+    this.name,
+    this.language,
+    this.isDefault = false,
+  });
+}
+
 class MkvMuxer {
   final File _outputFile;
   RandomAccessFile? _file;
 
+  int _videoTrackNumber = 1;
   int _clusterTimecode = -1;
   int _maxTimecodeMs = 0;
   int _durationPosition = -1;
@@ -27,17 +73,100 @@ class MkvMuxer {
 
   MkvMuxer(String path) : _outputFile = File(path);
 
-  Future<void> open(
+  static String _toIso639_2(String lang) {
+    final l = lang.trim().toLowerCase();
+    if (l.length == 3) return l;
+    const map = {
+      'ja': 'jpn',
+      'jp': 'jpn',
+      'japanese': 'jpn',
+      'en': 'eng',
+      'english': 'eng',
+      'es': 'spa',
+      'spanish': 'spa',
+      'fr': 'fra',
+      'french': 'fra',
+      'de': 'deu',
+      'german': 'deu',
+      'it': 'ita',
+      'italian': 'ita',
+      'pt': 'por',
+      'portuguese': 'por',
+      'ru': 'rus',
+      'russian': 'rus',
+      'zh': 'zho',
+      'chinese': 'zho',
+      'ko': 'kor',
+      'korean': 'kor',
+      'ar': 'ara',
+      'arabic': 'ara',
+      'hi': 'hin',
+      'hindi': 'hin',
+    };
+    return map[l] ?? (l.length >= 3 ? l.substring(0, 3) : 'und');
+  }
+
+  List<int> _buildAudioTrackEntry(MkvAudioTrack track) {
+    final entry = <int>[
+      ...Ebml.writeUint(0xD7, track.trackNumber),
+      ...Ebml.writeUint(0x73C5, track.trackUid ?? track.trackNumber),
+      ...Ebml.writeUint(0x83, 2), // TrackType Audio
+      ...Ebml.writeUint(0x88, track.isDefault ? 1 : 0), // FlagDefault
+      ...Ebml.writeString(0x86, track.codecId),
+    ];
+
+    if (track.name != null && track.name!.isNotEmpty) {
+      entry.addAll(Ebml.writeString(0x536E, track.name!));
+    }
+    if (track.language != null && track.language!.isNotEmpty) {
+      entry.addAll(Ebml.writeString(0x22B59C, _toIso639_2(track.language!)));
+    }
+    if (track.codecPrivate != null && track.codecPrivate!.isNotEmpty) {
+      entry.addAll(Ebml.writeData(0x63A2, track.codecPrivate!));
+    }
+
+    final audioSettings = <int>[
+      ...Ebml.writeFloat(0xB5, track.sampleRate),
+      ...Ebml.writeUint(0x9F, track.channels),
+    ];
+    entry.addAll(Ebml.writeData(0xE1, audioSettings));
+
+    return Ebml.writeData(0xAE, entry);
+  }
+
+  List<int> _buildSubtitleTrackEntry(MkvSubtitleTrack track) {
+    final entry = <int>[
+      ...Ebml.writeUint(0xD7, track.trackNumber),
+      ...Ebml.writeUint(0x73C5, track.trackUid ?? track.trackNumber),
+      ...Ebml.writeUint(0x83, 0x11), // TrackType Subtitle
+      ...Ebml.writeUint(0x88, track.isDefault ? 1 : 0), // FlagDefault
+      ...Ebml.writeString(0x86, track.codecId),
+    ];
+
+    if (track.name != null && track.name!.isNotEmpty) {
+      entry.addAll(Ebml.writeString(0x536E, track.name!));
+    }
+    if (track.language != null && track.language!.isNotEmpty) {
+      entry.addAll(Ebml.writeString(0x22B59C, _toIso639_2(track.language!)));
+    }
+
+    return Ebml.writeData(0xAE, entry);
+  }
+
+  /// Opens the MKV container with explicit audio and subtitle track configurations.
+  Future<void> openWithTracks({
     List<int>? avcc,
-    List<int>? audioConfig,
-    double audioSampleRate,
-    int audioChannels, {
+    int videoTrackNumber = 1,
+    int? videoTrackUid,
+    String? videoTrackName,
+    String? videoLanguage,
     int width = 1920,
     int height = 1080,
     double fps = 0.0,
-    bool addSubtitleTrack = false,
-    String subtitleCodecId = 'S_TEXT/UTF8',
+    List<MkvAudioTrack> audioTracks = const [],
+    List<MkvSubtitleTrack> subtitleTracks = const [],
   }) async {
+    _videoTrackNumber = videoTrackNumber;
     _file = await _outputFile.open(mode: FileMode.write);
 
     // 1. EBML Header
@@ -84,11 +213,19 @@ class MkvMuxer {
 
     if (avcc != null) {
       final videoTrackData = <int>[
-        ...Ebml.writeUint(0xD7, 1),
-        ...Ebml.writeUint(0x73C5, 1),
-        ...Ebml.writeUint(0x83, 1),
+        ...Ebml.writeUint(0xD7, videoTrackNumber),
+        ...Ebml.writeUint(0x73C5, videoTrackUid ?? videoTrackNumber),
+        ...Ebml.writeUint(0x83, 1), // TrackType Video
+        ...Ebml.writeUint(0x88, 1), // FlagDefault = 1
         ...Ebml.writeString(0x86, 'V_MPEG4/ISO/AVC'),
       ];
+
+      if (videoTrackName != null && videoTrackName.isNotEmpty) {
+        videoTrackData.addAll(Ebml.writeString(0x536E, videoTrackName));
+      }
+      if (videoLanguage != null && videoLanguage.isNotEmpty) {
+        videoTrackData.addAll(Ebml.writeString(0x22B59C, _toIso639_2(videoLanguage)));
+      }
 
       if (fps > 0) {
         int defaultDurationNs = (1000000000 / fps).round();
@@ -101,31 +238,71 @@ class MkvMuxer {
       tracksData.addAll(Ebml.writeData(0xAE, videoTrackData));
     }
 
-    if (audioConfig != null) {
-      tracksData.addAll(
-        Ebml.writeData(0xAE, [
-          ...Ebml.writeUint(0xD7, 2),
-          ...Ebml.writeUint(0x73C5, 2),
-          ...Ebml.writeUint(0x83, 2),
-          ...Ebml.writeString(0x86, 'A_AAC'),
-          ...Ebml.writeData(0x63A2, audioConfig),
-          ...Ebml.writeData(0xE1, [...Ebml.writeFloat(0xB5, audioSampleRate), ...Ebml.writeUint(0x9F, audioChannels)]),
-        ]),
-      );
+    for (final track in audioTracks) {
+      tracksData.addAll(_buildAudioTrackEntry(track));
     }
 
-    if (addSubtitleTrack) {
-      tracksData.addAll(
-        Ebml.writeData(0xAE, [
-          ...Ebml.writeUint(0xD7, 3), // TrackNumber
-          ...Ebml.writeUint(0x73C5, 3), // TrackUID
-          ...Ebml.writeUint(0x83, 0x11), // TrackType Subtitle
-          ...Ebml.writeString(0x86, subtitleCodecId),
-        ]),
-      );
+    for (final track in subtitleTracks) {
+      tracksData.addAll(_buildSubtitleTrackEntry(track));
     }
 
     _file!.writeFromSync(Ebml.writeData(0x1654AE6B, tracksData));
+  }
+
+  /// Opens the MKV container. Supports both traditional single-audio usage
+  /// and custom [audioTracks] and [subtitleTracks] for separate audio streams.
+  Future<void> open(
+    List<int>? avcc,
+    List<int>? audioConfig,
+    double audioSampleRate,
+    int audioChannels, {
+    int width = 1920,
+    int height = 1080,
+    double fps = 0.0,
+    bool addSubtitleTrack = false,
+    String subtitleCodecId = 'S_TEXT/UTF8',
+    List<MkvAudioTrack>? audioTracks,
+    List<MkvSubtitleTrack>? subtitleTracks,
+  }) async {
+    final effectiveAudioTracks = <MkvAudioTrack>[];
+    if (audioTracks != null && audioTracks.isNotEmpty) {
+      effectiveAudioTracks.addAll(audioTracks);
+    } else if (audioConfig != null) {
+      effectiveAudioTracks.add(
+        MkvAudioTrack(
+          trackNumber: 2,
+          codecPrivate: audioConfig,
+          sampleRate: audioSampleRate,
+          channels: audioChannels,
+          isDefault: true,
+        ),
+      );
+    }
+
+    final effectiveSubtitleTracks = <MkvSubtitleTrack>[];
+    if (subtitleTracks != null && subtitleTracks.isNotEmpty) {
+      effectiveSubtitleTracks.addAll(subtitleTracks);
+    } else if (addSubtitleTrack) {
+      final nextTrackNumber = effectiveAudioTracks.isEmpty
+          ? 2
+          : effectiveAudioTracks.map((t) => t.trackNumber).reduce(math.max) + 1;
+      effectiveSubtitleTracks.add(
+        MkvSubtitleTrack(
+          trackNumber: nextTrackNumber,
+          codecId: subtitleCodecId,
+          isDefault: true,
+        ),
+      );
+    }
+
+    await openWithTracks(
+      avcc: avcc,
+      audioTracks: effectiveAudioTracks,
+      subtitleTracks: effectiveSubtitleTracks,
+      width: width,
+      height: height,
+      fps: fps,
+    );
   }
 
   void writeBlock(int trackNumber, List<int> data, int pts90k, bool isKeyframe) {
@@ -156,7 +333,7 @@ class MkvMuxer {
       relativeTime = 0;
     }
 
-    if (trackNumber == 1 && isKeyframe) {
+    if (trackNumber == _videoTrackNumber && isKeyframe) {
       if (_cues.isEmpty || timecodeMs - _cues.last.timecode > 1000) {
         _cues.add(CuePoint(timecodeMs, _currentClusterPos));
       }
@@ -176,6 +353,11 @@ class MkvMuxer {
     ];
 
     _file!.writeFromSync(Ebml.writeData(0xA3, blockData));
+  }
+
+  /// Convenience method to write a block when the timestamp is already in milliseconds.
+  void writeBlockMs(int trackNumber, List<int> data, int timecodeMs, bool isKeyframe) {
+    writeBlock(trackNumber, data, timecodeMs * 90, isKeyframe);
   }
 
   void writeSubtitleBlock(int trackNumber, String text, int timecodeMs, int durationMs) {
@@ -253,7 +435,7 @@ class MkvMuxer {
         final cuesData = <int>[];
         for (final cue in _cues) {
           final cueTrackPositions = Ebml.writeData(0xB7, [
-            ...Ebml.writeUint(0xF7, 1),
+            ...Ebml.writeUint(0xF7, _videoTrackNumber),
             ...Ebml.writeUint(0xF1, cue.clusterPos),
           ]);
 

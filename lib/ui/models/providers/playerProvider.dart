@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/ui/models/providers/playerDataProvider.dart';
 import 'package:animestream/ui/models/providers/appProvider.dart';
 import 'package:animestream/ui/models/widgets/appWrapper.dart';

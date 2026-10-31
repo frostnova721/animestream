@@ -1,22 +1,31 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/commons/extensions.dart';
+import 'package:animestream/core/commons/hlsParser/hlsParser.dart';
+import 'package:animestream/core/commons/hlsParser/hlsSegment.dart';
 import 'package:animestream/core/remuxer/remuxer.dart';
+import 'package:encrypt/encrypt.dart';
 import 'package:http/http.dart';
 
 class StreamDownloader extends BaseDownloader {
   StreamDownloader(DownloadTaskIsolate task) : super(task);
+
+  final _encryptionKeyCache = <String, Uint8List>{};
 
   @override
   Future<void> download() async {
     await super.setUpPorts(task);
 
     final finalPath = await helper.makeDirectory(
-        fileName: task.fileName, fileExtension: task.useMkvRemuxer ? "mkv" : "mp4", downloadPath: task.downloadPath);
+      fileName: task.fileName,
+      fileExtension: task.useMkvRemuxer ? "mkv" : "mp4",
+      downloadPath: task.downloadPath,
+    );
 
     File? output;
     TsToMkvRemuxer? remuxed;
@@ -35,13 +44,15 @@ class StreamDownloader extends BaseDownloader {
         if (ext == "srt" || ext == "vtt") {
           await remuxed.loadSubtitles(downloadedSubsPath);
         } else {
-          task.sendPort?.send(DownloadMessage(
+          task.sendPort?.send(
+            DownloadMessage(
               status: 'error',
               id: task.id,
               message:
                   "Cannot write subtitles to the video file. Only SRT and VTT subtitles are supported by the remuxer.",
-                  extras: ["No stack trace needed btw... maybe.. the extension we got is: '$ext'"]
-                  ));
+              extras: ["No stack trace needed btw... maybe.. the extension we got is: '$ext'"],
+            ),
+          );
         }
       }
     }
@@ -51,15 +62,7 @@ class StreamDownloader extends BaseDownloader {
 
     try {
       final streamBaseLink = helper.makeBaseLink(task.url);
-      final List<String> segments = await helper.getSegments(task.url, customHeaders: task.customHeaders);
-      final Map<int, String> segmentsFiltered = {};
-
-      // For efficient index retrieval
-      for (int i = 0; i < segments.length; i++) {
-        if (segments[i].isNotEmpty) segmentsFiltered[i] = segments[i];
-      }
-
-      final entriesList = segmentsFiltered.entries.toList();
+      final segments = await HlsParser.parseSegments(task.url, customHeaders: task.customHeaders);
 
       final parallelDownloadsBatchSize = task.parallelBatches;
 
@@ -70,7 +73,7 @@ class StreamDownloader extends BaseDownloader {
       final Set<Future<void>> activeDownloads = {};
       int currentIndex = task.resumeFrom.toInt();
       int nextExpectedIndex = task.resumeFrom.toInt();
-      int totalSegments = entriesList.length;
+      int totalSegments = segments.length;
 
       Object? downloadError;
 
@@ -111,22 +114,25 @@ class StreamDownloader extends BaseDownloader {
         final maxLookahead = parallelDownloadsBatchSize * 2;
 
         // Fill the window
-        while (activeDownloads.length < parallelDownloadsBatchSize && 
-               currentIndex < totalSegments && 
-               (currentIndex - nextExpectedIndex) < maxLookahead) {
+        while (activeDownloads.length < parallelDownloadsBatchSize &&
+            currentIndex < totalSegments &&
+            (currentIndex - nextExpectedIndex) < maxLookahead) {
           final entryIndex = currentIndex;
-          final entry = entriesList[currentIndex];
+          final entry = segments[currentIndex];
           currentIndex++;
 
           final future = () async {
             try {
-              final segment = entry.value;
-              final segmentNumber = entry.key + 1;
+              final segment = entry.url;
+              final segmentNumber = currentIndex + 1;
 
               final uri = segment.startsWith('http') ? segment : "$streamBaseLink/$segment";
 
-              final res =
-                  await helper.downloadSegmentWithRetries(uri, task.retryAttempts, customHeaders: task.customHeaders);
+              final res = await helper.downloadSegmentWithRetries(
+                uri,
+                task.retryAttempts,
+                customHeaders: task.customHeaders,
+              );
 
               if (status == DownloadStatus.cancelled) {
                 return;
@@ -134,7 +140,9 @@ class StreamDownloader extends BaseDownloader {
 
               if (res.statusCode >= 200 && res.statusCode < 300) {
                 // Decrypt if theres an encryption
-                final buffer = helper.encryptionKey != null ? helper.decryptSegment(res.bodyBytes) : res.bodyBytes;
+                final buffer = entry.encryptionKey != null
+                    ? await _decryptSegment(buffer: res.bodyBytes, segment: entry)
+                    : res.bodyBytes;
                 buffers[entryIndex] = BufferItem(index: segmentNumber, buffer: buffer);
               } else {
                 print("Error for segment: $uri, body: ${res.body}, res head: ${res.headers}");
@@ -155,7 +163,7 @@ class StreamDownloader extends BaseDownloader {
         bool wroteSomething = false;
         while (buffers.containsKey(nextExpectedIndex)) {
           final b = buffers.remove(nextExpectedIndex)!;
-          
+
           task.useMkvRemuxer ? await remuxed?.processChunk(b.buffer) : out?.add(b.buffer);
 
           nextExpectedIndex++;
@@ -219,6 +227,46 @@ class StreamDownloader extends BaseDownloader {
     } catch (err) {
       print("[DOWNLOADER] Failed to download $fileName subs!");
       return "";
+    }
+  }
+
+  Future<Uint8List> _decryptSegment({required Uint8List buffer, required HlsSegment segment}) async {
+    try {
+      // fetch the key, and cache it for future use
+      final keyUri = segment.encryptionKey!.uri;
+      Uint8List? keyBytes = _encryptionKeyCache[keyUri];
+
+      if (keyBytes == null) {
+        final res = await get(Uri.parse(keyUri), headers: task.customHeaders);
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          keyBytes = res.bodyBytes;
+          _encryptionKeyCache[keyUri] = keyBytes;
+        } else {
+          throw Exception("Failed to fetch encryption key from $keyUri. Status code: ${res.statusCode}");
+        }
+      }
+
+      Uint8List ivBytes;
+      if (segment.encryptionKey!.iv != null) {
+        // Parse explicit IV from hex string (e.g., "0x00000000000000000000000000000001")
+        final hexString = segment.encryptionKey!.iv!.replaceAll('0x', '').padLeft(32, '0');
+        ivBytes = Uint8List.fromList(
+          List.generate(16, (i) => int.parse(hexString.substring(i * 2, i * 2 + 2), radix: 16)),
+        );
+      } else {
+        // Fallback: 16-byte big-endian integer of the sequence number
+        ivBytes = Uint8List(16);
+        final byteData = ByteData.view(ivBytes.buffer);
+        byteData.setUint64(8, segment.sequenceNumber, Endian.big); // Writes to the last 8 bytes
+      }
+
+      final encrypt = Encrypter(AES(Key(keyBytes), mode: AESMode.cbc));
+      final decryptedBuffer = encrypt.decryptBytes(Encrypted(buffer), iv: IV(ivBytes));
+      return Uint8List.fromList(decryptedBuffer);
+    } catch (err) {
+      print("COULDNT DECRYPT A SEGMENT, KILLING THE DOWNLOAD");
+      print(err.toString());
+      rethrow;
     }
   }
 

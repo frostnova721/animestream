@@ -1,7 +1,9 @@
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/core/commons/hlsParser/audioStream.dart';
+import 'package:animestream/core/commons/hlsParser/hlsParser.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/database/aniskip/aniskip.dart';
@@ -94,7 +96,7 @@ class PlayerDataProvider extends ChangeNotifier {
       print(mime);
     }
     try {
-      final master = await parseMasterPlaylist(url, customHeader: headers);
+      final master = await HlsParser.parseMasterPlaylist(url, customHeader: headers);
       _state = _state.copyWith(qualities: master.qualityStreams);
     } catch (e) {
       // just a backup, the code shouldnt reach here, but my luck... brooo....

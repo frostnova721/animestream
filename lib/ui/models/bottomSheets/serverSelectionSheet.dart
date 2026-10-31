@@ -5,7 +5,8 @@ import 'package:animestream/core/anime/downloader/downloadManager.dart';
 import 'package:animestream/core/anime/providers/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/core/commons/hlsParser/hlsMasterPlaylist.dart';
+import 'package:animestream/core/commons/hlsParser/hlsParser.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
@@ -135,10 +136,10 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   Future<void> getQualities(VideoStream source) async {
     List<Map<String, String>> mainList = [];
 
-    final ParsedHlsMaster list =
-        await parseMasterPlaylist(source.url, customHeader: source.customHeaders).catchError((e) {
+    final HlsMasterPlaylist list =
+        await  HlsParser.parseMasterPlaylist(source.url, customHeader: source.customHeaders).catchError((e) {
       Logs.app.log("${source.server}: $e");
-      return ParsedHlsMaster(audioStreams: [], qualityStreams: []);
+      return HlsMasterPlaylist(audioStreams: [], qualityStreams: []);
     });
     list.qualityStreams.forEach((element) {
       final map = element.toMap();

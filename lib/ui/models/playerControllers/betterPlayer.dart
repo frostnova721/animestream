@@ -1,5 +1,6 @@
 import 'package:animestream/core/app/logging.dart';
-import 'package:animestream/core/commons/extractQuality.dart';
+import 'package:animestream/core/commons/hlsParser/audioStream.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
 import 'package:better_player/better_player.dart';
@@ -180,8 +181,8 @@ class BetterPlayerWrapper implements VideoController {
     try {
       return controller.betterPlayerAsmsTracks.firstWhere((element) {
         final resMatch = element.height == (int.tryParse(qs.resolution.split("x").last) ?? 0);
-        final bwMatch = element.bitrate == (qs.bandwidth ?? 0);
-        return resMatch && bwMatch;
+        // final bwMatch = element.bitrate == (qs.bandwidth ?? 0);
+        return resMatch;
       }, orElse: () {
         print("[ERROR] No matching track found for '${qs.resolution}', defaulting to first track.");
         return controller.betterPlayerAsmsTracks.first;

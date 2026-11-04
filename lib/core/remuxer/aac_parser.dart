@@ -17,6 +17,9 @@ class AacParser {
     if (pts != null) {
       _nextPts = pts;
       _nextDts = dts ?? pts;
+    } else if (_nextPts == null) {
+      _nextPts = 0;
+      _nextDts = 0;
     }
 
     final frames = <ParsedAacFrame>[];

@@ -30,8 +30,15 @@ class StreamDownloader extends BaseDownloader {
     File? output;
     TsToMkvRemuxer? remuxed;
 
+    final hasAudio = task.audioStreams.isNotEmpty;
+
     if (task.useMkvRemuxer) {
-      remuxed = TsToMkvRemuxer(finalPath);
+      remuxed = TsToMkvRemuxer(
+        finalPath,
+        hasSeparateAudio: hasAudio,
+        audioLanguage: task.audioStreams.firstOrNull?.language,
+        audioTrackName: task.audioStreams.firstOrNull?.name,
+      );
     } else {
       output = File(finalPath);
     }
@@ -62,7 +69,11 @@ class StreamDownloader extends BaseDownloader {
 
     try {
       final streamBaseLink = helper.makeBaseLink(task.url);
+      final audioBaseLink = hasAudio ? helper.makeBaseLink(task.audioStreams.first.url) : "";
       final segments = await HlsParser.parseSegments(task.url, customHeaders: task.customHeaders);
+      final List<HlsSegment> audioSegements = task.audioStreams.isNotEmpty
+          ? await HlsParser.parseSegments(task.audioStreams.first.url, customHeaders: task.customHeaders)
+          : [];
 
       final parallelDownloadsBatchSize = task.parallelBatches;
 
@@ -70,14 +81,27 @@ class StreamDownloader extends BaseDownloader {
       int lastDownloadedSegmentIndex = -1;
 
       final Map<int, BufferItem> buffers = {};
+      final Map<int, BufferItem> audioBuffers = {};
+
       final Set<Future<void>> activeDownloads = {};
+      final Set<Future<void>> activeAudioDownloads = {};
+
       int currentIndex = task.resumeFrom.toInt();
       int nextExpectedIndex = task.resumeFrom.toInt();
-      int totalSegments = segments.length;
+      final int totalSegments = segments.length;
+
+      int currentAudioIndex = 0;
+      int nextExpectedAudioIndex = 0;
+      final int totalAudioSegments = audioSegements.length;
+
+      // slot allocation
+      final maxVideoBatch = parallelDownloadsBatchSize;
+      final maxAudioBatch = hasAudio ? 2 : 0;
+      final maxLookahead = maxVideoBatch * 2;
 
       Object? downloadError;
 
-      while (nextExpectedIndex < totalSegments) {
+      while (nextExpectedIndex < totalSegments || (hasAudio && nextExpectedAudioIndex < totalAudioSegments)) {
         if (downloadError != null) {
           throw downloadError!;
         }
@@ -109,11 +133,58 @@ class StreamDownloader extends BaseDownloader {
           }
         }
 
+        if (hasAudio) {
+          while (activeAudioDownloads.length < maxAudioBatch &&
+              currentAudioIndex < totalAudioSegments &&
+              (currentAudioIndex - nextExpectedAudioIndex) < maxLookahead) {
+            final entryIndex = currentAudioIndex;
+            final entry = audioSegements[currentAudioIndex];
+            currentAudioIndex++;
+
+            final future = () async {
+              try {
+                final segment = entry.url;
+                final segmentNumber = entryIndex + 1;
+
+                final uri = segment.startsWith('http') ? segment : "$audioBaseLink/$segment";
+
+                final res = await helper.downloadSegmentWithRetries(
+                  uri,
+                  task.retryAttempts,
+                  customHeaders: task.customHeaders,
+                );
+
+                if (status == DownloadStatus.cancelled) {
+                  return;
+                }
+
+                if (res.statusCode >= 200 && res.statusCode < 300) {
+                  // Decrypt if theres an encryption
+                  final buffer = entry.encryptionKey != null
+                      ? await _decryptSegment(buffer: res.bodyBytes, segment: entry)
+                      : res.bodyBytes;
+                  audioBuffers[entryIndex] = BufferItem(index: segmentNumber, buffer: buffer);
+                } else {
+                  print("Error for audio segment: $uri, body: ${res.body}, res head: ${res.headers}");
+                  throw Exception("ERR_REQ_FAILED. Got Status: ${res.statusCode} for audio segment: $segmentNumber");
+                }
+              } catch (e) {
+                downloadError = e;
+              }
+            }();
+
+            activeAudioDownloads.add(future);
+            future.whenComplete(() {
+              activeAudioDownloads.remove(future);
+            });
+          }
+        }
+
         // Limit the window lookahead to avoid unbounded memory usage if a single segment is too slow.
         // E.g., we allow fetching up to parallelDownloadsBatchSize * 2 segments ahead of the next expected one.
-        final maxLookahead = parallelDownloadsBatchSize * 2;
+        // final maxLookahead = parallelDownloadsBatchSize * 2;
 
-        // Fill the window
+        // Fill the video window
         while (activeDownloads.length < parallelDownloadsBatchSize &&
             currentIndex < totalSegments &&
             (currentIndex - nextExpectedIndex) < maxLookahead) {
@@ -161,18 +232,40 @@ class StreamDownloader extends BaseDownloader {
 
         // Write sequential completed segments to file
         bool wroteSomething = false;
+
+        // drain audio buffers first
+        while (audioBuffers.containsKey(nextExpectedAudioIndex)) {
+          if (!task.useMkvRemuxer) {
+            throw Exception("Cannot write audio buffers to file without remuxer enabled.");
+          }
+
+          final b = audioBuffers.remove(nextExpectedAudioIndex)!;
+
+          await remuxed?.processAudioChunk(b.buffer);
+
+          nextExpectedAudioIndex++;
+          // maybe in future add last downloaded aud segment here
+          // lastDownloadedAudioSegmentIndex = nextExpectedAudioIndex;
+          wroteSomething = true;
+        }
+
+        // then the video buffers
         while (buffers.containsKey(nextExpectedIndex)) {
           final b = buffers.remove(nextExpectedIndex)!;
 
-          task.useMkvRemuxer ? await remuxed?.processChunk(b.buffer) : out?.add(b.buffer);
+          task.useMkvRemuxer ? await remuxed?.processVideoChunk(b.buffer) : out?.add(b.buffer);
 
           nextExpectedIndex++;
           lastDownloadedSegmentIndex = nextExpectedIndex;
           wroteSomething = true;
+        }
 
+        if (wroteSomething) {
           // Update progress
-          final progress = ((nextExpectedIndex / totalSegments) * 100).toInt();
-          if (progress > lastUpdatedProgress && progress - lastUpdatedProgress >= 2) {
+          final totalUnits = totalSegments + totalAudioSegments;
+          final completedUnits = nextExpectedIndex + nextExpectedAudioIndex;
+          final progress = totalUnits > 0 ? ((completedUnits / totalUnits) * 100).toInt() : 0;
+          if (progress > lastUpdatedProgress && (progress - lastUpdatedProgress >= 2 || progress == 100)) {
             updateProgress(progress, finalPath);
             lastUpdatedProgress = progress;
           }
@@ -183,8 +276,13 @@ class StreamDownloader extends BaseDownloader {
         }
 
         // Wait for at least one download to complete if we didn't write anything and downloads are active
-        if (!wroteSomething && activeDownloads.isNotEmpty) {
-          await Future.any(activeDownloads.map((f) => f.catchError((_) {})));
+        if (!wroteSomething) {
+          if (activeDownloads.isNotEmpty || activeAudioDownloads.isNotEmpty) {
+            final allActive = [...activeDownloads, ...activeAudioDownloads];
+            await Future.any(allActive.map((f) => f.catchError((_) {})));
+          } else {
+            await Future.delayed(const Duration(milliseconds: 30)); 
+          }
         }
       }
 
@@ -205,6 +303,7 @@ class StreamDownloader extends BaseDownloader {
 
       print("[DOWNLOADER]<${task.id}> Closing download with state: ${status.name}");
     } catch (err) {
+      // pack the bags and get out!
       print(err);
       await remuxed?.close();
       await out?.close();

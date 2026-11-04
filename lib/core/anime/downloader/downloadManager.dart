@@ -3,6 +3,8 @@ import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
 import 'package:animestream/core/anime/downloader/types.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/core/commons/hlsParser/audioStream.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/widgets.dart';
 
@@ -42,6 +44,8 @@ class DownloadManager {
     String url,
     String filename, {
     String? subtitleUrl,
+    QualityStream? videoStream,
+    List<AudioStream> audioStreams = const [],
     Map<String, String> customHeaders = const {},
     bool mock = false, 
   }) async {
@@ -55,6 +59,8 @@ class DownloadManager {
     final item = DownloadItem(
       id: id,
       url: url,
+      videoStream: videoStream,
+      audioStreams: audioStreams,
       status: DownloadStatus.queued, // Every download is queued before initialisation!
       fileName: filename,
       customHeaders: customHeaders,

@@ -6,6 +6,7 @@ import 'package:animestream/core/commons/hlsParser/hlsMasterPlaylist.dart';
 import 'package:animestream/core/commons/hlsParser/hlsSegment.dart';
 import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:animestream/core/network/network.dart';
+import 'package:http/http.dart' as http;
 
 class HlsParser {
   static Future<bool> isM3u8Playlist(String url, {Map<String, String>? customHeader}) async {
@@ -68,26 +69,22 @@ class HlsParser {
         // we dont need these info yet
         // if (line.startsWith('#EXTM3U') || line.startsWith('#EXT-X-I-FRAME') || line.startsWith("#EXT-X-MEDIA") || line.startsWith("#EXT-X-VERSION"))
 
-        if (line.startsWith("#EXT-X-MEDIA:TYPE=AUDIO")) {
-          final asb = AudioStreamBuilder();
-          final attrs = _parseAttributes(line);
+        if (line.startsWith("#EXT-X-MEDIA:")) {
+          final attrs = _parseAttributes(line.substring(13));
+          if (attrs["TYPE"] == "AUDIO") {
+            final asb = AudioStreamBuilder();
 
-          // in hopes that the playlist will contain everything we neeed!
-          if (attrs.containsKey("GROUP-ID")) asb.addGroupId(attrs["GROUP-ID"]!);
+            if (attrs.containsKey("GROUP-ID")) asb.addGroupId(attrs["GROUP-ID"]!);
+            if (attrs.containsKey("LANGUAGE")) asb.addLanguage(attrs["LANGUAGE"]!);
+            if (attrs.containsKey("CHANNELS")) asb.addChannels(attrs["CHANNELS"]!);
+            if (attrs.containsKey("NAME")) asb.addName(attrs["NAME"]!);
+            if (attrs.containsKey("URI")) {
+              final linkPart = attrs["URI"]!;
+              asb.addUrl(baseUri.resolve(linkPart).toString());
+            }
 
-          if (attrs.containsKey("LANGUAGE")) asb.addLanguage(attrs["LANGUAGE"]!);
-
-          if (attrs.containsKey("CHANNELS")) asb.addChannels(attrs["CHANNELS"]!);
-
-          if (attrs.containsKey("NAME")) asb.addName(attrs["NAME"]!);
-          if (attrs.containsKey("URI")) {
-            final linkPart = attrs["URI"]!;
-            asb.addUrl(linkPart.startsWith('http') ? linkPart : "${_makeBaseLink(streamUrl)}/$linkPart");
+            audioStreams.add(asb.build());
           }
-          // }
-          // }
-
-          audioStreams.add(asb.build());
         }
 
         // ignore all other stuff
@@ -129,7 +126,7 @@ class HlsParser {
   static Future<List<HlsSegment>> parseSegments(String url, {Map<String, String> customHeaders = const {}}) async {
     final List<HlsSegment> segments = [];
     final baseUri = Uri.parse(url);
-    final res = await get(baseUri, headers: customHeaders);
+    final res = await http.get(baseUri, headers: customHeaders);
     final lines = res.body.split('\n');
 
     int sequenceNumber = 0;
@@ -140,9 +137,9 @@ class HlsParser {
       final line = lines[i].trim();
       if (line.isEmpty) continue;
 
-      if (line.startsWith('EXT-X-MEDIA-SEQUENCE:')) {
+      if (line.startsWith('#EXT-X-MEDIA-SEQUENCE:')) {
         sequenceNumber = int.tryParse(line.substring(22)) ?? 0;
-      } else if (line.startsWith('EXT-X-KEY:')) {
+      } else if (line.startsWith('#EXT-X-KEY:')) {
         final attrs = _parseAttributes(line.substring(11));
         final method = attrs['METHOD'] ?? "NONE";
 
@@ -155,7 +152,7 @@ class HlsParser {
             currentKey = HlsEncryptionKey(method: method, uri: baseUri.resolve(uri).toString(), iv: iv);
           }
         }
-      } else if (line.startsWith('EXTINF:')) {
+      } else if (line.startsWith('#EXTINF:')) {
         duration = double.tryParse(line.substring(8).split(',')[0]) ?? 0.0;
       } else if (!line.startsWith('#')) {
         final segmentUrl = baseUri.resolve(line).toString();
@@ -167,9 +164,9 @@ class HlsParser {
     return segments;
   }
 
-  static String _makeBaseLink(String uri) {
-    final split = uri.split('/');
-    split.removeLast();
-    return split.join('/');
-  }
+  // static String _makeBaseLink(String uri) {
+  //   final split = uri.split('/');
+  //   split.removeLast();
+  //   return split.join('/');
+  // }
 }

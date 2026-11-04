@@ -195,6 +195,7 @@ class Downloader {
       return;
     }
 
+    // cancel all state and try again
     item.progress = 0;
     item.lastDownloadedPart = null;
     _lastProgressUpdate.remove(id);
@@ -322,7 +323,10 @@ class Downloader {
         downloadPath: downloadPath,
         resumeFrom: item.lastDownloadedPart ?? 0,
         useMkvRemuxer: currentUserSettings?.useMkvRemuxer ?? true,
-        writeSubtitleTrackToVideo: currentUserSettings?.writeSubtitleTrackToVideo ?? false);
+        writeSubtitleTrackToVideo: currentUserSettings?.writeSubtitleTrackToVideo ?? false,
+        videoStream: item.videoStream,
+        audioStreams: item.audioStreams,
+        );
 
     return task;
   }

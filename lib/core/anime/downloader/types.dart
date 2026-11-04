@@ -1,26 +1,31 @@
 import 'dart:isolate';
 
+import 'package:animestream/core/commons/hlsParser/audioStream.dart';
+import 'package:animestream/core/commons/hlsParser/qualityStream.dart';
 import 'package:flutter/foundation.dart';
 
 // some of them here are just for names lol
 enum DownloadStatus { downloading, queued, paused, completed, cancelled, failed }
 
 DownloadStatus getDownloadStatus(String status) => switch (status) {
-      "downloading" => DownloadStatus.downloading,
-      "queued" => DownloadStatus.queued,
-      "paused" => DownloadStatus.paused,
-      "completed" => DownloadStatus.completed,
-      "cancelled" => DownloadStatus.cancelled,
-      "failed" => DownloadStatus.failed,
-      _ => throw Exception("Unknown DownloadStats value")
-    };
+  "downloading" => DownloadStatus.downloading,
+  "queued" => DownloadStatus.queued,
+  "paused" => DownloadStatus.paused,
+  "completed" => DownloadStatus.completed,
+  "cancelled" => DownloadStatus.cancelled,
+  "failed" => DownloadStatus.failed,
+  _ => throw Exception("Unknown DownloadStats value"),
+};
 
 class DownloadItem {
   // The download ID
   final int id;
 
+  final String _rawUrl;
+
   // The URL to the media to download (can be stream or video file)
-  final String url;
+  // No need to be provided if VideoStream is provided.
+  String get url => videoStream?.url ?? _rawUrl;
 
   // File name to be saved as
   final String fileName;
@@ -33,6 +38,12 @@ class DownloadItem {
 
   // Value to resume from after pausing
   int? lastDownloadedPart;
+
+  // The video stream to download (if any)
+  final QualityStream? videoStream;
+
+  // The audio streams to download (if any)
+  final List<AudioStream> audioStreams;
 
   // Notifier for UI updation
   final ValueNotifier<int> progressNotifier = ValueNotifier(0);
@@ -57,15 +68,21 @@ class DownloadItem {
 
   DownloadItem({
     required this.id,
-    required this.url,
     required DownloadStatus status,
     required this.fileName,
     this.customHeaders = const {},
+    this.videoStream,
+    this.audioStreams = const [],
+    String? url,
     int progress = 0,
     this.subtitleUrl,
     this.lastDownloadedPart,
     this.mock = false,
-  }) {
+  }) : _rawUrl = url ?? videoStream?.url ?? '',
+       assert(
+         videoStream != null || (url != null && url.isNotEmpty) || mock,
+         "Either url or videoStream must be provided",
+       ) {
     progressNotifier.value = progress;
     statusNotifier.value = status;
   }
@@ -96,21 +113,31 @@ class DownloadItem {
 
 // For isolates
 class DownloadTaskIsolate {
-  final String url;
   final String fileName;
   final int id;
+  final String downloadPath;
+
+  final QualityStream? videoStream;
+  final List<AudioStream> audioStreams;
+
+  // primary URL as a fallback, maybe for files which arent videos...
+  final String rawUrl;
+
+  // Get the primary URL to download
+  String get url => videoStream?.url ?? rawUrl;
+
+  final String? subsUrl;
+  final bool writeSubtitleTrackToVideo; // only for remuxed videos
+
   final Map<String, String> customHeaders;
   final int retryAttempts;
   final int parallelBatches;
-  final String? subsUrl;
+
   final SendPort? sendPort;
   final int resumeFrom;
   final bool useMkvRemuxer;
-  final bool writeSubtitleTrackToVideo; // only for remuxed videos
-  String downloadPath;
 
   DownloadTaskIsolate({
-    required this.url,
     required this.fileName,
     required this.customHeaders,
     required this.retryAttempts,
@@ -119,14 +146,32 @@ class DownloadTaskIsolate {
     required this.sendPort,
     required this.id,
     required this.downloadPath,
+    this.videoStream,
+    this.audioStreams = const [],
+    String? url,
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
     this.useMkvRemuxer = false,
     this.writeSubtitleTrackToVideo = false,
-  });
+  }) : rawUrl = url ?? videoStream?.url ?? '';
 
   @override
   String toString() {
-    return 'DownloadTaskIsolate(url: $url, fileName: $fileName, id: $id, customHeaders: $customHeaders, retryAttempts: $retryAttempts, parallelBatches: $parallelBatches, subsUrl: $subsUrl, sendPort: $sendPort, resumeFrom: $resumeFrom, downloadPath: $downloadPath, remux: $useMkvRemuxer), writeSubtitleTrackToVideo: $writeSubtitleTrackToVideo';
+    return 'DownloadTaskIsolate(\n'
+        '  id: $id,\n'
+        '  fileName: $fileName,\n'
+        '  url: $url,\n'
+        '  downloadPath: $downloadPath,\n'
+        '  resumeFrom: $resumeFrom,\n'
+        '  remux: $useMkvRemuxer,\n'
+        '  writeSubtitleTrackToVideo: $writeSubtitleTrackToVideo,\n'
+        '  subsUrl: $subsUrl,\n'
+        '  parallelBatches: $parallelBatches,\n'
+        '  retryAttempts: $retryAttempts,\n'
+        '  customHeaders: $customHeaders,\n'
+        '  sendPort: $sendPort,\n'
+        '  videoStream: $videoStream,\n'
+        '  audioStreams: $audioStreams,\n'
+        ')';
   }
 }
 

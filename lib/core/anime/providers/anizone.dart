@@ -117,7 +117,7 @@ class AniZone extends AnimeProvider {
         'thumbnail': epImg,
         'episodeTitle': title,
         'isFiller': isFiller,
-        'hasDub': false,
+        'hasDub': true, // good hopes that there is a dub audio track in the stream
       });
 
       i++;

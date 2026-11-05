@@ -280,10 +280,8 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
                   ),
                 )
               : streamSources.isNotEmpty
-              ? Container(
-                  height: MediaQuery.of(context).orientation == Orientation.landscape
-                      ? MediaQuery.of(context).size.height / 2
-                      : MediaQuery.of(context).size.height / 3,
+              ? ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height / 2),
                   child: _list(),
                 )
               : Container(
@@ -320,7 +318,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
             itemCount: qualities.length,
             shrinkWrap: true,
             itemBuilder: (BuildContext context, ind) =>
-                _DownloadTile(stream: qualities[ind], widget: widget, title: title),
+                _DownloadTile(stream: qualities[ind], parentSheet: widget, title: title),
           );
   }
 
@@ -330,82 +328,191 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
   }
 }
 
-class _DownloadTile extends StatelessWidget {
-  const _DownloadTile({required this.stream, required this.widget, required this.title});
+class _DownloadTile extends StatefulWidget {
+  const _DownloadTile({required this.stream, required this.parentSheet, required this.title});
 
   final DownloadStreamOptions stream;
-  final ServerSelectionBottomSheet widget;
+  final ServerSelectionBottomSheet parentSheet;
   final String title;
+
+  @override
+  State<_DownloadTile> createState() => _DownloadTileState();
+}
+
+class _DownloadTileState extends State<_DownloadTile> {
+  bool _expanded = false;
+  late int _selectedAudioIndex;
+
+  bool get _hasMultipleAudio => widget.stream.audioStreams.length > 1;
+
+  @override
+  void initState() {
+    super.initState();
+    // Default to track loved by the user if available, otherwise first
+    final streams = widget.stream.audioStreams;
+    final preferedLangIdx = streams.indexWhere(
+      (a) => widget.parentSheet.provider.preferDubs
+          ? a.isEnglish
+          : a.language.toLowerCase() == "jp" || a.language.toLowerCase() == "japanese",
+    );
+    _selectedAudioIndex = preferedLangIdx != -1 ? preferedLangIdx : 0;
+  }
+
+  void _startDownload({AudioStream? audioOverride}) {
+    String? subs = widget.stream.subtitleUrl;
+    subs = (subs?.isEmpty ?? true) ? null : subs;
+
+    final episodeNum = "${widget.parentSheet.episodeIndex + 1}";
+    final fileName = "${widget.title} EP ${episodeNum.padLeft(2, '0')}";
+
+    final audioStreams = audioOverride != null ? [audioOverride] : widget.stream.audioStreams;
+
+    DownloadManager()
+        .addDownloadTask(
+          widget.stream.videoStream.url,
+          fileName,
+          customHeaders: widget.stream.headers,
+          subtitleUrl: subs,
+          videoStream: widget.stream.videoStream,
+          audioStreams: audioStreams,
+        )
+        .onError((err, st) {
+          print(err);
+          print(st);
+          floatingSnackBar("$err");
+        });
+    Navigator.of(context).pop();
+    floatingSnackBar("Downloading the episode to your downloads folder");
+  }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       margin: EdgeInsets.only(top: 10),
-      child: ElevatedButton(
-        onPressed: () {
-          String? subs = stream.subtitleUrl;
-          subs = (subs?.isEmpty ?? true) ? null : subs;
-          // print(qualities[ind]);
-          Map<String, String> headers = stream.headers;
-
-          final episodeNum = "${widget.episodeIndex + 1}";
-
-          final fileName = "${title} EP ${episodeNum.padLeft(2, '0')}";
-          final streamLink = stream.videoStream.url;
-          // print(streamLink);
-
-          DownloadManager()
-              .addDownloadTask(
-                streamLink,
-                fileName,
-                customHeaders: headers,
-                subtitleUrl: subs,
-                videoStream: stream.videoStream,
-                audioStreams: stream.audioStreams,
-              )
-              .onError((err, st) {
-                print(err);
-                print(st);
-                floatingSnackBar("$err");
-              });
-          Navigator.of(context).pop();
-          floatingSnackBar("Downloading the episode to your downloads folder");
-        },
-        style: ElevatedButton.styleFrom(
-          elevation: 0,
-          backgroundColor: appTheme.backgroundSubColor,
-          padding: EdgeInsets.only(top: 10, bottom: 10, left: 20, right: 20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.center,
+      child: Material(
+        color: appTheme.backgroundSubColor,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(10),
+          onTap: () {
+            if (!_hasMultipleAudio) {
+              _startDownload();
+            } else {
+              setState(() => _expanded = !_expanded);
+            }
+          },
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(top: 5),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "${stream.server}",
-                        style: TextStyle(color: appTheme.accentColor, fontSize: 18, fontFamily: "Rubik"),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Padding(
+                        padding: EdgeInsets.only(top: 5),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "${widget.stream.server}",
+                              style: TextStyle(color: appTheme.accentColor, fontSize: 18, fontFamily: "Rubik"),
+                            ),
+                            Text(
+                              "${widget.stream.videoStream.quality}",
+                              style: TextStyle(color: appTheme.textMainColor, fontSize: 18, fontFamily: "Rubik"),
+                            ),
+                          ],
+                        ),
                       ),
-                      Text(
-                        "${stream.videoStream.quality}",
-                        style: TextStyle(color: appTheme.textMainColor, fontSize: 18, fontFamily: "Rubik"),
+                    ),
+                    if (_hasMultipleAudio)
+                      AnimatedRotation(
+                        turns: _expanded ? 0.5 : 0,
+                        duration: Duration(milliseconds: 200),
+                        child: Icon(Icons.expand_more, color: appTheme.textSubColor),
                       ),
-                    ],
-                  ),
+                  ],
+                ),
+                AnimatedSize(
+                  duration: Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topCenter,
+                  child: _expanded ? _audioTrackSection() : SizedBox.shrink(),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _audioTrackSection() {
+    final audioStreams = widget.stream.audioStreams;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Divider(color: appTheme.textSubColor.withAlpha(50)),
+        Padding(
+          padding: EdgeInsets.only(top: 4, bottom: 8),
+          child: Row(
+            children: [
+              Icon(Icons.audiotrack_rounded, size: 16, color: appTheme.textSubColor),
+              SizedBox(width: 6),
+              Text(
+                "Audio Track",
+                style: TextStyle(color: appTheme.textSubColor, fontSize: 14, fontFamily: "Rubik"),
+              ),
+            ],
+          ),
+        ),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: List.generate(audioStreams.length, (index) {
+            final audio = audioStreams[index];
+            final selected = _selectedAudioIndex == index;
+            final label = audio.name.isNotEmpty ? audio.name : audio.language;
+            return ChoiceChip(
+              selected: selected,
+              showCheckmark: false,
+              label: Text(
+                label,
+                style: TextStyle(
+                  color: selected ? appTheme.onAccent : appTheme.textMainColor,
+                  fontFamily: "Rubik",
+                  fontSize: 13,
+                ),
+              ),
+              selectedColor: appTheme.accentColor,
+              backgroundColor: appTheme.backgroundColor,
+              side: BorderSide(color: selected ? appTheme.accentColor : appTheme.textSubColor.withAlpha(80)),
+              onSelected: (val) {
+                if (val) setState(() => _selectedAudioIndex = index);
+              },
+            );
+          }),
+        ),
+        SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () {
+              _startDownload(audioOverride: audioStreams[_selectedAudioIndex]);
+            },
+            icon: Icon(Icons.download_rounded),
+            label: Text("Download"),
+            style: FilledButton.styleFrom(
+              backgroundColor: appTheme.accentColor,
+              foregroundColor: appTheme.onAccent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

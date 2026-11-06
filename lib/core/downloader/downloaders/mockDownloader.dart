@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/downloader/downloaders/baseDownloader.dart';
+import 'package:animestream/core/downloader/models.dart';
+
 
 class MockDownloader extends BaseDownloader {
   MockDownloader(DownloadTaskIsolate task) : super(task);

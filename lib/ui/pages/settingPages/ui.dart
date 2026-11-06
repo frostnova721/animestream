@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/theme.dart';
-import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/data/models.dart';
 import 'package:animestream/ui/models/popup.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';

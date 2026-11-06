@@ -1,4 +1,4 @@
-import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/core/downloader/downloadManager.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';

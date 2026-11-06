@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/hlsParser/qualityStream.dart';

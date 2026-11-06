@@ -1,7 +1,7 @@
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
-import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/data/models/settingsModal.dart';
 import 'package:hive/hive.dart';
 
 class Settings {

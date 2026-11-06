@@ -1,4 +1,4 @@
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/database/types.dart';
 
 class ServerSelectionBottomSheetContentData {

@@ -5,11 +5,10 @@ import 'package:animestream/core/anime/providers/animepahe.dart';
 import 'package:animestream/core/anime/providers/anizone.dart';
 import 'package:animestream/core/anime/providers/gojo.dart';
 import 'package:animestream/core/anime/providers/reanime.dart';
-import 'package:animestream/core/anime/providers/animeProvider.dart';
 import 'package:animestream/core/anime/providers/providerDetails.dart';
 import 'package:animestream/core/anime/providers/providerManager.dart';
 import 'package:animestream/core/anime/providers/providerPlugin.dart';
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:flutter/material.dart';
 

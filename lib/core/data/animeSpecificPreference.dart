@@ -2,7 +2,7 @@ import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
 import 'package:animestream/core/data/hive.dart';
-import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/data/models/animeSpecificPreference.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:hive/hive.dart';
 

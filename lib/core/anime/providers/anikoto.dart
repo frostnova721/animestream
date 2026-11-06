@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:animestream/core/anime/extractors/megaplayCrypto.dart';
 import 'package:animestream/core/anime/extractors/vidtube.dart';
-import 'package:animestream/core/anime/providers/animeProvider.dart';
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/anime/providers/models/animeProvider.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:html/parser.dart';
 import 'package:animestream/core/network/network.dart';

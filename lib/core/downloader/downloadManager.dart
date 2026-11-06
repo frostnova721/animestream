@@ -1,6 +1,6 @@
-import 'package:animestream/core/anime/downloader/downloader.dart';
-import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/downloader/downloader.dart';
+import 'package:animestream/core/downloader/downloaderHelper.dart';
+import 'package:animestream/core/downloader/models.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/hlsParser/audioStream.dart';

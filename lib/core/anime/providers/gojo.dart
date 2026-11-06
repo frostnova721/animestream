@@ -1,7 +1,6 @@
 import 'dart:convert';
 
-import 'package:animestream/core/anime/providers/animeProvider.dart';
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/app/values.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/network/network.dart';

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
-import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/data/models.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleText.dart';

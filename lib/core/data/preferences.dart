@@ -1,7 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/hive.dart';
-import 'package:animestream/core/data/types.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
+import 'package:animestream/core/data/models/userPreferencesModal.dart';
 
 class UserPreferences {
   static Future<UserPreferencesModal> getUserPreferences() async {

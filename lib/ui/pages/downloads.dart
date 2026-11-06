@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:animestream/core/anime/downloader/downloadManager.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/downloader/downloadManager.dart';
+import 'package:animestream/core/downloader/models.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/data/downloadHistory.dart';

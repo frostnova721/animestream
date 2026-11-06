@@ -4,10 +4,10 @@ import 'dart:isolate';
 import 'package:animestream/core/commons/hlsParser/hlsParser.dart';
 import 'package:collection/collection.dart';
 
-import 'package:animestream/core/anime/downloader/downloadManager.dart';
-import 'package:animestream/core/anime/downloader/downloaderCore.dart';
-import 'package:animestream/core/anime/downloader/downloaderHelper.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/downloader/downloadManager.dart';
+import 'package:animestream/core/downloader/downloaderCore.dart';
+import 'package:animestream/core/downloader/downloaderHelper.dart';
+import 'package:animestream/core/downloader/models.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/extensions.dart';

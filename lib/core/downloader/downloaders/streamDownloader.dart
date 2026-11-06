@@ -3,8 +3,8 @@ import 'dart:collection';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/downloader/downloaders/baseDownloader.dart';
+import 'package:animestream/core/downloader/models.dart';
 import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/commons/hlsParser/hlsParser.dart';
 import 'package:animestream/core/commons/hlsParser/hlsSegment.dart';
@@ -80,8 +80,8 @@ class StreamDownloader extends BaseDownloader {
       int lastUpdatedProgress = 0; // Dont notify if progress is same
       int lastDownloadedSegmentIndex = -1;
 
-      final Map<int, BufferItem> buffers = {};
-      final Map<int, BufferItem> audioBuffers = {};
+      final Map<int, _BufferItem> buffers = {};
+      final Map<int, _BufferItem> audioBuffers = {};
 
       final Set<Future<void>> activeDownloads = {};
       final Set<Future<void>> activeAudioDownloads = {};
@@ -163,7 +163,7 @@ class StreamDownloader extends BaseDownloader {
                   final buffer = entry.encryptionKey != null
                       ? await _decryptSegment(buffer: res.bodyBytes, segment: entry)
                       : res.bodyBytes;
-                  audioBuffers[entryIndex] = BufferItem(index: segmentNumber, buffer: buffer);
+                  audioBuffers[entryIndex] = _BufferItem(index: segmentNumber, buffer: buffer);
                 } else {
                   print("Error for audio segment: $uri, body: ${res.body}, res head: ${res.headers}");
                   throw Exception("ERR_REQ_FAILED. Got Status: ${res.statusCode} for audio segment: $segmentNumber");
@@ -214,7 +214,7 @@ class StreamDownloader extends BaseDownloader {
                 final buffer = entry.encryptionKey != null
                     ? await _decryptSegment(buffer: res.bodyBytes, segment: entry)
                     : res.bodyBytes;
-                buffers[entryIndex] = BufferItem(index: segmentNumber, buffer: buffer);
+                buffers[entryIndex] = _BufferItem(index: segmentNumber, buffer: buffer);
               } else {
                 print("Error for segment: $uri, body: ${res.body}, res head: ${res.headers}");
                 throw Exception("ERR_REQ_FAILED. Got Status: ${res.statusCode} for segment: $segmentNumber");
@@ -281,7 +281,7 @@ class StreamDownloader extends BaseDownloader {
             final allActive = [...activeDownloads, ...activeAudioDownloads];
             await Future.any(allActive.map((f) => f.catchError((_) {})));
           } else {
-            await Future.delayed(const Duration(milliseconds: 30)); 
+            await Future.delayed(const Duration(milliseconds: 30));
           }
         }
       }
@@ -374,3 +374,5 @@ class StreamDownloader extends BaseDownloader {
     return; // nothing to do
   }
 }
+
+class _BufferItem({required final int index, required final Uint8List buffer});

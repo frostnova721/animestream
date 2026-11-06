@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/downloader/downloaders/baseDownloader.dart';
+import 'package:animestream/core/downloader/models.dart';
 import 'package:animestream/core/commons/extensions.dart';
 import 'package:animestream/core/remuxer/remuxer.dart';
 import 'package:http/http.dart';
@@ -68,7 +69,7 @@ class _StreamDownloader extends BaseDownloader {
       int lastDownloadedSegmentIndex = -1;
 
       for (int i = task.resumeFrom.toInt(); i < segmentsFiltered.length; i += parallelDownloadsBatchSize) {
-        final List<BufferItem> buffers = [];
+        final List<_BufferItem> buffers = [];
 
         // Handle commands
         if (status == DownloadStatus.cancelled) {
@@ -131,9 +132,9 @@ class _StreamDownloader extends BaseDownloader {
           if (res.statusCode >= 200 && res.statusCode < 300) {
             // Decrypt if theres an encryption
             if (helper.encryptionKey != null) {
-              buffers.add(BufferItem(index: segmentNumber, buffer: helper.decryptSegment(res.bodyBytes)));
+              buffers.add(_BufferItem(index: segmentNumber, buffer: helper.decryptSegment(res.bodyBytes)));
             } else {
-              buffers.add(BufferItem(index: segmentNumber, buffer: res.bodyBytes));
+              buffers.add(_BufferItem(index: segmentNumber, buffer: res.bodyBytes));
             }
           } else {
             print("Error for segment: $uri, body: ${res.body}, res head: ${res.headers}");
@@ -213,3 +214,5 @@ class _StreamDownloader extends BaseDownloader {
     return; // nothing to do
   }
 }
+
+class _BufferItem({required final int index, required final Uint8List buffer});

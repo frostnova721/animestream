@@ -12,6 +12,12 @@ if not exist ".env" (
 )
 
 if "%1" == "pack" (
+     if "%2" == "win" (
+        echo Building windows setup executable.
+        echo Running command: flutter pub run inno_bundle:build --release --build-args="--dart-define-from-file=.env"
+        flutter pub run inno_bundle:build --release --build-args="--dart-define-from-file=.env"
+        exit /b 0
+    )
     if "%2" == "windows" (
         echo Building windows setup executable.
         echo Running command: flutter pub run inno_bundle:build --release --build-args="--dart-define-from-file=.env"

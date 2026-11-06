@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 import 'package:animestream/core/anime/providers/providerDetails.dart';
-import 'package:animestream/core/anime/providers/types.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/preferences.dart';
-import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/data/models.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/simkl/simkl.dart';

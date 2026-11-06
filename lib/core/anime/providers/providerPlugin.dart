@@ -1,4 +1,4 @@
-import 'package:animestream/core/anime/providers/animeProvider.dart';
+import 'package:animestream/core/anime/providers/models.dart';
 // import 'package:d4rt/d4rt.dart';
 
 class ProviderPlugin {

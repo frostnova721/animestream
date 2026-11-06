@@ -1,4 +1,4 @@
-import 'package:animestream/core/anime/downloader/downloadManager.dart';
+import 'package:animestream/core/downloader/downloadManager.dart';
 import 'package:animestream/core/data/watching.dart';
 import 'package:animestream/ui/models/bottomSheets/batchDownload.dart';
 import 'package:animestream/ui/models/bottomSheets/commentSection.dart';
@@ -8,7 +8,7 @@ import 'package:provider/provider.dart';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/data/types.dart';
+import 'package:animestream/core/data/models.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/bottomSheets/manualSearchSheet.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';

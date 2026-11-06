@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:animestream/core/anime/downloader/downloaders/baseDownloader.dart';
-import 'package:animestream/core/anime/downloader/types.dart';
+import 'package:animestream/core/downloader/downloaders/baseDownloader.dart';
+import 'package:animestream/core/downloader/models.dart';
 import 'package:http/http.dart';
 
 class ImageDownloader extends BaseDownloader {

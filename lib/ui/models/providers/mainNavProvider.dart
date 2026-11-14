@@ -10,6 +10,7 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
@@ -162,6 +163,7 @@ class MainNavProvider extends ChangeNotifier {
           floatingSnackBar("AniList token is invalid. Login again!");
 
           await AnilistLogin().removeToken();
+          DatabaseHandler.invalidateTracker();
 
           loggedIn = false;
           userProfile = null;

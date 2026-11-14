@@ -6,6 +6,7 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/local/local.dart';
 import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/mal/mal.dart';
 import 'package:animestream/core/database/simkl/login.dart';
@@ -47,6 +48,30 @@ class DatabaseHandler extends Database {
     }
   }
 
+  // Yes ik it is repetitive code! stfu
+  static Tracker getTrackerInstance(Databases dbs) {
+    switch (dbs) {
+      case Databases.anilist:
+        return Anilist();
+      case Databases.simkl:
+        return Simkl();
+      case Databases.mal:
+        return MAL();
+    }
+  }
+
+  static Tracker? _activeTracker;
+
+  static Future<Tracker> getActiveTracker() async {
+    if (_activeTracker != null) return _activeTracker!;
+    final db = currentUserSettings?.database ?? Databases.anilist;
+    final tracker = await getDatabaseLoginInstance(db).isLoggedIn() ? getTrackerInstance(db) : LocalTracker();
+    _activeTracker = tracker;
+    return tracker;
+  }
+
+  static void invalidateTracker() => _activeTracker = null;
+
   Future<bool> isLoggedIn() async {
     return await getDatabaseLoginInstance(db).isLoggedIn();
   }
@@ -63,11 +88,11 @@ class DatabaseHandler extends Database {
 
   @override
   Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) async {
-    return await getDatabaseInstance(db).getAnimeWatchProgress(id);
+    return await (await getActiveTracker()).getAnimeWatchProgress(id);
   }
 
   @override
   Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) async {
-    return await getDatabaseInstance(db).getUserAnimeList(userName, status: status);
+    return await (await getActiveTracker()).getUserAnimeList(userName, status: status);
   }
 }

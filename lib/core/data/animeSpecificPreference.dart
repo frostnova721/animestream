@@ -1,7 +1,6 @@
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
-import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/data/models/animeSpecificPreference.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:hive/hive.dart';
@@ -13,15 +12,38 @@ final String _boxName = HiveBox.animeInfo.boxName;
 
 // final _cache = <String, AnimeSpecificPreference?>{};
 
+// The box is kept open: Hive.openBox hands out the same instance to every caller, so closing it
+// after each access broke overlapping calls ("Box has already been closed"), e.g. the player's
+// save on exit racing the info page's getWatched(). Only this file uses the animeInfo box.
+Box? _box;
+
+Future<Box> _open() async {
+  final box = _box;
+  if (box != null && box.isOpen) return box;
+  return _box = await Hive.openBox(_boxName);
+}
+
+Future<void> _queue = Future.value();
+
+/// Runs [fn] once the previous read/write is done. Both functions here do a read-modify-write
+/// of the same map, so overlapping calls would lose updates, and a read could miss a save
+/// that started just before it (player exit -> info page refresh).
+Future<T> _serialized<T>(Future<T> Function() fn) {
+  final result = _queue.then((_) => fn());
+  _queue = result.then((_) {}, onError: (_) {});
+  return result;
+}
+
 /// Retruns an object of [AnimeSpecificPreference] if it exists!
 Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) async {
   //just handle anilist
   if (currentUserSettings?.database != Databases.anilist) return null;
 
-  var box = await Hive.openBox(_boxName);
-  if (!box.isOpen) {
-    box = await Hive.openBox(_boxName);
-  }
+  return _serialized(() => _getAnimeSpecificPreference(anilistId));
+}
+
+Future<AnimeSpecificPreference?> _getAnimeSpecificPreference(String anilistId) async {
+  final box = await _open();
 
   String? manSearch, provider;
   Map<dynamic, dynamic>? lastWatch;
@@ -44,8 +66,6 @@ Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) as
     await box.put(HiveKey.animeSpecificPreference.name, asp);
   }
 
-  await box.close();
-
   return AnimeSpecificPreference(
       lastWatchDuration: lastWatch,
       manualSearchQuery: manSearch,
@@ -53,9 +73,13 @@ Future<AnimeSpecificPreference?> getAnimeSpecificPreference(String anilistId) as
       previouslyUsedServer: item['previouslyUsedServer']);
 }
 
-Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreference preference) async {
-  Map<dynamic, dynamic> map =
-      Map.castFrom(await getVal(HiveKey.animeSpecificPreference, boxName: HiveBox.animeInfo) ?? {});
+Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreference preference) {
+  return _serialized(() => _saveAnimeSpecificPreference(anilistId, preference));
+}
+
+Future<void> _saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreference preference) async {
+  final box = await _open();
+  Map<dynamic, dynamic> map = Map.castFrom(box.get(HiveKey.animeSpecificPreference.name) ?? {});
 
   // print(map);
 
@@ -102,5 +126,5 @@ Future<void> saveAnimeSpecificPreference(String anilistId, AnimeSpecificPreferen
     finalMap = Map<dynamic, dynamic>.fromEntries(entries.take(_animeInfoLruCapacity));
   }
 
-  await storeVal(HiveKey.animeSpecificPreference, finalMap, boxName: HiveBox.animeInfo);
+  await box.put(HiveKey.animeSpecificPreference.name, finalMap);
 }

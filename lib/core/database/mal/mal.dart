@@ -3,11 +3,12 @@ import 'package:animestream/core/data/secureStorage.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/mal/login.dart';
+import 'package:animestream/core/database/mal/mutations.dart';
 import 'package:animestream/core/database/mal/types.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/core/network/network.dart';
 
-class MAL extends Database {
+class MAL extends Database implements Tracker {
   @override
   Future<DatabaseInfo> getAnimeInfo(int id) {
     throw UnimplementedError();
@@ -20,21 +21,16 @@ class MAL extends Database {
 
   static Map<String, String>? headers = null;
 
-  static Future<Map<String, String>> getHeader(
-      {bool refreshHeaders = false}) async {
+  static Future<Map<String, String>> getHeader({bool refreshHeaders = false}) async {
     if (headers != null && !refreshHeaders) return headers!;
     final token = await getSecureVal(SecureStorageKey.malToken);
-    final map = {
-      'Authorization': "Bearer ${token}",
-    };
+    final map = {'Authorization': "Bearer ${token}"};
     headers = map;
     return map;
   }
 
-  Future<String> fetch(String url,
-      {int recallAttempt = 0, bool refreshHeaders = false}) async {
-    if (recallAttempt > 2)
-      throw Exception("MAL-FETCH: MAX RECALL DEPTH LIMIT REACHED!");
+  Future<String> fetch(String url, {int recallAttempt = 0, bool refreshHeaders = false}) async {
+    if (recallAttempt > 2) throw Exception("MAL-FETCH: MAX RECALL DEPTH LIMIT REACHED!");
 
     final headers = await getHeader(refreshHeaders: refreshHeaders);
     final res = await get(Uri.parse(url), headers: headers);
@@ -43,8 +39,7 @@ class MAL extends Database {
 
     if (res.statusCode == 401) {
       await MALLogin().refreshToken();
-      return await fetch(url,
-          recallAttempt: recallAttempt + 1, refreshHeaders: true);
+      return await fetch(url, recallAttempt: recallAttempt + 1, refreshHeaders: true);
     }
 
     //might have to remove this!
@@ -66,7 +61,22 @@ class MAL extends Database {
 
   @override
   Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) {
-    // TODO: implement getUserAnimeList
     throw UnimplementedError();
+  }
+
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) {
+    return MALMutation().deleteAnimeEntry(id: id);
+  }
+
+  @override
+  Future<DatabaseMutationResult?> mutateAnimeList({
+    required int id,
+    MediaStatus? status = MediaStatus.CURRENT,
+    int? progress = 0,
+    MediaStatus? previousStatus,
+    int? score,
+  }) {
+    return MALMutation().mutateAnimeList(id: id, status: status, progress: progress, previousStatus: previousStatus, score: score);
   }
 }

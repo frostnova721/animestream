@@ -1,7 +1,6 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
-import 'package:animestream/ui/models/snackBar.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -61,9 +60,6 @@ class CommonInfo extends StatelessWidget {
                       padding: EdgeInsets.only(right: 20),
                       child: _button(
                         onClick: () {
-                          if (!provider.loggedIn) {
-                            return floatingSnackBar("Login to anilist!");
-                          }
                           showDialog(
                             context: context,
                             useRootNavigator: false,
@@ -90,9 +86,9 @@ class CommonInfo extends StatelessWidget {
                     ),
                     _button(
                       onClick: () {
-                        if (!provider.loggedIn) {
-                          return floatingSnackBar("Login to anilist!");
-                        }
+                        // if (!provider.loggedIn) {
+                        //   return floatingSnackBar("Login to anilist!");
+                        // }
                         showDialog(
                           context: context,
                           useRootNavigator: false,

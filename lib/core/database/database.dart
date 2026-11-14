@@ -48,3 +48,8 @@ abstract class DatabaseMutation {
 
   Future<DatabaseMutationResult?> deleteAnimeEntry({ required int id });
 }
+
+abstract class Tracker implements DatabaseMutation {
+  Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id);
+  Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status});
+}

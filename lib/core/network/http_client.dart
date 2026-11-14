@@ -78,7 +78,7 @@ class HTTP {
         return HttpResponse(
           200,
           bodyStr,
-          bodyBytes: Uint8List.fromList(cached.bodyBytes),
+          bodyBytes: cached.bodyBytes,
           headers: {'content-type': 'application/json'},
           request: HttpRequestInfo(uri),
           cached: true,
@@ -122,10 +122,11 @@ class HTTP {
           onTimeout: () => throw HttpException('Request timeout'),
         );
 
-    final bytes = await res.fold<List<int>>(
-      <int>[],
-      (buffer, element) => buffer..addAll(element),
-    );
+    final bytes = (await res.fold<BytesBuilder>(
+      BytesBuilder(copy: false),
+      (builder, chunk) => builder..add(chunk),
+    ))
+        .takeBytes();
     final resBody = utf8.decode(bytes, allowMalformed: true);
 
     final responseHeaders = <String, String>{};
@@ -136,7 +137,7 @@ class HTTP {
     final response = HttpResponse(
       res.statusCode,
       resBody,
-      bodyBytes: Uint8List.fromList(bytes),
+      bodyBytes: bytes,
       reasonPhrase: res.reasonPhrase,
       headers: responseHeaders,
       request: HttpRequestInfo(uri),

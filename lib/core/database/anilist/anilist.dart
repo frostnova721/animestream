@@ -1,5 +1,6 @@
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/values.dart';
+import 'package:animestream/core/database/anilist/mutations.dart';
 import 'package:animestream/core/database/anilist/rateLimiter.dart';
 import 'package:animestream/core/network/network.dart';
 
@@ -23,9 +24,10 @@ class AnilistApiException implements Exception {
   String toString() => 'AnilistApiException(statusCode: $statusCode, message: $message)';
 }
 
-class Anilist extends Database {
+class Anilist extends Database implements Tracker {
   Future<List<AnilistSearchResult>> search(String query) async {
-    final gquery = '''
+    final gquery =
+        '''
             query {
                 Page(perPage: 15) {
                     media(search: "$query", type: ANIME, isAdult: false) {
@@ -45,11 +47,7 @@ class Anilist extends Database {
                 }
             }
         ''';
-    final data = await fetchQuery(
-      gquery,
-      RequestType.media,
-      cacheDuration: const Duration(minutes: 30),
-    );
+    final data = await fetchQuery(gquery, RequestType.media, cacheDuration: const Duration(minutes: 30));
 
     List<AnilistSearchResult> searchResults = [];
 
@@ -59,16 +57,17 @@ class Anilist extends Database {
 
     data.forEach((item) {
       final classified = AnilistSearchResult(
-          cover: item['coverImage']['large'],
-          id: item['id'],
-          idMal: item['idMal'],
-          title: {
-            'english': item['title']['english'],
-            'romaji': item['title']['romaji'],
-            'native': item['title']['native'],
-          },
-          totalEpisodes: item['episodes'],
-          rating: item['averageScore'] is int ? item['averageScore'] / 10 : null);
+        cover: item['coverImage']['large'],
+        id: item['id'],
+        idMal: item['idMal'],
+        title: {
+          'english': item['title']['english'],
+          'romaji': item['title']['romaji'],
+          'native': item['title']['native'],
+        },
+        totalEpisodes: item['episodes'],
+        rating: item['averageScore'] is int ? item['averageScore'] / 10 : null,
+      );
       searchResults.add(classified);
     });
 
@@ -113,15 +112,16 @@ class Anilist extends Database {
         if (rec != null) {
           recommended.add(
             AnilistAnimeRelatedRecommendation(
-                id: rec['id'],
-                title: {
-                  'english': rec['title']['english'],
-                  'romaji': rec['title']['romaji'],
-                  'native': rec['title']['native'],
-                },
-                cover: rec['coverImage']['large'] ?? rec['coverImage']['extraLarge'],
-                type: rec['type'],
-                rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null),
+              id: rec['id'],
+              title: {
+                'english': rec['title']['english'],
+                'romaji': rec['title']['romaji'],
+                'native': rec['title']['native'],
+              },
+              cover: rec['coverImage']['large'] ?? rec['coverImage']['extraLarge'],
+              type: rec['type'],
+              rating: rec['averageScore'] is int ? rec['averageScore'] / 10 : null,
+            ),
           );
         }
       });
@@ -129,7 +129,8 @@ class Anilist extends Database {
       final List<AnilistAnimeRelatedRecommendation> relations = [];
 
       info['relations']['edges'].forEach((relation) {
-        relations.add(AnilistAnimeRelatedRecommendation(
+        relations.add(
+          AnilistAnimeRelatedRecommendation(
             id: relation['node']['id'],
             title: {
               'english': relation['node']['title']['english'],
@@ -139,7 +140,9 @@ class Anilist extends Database {
             cover: relation['node']['coverImage']['large'] ?? relation['node']['coverImage']['extraLarge'],
             type: relation['node']['type'],
             rating: null,
-            relationType: relation['relationType']));
+            relationType: relation['relationType'],
+          ),
+        );
       });
 
       List<String> tags = [];
@@ -218,8 +221,12 @@ class Anilist extends Database {
             }
           }''';
 
-    final List<dynamic> data = await fetchQuery(query, RequestType.media,
-        token: await getSecureVal(SecureStorageKey.anilistToken), cacheDuration: const Duration(hours: 1));
+    final List<dynamic> data = await fetchQuery(
+      query,
+      RequestType.media,
+      token: await getSecureVal(SecureStorageKey.anilistToken),
+      cacheDuration: const Duration(hours: 1),
+    );
 
     final List<CurrentlyAiringResult> airingAnimes = [];
 
@@ -248,7 +255,8 @@ class Anilist extends Database {
   Future<List<RecentlyUpdatedResult>> recentlyUpdated() async {
     final nowSec = DateTime.now().millisecondsSinceEpoch ~/ 1000;
     final timeMs = (nowSec ~/ 900) * 900; // 900s = 15 minute window
-    final query = '''{
+    final query =
+        '''{
         Page(perPage: 25) {
     airingSchedules (airingAt_greater: 0, airingAt_lesser: $timeMs, sort: TIME_DESC) {
       episode
@@ -302,7 +310,8 @@ class Anilist extends Database {
   }
 
   Future<List<TrendingResult>> getTrending() async {
-    final gquery = '''
+    final gquery =
+        '''
             query {
                 Page(perPage: 25) {
                     media(type: ANIME, sort: TRENDING_DESC, isAdult: false, season: ${getCurrentSeason()}) {
@@ -322,8 +331,11 @@ class Anilist extends Database {
                 }
             }
         ''';
-    final List<dynamic> trendings =
-        await fetchQuery(gquery, RequestType.media, cacheDuration: const Duration(hours: 6));
+    final List<dynamic> trendings = await fetchQuery(
+      gquery,
+      RequestType.media,
+      cacheDuration: const Duration(hours: 6),
+    );
 
     final List<TrendingResult> typed = [];
 
@@ -426,4 +438,16 @@ class Anilist extends Database {
   @override
   Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) =>
       AnilistQueries().getUserAnimeList(userName, status: status);
+
+  @override
+  Future<DatabaseMutationResult?> mutateAnimeList({
+    required int id,
+    MediaStatus? status,
+    int? progress,
+    int? score,
+    MediaStatus? previousStatus,
+  }) => AnilistMutations().mutateAnimeList(id: id, status: status, progress: progress, previousStatus: previousStatus, score: score);
+
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) => AnilistMutations().deleteAnimeEntry(id: id);
 }

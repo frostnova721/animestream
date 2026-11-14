@@ -5,6 +5,7 @@ import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/models.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/sources.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/toggleItem.dart';
@@ -222,6 +223,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         borderRadius: BorderRadius.circular(20),
                         onTap: () async {
                           await writeSettings(SettingsModal(database: Databases.values[index]));
+                          DatabaseHandler.invalidateTracker();
                           setState(() {});
                           setcState(() {});
                         },

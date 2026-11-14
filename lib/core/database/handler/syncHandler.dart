@@ -2,6 +2,9 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/mutations.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/handler/handler.dart';
+import 'package:animestream/core/database/local/local.dart';
+import 'package:animestream/core/database/local/types.dart';
 import 'package:animestream/core/database/mal/mutations.dart';
 import 'package:animestream/core/database/simkl/mutations.dart';
 import 'package:animestream/core/database/types.dart';
@@ -14,7 +17,23 @@ class SyncHandler extends DatabaseMutation {
     MediaStatus? status,
     MediaStatus? previousStatus,
     int? progress,
+    LocalMeta? meta,
   }) async {
+    if (await DatabaseHandler.getActiveTracker() case final LocalTracker localTracker) {
+      if (meta != null) {
+        await localTracker.saveMeta(
+          id: id,
+          title: meta.title,
+          cover: meta.cover,
+          totalEpisodes: meta.totalEpisodes,
+          rating: meta.rating,
+          otherIds: otherIds,
+        );
+      }
+
+      return localTracker.mutateAnimeList(id: id, status: status, progress: progress, otherIds: otherIds);
+    }
+
     final List<Databases> databases = Databases.values;
     final activedb = getActiveDatabase();
     final activeDbInstance = getDatabaseMutationInstance(activedb);
@@ -24,10 +43,10 @@ class SyncHandler extends DatabaseMutation {
         .mutateAnimeList(id: id, status: status, previousStatus: previousStatus, progress: progress)
         .then((val) => print("[SYNC HANDLER]: Synced ${activedb.name}"))
         .catchError((e, st) {
-      print(e);
-      print(st.toString());
-      return null;
-    });
+          print(e);
+          print(st.toString());
+          return null;
+        });
 
     //sync with other databases
     otherIds?.forEach((it) {
@@ -39,10 +58,10 @@ class SyncHandler extends DatabaseMutation {
               .mutateAnimeList(id: it.id, status: status, previousStatus: previousStatus, progress: progress)
               .then((val) => print("[SYNC HANDLER]: Synced ${it.database.name}"))
               .catchError((e, st) {
-            print(e);
-            print(st.toString());
-            return null;
-          });
+                print(e);
+                print(st.toString());
+                return null;
+              });
         }
       }
     });
@@ -61,10 +80,10 @@ class SyncHandler extends DatabaseMutation {
         .deleteAnimeEntry(id: id)
         .then((val) => print("[SYNC HANDLER]: Deleted from ${activedb.name}"))
         .catchError((e, st) {
-      print(e);
-      print(st.toString());
-      return null;
-    });
+          print(e);
+          print(st.toString());
+          return null;
+        });
 
     //sync with other databases
     otherIds?.forEach((it) {
@@ -76,10 +95,10 @@ class SyncHandler extends DatabaseMutation {
               .deleteAnimeEntry(id: it.id)
               .then((val) => print("[SYNC HANDLER]: Deleted from ${it.database.name}"))
               .catchError((e, st) {
-            print(e);
-            print(st.toString());
-            return null;
-          });
+                print(e);
+                print(st.toString());
+                return null;
+              });
         }
       }
     });

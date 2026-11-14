@@ -252,7 +252,11 @@ class InfoProvider extends ChangeNotifier {
           : (supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex);
 
       if (refreshLastWatchDuration) {
+        try{
         _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
+        } catch(err) {
+          Logs.app.log("failed to update last watch duration");
+        }
       }
     } catch (err) {
       Logs.app.log("[WATCH PROGRESS] $err");

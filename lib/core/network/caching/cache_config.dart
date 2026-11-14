@@ -29,7 +29,7 @@ class CacheConfig {
 
   factory CacheConfig.fromMap(Map<dynamic, dynamic> map) {
     return CacheConfig(
-      maxCacheSize: map['maxCacheSize'] as int? ?? 1024 * 1024 * 1024,
+      maxCacheSize: map['maxCacheSize'] as int? ?? 200 * 1024 * 1024,
       enableCaching: map['enableCaching'] as bool? ?? true,
       bypassCache: map['bypassCache'] as bool? ?? false,
     );

@@ -5,6 +5,7 @@ import 'package:animestream/core/database/anilist/anilist.dart';
 import 'package:animestream/core/database/anilist/login.dart';
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/mal/login.dart';
 import 'package:animestream/core/database/simkl/login.dart';
 import 'package:animestream/core/database/simkl/types.dart';
@@ -84,6 +85,7 @@ class _AccountSettingState extends State<AccountSetting> {
         if (err.statusCode == 401 || err.message.toLowerCase().contains("invalid token")) {
           floatingSnackBar("Anilist token is invalid. Login again!");
           await AnilistLogin().removeToken();
+          DatabaseHandler.invalidateTracker();
           if (mounted) setState(() => anilistLoggedIn = false);
         }
       } else {
@@ -101,6 +103,7 @@ class _AccountSettingState extends State<AccountSetting> {
       if (err.isUnauthorized) {
         floatingSnackBar("Simkl token is invalid. Login again!");
         await SimklLogin().removeToken();
+        DatabaseHandler.invalidateTracker();
       }
       if (mounted) setState(() => simklLoggedIn = false);
     } catch (err) {
@@ -114,6 +117,7 @@ class _AccountSettingState extends State<AccountSetting> {
       if (mounted) setState(() => malUser = res);
     } catch (err) {
       floatingSnackBar("MAL error: ${err.toString()}");
+      DatabaseHandler.invalidateTracker();
       if (mounted) setState(() => malLoggedIn = false);
     }
   }
@@ -133,6 +137,7 @@ class _AccountSettingState extends State<AccountSetting> {
         if (mounted) setState(() => malLoggedIn = false);
         break;
     }
+    DatabaseHandler.invalidateTracker();
     floatingSnackBar("Logged out successfully!");
   }
 
@@ -150,6 +155,7 @@ class _AccountSettingState extends State<AccountSetting> {
           logged = await MALLogin().initiateLogin();
           break;
       }
+      DatabaseHandler.invalidateTracker();
 
       if (logged) {
         floatingSnackBar("Login successful!");

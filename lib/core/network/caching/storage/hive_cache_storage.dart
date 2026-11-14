@@ -18,7 +18,7 @@ class CacheEntryAdapter extends TypeAdapter<CacheEntry> {
     };
     return CacheEntry(
       key: fields[0] as String? ?? '',
-      bodyBytes: (fields[1] as List<dynamic>? ?? []).cast<int>(),
+      bodyBytes: CacheEntry.toBytes(fields[1]),
       etag: fields[2] as String?,
       lastModified: fields[3] as String?,
       expiry: fields[4] as DateTime? ?? DateTime.fromMillisecondsSinceEpoch(0),

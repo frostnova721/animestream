@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/utils.dart';
 import 'package:animestream/core/database/handler/syncHandler.dart';
+import 'package:animestream/core/database/local/types.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:flutter/material.dart';
@@ -387,6 +388,12 @@ class _MediaListStatusBottomSheetState extends State<MediaListStatusBottomSheet>
                             previousStatus: assignItemEnum(initialSelection),
                             progress: progress,
                             otherIds: provider.altDatabases,
+                            meta: LocalMeta(
+                              title: provider.data.title,
+                              cover: provider.data.cover,
+                              totalEpisodes: provider.data.episodes,
+                              rating: provider.data.rating,
+                            ),
                           )
                               .then((value) {
                             initialSelection = selectedValue ?? initialSelection;

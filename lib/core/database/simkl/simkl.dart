@@ -10,11 +10,12 @@ import 'package:animestream/core/data/secureStorage.dart';
 
 import 'package:animestream/core/database/anilist/types.dart';
 import 'package:animestream/core/database/database.dart';
+import 'package:animestream/core/database/simkl/mutations.dart';
 import 'package:animestream/core/database/simkl/types.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/core/network/network.dart';
 
-class Simkl extends Database {
+class Simkl extends Database implements Tracker {
   static final _appHeader = "app-name=animestream&app-version=${AppVersion.instance.version}";
 
   static String imageLink(String url, {bool fanart = false}) =>
@@ -54,11 +55,13 @@ class Simkl extends Database {
     final List<dynamic> res = await fetch(url);
     List<SimklSearchResult> sr = [];
     res.forEach((it) {
-      sr.add(SimklSearchResult(
-        cover: imageLink(it['poster']),
-        id: it['ids']['simkl_id'],
-        title: {'english': it['title_en'] ?? it['title'], 'romaji': it['title_romaji'] ?? it['title']},
-      ));
+      sr.add(
+        SimklSearchResult(
+          cover: imageLink(it['poster']),
+          id: it['ids']['simkl_id'],
+          title: {'english': it['title_en'] ?? it['title'], 'romaji': it['title_romaji'] ?? it['title']},
+        ),
+      );
     });
 
     return sr;
@@ -86,12 +89,7 @@ class Simkl extends Database {
   Future<DatabaseAnimeWatchProgress> getAnimeWatchProgress(int id) async {
     final token = await getSecureVal(SecureStorageKey.simklToken);
     if (token == null || token.isEmpty) {
-      return SimklAnimeWatchProgress(
-        id: id,
-        progress: null,
-        totalEpisodes: null,
-        status: null,
-      );
+      return SimklAnimeWatchProgress(id: id, progress: null, totalEpisodes: null, status: null);
     }
 
     final url =
@@ -101,44 +99,30 @@ class Simkl extends Database {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
       'simkl-api-key': AnimeStreamEnvironment.simklClientId,
-      if (AppValues.defaultClientUserAgent.isNotEmpty)
-        'User-Agent': AppValues.defaultClientUserAgent,
+      if (AppValues.defaultClientUserAgent.isNotEmpty) 'User-Agent': AppValues.defaultClientUserAgent,
     };
 
     final body = jsonEncode([
       {
-        'ids': {'simkl': id}
-      }
+        'ids': {'simkl': id},
+      },
     ]);
 
     final res = await post(Uri.parse(url), headers: headers, body: body);
 
     if (res.statusCode == 404) {
-      return SimklAnimeWatchProgress(
-        id: id,
-        progress: null,
-        totalEpisodes: null,
-        status: null,
-      );
+      return SimklAnimeWatchProgress(id: id, progress: null, totalEpisodes: null, status: null);
     }
 
     if (res.statusCode < 200 || res.statusCode > 299) {
       if (res.statusCode == 401) {
         throw SimklException("Unauthorized - Invalid Token", 401);
       }
-      throw SimklException(
-        "Failed to fetch Simkl watch progress: ${res.statusCode}",
-        res.statusCode,
-      );
+      throw SimklException("Failed to fetch Simkl watch progress: ${res.statusCode}", res.statusCode);
     }
 
     if (res.body.trim().isEmpty) {
-      return SimklAnimeWatchProgress(
-        id: id,
-        progress: null,
-        totalEpisodes: null,
-        status: null,
-      );
+      return SimklAnimeWatchProgress(id: id, progress: null, totalEpisodes: null, status: null);
     }
 
     final decoded = jsonDecode(res.body);
@@ -149,5 +133,27 @@ class Simkl extends Database {
   Future<List<UserAnimeList>> getUserAnimeList(String userName, {List<MediaStatus>? status}) {
     // TODO: implement getUserAnimeList
     throw UnimplementedError();
+  }
+
+  @override
+  Future<DatabaseMutationResult?> deleteAnimeEntry({required int id}) {
+    return SimklMutation().deleteAnimeEntry(id: id);
+  }
+
+  @override
+  Future<DatabaseMutationResult?> mutateAnimeList({
+    required int id,
+    MediaStatus? status = MediaStatus.CURRENT,
+    int? progress = 0,
+    int? score,
+    MediaStatus? previousStatus,
+  }) {
+    return SimklMutation().mutateAnimeList(
+      id: id,
+      status: status,
+      progress: progress,
+      score: score,
+      previousStatus: previousStatus,
+    );
   }
 }

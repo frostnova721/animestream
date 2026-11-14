@@ -195,6 +195,7 @@ class ServerSelectionBottomSheetState extends State<ServerSelectionBottomSheet> 
       totalEpisodes: widget.provider.data.episodes,
       alternateDatabases: widget.provider.altDatabases,
       rating: widget.provider.data.rating,
+      titles: widget.provider.data.title,
     );
 
     final controller = Platform.isAndroid ? BetterPlayerWrapper() : FvpWrapper();

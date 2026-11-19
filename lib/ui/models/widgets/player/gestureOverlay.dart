@@ -22,7 +22,7 @@ class GestureOverlay extends StatefulWidget {
   final VoidCallback onDoubleTapRight;
 
   // Speed Control Callbacks (Long Press + Horizontal Drag)
-  final VoidCallback onSpeedUpStart;
+  final bool Function() onSpeedUpStart;
   final void Function(bool increase) onSpeedChange;
   final VoidCallback onSpeedUpEnd;
 
@@ -59,15 +59,15 @@ class GestureOverlay extends StatefulWidget {
 }
 
 class _GestureOverlayState extends State<GestureOverlay> {
-    // Tap State
+  // Tap State
   Timer? _tapTimer;
 
   bool _waitingForSecondTap = false;
 
   Offset? _lastTapPosition;
 
-  final int _doubleTapThreshold = 300; 
- // ms
+  final int _doubleTapThreshold = 300;
+  // ms
   bool _isSpeedingUp = false;
 
   double? _lastSpeedChangeOffset;
@@ -93,11 +93,11 @@ class _GestureOverlayState extends State<GestureOverlay> {
     if (_waitingForSecondTap && _lastTapPosition != null) {
       _waitingForSecondTap = false;
       _tapTimer?.cancel();
-      
+
       // Calculate which third of the screen was double-tapped
       final screenWidth = MediaQuery.sizeOf(context).width;
       final tapX = _lastTapPosition!.dx;
-      
+
       if (tapX < screenWidth * 0.33) {
         widget.onDoubleTapLeft();
       } else if (tapX > screenWidth * 0.66) {
@@ -110,35 +110,37 @@ class _GestureOverlayState extends State<GestureOverlay> {
 
     widget.onSingleTap();
     _waitingForSecondTap = true;
-    
+
+    _tapTimer?.cancel();
+
     _tapTimer = Timer(Duration(milliseconds: _doubleTapThreshold), () {
-      if (mounted) setState(() => _waitingForSecondTap = false);
+      _waitingForSecondTap = false;
     });
   }
 
   // --- VERTICAL DRAG (Volume / Brightness) ---
   void _onVerticalDragStart(DragStartDetails details) async {
     if (widget.controlsLocked) return;
-    
+
     final screenWidth = MediaQuery.sizeOf(context).width;
     final screenHeight = MediaQuery.sizeOf(context).height;
 
     // the middle part of screen is free from gestures.
     final freeSpace = screenWidth / 3;
-    
+
     // Add dead zones at top and bottom to prevent accidental triggers (like status bar pulldown)
     final verticalSafeArea = (screenHeight * 0.1).clamp(40.0, 80.0);
-    if (details.localPosition.dy < verticalSafeArea || 
-        details.localPosition.dy > screenHeight - verticalSafeArea) {
+    if (details.localPosition.dy < verticalSafeArea || details.localPosition.dy > screenHeight - verticalSafeArea) {
       return;
     }
 
     final isAtFreeSpace = details.localPosition.dx > freeSpace && details.localPosition.dx < (screenWidth - freeSpace);
-    
+
     // Add dead zones at left and right edges to prevent interference with system 'back' gestures
     final horizontalSafeArea = 40.0;
     if (details.localPosition.dx < horizontalSafeArea ||
-        details.localPosition.dx > screenWidth - horizontalSafeArea || isAtFreeSpace) {
+        details.localPosition.dx > screenWidth - horizontalSafeArea ||
+        isAtFreeSpace) {
       return;
     }
 
@@ -175,7 +177,7 @@ class _GestureOverlayState extends State<GestureOverlay> {
   // Speed Control
   void _onLongPressStart(LongPressStartDetails details) {
     if (widget.isDesktop || widget.controlsLocked || !widget.enableHoldToSpeedUp) return;
-    
+
     _isSpeedingUp = true;
     _lastSpeedChangeOffset = null;
     widget.onSpeedUpStart();
@@ -191,7 +193,8 @@ class _GestureOverlayState extends State<GestureOverlay> {
     }
 
     final delta = (offset - _lastSpeedChangeOffset!).abs();
-    if (delta >= 40) { // 40px threshold to snap to next speed
+    if (delta >= 40) {
+      // 40px threshold to snap to next speed
       widget.onSpeedChange(offset > _lastSpeedChangeOffset!);
       _lastSpeedChangeOffset = offset;
     }

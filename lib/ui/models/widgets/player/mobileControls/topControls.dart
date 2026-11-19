@@ -5,24 +5,22 @@ import 'package:animestream/ui/pages/settingPages/player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class TopControls extends StatelessWidget {
   const TopControls({
     super.key,
-    required this.provider,
-    required this.dataProvider,
     required this.context,
   });
 
-  final PlayerProvider provider;
-  final PlayerDataProvider dataProvider;
   final BuildContext context;
 
   @override
   Widget build(BuildContext context) {
-    final epTitle = provider.isOffline
-        ? 'Episode ${dataProvider.state.currentEpIndex + 1}'
-        : dataProvider.epLinks[dataProvider.state.currentEpIndex].episodeTitle;
+    final (epIdx, locked) = context.select<PlayerDataProvider, (int, bool)>((p) => (p.state.currentEpIndex ,p.state.controlsLocked));
+    final epTitle = context.read<PlayerProvider>().isOffline
+        ? 'Episode ${epIdx + 1}'
+        : context.read<PlayerDataProvider>().epLinks[epIdx].episodeTitle;
     return Expanded(
       child: Container(
         alignment: Alignment.topCenter,
@@ -30,7 +28,7 @@ class TopControls extends StatelessWidget {
           height: 50,
           child: Row(
             children: [
-              if (!dataProvider.state.controlsLocked)
+              if (!locked)
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
@@ -42,7 +40,7 @@ class TopControls extends StatelessWidget {
                   ),
                 ),
               Expanded(
-                child: dataProvider.state.controlsLocked
+                child: locked
                     ? Container()
                     : Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +50,7 @@ class TopControls extends StatelessWidget {
                             alignment: Alignment.topLeft,
                             child: Text(
                                 (epTitle == null || epTitle.isEmpty)
-                                    ? "Episode ${dataProvider.state.currentEpIndex + 1}"
+                                    ? "Episode ${epIdx + 1}"
                                     : epTitle,
                                 style: TextStyle(
                                   color: Colors.white,
@@ -65,7 +63,7 @@ class TopControls extends StatelessWidget {
                             padding: const EdgeInsets.only(left: 20),
                             alignment: Alignment.topLeft,
                             child: Text(
-                              "${dataProvider.showTitle}",
+                              "${context.read<PlayerDataProvider>().showTitle}",
                               style: TextStyle(
                                 color: Color.fromARGB(255, 190, 190, 190),
                                 fontFamily: 'NotoSans',
@@ -80,9 +78,10 @@ class TopControls extends StatelessWidget {
                         ],
                       ),
               ),
-              if (kDebugMode && !dataProvider.state.controlsLocked)
+              if (kDebugMode && !locked)
                 IconButton(
                   onPressed: () {
+                    final dataProvider = context.read<PlayerDataProvider>();
                     showDialog(
                       context: context,
                       builder: (BuildContext context) => AlertDialog(
@@ -105,7 +104,7 @@ class TopControls extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-              if (!dataProvider.state.controlsLocked)
+              if (!locked)
                 IconButton(
                   onPressed: () {
                     Navigator.push(
@@ -114,7 +113,7 @@ class TopControls extends StatelessWidget {
                             builder: (context) => PlayerSetting(
                                   fromWatchPage: true,
                                 ))).then((val) {
-                      dataProvider.initSubsettings();
+                      context.read<PlayerDataProvider>().initSubsettings();
                       // Restore View state (subtitle screen may change the view type)
                       SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
                       SystemChrome.setPreferredOrientations([
@@ -131,10 +130,10 @@ class TopControls extends StatelessWidget {
                 ),
               IconButton(
                 onPressed: () {
-                  dataProvider.toggleControlsLock();
+                  context.read<PlayerDataProvider>().toggleControlsLock();
                 },
                 icon: Icon(
-                  !dataProvider.state.controlsLocked ? Icons.lock_open_rounded : Icons.lock_rounded,
+                  !locked ? Icons.lock_open_rounded : Icons.lock_rounded,
                   color: Colors.white,
                 ),
               ),

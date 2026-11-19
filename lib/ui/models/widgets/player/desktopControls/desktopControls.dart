@@ -267,10 +267,9 @@ class _DesktopControlsState extends State<DesktopControls> {
                             padding: const EdgeInsets.only(left: 5, right: 5),
                             child: IconButton(
                                 onPressed: () {
-                                  (provider.controller.isPlaying ?? false)
+                                  (provider.state.playerState.isPlaying)
                                       ? provider.controller.pause()
                                       : provider.controller.play();
-                                  setState(() {});
                                 },
                                 icon: makeIcon(
                                     (provider.controller.isPlaying ?? false)
@@ -333,8 +332,8 @@ class _DesktopControlsState extends State<DesktopControls> {
                                   value: provider.state.volume,
                                   onChanged: (value) {
                                     final expVol = pow(value, 3).toDouble();
-                                    provider.controller.setVolume(expVol);
-                                    provider.updateVolume(value);
+                                    // provider.controller.setVolume(expVol);
+                                    provider.updateVolume(expVol);
                                   },
                                   min: 0,
                                   max: 1,

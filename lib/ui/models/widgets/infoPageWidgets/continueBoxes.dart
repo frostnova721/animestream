@@ -4,6 +4,14 @@ import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:flutter/material.dart';
 
+/// 0-based index of the episode to continue. Stays on the last episode once everything is watched,
+/// instead of pointing one past the end of the list.
+int _nextEpisodeIndex(InfoProvider provider) {
+  final total = provider.epLinks.length;
+  if (total == 0 || provider.watched < total) return provider.watched;
+  return total - 1;
+}
+
 class ContinueWatchingSideBox extends StatelessWidget {
   final InfoProvider provider;
   ContinueWatchingSideBox({
@@ -84,7 +92,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                               width: size.width / 3,
                               child: ServerSelectionBottomSheet(
                                 provider: provider,
-                                episodeIndex: provider.watched,
+                                episodeIndex: _nextEpisodeIndex(provider),
                                 type: ServerSheetType.watch,
                               ),
                             ),
@@ -276,9 +284,11 @@ class ContinueWatchingSideBox extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                               ),
-                              Container(
+                              FractionallySizedBox(
+                                alignment: Alignment.centerLeft,
+                                widthFactor: value.clamp(0.0, 1.0),
+                                child: Container(
                                 height: 8,
-                                width: 350 * value,
                                 decoration: BoxDecoration(
                                   gradient: LinearGradient(
                                     begin: Alignment.centerLeft,
@@ -297,6 +307,7 @@ class ContinueWatchingSideBox extends StatelessWidget {
                                     ),
                                   ],
                                 ),
+                              ),
                               ),
                             ],
                           );
@@ -346,7 +357,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                 width: size.width / 3,
                 child: ServerSelectionBottomSheet(
                   provider: provider,
-                  episodeIndex: provider.watched,
+                  episodeIndex: _nextEpisodeIndex(provider),
                   type: ServerSheetType.watch,
                 ),
               ),
@@ -478,9 +489,11 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                                     borderRadius: BorderRadius.circular(10),
                                   ),
                                 ),
-                                Container(
+                                FractionallySizedBox(
+                                  alignment: Alignment.centerLeft,
+                                  widthFactor: value.clamp(0.0, 1.0),
+                                  child: Container(
                                   height: 10,
-                                  width: size.width / 5 * value, // This value is roughly the size of bar
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
                                       begin: Alignment.centerLeft,
@@ -499,6 +512,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                                       ),
                                     ],
                                   ),
+                                ),
                                 ),
                               ],
                             ),
@@ -521,7 +535,7 @@ class ContinueWatchingBodyBox extends StatelessWidget {
                                 width: size.width / 3,
                                 child: ServerSelectionBottomSheet(
                                   provider: provider,
-                                  episodeIndex: provider.watched,
+                                  episodeIndex: _nextEpisodeIndex(provider),
                                   type: ServerSheetType.watch,
                                 ),
                               ),

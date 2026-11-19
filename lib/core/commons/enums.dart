@@ -54,5 +54,13 @@ enum SecureStorageKey {
 enum PlayerState {
   playing,
   paused,
-  buffering,
+  buffering;
+
+  bool get isPlaying {
+    return this == PlayerState.playing && this != PlayerState.buffering;
+  }
+
+  bool get isBuffering => this == PlayerState.buffering;
+
+  bool get isPaused => this == PlayerState.paused;
 }

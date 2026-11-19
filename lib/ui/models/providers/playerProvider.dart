@@ -25,16 +25,17 @@ class PlayerProvider extends ChangeNotifier {
   PlayerProviderState _state;
 
   PlayerProvider(this._controller, this._isOffline)
-      : _state = PlayerProviderState(
-          playerState: PlayerState.paused,
-          showSubs: false,
-          speed: 1,
-          volume: 1,
-          controlsVisible: true,
-          wakelockEnabled: false,
-          currentViewMode: ViewMode.fit,
-          pip: false,
-        );
+    : _state = PlayerProviderState(
+        playerState: PlayerState.paused,
+        showSubs: false,
+        speed: 1,
+        volume: 1,
+        controlsVisible: true,
+        wakelockEnabled: false,
+        currentViewMode: ViewMode.fit,
+        pip: false,
+        speedingUp: false,
+      );
 
   VideoController get controller => _controller;
 
@@ -44,13 +45,13 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Available playback speeds. This list is sorted!
   List<double> get playbackSpeeds => [
-        1,
-        1.25,
-        1.5,
-        1.75,
-        2,
-        if ((currentUserSettings?.enableSuperSpeeds ?? false) && !Platform.isWindows) ...[4, 5, 8, 10]
-      ];
+    1,
+    1.25,
+    1.5,
+    1.75,
+    2,
+    if ((currentUserSettings?.enableSuperSpeeds ?? false) && !Platform.isWindows) ...[4, 5, 8, 10],
+  ];
 
   /// Play a media
   Future<void> playVideo({
@@ -69,25 +70,25 @@ class PlayerProvider extends ChangeNotifier {
 
     final targetEpIndex = episodeIndex ?? dataProvider.state.currentEpIndex;
 
-    dataProvider.update(dataProvider.state.copyWith(
-      currentEpIndex: targetEpIndex,
-      currentStream: stream,
-      preloadStarted: false,
-      preloadedSources: [],
-      sliderValue: seekTime != null ? seekTime : 0,
-    ));
+    dataProvider.update(
+      dataProvider.state.copyWith(
+        currentEpIndex: targetEpIndex,
+        currentStream: stream,
+        preloadStarted: false,
+        preloadedSources: [],
+        sliderValue: seekTime != null ? seekTime : 0,
+      ),
+    );
 
     // quality extraction
     if (!offline) {
       await dataProvider.extractCurrentStreamQualities();
     } else {
-      dataProvider.update(dataProvider.state.copyWith(qualities: [
-        QualityStream(
-          url: stream.url,
-          resolution: "default",
-          quality: stream.quality,
-        )
-      ]));
+      dataProvider.update(
+        dataProvider.state.copyWith(
+          qualities: [QualityStream(url: stream.url, resolution: "default", quality: stream.quality)],
+        ),
+      );
     }
 
     final q = dataProvider.getPreferredQualityStreamFromQualities();
@@ -194,6 +195,8 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Set pip mode
   Future<void> setPip(bool val) async {
+    // to kill any accedental speedups 
+    stopSpeedUp();
     if (!Platform.isAndroid && !Platform.isWindows && !Platform.isLinux) {
       Logs.player.log("PiP not supported on this platform.");
     }
@@ -225,13 +228,12 @@ class PlayerProvider extends ChangeNotifier {
 
   Future<void> setQuality(QualityStream qs) async {
     _controller.setQuality(qs);
-    notifyListeners();
   }
 
   /// Plays an episode from preloaded episode from the data provider
   void playPreloadedEpisode(PlayerDataProvider dataProvider) async {
     //just return if episode ended and next video is being loaded or the episode is the last one
-    if (dataProvider.state.currentEpIndex + 1 >= dataProvider.epLinks.length /* add autonext */) {
+    if (dataProvider.state.currentEpIndex + 1 >= dataProvider.epLinks.length /* add autonext */ ) {
       return;
     }
     // calledAutoNext = true;
@@ -246,19 +248,23 @@ class PlayerProvider extends ChangeNotifier {
       final sizeRegex = RegExp(r'\[(.*?)\]');
 
       final src = preferredServerLink.isNotEmpty
-          ? (preferredServerLink.firstWhereOrNull((e) =>
-                  e.quality.replaceAll(sizeRegex, "").trim() ==
-                  dataProvider.state.currentStream.quality.replaceAll(sizeRegex, "").trim()) ??
-              preferredServerLink[0]) // pick the most matching one as previous one
+          ? (preferredServerLink.firstWhereOrNull(
+                  (e) =>
+                      e.quality.replaceAll(sizeRegex, "").trim() ==
+                      dataProvider.state.currentStream.quality.replaceAll(sizeRegex, "").trim(),
+                ) ??
+                preferredServerLink[0]) // pick the most matching one as previous one
           : dataProvider.state.preloadedSources[0];
 
-      dataProvider.update(dataProvider.state.copyWith(
-        streams: dataProvider.state.preloadedSources,
-        currentStream: src,
-        currentEpIndex: dataProvider.state.currentEpIndex + 1,
-        preloadStarted: false,
-        preloadedSources: [],
-      ));
+      dataProvider.update(
+        dataProvider.state.copyWith(
+          streams: dataProvider.state.preloadedSources,
+          currentStream: src,
+          currentEpIndex: dataProvider.state.currentEpIndex + 1,
+          preloadStarted: false,
+          preloadedSources: [],
+        ),
+      );
 
       await playVideo(
         stream: src,
@@ -299,6 +305,36 @@ class PlayerProvider extends ChangeNotifier {
     windowManager.setAlignment(Alignment.bottomRight);
     Provider.of<AppProvider>(AppWrapper.navKey.currentContext!, listen: false).showTitleBar = true;
   }
+
+  double _speedBeforeBoost = 1;
+
+  bool startSpeedUp({required bool locked}) {
+    if (_state.speedingUp || locked || !_state.playerState.isPlaying) return false;
+    _speedBeforeBoost = _state.speed;
+    final spedUp = (_state.speed * 2).clamp(2.0, playbackSpeeds.last).toDouble();
+    _state = _state.copyWith(speedingUp: true, speed: spedUp);
+    _controller.setSpeed(spedUp);
+    notifyListeners();
+    return true;
+  }
+
+  void stepSpeedBoost(bool increase) {
+    if (!_state.speedingUp) return;
+    final speeds = playbackSpeeds.where((s) => s >= 2).toList();
+    final curr = _state.speed;
+    final next = increase
+        ? speeds.firstWhereOrNull((s) => s > curr) ?? speeds.last
+        : speeds.lastWhereOrNull((s) => s < curr) ?? speeds.first;
+    if(next == curr) return;
+    setSpeed(next);
+  }
+
+  void stopSpeedUp() {
+    if(!_state.speedingUp) return;
+    _state = _state.copyWith(speedingUp: false, speed: _speedBeforeBoost);
+    _controller.setSpeed(_speedBeforeBoost);
+    notifyListeners();
+  }
 }
 
 class PlayerProviderState {
@@ -310,6 +346,7 @@ class PlayerProviderState {
   final bool wakelockEnabled;
   final ViewMode currentViewMode;
   final bool pip;
+  final bool speedingUp;
 
   PlayerProviderState({
     required this.playerState,
@@ -320,6 +357,7 @@ class PlayerProviderState {
     required this.wakelockEnabled,
     required this.currentViewMode,
     required this.pip,
+    required this.speedingUp,
   });
 
   PlayerProviderState copyWith({
@@ -331,6 +369,7 @@ class PlayerProviderState {
     bool? wakelockEnabled,
     ViewMode? currentViewMode,
     bool? pip,
+    bool? speedingUp,
   }) {
     return PlayerProviderState(
       playerState: playerState ?? this.playerState,
@@ -341,6 +380,7 @@ class PlayerProviderState {
       wakelockEnabled: wakelockEnabled ?? this.wakelockEnabled,
       currentViewMode: currentViewMode ?? this.currentViewMode,
       pip: pip ?? this.pip,
+      speedingUp: speedingUp ?? this.speedingUp,
     );
   }
 }

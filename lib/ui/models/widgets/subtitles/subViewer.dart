@@ -178,7 +178,7 @@ class _SubViewerState extends State<SubViewer> {
         return Align(
           alignment: getLineAlignment(alignment),
           child: Container(
-            width: MediaQuery.of(context).size.width / 1.4,
+            width: MediaQuery.sizeOf(context).width / 1.4,
             margin: EdgeInsets.only(bottom: widget.settings.bottomMargin, top: widget.settings.bottomMargin),
             child: Column(
               mainAxisSize: MainAxisSize.min,

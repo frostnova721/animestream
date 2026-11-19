@@ -22,10 +22,7 @@ class WatchSection extends StatelessWidget {
           padding: EdgeInsets.only(top: 30, left: 15),
           child: Column(
             children: [
-              CommonInfo(
-                provider: provider,
-                splitWidth: splitWidth,
-              ),
+              CommonInfo(provider: provider, splitWidth: splitWidth),
               if (size.width < splitWidth)
                 Container(
                   width: size.width / 2,
@@ -34,17 +31,9 @@ class WatchSection extends StatelessWidget {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Expanded(
-                        flex: 1,
-                        child: SourceBodyWidget(provider: provider),
-                      ),
+                      Expanded(flex: 1, child: SourceBodyWidget(provider: provider)),
                       SizedBox(width: 16),
-                      Expanded(
-                        flex: 1,
-                        child: ContinueWatchingBodyBox(
-                          provider: provider,
-                        ),
-                      ),
+                      Expanded(flex: 1, child: ContinueWatchingBodyBox(provider: provider)),
                     ],
                   ),
                 ),
@@ -59,12 +48,8 @@ class WatchSection extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  SourceSideWidget(
-                    provider: provider,
-                  ),
-                  ContinueWatchingSideBox(
-                    provider: provider,
-                  ),
+                  SourceSideWidget(provider: provider),
+                  ContinueWatchingSideBox(provider: provider),
                 ],
               ),
             ),
@@ -77,22 +62,15 @@ class WatchSection extends StatelessWidget {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 20).copyWith(top: 50),
       height: (size.height / 1.75),
-      constraints: BoxConstraints(
-        minHeight: 600,
-      ),
+      constraints: BoxConstraints(minHeight: 600),
       width: size.width / (size.width > splitWidth ? 1.75 : 1.3),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        color: appTheme.backgroundSubColor,
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(20), color: appTheme.backgroundSubColor),
       child: provider.foundName == null
           ? Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(
-                    color: appTheme.accentColor,
-                  ),
+                  CircularProgressIndicator(color: appTheme.accentColor),
                   SizedBox(height: 16),
                   Text(
                     "Loading episodes...",
@@ -107,61 +85,15 @@ class WatchSection extends StatelessWidget {
               ),
             )
           : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: double.infinity,
-                  padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.centerLeft,
-                      end: Alignment.centerRight,
-                      colors: [
-                        appTheme.accentColor.withAlpha(50),
-                        appTheme.accentColor.withAlpha(15),
-                      ],
+                Row(
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.only(top: 16, left: 16),
+                      child: Text("Episodes", style: TextStyle(fontFamily: "Rubik", fontSize: 22)),
                     ),
-                    borderRadius: BorderRadius.only(
-                      topLeft: Radius.circular(20),
-                      topRight: Radius.circular(20),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.video_library_rounded,
-                            size: 18,
-                            color: appTheme.accentColor,
-                          ),
-                          SizedBox(width: 8),
-                          Text(
-                            "Episodes",
-                            style: TextStyle(
-                              color: appTheme.textMainColor,
-                              fontFamily: "Poppins",
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 0.6,
-                            ),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: appTheme.accentColor.withAlpha(70),
-                          shape: BoxShape.circle,
-                        ),
-                        child: Icon(
-                          Icons.playlist_play_rounded,
-                          color: appTheme.accentColor,
-                          size: 22,
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.all(16),
@@ -179,16 +111,13 @@ class WatchSection extends StatelessWidget {
                                 ),
                                 child: IconButton(
                                   style: IconButton.styleFrom(
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
                                   onPressed: () {
                                     if (provider.currentPageIndex == 0) return;
                                     provider.currentPageIndex -= 1;
                                   },
-                                  icon: Icon(
-                                    Icons.arrow_back_ios_rounded,
-                                    color: appTheme.textMainColor,
-                                    size: 16,
-                                  ),
+                                  icon: Icon(Icons.arrow_back_ios_rounded, color: appTheme.textMainColor, size: 16),
                                   tooltip: "Previous page",
                                 ),
                               ),
@@ -200,9 +129,7 @@ class WatchSection extends StatelessWidget {
                                     useRootNavigator: false,
                                     builder: (ctx) => Dialog(
                                       backgroundColor: appTheme.backgroundColor,
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
+                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                                       child: Container(
                                         width: size.width / 3,
                                         height: size.height / 2,
@@ -239,10 +166,7 @@ class WatchSection extends StatelessWidget {
                                                       Navigator.of(ctx).pop();
                                                     },
                                                     child: Container(
-                                                      padding: EdgeInsets.symmetric(
-                                                        horizontal: 10,
-                                                        vertical: 10,
-                                                      ),
+                                                      padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                                                       decoration: BoxDecoration(
                                                         color: provider.currentPageIndex == ind
                                                             ? appTheme.accentColor
@@ -312,11 +236,7 @@ class WatchSection extends StatelessWidget {
                                         ),
                                       ),
                                       SizedBox(width: 6),
-                                      Icon(
-                                        Icons.arrow_drop_down,
-                                        color: appTheme.onAccent,
-                                        size: 20,
-                                      ),
+                                      Icon(Icons.arrow_drop_down, color: appTheme.onAccent, size: 20),
                                     ],
                                   ),
                                 ),
@@ -329,16 +249,13 @@ class WatchSection extends StatelessWidget {
                                 ),
                                 child: IconButton(
                                   style: IconButton.styleFrom(
-                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  ),
                                   onPressed: () {
                                     if (provider.currentPageIndex >= provider.visibleEpList.length - 1) return;
                                     provider.currentPageIndex += 1;
                                   },
-                                  icon: Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    color: appTheme.textMainColor,
-                                    size: 16,
-                                  ),
+                                  icon: Icon(Icons.arrow_forward_ios_rounded, color: appTheme.textMainColor, size: 16),
                                   tooltip: "Next page",
                                 ),
                               ),
@@ -346,9 +263,7 @@ class WatchSection extends StatelessWidget {
                           ),
                         )
                       else
-                        Expanded(
-                          child: SizedBox(),
-                        ),
+                        Expanded(child: SizedBox()),
                       Container(
                         decoration: BoxDecoration(
                           color: appTheme.textMainColor.withAlpha(15),
@@ -356,12 +271,7 @@ class WatchSection extends StatelessWidget {
                         ),
                         padding: EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                         margin: EdgeInsets.symmetric(horizontal: 10),
-                        child: Row(
-                          children: [
-                            _buildSubDubButton(false),
-                            _buildSubDubButton(true),
-                          ],
-                        ),
+                        child: Row(children: [_buildSubDubButton(false), _buildSubDubButton(true)]),
                       ),
                       Container(
                         decoration: BoxDecoration(
@@ -386,11 +296,7 @@ class WatchSection extends StatelessWidget {
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.video_library_rounded,
-                                size: 48,
-                                color: appTheme.textMainColor.withAlpha(100),
-                              ),
+                              Icon(Icons.video_library_rounded, size: 48, color: appTheme.textMainColor.withAlpha(100)),
                               SizedBox(height: 16),
                               Text(
                                 "No episodes found",
@@ -433,20 +339,18 @@ class WatchSection extends StatelessWidget {
         borderRadius: BorderRadius.circular(10),
       ),
       child: IconButton(
-          onPressed: () {
-            provider.preferDubs = isDub;
-          },
-          style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-          icon: Text(
-            isDub ? "dub" : "sub",
-            style: TextStyle(color: provider.preferDubs == isDub ? appTheme.onAccent : null, fontWeight: FontWeight.bold),
-          ),
-          padding: EdgeInsets.all(8),
-          constraints: BoxConstraints(
-            minWidth: 36,
-            minHeight: 36,
-          ),
-          tooltip: isDub ? "prefer dubs" : "prefer subs"),
+        onPressed: () {
+          provider.preferDubs = isDub;
+        },
+        style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
+        icon: Text(
+          isDub ? "dub" : "sub",
+          style: TextStyle(color: provider.preferDubs == isDub ? appTheme.onAccent : null, fontWeight: FontWeight.bold),
+        ),
+        padding: EdgeInsets.all(8),
+        constraints: BoxConstraints(minWidth: 36, minHeight: 36),
+        tooltip: isDub ? "prefer dubs" : "prefer subs",
+      ),
     );
   }
 
@@ -463,21 +367,14 @@ class WatchSection extends StatelessWidget {
           provider.viewMode = mode;
         },
         style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-        icon: Icon(
-          icon,
-          color: provider.viewMode == mode ? appTheme.onAccent : appTheme.textMainColor,
-          size: 18,
-        ),
+        icon: Icon(icon, color: provider.viewMode == mode ? appTheme.onAccent : appTheme.textMainColor, size: 18),
         padding: EdgeInsets.all(8),
-        constraints: BoxConstraints(
-          minWidth: 36,
-          minHeight: 36,
-        ),
+        constraints: BoxConstraints(minWidth: 36, minHeight: 36),
         tooltip: mode == 0
             ? "List view"
             : mode == 1
-                ? "Grid view"
-                : "Compact grid",
+            ? "Grid view"
+            : "Compact grid",
       ),
     );
   }

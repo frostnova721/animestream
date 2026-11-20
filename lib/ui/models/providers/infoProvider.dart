@@ -17,9 +17,12 @@ import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/sources.dart';
 
+enum InfoView { info, watch }
+
 class InfoProvider extends ChangeNotifier {
+  final InfoView initialSection;
   int id;
-  InfoProvider(int id) : this.id = id;
+  InfoProvider(int id, {this.initialSection = InfoView.info}) : this.id = id;
 
   late DatabaseInfo _data;
 
@@ -52,7 +55,6 @@ class InfoProvider extends ChangeNotifier {
   bool _epSearcherror = false;
   bool _loggedIn = false;
   bool _dataLoaded = false;
-  // bool _infoPage = true;
   bool _infoLoadError = false;
   bool _preferDubs = false;
 
@@ -62,7 +64,6 @@ class InfoProvider extends ChangeNotifier {
   bool get epSearcherror => _epSearcherror;
   bool get loggedIn => _loggedIn;
   bool get dataLoaded => _dataLoaded;
-  // bool get infoPage => _infoPage;
   bool get preferDubs => _preferDubs;
 
   Map? get lastWatchedDurationMap => _lastWatchedDurationMap;

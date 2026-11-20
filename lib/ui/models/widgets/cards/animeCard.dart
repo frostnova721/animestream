@@ -4,6 +4,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/handler/syncHandler.dart';
 import 'package:animestream/core/database/local/types.dart';
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/ContextMenu.dart';
 import 'package:animestream/ui/pages/info.dart';
@@ -21,6 +22,7 @@ class AnimeCard extends StatefulWidget {
   final String? subText;
   final double? rating;
   final void Function()? afterNavigation;
+  final InfoView openTo;
 
   const AnimeCard({
     super.key,
@@ -34,6 +36,7 @@ class AnimeCard extends StatefulWidget {
     this.shouldNavigate = true,
     this.subText = null,
     this.isMobile = true,
+    this.openTo = InfoView.info,
   });
 
   @override
@@ -66,7 +69,7 @@ class _AnimeCardState extends State<AnimeCard> {
         onTap: () {
           if (!widget.isAnime) return floatingSnackBar("Manga or Novels aren't supported");
           if (widget.shouldNavigate)
-            Navigator.of(context).push(MaterialPageRoute(builder: (context) => Info(id: widget.id))).then((val) {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => Info(id: widget.id, initialSection: widget.openTo,))).then((val) {
               widget.afterNavigation?.call();
             });
         },

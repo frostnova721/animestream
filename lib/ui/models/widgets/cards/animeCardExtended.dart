@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -20,6 +21,7 @@ class AnimeCardExtended extends StatelessWidget {
   final String? bannerImageUrl;
   final Color? surfaceColor;
   final double? customWidth;
+  final InfoView openTo;
 
   const AnimeCardExtended({
     super.key,
@@ -35,6 +37,7 @@ class AnimeCardExtended extends StatelessWidget {
     this.bannerImageUrl,
     this.customWidth,
     this.surfaceColor,
+    this.openTo = InfoView.info,
   });
 
   @override
@@ -57,6 +60,7 @@ class AnimeCardExtended extends StatelessWidget {
                 MaterialPageRoute(
                   builder: (context) => Info(
                     id: id,
+                    initialSection: openTo,
                   ),
                 ),
               )

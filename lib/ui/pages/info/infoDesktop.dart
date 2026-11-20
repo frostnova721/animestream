@@ -35,7 +35,7 @@ class _InfoDesktopState extends State<InfoDesktop> {
           AnimeStreamNavRail(
             controller: viewController,
             shouldExpand: true,
-            initialIndex: 1,
+            initialIndex: context.read<InfoProvider>().initialSection == InfoView.info ? 1 : 2,
             destinations: [
               AnimeStreamNavDestination(
                   icon: Icons.arrow_back,

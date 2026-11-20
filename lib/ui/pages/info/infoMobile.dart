@@ -29,7 +29,7 @@ class InfoMobile extends StatefulWidget {
 class _InfoMobileState extends State<InfoMobile> {
   late InfoProvider provider;
 
-  bool infoPage = true;
+  late bool infoPage = context.read<InfoProvider>().initialSection == InfoView.info;
 
   FocusNode _watchInfoButtonFocusNode = FocusNode();
   final useNativeTitle = currentUserSettings?.nativeTitle ?? false;
@@ -129,7 +129,6 @@ class _InfoMobileState extends State<InfoMobile> {
                                   ),
                                 ),
                               ),
-                              // if (provider.loggedIn)
                                 Container(
                                   child: ElevatedButton(
                                     onPressed: () {
@@ -160,62 +159,6 @@ class _InfoMobileState extends State<InfoMobile> {
                                     ),
                                   ),
                                 ),
-                              // if (!provider.loggedIn && provider.started)
-                              //   ElevatedButton(
-                              //     onPressed: () {
-                              //       showDialog(
-                              //           context: context,
-                              //           builder: (context) {
-                              //             return AlertDialog(
-                              //               actions: [
-                              //                 TextButton(
-                              //                     onPressed: () => Navigator.of(context).pop(), child: Text("No")),
-                              //                 TextButton(
-                              //                   onPressed: () async {
-                              //                     await removeWatching(provider.id);
-                              //                     provider.clearLastWatchDuration();
-                              //                     await provider.getWatched(refreshLastWatchDuration: true);
-                              //                     Navigator.pop(context);
-                              //                   },
-                              //                   child: Text("Yes"),
-                              //                   style: TextButton.styleFrom(
-                              //                     backgroundColor: appTheme.accentColor,
-                              //                     foregroundColor: appTheme.onAccent,
-                              //                   ),
-                              //                 )
-                              //               ],
-                              //               content: Padding(
-                              //                 padding: const EdgeInsets.all(10),
-                              //                 child: Text.rich(
-                              //                   TextSpan(text: "Remove \"", style: TextStyle(fontSize: 15), children: [
-                              //                     TextSpan(
-                              //                         text: "${getTitle(provider.data.title)}",
-                              //                         style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
-                              //                     TextSpan(
-                              //                         text: "\" from your watch history?",
-                              //                         style: TextStyle(fontSize: 15)),
-                              //                   ]),
-                              //                 ),
-                              //               ),
-                              //             );
-                              //           });
-                              //     },
-                                //   style: ElevatedButton.styleFrom(
-                                //     shape: CircleBorder(
-                                //       side: BorderSide(
-                                //         color: appTheme.accentColor,
-                                //       ),
-                                //     ),
-                                //     fixedSize: Size(50, 50),
-                                //     backgroundColor: appTheme.backgroundColor,
-                                //     padding: EdgeInsets.zero,
-                                //   ),
-                                //   child: Icon(
-                                //     Icons.delete_outline_rounded,
-                                //     color: appTheme.accentColor,
-                                //     size: 28,
-                                //   ),
-                                // )
                             ],
                           ),
                         ),

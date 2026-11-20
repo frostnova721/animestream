@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animestream/core/app/logging.dart';
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/providers/mainNavProvider.dart';
 import 'package:animestream/ui/models/screenType.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +21,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 class Home extends StatefulWidget {
   final MainNavProvider mainNavProvider;
 
-  const Home({
-    super.key,
-    required this.mainNavProvider,
-  });
+  const Home({super.key, required this.mainNavProvider});
 
   @override
   State<Home> createState() => _HomeState();
@@ -86,7 +84,9 @@ class _HomeState extends State<Home> {
     }
   }
 
+  // stuff for right panel
   AnimeListData<HomePageList>? selectedList;
+  InfoView selectedOpenTo = InfoView.info;
 
   @override
   Widget build(BuildContext context) {
@@ -98,10 +98,7 @@ class _HomeState extends State<Home> {
         onRefresh: () async {
           await widget.mainNavProvider.refresh(refreshPage: 0, fromSettings: false);
         },
-        header: WaterDropMaterialHeader(
-          backgroundColor: appTheme.backgroundSubColor,
-          color: appTheme.accentColor,
-        ),
+        header: WaterDropMaterialHeader(backgroundColor: appTheme.backgroundSubColor, color: appTheme.accentColor),
         child: Container(
           padding: pagePadding(context).copyWith(left: 0),
           child: Row(
@@ -113,9 +110,13 @@ class _HomeState extends State<Home> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      buildHeader("Home", context, afterNavigation: () {
-                        if (mounted) setState(() {});
-                      }),
+                      buildHeader(
+                        "Home",
+                        context,
+                        afterNavigation: () {
+                          if (mounted) setState(() {});
+                        },
+                      ),
                       AnimatedSwitcher(
                         duration: Duration(milliseconds: 400),
                         child: storedUserData != null
@@ -126,17 +127,18 @@ class _HomeState extends State<Home> {
                                   constraints: BoxConstraints(maxWidth: 450),
                                   child: Row(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      _accountCard(),
-                                      _listButton(),
-                                    ],
+                                    children: [_accountCard(), _listButton()],
                                   ),
                                 ),
                               )
                             : null,
                       ),
-                      _titleAndList("Continue Watching", widget.mainNavProvider.recentlyWatched,
-                          showRefreshIndication: refreshing),
+                      _titleAndList(
+                        "Continue Watching",
+                        widget.mainNavProvider.recentlyWatched,
+                        showRefreshIndication: refreshing,
+                        openTo: InfoView.watch,
+                      ),
                       divider(),
                       _titleAndList("Aired This Season", widget.mainNavProvider.currentlyAiring),
                       if (widget.mainNavProvider.loggedIn) ...[
@@ -148,11 +150,7 @@ class _HomeState extends State<Home> {
                   ),
                 ),
               ),
-              if (selectedList != null)
-                Expanded(
-                  flex: selectedList == null ? 0 : 1,
-                  child: _rightPanel(),
-                )
+              if (selectedList != null) Expanded(flex: selectedList == null ? 0 : 1, child: _rightPanel()),
             ],
           ),
         ),
@@ -183,11 +181,7 @@ class _HomeState extends State<Home> {
                           selectedList = null;
                         });
                       },
-                      icon: Icon(
-                        Icons.arrow_forward_ios_rounded,
-                        color: appTheme.textMainColor,
-                        size: 20,
-                      ),
+                      icon: Icon(Icons.arrow_forward_ios_rounded, color: appTheme.textMainColor, size: 20),
                     ),
                     Padding(
                       padding: const EdgeInsets.only(right: 12),
@@ -219,6 +213,7 @@ class _HomeState extends State<Home> {
                             item.title['english'] ?? item.title['romaji'] ?? "",
                             item.coverImage,
                             rating: item.rating,
+                            openTo: selectedOpenTo,
                           ),
                         );
                       },
@@ -231,9 +226,7 @@ class _HomeState extends State<Home> {
   }
 
   SizedBox footSpace() {
-    return SizedBox(
-      height: MediaQuery.of(context).padding.bottom + 60,
-    );
+    return SizedBox(height: MediaQuery.of(context).padding.bottom + 60);
   }
 
   _listButton() {
@@ -249,17 +242,15 @@ class _HomeState extends State<Home> {
             backgroundColor: appTheme.backgroundSubColor,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           ),
-          onPressed: () => Navigator.of(context)
-              .push(MaterialPageRoute(builder: (context) => AnimeLists()))
-              .then((val) => getLists(userName: storedUserData?.name)),
+          onPressed: () =>
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => AnimeLists()))
+                  .then((val) => getLists(userName: storedUserData?.name)),
           child: Container(
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
-                  Icons.folder_rounded,
-                  color: appTheme.textMainColor,
-                ),
+                Icon(Icons.folder_rounded, color: appTheme.textMainColor),
                 Padding(
                   padding: const EdgeInsets.only(left: 10),
                   child: Text(
@@ -289,11 +280,9 @@ class _HomeState extends State<Home> {
         color: appTheme.backgroundSubColor,
         child: InkWell(
           overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.1)),
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => UserStats(userModal: storedUserData!),
-            ),
-          ),
+          onTap: () =>
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => UserStats(userModal: storedUserData!))),
           child: Container(
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             height: 60,
@@ -311,10 +300,11 @@ class _HomeState extends State<Home> {
                   child: Text(
                     storedUserData!.name,
                     style: TextStyle(
-                        fontFamily: "Poppins",
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: appTheme.textMainColor),
+                      fontFamily: "Poppins",
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: appTheme.textMainColor,
+                    ),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -341,7 +331,12 @@ class _HomeState extends State<Home> {
     );
   }
 
-  Column _titleAndList(String title, AnimeListData<HomePageList> list, {bool showRefreshIndication = false}) {
+  Column _titleAndList(
+    String title,
+    AnimeListData<HomePageList> list, {
+    bool showRefreshIndication = false,
+    InfoView openTo = InfoView.info,
+  }) {
     return Column(
       children: [
         Row(
@@ -361,66 +356,61 @@ class _HomeState extends State<Home> {
                 margin: EdgeInsets.only(left: 5),
                 height: 15,
                 width: 15,
-                child: CircularProgressIndicator(
-                  color: appTheme.accentColor,
-                  strokeWidth: 2,
-                ),
+                child: CircularProgressIndicator(color: appTheme.accentColor, strokeWidth: 2),
               ),
             Spacer(),
             IconButton(
-                onPressed: () {
-                  if (context.screenType == ScreenType.expanded || context.screenType == ScreenType.large) {
-                    setState(() {
-                      selectedList = list;
-                    });
-                    return;
-                  }
-                  showModalBottomSheet(
-                      context: context,
-                      showDragHandle: true,
-                      builder: (context) {
-                        return Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16, bottom: 12),
-                              child: Text(
-                                title,
-                                style: textStyle(),
-                              ),
+              onPressed: () {
+                if (context.screenType == ScreenType.expanded || context.screenType == ScreenType.large) {
+                  setState(() {
+                    selectedList = list;
+                    selectedOpenTo = openTo;
+                  });
+                  return;
+                }
+                showModalBottomSheet(
+                  context: context,
+                  showDragHandle: true,
+                  builder: (context) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 16, bottom: 12),
+                          child: Text(title, style: textStyle()),
+                        ),
+                        Expanded(
+                          child: GridView.builder(
+                            padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+                            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
+                              mainAxisExtent: Platform.isAndroid ? 220 : 260,
+                              // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
+                              childAspectRatio: 120 / 220,
+                              mainAxisSpacing: 10,
                             ),
-                            Expanded(
-                              child: GridView.builder(
-                                padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
-                                gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
-                                  maxCrossAxisExtent: Platform.isAndroid ? 140 : 180,
-                                  mainAxisExtent: Platform.isAndroid ? 220 : 260,
-                                  // crossAxisCount: MediaQuery.of(context).orientation == Orientation.portrait ? 3 : 6,
-                                  childAspectRatio: 120 / 220,
-                                  mainAxisSpacing: 10,
+                            itemCount: list.items.length,
+                            itemBuilder: (context, index) {
+                              final item = list.items[index];
+                              return Center(
+                                child: Cards.animeCard(
+                                  item.id,
+                                  item.title['english'] ?? item.title['romaji'] ?? "",
+                                  item.coverImage,
+                                  rating: item.rating,
+                                  openTo: openTo,
                                 ),
-                                itemCount: list.items.length,
-                                itemBuilder: (context, index) {
-                                  final item = list.items[index];
-                                  return Center(
-                                    child: Cards.animeCard(
-                                      item.id,
-                                      item.title['english'] ?? item.title['romaji'] ?? "",
-                                      item.coverImage,
-                                      rating: item.rating,
-                                    ),
-                                  );
-                                },
-                              ),
-                            ),
-                          ],
-                        );
-                      });
-                },
-                icon: Icon(
-                  Icons.arrow_forward_ios,
-                  size: 18,
-                ))
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+              icon: Icon(Icons.arrow_forward_ios, size: 18),
+            ),
           ],
         ),
         Container(
@@ -432,10 +422,7 @@ class _HomeState extends State<Home> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Image.asset(
-                          "lib/assets/images/ghost.png",
-                          color: Color.fromARGB(255, 80, 80, 80),
-                        ),
+                        Image.asset("lib/assets/images/ghost.png", color: Color.fromARGB(255, 80, 80, 80)),
                         Padding(
                           padding: const EdgeInsets.only(top: 10.0),
                           child: Text(
@@ -454,64 +441,62 @@ class _HomeState extends State<Home> {
                   ),
                 )
               : list.state.isLoaded
-                  ? list.items.length > 0
-                      // condition where list loaded and has items
-                      ? ListView.builder(
-                          padding: EdgeInsets.zero,
-                          scrollDirection: Axis.horizontal,
-                          itemCount: list.items.length,
-                          itemBuilder: (context, index) {
-                            final item = list.items[index];
-                            final preferNative = currentUserSettings?.nativeTitle ?? false;
-                            final normalTitle =
-                                item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '';
-                            final title = preferNative ? item.title['native'] ?? normalTitle : normalTitle;
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Cards.animeCardExtended(item.id, title, item.coverImage, item.rating ?? 0.0,
-                                  bannerImageUrl: item.coverImage,
-                                  watchedEpisodeCount: item.watchedEpisodeCount,
-                                  totalEpisodes: item.totalEpisodes,
-                                  afterNavigation: () => getLists(userName: storedUserData?.name)),
-                            );
-                          })
-
-                      // condition where list loaded but has no items
-                      : Center(
-                          child: Container(
-                            alignment: Alignment.center,
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Image.asset(
-                                  "lib/assets/images/ghost.png",
-                                  color: Color.fromARGB(255, 80, 80, 80),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.only(top: 10.0),
-                                  child: Text(
-                                    "Boo! Nothing's here!",
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontFamily: "NunitoSans",
-                                      fontWeight: FontWeight.w500,
-                                      color: Color.fromARGB(255, 80, 80, 80),
-                                      fontSize: 18,
-                                    ),
+              ? list.items.length > 0
+                    // condition where list loaded and has items
+                    ? ListView.builder(
+                        padding: EdgeInsets.zero,
+                        scrollDirection: Axis.horizontal,
+                        itemCount: list.items.length,
+                        itemBuilder: (context, index) {
+                          final item = list.items[index];
+                          final preferNative = currentUserSettings?.nativeTitle ?? false;
+                          final normalTitle =
+                              item.title['english'] ?? item.title['romaji'] ?? item.title['title'] ?? '';
+                          final title = preferNative ? item.title['native'] ?? normalTitle : normalTitle;
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Cards.animeCardExtended(
+                              item.id,
+                              title,
+                              item.coverImage,
+                              item.rating ?? 0.0,
+                              bannerImageUrl: item.coverImage,
+                              watchedEpisodeCount: item.watchedEpisodeCount,
+                              totalEpisodes: item.totalEpisodes,
+                              openTo: openTo,
+                              afterNavigation: () => getLists(userName: storedUserData?.name),
+                            ),
+                          );
+                        },
+                      )
+                    // condition where list loaded but has no items
+                    : Center(
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Image.asset("lib/assets/images/ghost.png", color: Color.fromARGB(255, 80, 80, 80)),
+                              Padding(
+                                padding: const EdgeInsets.only(top: 10.0),
+                                child: Text(
+                                  "Boo! Nothing's here!",
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: "NunitoSans",
+                                    fontWeight: FontWeight.w500,
+                                    color: Color.fromARGB(255, 80, 80, 80),
+                                    fontSize: 18,
                                   ),
                                 ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
-                        )
-
-                  // Still in loading phase!
-                  : Center(
-                      child: CircularProgressIndicator(
-                        color: appTheme.accentColor,
-                      ),
-                    ),
-        )
+                        ),
+                      )
+              // Still in loading phase!
+              : Center(child: CircularProgressIndicator(color: appTheme.accentColor)),
+        ),
       ],
     );
   }

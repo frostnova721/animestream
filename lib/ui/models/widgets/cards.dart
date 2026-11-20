@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
+import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCardExtended.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
 import 'package:flutter/material.dart';
@@ -150,6 +151,7 @@ class Cards {
     String? subText = null,
     double? rating = null,
     bool? isMobile,
+    InfoView openTo = InfoView.info,
     void Function()? afterNavigation,
   }) {
     return AnimeCard(
@@ -164,6 +166,7 @@ class Cards {
       subText: subText,
       rating: rating,
       isMobile: isMobile ?? Platform.isAndroid,
+      openTo: openTo,
     );
   }
 
@@ -179,6 +182,7 @@ class Cards {
     int? watchedEpisodeCount,
     int? totalEpisodes,
     String? bannerImageUrl,
+     InfoView openTo = InfoView.info,
   }) =>
       AnimeCardExtended(
         id: id,
@@ -191,5 +195,6 @@ class Cards {
         shouldNavigate: shouldNavigate,
         totalEpisodes: totalEpisodes,
         watchedEpisodeCount: watchedEpisodeCount,
+        openTo: openTo,
       );
 }

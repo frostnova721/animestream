@@ -332,7 +332,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                   style: TextStyle(fontFamily: "Rubik", fontSize: 12, color: appTheme.textMainColor),
                 ),
                 backgroundColor: appTheme.backgroundSubColor,
-                side: BorderSide(color: appTheme.textSubColor.withAlpha(50)),
+                side: BorderSide(color: Colors.transparent),
                 onPressed: _selectAll,
               ),
               const SizedBox(width: 8),
@@ -343,7 +343,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                   style: TextStyle(fontFamily: "Rubik", fontSize: 12, color: appTheme.textMainColor),
                 ),
                 backgroundColor: appTheme.backgroundSubColor,
-                side: BorderSide(color: appTheme.textSubColor.withAlpha(50)),
+                side: BorderSide(color: Colors.transparent),
                 onPressed: _selectUnwatchedOnly,
               ),
               const SizedBox(width: 8),
@@ -354,7 +354,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                   style: TextStyle(fontFamily: "Rubik", fontSize: 12, color: appTheme.textMainColor),
                 ),
                 backgroundColor: appTheme.backgroundSubColor,
-                side: BorderSide(color: appTheme.textSubColor.withAlpha(50)),
+                side: BorderSide(color: Colors.transparent),
                 onPressed: _invertSelection,
               ),
             ],
@@ -438,9 +438,8 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
           height: 48,
           child: FilledButton.icon(
             onPressed: _selectedIndices.isEmpty ? null : () => setState(() => _step = 1),
-            icon: const Icon(Icons.arrow_forward_rounded, size: 20),
             label: Text(
-              "Next (${_selectedIndices.length})",
+              "Next",
               style: const TextStyle(fontFamily: "Rubik", fontWeight: FontWeight.bold, fontSize: 16),
             ),
             style: FilledButton.styleFrom(
@@ -501,7 +500,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                     ),
                     selectedColor: appTheme.accentColor,
                     backgroundColor: appTheme.backgroundColor,
-                    side: BorderSide(color: selected ? appTheme.accentColor : appTheme.textSubColor.withAlpha(80)),
+                    side: BorderSide(color: selected ? appTheme.accentColor : Colors.transparent),
                     onSelected: (val) {
                       if (val) setState(() => _preferredQuality = quality);
                     },
@@ -528,7 +527,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                     ),
                     selectedColor: appTheme.accentColor,
                     backgroundColor: appTheme.backgroundColor,
-                    side: BorderSide(color: !_preferDubs ? appTheme.accentColor : appTheme.textSubColor.withAlpha(80)),
+                    side: BorderSide(color: !_preferDubs ? appTheme.accentColor : Colors.transparent),
                     onSelected: (val) {
                       if (val) setState(() => _preferDubs = false);
                     },
@@ -546,7 +545,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                     ),
                     selectedColor: appTheme.accentColor,
                     backgroundColor: appTheme.backgroundColor,
-                    side: BorderSide(color: _preferDubs ? appTheme.accentColor : appTheme.textSubColor.withAlpha(80)),
+                    side: BorderSide(color: _preferDubs ? appTheme.accentColor : Colors.transparent),
                     onSelected: (val) {
                       if (val) setState(() => _preferDubs = true);
                     },
@@ -574,7 +573,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                     selectedColor: appTheme.accentColor,
                     backgroundColor: appTheme.backgroundColor,
                     side: BorderSide(
-                      color: _includeSubtitles ? appTheme.accentColor : appTheme.textSubColor.withAlpha(80),
+                      color: _includeSubtitles ? appTheme.accentColor : Colors.transparent,
                     ),
                     onSelected: (val) {
                       if (val) setState(() => _includeSubtitles = true);
@@ -594,7 +593,7 @@ class _BatchDownloadSheetContentState extends State<BatchDownloadSheetContent> {
                     selectedColor: appTheme.accentColor,
                     backgroundColor: appTheme.backgroundColor,
                     side: BorderSide(
-                      color: !_includeSubtitles ? appTheme.accentColor : appTheme.textSubColor.withAlpha(80),
+                      color: !_includeSubtitles ? appTheme.accentColor : Colors.transparent,
                     ),
                     onSelected: (val) {
                       if (val) setState(() => _includeSubtitles = false);

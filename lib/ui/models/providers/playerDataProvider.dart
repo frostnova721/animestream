@@ -42,23 +42,38 @@ class PlayerDataProvider extends ChangeNotifier {
     this.coverImageUrl, // just for presence updation
     this.preferDubs = false,
   }) : _state = PlayerDataProviderState(
-          streams: initialStreams,
-          currentStream: initialStream,
-          controlsLocked: false,
-          qualities: [],
-          currentQuality: QualityStream.paceholder(),
-          audioTracks: [],
-          currentAudioTrack: AudioStream.placeholder(),
-          currentEpIndex: startIndex,
-          preloadStarted: false,
-          preloadedSources: [],
-          currentTimeStamp: '00:00',
-          maxTimeStamp: '00:00',
-          preferredServer: selectedSource,
-          sliderValue: 0,
-        );
+         streams: initialStreams,
+         currentStream: initialStream,
+         controlsLocked: false,
+         qualities: [],
+         currentQuality: QualityStream.paceholder(),
+         audioTracks: [],
+         currentAudioTrack: AudioStream.placeholder(),
+         currentEpIndex: startIndex,
+         preloadStarted: false,
+         preloadedSources: [],
+         currentTimeStamp: '00:00',
+         maxTimeStamp: '00:00',
+         preferredServer: selectedSource,
+         sliderValue: 0,
+       );
 
   PlayerDataProviderState get state => _state;
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
 
   final discord = (currentUserSettings?.enableDiscordRichPresence ?? false) ? DiscordDesktopRPC() : null;
 
@@ -66,10 +81,10 @@ class PlayerDataProvider extends ChangeNotifier {
 
   /// Call this to refresh/init subs settings
   void initSubsettings() => UserPreferences.getUserPreferences().then((val) {
-        subtitleSettings = val.subtitleSettings ?? SubtitleSettings();
-        _state = _state.copyWith(subsInited: true);
-        notifyListeners();
-      });
+    subtitleSettings = val.subtitleSettings ?? SubtitleSettings();
+    _state = _state.copyWith(subsInited: true);
+    notifyListeners();
+  });
 
   /// Get and store the qualities and audio available for the current stream
   Future<void> extractCurrentStreamQualities() async {
@@ -77,7 +92,8 @@ class PlayerDataProvider extends ChangeNotifier {
     final headers = _state.currentStream.customHeaders;
 
     // Direct container files (MKV, MP4, WebM) do not have HLS master playlists.
-    final isContainer = url.contains(RegExp(r'\.(mkv|mp4|mov|webm)', caseSensitive: false)) ||
+    final isContainer =
+        url.contains(RegExp(r'\.(mkv|mp4|mov|webm)', caseSensitive: false)) ||
         _state.currentStream.server.contains('[MKV]') ||
         _state.currentStream.server.contains('[MP4]');
 
@@ -168,10 +184,7 @@ class PlayerDataProvider extends ChangeNotifier {
   /// Update the state of time stamps
   void updateTimeStamps(String current, String max) {
     if (_state.currentTimeStamp == current && _state.maxTimeStamp == max) return;
-    _state = _state.copyWith(
-      currentTimeStamp: current,
-      maxTimeStamp: max,
-    );
+    _state = _state.copyWith(currentTimeStamp: current, maxTimeStamp: max);
     notifyListeners();
   }
 
@@ -186,16 +199,10 @@ class PlayerDataProvider extends ChangeNotifier {
   void updateProgress({required int positionInSeconds, required int durationInSeconds}) {
     final current = getFormattedTime(positionInSeconds);
     final max = getFormattedTime(durationInSeconds);
-    if (_state.sliderValue == positionInSeconds &&
-        _state.currentTimeStamp == current &&
-        _state.maxTimeStamp == max) {
+    if (_state.sliderValue == positionInSeconds && _state.currentTimeStamp == current && _state.maxTimeStamp == max) {
       return;
     }
-    _state = _state.copyWith(
-      sliderValue: positionInSeconds,
-      currentTimeStamp: current,
-      maxTimeStamp: max,
-    );
+    _state = _state.copyWith(sliderValue: positionInSeconds, currentTimeStamp: current, maxTimeStamp: max);
     notifyListeners();
   }
 
@@ -218,14 +225,19 @@ class PlayerDataProvider extends ChangeNotifier {
     }
     List<VideoStream> srcs = [];
     //its actually the getStreams function!
-    await SourceManager.instance.getStreams(selectedSource, epLinks[index].episodeLink,
-        dub: preferDubs, metadata: epLinks[index].metadata, (list, finished) {
-      srcs = srcs + list;
-      if (finished) {
-        _state = _state.copyWith(preloadedSources: srcs);
-        print("[PLAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
-      }
-    });
+    await SourceManager.instance.getStreams(
+      selectedSource,
+      epLinks[index].episodeLink,
+      dub: preferDubs,
+      metadata: epLinks[index].metadata,
+      (list, finished) {
+        srcs = srcs + list;
+        if (finished) {
+          _state = _state.copyWith(preloadedSources: srcs);
+          print("[PLAYER] PRELOAD FINISHED FOUND ${srcs.length} SERVERS");
+        }
+      },
+    );
   }
 
   /// Get skip times for current episode
@@ -418,19 +430,7 @@ class ViewMode {
 }
 
 final List<ViewMode> viewModes = [
-  ViewMode(
-    icon: Icons.fullscreen,
-    desc: "fit",
-    value: BoxFit.contain,
-  ),
-  ViewMode(
-    icon: Icons.zoom_out_map_rounded,
-    desc: "filled",
-    value: BoxFit.fill,
-  ),
-  ViewMode(
-    icon: Icons.crop_outlined,
-    desc: "cropped",
-    value: BoxFit.cover,
-  ),
+  ViewMode(icon: Icons.fullscreen, desc: "fit", value: BoxFit.contain),
+  ViewMode(icon: Icons.zoom_out_map_rounded, desc: "filled", value: BoxFit.fill),
+  ViewMode(icon: Icons.crop_outlined, desc: "cropped", value: BoxFit.cover),
 ];

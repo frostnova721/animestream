@@ -37,6 +37,21 @@ class PlayerProvider extends ChangeNotifier {
         speedingUp: false,
       );
 
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
+  }
+
   VideoController get controller => _controller;
 
   PlayerProviderState get state => _state;
@@ -195,7 +210,7 @@ class PlayerProvider extends ChangeNotifier {
 
   /// Set pip mode
   Future<void> setPip(bool val) async {
-    // to kill any accedental speedups 
+    // to kill any accedental speedups
     stopSpeedUp();
     if (!Platform.isAndroid && !Platform.isWindows && !Platform.isLinux) {
       Logs.player.log("PiP not supported on this platform.");
@@ -325,12 +340,12 @@ class PlayerProvider extends ChangeNotifier {
     final next = increase
         ? speeds.firstWhereOrNull((s) => s > curr) ?? speeds.last
         : speeds.lastWhereOrNull((s) => s < curr) ?? speeds.first;
-    if(next == curr) return;
+    if (next == curr) return;
     setSpeed(next);
   }
 
   void stopSpeedUp() {
-    if(!_state.speedingUp) return;
+    if (!_state.speedingUp) return;
     _state = _state.copyWith(speedingUp: false, speed: _speedBeforeBoost);
     _controller.setSpeed(_speedBeforeBoost);
     notifyListeners();

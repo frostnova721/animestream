@@ -105,11 +105,7 @@ class InfoProvider extends ChangeNotifier {
     _selectedSource = val;
     if (aspProvider != val.identifier) {
       aspProvider = val.identifier;
-      saveAnimeSpecificPreference(
-          id.toString(),
-          AnimeSpecificPreference(
-            preferredProvider: val.identifier,
-          ));
+      saveAnimeSpecificPreference(id.toString(), AnimeSpecificPreference(preferredProvider: val.identifier));
     }
     // we just using this condition for validation (too lazy to add a field for it)
     sourceManager.useInbuiltProviders = selectedSource.version == "0.0.0.0";
@@ -128,9 +124,7 @@ class InfoProvider extends ChangeNotifier {
   set viewMode(int newIndex) {
     _viewMode = newIndex;
     UserPreferences.saveUserPreferences(
-      UserPreferencesModal(
-        episodesViewMode: UserPreferencesModal.getViewModeEnum(newIndex),
-      ),
+      UserPreferencesModal(episodesViewMode: UserPreferencesModal.getViewModeEnum(newIndex)),
     );
     notifyListeners();
   }
@@ -157,11 +151,7 @@ class InfoProvider extends ChangeNotifier {
 
   set preferDubs(bool val) {
     _preferDubs = val;
-    UserPreferences.saveUserPreferences(
-      UserPreferencesModal(
-        preferDubs: val,
-      ),
-    );
+    UserPreferences.saveUserPreferences(UserPreferencesModal(preferDubs: val));
     paginate(epLinks);
     notifyListeners();
   }
@@ -190,10 +180,13 @@ class InfoProvider extends ChangeNotifier {
     final matchedSource = sources
         .where((e) => e.identifier == (asp?.preferredProvider ?? currentUserSettings?.preferredProvider))
         .firstOrNull; // pick provider from last selected provider or default one
-    selectedSource =
-        matchedSource != null ? matchedSource : (sources.isEmpty ? sourceManager.inbuiltSources[0] : sources[0]);
+    selectedSource = matchedSource != null
+        ? matchedSource
+        : (sources.isEmpty ? sourceManager.inbuiltSources[0] : sources[0]);
 
     await _getInfo(id);
+
+    if (_disposed) return;
 
     await loadPreferences();
 
@@ -220,11 +213,9 @@ class InfoProvider extends ChangeNotifier {
     _previouslyUsedServer = server;
     _previouslyUsedServerQuality = quality;
     await saveAnimeSpecificPreference(
-        id.toString(),
-        AnimeSpecificPreference(
-          previouslyUsedServer: server,
-          previouslyUsedServerQuality: quality,
-        ));
+      id.toString(),
+      AnimeSpecificPreference(previouslyUsedServer: server, previouslyUsedServerQuality: quality),
+    );
     notifyListeners();
   }
 
@@ -233,6 +224,8 @@ class InfoProvider extends ChangeNotifier {
       // final isLoggedInAnilist = await AnilistLogin().isLoggedIn();
 
       final (watched, status) = await getAnimeWatchProgress(id);
+      if (_disposed) return;
+      
       _watched = watched;
       _started = watched > 0;
       _mediaListStatus = status;
@@ -253,9 +246,9 @@ class InfoProvider extends ChangeNotifier {
           : (supposedPageIndex >= visibleEpList.length ? visibleEpList.length - 1 : supposedPageIndex);
 
       if (refreshLastWatchDuration) {
-        try{
-        _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
-        } catch(err) {
+        try {
+          _lastWatchedDurationMap = (await getAnimeSpecificPreference(id.toString()))?.lastWatchDuration;
+        } catch (err) {
           Logs.app.log("failed to update last watch duration");
         }
       }
@@ -360,11 +353,7 @@ class InfoProvider extends ChangeNotifier {
     }
 
     //to find a exact match
-    List<Map<String, String?>> match = sr
-        .where(
-          (e) => e['name'] == query,
-        )
-        .toList();
+    List<Map<String, String?>> match = sr.where((e) => e['name'] == query).toList();
     if (match.isEmpty) match = sr;
     final links = await sourceManager.getAnimeEpisodes(selectedSource.identifier, match[0]['alias']!);
     paginate(links);
@@ -411,7 +400,9 @@ class InfoProvider extends ChangeNotifier {
   void clearLastWatchDuration() async {
     _lastWatchedDurationMap = {};
     await saveAnimeSpecificPreference(
-        id.toString(), AnimeSpecificPreference(lastWatchDuration: _lastWatchedDurationMap));
+      id.toString(),
+      AnimeSpecificPreference(lastWatchDuration: _lastWatchedDurationMap),
+    );
     notifyListeners();
   }
 
@@ -440,5 +431,20 @@ class InfoProvider extends ChangeNotifier {
     // recalculate the page index based on updated value
     paginate(epLinks);
     notifyListeners();
+  }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+
+  @override
+  void notifyListeners() {
+    if (!_disposed) {
+      super.notifyListeners();
+    }
   }
 }

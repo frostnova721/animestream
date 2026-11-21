@@ -145,7 +145,6 @@ class _MobileControlsState extends State<MobileControls> {
                                   ignoring: locked,
                                   child: Container(
                                     child: SeekBar(
-                                      locked: locked,
                                       sliderTheme: SliderThemeData(
                                         trackHeight: 1.3,
                                         thumbColor: appTheme.accentColor,

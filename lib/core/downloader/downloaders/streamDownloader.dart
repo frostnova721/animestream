@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -319,7 +320,7 @@ class StreamDownloader extends BaseDownloader {
           status: 'error',
           id: task.id,
           message: "Cannot write subtitles to the video file. Only SRT and VTT subtitles are supported by the remuxer.",
-          extras: ["No stack trace needed btw... maybe.. the extension we got is: '$ext'"],
+          extras: ["Subtitle URL: ${task.subsUrl} , Extension is $ext"],
         ),
       );
     }
@@ -330,14 +331,26 @@ class StreamDownloader extends BaseDownloader {
       final folder = File(downloadPath).parent;
       fileName = fileName.replaceAll(RegExp(r'[<>:"/\\|?*]'), '') + " Subtitles";
 
-      final ext = url.split(".").lastOrNull ?? "txt";
+      final res = await get(Uri.parse(url), headers: task.customHeaders);
+      final ext = await detectSubtitleFormat(utf8.decode(res.bodyBytes)) ?? "txt";
       final file = File("${folder.path}${Platform.pathSeparator}$fileName.$ext");
-      await file.writeAsString((await get(Uri.parse(url), headers: task.customHeaders)).body);
+      await file.writeAsString(utf8.decode(res.bodyBytes));
       return file.path;
     } catch (err) {
       print("[DOWNLOADER] Failed to download $fileName subs!");
       return "";
     }
+  }
+
+  String? detectSubtitleFormat(String body) {
+    final head = body.replaceFirst('\uFEFF', '').trimLeft(); // strip BOM + leading blank lines
+    final start = head.length > 2000 ? head.substring(0, 2000) : head;
+
+    if (start.startsWith('WEBVTT')) return "vtt";
+    if (start.contains('[Script Info]') || start.contains('[Events]')) return "ass";
+    if (RegExp(r'\d{2}:\d{2}:\d{2},\d{3}\s*-->').hasMatch(start)) return "srt"; // comma = SRT
+    if (RegExp(r'(\d{2}:)?\d{2}:\d{2}\.\d{3}\s*-->').hasMatch(start)) return "vtt"; // dot, header missing
+    return null;
   }
 
   @override

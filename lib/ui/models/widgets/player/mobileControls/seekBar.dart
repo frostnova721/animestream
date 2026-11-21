@@ -5,9 +5,8 @@ import 'package:provider/provider.dart';
 
 class SeekBar extends StatefulWidget {
   final SliderThemeData sliderTheme;
-  final bool locked;
 
-  const SeekBar({super.key, required this.sliderTheme, required this.locked});
+  const SeekBar({super.key, required this.sliderTheme});
 
   @override
   State<SeekBar> createState() => _SeekBarState();
@@ -41,12 +40,19 @@ class _SeekBarState extends State<SeekBar> {
         onChangeStart: (value) {
           _wasPlaying = pp.state.playerState.isPlaying;
           pp.controller.pause();
+          setState(() {
+            _dragValue = value;
+          });
         },
         onChangeEnd: (value) async {
-          // just to make sure its on the same page...
-          await pp.controller.seekTo(Duration(seconds: value.toInt()));
-
-          if (_wasPlaying) await pp.controller.play();
+          try {
+            // just to make sure its on the same page...
+            await pp.controller.seekTo(Duration(seconds: value.toInt()));
+            context.read<PlayerDataProvider>().updateSliderValue(value.toInt());
+          } finally {
+            if (_wasPlaying) await pp.controller.play();
+            if (mounted) setState(() => _dragValue = null);
+          }
         },
       ),
     );

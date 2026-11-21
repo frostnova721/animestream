@@ -49,7 +49,7 @@ class _InfoDesktopState extends State<InfoDesktop> {
               ),
               AnimeStreamNavDestination(
                 icon: Icons.play_arrow_rounded,
-                label: "Play",
+                label: "Watch",
               ),
             ],
           ),

@@ -58,7 +58,7 @@ class BetterPlayerWrapper implements VideoController {
   int? get duration => controller.videoPlayerController?.value.duration?.inMilliseconds;
 
   @override
-  int? get buffered => controller.videoPlayerController?.value.buffered.lastOrNull?.end.inSeconds;
+  int? get buffered => controller.videoPlayerController?.value.buffered.lastOrNull?.end.inMilliseconds;
 
   @override
   double? get volume => controller.videoPlayerController?.value.volume;

@@ -32,7 +32,7 @@ class Downloader {
   static final Map<int, SendPort> _isolatePorts = {};
 
   /// The max concurrent downloads count
-  static const int MAX_DOWNLOADS_COUNT = 5;
+  static final int MAX_DOWNLOADS_COUNT = Platform.isAndroid ? 2 : 3;
 
   /// The max batch size per stream (for segments)
   static int MAX_STREAM_BATCH_SIZE = 5;
@@ -200,7 +200,7 @@ class Downloader {
 
   Future<void> requestRetry(int id) async {
     final item = _maybeGetDownloadItem(id);
-    if(item == null || item.status != DownloadStatus.failed) {
+    if (item == null || item.status != DownloadStatus.failed) {
       return;
     }
 
@@ -245,7 +245,8 @@ class Downloader {
           if (!msg.silent) {
             _helper.sendCompletedNotif(msg.id, msg.extras[0] as String, msg.extras[1] as String);
             DownloadHistory.saveItem(
-                _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String));
+              _cookHistoryItem(_getDownloadItem(msg.id), DownloadStatus.completed, msg.extras[1] as String),
+            );
           }
           _endTask(msg.id);
           logger?.log("Download completed for task ${msg.id}.", addToBuffer: true);
@@ -255,8 +256,10 @@ class Downloader {
         {
           // _endTask(msg.id);
           // print("Welp, something went wrong..");
-          logger?.log("Download error for ${msg.id}. \nError: ${msg.message} \n StackTrace: ${msg.extras[0] as String}",
-              addToBuffer: true);
+          logger?.log(
+            "Download error for ${msg.id}. \nError: ${msg.message} \n StackTrace: ${msg.extras[0] as String}",
+            addToBuffer: true,
+          );
           break;
         }
       case 'fail':
@@ -267,10 +270,7 @@ class Downloader {
           item.status = DownloadStatus.failed;
           await _cleanUp(msg.id, dequeue: false);
           _helper.sendCancelledNotif(msg.id, failed: true);
-          logger?.log(
-            "Download failed for ${msg.id}. Reason: ${msg.message}",
-            addToBuffer: true,
-          );
+          logger?.log("Download failed for ${msg.id}. Reason: ${msg.message}", addToBuffer: true);
           await _processQueue();
           break;
         }
@@ -324,22 +324,22 @@ class Downloader {
     _receivePorts[item.id] = rp;
 
     final task = DownloadTaskIsolate(
-        url: item.url,
-        fileName: item.fileName,
-        customHeaders: item.customHeaders,
-        retryAttempts: MAX_RETRY_ATTEMPTS,
-        parallelBatches: MAX_STREAM_BATCH_SIZE * ((currentUserSettings?.fasterDownloads ?? false) ? 2 : 1),
-        subsUrl: item.subtitleUrl,
-        sendPort: rp.sendPort,
-        id: item.id,
-        // rootIsolateToken: rootIsolateToken,
-        downloadPath: downloadPath,
-        resumeFrom: item.lastDownloadedPart ?? 0,
-        useMkvRemuxer: currentUserSettings?.useMkvRemuxer ?? true,
-        writeSubtitleTrackToVideo: currentUserSettings?.writeSubtitleTrackToVideo ?? false,
-        videoStream: item.videoStream,
-        audioStreams: item.audioStreams,
-        );
+      url: item.url,
+      fileName: item.fileName,
+      customHeaders: item.customHeaders,
+      retryAttempts: MAX_RETRY_ATTEMPTS,
+      parallelBatches: MAX_STREAM_BATCH_SIZE * ((currentUserSettings?.fasterDownloads ?? false) ? 2 : 1),
+      subsUrl: item.subtitleUrl,
+      sendPort: rp.sendPort,
+      id: item.id,
+      // rootIsolateToken: rootIsolateToken,
+      downloadPath: downloadPath,
+      resumeFrom: item.lastDownloadedPart ?? 0,
+      useMkvRemuxer: currentUserSettings?.useMkvRemuxer ?? true,
+      writeSubtitleTrackToVideo: currentUserSettings?.writeSubtitleTrackToVideo ?? false,
+      videoStream: item.videoStream,
+      audioStreams: item.audioStreams,
+    );
 
     return task;
   }
@@ -370,7 +370,7 @@ class Downloader {
   Future<_DownloadType> _getDownloadType(DownloadItem item) async {
     if (item.mock) return _DownloadType.mock;
     // DASH tracks all share the manifest URL, so the ref is the only reliable signal
-    if (item.videoStream?.ref is DashRef)  {
+    if (item.videoStream?.ref is DashRef) {
       return _DownloadType.stream;
     }
     final ext = _helper.extractExtension(item.url);

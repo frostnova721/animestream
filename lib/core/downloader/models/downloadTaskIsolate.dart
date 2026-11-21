@@ -12,13 +12,17 @@ class DownloadTaskIsolate {
   final QualityStream? videoStream;
   final List<AudioStream> audioStreams;
 
-  // primary URL as a fallback, maybe for files which arent videos...
+  /// primary URL as a fallback, maybe for files which arent videos...
   final String rawUrl;
 
-  // Get the primary URL to download
+  /// Get the primary URL to download
   String get url => videoStream?.url ?? rawUrl;
 
+  /// The URL of the subtitles file
   final String? subsUrl;
+
+  /// The type of the subtitles file (e.g., "srt", "vtt")
+  // final String? subsType;
   final bool writeSubtitleTrackToVideo; // only for remuxed videos
 
   final Map<String, String> customHeaders;
@@ -44,6 +48,7 @@ class DownloadTaskIsolate {
     this.resumeFrom = 0, // next segment index if stream, exact progress if mp4
     this.useMkvRemuxer = false,
     this.writeSubtitleTrackToVideo = false,
+    // this.subsType,
   }) : rawUrl = url ?? videoStream?.url ?? '';
 
   @override
@@ -57,6 +62,7 @@ class DownloadTaskIsolate {
         '  remux: $useMkvRemuxer,\n'
         '  writeSubtitleTrackToVideo: $writeSubtitleTrackToVideo,\n'
         '  subsUrl: $subsUrl,\n'
+        // '  subsType: $subsType,\n'
         '  parallelBatches: $parallelBatches,\n'
         '  retryAttempts: $retryAttempts,\n'
         '  customHeaders: $customHeaders,\n'

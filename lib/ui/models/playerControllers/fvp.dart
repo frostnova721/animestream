@@ -20,7 +20,7 @@ class FvpWrapper implements VideoController {
   String? get activeMediaUrl => controller.dataSource;
 
   @override
-  int? get buffered => controller.value.buffered.lastOrNull?.end.inSeconds;
+  int? get buffered => controller.value.buffered.lastOrNull?.end.inMilliseconds;
 
   @override
   void dispose() async {

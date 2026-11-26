@@ -57,9 +57,7 @@ void main(List<String> args) async {
     await loadAndAssignSettings();
 
     if (!Platform.isAndroid) {
-      fvp.registerWith(options: {
-        'fastSeek': true,
-      });
+      fvp.registerWith(options: {'fastSeek': true});
     }
 
     if (Platform.isWindows || Platform.isLinux) {
@@ -85,12 +83,7 @@ void main(List<String> args) async {
 
     HttpOverrides.global = _HttpOverrides();
 
-    runApp(
-      ChangeNotifierProvider(
-        create: (context) => AppProvider(),
-        child: const AnimeStream(),
-      ),
-    );
+    runApp(ChangeNotifierProvider(create: (context) => AppProvider(), child: const AnimeStream()));
   } catch (err) {
     // These are critical errors, so we force log them
     Logs.app.log(err.toString(), addToBuffer: true);
@@ -103,10 +96,9 @@ void main(List<String> args) async {
 }
 
 Future<void> loadAndAssignSettings() async {
-  await Settings().getSettings().then((settings) => {
-        currentUserSettings = settings,
-        Logs.app.log("[STARTUP] Loaded user settings"),
-      });
+  await Settings().getSettings().then(
+    (settings) => {currentUserSettings = settings, Logs.app.log("[STARTUP] Loaded user settings")},
+  );
 
   await UserPreferences.getUserPreferences().then((pref) {
     userPreferences = pref;
@@ -135,8 +127,9 @@ Future<void> loadAndAssignSettings() async {
 
     if (darkMode) {
       appTheme = theme.theme;
-      appTheme.backgroundColor =
-          (currentUserSettings!.amoledBackground ?? false) ? Colors.black : theme.theme.backgroundColor;
+      appTheme.backgroundColor = (currentUserSettings!.amoledBackground ?? false)
+          ? Colors.black
+          : theme.theme.backgroundColor;
     } else {
       appTheme = AnimeStreamTheme(
         accentColor: theme.lightVariant.accentColor,
@@ -159,6 +152,9 @@ class AnimeStream extends StatefulWidget {
   static final GlobalKey<ScaffoldMessengerState> snackbarKey = GlobalKey<ScaffoldMessengerState>();
 
   static final navigatorKey = GlobalKey<NavigatorState>();
+
+  static final routeObserver = RouteObserver<ModalRoute<void>>();
+
   @override
   State<AnimeStream> createState() => _AnimeStreamState();
 }
@@ -217,9 +213,7 @@ class _AnimeStreamState extends State<AnimeStream> {
               if (id != null) {
                 AnimeStream.navigatorKey.currentState?.push(
                       MaterialPageRoute(
-                        builder: (context) => AppWrapper(
-                          firstPage: Info(id: id),
-                        ),
+                        builder: (context) => AppWrapper(firstPage: Info(id: id)),
                       ),
                     ) ??
                     print("Nah");
@@ -298,17 +292,19 @@ class _AnimeStreamState extends State<AnimeStream> {
             title: 'Animestream',
             navigatorKey: AnimeStream.navigatorKey,
             scaffoldMessengerKey: AnimeStream.snackbarKey,
+            navigatorObservers: [AnimeStream.routeObserver],
             theme: ThemeData(
-                useMaterial3: true,
+              useMaterial3: true,
+              brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
+              textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
+              scaffoldBackgroundColor: appTheme.backgroundColor,
+              bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
+              colorScheme: ColorScheme.fromSeed(
                 brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-                textTheme: Theme.of(context).textTheme.apply(bodyColor: appTheme.textMainColor, fontFamily: "NotoSans"),
-                scaffoldBackgroundColor: appTheme.backgroundColor,
-                bottomSheetTheme: BottomSheetThemeData(backgroundColor: appTheme.modalSheetBackgroundColor),
-                colorScheme: ColorScheme.fromSeed(
-                  brightness: themeProvider.isDark ? Brightness.dark : Brightness.light,
-                  seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
-                ),
-                iconTheme: IconThemeData(color: appTheme.textMainColor)),
+                seedColor: (currentUserSettings?.materialTheme ?? false) ? scheme.accentColor : appTheme.accentColor,
+              ),
+              iconTheme: IconThemeData(color: appTheme.textMainColor),
+            ),
             home: ChangeNotifierProvider(
               create: (context) => MainNavProvider(),
               child: Platform.isWindows || Platform.isLinux ? AppWrapper(firstPage: MainNavigator()) : MainNavigator(),

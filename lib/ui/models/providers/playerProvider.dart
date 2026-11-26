@@ -12,6 +12,7 @@ import 'package:collection/collection.dart';
 
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/ui/models/playerControllers/videoController.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import 'package:window_manager/window_manager.dart';
@@ -35,13 +36,21 @@ class PlayerProvider extends ChangeNotifier {
         currentViewMode: ViewMode.fit,
         pip: false,
         speedingUp: false,
-      );
+      ) {
+    if (Platform.isAndroid) _initPip();
+  }
 
   bool _disposed = false;
+
+  final _channel = MethodChannel('animestream.app/utils');
 
   @override
   void dispose() {
     _disposed = true;
+    if (Platform.isAndroid) {
+      _channel.setMethodCallHandler(null);
+      setAutoPip(false);
+    }
     super.dispose();
   }
 
@@ -75,9 +84,9 @@ class PlayerProvider extends ChangeNotifier {
     bool offline = false,
     bool preserveProgress = false,
     int? episodeIndex,
-    int? startFromMs,
+    double? startFromPercent,
   }) async {
-    int? seekTime = startFromMs;
+    int? seekTime;
     if (preserveProgress) {
       seekTime = _controller.position ?? 0;
       await _controller.pause();
@@ -110,6 +119,11 @@ class PlayerProvider extends ChangeNotifier {
     dataProvider.updateCurrentQuality(q);
 
     await _controller.initiateVideo(stream.url, headers: stream.customHeaders, offline: offline);
+
+    final totalMs = _controller.duration ?? 0;
+    if (startFromPercent != null && totalMs > 0) {
+      seekTime = (startFromPercent.clamp(0, 100) / 100 * totalMs).toInt();
+    }
 
     if (seekTime != null) await _controller.seekTo(Duration(milliseconds: seekTime));
 
@@ -178,6 +192,7 @@ class PlayerProvider extends ChangeNotifier {
     if (_state.playerState == playState) return;
     _state = _state.copyWith(playerState: playState);
     handleWakelock();
+    if (Platform.isAndroid) _syncPipPlayState();
     notifyListeners();
   }
 
@@ -222,9 +237,70 @@ class PlayerProvider extends ChangeNotifier {
 
     if (Platform.isWindows) {
       val ? _enablePip() : _disablePip();
+    } else if (Platform.isAndroid) {
+      _channel.invokeMethod("enterPip");
     } else {
       await controller.setPip(true); // doesnt really matter for android since disabling is done by the system
     }
+    notifyListeners();
+  }
+
+  void setAutoPip(bool val) {
+    if (!Platform.isAndroid) return;
+    _channel.invokeMethod("setAutoPip", {"enabled": val && (currentUserSettings?.enablePipOnMinimize ?? false)});
+  }
+
+  void _initPip() {
+    setAutoPip(true);
+    _channel.setMethodCallHandler((call) async {
+      if (_disposed) return;
+
+      final skip = currentUserSettings?.skipDuration ?? 10;
+      switch (call.method) {
+        case "onPipChanged":
+          _onPipChanged(call.arguments == true);
+        case "pipAction":
+          switch (call.arguments) {
+            case "playPause":
+              (_controller.isPlaying ?? false) ? controller.pause() : controller.play();
+            case "forward":
+              fastForward(skip);
+            case "rewind":
+              fastForward(-skip);
+          }
+      }
+    });
+  }
+
+  void _onPipChanged(bool val) {
+    updatePipState(val);
+    if (val) {
+      toggleControlsVisibility(action: false);
+      return;
+    }
+
+    Future.delayed(Duration(milliseconds: 250), () {
+      if (_disposed) return;
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+      SystemChrome.setPreferredOrientations([DeviceOrientation.landscapeLeft, DeviceOrientation.landscapeRight]);
+      handleWakelock();
+    });
+  }
+
+  bool _wasPlaying = true;
+
+  /// Synchronize the play state of the PiP window
+  void _syncPipPlayState() {
+    final playing = controller.isPlaying ?? false;
+    if (playing == _wasPlaying) return;
+    _wasPlaying = playing;
+    _channel.invokeMethod("setPipPlaying", {"playing": playing});
+  }
+
+  /// Sync pip state when the system enters/exits PiP on its own (android auto PiP / closing the window)
+  void updatePipState(bool val) {
+    if (_state.pip == val) return;
+    _state = _state.copyWith(pip: val);
     notifyListeners();
   }
 
@@ -271,22 +347,19 @@ class PlayerProvider extends ChangeNotifier {
                 preferredServerLink[0]) // pick the most matching one as previous one
           : dataProvider.state.preloadedSources[0];
 
+      final newEpIndex = dataProvider.state.currentEpIndex + 1;
+
       dataProvider.update(
         dataProvider.state.copyWith(
           streams: dataProvider.state.preloadedSources,
           currentStream: src,
-          currentEpIndex: dataProvider.state.currentEpIndex + 1,
+          currentEpIndex: newEpIndex,
           preloadStarted: false,
           preloadedSources: [],
         ),
       );
 
-      await playVideo(
-        stream: src,
-        dataProvider: dataProvider,
-        episodeIndex: dataProvider.state.currentEpIndex + 1,
-        preserveProgress: false,
-      );
+      await playVideo(stream: src, dataProvider: dataProvider, episodeIndex: newEpIndex, preserveProgress: false);
     } else {
       Logs.player.log("No preloaded sources found!");
     }

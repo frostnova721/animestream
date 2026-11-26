@@ -6,6 +6,7 @@ import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/animeSpecificPreference.dart';
 import 'package:animestream/core/data/models.dart';
+import 'package:animestream/main.dart';
 import 'package:animestream/ui/models/playerControllers/betterPlayer.dart';
 import 'package:animestream/ui/models/widgets/player/controls.dart';
 import 'package:animestream/ui/models/widgets/player/gestureOverlay.dart';
@@ -34,7 +35,7 @@ class Watch extends StatefulWidget {
   State<Watch> createState() => _WatchState();
 }
 
-class _WatchState extends State<Watch> with WidgetsBindingObserver {
+class _WatchState extends State<Watch> with WidgetsBindingObserver, RouteAware {
   late VideoController controller;
 
   @override
@@ -46,7 +47,6 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _initialize();
-      _initCallbacks(context);
     });
 
     WidgetsBinding.instance.addObserver(this);
@@ -67,17 +67,18 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     // }
   }
 
-  final _channel = MethodChannel('animestream.app/utils');
-
-  void _initCallbacks(BuildContext context) {
-    _channel.setMethodCallHandler((call) async {
-      if (call.method == "onUserLeaveHint") {
-        if (currentUserSettings?.enablePipOnMinimize ?? false) {
-          context.read<PlayerProvider>().setPip(true);
-        }
-      }
-    });
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if(route != null) AnimeStream.routeObserver.subscribe(this, route);
   }
+
+  @override
+  void didPushNext() => context.read<PlayerProvider>().setAutoPip(false);
+
+  @override
+  void didPopNext() => context.read<PlayerProvider>().setAutoPip(true);
 
   void setWatchMode() {
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
@@ -94,14 +95,11 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
 
     dataProvider.initSubsettings();
 
-    final lastWatchPct = (dataProvider.lastWatchDuration ?? 0).clamp(0, 100);
-    final totalMs = controller.duration ?? 0;
-    final lastWatchDuration = totalMs <= 0 ? 0 : ((lastWatchPct / 100) * totalMs).toInt();
     await context.read<PlayerProvider>().playVideo(
       stream: dataProvider.state.currentStream,
       dataProvider: dataProvider,
       offline: widget.localSource,
-      startFromMs: lastWatchDuration,
+      startFromPercent: dataProvider.lastWatchDuration?.toDouble(),
     );
 
     if (mounted) context.read<PlayerProvider>().toggleSubs(action: dataProvider.state.currentStream.subtitle != null);
@@ -589,6 +587,7 @@ class _WatchState extends State<Watch> with WidgetsBindingObserver {
     _controlsTimer?.cancel();
     _tapTimer?.cancel();
 
+    AnimeStream.routeObserver.unsubscribe(this);
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }

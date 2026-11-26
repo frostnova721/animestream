@@ -1,6 +1,4 @@
-# V1.4.8-Beta1
-
-NOTE: This is an alpha version with name of beta version. The features introduced or are modified may be buggy, install only if you dont mind dealing with them bugs!
+# V1.4.8-Beta2
 
 ## Whats New
 

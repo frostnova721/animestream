@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class DatabaseAccountCard extends StatelessWidget {
   final String databaseName;
   final bool loggedIn;
-  final UserModal? userModal;
+  final UserModel? userModal;
   final VoidCallback onLogin;
   final VoidCallback onLogout;
 

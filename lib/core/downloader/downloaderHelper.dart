@@ -4,8 +4,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/ui/models/notification.dart';
-import 'package:animestream/ui/models/snackBar.dart';
+import 'package:animestream/core/app/notification.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
@@ -41,7 +40,7 @@ class DownloaderHelper {
     }
 
     if (status.isDenied) {
-      showToast("Provide storage access for downloading!");
+      // showToast("Provide storage access for downloading!");
       return (await fileAccessPermission.request()).isGranted;
     } else {
       return true;

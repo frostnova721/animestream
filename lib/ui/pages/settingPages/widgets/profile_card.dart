@@ -6,7 +6,7 @@ import 'package:animestream/ui/pages/settingPages/stats.dart';
 import 'package:flutter/material.dart';
 
 class ProfileCard extends StatelessWidget {
-  final UserModal? userModal;
+  final UserModel? userModal;
   final VoidCallback onLogout;
   final String accountName;
 

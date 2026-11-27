@@ -1,5 +1,5 @@
 //GPT CODE!!!
-import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitle.dart';
 import 'package:collection/collection.dart';
 
 class VttRipper {

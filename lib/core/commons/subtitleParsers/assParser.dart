@@ -1,6 +1,6 @@
 import 'package:animestream/core/commons/subtitleParsers/subtitleParsers.dart';
 import 'package:animestream/core/commons/subtitleParsers/util.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitle.dart';
 
 // Vibecoded parser dont blame me for this mess
 class ASSRIPPER {

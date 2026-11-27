@@ -40,7 +40,7 @@ class DownloadManager {
   }
 
   /// Adds a new download task to the downloader
-  Future<void> addDownloadTask(
+  Future<bool> addDownloadTask(
     String url,
     String filename, {
     String? subtitleUrl,
@@ -52,7 +52,7 @@ class DownloadManager {
     if(!(await DownloaderHelper().checkAndRequestPermission())) {
       floatingSnackBar("Allow 'All files access' to download files.");
       Logs.downloader.log("Storage permission not granted. Rejecting download request...");
-      return;
+      return false;
     }
     final id = DownloaderHelper.generateId();
 
@@ -70,6 +70,8 @@ class DownloadManager {
     );
 
     await _downloader.startDownload(item);
+
+    return true;
   }
 
   /// ** All of the below commands to the downloader are fire and forget. **

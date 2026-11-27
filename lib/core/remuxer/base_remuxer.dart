@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitle.dart';
 
 import 'mkv_muxer.dart';
 import 'subtitle_parser.dart';

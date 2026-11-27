@@ -5,7 +5,7 @@ import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/subtitleParsers/assParser.dart';
 import 'package:animestream/core/commons/subtitleParsers/srtParser.dart';
 import 'package:animestream/core/commons/subtitleParsers/vttParser.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitle.dart';
 import 'package:animestream/core/network/network.dart';
 
 class Subtitleparsers {

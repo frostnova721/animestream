@@ -1,7 +1,7 @@
 import 'package:animestream/core/downloader/downloadManager.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/widgets/ContextMenu.dart';
+import 'package:animestream/ui/models/widgets/contextMenu.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/infoSection.dart';
 import 'package:animestream/ui/models/widgets/infoPageWidgets/watchSection.dart';

@@ -30,9 +30,9 @@ class _AccountSettingState extends State<AccountSetting> {
   bool malLoggedIn = false;
   bool discordLoggedIn = false;
 
-  UserModal? user;
-  UserModal? simklUser;
-  UserModal? malUser;
+  UserModel? user;
+  UserModel? simklUser;
+  UserModel? malUser;
 
   bool loading = true;
 
@@ -202,7 +202,7 @@ class _AccountSettingState extends State<AccountSetting> {
                       children: [
                         ...Databases.values.map((db) {
                           bool isLoggedIn = false;
-                          UserModal? userModal;
+                          UserModel? userModal;
 
                           switch (db) {
                             case Databases.anilist:

@@ -1,7 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/app/version.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/widgets/ContextMenu.dart';
+import 'package:animestream/ui/models/widgets/contextMenu.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/settingPages/logs.dart';

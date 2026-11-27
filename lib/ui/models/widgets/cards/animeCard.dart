@@ -6,7 +6,7 @@ import 'package:animestream/core/database/handler/syncHandler.dart';
 import 'package:animestream/core/database/local/types.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/widgets/ContextMenu.dart';
+import 'package:animestream/ui/models/widgets/contextMenu.dart';
 import 'package:animestream/ui/pages/info.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';

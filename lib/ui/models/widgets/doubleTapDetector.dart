@@ -2,14 +2,14 @@ import 'dart:async';
 
 import 'package:flutter/widgets.dart';
 
-class DoubleTapDectector extends StatefulWidget {
+class DoubleTapDetector extends StatefulWidget {
   final Widget? child;
   final void Function() onDoubleTap;
   final void Function()? onSingleTap;
   final Duration tapInterval;
   final double tapSlop;
   final HitTestBehavior behavior;
-  const DoubleTapDectector({
+  const DoubleTapDetector({
     super.key,
     required this.onDoubleTap,
     this.onSingleTap,
@@ -20,10 +20,10 @@ class DoubleTapDectector extends StatefulWidget {
   });
 
   @override
-  State<DoubleTapDectector> createState() => _DoubleTapDectectorState();
+  State<DoubleTapDetector> createState() => _DoubleTapDetectorState();
 }
 
-class _DoubleTapDectectorState extends State<DoubleTapDectector> {
+class _DoubleTapDetectorState extends State<DoubleTapDetector> {
   Timer? _timer;
   int _tapCount = 0;
   DateTime? _lastTapTime;

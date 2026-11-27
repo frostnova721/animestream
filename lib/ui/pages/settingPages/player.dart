@@ -63,7 +63,7 @@ class PlayerSettingState extends State<PlayerSetting> {
     });
   }
 
-  Future<void> writeSettings(SettingsModal settings) async {
+  Future<void> writeSettings(SettingsModel settings) async {
     await Settings().writeSettings(settings);
     setState(() {
       readSettings();
@@ -125,7 +125,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                       });
                                     },
                                     onChangeEnd: (val) {
-                                      writeSettings(SettingsModal(skipDuration: skipDurationSliderValue.toInt()));
+                                      writeSettings(SettingsModel(skipDuration: skipDurationSliderValue.toInt()));
                                     },
                                     value: skipDurationSliderValue,
                                     divisions: 9,
@@ -174,7 +174,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     },
                                     onChangeEnd: (val) {
                                       writeSettings(
-                                          SettingsModal(megaSkipDuration: megaSkipDurationSliderValue.toInt()));
+                                          SettingsModel(megaSkipDuration: megaSkipDurationSliderValue.toInt()));
                                     },
                                     value: megaSkipDurationSliderValue,
                                     divisions: 26,
@@ -213,7 +213,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                                     onSelectionChanged: (val) {
                                       setState(() {
                                         preferredQuality = val.first;
-                                        writeSettings(SettingsModal(preferredQuality: val.first));
+                                        writeSettings(SettingsModel(preferredQuality: val.first));
                                       });
                                     },
                                     segments: [
@@ -262,12 +262,12 @@ class PlayerSettingState extends State<PlayerSetting> {
                               description: "Enable extra player speeds",
                               onTapFunction: () {
                                 enableSuperSpeeds = !enableSuperSpeeds;
-                                writeSettings(SettingsModal(enableSuperSpeeds: enableSuperSpeeds));
+                                writeSettings(SettingsModel(enableSuperSpeeds: enableSuperSpeeds));
                               }),
                             ToggleItem(
                               onTapFunction: () {
                                 doubleTapToSkip = !doubleTapToSkip;
-                                writeSettings(SettingsModal(doubleTapToSkip: doubleTapToSkip));
+                                writeSettings(SettingsModel(doubleTapToSkip: doubleTapToSkip));
                               },
                               label: "Double tap to seek",
                               description: "Double tap left/right to jump $skipDuration seconds",
@@ -280,7 +280,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                             value: enablePipOnMinimize,
                             onTapFunction: () {
                               enablePipOnMinimize = !enablePipOnMinimize;
-                              writeSettings(SettingsModal(enablePipOnMinimize: enablePipOnMinimize));
+                              writeSettings(SettingsModel(enablePipOnMinimize: enablePipOnMinimize));
                             },
                           ),
                           ToggleItem(
@@ -289,13 +289,13 @@ class PlayerSettingState extends State<PlayerSetting> {
                             value: autoOpEdSkip,
                             onTapFunction: () {
                               autoOpEdSkip = !autoOpEdSkip;
-                              writeSettings(SettingsModal(autoOpEdSkip: autoOpEdSkip));
+                              writeSettings(SettingsModel(autoOpEdSkip: autoOpEdSkip));
                             },
                           ),
                           ToggleItem(
                             onTapFunction: () {
                               enableHoldToSpeedUp = !enableHoldToSpeedUp;
-                              writeSettings(SettingsModal(enableHoldToSpeedUp: enableHoldToSpeedUp));
+                              writeSettings(SettingsModel(enableHoldToSpeedUp: enableHoldToSpeedUp));
                             },
                             label: "Hold to Speed Up",
                             description: "Long press the player to speed up the video",
@@ -304,7 +304,7 @@ class PlayerSettingState extends State<PlayerSetting> {
                           ToggleItem(
                             onTapFunction: () {
                               enablePlayerGestures = !enablePlayerGestures;
-                              writeSettings(SettingsModal(enablePlayerGestures: enablePlayerGestures));
+                              writeSettings(SettingsModel(enablePlayerGestures: enablePlayerGestures));
                             },
                             label: "Player Gestures",
                             description: "Gestures for brightness & volume controls",

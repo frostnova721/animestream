@@ -20,7 +20,7 @@ import 'package:animestream/ui/models/widgets/sourceTile.dart';
 import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:animestream/ui/pages/watch.dart';
 import 'package:flutter/material.dart';
-import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/core/anime/providers/sourceManager.dart';
 import 'package:provider/provider.dart';
 import 'package:collection/collection.dart';
 
@@ -375,6 +375,7 @@ class _DownloadTileState extends State<_DownloadTile> {
           print(err);
           print(st);
           floatingSnackBar("$err");
+          return false;
         });
     Navigator.of(context).pop();
     floatingSnackBar("Downloading the episode to your downloads folder");

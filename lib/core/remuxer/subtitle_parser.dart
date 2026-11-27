@@ -3,7 +3,7 @@ import 'dart:io';
 
 import 'package:animestream/core/commons/subtitleParsers/srtParser.dart';
 import 'package:animestream/core/commons/subtitleParsers/vttParser.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitle.dart';
 
 enum SubtitleAlignment { bottomCenter }
 

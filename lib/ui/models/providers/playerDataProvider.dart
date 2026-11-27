@@ -10,9 +10,9 @@ import 'package:animestream/core/database/aniskip/aniskip.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/core/integrations/discord/desktopRPC.dart';
-import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/core/anime/providers/sourceManager.dart';
 import 'package:animestream/ui/models/widgets/player/playerUtils.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
+import 'package:animestream/core/data/models/subtitleSettings.dart';
 import 'package:dart_discord_presence/dart_discord_presence.dart';
 import 'package:flutter/material.dart';
 

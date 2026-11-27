@@ -1,7 +1,7 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
-import 'package:animestream/core/data/animeSpecificPreference.dart';
+import 'package:animestream/core/data/animeSpecificPreferenceStore.dart';
 import 'package:animestream/core/data/models.dart';
-import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/core/anime/providers/sourceManager.dart';
 import 'package:flutter/material.dart';
 
 class ManualSearchSheet extends StatefulWidget {

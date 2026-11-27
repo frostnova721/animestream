@@ -1,5 +1,5 @@
 import 'package:animestream/core/commons/subtitleParsers/util.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitle.dart';
+import 'package:animestream/core/commons/subtitleParsers/subtitle.dart';
 // import 'package:flutter/widgets.dart';
 
 class SrtRipper {

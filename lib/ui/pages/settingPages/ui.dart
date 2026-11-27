@@ -97,7 +97,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                 //the package just wont work if <android 12!!!
                                 if (!isAboveAndroid12) return floatingSnackBar("Android 12 or greater is required");
                                 materialTheme = !materialTheme;
-                                await Settings().writeSettings(SettingsModal(materialTheme: materialTheme));
+                                await Settings().writeSettings(SettingsModel(materialTheme: materialTheme));
                                 setState(() {});
                                 if (materialTheme) {
                                   return Provider.of<AppProvider>(context, listen: false).justRefresh();
@@ -136,7 +136,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   emptySelectionAllowed: false,
                                   onSelectionChanged: (val) async {
                                     darkMode = val.first;
-                                    await Settings().writeSettings(SettingsModal(darkMode: darkMode));
+                                    await Settings().writeSettings(SettingsModel(darkMode: darkMode));
 
                                     await Provider.of<AppProvider>(context, listen: false).applyThemeMode(darkMode);
                                     // await setThemeMode(val.first);
@@ -156,7 +156,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                             onTapFunction: () async {
                               nativeTitle = !nativeTitle;
                               setState(() {});
-                              await Settings().writeSettings(SettingsModal(nativeTitle: nativeTitle));
+                              await Settings().writeSettings(SettingsModel(nativeTitle: nativeTitle));
                               Provider.of<AppProvider>(context, listen: false).justRefresh();
                             },
                             label: "Prefer Native Titles",
@@ -170,7 +170,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               // setState(() {
                               AMOLEDBackgroundEnabled = !AMOLEDBackgroundEnabled;
                               // });
-                              await Settings().writeSettings(SettingsModal(amoledBackground: AMOLEDBackgroundEnabled));
+                              await Settings().writeSettings(SettingsModel(amoledBackground: AMOLEDBackgroundEnabled));
                               appTheme = darkMode
                                   ? AnimeStreamTheme(
                                       accentColor: thm.theme.accentColor,
@@ -194,7 +194,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                               setState(() {
                                 useOldNavbar = !useOldNavbar;
                               });
-                              await Settings().writeSettings(SettingsModal(useOldNavbar: useOldNavbar));
+                              await Settings().writeSettings(SettingsModel(useOldNavbar: useOldNavbar));
                               Provider.of<AppProvider>(context, listen: false).justRefresh();
                             },
                             label: "Use Old Navbar",
@@ -216,7 +216,7 @@ class _ThemeSettingState extends State<ThemeSetting> {
                                   divisions: 10,
                                   onDragEnd: (val) async {
                                     await Settings().writeSettings(
-                                      SettingsModal(navbarTranslucency: navbarTranslucency),
+                                      SettingsModel(navbarTranslucency: navbarTranslucency),
                                     );
                                     Provider.of<AppProvider>(context, listen: false).justRefresh();
                                   }),

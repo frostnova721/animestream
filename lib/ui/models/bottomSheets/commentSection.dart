@@ -3,7 +3,7 @@ import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/database/anilist/login.dart';
-import 'package:animestream/core/database/commentum/commentumTokenStore.dart';
+import 'package:animestream/core/integrations/commentum/commentumTokenStore.dart';
 import 'package:animestream/ui/models/snackBar.dart';
 import 'package:animestream/ui/models/widgets/comment.dart';
 import 'package:animestream/ui/models/widgets/loader.dart';

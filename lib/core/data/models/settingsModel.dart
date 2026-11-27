@@ -1,6 +1,6 @@
 import 'package:animestream/core/database/database.dart';
 
-class SettingsModal {
+class SettingsModel {
   /// Skip duration in seconds for the player [defaults to 10 seconds]
   final int? skipDuration;
 
@@ -85,7 +85,7 @@ class SettingsModal {
   /// Write the subtitle track to video file (only works when using remuxer)
   final bool? writeSubtitleTrackToVideo;
 
-  SettingsModal({
+  SettingsModel({
     this.megaSkipDuration,
     this.skipDuration,
     this.showErrors,
@@ -116,8 +116,8 @@ class SettingsModal {
     this.writeSubtitleTrackToVideo,
   });
 
-  factory SettingsModal.fromMap(Map<dynamic, dynamic> map) {
-    return SettingsModal(
+  factory SettingsModel.fromMap(Map<dynamic, dynamic> map) {
+    return SettingsModel(
       megaSkipDuration: map['megaSkipDuration'] ?? 85,
       skipDuration: map['skipDuration'] ?? 10,
       showErrors: map['showErrors'] ?? false,

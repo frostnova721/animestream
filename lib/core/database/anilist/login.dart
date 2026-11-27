@@ -38,7 +38,7 @@ class AnilistLogin extends DatabaseLogin {
     await storeSecureVal(SecureStorageKey.anilistToken, null);
   }
 
-  Future<UserModal> getUserProfile() async {
+  Future<UserModel> getUserProfile() async {
     final query = '''{
   Viewer {
     id
@@ -58,7 +58,7 @@ class AnilistLogin extends DatabaseLogin {
     final res = await Anilist().fetchQuery(query, null, token: token, cacheDuration: const Duration(hours: 12));
 
     final data = res['Viewer'];
-    return UserModal(
+    return UserModel(
         id: data['id'],
         avatar: data['avatar']['large'] ?? data['avatar']['medium'],
         name: data['name'],

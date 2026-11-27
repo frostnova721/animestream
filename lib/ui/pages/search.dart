@@ -144,7 +144,7 @@ class _SearchState extends State<Search> {
             value: verticalCards,
             onChanged: (val) => setState(() {
               verticalCards = val!;
-              UserPreferences.saveUserPreferences(UserPreferencesModal(searchPageListMode: val));
+              UserPreferences.saveUserPreferences(UserPreferencesModel(searchPageListMode: val));
             }),
             activeColor: appTheme.accentColor,
             checkColor: Colors.black,

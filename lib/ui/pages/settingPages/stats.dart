@@ -10,7 +10,7 @@ import 'package:animestream/ui/pages/settingPages/common.dart';
 import 'package:flutter/material.dart';
 
 class UserStats extends StatefulWidget {
-  final UserModal userModal;
+  final UserModel userModal;
   const UserStats({super.key, required this.userModal});
 
   @override
@@ -41,7 +41,7 @@ class _UserStatsState extends State<UserStats> {
     }
   }
 
-  late UserModal user;
+  late UserModel user;
   String? genreThumbnail;
   AnilistUserStats? stats;
 

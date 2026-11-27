@@ -6,7 +6,7 @@ import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
 import 'package:animestream/core/commons/utils.dart';
-import 'package:animestream/core/data/animeSpecificPreference.dart';
+import 'package:animestream/core/data/animeSpecificPreferenceStore.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/models.dart';
 import 'package:animestream/core/data/watching.dart';
@@ -15,7 +15,7 @@ import 'package:animestream/core/database/simkl/simkl.dart';
 import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/core/database/types.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/core/anime/providers/sourceManager.dart';
 
 enum InfoView { info, watch }
 
@@ -124,7 +124,7 @@ class InfoProvider extends ChangeNotifier {
   set viewMode(int newIndex) {
     _viewMode = newIndex;
     UserPreferences.saveUserPreferences(
-      UserPreferencesModal(episodesViewMode: UserPreferencesModal.getViewModeEnum(newIndex)),
+      UserPreferencesModel(episodesViewMode: UserPreferencesModel.getViewModeEnum(newIndex)),
     );
     notifyListeners();
   }
@@ -151,7 +151,7 @@ class InfoProvider extends ChangeNotifier {
 
   set preferDubs(bool val) {
     _preferDubs = val;
-    UserPreferences.saveUserPreferences(UserPreferencesModal(preferDubs: val));
+    UserPreferences.saveUserPreferences(UserPreferencesModel(preferDubs: val));
     paginate(epLinks);
     notifyListeners();
   }
@@ -198,7 +198,7 @@ class InfoProvider extends ChangeNotifier {
   /// Fetch preferences
   Future<void> loadPreferences() async {
     final preferences = await UserPreferences.getUserPreferences();
-    _viewMode = UserPreferencesModal.getViewModeIndex(preferences.episodesViewMode ?? EpisodeViewModes.tile);
+    _viewMode = UserPreferencesModel.getViewModeIndex(preferences.episodesViewMode ?? EpisodeViewModes.tile);
     _preferDubs = preferences.preferDubs ?? false;
 
     //load TV stuff

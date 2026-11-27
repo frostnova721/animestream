@@ -1,24 +1,24 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/hive.dart';
 import 'package:animestream/core/commons/enums/hiveEnums.dart';
-import 'package:animestream/core/data/models/userPreferencesModal.dart';
+import 'package:animestream/core/data/models/userPreferencesModel.dart';
 
 class UserPreferences {
-  static Future<UserPreferencesModal> getUserPreferences() async {
+  static Future<UserPreferencesModel> getUserPreferences() async {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
     print(prefMap);
     if (prefMap == null || prefMap.isEmpty) {
       print("Got empty list of preferences.");
-      return UserPreferencesModal.defaults();
+      return UserPreferencesModel.defaults();
     }
-    return UserPreferencesModal.fromMap(prefMap);
+    return UserPreferencesModel.fromMap(prefMap);
   }
 
-  static Future<void> saveUserPreferences(UserPreferencesModal userPref) async {
+  static Future<void> saveUserPreferences(UserPreferencesModel userPref) async {
     Map<dynamic, dynamic>? prefMap = await getVal(HiveKey.userPreferences);
     if (prefMap == null || prefMap.isEmpty) {
       print("Got empty list of preferences.");
-      prefMap = UserPreferencesModal.defaults().toMap();
+      prefMap = UserPreferencesModel.defaults().toMap();
     }
     final mapped = userPref.toMap();
     mapped.forEach((k, v) {
@@ -27,7 +27,7 @@ class UserPreferences {
       }
     });
     print(prefMap);
-    userPreferences = UserPreferencesModal.fromMap(prefMap);
+    userPreferences = UserPreferencesModel.fromMap(prefMap);
     await storeVal(HiveKey.userPreferences, prefMap);
   }
 }

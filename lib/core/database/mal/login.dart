@@ -138,13 +138,13 @@ class MALLogin extends DatabaseLogin {
     print("[MAL-LOGIN]: Token refreshed, Access token has been saved!");
   }
 
-  Future<UserModal> getUserProfile() async {
+  Future<UserModel> getUserProfile() async {
     final url = "https://api.myanimelist.net/v2/users/@me";
 
     final res = await MAL().fetch(url);
     final data = jsonDecode(res);
     //doesnt have banners
-    return UserModal(
+    return UserModel(
         avatar: data['picture'],
         banner: null,
         id: data['id'],

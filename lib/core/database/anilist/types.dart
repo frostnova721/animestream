@@ -63,13 +63,13 @@ class TrendingResult {
   });
 }
 
-class UserModal {
+class UserModel {
   final int id;
   final String? banner;
   final String? avatar;
   final String name;
 
-  UserModal({
+  UserModel({
     required this.avatar,
     required this.banner,
     required this.id,

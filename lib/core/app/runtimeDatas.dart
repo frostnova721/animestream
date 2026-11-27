@@ -4,13 +4,13 @@ import 'package:animestream/ui/theme/types.dart';
 // import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 //saved anilist data
-UserModal? storedUserData;
+UserModel? storedUserData;
 
 //saved settings
-SettingsModal? currentUserSettings;
+SettingsModel? currentUserSettings;
 
 //user prefs
-UserPreferencesModal? userPreferences;
+UserPreferencesModel? userPreferences;
 
 //saved theme
 late AnimeStreamTheme appTheme;

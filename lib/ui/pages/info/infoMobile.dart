@@ -14,7 +14,7 @@ import 'package:animestream/ui/models/bottomSheets/mediaListStatus.dart';
 import 'package:animestream/ui/models/bottomSheets/serverSelectionSheet.dart';
 import 'package:animestream/ui/models/providers/infoProvider.dart';
 import 'package:animestream/ui/models/snackBar.dart';
-import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/core/anime/providers/sourceManager.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/loader.dart';
 import 'package:animestream/ui/pages/info.dart';
@@ -353,7 +353,7 @@ class _InfoMobileState extends State<InfoMobile> {
                             padding: const EdgeInsets.only(right: 10),
                             child: IconButton(
                               tooltip:
-                                  "switch to ${UserPreferencesModal.getViewModeEnum((provider.viewMode + 1) % provider.viewModeIndexLength).name} view",
+                                  "switch to ${UserPreferencesModel.getViewModeEnum((provider.viewMode + 1) % provider.viewModeIndexLength).name} view",
                               onPressed: () {
                                 setState(() {
                                   provider.viewMode = (provider.viewMode + 1) % provider.viewModeIndexLength;

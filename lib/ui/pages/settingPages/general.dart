@@ -6,7 +6,7 @@ import 'package:animestream/core/data/settings.dart';
 import 'package:animestream/core/data/models.dart';
 import 'package:animestream/core/database/database.dart';
 import 'package:animestream/core/database/handler/handler.dart';
-import 'package:animestream/ui/models/sources.dart';
+import 'package:animestream/core/anime/providers/sourceManager.dart';
 import 'package:animestream/ui/models/widgets/clickableItem.dart';
 import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:animestream/ui/pages/settingPages/cache.dart';
@@ -41,7 +41,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
     });
   }
 
-  Future<void> writeSettings(SettingsModal settings) async {
+  Future<void> writeSettings(SettingsModel settings) async {
     await Settings().writeSettings(settings);
     setState(() {
       readSettings();
@@ -78,7 +78,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         setState(() {
                           showErrorsButtonState = !showErrorsButtonState;
                         });
-                        writeSettings(SettingsModal(showErrors: showErrorsButtonState));
+                        writeSettings(SettingsModel(showErrors: showErrorsButtonState));
                       },
                     ),
                     ToggleItem(
@@ -88,7 +88,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         setState(() {
                           receivePreReleases = !receivePreReleases;
                         });
-                        writeSettings(SettingsModal(receivePreReleases: receivePreReleases));
+                        writeSettings(SettingsModel(receivePreReleases: receivePreReleases));
                       },
                       description: "*maybe unstable",
                     ),
@@ -97,7 +97,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       description: "Automatically play the episodes using the last server you used",
                       value: userPreferences?.autoSelectPreviouslyUsedServer ?? false,
                       onTapFunction: () async {
-                        await UserPreferences.saveUserPreferences(UserPreferencesModal(
+                        await UserPreferences.saveUserPreferences(UserPreferencesModel(
                           autoSelectPreviouslyUsedServer: !(userPreferences?.autoSelectPreviouslyUsedServer ?? false),
                         ));
                         setState(() {});
@@ -108,7 +108,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         label: "Enable Discord Rich Presence",
                         value: currentUserSettings?.enableDiscordRichPresence ?? false,
                         onTapFunction: () async {
-                          await writeSettings(SettingsModal(
+                          await writeSettings(SettingsModel(
                               enableDiscordRichPresence: !(currentUserSettings!.enableDiscordRichPresence ?? false)));
                           setState(() {});
                         },
@@ -168,7 +168,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                         setState(() {
                           enableLogging = !enableLogging;
                         });
-                        writeSettings(SettingsModal(enableLogging: enableLogging));
+                        writeSettings(SettingsModel(enableLogging: enableLogging));
                       },
                       label: "Enable Logging",
                       description: "Helps with debugging issues",
@@ -222,7 +222,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () async {
-                          await writeSettings(SettingsModal(database: Databases.values[index]));
+                          await writeSettings(SettingsModel(database: Databases.values[index]));
                           DatabaseHandler.invalidateTracker();
                           setState(() {});
                           setcState(() {});
@@ -288,7 +288,7 @@ class _GeneralSettingState extends State<GeneralSetting> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(20),
                         onTap: () async {
-                          await writeSettings(SettingsModal(preferredProvider: sources[index].identifier));
+                          await writeSettings(SettingsModel(preferredProvider: sources[index].identifier));
                           setState(() {});
                           setcState(() {});
                         },

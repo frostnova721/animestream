@@ -4,7 +4,7 @@ import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/data/preferences.dart';
 import 'package:animestream/core/data/models.dart';
 import 'package:animestream/ui/models/widgets/slider.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
+import 'package:animestream/core/data/models/subtitleSettings.dart';
 import 'package:animestream/ui/models/widgets/subtitles/subtitleText.dart';
 import 'package:animestream/ui/models/widgets/toggleItem.dart';
 import 'package:flutter/material.dart';
@@ -60,7 +60,7 @@ class _SubtitleSettingPageState extends State<SubtitleSettingPage> {
   }
 
   Future<void> saveSubSettings() async {
-    await UserPreferences.saveUserPreferences(UserPreferencesModal(subtitleSettings: settings));
+    await UserPreferences.saveUserPreferences(UserPreferencesModel(subtitleSettings: settings));
     print("Sub preference saved!");
   }
 

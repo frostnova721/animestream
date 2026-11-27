@@ -39,9 +39,9 @@ class MainNavProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  UserModal? _userProfile;
-  UserModal? get userProfile => _userProfile;
-  set userProfile(UserModal? user) {
+  UserModel? _userProfile;
+  UserModel? get userProfile => _userProfile;
+  set userProfile(UserModel? user) {
     _userProfile = user;
     notifyListeners();
   }

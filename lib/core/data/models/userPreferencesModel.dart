@@ -1,13 +1,13 @@
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/ui/models/widgets/subtitles/subtitleSettings.dart';
+import 'package:animestream/core/data/models/subtitleSettings.dart';
 
-class UserPreferencesModal {
+class UserPreferencesModel {
   final EpisodeViewModes? episodesViewMode;
   final SubtitleSettings? subtitleSettings;
   final bool? preferDubs;
   final bool? searchPageListMode;
   final bool? autoSelectPreviouslyUsedServer;
-  UserPreferencesModal({
+  UserPreferencesModel({
     this.episodesViewMode,
     this.subtitleSettings,
     this.preferDubs,
@@ -15,8 +15,8 @@ class UserPreferencesModal {
     this.autoSelectPreviouslyUsedServer,
   });
 
-  factory UserPreferencesModal.fromMap(Map<dynamic, dynamic> map) {
-    return UserPreferencesModal(
+  factory UserPreferencesModel.fromMap(Map<dynamic, dynamic> map) {
+    return UserPreferencesModel(
       episodesViewMode: getViewModeEnum(map['episodesViewMode'] ?? 0),
       subtitleSettings:
           map['subtitleSettings'] != null ? SubtitleSettings.fromMap(map['subtitleSettings']) : SubtitleSettings(),
@@ -26,8 +26,8 @@ class UserPreferencesModal {
     );
   }
 
-  factory UserPreferencesModal.defaults() {
-    return UserPreferencesModal(
+  factory UserPreferencesModel.defaults() {
+    return UserPreferencesModel(
       episodesViewMode: EpisodeViewModes.list,
       preferDubs: false,
       searchPageListMode: false,

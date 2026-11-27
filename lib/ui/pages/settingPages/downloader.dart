@@ -23,7 +23,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
     readSettings();
   }
 
-  Future<void> writeSettings(SettingsModal settings) async {
+  Future<void> writeSettings(SettingsModel settings) async {
     await Settings().writeSettings(settings);
     setState(() {
       readSettings();
@@ -62,7 +62,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                       setState(() {
                         fasterDownloads = !fasterDownloads;
                       });
-                      writeSettings(SettingsModal(fasterDownloads: fasterDownloads));
+                      writeSettings(SettingsModel(fasterDownloads: fasterDownloads));
                     },
                     description: "download 2x items per batch"),
                 ToggleItem(
@@ -73,7 +73,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                       setState(() {
                         useQueuedDownloads = !useQueuedDownloads;
                       });
-                      writeSettings(SettingsModal(useQueuedDownloads: useQueuedDownloads));
+                      writeSettings(SettingsModel(useQueuedDownloads: useQueuedDownloads));
                     }),
 
                 // f**k experimental notice
@@ -85,7 +85,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                       setState(() {
                         useRemuxer = !useRemuxer;
                       });
-                      writeSettings(SettingsModal(useMkvRemuxer: useRemuxer));
+                      writeSettings(SettingsModel(useMkvRemuxer: useRemuxer));
                     }),
                 ToggleItem(
                     label: "Write subtitle to video",
@@ -95,7 +95,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                       setState(() {
                         writeSubtitleTrackToVideo = !writeSubtitleTrackToVideo;
                       });
-                      writeSettings(SettingsModal(writeSubtitleTrackToVideo: writeSubtitleTrackToVideo));
+                      writeSettings(SettingsModel(writeSubtitleTrackToVideo: writeSubtitleTrackToVideo));
                     }),
                 InkWell(
                   onTap: () async {
@@ -109,7 +109,7 @@ class _DownloaderSettingsState extends State<DownloaderSettings> {
                     // }
                     if (dir == null) return;
                     print("Path set to: $dir");
-                    await Settings().writeSettings(SettingsModal(downloadPath: dir));
+                    await Settings().writeSettings(SettingsModel(downloadPath: dir));
                     setState(() {});
                     floatingSnackBar("might need to provide 'allow access to all files' while downloading!");
                   },

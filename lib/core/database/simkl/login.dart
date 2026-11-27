@@ -115,7 +115,7 @@ class SimklLogin extends DatabaseLogin {
     return await completer.future;
   }
 
-  Future<UserModal> getUserProfile() async {
+  Future<UserModel> getUserProfile() async {
     final url = "https://api.simkl.com/users/settings";
     final headers = await SimklMutation.getHeader();
     final res = await post(Uri.parse(url), headers: headers);
@@ -130,7 +130,7 @@ class SimklLogin extends DatabaseLogin {
     }
 
     final jsoned = jsonDecode(res.body);
-    final userModal = UserModal(
+    final userModal = UserModel(
       avatar: jsoned['user']['avatar'],
       banner: null,
       id: jsoned['account']['id'],

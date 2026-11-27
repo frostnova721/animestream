@@ -3,8 +3,8 @@ import 'dart:io';
 import 'package:animestream/core/app/logging.dart';
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/commons/enums.dart';
-import 'package:animestream/core/database/anilist/queries.dart';
 import 'package:animestream/core/database/anilist/types.dart';
+import 'package:animestream/core/database/handler/handler.dart';
 import 'package:animestream/ui/models/widgets/bottomBar.dart';
 import 'package:animestream/ui/models/widgets/cards.dart';
 import 'package:animestream/ui/models/widgets/cards/animeCard.dart';
@@ -116,8 +116,10 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
     });
   }
 
+  final userName = storedUserData?.name ?? "User";
+
   Future<void> getAnimeList() async {
-    final list = await AnilistQueries().getUserAnimeList(storedUserData!.name);
+    final list = await DatabaseHandler().getUserAnimeList(userName);
     if (list.isEmpty) throw new Exception("List is empty lil bro!");
     rawAnimeList = list;
     sort(SortType.RecentlyUpdated);
@@ -211,7 +213,7 @@ class _AnimeListsState extends State<AnimeLists> with TickerProviderStateMixin {
                           Container(
                             padding: EdgeInsets.only(left: 10, right: 20),
                             child: Text(
-                              "${storedUserData?.name}'s List",
+                              "${userName}'s List",
                               style: TextStyle(
                                 color: appTheme.textMainColor,
                                 fontFamily: "Rubik",

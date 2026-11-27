@@ -23,7 +23,8 @@ class AnilistLogin extends DatabaseLogin {
   /**Will only return bool (i hope) */
   @override
   Future<bool> initiateLogin() async {
-    final res = await FlutterWebAuth2.authenticate(url: url, callbackUrlScheme: "auth.animestream");
+    final res = await FlutterWebAuth2.authenticate(url: url, callbackUrlScheme: "auth.animestream",
+    options:FlutterWebAuth2Options());
     if (!res.contains("access_token")) {
       print("ERR_RECIEVED_AUTH_CODE_NULL");
       return false;
@@ -59,10 +60,11 @@ class AnilistLogin extends DatabaseLogin {
 
     final data = res['Viewer'];
     return UserModel(
-        id: data['id'],
-        avatar: data['avatar']['large'] ?? data['avatar']['medium'],
-        name: data['name'],
-        banner: data['bannerImage']);
+      id: data['id'],
+      avatar: data['avatar']['large'] ?? data['avatar']['medium'],
+      name: data['name'],
+      banner: data['bannerImage'],
+    );
   }
 
   Future<bool> isLoggedIn() async {

@@ -256,10 +256,10 @@ packages:
     dependency: "direct main"
     description:
       name: desktop_webview_window
-      sha256: b6fdae2cbf9571879b1761c12f27facaf82e22d0bdc74d049907c2a09a432957
+      sha256: "1bd3f4276d7594d9e1600782f72dbbf773a2019fa0e9a8d421d7df2f5a9b63cc"
       url: "https://pub.dev"
     source: hosted
-    version: "0.3.0"
+    version: "0.4.3"
   device_info_plus:
     dependency: "direct main"
     description:
@@ -479,18 +479,26 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_web_auth_2
-      sha256: a76acb2eda3099f547b45e6c290d0fa21deafe72d9261e9a105b5d759f8a80ff
+      sha256: "05c0b09cbdb0f98b528d21fb4ba5711652e9d92697412f96ad4c327ed5090f9f"
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0-alpha.7"
+    version: "6.1.0"
+  flutter_web_auth_2_desktop_webview:
+    dependency: transitive
+    description:
+      name: flutter_web_auth_2_desktop_webview
+      sha256: "461aa4a80bb99e9344ac3536fc80a3f79773d96c38575eb7363e7b3e95044f7d"
+      url: "https://pub.dev"
+    source: hosted
+    version: "6.0.1"
   flutter_web_auth_2_platform_interface:
     dependency: transitive
     description:
       name: flutter_web_auth_2_platform_interface
-      sha256: "6d3f35c0435225f31c9734be69cb5ce6f4fad194d6648b00c10eaf5a844837c9"
+      sha256: bb8ddc6344bc9f3b61e6ea9ef6830dd97cd4cc8aeda78281972ccf07e659127d
       url: "https://pub.dev"
     source: hosted
-    version: "6.0.0-alpha.2"
+    version: "6.0.0"
   flutter_web_plugins:
     dependency: transitive
     description: flutter
@@ -693,10 +701,10 @@ packages:
     dependency: transitive
     description:
       name: material_ui
-      sha256: "4f3f38b9953df0a87d6bf5f21880029f77c47048487d5339410c39936be4683b"
+      sha256: a6b19012df437a356cbc01f8ea22a105e07194c47c9a6009da0032a0ce35c4ab
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.1"
+    version: "1.11.1"
   meta:
     dependency: transitive
     description:
@@ -1473,4 +1481,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.13.0 <4.0.0"
-  flutter: ">=3.44.0"
+  flutter: ">=3.47.0"

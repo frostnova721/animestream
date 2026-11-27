@@ -1,5 +1,6 @@
 import 'package:animestream/core/app/runtimeDatas.dart';
 import 'package:animestream/core/news/animenews.dart';
+import 'package:animestream/core/news/detailedAnimeNews.dart';
 import 'package:flutter/material.dart';
 
 class NewsDetails extends StatefulWidget {
@@ -11,7 +12,7 @@ class NewsDetails extends StatefulWidget {
 }
 
 class _NewsDetailsState extends State<NewsDetails> {
-  Map<String, dynamic> news = {};
+  late DetailedAnimeNews news;
   bool loaded = false;
 
   @override
@@ -57,7 +58,7 @@ class _NewsDetailsState extends State<NewsDetails> {
                   Container(
                     padding: EdgeInsets.only(left: 20, right: 20, bottom: 25, top: 25),
                     child: Text(
-                      news['title'],
+                      news.title,
                       style: TextStyle(
                         color: appTheme.textMainColor,
                         fontFamily: "Poppins",
@@ -66,10 +67,10 @@ class _NewsDetailsState extends State<NewsDetails> {
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  if (news['image'] != null)
+                  if (news.image != null)
                     Container(
                       child: Image.network(
-                        news['image'],
+                        news.image!,
                         frameBuilder: (context, child, frame, wasSynchronouslyLoaded) {
                           if (wasSynchronouslyLoaded) return child;
                           return AnimatedOpacity(
@@ -82,19 +83,18 @@ class _NewsDetailsState extends State<NewsDetails> {
                     ),
                   Container(
                     padding: EdgeInsets.only(left: 20, right: 20, top: 25),
-                    child: RichText(
-                      text: TextSpan(
-                        children: [
-                          TextSpan(
-                            text: news['info'][0],
-                            style: detailStyle(true),
-                          ),
-                          TextSpan(
-                            text: news['info'].substring(1),
-                            style: detailStyle(false),
-                          )
-                        ],
-                      ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        ...news.info.map((e) => Container(
+                              padding: EdgeInsets.only(bottom: 20),
+                              child: Text(
+                                e,
+                                style: detailStyle(false),
+                                textAlign: TextAlign.justify,
+                              ),
+                            ))
+                      ],
                     ),
                   ),
                   Container(

@@ -119,19 +119,17 @@ class _HomeState extends State<Home> {
                       ),
                       AnimatedSwitcher(
                         duration: Duration(milliseconds: 400),
-                        child: storedUserData != null
-                            ? Align(
-                                alignment: Alignment.center,
-                                child: Container(
-                                  margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
-                                  constraints: BoxConstraints(maxWidth: 450),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [_accountCard(), _listButton()],
-                                  ),
-                                ),
-                              )
-                            : null,
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Container(
+                            margin: EdgeInsets.only(left: 20, bottom: 20, right: 20),
+                            constraints: BoxConstraints(maxWidth: 450),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [_accountCard(), _listButton()],
+                            ),
+                          ),
+                        ),
                       ),
                       _titleAndList(
                         "Continue Watching",
@@ -280,9 +278,14 @@ class _HomeState extends State<Home> {
         color: appTheme.backgroundSubColor,
         child: InkWell(
           overlayColor: WidgetStatePropertyAll(appTheme.accentColor.withValues(alpha: 0.1)),
-          onTap: () =>
+          onTap: () {
+            if (storedUserData != null) {
               Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => UserStats(userModal: storedUserData!))),
+                  .push(MaterialPageRoute(builder: (context) => UserStats(userModal: storedUserData!)));
+            } else {
+              floatingSnackBar("You need to be logged in to view your stats!");
+            }
+          },
           child: Container(
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
             height: 60,
@@ -291,14 +294,14 @@ class _HomeState extends State<Home> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 CircleAvatar(
-                  backgroundImage: storedUserData!.avatar != null
+                  backgroundImage: storedUserData?.avatar != null
                       ? NetworkImage(storedUserData!.avatar!)
                       : AssetImage('lib/assets/images/chisato_AI.jpg') as ImageProvider,
                 ),
                 Padding(
                   padding: EdgeInsets.only(left: 10),
                   child: Text(
-                    storedUserData!.name,
+                    storedUserData?.name ?? "User",
                     style: TextStyle(
                       fontFamily: "Poppins",
                       fontSize: 16,
